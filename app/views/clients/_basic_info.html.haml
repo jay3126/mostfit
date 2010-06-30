@@ -38,6 +38,12 @@
         = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
   %tr
     %td
+      Gender:
+    %td
+      = select(:gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please select gender")
+      %br/
+  %tr
+    %td
       Client Type
     %td
       = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
