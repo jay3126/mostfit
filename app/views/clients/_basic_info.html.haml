@@ -45,6 +45,12 @@
       %br/
   %tr
     %td
+      Existing customer:
+    %td
+      = select(:existing_customer, :collection => [[:no, "No"], [:yes, "Yes"]])
+      %br/
+  %tr
+    %td
       Client Type
     %td
       = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
