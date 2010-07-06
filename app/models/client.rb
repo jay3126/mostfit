@@ -11,6 +11,7 @@ class Client
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :existing_customer,	Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,	Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
   property :spouse_name,     String, :length => 100, :lazy => true
@@ -53,6 +54,11 @@ class Client
   property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
   property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :house_type, String, :length => 20, :nullable => true, :lazy => true
+  property :house_area_in_sqmeter, String, :length => 20, :nullable => true, :lazy => true
+  property :house_type_of_roof, String, :length => 20, :nullable => true, :lazy => true
+  property :house_current_value, String, :length => 20, :nullable => true, :lazy => true
+
   property :other_productive_asset, String, :length => 30, :nullable => true, :lazy => true
   property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
