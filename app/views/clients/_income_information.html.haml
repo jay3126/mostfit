@@ -1,7 +1,32 @@
 %table
   %tr
     %td{:colspan => '2'}
-      %h1==Income information
+      %h1==Income and assets
+  %tr
+    %td
+      %table{:width => '100%', :border => '1'}
+      %tr
+        %th
+        %th
+          Type
+        %th
+          Area (in sq. meters)
+        %th
+          Type of roof
+        %th
+          Current value (in Rs.)
+      %tr
+        %td
+          Own home:
+        %td
+          = text_field(:house_type, :size => 20)
+        %td
+          = text_field(:house_area_in_sqmeter, :size => 20)
+        %td
+          = text_field(:house_type_of_roof, :size => 20)
+        %td
+          = text_field(:house_current_value, :size => 20)
+      %br/
   %tr
     %td
       Other productive asset:
