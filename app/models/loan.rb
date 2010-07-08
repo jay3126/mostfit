@@ -316,13 +316,13 @@ class Loan
   def repay(input, user, received_on, received_by, defer_update = false, style = :normal)
     # this is the way to repay loans, _not_ directly on the Payment model
     # this to allow validations on the Payment to be implemented in (subclasses of) the Loan
-    unless input.is_a? Array or input.is_a? Fixnum
+    unless input.is_a? Array or input.is_a? Fixnum or input.is_a? Float
       raise "the input argument of Loan#repay should be of class Fixnum or Array"
     end
     raise "cannot repay a loan that has not been saved" if new?
 
     principal, interest, total, fees_paid = 0, 0, nil, 0
-    if input.is_a? Fixnum  # in case only one amount is specified
+    if input.is_a? Fixnum  or input.is_a? Float # in case only one amount is specified
       # interest is paid first, the rest goes in as principal
       # the payment is filed on received_on without knowing about the future
       # it could happen that payment have been made after this payment
@@ -339,7 +339,7 @@ class Loan
         interest, principal = pay_prorata(input, received_on)
       end
     elsif input.is_a? Array  # in case principal and interest are specified separately
-      principal, interest = input[0].to_i, input[1].to_i
+      principal, interest = input[0], input[1]
     end
     save_status = nil
     payments = []
@@ -347,19 +347,19 @@ class Loan
       if fees_paid > 0
         fee_payment = Payment.new(:loan => self, :created_by => user,
                                   :received_on => received_on, :received_by => received_by,
-                                  :amount => fees_paid.round, :type => :fees)
+                                  :amount => fees_paid.round(2), :type => :fees)
         payments.push(fee_payment)
       end
       if interest > 0
         int_payment = Payment.new(:loan => self, :created_by => user,
                                   :received_on => received_on, :received_by => received_by,
-                                  :amount => interest.round, :type => :interest)
+                                  :amount => interest.round(2), :type => :interest)
         payments.push(int_payment)
       end
       if principal > 0
         prin_payment = Payment.new(:loan => self, :created_by => user,
                                    :received_on => received_on, :received_by => received_by,
-                                   :amount => principal.round, :type => :principal)        
+                                   :amount => principal.round(2), :type => :principal)        
         payments.push(prin_payment)
       end
       if payments.collect{|payment| payment.save}.include?(false)
@@ -533,11 +533,11 @@ class Loan
       fees_so_far += fees || 0
       balance -= principal
       @schedule[date] = {
-        :principal                  => principal,
-        :interest                   => interest,
-        :fees                       => fees,
-        :total_principal            => (principal_so_far),
-        :total_interest             => (interest_so_far),
+        :principal                  => principal.round(2),
+        :interest                   => interest.round(2),
+        :fees                       => fees.round(2),
+        :total_principal            => (principal_so_far.round(2)),
+        :total_interest             => (interest_so_far.round(2)),
         :total                      => (principal_so_far + interest_so_far).round(2),
         :balance                    => balance.round(2),
       }
@@ -607,13 +607,13 @@ class Loan
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
     raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    (amount.to_f / number_of_installments).round(2)
+    (amount.to_f / number_of_installments)
   end
   def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
     raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    (amount * interest_rate / number_of_installments).round(2)
+    (amount * interest_rate / number_of_installments)
   end
 
   # These info functions need not be overridden in derived classes.
@@ -623,18 +623,18 @@ class Loan
   #    scheduled_[principal, interest, total]_up_to(date)
   #    scheduled_[principal, interest, total]_on(date)
 
-  def total_principal_to_be_received; get_scheduled(:total_principal, self.scheduled_maturity_date); end
-  def total_interest_to_be_received; get_scheduled(:total_interest, self.scheduled_maturity_date); end
-  def total_to_be_received; (total_principal_to_be_received + total_interest_to_be_received).to_i; end
+  def total_principal_to_be_received; get_scheduled(:total_principal, self.scheduled_maturity_date).round(2); end
+  def total_interest_to_be_received; get_scheduled(:total_interest, self.scheduled_maturity_date).round(2); end
+  def total_to_be_received; (total_principal_to_be_received + total_interest_to_be_received).round(2); end
 
-  def scheduled_principal_up_to(date); get_scheduled(:total_principal, date); end
-  def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date); end
-  def scheduled_total_up_to(date); (scheduled_principal_up_to(date) + scheduled_interest_up_to(date)).to_i;  end
+  def scheduled_principal_up_to(date); get_scheduled(:total_principal, date).round(2); end
+  def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date).round(2); end
+  def scheduled_total_up_to(date); (scheduled_principal_up_to(date) + scheduled_interest_up_to(date)).round(2);  end
 
 
-  def scheduled_principal_due_on(date); get_scheduled(:principal, date); end
-  def scheduled_interest_due_on(date); get_scheduled(:interest, date); end
-  def scheduled_total_due_on(date); scheduled_principal_due_on(dqte) + scheduled_interest_due_on(date); end
+  def scheduled_principal_due_on(date); get_scheduled(:principal, date).round(2); end
+  def scheduled_interest_due_on(date); get_scheduled(:interest, date).round(2); end
+  def scheduled_total_due_on(date); (scheduled_principal_due_on(dqte) + scheduled_interest_due_on(date)).round(2); end
   # these 3 methods return scheduled amounts from a LOAN-OUTSTANDING perspective
   # they are purely calculated -- no calls to its payments or loan_history)
   def scheduled_outstanding_principal_on(date)  # typically reimplemented in subclasses
@@ -678,34 +678,34 @@ class Loan
   # the following methods basically count the payments (PAYMENT-RECEIVED perspective)
   # the last method makes the actual (optimized) db call and is cached
 
-  def principal_received_up_to(date); get_actual(:total_principal, date); end
-  def interest_received_up_to(date); get_actual(:total_interest, date); end
-  def total_received_up_to(date); get_actual(:total,date); end
+  def principal_received_up_to(date); get_actual(:total_principal, date).round(2); end
+  def interest_received_up_to(date); get_actual(:total_interest, date).round(2); end
+  def total_received_up_to(date); get_actual(:total,date).round(2); end
 
-  def principal_received_on(date); get_actual(:principal, date); end
-  def interest_received_on(date); get_actual(:interest, date); end
-  def total_received_on(date); principal_received_on(date) + interest_received_on(date); end
+  def principal_received_on(date); get_actual(:principal, date).round(2); end
+  def interest_received_on(date); get_actual(:interest, date).round(2); end
+  def total_received_on(date); (principal_received_on(date) + interest_received_on(date)).round(2); end
 
   # these 3 methods return overpayment amounts (PAYMENT-RECEIVED perspective)
   # negative values mean shortfall (we're positive-minded at intellecap)
   def principal_overpaid_on(date)
-    (principal_received_up_to(date) - scheduled_principal_up_to(date))
+    (principal_received_up_to(date) - scheduled_principal_up_to(date)).round(2)
   end
   def interest_overpaid_on(date)
-    (interest_received_up_to(date) - scheduled_interest_up_to(date))
+    (interest_received_up_to(date) - scheduled_interest_up_to(date)).round(2)
   end
   def total_overpaid_on(date)
-    total_received_up_to(date) - scheduled_total_up_to(date)
+    (total_received_up_to(date) - scheduled_total_up_to(date)).round(2)
   end
   # these 3 methods return actual outstanding amounts (LOAN-OUTSTANDING perspective)
   def actual_outstanding_principal_on(date)
-    get_actual(:balance, date)
+    get_actual(:balance, date).round(2)
   end
   def actual_outstanding_interest_on(date)
-    scheduled_outstanding_interest_on(date) - interest_overpaid_on(date)
+    (scheduled_outstanding_interest_on(date) - interest_overpaid_on(date)).round(2)
   end
   def actual_outstanding_total_on(date)
-    scheduled_outstanding_total_on(date) - total_overpaid_on(date)
+    (scheduled_outstanding_total_on(date) - total_overpaid_on(date)).round(2)
   end
   def payment_dates
     payments.map { |p| p.received_on }
@@ -717,7 +717,7 @@ class Loan
   end
 
   def get_status(date = Date.today, total_received = nil) # we have this last parameter so we can speed up get_status
-                                                          # considerably by passing total_received, i.e. from history_for
+    # considerably by passing total_received, i.e. from history_for
     #return @status if @status
     date = Date.parse(date)      if date.is_a? String
     return :applied_in_future    if applied_on > date  # non existant
