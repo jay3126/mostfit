@@ -1,6 +1,10 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :journals
   resources :loan_utilizations
+  resources :rule_books
+  resources :account_types
+  resources :accounts, :id => /\d+/
   resources :bookmarks
   resources :audit_items
   resources :attendances
@@ -40,6 +44,7 @@ Merb::Router.prepare do
   resources :centers
   resources :payments
   resources :branches  do
+    resources :journals
     resources :centers  do
       resources :client_groups
       resources :clients do
@@ -61,6 +66,7 @@ Merb::Router.prepare do
   match('/search(/:action)').to(:controller => 'searches')
   match('/searches(/:action)').to(:controller => 'searches')
   match('/reports/graphs').to(:controller => 'reports', :action => 'graphs')
+  match('/reports/show(/:id)').to(:controller => 'reports', :action => 'show')
   match('/reports/:report_type(/:id)').to(:controller => 'reports', :action => 'show').name(:show_report)
   resources :reports
   match('/data_entry').to(:namespace => 'data_entry', :controller => 'index').name(:data_entry)

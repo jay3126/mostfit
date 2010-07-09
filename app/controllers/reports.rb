@@ -1,6 +1,6 @@
 class Reports < Application
   Types = [
-           DailyReport, ConsolidatedReport, TransactionLedger, ProjectedReport, LoanDisbursementRegister, LateDisbursalsReport, TargetReport,
+           DailyReport, ConsolidatedReport, TransactionLedger, ProjectedReport, LoanDisbursementRegister, LateDisbursalsReport, TargetReport, GeneralLedgerReport, TrialBalanceReport,
            LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport, LoanSizePerManagerReport
           ]
   layout :determine_layout 
@@ -13,6 +13,7 @@ class Reports < Application
 
   def show(report_type, id)
     provides :pdf
+    report_type = params[:report_type] if report_type == "show" and params.key?(:report_type)
     klass = Kernel.const_get(report_type)
     @report = Report.get(id) if id
     class_key  =  klass.to_s.snake_case.to_sym
@@ -30,6 +31,9 @@ class Reports < Application
       elsif [LateDisbursalsReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, LoanSizePerManagerReport].include?(klass)
         @data  = @report.generate
         display @data
+      elsif klass==GeneralLedgerReport or klass == TrialBalanceReport
+        @data  = @report.generate(params)
+        display @data        
       elsif klass==TargetReport
         @targets = @report.generate
         display [@targets]
