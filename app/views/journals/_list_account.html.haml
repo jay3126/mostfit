@@ -11,19 +11,23 @@
     %th 
       Amount
     %th 
+      TXN ID
+    %th 
       Comment
   - @account.postings.journals(:order => [:date.desc], :order => [:id.desc]).each do |journal|
     - postings = journal.postings.sort_by{|x| x.amount}
     %tr
       %td
-        = journal.date.strftime("%Y/%m/%d")
+        = journal.created_at.strftime("%Y/%m/%d")
       %td 
         = journal.id
       %td 
-        = journal.postings.first.account.name
+        = postings.first.account.name
       %td 
-        = journal.postings.last.account.name
+        = postings.last.account.name
       %td 
         = postings.first.amount.abs
+      %td 
+        = journal.transaction_id 
       %td 
         = journal.comment
