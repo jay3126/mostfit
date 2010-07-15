@@ -167,13 +167,32 @@
       School distance:
     %td
       = text_field(:school_distance, :size => 10)
-      %br/
-  %tr
     %td
-      Phc distance:
+      PHC distance:
     %td
       = text_field(:phc_distance, :size => 10)
       %br/
   %tr
-    %td{:colspan => '2'}
-      %hr
+    %td
+      Has electricity connection?:
+    %td
+      = select(:has_electricity_connection, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has electricity?")
+    %td
+      Cooking equipment:
+    %td
+      = select(:cooking_equipment, :collection => [[:wood_and_gobar, "Wood, gobar"], [:kerosene_stove, "Kerosene stove"], [:gas, "Gas"]] , :prompt => "Choose one")
+  %tr
+    %td
+      Has bank account?:
+    %td
+      = select(:has_bank_account, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has bank account?")
+  %tr
+    %td
+      Has PAN Card?:
+    %td
+      = select(:has_PAN_card, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has PAN Card?")
+    %td
+      PAN Number (if present):
+    %td
+      = text_field(:PAN_number, :size => 20)
+

@@ -100,6 +100,11 @@ class Client
   property :not_in_school_bonded_sons, Integer, :length => 10, :default => 0, :lazy => true
   property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
   property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
+  property :has_electricity_connection, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :cooking_equipment, Enum.send('[]', *['', 'wood_and_gobar', 'kerosene_stove', 'gas']), :default => '', :nullable => true, :lazy => true
+  property :has_bank_account, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :has_PAN_card, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :PAN_number, String, :length => 20, :nullable => true, :lazy => true
   property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :house_area_in_sqmeter, String, :length => 20, :nullable => true, :lazy => true
@@ -148,6 +153,8 @@ class Client
   property :other_loan_5_cycle, Integer, :length => 5, :nullable => true, :lazy => true
   property :other_loan_5_total_amount, Integer, :length => 10, :nullable => true, :lazy => true
   property :other_loan_5_amount_outstanding, Integer, :length => 10, :nullable => true, :lazy => true
+  property :occupation_category, Enum.send('[]', *['', 'landless_labourer', 'small_farmer', 'farmer', 'ssi']), :default => '', :nullable => true, :lazy => true
+  property :nature_of_employment, Enum.send('[]', *['', 'unemployed', 'on_contract', 'with_pvt_co', 'self_employed']), :default => '', :nullable => true, :lazy => true
   property :occupation_own, String, :length => 10, :nullable => true, :lazy => true
   property :capital_own, Integer, :length => 10, :nullable => true, :lazy => true
   property :sales_own, Integer, :length => 10, :nullable => true, :lazy => true

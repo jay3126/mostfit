@@ -157,6 +157,16 @@
       = text_field(:other_loan_5_amount_outstanding, :size => 10)
   %tr
     %td
+      Occupation category:
+    %td
+      = select(:occupation_category, :collection => [[:landless_labourer, "Landless labourer"], [:small_farmer, "Small farmer"], [:farmer, "Farmer"], [:ssi, "Laghu Udyog"]] , :prompt => "Choose one")
+  %tr
+    %td
+      Nature of employment:
+    %td
+      = select(:nature_of_employment, :collection => [[:unemployed, "Unemployed"], [:on_contract, "On contract employment"], [:with_pvt_co, "With Pvt. Ltd. Co."], [:self_employed, "Self-employed"]] , :prompt => "Choose one")
+  %tr
+    %td
       %table{:width => '100%'}
       %tr
         %td
