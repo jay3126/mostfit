@@ -39,6 +39,12 @@
           = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
   %tr
     %td
+      Description of member:
+    %td
+      = text_field :client_description, :size => 60
+      %br/
+  %tr
+    %td
       Gender:
     %td
       = select(:gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please select gender")
@@ -81,14 +87,44 @@
       = date_select_for @client, :grt_pass_date, :nullable => true, :max_date => Date.today
   %tr
     %td
+      Religion:
+    %td
+      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddhist, "Buddhist"], [:christian, "Christian"], [:other, "Other"]] , :prompt => "Select religion")
+  %tr
+    %td
+      Caste:
+    %td
+      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select caste")
+  %tr
+    %td
       Spouse name:
     %td
       = text_field :spouse_name, :size => 40
   %tr
     %td
+      Father's name:
+    %td
+      = text_field :fathers_name, :size => 40
+      &nbsp;&nbsp;
+      Alive: &nbsp;
+      = select(:father_is_alive, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Is father alive?")
+    %td{ :colspan => '2' }
+      &nbsp;
+  %tr
+    %td
       Address:
     %td
       ~ text_area :address, :rows => 6, :cols => 38
+  %tr
+    %td
+      PIN Code:
+    %td
+      = text_field :address_pin, :size => 10
+      &nbsp;&nbsp;
+      Phone number: &nbsp;
+      = text_field :phone_number, :size => 20
+    %td{ :colspan => '2' }
+      &nbsp;
   %tr
     %td
       Occupation

@@ -1,12 +1,103 @@
 %table
   %tr
-    %td{:colspan => '2'}
-      %h1==Family details
-  %tr
     %td
       Number of family members:
     %td
       = text_field(:number_of_family_members, :size => 10)
+  %tr
+    %th
+      Family members
+  %tr
+    %td
+      %table{:width =>'100%' }
+      %tr
+        %td
+          Name
+        %td
+          Age
+        %td
+          Relationship with member
+        %td
+          Occupation/Education (with standard)
+        %td
+          Monthly income
+      %tr
+        %td
+          = text_field(:family_member_1_name, :size => 30)
+        %td
+          = text_field(:family_member_1_age, :size => 5)
+        %td
+          = select(:family_member_1_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_1_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_1_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_2_name, :size => 30)
+        %td
+          = text_field(:family_member_2_age, :size => 5)
+        %td
+          = select(:family_member_2_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_2_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_2_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_3_name, :size => 30)
+        %td
+          = text_field(:family_member_3_age, :size => 5)
+        %td
+          = select(:family_member_3_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_3_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_3_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_4_name, :size => 30)
+        %td
+          = text_field(:family_member_4_age, :size => 5)
+        %td
+          = select(:family_member_4_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_4_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_4_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_5_name, :size => 30)
+        %td
+          = text_field(:family_member_5_age, :size => 5)
+        %td
+          = select(:family_member_5_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_5_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_5_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_6_name, :size => 30)
+        %td
+          = text_field(:family_member_6_age, :size => 5)
+        %td
+          = select(:family_member_6_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_6_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_6_monthly_income, :size => 10)
+      %tr
+        %td
+          = text_field(:family_member_7_name, :size => 30)
+        %td
+          = text_field(:family_member_7_age, :size => 5)
+        %td
+          = select(:family_member_7_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
+        %td
+          = text_field(:family_member_7_occupation_or_education, :size => 30)
+        %td
+          = text_field(:family_member_7_monthly_income, :size => 10)
       %br/
   %tr
     %td
