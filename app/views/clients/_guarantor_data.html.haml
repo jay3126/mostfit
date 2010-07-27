@@ -30,7 +30,7 @@
     %td
       Relationship:
     %td
-      = select(:guarantor_relationship, :collection => [[:brother, "Brother"], [:brother_in_law, "Brother-in-law"], [:father, "Father"], [:father_in_law, "Father-in-law"], [:adult_son, "Adult son"]] , :prompt => "Choose relationship")
+      = select(:guarantor_relationship, :collection => [[:spouse, "Spouse"], [:brother, "Brother"], [:brother_in_law, "Brother-in-law"], [:father, "Father"], [:father_in_law, "Father-in-law"], [:adult_son, "Adult son"], [:other, "Other"]] , :prompt => "Choose relationship")
       %br/
   %tr
     %td

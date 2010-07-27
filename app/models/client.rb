@@ -49,7 +49,7 @@ class Client
   property :guarantor_fathers_name, String, :length => 100, :nullable => true, :lazy => true
   property :guarantor_date_of_birth, Date,  :index => true, :lazy => true
   property :guarantor_address, Text, :lazy => true
-  property :guarantor_relationship, Enum.send('[]', *['', 'brother', 'brother_in_law', 'father', 'father_in_law', 'adult_son']), :default => '', :nullable => true, :lazy => true
+  property :guarantor_relationship, Enum.send('[]', *['', 'spouse', 'brother', 'brother_in_law', 'father', 'father_in_law', 'adult_son', 'other']), :default => '', :nullable => true, :lazy => true
   
   property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
   property :family_member_1_name, String, :length => 30, :nullable => true, :lazy => true
@@ -98,8 +98,8 @@ class Client
   property :not_in_school_bonded_girls, Integer, :length => 10, :default => 0, :lazy => true
   property :not_in_school_working_sons, Integer, :length => 10, :default => 0, :lazy => true
   property :not_in_school_bonded_sons, Integer, :length => 10, :default => 0, :lazy => true
-  property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
+  property :school_distance, String, :length => 10, :nullable => true, :lazy => true
+  property :phc_distance, String, :length => 10, :nullable => true, :lazy => true
   property :has_electricity_connection, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :cooking_equipment, Enum.send('[]', *['', 'wood_and_gobar', 'kerosene_stove', 'gas']), :default => '', :nullable => true, :lazy => true
   property :has_bank_account, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
