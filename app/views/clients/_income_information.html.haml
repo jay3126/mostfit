@@ -1,37 +1,268 @@
 %table
   %tr
-    %td{:colspan => '2'}
-      %h1==Income information
+    %td
+    %td
+      Area (in sq. meters)
+    %td
+      Type of roof
+    %td
+      Current value (in Rs.)
   %tr
     %td
-      Other productive asset:
+      Own home:
     %td
-      = text_field(:other_productive_asset, :size => 30)
-      %br/
+      = text_field(:house_area_in_sqmeter, :size => 20)
+    %td
+      = text_field(:house_type_of_roof, :size => 20)
+    %td
+      = text_field(:house_current_value, :size => 20)
   %tr
-    %td
-      Income regular:
-    %td
-      = select(:income_regular, :collection => [[:no, "No"], [:yes, "Yes"]] , :prompt => "is client income regular?")
-      %br/
-  %tr
-    %td
-      Client migration:
-    %td
-      = select(:client_migration, :collection => [[:no, "No"], [:yes, "Yes"]] , :prompt => "is client a migrated resident?")
-      %br/
-  %tr
-    %td
-      Pr loan amount:
-    %td
-      = text_field(:pr_loan_amount, :size => 10)
-      %br/
-  %tr
-    %td
-      Other income:
-    %td
-      = text_field(:other_income, :size => 10)
-      %br/
-  %tr
-    %td{:colspan => '2'}
+    %td{:colspan => '4'}
       %hr
+  %tr
+    %td
+      Land for farming:
+    %td
+      Total
+    %td
+      Irrigated
+  %tr
+    %td
+      Area (in acres)
+    %td
+      = text_field(:total_land_farming, :size => 10)
+    %td
+      = text_field(:total_land_farming_irrigated, :size => 10)
+  %tr
+    %td{:colspan => '4'}
+      %hr
+  %tr
+    %td
+      Asset Information
+  %tr
+    %td
+      Values as of date:
+    %td{ :colspan => '2' }
+      = date_select_for @client, :asset_value_date, :nullable => true, :default => Date.today
+  %tr
+    %td
+      Asset
+    %td
+      Value
+  %tr
+    %td
+      = text_field(:asset_1, :size => 20)
+    %td
+      = text_field(:asset_1_value, :size => 10)
+  %tr
+    %td
+      = text_field(:asset_2, :size => 20)
+    %td
+      = text_field(:asset_2_value, :size => 10)
+  %tr
+    %td
+      = text_field(:asset_3, :size => 20)
+    %td
+      = text_field(:asset_3_value, :size => 10)
+  %tr
+    %td
+      = text_field(:asset_4, :size => 20)
+    %td
+      = text_field(:asset_4_value, :size => 10)
+  %tr
+    %td
+      = text_field(:asset_5, :size => 20)
+    %td
+      = text_field(:asset_5_value, :size => 10)
+  %tr
+    %td
+      Other indebtedness
+  %tr
+    %td
+      Name of lender
+    %td
+      Type of lender
+    %td
+      Purpose of loan
+    %td
+      Loan cycle no.
+    %td
+      Total loan amount
+    %td
+      Loan amount outstanding
+  %tr
+    %td
+      = text_field(:other_loan_1_lender, :size => 10)
+    %td
+      = select(:other_loan_1_lender_type, :collection => [[:local_moneylender, "Local moneylender"], [:shg, "Self-help group"], [:bank, "Bank"], [:mfi, "MFI"]], :prompt => "Choose lender type")
+    %td
+      = text_field(:other_loan_1_purpose, :size => 10)
+    %td
+      = text_field(:other_loan_1_cycle, :size => 5)
+    %td
+      = text_field(:other_loan_1_total_amount, :size => 10)
+    %td
+      = text_field(:other_loan_1_amount_outstanding, :size => 10)
+  %tr
+    %td
+      = text_field(:other_loan_2_lender, :size => 10)
+    %td
+      = select(:other_loan_2_lender_type, :collection => [[:local_moneylender, "Local moneylender"], [:shg, "Self-help group"], [:bank, "Bank"], [:mfi, "MFI"]], :prompt => "Choose lender type")
+    %td
+      = text_field(:other_loan_2_purpose, :size => 10)
+    %td
+      = text_field(:other_loan_2_cycle, :size => 5)
+    %td
+      = text_field(:other_loan_2_total_amount, :size => 10)
+    %td
+      = text_field(:other_loan_2_amount_outstanding, :size => 10)
+  %tr
+    %td
+      = text_field(:other_loan_3_lender, :size => 10)
+    %td
+      = select(:other_loan_3_lender_type, :collection => [[:local_moneylender, "Local moneylender"], [:shg, "Self-help group"], [:bank, "Bank"], [:mfi, "MFI"]], :prompt => "Choose lender type")
+    %td
+      = text_field(:other_loan_3_purpose, :size => 10)
+    %td
+      = text_field(:other_loan_3_cycle, :size => 5)
+    %td
+      = text_field(:other_loan_3_total_amount, :size => 10)
+    %td
+      = text_field(:other_loan_3_amount_outstanding, :size => 10)
+  %tr
+    %td
+      = text_field(:other_loan_4_lender, :size => 10)
+    %td
+      = select(:other_loan_4_lender_type, :collection => [[:local_moneylender, "Local moneylender"], [:shg, "Self-help group"], [:bank, "Bank"], [:mfi, "MFI"]], :prompt => "Choose lender type")
+    %td
+      = text_field(:other_loan_4_purpose, :size => 10)
+    %td
+      = text_field(:other_loan_4_cycle, :size => 5)
+    %td
+      = text_field(:other_loan_4_total_amount, :size => 10)
+    %td
+      = text_field(:other_loan_4_amount_outstanding, :size => 10)
+  %tr
+    %td
+      = text_field(:other_loan_5_lender, :size => 10)
+    %td
+      = select(:other_loan_5_lender_type, :collection => [[:local_moneylender, "Local moneylender"], [:shg, "Self-help group"], [:bank, "Bank"], [:mfi, "MFI"]], :prompt => "Choose lender type")
+    %td
+      = text_field(:other_loan_5_purpose, :size => 10)
+    %td
+      = text_field(:other_loan_5_cycle, :size => 5)
+    %td
+      = text_field(:other_loan_5_total_amount, :size => 10)
+    %td
+      = text_field(:other_loan_5_amount_outstanding, :size => 10)
+  %tr
+    %td
+      Occupation category:
+    %td
+      = select(:occupation_category, :collection => [[:landless_labourer, "Landless labourer"], [:small_farmer, "Small farmer"], [:farmer, "Farmer"], [:ssi, "Laghu Udyog"]] , :prompt => "Choose one")
+  %tr
+    %td
+      Nature of employment:
+    %td
+      = select(:nature_of_employment, :collection => [[:unemployed, "Unemployed"], [:on_contract, "On contract employment"], [:with_pvt_co, "With Pvt. Ltd. Co."], [:self_employed, "Self-employed"]] , :prompt => "Choose one")
+  %tr
+    %td
+      %table{:width => '100%'}
+      %tr
+        %td
+          Income
+        %td
+          Own
+        %td
+          Spouse
+        %td
+          Other
+      %tr
+        %td
+          Occupation
+        %td
+          = text_field(:occupation_own, :size => 10)
+        %td
+          = text_field(:occupation_spouse, :size => 10)
+        %td
+          = text_field(:occupation_other, :size => 10)
+      %tr
+        %td
+          Capital
+        %td
+          = text_field(:capital_own, :size => 10)
+        %td
+          = text_field(:capital_spouse, :size => 10)
+        %td
+          = text_field(:capital_other, :size => 10)
+      %tr
+        %td
+          Sales
+        %td
+          = text_field(:sales_own, :size => 10)
+        %td
+          = text_field(:sales_spouse, :size => 10)
+        %td
+          = text_field(:sales_other, :size => 10)
+      %tr
+        %td
+          Expenses
+        %td
+          = text_field(:expenses_own, :size => 10)
+        %td
+          = text_field(:expenses_spouse, :size => 10)
+        %td
+          = text_field(:expenses_other, :size => 10)
+      %tr
+        %td
+          Income (daily)
+        %td
+          = text_field(:income_own, :size => 10)
+        %td
+          = text_field(:income_spouse, :size => 10)
+        %td
+          = text_field(:income_other, :size => 10)
+      %tr
+        %th
+          Total Monthly Income (incomes x 30)
+        %td
+          = text_field(:total_income, :size => 10)
+  %tr
+    %td
+      Expenses:
+  %tr
+    %td
+      Food:
+    %td
+      = text_field(:expense_food, :size => 10)
+    %td
+      Health:
+    %td
+      = text_field(:expense_health, :size => 10)
+  %tr
+    %td
+      Education:
+    %td
+      = text_field(:expense_education, :size => 10)
+    %td
+      Loan repayments:
+    %td
+      = text_field(:loan_repayments, :size => 10)
+  %tr
+    %td
+      Mobile/phone bills:
+    %td
+      = text_field(:expense_phone_bills, :size => 10)
+    %td
+      Insurance:
+    %td
+      = text_field(:expense_insurance, :size => 10)
+  %tr
+    %td
+      Other expenses:
+    %td
+      = text_field(:expense_other, :size => 10)
+    %th
+      Total expenses
+    %td
+      = text_field(:total_expenses, :size => 10)

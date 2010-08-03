@@ -1,0 +1,40 @@
+%table
+  %tr
+    %td{:colspan => '2'}
+      %span.greytext
+        If other than husband, please enter guarantor information here (not older than 60)
+        %br/
+  %tr
+    %td
+      Name:
+    %td
+      = text_field(:guarantor_name, :size => 30)
+      %br/
+  %tr
+    %td
+      Father's Name:
+    %td
+      = text_field(:guarantor_fathers_name, :size => 30)
+      %br/
+  %tr
+    %td
+      Date of birth:
+    %td
+      = date_select_for @client, :guarantor_date_of_birth, :nullable => true, :min_date => Date.today-22265, :max_date => Date.today-1000
+  %tr
+    %td
+      Address:
+    %td
+      ~ text_area :guarantor_address, :rows => 6, :cols => 38
+  %tr
+    %td
+      Relationship:
+    %td
+      = select(:guarantor_relationship, :collection => [[:spouse, "Spouse"], [:brother, "Brother"], [:brother_in_law, "Brother-in-law"], [:father, "Father"], [:father_in_law, "Father-in-law"], [:adult_son, "Adult son"], [:other, "Other"]] , :prompt => "Choose relationship")
+      %br/
+  %tr
+    %td
+      Occupation:
+    %td
+      = select :guarantor_occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"
+    %br/

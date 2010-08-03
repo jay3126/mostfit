@@ -14,7 +14,7 @@ class Payment
   PAYMENT_TYPES = [:principal, :interest, :fees]
   
   property :id,                  Serial
-  property :amount,              Integer, :nullable => false, :index => true
+  property :amount,              Float, :nullable => false, :index => true
   property :type,                Enum.send('[]',*PAYMENT_TYPES), :index => true
   property :comment,             String, :length => 50
   property :received_on,         Date,    :nullable => false, :index => true
@@ -198,7 +198,7 @@ class Payment
         a = loan.total_fees_payable_on(received_on) if loan
         a = client.total_fees_payable_on(received_on) if client and not loan
       end      
-      if (not a.blank?) and amount > a
+      if (not a.blank?) and amount.round(2) > a.round(2)
         return [false, "#{type} is more than the total #{type} due"]
       end
     end

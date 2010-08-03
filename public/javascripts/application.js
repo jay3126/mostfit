@@ -277,6 +277,20 @@ function confirm_for(things) {
   }
 }
 
+function calculateSum(toField, addTheseFields) {
+    
+    var sum = 0;
+
+    $.each(addTheseFields, function(idx,ele){
+	    if($("#"+ele).val()!=""){
+		sum = sum + parseInt($("#"+ele).val());
+            }
+	});
+     $("#"+toField).val(sum);
+}
+
+
+
 
 $(document).ready(function(){
 	create_remotes();
@@ -505,6 +519,7 @@ $(document).ready(function(){
 	  link=$(a.currentTarget);
 	  addFloater(link);
 	  return(false);
+
       });  
 
   if($("#rule_book_action").length>0){
@@ -521,4 +536,26 @@ $(document).ready(function(){
   }
 
 });
+
+      });
+  
+  
+  income_arr = ["client_income_own", "client_income_spouse", "client_income_other"];
+  $.each(income_arr, function(){
+	  $("#"+this).change(function(){
+		  calculateSum("client_total_income",income_arr);
+	      });
+      });
+  
+  expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education","client_expense_phone_bills", "client_expense_insurance",
+		 "client_expense_other"];
+  $.each(expense_arr, function(){
+	  $("#"+this).change(function(){
+		 calculateSum("client_total_expenses",expense_arr);
+	      });
+      });
+
+
+    });
+
 

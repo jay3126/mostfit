@@ -24,6 +24,7 @@ class RuleBook
   validates_with_method  :percentage_should_be_100
   
   def self.get_accounts(obj)
+
     return false if ($globals and $globals[:mfi_details] and not $globals[:mfi_details][:accounting_enabled])
 
     if obj.class==Payment

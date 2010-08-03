@@ -32,23 +32,23 @@
       %td
         - debit = (account.postings.sum(:amount, :amount.lte => 0)||0) * -1
         - debit_sum += debit
-        = debit.round
+        = (debit*10**2).round.to_f / 10**2
       %td
         - credit = account.postings.sum(:amount, :amount.gte => 0)||0
         - credit_sum += credit
-        = credit.round
+        = (credit*10**2).round.to_f / 10**2
       %td
-        = (((debit - credit) * -1) + opening_balance).round
+        = ((((debit - credit) * -1) + opening_balance)*10**2).round.to_f / 10**2
   %tr
     %td
     %td
     %td
-      =opening_sum.round
+      =(opening_sum*10**2).round.to_f / 10**2
     %td
-      =debit_sum.round
+      =(debit_sum*10**2).round.to_f / 10**2
     %td
-      =credit_sum.round
+      =(credit_sum*10**2).round.to_f / 10**2
     %td
-      = (opening_sum + (credit_sum - debit_sum)).round
+      =((opening_sum + (credit_sum - debit_sum))*10**2).round.to_f / 10**2
 
 = paginate @data 
