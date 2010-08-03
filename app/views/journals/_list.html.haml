@@ -9,6 +9,8 @@
     %th 
       Credit Account
     %th 
+      Break Up
+    %th
       Amount
     %th 
       Comment
@@ -24,11 +26,15 @@
         - debit_postings.each do |p|
           = p.account.name
           %br
-      %td 
+      %td
+        = "<br>"*debit_postings.length 
         - credit_postings.each do |p|
           = p.account.name
           %br
-      %td 
+        
+      %td
+        = (debit_postings + credit_postings).collect{|p| p.amount.abs}.join("<br/>")  
+      %td
         = postings.map{|x| x.amount>0 ? x.amount : 0}.inject(0){|s,x| s+=x}
       %td 
         = journal.comment
