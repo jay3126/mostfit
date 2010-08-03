@@ -521,7 +521,7 @@ $(document).ready(function(){
 	  return(false);
 
       });  
-
+  
   if($("#rule_book_action").length>0){
       function showHideFees(){
 	  if($("#rule_book_action").val()==="fees")
@@ -534,10 +534,6 @@ $(document).ready(function(){
 	      showHideFees();
 	  });
   }
-
-});
-
-      });
   
   
   income_arr = ["client_income_own", "client_income_spouse", "client_income_other"];
@@ -547,15 +543,16 @@ $(document).ready(function(){
 	      });
       });
   
-  expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education","client_expense_phone_bills", "client_expense_insurance",
-		 "client_expense_other"];
+  expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education",
+		 "client_expense_phone_bills", "client_expense_insurance","client_expense_other"];
   $.each(expense_arr, function(){
 	  $("#"+this).change(function(){
-		 calculateSum("client_total_expenses",expense_arr);
+		  calculateSum("client_total_expenses",expense_arr);
 	      });
       });
-
-
+  
+  
     });
+
 
 
