@@ -215,7 +215,7 @@
           = text_field(:expenses_other, :size => 10)
       %tr
         %td
-          Income (daily)
+          Income 
         %td
           = text_field(:income_own, :size => 10)
         %td
@@ -224,7 +224,7 @@
           = text_field(:income_other, :size => 10)
       %tr
         %th
-          Total Monthly Income (incomes x 30)
+          Total Monthly Income
         %td
           = text_field(:total_income, :size => 10)
   %tr
@@ -266,3 +266,9 @@
       Total expenses
     %td
       = text_field(:total_expenses, :size => 10)
+  %tr
+    %td
+      %b Net surplus:
+    %td
+      = text_field(:net_surplus, :size => 10)
+
