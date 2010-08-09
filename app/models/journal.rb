@@ -106,21 +106,25 @@ class Journal
         x.DATA{
           x.TALLYMESSAGE{
             Journal.all(hash).each do |j|
-              debit_posting, credit_posting = j.postings
+              debit_posting, credit_posting = j.postings.group_by{ |p| p.amount > 0}.values
               x.VOUCHER{
                 x.DATE j.date.strftime("%Y%m%d")
                 x.NARRATION j.comment
                 x.VOUCHERTYPENAME j.journal_type.name
                 x.VOUCHERNUMBER j.id
                 x.tag! 'ALLLEDGERENTRIES.LIST' do
-                  x.LEDGERNAME(credit_posting.account.name)
+                  credit_posting.each do |p|
+                  x.LEDGERNAME(p.account.name)
                   x.ISDEEMEDPOSITIVE("No")
-                  x.AMOUNT(credit_posting.amount)
+                  x.AMOUNT(p.amount)
+                  end
                 end
                 x.tag! 'ALLLEDGERENTRIES.LIST' do
-                  x.LEDGERNAME(debit_posting.account.name)
+                  debit_posting.each do |p|
+                  x.LEDGERNAME(p.account.name)
                   x.ISDEEMEDPOSITIVE("Yes")
-                  x.AMOUNT(debit_posting.amount)
+                  x.AMOUNT(p.amount)
+                  end
                 end
               }
             end
@@ -131,4 +135,57 @@ class Journal
     f.write(x)
     f.close
   end 
+
+
+
+
+  def self.xml_tallySingle(hash={})
+    credit = Journal.all().group_by{|j| j.journal_type.name}.map{|journal_type, journals| {journal_type => Posting.all(:journal => journals, :amount.gt => 0).aggregate(:account_id, :amount.sum)}}
+    n = credit.size
+    debit = Journal.all().group_by{|j| j.journal_type.name}.map{|journal_type, journals| {journal_type => Posting.all(:journal => journals, :amount.lt => 0).aggregate(:account_id, :amount.sum)}}
+    m = debit.size
+    xml_file = '/tmp/voucher1.xml'
+    f = File.open(xml_file,'w')
+    x = Builder::XmlMarkup.new(:indent => 1)
+    x.ENVELOPE{
+      x.HEADER {    
+        x.VERSION "1"
+        x.TALLYREQUEST "Import"
+        x.TYPE "Data"
+        x.ID "Vouchers"  
+      }
+      
+      x.BODY { 
+        x.DESC{
+        }
+        x.DATA{
+          x.TALLYMESSAGE{
+            #          
+            x.VOUCHER{
+              x.DATE Date.today.strftime("%Y%m%d")
+              x.NARRATION  "#{Date.today}" + "comdined journal entry"
+              n = debit[0].keys[0]
+              x.VOUCHERTYPENAME n
+              x.VOUCHERNUMBER "100"
+              x.tag! 'ALLLEDGERENTRIES.LIST' do
+                x.LEDGERNAME credit[0][n][0][0]
+                x.ISDEEMEDPOSITIVE("No")
+                x.AMOUNT credit[0][n][0][1]
+              end
+                    
+              x.tag! 'ALLLEDGERENTRIES.LIST' do     
+                x.LEDGERNAME  debit[0][n][0][0]
+                x.ISDEEMEDPOSITIVE("Yes")
+                x.AMOUNT debit[0][n][0][1]
+              end
+            }
+          }
+        }
+      }
+    } 
+    f.write(x)
+    f.close
+  end 
+  
+ 
 end

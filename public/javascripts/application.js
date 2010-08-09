@@ -354,6 +354,43 @@ function confirm_for(things) {
   }
 }
 
+var uniqueID = (function() {
+	var id = 0; // This is the private persistent value
+	return function() { return id++; };  // Return and increment
+    })();
+
+
+function calculateSum(toField, addTheseFields) {
+
+    var sum = 0, net = 0, net1 = 0;
+     status = uniqueID();
+    console.log(status);
+    $.each(addTheseFields, function(idx,ele){
+	    if($("#"+ele).val()!=""){
+		sum = sum + parseInt($("#"+ele).val());
+            }
+	});
+     $("#"+toField).val(sum);
+     if(toField == "client_total_income")
+	 {
+	     net = net + sum;
+	     val1 = net;
+	 }
+     else if(toField == "client_total_expenses")
+	 {
+	     net1 = net1 + sum;
+
+	 }
+
+     if(status){
+
+	 $("#client_net_surplus").val((val1 - net1))
+	 }
+}
+
+
+
+
 
 $(document).ready(function(){
 	create_remotes();
@@ -618,5 +655,19 @@ $(document).ready(function(){
 	      showHideFees();
 	  });
   }
-});
+  income_arr = ["client_income_own", "client_income_spouse", "client_income_other"];
+  $.each(income_arr, function(){
+	  $("#"+this).change(function(){
+		  calculateSum("client_total_income",income_arr);
+	  });
+  });
 
+  expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education",
+		 "client_loan_repayments","client_expense_phone_bills",
+		 "client_expense_insurance","client_expense_other"];
+  $.each(expense_arr, function(){
+	  $("#"+this).change(function(){
+	    calculateSum("client_total_expenses",expense_arr);
+	  });
+  });
+});

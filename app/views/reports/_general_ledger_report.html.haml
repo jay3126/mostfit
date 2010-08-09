@@ -6,11 +6,11 @@
     %th
       Discription
     %th
-      Account
+      Debit Account
     %th
-      Debit
+      Credit Account
     %th
-      Credit
+      Amount
  
   - length = 5
   - org_total = []
@@ -24,14 +24,19 @@
         = journal.date.strftime(time_format)
       %td
         = journal.comment
+        - debit_postings, credit_postings = journal.postings.group_by{|x| x.amount>0}.values
       %td
-        = journal.postings.sort_by{|x| x.amount}.map{|p| accounts[p.account_id].name}.join("<br/>")
-        - debit, credit = journal.postings.map{|p| p.amount}.sort
+        - debit_postings.each do |p|
+          = p.account.name
+          %br
       %td
-        =debit * -1
+        = "<br>"*debit_postings.length
+        - credit_postings.each do |p|
+          = p.account.name
+          %br
       %td
-        %br
-        =credit
+        
+        = (debit_postings + credit_postings).collect{|p| p.amount.abs}.join("<br/>")
   %tr
     %td
     %td

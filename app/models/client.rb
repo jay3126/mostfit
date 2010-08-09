@@ -19,6 +19,7 @@ class Client
   property :spouse_name,     String, :length => 100, :lazy => true
   property :fathers_name,     String, :length => 100, :lazy => true
   property :father_is_alive, Enum.send('[]', *['', 'yes', 'no']), :default => '', :nullable => true, :lazy => true
+  property :spouse_date_of_birth, Date, :index => true, :lazy => true 
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :address,         Text, :lazy => true
   property :address_pin,     String, :length => 10, :lazy => true
@@ -183,6 +184,8 @@ class Client
   property :expense_other, Integer, :length => 10, :nullable => true, :lazy => true
   property :total_expenses, Integer, :length => 10, :nullable => true, :lazy => true
 
+  property :net_surplus, Integer,:length => 10, :nullable => true, :lazy => true
+
   property :other_productive_asset, String, :length => 30, :nullable => true, :lazy => true
   property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
@@ -242,6 +245,7 @@ class Client
   has n, :insurance_policies
   has n, :attendances
   has n, :claims
+  has 1, :document_type
   validates_length :account_number, :max => 20
 
   belongs_to :center

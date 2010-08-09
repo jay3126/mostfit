@@ -38,6 +38,7 @@ class RuleBook
       # In case of objects being passed in a set then we give out hashes of credit and debit accounts with values being amount and keys being acocunt
       client = obj.first.client_id > 0 ? obj.first.client : obj.first.loan.client
       branch  = client.center.branch      
+     
       credit_accounts, debit_accounts  = {}, {}
       obj.each{|p|  
         rule = if p.type==:fees
@@ -49,7 +50,7 @@ class RuleBook
           credit_accounts[car.credit_account] ||= 0
           credit_accounts[car.credit_account] += (p.amount * (car.percentage)/100)
         }
-
+        
         rule.debit_account_rules.each{|dar|
           debit_accounts[dar.debit_account] ||= 0
           debit_accounts[dar.debit_account] += (p.amount * (dar.percentage)/100)
@@ -57,15 +58,15 @@ class RuleBook
       }
       return [credit_accounts, debit_accounts]
     end
-    
+
     if rule = first(:action => transaction_type, :branch => branch, :fee => fee)
-    elsif rule = first(:action => transaction_type, :branch => nil, :fee => nil)
-    elsif rule = first(:action => transaction_type, :branch => nil, :fee => fee)
     elsif rule = first(:action => transaction_type, :branch => branch, :fee => nil)
+    elsif rule = first(:action => transaction_type, :branch => nil, :fee => fee)
+    elsif rule = first(:action => transaction_type, :branch => nil, :fee => nil)
     else
       raise "NoRuleFoundError"
     end
-
+    
     credit_accounts, debit_accounts  = {}, {}
     rule.credit_account_rules.each{|car|
       credit_accounts[car.credit_account] ||= 0

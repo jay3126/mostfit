@@ -64,12 +64,18 @@
     %td
       Reference:
     %td
-      = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
+      = text_field :reference, :size => 40
       %br/
       %span.greytext
         references are unique, a way to check that this is the only record of a client
         %br/
         for this reason it is advisable to use a government ID as reference
+  %tr
+    %td 
+      Reference ID:
+    %td
+      = select:document_type_id, :collection => DocumentType.all.map{|x| [x.id, x.name]} ,:prompt => "Select reference"
+   
   %tr
     %td
       Date of birth:
@@ -100,6 +106,11 @@
       Spouse name:
     %td
       = text_field :spouse_name, :size => 40
+  %tr
+    %td 
+      Spouse Date of Birth:
+    %td
+      = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %td
       Father's name:

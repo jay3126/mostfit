@@ -29,8 +29,13 @@ class RuleBooks < Application
     rule_book, credit_accounts, debit_accounts = get_credit_and_debit_accounts(rule_book)
     @rule_book = RuleBook.new(rule_book)
 
-    credit_accounts.each{|ca| @rule_book.credit_account_rules << CreditAccountRule.new(:credit_account => ca[:account], :percentage => ca[:percentage])}
-    debit_accounts.each{|da|  @rule_book.debit_account_rules  << DebitAccountRule.new(:debit_account => da[:account], :percentage => da[:percentage])}
+    credit_accounts.each{|ca| 
+      @rule_book.credit_account_rules << CreditAccountRule.new(:credit_account => ca[:account], :percentage => ca[:percentage])
+    }
+    
+    debit_accounts.each{|da| 
+      @rule_book.debit_account_rules  << DebitAccountRule.new(:debit_account => da[:account], :percentage => da[:percentage])
+    }
 
     if @rule_book.save
       redirect resource(:rule_books), :message => {:notice => "RuleBook was successfully created"}
@@ -47,10 +52,19 @@ class RuleBooks < Application
     RuleBook.transaction do
       @rule_book.attributes = rule_book
       @rule_book.credit_accounts, @rule_book.debit_accounts = [], []
-      credit_accounts.each{|ca| @rule_book.credit_accounts << ca[:account]}
-      debit_accounts.each{|da| @rule_book.debit_accounts << da[:account]}
-      credit_accounts.each{|ca| @rule_book.credit_account_rules.find{|x| x.credit_account_id == ca[:account].id}.percentage=ca[:percentage]}
-      debit_accounts.each{|da|  @rule_book.debit_account_rules.find{|x|  x.debit_account_id  == da[:account].id}.percentage=da[:percentage]}
+      @rule_book.credit_account_rules , @rule_book.debit_account_rules = [], []
+      credit_accounts.each{|ca| 
+        @rule_book.credit_account_rules << CreditAccountRule.new(:credit_account => ca[:account], :percentage => ca[:percentage])
+      }
+      
+      debit_accounts.each{|da| 
+        @rule_book.debit_account_rules  << DebitAccountRule.new(:debit_account => da[:account], :percentage => da[:percentage])
+      }
+
+      # credit_accounts.each{|ca| @rule_book.credit_accounts << ca[:account]}
+      # debit_accounts.each{|da| @rule_book.debit_accounts << da[:account]}
+      # credit_accounts.each{|ca| @rule_book.credit_account_rules.find{|x| x.credit_account_id == ca[:account].id}.percentage=ca[:percentage]}
+      # debit_accounts.each{|da|  @rule_book.debit_account_rules.find{|x|  x.debit_account_id  == da[:account].id}.percentage=da[:percentage]}
 
       if @rule_book.save        
         redirect resource(:rule_books)
@@ -73,13 +87,13 @@ class RuleBooks < Application
 private
   def get_credit_and_debit_accounts(rule_book)
     if rule_book[:credit_accounts]
-      credit_accounts = rule_book[:credit_accounts].reject{|k, ca| ca[:account_id].blank?}.map{|k, ca| 
+      credit_accounts = rule_book[:credit_accounts].reject{|k, ca| ca[:account_id].blank?}.sort_by{|x| x[0]}.map{|k, ca| 
         {:account => Account.get(ca[:account_id]), :percentage => ca[:percentage]}
       }.compact
       rule_book.delete(:credit_accounts)
     end
     if rule_book[:debit_accounts]
-      debit_accounts  = rule_book[:debit_accounts].reject{|k, da| da[:account_id].blank?}.map{|k, da| 
+      debit_accounts  = rule_book[:debit_accounts].reject{|k, da| da[:account_id].blank?}.sort_by{|x| x[0]}.map{|k, da| 
         {:account => Account.get(da[:account_id]), :percentage => da[:percentage]}
       }.compact
       rule_book.delete(:debit_accounts)
