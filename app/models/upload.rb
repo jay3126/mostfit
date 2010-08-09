@@ -28,9 +28,9 @@ class Upload
       u.destroy if not u.login=="admin"
     }
     models.each{|model|      
+      model.all.destroy!
       next unless File.exists?(File.join(Merb.root, "uploads", @directory, model.to_s.snake_case.pluralize))
-#      model.all.destroy!
-#      log.info("Destroying old records for #{model.to_s.plural} (if any)") if log
+      log.info("Destroying old records for #{model.to_s.plural} (if any)") if log
       log.info("Creating #{model.to_s.plural}") if log
       headers = {}
       FasterCSV.open(File.join(Merb.root, "uploads", @directory, model.to_s.snake_case.pluralize), "r").each_with_index{|row, idx|

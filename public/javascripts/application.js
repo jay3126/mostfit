@@ -1,10 +1,10 @@
 // Common JavaScript code across your application goes here.
 var lineNos=0;
 function addFloater(link){
-    $(link).after("<div class='floater'><img height='400' src="+link.attr('href')+"/><span class='close_button'>X</span></div>");	  
+    $(link).after("<div class='floater'><img height='400' src="+link.attr('href')+"/><span class='close_button'>X</span></div>");
     $(".close_button").click(function(button){
-	    $("div.floater").remove();
-	});
+      $("div.floater").remove();
+    });
 }
 function spitLogs(){
     $.get("/logs/"+$("div.log_box").attr("id"), function(data){
@@ -161,6 +161,52 @@ function dateFromAge(ageYear, ageMonth, ageDay){
     }
     return birthDate;
 }
+function attachFormRemoteTo(form){
+  if(form.length==0)
+    return(false);
+  $(form).submit(function(){
+		   $(form).find("input[type='submit']").attr("disabled", true);
+		   $(form).after("<img id='spinner' src='/images/spinner.gif' />");
+		   $.ajax({
+			    type: form.attr("method"),
+			    url: form.attr("action"),
+			    data: form.serialize(),
+			    success: function(data, status, xmlObj){
+			      if(data.redirect){
+				window.location.href = data.redirect;
+			      }else if(form.find("input[name='_target_']").length>0){
+				id=form.find("input[name='_target_']").attr("value");
+				$("#"+id).html(data);
+				attachFormRemoteTo($("#"+id).find("form._remote_"));
+			      }else if(form.find("table").length>0){
+				form.find("table").html(data);
+				attachFormRemoteTo(form.find("table form._remote_"));
+			      }else if(form.find("div").length>0){
+				form.find("div").html(data);
+				attachFormRemoteTo(form.find("div").find("form._remote_"));
+			      }else{
+				form.append(data);
+				attachFormRemoteTo(form.find("form._remote_"));
+			      }
+			      $("#spinner").remove();
+			      $(form).find("input[type='submit']").attr("disabled", "");
+			    },
+			    error: function(xhr, text, errorThrown){
+			      if(xhr.status=="302"){
+				window.location.href = text;
+			      }else{
+				$("div.error").remove();
+				txt = "<div class='error'>"+xhr.responseText+"</div>"
+				form.before(txt);
+				$("#spinner").remove();
+				$(form).find("input[type='submit']").attr("disabled", "");
+			      }
+			    }
+			  });
+		   return false;
+		 });
+}
+
 function create_remotes(){
     $("a._remote_").click(function(){
 	    href=$(this).attr("href");
@@ -179,44 +225,44 @@ function create_remotes(){
 		    },
 		    error: function(xhr, text, errorThrown){
 			txt = "<div class='error'>"+xhr.responseText+"</div>"
-			$(a).after(txt);			
+			$(a).after(txt);
 		    }
 		});
 	    return false;
 	});
-    $("form._remote_").submit(function(){
-	    form = $(this);
-	    $(form).after("<img id='spinner' src='/images/spinner.gif' />");
+
+    $("a._customreports_").click(function(){
+	    href=$(this).attr("href");
+	    method="GET"
+	    if($(this).hasClass("self")){
+		href=href+(href.indexOf("?")>-1 ? "&" : "?")+$(this).parent().serialize();
+                method="POST"
+	    }
+	    a=$(this);
 	    $.ajax({
-		    type: form.attr("method"),
-		    url: form.attr("action"),
-		    data: form.serialize(),
+		    type: "POST",
+		    url: href,
 		    success: function(data){
-			if(form.find("div").length>0)
-			    form.find("div").html(data);
-			else if(form.find("table").length>0){
-			    form.find("table").html(data);
-			}else if(form.find("input[name='_target_']").length>0){
-			    id=form.find("input[name='_target_']").attr("value");
-			    $("#"+id).html(data);
-			}
-			$("#spinner").remove();
+			$(a).after(data);
+			$(a).remove();
+			attachCustomTableEvents();
 		    },
 		    error: function(xhr, text, errorThrown){
-			$("div.error").remove();
 			txt = "<div class='error'>"+xhr.responseText+"</div>"
-			form.before(txt);
-			$("#spinner").remove();			
+			$(a).after(txt);
 		    }
 		});
 	    return false;
+	});
+    $("form._remote_").each(function(idx, form){
+	    attachFormRemoteTo($(form));
 	});
 }
 function attachReportingFormEvents(id){
     $("#reporting_form tr#"+id+" select").change(function(){
 	  if($(this).attr("class")=="more")
 	      return;
-	  var types = ["model", "property", "operator", "value"];
+	  var types = ["model", "property", "operator", "span"];
 	  id = $(this).attr("id");
 	  name = $(this).attr("name").split(/\[/)[0];
 	  counter = $(this).attr("name").split(/\[/)[1].split("]")[0];
@@ -229,8 +275,8 @@ function attachReportingFormEvents(id){
 		  $.ajax({
 			url: "/search/get?counter="+counter+"&"+$("#reporting_form").serialize(),
 			success: function(data){
-                              if(nextType==="value"){
-				  $("#reporting_form span#"+nextType+'_'+counter).html(data);				  
+                              if(nextType==="span"){
+				  $("#reporting_form span#"+nextType+'_'+counter).html(data);
 			      }else{
 				  $("#reporting_form select#"+nextType+'_'+counter).html("");
 				  $("#reporting_form select#"+nextType+'_'+counter).append(data);
@@ -260,6 +306,37 @@ function attachReportingFormEvents(id){
       });
 }
 
+total_cols = 0;
+MAX_COLS = 20;
+function attachCustomTableEvents(){
+  $("#reporting_form #customtable .checkbox").click(function() {
+      var type = $(this);
+//      selected_field = $("#"+this.id + "_precedence_"); //#reporting_form #customtable @"+type.attr("name")+"[precedence]");
+      selected_field = window.document.getElementById(this.id.replace("fields","precedence"));
+      if(selected_field == null)
+        return;
+      if(total_cols >= MAX_COLS)
+        return;
+      //alert(selected_field.style.display);
+      if(selected_field.style.display == "none") {
+        selected_field.style.display = "";
+        selected_field.selectedIndex = total_cols;
+        total_cols++;
+      }
+      else {
+        selected_field.style.display = "none";
+        total_cols--;
+      }
+
+      //alert(selected_field.attr("id"));
+      //selected_field.toggle();
+
+
+//      window.document.getElementByName(type.name+"_precedence").innerText("Hello")
+
+      });
+}
+
 function confirm_for(things) {
   /* given a hash of ids and values, this function asks a confirmation to proceed if the values of the elements
    * are not the same as the provided values
@@ -280,7 +357,6 @@ function confirm_for(things) {
 
 $(document).ready(function(){
 	create_remotes();
-	$('form').highlight();
 	//Handling targets form
 	$("select#target_attached_to").change(function(){
 		$.ajax({
@@ -315,11 +391,35 @@ $(document).ready(function(){
 	//Handling reports
 	if($("table.report").length>0 && !$("table.report").hasClass("nojs")){
 	    showTableTrs();
-	    $("table.report").before("<a class='expand_all'>Expand all</a>");
-	    $("table.report tr.branch td").append("<a id='center' class='expand'>Expand centers</a>");
-	    $("table.report tr.center td").append("<a id='group' class='expand'>Expand groups</a>");
-	    if($("table.report tr.date").length>0)
-		$("table.report tr.group td").append("<a id='date' class='expand'>Expand dates</a>");
+	    var table = $("table.report");
+	    table.before("<a class='expand_all'>Expand all</a>");
+	    //level 2
+	    if(table.find("tr.branch td")){
+		if(table.find("tr.branch").attr("id"))
+		  level2_name=table.find("tr.branch").attr("id");
+		else
+		  level2_name='center';
+		if(table.find("tr." + level2_name).length>0)
+		  table.find("tr.branch td").append("<a id='"+level2_name+"' class='expand'>Expand "+level2_name+"s</a>");
+	      //level 3
+	      if(table.find("tr." + level2_name + " td")){
+		  if(table.find("tr." + level2_name).attr("id"))
+		    level3_name=table.find("tr."+level2_name).attr("id");
+		  else
+		    level3_name='group';
+		  if(table.find("tr." + level3_name).length>0)
+		    table.find("tr."+ level2_name + " td").append("<a id='"+level3_name+"' class='expand'>Expand "+level3_name+"s</a>");
+		  //level 4
+		  if(table.find("tr." + level3_name + " td").length>0){
+		    if(table.find("tr." + level3_name).attr("id"))
+		      level4_name=table.find("tr."+level3_name).attr("id");
+		    else
+		      level4_name='date';
+		    if(table.find("tr." + level4_name).length>0)
+		      table.find("tr."+ level3_name + " td").append("<a id='"+level4_name+"' class='expand'>Expand "+level4_name+"s</a>");
+		  }
+		}
+	    }
 	    if($("table.report tr.loan").length>0)
 		$("table.report tr.group td").append("<a id='loan' class='expand'>Expand loans</a>");
 	    if($("table.report tr.client").length>0)
@@ -481,13 +581,13 @@ $(document).ready(function(){
   $("#bookmark_form input:checkbox").click(function(){
 	  if($(this).attr("value")==="all" && $(this).attr("checked")===true){
 	      $("#bookmark_form input:checkbox").each(function(){
-		      $(this).attr("checked", "true");		      
+		      $(this).attr("checked", "true");
 		  });
 	      $("#bookmark_form input[value='none']").attr("checked", "");
 	  }
 	  if($(this).attr("value")==="none" && $(this).attr("checked")===true){
 	      $("#bookmark_form input:checkbox").each(function(){
-		      $(this).attr("checked", "");		      
+		      $(this).attr("checked", "");
 		  });
 	      $("#bookmark_form input[value='none']").attr("checked", "true");
 	  }
@@ -497,7 +597,7 @@ $(document).ready(function(){
 	  val=$("#account_account_type_id").val();
 	  $.ajax({
 		  url: "/accounts?account_type_id="+val,
-		      success: function(data){$("#account_parent_id").html(data);}		  
+		      success: function(data){$("#account_parent_id").html(data);}
 	      });
       });
   attachReportingFormEvents("formdiv_1");
@@ -505,6 +605,18 @@ $(document).ready(function(){
 	  link=$(a.currentTarget);
 	  addFloater(link);
 	  return(false);
-      });  
+      });
+  if($("#rule_book_action").length>0){
+      function showHideFees(){
+	  if($("#rule_book_action").val()==="fees")
+	      $("#fees_row").show();
+	  else
+	      $("#fees_row").hide();
+      }
+      showHideFees();
+      $("#rule_book_action").change(function(){
+	      showHideFees();
+	  });
+  }
 });
 

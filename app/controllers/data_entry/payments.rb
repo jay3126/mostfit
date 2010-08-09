@@ -31,7 +31,13 @@ module DataEntry
         bulk_payments_and_disbursals
         mark_attendance
         if @errors.blank?
-          redirect(params[:return]||url(:data_entry), :message => {:notice => 'All payments made succesfully'})
+          notice = 'All payments made succesfully'
+          return_url = params[:return]||url(:data_entry)
+          if(request.xhr?)
+            render("<div class='notice'>#{notice}<div>", :layout => layout?)
+          else
+            redirect(return_url, :message => {:notice => notice})
+          end
         elsif params[:format] and params[:format]=="xml"
           display("")
         else 
