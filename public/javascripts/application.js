@@ -661,7 +661,6 @@ $(document).ready(function(){
 		  calculateSum("client_total_income",income_arr);
 	  });
   });
-
   expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education",
 		 "client_loan_repayments","client_expense_phone_bills",
 		 "client_expense_insurance","client_expense_other"];
@@ -669,5 +668,9 @@ $(document).ready(function(){
 	  $("#"+this).change(function(){
 	    calculateSum("client_total_expenses",expense_arr);
 	  });
+  });
+
+  $("form._disable_button_").submit(function(form){
+    $(form.currentTarget).find("input[type='submit']").attr('disabled', true);
   });
 });
