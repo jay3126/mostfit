@@ -12,6 +12,7 @@ class Client
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :type_of_id, Enum.send('[]', *['', 'voter_id', 'driving_licence', 'pan_card', 'gp_certificate', 'ration_card', 'nrega_card', 'phone_bill', 'eletricity_bill']), :nullable => false, :lazy => true
   property :existing_customer,	Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :client_description, String, :length => 100, :nullable => true, :index => false
@@ -245,7 +246,6 @@ class Client
   has n, :insurance_policies
   has n, :attendances
   has n, :claims
-  has 1, :document_type
   validates_length :account_number, :max => 20
 
   belongs_to :center
