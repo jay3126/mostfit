@@ -112,18 +112,18 @@ class Journal
                 x.NARRATION j.comment
                 x.VOUCHERTYPENAME j.journal_type.name
                 x.VOUCHERNUMBER j.id
-                x.tag! 'ALLLEDGERENTRIES.LIST' do
-                  credit_posting.each do |p|
-                  x.LEDGERNAME(p.account.name)
-                  x.ISDEEMEDPOSITIVE("No")
-                  x.AMOUNT(p.amount)
+                credit_posting.each do |p|
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME(p.account.name)
+                    x.ISDEEMEDPOSITIVE("No")
+                    x.AMOUNT(p.amount)
                   end
                 end
-                x.tag! 'ALLLEDGERENTRIES.LIST' do
-                  debit_posting.each do |p|
-                  x.LEDGERNAME(p.account.name)
-                  x.ISDEEMEDPOSITIVE("Yes")
-                  x.AMOUNT(p.amount)
+                debit_posting.each do |p|
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME(p.account.name)
+                    x.ISDEEMEDPOSITIVE("Yes")
+                    x.AMOUNT(p.amount)
                   end
                 end
               }
@@ -136,7 +136,7 @@ class Journal
     f.close
   end 
 
-
+  
 
 
   def self.xml_tallySingle(hash={})
