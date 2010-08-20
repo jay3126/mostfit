@@ -31,23 +31,25 @@ class Info < Application
 
       @centers[:new]   = @obj.centers(new_date_hash)
       @centers[:upto]  = @obj.centers(upto_date_hash)
+    else
+      raise "Unknown obj class"
     end
 
     if @areas and not @branches
       @branches        = {}
-      @branches[:new]  = @areas.branches(new_date_hash)
-      @branches[:upto] = @areas.branches(upto_date_hash)
+      @branches[:new]  = (@areas.class==Hash ? @areas[:upto] : @areas).branches(new_date_hash)
+      @branches[:upto] = (@areas.class==Hash ? @areas[:upto] : @areas).branches(upto_date_hash)
     end
 
     if @branches and not @centers
       @centers   = {}
-      @centers   = @branches.centers(new_date_hash)
-      @centers   = @branches.centers(upto_date_hash)
+      @centers[:new]   = (@branches.class==Hash ? @branches[:upto] : @branches).centers(new_date_hash)
+      @centers[:upto]   = (@branches.class==Hash ? @branches[:upto] : @branches).centers(upto_date_hash)
     end
 
-    @clients        = {}    
-    @clients[:new]  = @centers[:new].clients(client_hash(:new))
-    @clients[:upto] = @centers[:upto].clients(client_hash(:upto))
+    @clients        = {} 
+    @clients[:new]  = (@centers.class==Hash ? @centers[:upto] : @centers).clients(client_hash(:new))
+    @clients[:upto] = (@centers.class==Hash ? @centers[:upto] : @centers).clients(client_hash(:upto))
 
     set_more_info(@obj)
     render :file => 'info/moreinfo', :layout => false
@@ -79,7 +81,7 @@ class Info < Application
     @loans_created_by_admin = User.all(:role => :admin).audit_trails(:action => :create, :auditable_type => "Loan").count(:auditable_id)
     @loans_edited_by_admin  = User.all(:role => :admin).audit_trails(:action => :update, :auditable_type => "Loan").count(:auditable_id)
     @loans_deleted_by_admin = User.all(:role => :admin).audit_trails(:action => :destroy,:auditable_type => "Loan").count(:auditable_id)
-    @clients_without_insurance = (@client_ids - InsurancePolicy.all(:fields => [:client_id]).map{|x| x.client_id}).length
+    @clients_without_insurance = (@client_ids - InsurancePolicy.all(:fields => [:id, :client_id]).map{|x| x.client_id}).length
     render :file => 'info/exceptions', :layout => false
   end
 
@@ -117,7 +119,9 @@ private
     @clients_upto_count = (@centers_upto_count>0) ? @clients[:upto].count : 0
 
     @payments        = Payment.collected_for(obj, @from_date, @to_date)
+    @total_payments  = Payment.collected_for(obj, Date.min_date, @to_date)
     @fees            = Fee.collected_for(obj, @from_date, @to_date)
+    @total_fees      = Fee.collected_for(obj, Date.min_date, @to_date)
     @total_disbursed = LoanHistory.amount_disbursed_for(obj, Date.min_date, @to_date)
     @loan_disbursed  = LoanHistory.amount_disbursed_for(obj, @from_date, @to_date)
     @loan_data       = LoanHistory.sum_outstanding_for(obj, @from_date, @to_date)

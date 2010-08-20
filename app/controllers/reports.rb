@@ -1,7 +1,10 @@
 class Reports < Application
+  include DateParser
   Types = [
-           DailyReport, ConsolidatedReport, TransactionLedger, ProjectedReport, LoanDisbursementRegister, LateDisbursalsReport, TargetReport, GeneralLedgerReport, TrialBalanceReport,
-           LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport, LoanSizePerManagerReport
+           DailyReport, ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, TransactionLedger, ProjectedReport, 
+           LoanDisbursementRegister, ScheduledDisbursementRegister, LateDisbursalsReport, 
+           TargetReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport, 
+           LoanSizePerManagerReport
           ]
   layout :determine_layout 
 
@@ -25,18 +28,13 @@ class Reports < Application
       if klass==TransactionLedger
         @groups, @centers, @branches, @payments, @clients = @report.generate
         display [@groups, @centers, @branches, @payments, @clients]
-      elsif klass==LoanDisbursementRegister or klass==LoanSanctionRegister
+      elsif [LoanSanctionRegister, ScheduledDisbursementRegister].include?(klass)
         @groups, @centers, @branches, @loans, @loan_products = @report.generate
         display [@groups, @centers, @branches, @loans, @loan_products]
-      elsif [LateDisbursalsReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, LoanSizePerManagerReport].include?(klass)
+      elsif [ConsolidatedReport, LateDisbursalsReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, StaffConsolidatedReport, 
+             QuarterConsolidatedReport, ClientAbsenteeismReport, LoanSizePerManagerReport, TargetReport, LoanDisbursementRegister].include?(klass)
         @data  = @report.generate
         display @data
-      elsif klass==GeneralLedgerReport or klass == TrialBalanceReport
-        @data  = @report.generate(params)
-        display @data        
-      elsif klass==TargetReport
-        @targets = @report.generate
-        display [@targets]
       else
         @groups, @centers, @branches = @report.generate
         display [@groups, @centers, @branches]
@@ -108,7 +106,7 @@ class Reports < Application
   def get_date(params, col)
     if params and params.key?(col)
       date_hash = params[col]
-      return Date.parse(date_hash[:year] + "-" + date_hash[:month] + "-" + date_hash[:day])
+      return Date.parse(date_hash)
     end
   end
   

@@ -8,9 +8,11 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
+  after  :save,   :check_client_deceased
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :type_of_id, Enum.send('[]', *['', 'voter_id', 'driving_licence', 'pan_card', 'gp_certificate', 'ration_card', 'nrega_card', 'phone_bill', 'eletricity_bill']), :nullable => false, :lazy => true
   property :existing_customer,	Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :client_description, String, :length => 100, :nullable => true, :index => false
@@ -106,6 +108,7 @@ class Client
   property :has_bank_account, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :has_PAN_card, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :PAN_number, String, :length => 20, :nullable => true, :lazy => true
+
   property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :house_area_in_sqmeter, String, :length => 20, :nullable => true, :lazy => true
@@ -191,6 +194,7 @@ class Client
   property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
+
   property :total_land_farming, Integer, :lazy => true
   property :total_land_farming_irrigated, Integer, :lazy => true
   property :irrigated_land_own_fertile, Integer, :lazy => true
@@ -202,12 +206,13 @@ class Client
   property :irrigated_land_own_wasteland, Integer, :lazy => true
   property :irrigated_land_leased_wasteland, Integer, :lazy => true
   property :irrigated_land_shared_wasteland, Integer, :lazy => true
+
   property :children_girls_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
   property :children_girls_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_girls_over_5_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_girls_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
   property :children_sons_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
   property :children_sons_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_over_5_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_sons_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
   property :not_in_school_working_girls, Integer, :length => 10, :default => 0, :lazy => true
   property :not_in_school_bonded_girls, Integer, :length => 10, :default => 0, :lazy => true
   property :not_in_school_working_sons, Integer, :length => 10, :default => 0, :lazy => true
@@ -241,7 +246,6 @@ class Client
   has n, :insurance_policies
   has n, :attendances
   has n, :claims
-  has 1, :document_type
   validates_length :account_number, :max => 20
 
   belongs_to :center
@@ -272,8 +276,14 @@ class Client
   validates_with_method :dates_make_sense
 
   def self.from_csv(row, headers)
-    center         = Center.first(:name => row[headers[:center]].strip) if row[headers[:center]].strip
-    next unless center
+    if center_attr = row[headers[:center]].strip
+      if center   = Center.first(:name => center_attr)
+      elsif center   = Center.first(:code => center_attr)
+      elsif /\d+/.match(center_attr)
+        center   = Center.get(center_attr)
+      end
+    end
+    return unless center
     branch         = center.branch
     #creating group either on group ccode(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
@@ -397,9 +407,16 @@ class Client
   def check_client_deceased
     if not self.active and not self.inactive_reason.blank? and [:death_of_client, :death_of_spouse].include?(self.inactive_reason.to_sym)
       loans.each do |loan|
-        if loan.status==:outstanding or loan.status==:disbursed and self.claims.length>0 and claim=self.claims.last
+        if (loan.status==:outstanding or loan.status==:disbursed) and self.claims.length>0 and claim=self.claims.last
           if claim.stop_further_installments
-            loan.under_claim_settlement = claim.date_of_death
+            last_payment_date = loan.payments.aggregate(:received_on.max)
+            if last_payment_date and (last_payment_date > claim.date_of_death) 
+              loan.under_claim_settlement = last_payment_date 
+            elsif claim.date_of_death
+              loan.under_claim_settlement = claim.date_of_death
+            else
+              loan.under_claim_settlement = Date.today
+            end
             loan.save
           end
         end
@@ -427,7 +444,7 @@ class Client
 
   def dates_make_sense
     return true if not grt_pass_date or not date_joined 
-    return [false, "Client cannot join this center before the center was created"] if center and center.creation_date > date_joined
+    return [false, "Client cannot join this center before the center was created"] if center and center.creation_date and center.creation_date > date_joined
     return [false, "GRT Pass Date cannot be before Date Joined"]  if grt_pass_date < date_joined
     return [false, "Client cannot die before he became a client"] if deceased_on and (deceased_on < date_joined or deceased_on < grt_pass_date)
     true

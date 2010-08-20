@@ -62,7 +62,7 @@
       = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
   %tr
     %td
-      Reference:
+      Reference Identification:
     %td
       = text_field :reference, :size => 40
       %br/
@@ -72,10 +72,9 @@
         for this reason it is advisable to use a government ID as reference
   %tr
     %td 
-      Reference ID:
+      Type of identification:
     %td
-      = select:document_type_id, :collection => DocumentType.all.map{|x| [x.id, x.name]} ,:prompt => "Select reference"
-   
+      = select(:type_of_id, :collection => [[:voter_id, "Voter ID"], [:driving_licence, "Driving Licence"], [:pan_card, "PAN Card"], [:gp_certificate, "Gram Panchayat Certificate"], [:ration_card, "Ration Card"], [:nrega_card, "NREGA Card"], [:phone_bill, "Phone bill"], [:electricity_bill, "Electricity bill"]] , :prompt => "Select ID card type")
   %tr
     %td
       Date of birth:
