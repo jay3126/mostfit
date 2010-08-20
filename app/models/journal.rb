@@ -87,7 +87,7 @@ class Journal
     repository.adapter.query(sql)
   end
   
-
+# This function will create multiple vouchers 
   def self.xml_tally(hash={})
     xml_file = '/tmp/voucher.xml'
     f = File.open(xml_file,'w')
@@ -138,13 +138,10 @@ class Journal
 
   
 
+#this function will create single voucher 
 
-  def self.xml_tallySingle(hash={})
-    credit = Journal.all().group_by{|j| j.journal_type.name}.map{|journal_type, journals| {journal_type => Posting.all(:journal => journals, :amount.gt => 0).aggregate(:account_id, :amount.sum)}}
-    n = credit.size
-    debit = Journal.all().group_by{|j| j.journal_type.name}.map{|journal_type, journals| {journal_type => Posting.all(:journal => journals, :amount.lt => 0).aggregate(:account_id, :amount.sum)}}
-    m = debit.size
-    xml_file = '/tmp/voucher1.xml'
+  def self.tallysinglevoucher(hash={})
+    xml_file = '/tmp/single.xml'
     f = File.open(xml_file,'w')
     x = Builder::XmlMarkup.new(:indent => 1)
     x.ENVELOPE{
@@ -160,25 +157,31 @@ class Journal
         }
         x.DATA{
           x.TALLYMESSAGE{
-            #          
             x.VOUCHER{
               x.DATE Date.today.strftime("%Y%m%d")
-              x.NARRATION  "#{Date.today}" + "comdined journal entry"
-              n = debit[0].keys[0]
-              x.VOUCHERTYPENAME n
-              x.VOUCHERNUMBER "100"
-              x.tag! 'ALLLEDGERENTRIES.LIST' do
-                x.LEDGERNAME credit[0][n][0][0]
-                x.ISDEEMEDPOSITIVE("No")
-                x.AMOUNT credit[0][n][0][1]
+              x.NARRATION "#{Date.today}" + "combined journal entry"
+              x.VOUCHERTYPENAME "Journal"
+              x.VOUCHERNUMBER "1"
+              
+              Account.all().each do |acc|
+                credit = acc.postings.sum(:amount, :amount.gt => 0)
+                debit = acc.postings.sum(:amount, :amount.lt => 0)
+                if credit != nil and debit != nil
+                       
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME acc.name
+                    x.ISDEEMEDPOSITIVE("No")
+                    x.AMOUNT credit
+                  end
+                  
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME acc.name
+                    x.ISDEEMEDPOSITIVE("Yes")  
+                    x.AMOUNT debit
+                  end
+                end
               end
-                    
-              x.tag! 'ALLLEDGERENTRIES.LIST' do     
-                x.LEDGERNAME  debit[0][n][0][0]
-                x.ISDEEMEDPOSITIVE("Yes")
-                x.AMOUNT debit[0][n][0][1]
-              end
-            }
+            }            
           }
         }
       }
@@ -186,6 +189,6 @@ class Journal
     f.write(x)
     f.close
   end 
-  
+
  
 end
