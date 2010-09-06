@@ -1,0 +1,55 @@
+%table.form
+  - if @client.blank?       
+    %tr
+      %td
+        For Client
+      %td
+        = select_client_for @guarantor, :client_id  
+  -else
+    %tr
+      %td
+        For Client
+      %td
+        = @client.name
+        %input{:id => "client_id", :value => "#{@client.id}", :type => "hidden"}
+    
+  %tr
+    %td
+      Name of Guarantor 
+    %td
+      =text_field :name
+  %tr
+    %td
+      Fathers Name
+    %td
+      = text_field :father_name   
+  %tr 
+    %td
+      Date of Birth
+    %td
+      = date_select_for @guarantor, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %td
+      Address
+    %td
+      ~ text_area :address, :rows => 6, :cols => 38
+  %tr  
+    %td
+      Relation
+    %td
+      - options = (Guarantor::RELATIONS.map { |x| [x.to_s, x.to_s.capitalize] })
+      =select :relationship_to_client, :collection => options, :prompt => "Select action"
+  %tr
+    %td
+      Reference
+    %td
+      =text_field :external_id_number
+  %tr
+    %td
+      Reference Document
+    %td
+      - options = (Guarantor::DOC.map { |x| [x.to_s, x.to_s.capitalize] })
+      = select :external_id_type, :collection => options, :prompt => "Select Document"
+      
+    
+    

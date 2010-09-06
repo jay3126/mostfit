@@ -1,0 +1,9 @@
+%h1
+  Edit Guarantor details
+  = @guarantor.name
+= error_messages_for @guarantor
+- form_url = resource(@client, :guarantors)
+
+= form_for(@guarantor, :action => form_url) do
+  = partial "guarantors/fields"
+  = submit "Save client"

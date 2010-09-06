@@ -1,0 +1,10 @@
+
+= error_messages_for @guarantor
+
+= form_for(@guarantor, :action => resource(@client,:guarantors)) do
+  %h1 Create a new Guarantor
+  %fieldset
+    = partial "guarantors/fields"
+    = submit "Create Guarantor"
+    = link_to 'cancel', resource(@client)
+

@@ -1,0 +1,11 @@
+%h1
+  Guarantors details
+
+  %br
+
+  = @guarantor.name 
+
+
+= link_to 'Edit', resource(@client, @guarantor, :edit)
+|
+= link_to 'Back', resource(@client, :guarantors)

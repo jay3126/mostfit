@@ -1,9 +1,13 @@
 class Guarantors < Application
   # provides :xml, :yaml, :js
+  before :get_status, :exclude => ['redirect_to_show']
+ 
+
 
   def index
-    @guarantors = Guarantor.all
+    @guarantors = @client ? @client.guarantors : Guarantor.all 
     display @guarantors
+    
   end
 
   def show(id)
@@ -19,17 +23,19 @@ class Guarantors < Application
   end
 
   def edit(id)
+    debugger
     only_provides :html
-    @guarantor = Guarantor.get(id)
+    @guarantor ||= Guarantor.get(id)
     raise NotFound unless @guarantor
     display @guarantor
   end
 
   def create(guarantor)
     @guarantor = Guarantor.new(guarantor)
+    @guarantor.client = @client if @client
    
     if @guarantor.save
-      redirect resource(:guarantors), :message => {:notice => "Guarantor was successfully created"}
+      redirect resource(@client,:guarantors), :message => {:notice => "Guarantor was successfully created"}
     else
       message[:error] = "Guarantor failed to be created"
       render :new
@@ -38,10 +44,10 @@ class Guarantors < Application
 
 
   def update(id, guarantor)
-    @guarantor = Guarantor.get(id)
+    @guarantor ||= Guarantor.get(id)
     raise NotFound unless @guarantor
     if @guarantor.update(guarantor)
-       redirect resource(@guarantor)
+       redirect resource(@client,:guarantors)
     else
       display @guarantor, :edit
     end
@@ -56,5 +62,25 @@ class Guarantors < Application
       raise InternalServerError
     end
   end
+
+  def redirect_to_show(id)
+    raise NotFound unless @guarantor = Guarantor.get(id)
+    if @guarantor.client
+      redirect resource(@guarantor.client,@guarantor)
+    else
+      redirect resource(@guarantor, :edit)
+    end
+  end
+
+  private
+  def get_status
+    debugger
+    if params[:client_id] 
+
+      @client = Client.get(params[:client_id])
+      raise NotFound unless @client
+    end
+  end
+
 
 end # Guarantors
