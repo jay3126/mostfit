@@ -163,7 +163,7 @@ class Journal
               x.VOUCHERTYPENAME "Journal"
               x.VOUCHERNUMBER "1"
               
-              Account.all().each do |acc|
+              Account.all.each do |acc|
                 credit = acc.postings.sum(:amount, :amount.gt => 0)
                 debit = acc.postings.sum(:amount, :amount.lt => 0)
                 if credit != nil and debit != nil
