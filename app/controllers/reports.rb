@@ -3,7 +3,7 @@ class Reports < Application
   Types = [
            DailyReport, ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, TransactionLedger, ProjectedReport, 
            LoanDisbursementRegister, ScheduledDisbursementRegister, LateDisbursalsReport, 
-           TargetReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport, 
+           TargetReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport,GeneralLedgerReport,TrialBalanceReport, 
            LoanSizePerManagerReport
           ]
   layout :determine_layout 
@@ -34,6 +34,9 @@ class Reports < Application
       elsif [ConsolidatedReport, LateDisbursalsReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, StaffConsolidatedReport, 
              QuarterConsolidatedReport, ClientAbsenteeismReport, LoanSizePerManagerReport, TargetReport, LoanDisbursementRegister].include?(klass)
         @data  = @report.generate
+        display @data
+      elsif [TrialBalanceReport,GeneralLedgerReport].include?(klass)
+        @data = @report.generate(params)
         display @data
       else
         @groups, @centers, @branches = @report.generate
