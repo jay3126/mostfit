@@ -3,10 +3,10 @@ class Guarantor
 
   property :id,   Serial
   property :legacy_id, String 
-  property :name, String, :index => true
-  property :father_name, String, :index => true
+  property :name, String, :length => 100, :index => true
+  property :father_name, String, :length => 100, :index => true
   property :date_of_birth, Date
-  property :address, String 
+  property :address, String, :length => 100 
   property :relationship_to_client, Enum.send('[]', *['', 'spouse', 'brother', 'brother_in_law', 'father', 'father_in_law', 'adult_son', 'other']), :default => '', :nullable => true, :lazy => true
  
   belongs_to :client
@@ -16,3 +16,7 @@ class Guarantor
   validates_length :name,   :minimum => 3
   validates_length :father_name,   :minimum => 3
 end
+
+# We migrated data for Intellecash using the followng
+# to copy over data for existing guarantors from the clients table into the new guarantors table:
+# insert into guarantors(name, father_name, date_of_birth, address, relationship_to_client, guarantor_occupation_id, client_id)  select guarantor_name, guarantor_fathers_name, guarantor_date_of_birth, guarantor_address, guarantor_relationship, guarantor_occupation_id, id from clients;
