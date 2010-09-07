@@ -1,9 +1,12 @@
-%h1
-  Edit Guarantor details
-  = @guarantor.name
-= error_messages_for @guarantor
-- form_url = resource(@client, :guarantors)
+- form_url   =  resource(@client,@guarantor, {:return => params[:return]})
+=error_messages_for @guarantor
 
-= form_for(@guarantor, :action => form_url) do
-  = partial "guarantors/fields"
-  = submit "Save client"
+= form_for(@guarantor, :action => form_url, :class => "form" ) do
+  %h1 Edit a Guarantor
+  %fieldset
+    = partial "guarantors/fields"
+    = submit "Update"
+
+= link_to 'Show', resource(@client,@guarantor)
+|
+= link_to 'Back', resource(@client)

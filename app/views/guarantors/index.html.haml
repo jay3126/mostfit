@@ -19,7 +19,7 @@
       %td 
         = guarantor.relationship_to_client
       %td
-        = link_to 'Edit', resource(@client,guarantor, :edit)
+        = link_to 'Edit', resource(@client,@guarantor, :edit)
 
 
 = link_to 'New', resource(@client,:guarantors, :new)

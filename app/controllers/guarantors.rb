@@ -35,7 +35,7 @@ class Guarantors < Application
     @guarantor.client = @client if @client
    
     if @guarantor.save
-      redirect resource(@client,:guarantors), :message => {:notice => "Guarantor was successfully created"}
+      redirect resource(@client), :message => {:notice => "Guarantor was successfully created"}
     else
       message[:error] = "Guarantor failed to be created"
       render :new
@@ -44,10 +44,12 @@ class Guarantors < Application
 
 
   def update(id, guarantor)
-    @guarantor ||= Guarantor.get(id)
+    debugger
+    @guarantor = Guarantor.get(id)
     raise NotFound unless @guarantor
     if @guarantor.update(guarantor)
-       redirect resource(@client,:guarantors)
+      # redirect resource(:guarantors)
+      redirect resource(@client)
     else
       display @guarantor, :edit
     end
