@@ -190,33 +190,30 @@
     %table
       %tr
         %td
-          = link_to "Add Guarantor", resource(@client, :guarantors, :new)
-          %br
-        %td
           - if @client.guarantors.blank?
-            No Gurarantors.
+            No Guarantors.
             = link_to "[Add one]", resource(@client, :guarantors, :new)
           - else
-            %h1 List of Guarantors for #{@client.name} - ID is #{@client.id}
+            %h2 Guarantors for #{@client.name} (Customer ID: #{@client.id})
             %table
               %tr
                 %th
-                  ID
+                  Guarantor ID
+                %th 
+                  Assigned ID (if any)
                 %th 
                   Name
                 %th
                   Date of Birth
                 %th 
                   Relation
-                %th
-                  Reference
-                %th
-                  Document
               %tr
               - @client.guarantors.each do |g|
                 %tr
                   %td 
                     = g.id
+                  %td 
+                    = g.legacy_id
                   %td
                     = g.name
                   %td
@@ -224,9 +221,8 @@
                   %td
                     = g.relationship_to_client
                   %td
-                    = g.external_id_number
-                  %td
-                    = g.external_id_type
-                  %td
                     = link_to 'Edit', resource(@client,g,:edit)
                     %br
+              %tr
+                %td
+                  = link_to "Add Guarantor", resource(@client, :guarantors, :new)

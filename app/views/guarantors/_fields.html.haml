@@ -35,21 +35,11 @@
       ~ text_area :address, :rows => 6, :cols => 38
   %tr  
     %td
-      Relation
+      Relationship
     %td
-      - options = (Guarantor::RELATIONS.map { |x| [x.to_s, x.to_s.capitalize] })
-      =select :relationship_to_client, :collection => options, :prompt => "Select action"
-  %tr
+      = select(:relationship_to_client, :collection => [[:spouse, "Spouse"], [:brother, "Brother"], [:brother_in_law, "Brother-in-law"], [:father, "Father"], [:father_in_law, "Father-in-law"], [:adult_son, "Adult son"], [:other, "Other"]] , :prompt => "Choose relationship")
+  %tr  
     %td
-      Reference
+      Occupation 
     %td
-      =text_field :external_id_number
-  %tr
-    %td
-      Reference Document
-    %td
-      - options = (Guarantor::DOC.map { |x| [x.to_s, x.to_s.capitalize] })
-      = select :external_id_type, :collection => options, :prompt => "Select Document"
-      
-    
-    
+      = select :guarantor_occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "Choose occupation"
