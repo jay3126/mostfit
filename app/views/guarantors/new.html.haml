@@ -1,7 +1,7 @@
 
 = error_messages_for @guarantor
 
-= form_for(@guarantor, :action => resource(@client,:guarantors)) do
+= form_for(@guarantor, :action => resource(@client,:guarantors),:class => "form") do
   %h1 Create a new Guarantor
   %fieldset
     = partial "guarantors/fields"

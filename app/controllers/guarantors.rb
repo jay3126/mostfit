@@ -6,12 +6,13 @@ class Guarantors < Application
 
   def index
     @guarantors = @client ? @client.guarantors : Guarantor.all 
+    
     display @guarantors
     
   end
 
   def show(id)
-    @guarantor = Guarantor.get(id)
+    @guarantor ||= Guarantor.get(id)
     raise NotFound unless @guarantor
     display @guarantor
   end
@@ -23,7 +24,6 @@ class Guarantors < Application
   end
 
   def edit(id)
-    debugger
     only_provides :html
     @guarantor ||= Guarantor.get(id)
     raise NotFound unless @guarantor
@@ -44,11 +44,9 @@ class Guarantors < Application
 
 
   def update(id, guarantor)
-    debugger
     @guarantor = Guarantor.get(id)
     raise NotFound unless @guarantor
     if @guarantor.update(guarantor)
-      # redirect resource(:guarantors)
       redirect resource(@client)
     else
       display @guarantor, :edit
