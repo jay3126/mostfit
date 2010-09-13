@@ -73,7 +73,7 @@ module DataEntry
     
     def create(payment)
       raise NotFound unless @loan = Loan.get(payment[:loan_id])
-      amounts = payment[:amount].to_i
+      amounts = payment[:amount].to_f
       receiving_staff = StaffMember.get(payment[:received_by])
       # we create payment through the loan, so subclasses of the loan can take full responsibility for it (validations and such)
       if payment[:type] == "total"
@@ -144,7 +144,7 @@ module DataEntry
         params[:paid][:loan].keys.each do |k|
           @loan = Loan.get(k.to_i)
           @loan.history_disabled = true
-          amounts = params[:paid][:loan][k.to_sym].to_i
+          amounts = params[:paid][:loan][k.to_sym].to_f
           if params.key?(:payment_type) and params[:payment_type] == "fees"
             @loan.pay_fees(amounts, @date, @staff, session.user)
             next
