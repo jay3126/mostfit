@@ -6,11 +6,10 @@ class StaffMembers < Application
   def index
     per_page = 25
     @date = params[:date] ? parse_date(params[:date]) : Date.today
-
+    @branch = Branch.get(params[:branch_id]) if params[:branch_id]
     hash = get_staff_members_hash
     @staff_members = StaffMember.all(hash).paginate(:page => params[:page], :per_page => per_page)
     set_staff_member_counts
-
     display @staff_members
   end
 
@@ -35,7 +34,7 @@ class StaffMembers < Application
     @payments      = Payment.collected_for(@center, @from_date, @to_date)
     @fees          = Fee.collected_for(@center, @from_date, @to_date)
     @loan_disbursed= LoanHistory.amount_disbursed_for(@center, @from_date, @to_date)
-    @loan_data     = LoanHistory.sum_outstanding_for(@center, @from_date, @to_date)
+    @loan_data     = LoanHistory.sum_outstanding_for(@center, @to_date)
     @defaulted     = LoanHistory.defaulted_loan_info_for(@center, @to_date)
     render :file => 'branches/moreinfo', :layout => false
   end
@@ -65,15 +64,34 @@ class StaffMembers < Application
     @staff_member = StaffMember.get(id)
     raise NotFound unless @staff_member
     @date      = params[:date] ? parse_date(params[:date]) : Date.today
-    @date     = @date.holiday_bump
-    days       = []
-    days      << Center.meeting_days[@date.cwday]
-    days      << Center.meeting_days[@date.holidays_shifted_today.cwday]
-    @centers   = @staff_member.centers.all(:meeting_day => days.uniq).sort_by{|x| x.name}
+    @date      = @date.holiday_bump
+    center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
+    @centers   = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
     if params[:format] == "pdf"
       generate_pdf
       send_data(File.read("#{Merb.root}/public/pdfs/staff_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf"),
                 :filename => "#{Merb.root}/public/pdfs/staff_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
+    else
+      display @centers
+    end
+  end
+
+  def disbursement_sheet(id)
+    #make it like day_sheet
+    @staff_member = StaffMember.get(id)
+    raise NotFound unless @staff_member
+    @date = params[:date] ? parse_date(params[:date]): Date.today
+    @date = @date.holiday_bump
+    center_ids = Loan.all(
+            :scheduled_disbursal_date.gte => @date,
+            :scheduled_disbursal_date.lte => @date
+    ).map{|x| x.client.center_id}.uniq
+    @centers = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
+    #debugger
+    if params[:format] == "pdf"
+      generate_pdf
+      send_data(File.read("#{Merb.root}/public/pdfs/staff_#{@staff_member.id} #{@date.strftime('%Y_%m_%d')}.pdf"), 
+      :filename => "#{Merb.root}/public/pdfs/staff_#{@staff_member.id} #{@date.strftime('%Y_%m_%d')}.pdf")
     else
       display @centers
     end
@@ -135,7 +153,7 @@ class StaffMembers < Application
   end
   
   def get_staff_members_hash
-    if session.user.role == :staff_member
+    if session.user.role == :staff_member or session.user.staff_member
       st = session.user.staff_member
       ids = []
       [st.branches, st.centers.branches].flatten.uniq.each{|branch|        
@@ -156,7 +174,7 @@ class StaffMembers < Application
   def set_staff_member_counts
     first_of_this_month = Date.new(@date.year, @date.month, 1)
     end_of_this_month   = @date
-
+    client_ids = @branch.client_ids if @branch
     { 
       :branch_managers => Branch, :center_managers => Center, :applied_loans => Loan, :approved_loans => Loan, 
       :rejected_loans  => Loan, :disbursed_loans => Loan, :written_off_loans => Loan
@@ -164,13 +182,23 @@ class StaffMembers < Application
       if klass==Branch or klass==Center
         aggregate_by   = :manager_staff_id
         overall_cond   = {:creation_date.lte => @date}
-        thismonth_cond = {:creation_date.lte => @date, :creation_date.gte => first_of_this_month}
+        thismonth_cond = {:creation_date.lte => @date, :creation_date.gte => first_of_this_month}        
+        if @branch
+          sym = (klass==Branch ? :id : :branch_id)
+          overall_cond[sym]   = @branch.id
+          thismonth_cond[sym] = @branch.id
+        end
       else
         name           = (type.to_s.split('_')-["loans"]).join("_")
         aggregate_by   = (name + "_by_staff_id").to_sym
         date_key       = name=="disbursed" ? :disbursal_date : (name+"_on").to_sym
         overall_cond   = {date_key.lte => @date}
         thismonth_cond = {date_key.lte => @date, date_key.gte => first_of_this_month}
+        if @branch
+          branch_cond     = {:client_id => client_ids}
+          overall_cond   += branch_cond
+          thismonth_cond += branch_cond
+        end
       end
       
       instance_variable_set("@#{type}_overall",   klass.all(overall_cond).aggregate(aggregate_by, :all.count))

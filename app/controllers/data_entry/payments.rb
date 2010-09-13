@@ -60,7 +60,7 @@ module DataEntry
           bulk_payments_and_disbursals
           mark_attendance
         end
-        if @errors.blank?
+        if @success and @errors.blank?
           redirect url(:enter_payments, :action => 'by_staff_member'), :message => {:notice => "All payments made succesfully"}
         else
           render
@@ -81,7 +81,17 @@ module DataEntry
       else
         payment[:created_by] = session.user
         @payment = Payment.new(payment)
+        if payment[:type]=="fees" and @payment.received_on
+          obj = @loan || @client
+          if fee = obj.fees_payable_on[@payment.received_on]
+            @payment.fee = fee
+          else
+            fees = obj.fee_schedule.reject{|d, f| d>@payment.received_on}.values.collect{|x| x.keys}.flatten - obj.fee_payments.values.collect{|x| x.keys}.flatten
+            @payment.fee = fees.first if fees and fees.length>0
+          end
+        end
         succes = @payment.save
+        @loan.update_history if succes
       end
       if succes  # true if saved
         if params[:format]=='xml'
@@ -142,8 +152,8 @@ module DataEntry
           @type = params[:payment][:type]
           style = params[:payment_style][k.to_sym].to_sym
           next if amounts<=0          
-          success, @prin, @int, @fees = @loan.repay(amounts, session.user, @date, @staff, false, style)
-          if success
+          @success, @prin, @int, @fees = @loan.repay(amounts, session.user, @date, @staff, false, style)
+          if @success
             @loan.history_disabled = false
             @loan.update_history
           end

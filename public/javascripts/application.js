@@ -83,7 +83,11 @@ function showThis(li, idx){
 	);
 	remote.remove();
     }
+  if(window.location.hash.length>0 && window.location.hash.indexOf($(li).attr("id"))>0 && window.location.hash!=$(li).attr("id")){
+    window.location.hash=window.location.hash;
+  }else{
     window.location.hash=$(li).attr("id");
+  }
 }
 function showTableTrs(){
     $("table.report tr").hide();
@@ -164,7 +168,8 @@ function dateFromAge(ageYear, ageMonth, ageDay){
 function attachFormRemoteTo(form){
   if(form.length==0)
     return(false);
-  $(form).submit(function(){
+  $(form).submit(function(f){
+		   form=$(f.currentTarget);
 		   $(form).find("input[type='submit']").attr("disabled", true);
 		   $(form).after("<img id='spinner' src='/images/spinner.gif' />");
 		   $.ajax({
@@ -209,54 +214,64 @@ function attachFormRemoteTo(form){
 
 function create_remotes(){
     $("a._remote_").click(function(){
-	    href=$(this).attr("href");
-	    method="GET"
-	    if($(this).hasClass("self")){
-		href=href+(href.indexOf("?")>-1 ? "&" : "?")+$(this).parent().serialize();
-                method="POST"
-	    }
-	    a=$(this);
-	    $.ajax({
-		    type: "POST",
-		    url: href,
-		    success: function(data){
-			$(a).after(data);
-			$(a).remove();
-		    },
-		    error: function(xhr, text, errorThrown){
-			txt = "<div class='error'>"+xhr.responseText+"</div>"
-			$(a).after(txt);
-		    }
-		});
-	    return false;
-	});
+      $(this).unbind();
+      href=$(this).attr("href");
+      method="GET"
+      if($(this).hasClass("self")){
+	href=href+(href.indexOf("?")>-1 ? "&" : "?")+$(this).parent().serialize();
+        method="POST"
+      }
+      a=$(this);
+      a.after("<img id='spinner' src='/images/spinner.gif'/>");
+      $.ajax({
+	type: method,
+	url: href,
+	success: function(data){
+	  if($(a).attr("id") && $("#"+$(a).attr("id")).length>0){
+	    $("#"+$(a).attr("id")).html(data);
+	    create_remotes();
+	  }else{
+	    $(a).after(data);
+	    $(a).remove();
+	    $("#spinner").remove();
+	  }
+	},
+	error: function(xhr, text, errorThrown){
+	  txt = "<div class='error'>"+xhr.responseText+"</div>"
+	  $(a).after(txt);
+	  $("#spinner").remove();
+	}
+      });
+      return false;
+    });
 
     $("a._customreports_").click(function(){
-	    href=$(this).attr("href");
-	    method="GET"
-	    if($(this).hasClass("self")){
-		href=href+(href.indexOf("?")>-1 ? "&" : "?")+$(this).parent().serialize();
-                method="POST"
-	    }
-	    a=$(this);
-	    $.ajax({
-		    type: "POST",
-		    url: href,
-		    success: function(data){
-			$(a).after(data);
-			$(a).remove();
-			attachCustomTableEvents();
-		    },
-		    error: function(xhr, text, errorThrown){
-			txt = "<div class='error'>"+xhr.responseText+"</div>"
-			$(a).after(txt);
-		    }
-		});
-	    return false;
-	});
+      href=$(this).attr("href");
+      method="GET"
+      if($(this).hasClass("self")){
+	href=href+(href.indexOf("?")>-1 ? "&" : "?")+$(this).parent().serialize();
+        method="POST"
+      }
+      a=$(this);
+      $.ajax({
+	type: "POST",
+	url: href,
+	success: function(data){
+	  $(a).after(data);
+	  $(a).remove();
+	  attachCustomTableEvents();
+	},
+	error: function(xhr, text, errorThrown){
+	  txt = "<div class='error'>"+xhr.responseText+"</div>"
+	  $(a).after(txt);
+	}
+      });
+      return false;
+    });
     $("form._remote_").each(function(idx, form){
-	    attachFormRemoteTo($(form));
-	});
+      $(form).unbind();
+      attachFormRemoteTo($(form));
+    });
 }
 function attachReportingFormEvents(id){
     $("#reporting_form tr#"+id+" select").change(function(){
@@ -311,13 +326,11 @@ MAX_COLS = 20;
 function attachCustomTableEvents(){
   $("#reporting_form #customtable .checkbox").click(function() {
       var type = $(this);
-//      selected_field = $("#"+this.id + "_precedence_"); //#reporting_form #customtable @"+type.attr("name")+"[precedence]");
       selected_field = window.document.getElementById(this.id.replace("fields","precedence"));
       if(selected_field == null)
         return;
       if(total_cols >= MAX_COLS)
         return;
-      //alert(selected_field.style.display);
       if(selected_field.style.display == "none") {
         selected_field.style.display = "";
         selected_field.selectedIndex = total_cols;
@@ -327,13 +340,6 @@ function attachCustomTableEvents(){
         selected_field.style.display = "none";
         total_cols--;
       }
-
-      //alert(selected_field.attr("id"));
-      //selected_field.toggle();
-
-
-//      window.document.getElementByName(type.name+"_precedence").innerText("Hello")
-
       });
 }
 
@@ -359,11 +365,9 @@ var uniqueID = (function() {
 	return function() { return id++; };  // Return and increment
     })();
 
-
 function calculateSum(toField, addTheseFields) {
-
     var sum = 0, net = 0, net1 = 0;
-     status = uniqueID();
+    status = uniqueID();
     console.log(status);
     $.each(addTheseFields, function(idx,ele){
 	    if($("#"+ele).val()!=""){
@@ -371,29 +375,32 @@ function calculateSum(toField, addTheseFields) {
             }
 	});
      $("#"+toField).val(sum);
-     if(toField == "client_total_income")
-	 {
+     if(toField == "client_total_income"){
 	     net = net + sum;
 	     val1 = net;
-	 }
-     else if(toField == "client_total_expenses")
-	 {
+     }
+     else if(toField == "client_total_expenses"){
 	     net1 = net1 + sum;
-
-	 }
-
-     if(status){
-
-	 $("#client_net_surplus").val((val1 - net1))
-	 }
+     }
+     if(status){	 
+	 $("#client_net_surplus").val((val1 - net1));
+     }
 }
-
-
-
-
+function fillCenters(){
+  $("#branch_selector").change(function(){
+    $.ajax({
+      type: "GET",
+      url: "/branches/centers/"+$("#branch_selector").val(),
+      success: function(data){
+	$("#center_selector").html(data);
+      }
+    });
+  });
+}
 
 $(document).ready(function(){
 	create_remotes();
+	fillCenters();
 	//Handling targets form
 	$("select#target_attached_to").change(function(){
 		$.ajax({
@@ -411,12 +418,14 @@ $(document).ready(function(){
 	if($("div.tab_container").length>0){
 	    $("div.tab_container ul.tabs li:first").addClass("active");
 	    $("div.tab_container ul.tabs li").each(function(idx, li){
-		    $("div.tab_container div.tab").hide();
-		    $(li).click(function(){
-			    showThis($(this), idx);
-			});
-		});
-	    li = $("div.tab_container ul.tabs li"+window.location.hash);
+						     $("div.tab_container div.tab").hide();
+						     $(li).click(function(){
+								   showThis($(this), idx);
+								   $(".graphContainer:visible .graphs:first").toggle();
+								 });
+						     });
+	    id = window.location.hash.split("/")[0];
+	    li = $("div.tab_container ul.tabs li"+id);
 	    if(window.location.hash.length>0 && li.length>0){
 		idx = li.index();
 		showThis(li, idx);
@@ -494,6 +503,13 @@ $(document).ready(function(){
 			$(this).parent().parent().nextUntil("tr.branch_total").hide();
 		    setToggleText();
 		});
+	    $('.report').floatHeader({
+	      fadeIn: 250,
+	      fadeOut: 250,
+	      forceClass: true,
+	      recalculate: true,
+	      markerClass: 'header'
+	    });
 	}
 	if($("a.moreinfo").length>0){
 	    $("a.moreinfo").click(function(){
@@ -672,5 +688,71 @@ $(document).ready(function(){
 
   $("form._disable_button_").submit(function(form){
     $(form.currentTarget).find("input[type='submit']").attr('disabled', true);
+    return(true);
+  });
+  $("a._rejection_button_").click(function(a){
+    if(confirm('Do you really want to reject these loans?')){
+      form = $($(a.currentTarget).parent()[0]);
+      form.attr("action", $(a.currentTarget).attr("href"));
+      form.submit();
+      return false;
+    }else{
+      return false;
+    }
+  });
+
+  $("#client_active").change(function(){
+    $("#inactive_options").toggle();
+  });
+  $("a.expand_collapsed").click(function(a){
+    $(".collapsed").toggle();
+    if($(a.currentTarget).css("background-image").indexOf("closed.gif")>0){
+      $(a.currentTarget).css("background-image", "url(/images/elements/open.gif)");
+    }else{
+      $(a.currentTarget).css("background-image", "url(/images/elements/closed.gif)");
+    }
+  });
+  if($(".graphContainer").length>0){
+    $(".graphContainer .graphs:first").toggle();
+    $(".graphContainer .listContainer ul li").click(function(liClicked){
+						      li=liClicked.currentTarget;
+						      container=$(li).parent().parent().parent();
+						      container.find("li.selected").removeClass("selected");
+						      idx=$(li).index();
+						      if(window.location.hash.split("/")[0].length>0){
+							id=window.location.hash.split("/")[0];
+						      }else{
+							id="#"+$(li).parent().attr("id");
+						      }
+						      window.location.hash=id+"/"+(idx+1);
+						      $(".graphContainer:visible").siblings().attr("action", "/dashboard"+window.location.hash);
+						      $(container).find(".graphs").hide();
+						      $($(container).find(".graphs")[idx]).show();
+						      $(li).addClass("selected");
+						    });
+    if(window.location.hash.length>0){
+      container=$(".graphContainer:visible");
+      if(window.location.hash.indexOf("/")>0)
+	idx=parseInt(window.location.hash.split("/")[1])-1;
+      else
+	idx=0;
+      container.find("li.selected").removeClass("selected");
+      $($(container).find(".listContainer ul li")[idx]).addClass("selected");
+      $(container).find(".graphs").hide();
+      $($(container).find(".graphs")[idx]).show();
+    }
+  }
+
+  $("table#user_form select#user_role").change(function(select){
+    if($(select.currentTarget).val()==="funder"){
+      $("#user_form .staff_member").hide();
+      $("#user_form .funder").show();
+      $("#user_form #user_staff_member").val("");
+    }
+    if($(select.currentTarget).val()==="staff_member"){
+      $("#user_form .staff_member").show();
+      $("#user_form .funder").hide();
+      $("#user_form #user_funder").val("");
+    }
   });
 });

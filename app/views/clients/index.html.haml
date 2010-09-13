@@ -5,23 +5,23 @@
 %div.maininfo
   %table.narrow.form{ :style => "width: 40%;" }
     %tr.odd
-      %td name
+      %td Name
       %td
         %b= @center.name
         == (code: #{@center.code}, id: #{@center.id})
     %tr
-      %td manager
+      %td Manager
       %td= link_to @center.manager.name, resource(@center.manager)
     %tr.odd
-      %td in branch
+      %td In branch
       %td
         = link_to @branch.name, resource(@center.branch)
         %br/
         %span.greytext
-          managed by:
+          Managed by:
           = link_to @center.branch.manager.name, resource(@center.manager)
     %tr
-      %td meeting
+      %td Meeting
       %td== #{@center.meeting_day.to_s.capitalize}#{(@center.meeting_time_hours and @center.meeting_time_minutes) ? ", #{@center.meeting_time_hours}:#{@center.meeting_time_minutes}" : ''}
     %tr.odd
       %td Address
@@ -55,6 +55,8 @@
       Data Entry
     %li#history
       History
+    %li#miscellaneous
+      Miscellaneous
   %div.tab    
     =partial "clients/list", :center_leader => leader
   %div.tab    
@@ -75,3 +77,5 @@
     %div#bulk_form
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :id => @center.id, :action => :misc)}

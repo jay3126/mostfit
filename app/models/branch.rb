@@ -32,13 +32,24 @@ class Branch
   end
 
   def centers_with_paginate(params, user)
-    hash = {:order => [:meeting_day]}
+    hash = {:order => [:meeting_day, :meeting_time_hours, :meeting_time_minutes]}
     # This the logged in person is a staff member and he is not a branch manager
-    if user.role == :staff_member and user.staff_member.branches.length==0
-      hash[:manager] = user.staff_member
+    if staff = user.staff_member and not staff==self.manager
+      if not staff.branches.include?(self) and not staff.areas.branches.include?(self) and not staff.regions.areas.branches.include?(self)
+        hash[:manager] = user.staff_member
+      end
+    elsif user.role == :funder and funding_lines = Funder.first(:user_id => user.id).funding_lines
+      hash[:id] = LoanHistory.parents_where_loans_of(Center, {:loan => {:funding_line_id => funding_lines.map{|x| x.id}}})
     end
     hash[:branch] = self    
-    Center.all(hash).paginate(:page => params[:page], :per_page => 15)
+
+    if params[:meeting_day] and Center::DAYS.include?(params[:meeting_day].to_sym)
+      hash[:meeting_day]= params[:meeting_day].to_sym
+    else
+      hash[:meeting_day]=Date.today.weekday
+    end
+
+    Center.all(hash)
   end
 
   def client_groups(hash={})
@@ -59,6 +70,14 @@ class Branch
     else
       Branch.all(:conditions => ["code=? or name like ?", q, q+'%'])
     end
+  end
+  
+  def client_ids
+    repository.adapter.query(%Q{
+                                SELECT cl.id clid
+                                FROM branches b, centers c, clients cl
+                                WHERE b.id=#{self.id} AND b.id=c.branch_id AND c.id=cl.center_id AND cl.deleted_at is NULL
+                             })    
   end
 
   private

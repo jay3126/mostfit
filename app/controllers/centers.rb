@@ -5,11 +5,16 @@ class Centers < Application
 
   def index    
     redirect resource(@branch) if @branch
-    hash = {:order => [:meeting_day]}
+    hash = {:order => [:meeting_day, :meeting_time_hours]}
     hash[:manager] = session.user.staff_member if session.user.role == :staff_member
     hash[:branch] = @branch if @branch
     @centers = Center.all(hash).paginate(:per_page => 15, :page => params[:page] || 1)
     display @centers
+  end
+
+  def list
+    @centers = @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
+    partial "centers/list", :layout => layout?
   end
 
   def show(id)
@@ -149,6 +154,13 @@ class Centers < Application
     @clients = @center.clients
     partial "centers/weeksheet"
   end
+  
+  def misc
+    @center =  Center.get(params[:id])
+    raise NotFound unless @center
+    @meeting_days  =  @center.center_meeting_days(:order => [:valid_from])
+    partial "centers/misc"
+  end
 
   private
   include DateParser  # for the parse_date method used somewhere here..
@@ -175,7 +187,7 @@ class Centers < Application
   
   def grouped_clients
     clients = {}
-    @center.clients.each{|c|
+    (@clients || @center.clients).each{|c|
       group_name = c.client_group ? c.client_group.name : "No group"
       clients[group_name]||=[]
       clients[group_name] << c

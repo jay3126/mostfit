@@ -18,7 +18,7 @@
     %td
       Date of issue
     %td
-      =date_select_for @document, :date_of_issue
+      =date_select_for @document, :date_of_issue, :min_date => Date.new(1950, 1, 1)
   %tr
     %td
       Valid Date
@@ -34,3 +34,20 @@
       Select document
     %td
       =file_field :document
+  %tr
+    %td
+      Select document
+    %td
+      =file_field :document_2
+  %tr
+    %td
+      Select document
+    %td
+      =file_field :document_3
+  %tr
+    %td
+      Select document
+    %td
+      =file_field :document_4
+
+

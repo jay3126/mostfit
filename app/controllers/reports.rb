@@ -1,10 +1,10 @@
 class Reports < Application
   include DateParser
   Types = [
-           DailyReport, ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, TransactionLedger, ProjectedReport, 
-           LoanDisbursementRegister, ScheduledDisbursementRegister, LateDisbursalsReport, 
-           TargetReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, LoanSanctionRegister, ClientAbsenteeismReport,GeneralLedgerReport,TrialBalanceReport, 
-           LoanSizePerManagerReport
+           DailyReport, ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, TransactionLedger, ProjectedReport,
+           LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, LateDisbursalsReport, LoanSizePerManagerReport, ClaimReport, 
+           TargetReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, 
+           GeneralLedgerReport, TrialBalanceReport
           ]
   layout :determine_layout 
 
@@ -22,33 +22,36 @@ class Reports < Application
     class_key  =  klass.to_s.snake_case.to_sym
     dates = get_dates(class_key)
 
-    if Reports::Types.include?(klass)
+    if @report
+      display @report
+    elsif Reports::Types.include?(klass)
       #Generating report
       @report   = klass.new(params[class_key], dates, session.user)
-      if klass==TransactionLedger
+      if not params[:submit]
+        render :form
+      elsif klass == TransactionLedger
         @groups, @centers, @branches, @payments, @clients = @report.generate
         display [@groups, @centers, @branches, @payments, @clients]
-      elsif [LoanSanctionRegister, ScheduledDisbursementRegister].include?(klass)
+      elsif [LoanSanctionRegister].include?(klass)
         @groups, @centers, @branches, @loans, @loan_products = @report.generate
         display [@groups, @centers, @branches, @loans, @loan_products]
-      elsif [ConsolidatedReport, LateDisbursalsReport, LoanPurposeReport, ClientOccupationReport, DelinquentLoanReport, ParByCenterReport, StaffConsolidatedReport, 
-             QuarterConsolidatedReport, ClientAbsenteeismReport, LoanSizePerManagerReport, TargetReport, LoanDisbursementRegister].include?(klass)
-        @data  = @report.generate
+      else        
+        case @report.method(:generate).arity
+        when 0
+          @data = @report.generate
+        when 1
+          @data = @report.generate(params)
+        end
         display @data
-      elsif [TrialBalanceReport,GeneralLedgerReport].include?(klass)
-        @data = @report.generate(params)
-        display @data
-      else
-        @groups, @centers, @branches = @report.generate
-        display [@groups, @centers, @branches]
       end
     elsif id.nil?
-      @reports = klass.all
+      @reports = klass.all(:order => [:start_date.desc])
+      if klass==DuplicateClientsReport and (DuplicateClientsReport.count==0 or (Date.today - DuplicateClientsReport.all.aggregate(:created_at).max).to_i>6)
+        DuplicateClientsReport.new.generate
+      end
       display @reports
     elsif id and params[:format] == "pdf"
       send_data(@report.get_pdf.generate, :filename => 'report.pdf')
-    else
-      display @report
     end
   end
   

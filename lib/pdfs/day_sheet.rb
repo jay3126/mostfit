@@ -3,7 +3,7 @@ module Pdf
     def generate_pdf
       pdf = PDF::Writer.new(:orientation => :landscape)
       pdf.select_font "Times-Roman"
-      pdf.text "Day sheet for #{@staff_member.name} for #{@date}", :font_size => 24, :justification => :center
+      pdf.text "Daily Collection Sheet for #{@staff_member.name} for #{@date}", :font_size => 24, :justification => :center
       pdf.text("\n")
       days_absent = Attendance.all(:status => "absent", :center => @centers).aggregate(:client_id, :all.count).to_hash
       @centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
@@ -92,7 +92,7 @@ module Pdf
         
         #draw table for scheduled disbursals
         loans_to_disburse = center.clients.loans(:disbursal_date => @date)
-        if loans_to_disburse.count > 0
+        if center.clients.count>0 and loans_to_disburse.count > 0
           table = PDF::SimpleTable.new
           table.data = []
 
@@ -107,7 +107,7 @@ module Pdf
           table.shade_rows    = :none
           table.show_headings = true          
           table.shade_headings = true
-          table.orientation   = :left
+          table.orientation   = :center
           table.position      = :center
           table.title_font_size = 16
           table.header_gap = 10

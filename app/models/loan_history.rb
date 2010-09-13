@@ -34,7 +34,10 @@ class LoanHistory
   
   validates_present :loan,:scheduled_outstanding_principal,:scheduled_outstanding_total,:actual_outstanding_principal,:actual_outstanding_total
 
-
+  @@selects = {Branch => "b.id", Center => "c.id", Client => "cl.id", Loan => "l.id", Area => "a.id", Region => "r.id", ClientGroup => "cg.id"}
+  @@tables = ["regions r", "areas a", "branches b", "centers c", "client_groups cg", "clients cl", "loans l"]
+  @@models = [Region, Area, Branch, Center, ClientGroup, Client, Loan]
+  @@optionals = [ClientGroup]
   # __DEPRECATED__ the prefered way to make history and future.
   # HISTORY IS NOW WRITTEN BY THE LOAN MODEL USING update_history_bulk_insert
   def self.add_group
@@ -82,6 +85,7 @@ class LoanHistory
   end
 
   def self.sum_outstanding_for_loans(date, loan_ids)
+    loan_ids = loan_ids.length > 0 ? loan_ids.join(', ') : "NULL"
     repository.adapter.query(%Q{
       SELECT
         SUM(scheduled_outstanding_principal) AS scheduled_outstanding_principal,
@@ -90,7 +94,7 @@ class LoanHistory
         SUM(actual_outstanding_total)        AS actual_outstanding_total
       FROM
       (select scheduled_outstanding_principal,scheduled_outstanding_total, actual_outstanding_principal, actual_outstanding_total from
-        (select loan_id, max(date) as date from loan_history where date <= '#{date.strftime('%Y-%m-%d')}' and loan_id in (#{loan_ids.join(', ')}) and status in (5,6,7,8) group by loan_id) as dt, 
+        (select loan_id, max(date) as date from loan_history where date <= '#{date.strftime('%Y-%m-%d')}' and loan_id in (#{loan_ids}) and status in (5,6,7,8) group by loan_id) as dt, 
         loan_history lh
       where lh.loan_id = dt.loan_id and lh.date = dt.date) as dt1;})
   end
@@ -118,7 +122,7 @@ class LoanHistory
          AND date <= '#{date.strftime("%Y-%m-%d")}') as dt WHERE pdiff>0 AND tdiff>0  GROUP BY #{group_by}_id;})
   end
   
-  def self.defaulted_loan_info_for(obj, date=Date.today, type=:aggregate)
+  def self.defaulted_loan_info_for(obj, date=Date.today, days=nil, type=:aggregate)
     if obj.class==Branch
       query = "branch_id=#{obj.id}"
     elsif obj.class==Center
@@ -134,7 +138,9 @@ class LoanHistory
       ids = (ids.length==0 ? "NULL" : ids.join(","))
       query = "loan_id in (#{ids})"
     end
-    
+
+    query+=" AND days_overdue<=#{days}" if days
+
     # either we list or we aggregate depending on type
     if type==:listing
       select = %Q{
@@ -173,16 +179,15 @@ class LoanHistory
 
   # TODO: subsitute the body of this function with sum_outstanding_grouped_by
   def self.sum_outstanding_by_group(from_date, to_date, loan_product_id=nil)
-    extra, from = "", "loan_history lh"
+    extra, from = "", "loan_history lh, loans l"
     if loan_product_id and loan_product_id.to_i>0
-      extra = "AND lh.loan_id=l.id AND l.loan_product_id=#{loan_product_id}"
-      from += ", loans l"
+      extra = "AND l.loan_product_id=#{loan_product_id}"
     end
     ids=repository.adapter.query(%Q{
                                  SELECT lh.loan_id loan_id, max(lh.date) date
                                  FROM #{from}
                                  WHERE lh.status in (5,6,7,8) AND lh.date>='#{from_date.strftime('%Y-%m-%d')}' 
-                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' #{extra}
+                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
                                  GROUP BY lh.loan_id
                                  }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
     return false if ids.length==0
@@ -202,19 +207,53 @@ class LoanHistory
       GROUP BY client_group_id;
     })
   end
+  
+  def self.advance_balance(to_date, group_by)
+    ids=repository.adapter.query(%Q{
+                                 SELECT lh.loan_id loan_id, max(lh.date) date
+                                 FROM  loans l, loan_history lh
+                                 WHERE lh.status in (5,6,7,8)
+                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' AND lh.loan_id=l.id AND l.deleted_at is NULL
+                                 GROUP BY lh.loan_id
+                                 }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
+    return false if ids.length==0
+
+    repository.adapter.query(%Q{
+      SELECT 
+        SUM(scheduled_outstanding_principal-actual_outstanding_principal) AS balance_principal,
+        SUM(scheduled_outstanding_total-actual_outstanding_total) AS balance_total,
+        #{group_by}_id
+      FROM loan_history
+      WHERE (loan_id, date) in (#{ids}) AND status in (5,6)
+            AND scheduled_outstanding_principal>actual_outstanding_principal AND scheduled_outstanding_total>actual_outstanding_total
+      GROUP BY #{group_by}_id;
+    })    
+  end
+
+  def self.sum_advance_payment(from_date, to_date, group_by)
+    repository.adapter.query(%Q{
+      SELECT 
+        SUM(principal_paid) AS advance_principal,
+        SUM(principal_paid) + SUM(interest_paid) AS advance_total,
+        #{group_by}_id
+      FROM loan_history
+      WHERE status in (5,6) AND date>='#{from_date.strftime('%Y-%m-%d')}' AND date<='#{to_date.strftime('%Y-%m-%d')}'
+            AND scheduled_outstanding_principal>actual_outstanding_principal AND scheduled_outstanding_total>actual_outstanding_total
+      GROUP BY #{group_by}_id;
+    })
+  end
 
   # TODO: subsitute the body of this function with sum_outstanding_grouped_by
   def self.sum_outstanding_by_center(from_date, to_date, loan_product_id=nil)
-    extra, from = "", "loan_history lh"
+    extra, from = "", "loan_history lh, loans l"
     if loan_product_id and loan_product_id.to_i>0
-      extra = "AND lh.loan_id=l.id AND l.loan_product_id=#{loan_product_id}"
-      from += ", loans l"
+      extra = "AND l.loan_product_id=#{loan_product_id}"
     end
     ids=repository.adapter.query(%Q{
                                  SELECT lh.loan_id loan_id, max(lh.date) date
                                  FROM #{from}
                                  WHERE lh.status in (5,6,7,8) AND lh.date>='#{from_date.strftime('%Y-%m-%d')}' 
-                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' #{extra}
+                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
                                  GROUP BY lh.loan_id
                                  }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
     return false if ids.length==0
@@ -235,16 +274,15 @@ class LoanHistory
   end
 
   def self.sum_outstanding_grouped_by(to_date, group_by, loan_product_id=nil)
-    extra, from = "", "loan_history lh"
+    extra, from = "", "loan_history lh, loans l"
     if loan_product_id and loan_product_id.to_i>0
-      extra = "AND lh.loan_id=l.id AND l.loan_product_id=#{loan_product_id}"
-      from += ", loans l"
+      extra = "AND l.loan_product_id=#{loan_product_id}"
     end
     ids=repository.adapter.query(%Q{
                                  SELECT lh.loan_id loan_id, max(lh.date) date
                                  FROM #{from}
                                  WHERE lh.status in (5,6,7,8)
-                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' #{extra}
+                                 AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
                                  GROUP BY lh.loan_id
                                  }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
     return false if ids.length==0
@@ -252,7 +290,7 @@ class LoanHistory
     if group_by.class==String
       group_by = group_by+"_id"
     elsif group_by.class==Array
-      group_by = group_by.map{|x| x+"_id"}.join(", ")
+      group_by = group_by.map{|x| "#{x}_id"}.join(", ")
     elsif group_by.class==Symbol
       group_by = "#{group_by}_id"
     else
@@ -278,16 +316,15 @@ class LoanHistory
   # TODO: subsitute the body of this function with sum_outstanding_grouped_by
   def self.sum_outstanding_by_month(month, year, branch, loan_product_id=nil)
     date = Date.new(year, month, -1)
-    extra, from = "", "loan_history lh"
+    extra, from = "", "loan_history lh, loans l"
     if loan_product_id and loan_product_id.to_i>0
       extra = "AND lh.loan_id=l.id AND l.loan_product_id=#{loan_product_id}"
-      from += ", loans l"
     end
     ids=repository.adapter.query(%Q{
                                  SELECT lh.loan_id loan_id, max(lh.date) date
                                  FROM #{from}
                                  WHERE lh.branch_id=#{branch.id} AND lh.status in (5,6,7,8)
-                                 AND lh.date<='#{date.strftime('%Y-%m-%d')}' #{extra}
+                                 AND lh.date<='#{date.strftime('%Y-%m-%d')}' AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
                                  GROUP BY lh.loan_id
                                  }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
     return false if ids.length==0
@@ -307,7 +344,7 @@ class LoanHistory
     })
   end
 
-  def self.sum_outstanding_for(obj, from_date=Date.today-7, to_date=Date.today)
+  def self.sum_outstanding_for(obj, to_date=Date.today)
     if [Branch, Center, ClientGroup].include?(obj.class)
       q = "#{obj.class.name.snake_case}_id"
       query = "#{q}=#{obj.id}"
@@ -321,13 +358,16 @@ class LoanHistory
       ids = (ids.length==0 ? "NULL" : ids.join(","))
       query="loan_id in (#{ids})"
       q = "branch_id"
+    elsif obj==Mfi
+      query="1"
     end
-
+    group_by = q ? "GROUP BY #{q}" : " LIMIT 1"
+    q = ", #{q}" if q
     ids=repository.adapter.query(%Q{
                                  SELECT lh.loan_id loan_id, max(lh.date) date
                                  FROM loan_history lh, loans l
-                                 WHERE l.id=lh.loan_id AND l.deleted_at is NULL AND l.disbursal_date is NOT NULL
-                                 AND #{query} AND lh.date>='#{from_date.strftime('%Y-%m-%d')}' 
+                                 WHERE l.id=lh.loan_id AND l.deleted_at is NULL AND l.disbursal_date is NOT NULL AND status in (5,6,7,8)
+                                 AND #{query}
                                  AND lh.date<='#{to_date.strftime('%Y-%m-%d')}'
                                  GROUP BY lh.loan_id
                                  }).collect{|x| "(#{x.loan_id}, '#{x.date.strftime('%Y-%m-%d')}')"}.join(",")
@@ -341,15 +381,15 @@ class LoanHistory
         SUM(if(actual_outstanding_principal<0, actual_outstanding_principal,0))    AS advance_principal,
         SUM(if(actual_outstanding_total<0,     actual_outstanding_total,0))        AS advacne_total,
         COUNT(DISTINCT(loan_id))             AS loans_count,
-        COUNT(DISTINCT(client_id))           AS clients_count,
-        branch_id
+        COUNT(DISTINCT(client_id))           AS clients_count
+        #{q}
     }
 
     repository.adapter.query(%Q{
       SELECT #{select}
       FROM loan_history
-      WHERE (loan_id, date) in (#{ids})
-      GROUP BY #{q}
+      WHERE (loan_id, date) in (#{ids}) AND status in (5,6)
+      #{group_by}
     })
   end
 
@@ -403,43 +443,77 @@ class LoanHistory
     repository.adapter.query(query).first
   end
 
-  def self.borrower_clients_count_in(obj)
-    froms = ["clients cl", "loans l"]
-    conditions = ["cl.id=l.client_id", "l.deleted_at is NULL"]
+  def self.borrower_clients_count_in(obj, hash={})
+    klass, obj = get_class_of(obj)
 
-    klass = (obj.class == Array or obj.class==DataMapper::Associations::OneToMany::Collection) ? obj.first.class : obj.class
-    obj   = (obj.class == Array or obj.class==DataMapper::Associations::OneToMany::Collection) ? obj : [obj]
+    froms = build_froms(klass)
+    conditions  = build_conditions(klass, obj, hash)
+    repository.adapter.query("SELECT count(*) FROM #{froms.join(', ')} WHERE #{conditions.join(' AND ')}")
+  end
+
+  def self.parents_where_loans_of(klass, hash)    
+    selects    = build_selects(klass)
+    froms      = build_froms(klass)    
+    conditions = build_conditions(klass, klass.all, hash)
+    repository.adapter.query("SELECT #{selects} FROM #{froms.join(', ')} WHERE #{conditions.join(' AND ')}")
+  end
+  
+  private
+  def self.get_class_of(obj)
+    if [Array, DataMapper::Associations::OneToMany::Collection, DataMapper::Collection].include?(obj.class)
+      klass = obj.first.class 
+    else
+      klass = obj.class
+      obj   = [obj]
+    end
+    [klass, obj]
+  end
+  
+  def self.build_selects(klass)
+    "distinct(#{@@selects[klass]})"
+  end
+    
+  def self.build_froms(klass)
+    froms  = []    
+    return false unless @@models.include?(klass)
+    idx    = @@models.index(klass)
+    @@tables[idx..-1].each{|table|
+      froms << table
+    }
+    froms
+  end
+
+  def self.build_conditions(klass, obj, hash)
+    conditions =  ["cl.id=l.client_id", "l.deleted_at is NULL"]
+    if hash.length>0
+      conditions += hash[:loan].map{|k, v|   v.is_a?(Array) ? "l.#{k} in (#{v.join(',')})"  : "l.#{k}=#{v}"} if hash.key?(:loan)
+      conditions += hash[:client].map{|k, v| v.is_a?(Array) ? "cl.#{k} in (#{v.join(',')})" : "cl.#{k}=#{v}"} if hash.key?(:client)
+      conditions += hash[:center].map{|k, v| v.is_a?(Array) ? "c.#{k} in (#{v.join(',')})"  : "c.#{k}=#{v}"} if hash.key?(:center)
+      conditions += hash[:branch].map{|k, v| v.is_a?(Array) ? "b.#{k} in (#{v.join(',')})"  : "b.#{k}=#{v}"} if hash.key?(:branch)
+    end
 
     if klass==Branch
-      froms << "centers c" 
-      froms << "branches b"
       conditions << "b.id in (#{obj.map{|x| x.id}.join(',')})"
       conditions << "cl.center_id=c.id"
       conditions << "c.branch_id=b.id"
     elsif klass==Center
-      froms << "centers c"
       conditions << "cl.center_id=c.id"
       conditions << "c.id in (#{obj.map{|x| x.id}.join(',')})"
+    elsif klass==ClientGroup
+      conditions << "cl.client_group_id=cg.id"
+      conditions << "cg.id in (#{obj.map{|x| x.id}.join(',')})"
     elsif klass==Area
-      froms << "centers c"
-      froms << "branches b"
-      froms << "areas a"
       conditions << "a.id in (#{obj.map{|x| x.id}.join(',')})"
       conditions << "a.id=b.area_id"
       conditions << "c.branch_id=b.id"
       conditions << "cl.center_id=c.id"
     elsif klass==Region
-      froms << "centers c"
-      froms << "branches b"
-      froms << "areas a"
-      froms << "regions r"
       conditions << "r.id in (#{obj.map{|x| x.id}.join(',')})"
       conditions << "r.id=a.region_id"
       conditions << "a.id=b.area_id"
       conditions << "c.branch_id=b.id"
       conditions << "cl.center_id=c.id"
     end
-
-    repository.adapter.query("SELECT count(*) FROM #{froms.join(', ')} WHERE #{conditions.join(' AND ')}")
+    conditions
   end
 end

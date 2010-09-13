@@ -283,8 +283,10 @@ class Loan
         raise ArgumentError.new("Strange period you got..")
     end
     if cl=self.client(:fields => [:id, :center_id]) and cen=cl.center and cen.meeting_day != :none and ensure_meeting_day
-      next_meeting_day = cen.next_meeting_date_from(new_date)
-      new_date = next_meeting_day unless new_date.weekday == cen.meeting_day
+      unless new_date.weekday == cen.meeting_day_for(new_date)
+        next_meeting_day = cen.next_meeting_date_from(new_date)
+        new_date = next_meeting_day
+      end
       #new_date - new_date.cwday + Center.meeting_days.index(client.center.meeting_day)
     end
     new_date.holiday_bump
@@ -342,9 +344,11 @@ class Loan
     elsif input.is_a? Array  # in case principal and interest are specified separately
       principal, interest = input[0], input[1]
     end
+
     save_status = nil
     payments = []
     Payment.transaction do |t|
+      self.history_disabled=true
       if fees_paid > 0
         fee_payment = Payment.new(:loan => self, :created_by => user,
                                   :received_on => received_on, :received_by => received_by,
@@ -379,6 +383,7 @@ class Loan
         update_history
       end
     else
+      self.history_disabled=false
       already_updated=false
       update_history  # update the history if we saved a payment
     end
@@ -629,9 +634,11 @@ class Loan
   #    scheduled_[principal, interest, total]_up_to(date)
   #    scheduled_[principal, interest, total]_on(date)
 
-  def total_principal_to_be_received; get_scheduled(:total_principal, self.scheduled_maturity_date).round(2); end
-  def total_interest_to_be_received; get_scheduled(:total_interest, self.scheduled_maturity_date).round(2); end
-  def total_to_be_received; (total_principal_to_be_received + total_interest_to_be_received).round(2); end
+  def total_principal_to_be_received; get_scheduled(:total_principal, self.scheduled_maturity_date); end
+  def total_interest_to_be_received; get_scheduled(:total_interest, self.scheduled_maturity_date); end
+  def total_to_be_received
+    ((total_principal_to_be_received>0 ? total_principal_to_be_received : amount) + total_interest_to_be_received).to_i
+  end
 
   def scheduled_principal_up_to(date); get_scheduled(:total_principal, date).round(2); end
   def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date).round(2); end
@@ -730,7 +737,8 @@ class Loan
     return :pending_approval     if applied_on <= date and
                                  not (approved_on and approved_on <= date) and
                                  not (rejected_on and rejected_on <= date)
-    return :approved             if (approved_on and approved_on <= date) and not (disbursal_date and disbursal_date <= date)
+    return :approved             if (approved_on and approved_on <= date) and not (disbursal_date and disbursal_date <= date) and 
+                                 not (rejected_on and rejected_on <= date)
     return :rejected             if (rejected_on and rejected_on <= date)
     return :written_off          if (written_off_on and written_off_on <= date)
     return :claim_settlement     if under_claim_settlement and under_claim_settlement <= date
@@ -739,7 +747,7 @@ class Loan
     return :disbursed          if (date == disbursal_date) and total_received < total_to_be_received
     if total_received >= total_to_be_received
       @status =  :repaid
-    elsif total_principal_to_be_received<=principal_received and scheduled_interest_up_to(date)<=interest_received_up_to(Date.today)
+    elsif amount<=principal_received and scheduled_interest_up_to(date)<=interest_received_up_to(Date.today)
       @status =  :repaid
     elsif amount<=principal_received
       @status =  :repaid
@@ -766,7 +774,9 @@ class Loan
   end
   # the installment dates
   def installment_dates
-    (0..(number_of_installments-1)).to_a.map { |x| shift_date_by_installments(scheduled_first_payment_date, x, [:weekly, :biweekly].include?(installment_frequency)) }
+    (0..(number_of_installments-1)).to_a.map {|x| 
+      shift_date_by_installments(scheduled_first_payment_date, x, [:weekly, :biweekly].include?(installment_frequency))
+    }
   end
 
   #Increment/sync the loan cycle number. All the past loans which are disbursed are counted
@@ -889,8 +899,8 @@ class Loan
     d = received_on
     total = total.to_f
     while used < total
-      prin -= principal_overpaid_on(d)
-      int  -= interest_overpaid_on(d)
+      prin -= principal_overpaid_on(d).round(2)
+      int  -= interest_overpaid_on(d).round(2)
       used  = (prin + int)
       d = shift_date_by_installments(d, 1)
     end

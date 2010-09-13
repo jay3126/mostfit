@@ -204,12 +204,19 @@ class Dashboard < Application
       graph.x_axis.steps = get_axis
       return graph.generate
     when "outstanding"
+      condition = ""
       if params[:branch_id] and params[:branch_id].to_i > 0
-        condition = "AND lh.branch_id=#{params[:branch_id]}"
+        condition += "AND lh.branch_id=#{params[:branch_id]}"
         min_date  = Branch.get(params[:branch_id]).creation_date
       else
         min_date  = Loan.min(:disbursal_date)
       end
+      
+      if params[:staff_member_id] and params[:staff_member_id].to_i > 0
+        center_ids = StaffMember.get(params[:staff_member_id]).centers.map{|x| x.id}
+        condition += " AND lh.center_id in (#{center_ids.length==0 ? 'NULL' : center_ids.join(', ')})"
+      end
+
       data = []
       (min_date.year..Date.today.year).each{|year|
         1.upto(12){|month|
@@ -257,16 +264,17 @@ class Dashboard < Application
       ages = {1 => 0, 2 => 0, 3 => 0, 4  => 0, 5 => 0, 6 => 0, 7 => 0, 8 => 0, 9 => 0, 10 => 0}
       Loan.all(:disbursal_date.not => nil, :disbursal_date.lte => Date.today).each{|l|
         age = (100*(Date.today-l.disbursal_date)/(l.number_of_installments * l.installment_frequency_in_days)/10).ceil
-        next if age>10
+        age = 10 if age>10
         next unless ages[age]
         ages[age]+=1
       }
       vals = []
+      
       ages.to_a.sort_by{|x| x[0]}.each{|key, count|
         vals.push([count, "#{(key-1)*10} to #{key*10} %"])
       }      
-      graph = BarGraph.new("Aging analysis")
-      graph.data_type=:individual
+      graph = BarGraph.new("Ageing analysis")
+      graph.data_type = :individual
       graph.data(vals)
       return graph.generate      
     when "yield"
@@ -287,7 +295,12 @@ class Dashboard < Application
       graph.data_type = :individual
       graph.data(vals.map{|x|
                    branch=Branch.get(x.branch_id)
-                   [(100*(LoanHistory.defaulted_loan_info_for(branch).principal_due/(x.actual_outstanding_principal||0)).to_f).round(2), branch.name]
+                   principal_overdue = if history = LoanHistory.defaulted_loan_info_for(branch)
+                                         history.principal_due
+                                       else
+                                         0
+                                       end
+                   [(100*(principal_overdue/(x.actual_outstanding_principal||0)).to_f).round(2), branch.name]
                  })
       return graph.generate
     end

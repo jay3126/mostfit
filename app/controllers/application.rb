@@ -2,6 +2,9 @@ class Application < Merb::Controller
   before :ensure_authenticated
   before :ensure_can_do
   before :insert_session_to_observer
+  before :add_collections, :only => [:index, :show]
+  
+  @@controllers  = ["regions", "area", "branches", "centers", "clients", "loans", "payments"]
 
   def insert_session_to_observer
     DataAccessObserver.insert_session(session.object_id)
@@ -46,7 +49,8 @@ class Application < Merb::Controller
     # if flag is still set to true delete the object
     if flag == true and obj.destroy
       # delete all the loan history
-      LoanHistory.all(:loan_id => obj.id).destroy if model==Loan      
+      LoanHistory.all(:loan_id => obj.id).destroy if model==Loan
+      Attendance.all(:client_id => obj.id).destroy if model==Client
       return_url = params[:return].split("/")[0..-3].join("/")
       redirect(return_url, :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
     else
@@ -72,7 +76,7 @@ class Application < Merb::Controller
     model =  obj.class
     # add child definitions to children; For loan model do not add history
     children = model.relationships.find_all{|x|
-      x[0] if x[1].class==DataMapper::Associations::OneToMany::Relationship and not x[0]=="history" and not x[0]=="audit_trails"
+      x[0] if x[1].class==DataMapper::Associations::OneToMany::Relationship and not x[0]=="history" and not x[0]=="audit_trails" and not x[0]=="attendances"
     }
    
     children_present = {}
@@ -91,5 +95,40 @@ class Application < Merb::Controller
       end
     }
     [flag, children_present]
+  end
+
+  def display_from_cache
+    file = get_cached_filename
+    return true unless File.exists?(file)
+    return true if not File.mtime(file).to_date==Date.today
+    throw :halt, render(File.read(file), :layout => false)
+  end
+  
+  def store_to_cache
+    file = get_cached_filename
+    if not (File.exists?(file) and File.mtime(file).to_date==Date.today)
+      File.open(file, "w"){|f|
+        f.puts @body
+      }
+    end
+  end
+  
+  def get_cached_filename
+    hash = params.deep_clone
+    dir = File.join(Merb.root, "public", hash.delete(:controller).to_s, hash.delete(:action).to_s)
+    unless File.exists?(dir)
+      FileUtils.mkdir_p(dir)
+    end
+    File.join(dir, (hash.empty? ? "index" : hash.collect{|k,v| "#{k}_#{v}"}))
+  end
+
+  def add_collections
+    return unless session.user.role==:funder
+    return if not @@controllers.include?(params[:controller])
+    @funder = Funder.first(:user_id => session.user.id)
+    idx     = @@controllers.index(params[:controller])
+    idx    += 1 if params[:action]!="index"
+    var     = @@controllers[idx]
+    instance_variable_set("@#{var}", @funder.send(var))
   end
 end

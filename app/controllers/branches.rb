@@ -3,15 +3,15 @@ class Branches < Application
   include DateParser
 
   def index
-    @branches = Branch.paginate(:page => params[:page], :per_page => 15)
+    @branches = (@branches || Branch.all).paginate(:page => params[:page], :per_page => 15)
     display @branches
   end
 
   def show(id)
     @branch = Branch.get(id)
     raise NotFound unless @branch
-    @centers = @branch.centers_with_paginate({:page => params[:page]}, session.user)
-    display [@branch, @centers], 'centers/index'
+    @centers = @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
+    display [@branch, @centers], 'centers/index', :layout => layout?
   end
   
   def today(id)
@@ -68,6 +68,15 @@ class Branches < Application
       raise InternalServerError
     end
   end
+
+  def centers
+    if params[:id] 
+      branch = Branch.get(params[:id])
+      next unless branch
+      return("<option value=''>Select center</option>"+branch.centers(:order => [:name]).map{|cen| "<option value=#{cen.id}>#{cen.name}</option>"}.join)
+    end
+  end
+
 
   # this redirects to the proper url, used from the router
   def redirect_to_show(id)

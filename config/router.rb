@@ -45,7 +45,8 @@ Merb::Router.prepare do
   resources :loans, :id => %r(\d+)
   resources :centers, :id => %r(\d+)
   resources :payments
-  resources :branches  do    
+  resources :branches, :id => %r(\d+)  do    
+    resources :journals
     resources :centers, :id => %r(\d+)  do
       resources :client_groups
       resources :clients do
@@ -59,6 +60,7 @@ Merb::Router.prepare do
   end
   resources :funders do    resources :funding_lines
   end
+  resources :center_meeting_days
 
   match('/dashboard/centers/:report_type/:branch_id').to(:controller => 'dashboard', :action => "centers", :branch_id => ":branch_id", :report_type => ":report_type").name(:dashboard_centers)
   match('/design').to(:controller => 'loan_products', :action => 'design').name(:design_loan_product)
@@ -99,6 +101,8 @@ Merb::Router.prepare do
   match('/branches/:branch_id/centers/:center_id/weeksheet').to( :controller => 'centers', :action => 'weeksheet').name(:weeksheet)
   match('/staff_members/:id/day_sheet').to(:controller => 'staff_members', :action => 'day_sheet').name(:day_sheet)
   match('/staff_members/:id/day_sheet.:format').to(:controller => 'staff_members', :action => 'day_sheet', :format => ":format").name(:day_sheet_with_format)
+  match('/staff_members/:id/disbursement_sheet').to(:controller => 'staff_members', :action => 'disbursement_sheet').name(:disbursement_sheet)
+  match('/staff_members/:id/disbursement_sheet.:format').to(:controller => 'staff_members', :action => 'disbursement_sheet', :format => ":format").name(:disbursement_sheet_with_format)
   match('/browse(/:action)').to(:controller => 'browse').name(:browse)
   match('/loans/:action').to(:controller => 'loans').name(:loan_actions)
   # this uses the redirect_to_show methods on the controllers to redirect some models to their appropriate urls

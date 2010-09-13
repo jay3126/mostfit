@@ -1,17 +1,23 @@
 class ClientGroups < Application
   # provides :xml, :yaml, :js
-  before :get_context, :only => ['edit', 'update']
+  before :get_context, :only => ['edit', 'update', 'index']
 
   def index
-    @client_groups = ClientGroup.all
+    if @center
+      @client_groups = @center.client_groups
+    elsif @branch
+      @client_groups = @branch.center.client_groups
+    else
+      @client_groups = ClientGroup.all
+    end
     display @client_groups
   end
 
   def show(id)
     @client_group = ClientGroup.get(id)
     raise NotFound unless @client_group
-    @cgts = @client_group.cgts
-    @grts = @client_group.grts
+    @cgts = Cgt.all(:client_group => @client_group)
+    @grts = Grt.all(:client_group => @client_group)
     display @client_group
   end
 

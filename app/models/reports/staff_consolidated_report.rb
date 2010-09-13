@@ -19,6 +19,10 @@ class StaffConsolidatedReport < Report
   def generate
     branches, centers, data, staff, clients = {}, {}, {}, {}, {}
     histories = LoanHistory.sum_outstanding_by_center(self.from_date, self.to_date, self.loan_product_id)
+    advances  = LoanHistory.sum_advance_payment(self.from_date, self.to_date, :center)||[]
+    balances  = LoanHistory.advance_balance(self.to_date, :center)||[]
+    old_balances = LoanHistory.advance_balance(self.from_date-1, :center)||[]
+
     StaffMember.all.each{|s| staff[s.id]=s}
     @branch.each{|b|
       data[b]||= {}
@@ -33,17 +37,18 @@ class StaffConsolidatedReport < Report
         #amount_applied,amount_sanctioned,amount_disbursed,outstanding(p),outstanding(i),total,principal_paidback,interest_,fee_,shortfalls, #defaults, name
         data[b][cm][c] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         history  = histories.find{|x| x.center_id==c.id} if histories
+        advance  = advances.find{|x|  x.center_id==c.id}
+        balance  = balances.find{|x|  x.center_id==c.id}
+        old_balance = old_balances.find{|x|  x.center_id==c.id}
+
         if history
           principal_scheduled = history.scheduled_outstanding_principal
           total_scheduled     = history.scheduled_outstanding_total
           
           principal_actual    = history.actual_outstanding_principal
           total_actual        = history.actual_outstanding_total
-          
-          principal_advance   = history.advance_principal
-          total_advance       = history.advance_total
         else
-          principal_scheduled, total_scheduled, principal_actual, total_actual, principal_advance, total_advance = 0, 0, 0, 0, 0, 0
+          principal_scheduled, total_scheduled, principal_actual, total_actual = 0, 0, 0, 0
         end
         
         data[b][cm][c][7] += principal_actual
@@ -54,9 +59,13 @@ class StaffConsolidatedReport < Report
         data[b][cm][c][11] += ((total_actual-principal_actual) > (total_scheduled-principal_scheduled) ? (total_actual-principal_actual - (total_scheduled-principal_scheduled)) : 0)
         data[b][cm][c][12] += total_actual > total_scheduled ? total_actual - total_scheduled : 0
         
-        data[b][cm][c][13]  += principal_advance
-        data[b][cm][c][15] += total_advance
-        data[b][cm][c][14] += (total_advance - principal_advance)
+        advance_total = advance ? advance.advance_total : 0
+        balance_total = balance ? balance.balance_total : 0
+        old_balance_total = old_balance ? old_balance.balance_total : 0
+        
+        data[b][cm][c][13]  += advance_total
+        data[b][cm][c][15]  += balance_total
+        data[b][cm][c][14]  += advance_total - balance_total + old_balance_total
       }
     }
 
@@ -65,10 +74,17 @@ class StaffConsolidatedReport < Report
       clients[c.id] = c
     }
     
+    extra_condition = ""
+    froms = "payments p, clients cl, centers c"
+    if self.loan_product_id
+      froms+= ", loans l"
+      extra_condition = " and p.loan_id=l.id and l.loan_product_id=#{self.loan_product_id}"
+    end
+
     repository.adapter.query(%Q{
-                               SELECT p.received_by_staff_id staff_id, c.id center_id, c.branch_id branch_id, type ptype, SUM(amount) amount
-                               FROM clients cl, centers c, payments p
-                               WHERE p.received_on >= '#{from_date.strftime('%Y-%m-%d')}' and p.received_on <= '#{to_date.strftime('%Y-%m-%d')}'
+                               SELECT p.received_by_staff_id staff_id, c.id center_id, c.branch_id branch_id, type ptype, SUM(p.amount) amount
+                               FROM #{froms}
+                               WHERE p.received_on >= '#{from_date.strftime('%Y-%m-%d')}' and p.received_on <= '#{to_date.strftime('%Y-%m-%d')}' #{extra_condition}
                                AND p.deleted_at is NULL AND p.client_id=cl.id AND cl.center_id=c.id AND cl.deleted_at is NULL AND c.id in (#{center_ids})
                                GROUP BY staff_id, center_id, p.type
                              }).each{|p|      
@@ -99,11 +115,11 @@ class StaffConsolidatedReport < Report
 
       data[branch][st] ||= {}
       data[branch][st][center] ||= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      data[branch][st][center][0] += l.amount
+      data[branch][st][center][0] += l.amount_applied_for||l.amount
     }
 
     #2: Approved on
-    hash = {:approved_on.gte => from_date, :approved_on.lte => to_date, :fields => [:id, :amount, :client_id, :approved_by_staff_id]}
+    hash = {:approved_on.gte => from_date, :approved_on.lte => to_date, :fields => [:id, :amount, :client_id, :approved_by_staff_id], :rejected_on => nil}
     hash[:loan_product_id] = self.loan_product_id if self.loan_product_id
     Loan.all(hash).each{|l|
       next if not clients.key?(l.client_id)
@@ -115,11 +131,11 @@ class StaffConsolidatedReport < Report
 
       data[branch][st] ||= {}
       data[branch][st][center] ||= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-      data[branch][st][center][1] += l.amount
+      data[branch][st][center][1] += l.amount_sanctioned||l.amount
     }
 
     #3: Disbursal date
-    hash = {:disbursal_date.gte => from_date, :disbursal_date.lte => to_date, :fields => [:id, :amount, :client_id, :disbursed_by_staff_id]}
+    hash = {:disbursal_date.gte => from_date, :disbursal_date.lte => to_date, :fields => [:id, :amount, :client_id, :disbursed_by_staff_id], :rejected_on => nil}
     hash[:loan_product_id] = self.loan_product_id if self.loan_product_id
     Loan.all(hash).each{|l|
       next if not clients.key?(l.client_id)
