@@ -1,8 +1,10 @@
 %h1 
   List of Guarantors 
-  == for #{@client.name}
+  == for #{@client.name} (client ID: #{@client.id})
 %table 
   %tr
+    %th 
+      Guarantor ID (displayed) 
     %th 
       Name 
     %th
@@ -12,6 +14,8 @@
   %tr
   - for guarantor in @guarantors    
     %tr
+      %td
+        = "G-" + guarantor.id.to_s
       %td
         = guarantor.name
       %td

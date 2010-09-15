@@ -200,7 +200,7 @@
                 %th
                   Guarantor ID
                 %th 
-                  Assigned ID (if any)
+                  ID Displayed As 
                 %th 
                   Name
                 %th
@@ -210,10 +210,11 @@
               %tr
               - @client.guarantors.each do |g|
                 %tr
+                  %td
+                    - id_val = g.id 
+                    = id_val 
                   %td 
-                    = g.id
-                  %td 
-                    = g.legacy_id
+                    = "G-" + id_val.to_s 
                   %td
                     = g.name
                   %td
