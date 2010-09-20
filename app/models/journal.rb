@@ -44,19 +44,19 @@ class Journal
       #debit entries
       if debit_accounts.is_a?(Hash)
         debit_accounts.each{|debit_account, amount|
-          Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency])
+          Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency])
+        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       #credit entries
       if credit_accounts.is_a?(Hash)
         credit_accounts.each{|credit_account, amount|
-          Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency])
+          Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency])
+        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       # Rollback in case of both accounts being the same
@@ -140,8 +140,9 @@ class Journal
 
 #this function will create single voucher 
 
-  def self.tallysinglevoucher(hash={})
-    xml_file = '/tmp/single.xml'
+
+  def self.voucher(hash={})
+    xml_file = '/tmp/single1.xml'
     f = File.open(xml_file,'w')
     x = Builder::XmlMarkup.new(:indent => 1)
     x.ENVELOPE{
@@ -157,31 +158,50 @@ class Journal
         }
         x.DATA{
           x.TALLYMESSAGE{
-            x.VOUCHER{
-              x.DATE Date.today.strftime("%Y%m%d")
-              x.NARRATION "#{Date.today}" + "combined journal entry"
-              x.VOUCHERTYPENAME "Journal"
-              x.VOUCHERNUMBER "1"
-              
-              Account.all.each do |acc|
-                credit = acc.postings.sum(:amount, :amount.gt => 0)
-                debit = acc.postings.sum(:amount, :amount.lt => 0)
-                if credit != nil and debit != nil
-                       
-                  x.tag! 'ALLLEDGERENTRIES.LIST' do
-                    x.LEDGERNAME acc.name
-                    x.ISDEEMEDPOSITIVE("No")
-                    x.AMOUNT credit
-                  end
-                  
-                  x.tag! 'ALLLEDGERENTRIES.LIST' do
-                    x.LEDGERNAME acc.name
-                    x.ISDEEMEDPOSITIVE("Yes")  
-                    x.AMOUNT debit
-                  end
+            credit = Journal.all.postings(:amount.gt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
+            debit = Journal.all.postings(:amount.lt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
+            ledger = Account.all
+            [1,2,3].map{|y|
+              x.VOUCHER{
+                x.DATE Date.today.strftime("%Y%m%d")
+                x.NARRATION "#{Date.today}" + "combined journal entry"
+                if y==1 
+                  name = "Payment" 
+                elsif y == 2 
+                  name = "Reciept" 
+                else
+                  name = "Journal"
                 end
-              end
-            }            
+                x.VOUCHERTYPENAME name 
+                x.VOUCHERNUMBER Date.today.strftime() + " " + "Payments"
+                credit.each { |c|
+                  if c[1] == y
+                    x.tag! 'ALLLEDGERENTRIES.LIST' do
+                      ledger.each{ |l|
+                        if l.id == c[0]
+                          x.LEDGERNAME l.name
+                        end
+                      }
+                      x.ISDEEMEDPOSITIVE("No")
+                      x.AMOUNT c[2].round(2)
+                    end
+                  end
+                }
+                debit.each {|d|
+                  if d[1] == y
+                    x.tag! 'ALLLEDGERENTRIES.LIST' do
+                      ledger.each { |l|
+                        if l.id == d[0]
+                          x.LEDGERNAME l.name
+                        end
+                      }
+                      x.ISDEEMEDPOSITIVE("Yes")  
+                      x.AMOUNT d[2].round(2)
+                    end 
+                  end
+                }
+              }
+            }
           }
         }
       }
@@ -189,6 +209,7 @@ class Journal
     f.write(x)
     f.close
   end 
+
 
  
 end

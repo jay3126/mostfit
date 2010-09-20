@@ -5,7 +5,9 @@ class Posting
   property :amount,       Float,   :index => true   
   property :journal_id,   Integer, :index => true  
   property :account_id,   Integer, :index => true  
-  property :currency_id,  Integer, :index => true  
+  property :currency_id,  Integer, :index => true
+  property :date,           Date,   :index => true  
+  property :journal_type_id, Integer, :index => true
   belongs_to :journal
   belongs_to :account
   belongs_to :currency
