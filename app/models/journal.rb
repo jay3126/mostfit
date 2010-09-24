@@ -168,7 +168,7 @@ class Journal
                 if y==1 
                   name = "Payment" 
                 elsif y == 2 
-                  name = "Reciept" 
+                  name = "Receipt" 
                 else
                   name = "Journal"
                 end
