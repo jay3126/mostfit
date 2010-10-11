@@ -50,11 +50,7 @@ class AccountPaymentObserver
     debit_accounts.each{|account, amount|  debit_accounts[account] = amount * -1}     if debit_accounts.is_a?(Hash)
     credit_accounts.each{|account, amount| credit_accounts[account] = amount * -1}    if credit_accounts.is_a?(Hash)
     
-    if obj.type == 'fees' or obj.type == 'interest' or obj.type == 'principal'
       journal[:journal_type_id]=  2
-    else
-      journal[:journal_type_id]=  3
-    end
     
     status, @journal = Journal.create_transaction(journal, debit_accounts, credit_accounts)
   end

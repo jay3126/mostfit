@@ -135,7 +135,7 @@ Merb::BootLoader.after_app_loads do
     Merb.logger.info("Couldn't create the 'INR' currency, Possibly unable to access the database.")
   end
   
-  VOUCHERS = ['Payment', 'Receipt', 'Journal']
+  VOUCHERS = ['Payment', 'Receipt']
   
   begin 
     if JournalType.all.empty?

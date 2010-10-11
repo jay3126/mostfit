@@ -161,19 +161,17 @@ class Journal
             credit = Journal.all.postings(:amount.gt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
             debit = Journal.all.postings(:amount.lt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
             ledger = Account.all
-            [1,2,3].map{|y|
+            [1,2].map{|y|
               x.VOUCHER{
                 x.DATE Date.today.strftime("%Y%m%d")
-                x.NARRATION "#{Date.today}" + "combined journal entry"
+                x.NARRATION "#{Date.today}" + " combined journal entry"
                 if y==1 
                   name = "Payment" 
                 elsif y == 2 
                   name = "Receipt" 
-                else
-                  name = "Journal"
                 end
                 x.VOUCHERTYPENAME name 
-                x.VOUCHERNUMBER Date.today.strftime() + " " + "Payments"
+                x.VOUCHERNUMBER Date.today.strftime("%Y%m%d") + " " + name
                 credit.each { |c|
                   if c[1] == y
                     x.tag! 'ALLLEDGERENTRIES.LIST' do
