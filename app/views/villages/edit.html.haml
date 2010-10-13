@@ -1,0 +1,12 @@
+%h1
+  Village
+  = @village.name
+= error_messages_for @village
+
+= form_for(@village, :action => url(:village, @village)) do
+  = partial :fields
+  = submit "Update #{@village.name.capitalize}"
+
+= link_to 'Show', url(:village, @village)
+|
+= link_to 'Back', url(:villages)

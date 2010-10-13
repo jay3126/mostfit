@@ -1,0 +1,28 @@
+%h1
+  Villages
+
+- if @villages.count == 0
+  .flash
+    .notice
+      No villages
+- else
+  %table.narrow
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Name
+        %th
+          Actions
+    %tr
+      - for village in @villages
+        %tr
+          %td
+            = village.id
+          %td
+            = village.name
+          %td
+            = link_to 'Edit', url(:edit_village,  village)
+
+= link_to 'New', url(:new_village)
