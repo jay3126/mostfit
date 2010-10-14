@@ -3,7 +3,7 @@ class Reports < Application
   Types = {
     :periodic     => [DailyReport, WeeklyReport], 
     :consolidated => [ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport], 
-    :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport], 
+    :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, GuarantorReport], 
     :targets_and_projections  => [ProjectedReport, TargetReport],
     :statistics   => [LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport], 
     :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, DuplicateClientsReport],

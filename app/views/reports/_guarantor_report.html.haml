@@ -1,0 +1,21 @@
+=partial :form
+%table.report.nojs
+  %tr.header
+    %th
+      Guarantor ID
+    %th
+      Guarantor Name 
+    %th
+      Guarantor Date of birth 
+    %th
+      Client ID
+  - @data.each do |guarantor| 
+    %tr 
+      %td
+        = "G-" + guarantor.id.to_s
+      %td
+        = guarantor.name
+      %td
+        = guarantor.date_of_birth
+      %td
+        = guarantor.client.id.to_s
