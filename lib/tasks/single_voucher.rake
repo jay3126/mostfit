@@ -21,18 +21,18 @@ namespace :mostfit do
       [Journal].each do |model|
         table=model.to_s.snake_case.pluralize
         model.all.each do |obj|        
-          repository.adapter.execute("update #{table} set journal_type_id='2' where journal_type_id= '3' ")
+          repository.adapter.execute("update #{table} set journal_type_id='2' where journal_type_id = '3' ")
           
         end        
-      end	   
-      
-      Posting.all.each do |post|  
-         table=Posting.to_s.snake_case.pluralize
-        Journal.all.each do |jou|
-          repository.adapter.execute("update #{table} set journal_type_id = '#{jou.journal_type_id}',date = '#{jou.date}' where journal_id = #{jou.id}")	
-         
-        end				       
-      end	  	   
+      end
+
+      Posting.all.each do |x|
+        Journal.all.each do |y|
+          x.journal_type_id = y.journal_type_id if x.journal_id == y.id
+          x.date = y.date if x.journal_id == y.id
+          x.save
+        end
+      end
     end
   end
 end
