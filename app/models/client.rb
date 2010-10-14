@@ -252,6 +252,7 @@ class Client
   belongs_to :center
   belongs_to :client_group
   belongs_to :occupation, :nullable => true
+  belongs_to :village, :nullable => true
   belongs_to :guarantor_occupation, :nullable => true, :child_key => [:guarantor_occupation_id], :model => 'Occupation'
   belongs_to :client_type
   belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
