@@ -365,10 +365,10 @@ var uniqueID = (function() {
 	return function() { return id++; };  // Return and increment
     })();
 
+//This function is used to calculate net surplus value for intellecash  
 function calculateSum(toField, addTheseFields) {
     var sum = 0, net = 0, net1 = 0;
     status = uniqueID();
-    console.log(status);
     $.each(addTheseFields, function(idx,ele){
 	    if($("#"+ele).val()!=""){
 		sum = sum + parseInt($("#"+ele).val());
