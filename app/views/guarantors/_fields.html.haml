@@ -20,6 +20,11 @@
       =text_field :name
   %tr
     %td
+      Gender:
+    %td
+      = select(:gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select gender")
+  %tr
+    %td
       Fathers Name
     %td
       = text_field :father_name   

@@ -5,6 +5,7 @@ class Guarantor
   property :name, String, :length => 100, :index => true
   property :father_name, String, :length => 100, :index => true
   property :date_of_birth, Date
+  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
   property :address, String, :length => 100 
   property :relationship_to_client, Enum.send('[]', *['', 'spouse', 'brother', 'brother_in_law', 'father', 'father_in_law', 'adult_son', 'other']), :default => '', :nullable => true, :lazy => true
   property :created_at,      DateTime, :default => Time.now
