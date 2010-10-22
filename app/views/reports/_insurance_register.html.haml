@@ -1,7 +1,7 @@
 =partial :form
 %table.report.nojs
   %tr.header
-    %th
+    %th{:width => "10px"}
       Loan Account No.
     %th
       Unique Reference Number / Cust ID
@@ -27,10 +27,11 @@
   - clients_and_loans = {} 
   - clients_and_loans = Hash[*clients.collect { |client| [client.loans.first, client] }.flatten]
   - guarantors_and_loans = {} 
-  - guarantors_and_loans = Hash[*clients.collect { |client| [client.loans.first, client.guarantors.first] }.flatten]
+  - guarantors_and_loans = Hash[*clients.collect { |client| [client.loans.first, client.guarantors.first]}.flatten]
+  - guarantors_and_loans.each { |k, v| guarantors_and_loans.delete(k) unless v }
   - clients_and_loans.each do |loan, client| 
     %tr 
-      %td
+      %td{:width => "10px"}
         = loan.id.to_s
       %td
         = client.id
@@ -48,9 +49,10 @@
       %td
         = loan.disbursal_date
       %td
-        = client.center.branch
+        = client.center.branch.name
       %td
-        = client.occupation
+        - occupation_name = client.occupation ? client.occupation.name : ""
+        = occupation_name
       %td
         = "M" 
   - guarantors_and_loans.each do |loan, guarantor| 
@@ -73,8 +75,9 @@
       %td
         = loan.disbursal_date
       %td
-        = guarantor.client.center.branch
+        = guarantor.client.center.branch.name
       %td
-        = guarantor.guarantor_occupation
+        - occupation_name = guarantor.guarantor_occupation ? guarantor.guarantor_occupation.name : ""
+        = occupation_name
       %td
         = "G" 
