@@ -15,24 +15,14 @@ Merb.start_environment(:environment => ENV['MERB_ENV'] || 'development')
 namespace :mostfit do
   namespace :data do
     desc "This rake task helps to bringe database at perticular stage for creating single voucher"
-    task :single_voucher do
+    task :update_database_for_creating_single_voucher do
       
-      JournalType.all(:name => "journal").destroy!
-      [Journal].each do |model|
-        table=model.to_s.snake_case.pluralize
-        model.all.each do |obj|        
-          repository.adapter.execute("update #{table} set journal_type_id='2' where journal_type_id = '3' ")
-          
-        end        
-      end
-
-      Posting.all.each do |x|
-        Journal.all.each do |y|
-          x.journal_type_id = y.journal_type_id if x.journal_id == y.id
-          x.date = y.date if x.journal_id == y.id
-          x.save
-        end
-      end
+      repository.adapter.execute("update journals set journal_type_id='2' where journal_type_id = '3' ")
+     
+      repository.adapter.execute("
+      update postings p, journals j
+     set p.journal_type_id = j.journal_type_id,p.date = j.date
+    where p.journal_id = j.id")
     end
   end
 end
