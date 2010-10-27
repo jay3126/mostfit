@@ -1,0 +1,16 @@
+%h1
+  ExpenseVouchers controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/expense_vouchers/index.html.erb
+%table
+  %tr
+  - for expense_voucher in @expense_vouchers
+    %tr
+      %td
+        = link_to 'Show', url(:expense_voucher, expense_voucher)
+      %td
+        = link_to 'Edit', url(:edit_expense_voucher,  expense_voucher)
+
+= link_to 'New', url(:new_expense_voucher)

@@ -1,0 +1,12 @@
+- form_url = resource(@expense_head, {:return => params[:return]})
+= error_messages_for @expense_head
+
+= form_for(@expense_head, :action => form_url, :class => "form") do
+  %fieldset
+    %h1 Edit an Expense Head
+    = partial "expense_heads/fields"
+    = submit "Update"
+
+= link_to 'Show', url(:expense_head, @expense_head)
+|
+= link_to 'Back', url(:expense_heads)

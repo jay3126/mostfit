@@ -4,11 +4,15 @@
   |
   = link_to 'Manage Account Type', url(:account_types)
   |
+  = link_to 'Manage Expense Heads', url(:expense_heads)
+  |
   = link_to 'New Account', url(:new_account)
   |
   = link_to 'Manage Accounting Rule', url(:rule_books)
   |
-  = link_to_with_rights 'Create a new voucher', resource(:journals, :new)
+  = link_to_with_rights 'Create a new journal entry', resource(:journals, :new)
+  |
+  = link_to_with_rights 'Create a new expense voucher', resource(:expense_vouchers, :new)
   | 
   = link_to_with_rights 'View recent journal entries', resource(:journals)
 

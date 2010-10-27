@@ -1,0 +1,9 @@
+- form_url = resource(:expense_heads, {:return => params[:return]})
+= error_messages_for @expense_head
+
+= form_for(@expense_head, :action => form_url, :class => "form" ) do
+  %fieldset
+    %h1 Create a new Expense Head
+    = partial("expense_heads/fields")
+    = submit "Create"
+    = link_to 'Cancel', url(:expense_heads)

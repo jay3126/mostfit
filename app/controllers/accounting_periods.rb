@@ -29,9 +29,9 @@ class AccountingPeriods < Application
     @accounting_period = AccountingPeriod.new(accounting_period)
     @accounting_period.created_by_user_id = session.user.id
     if @accounting_period.save
-      redirect resource(:accounting_periods), :message => {:notice => "AccountingPeriod was successfully created"}
+      redirect resource(:accounting_periods), :message => {:notice => "Accounting Period was successfully created"}
     else
-      message[:error] = "AccountingPeriod failed to be created"
+      message[:error] = "Accounting Period failed to be created"
       render :new
     end
   end
