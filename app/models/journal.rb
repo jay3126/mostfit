@@ -135,12 +135,7 @@ class Journal
     f.write(x)
     f.close
   end 
-
-  
-
 #this function will create single voucher 
-
-
   def self.voucher(hash={})
     xml_file = '/tmp/single1.xml'
     f = File.open(xml_file,'w')
@@ -157,9 +152,9 @@ class Journal
         x.DESC{
         }
         x.DATA{
-          x.TALLYMESSAGE{
-            credit = Journal.all.postings(:amount.gt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
-            debit = Journal.all.postings(:amount.lt => 0).aggregate(:account_id,:journal_type_id,:amount.sum)
+          x.TALLYMESSAGE{           
+            credit = Journal.all.postings(hash.merge(:amount.gt => 0)).aggregate(:account_id,:journal_type_id,:amount.sum)
+            debit = Journal.all.postings(hash.merge(:amount.lt => 0)).aggregate(:account_id,:journal_type_id,:amount.sum)
             ledger = Account.all
             [1,2].map{|y|
               x.VOUCHER{
@@ -207,7 +202,4 @@ class Journal
     f.write(x)
     f.close
   end 
-
-
- 
 end
