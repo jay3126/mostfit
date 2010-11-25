@@ -2,12 +2,14 @@ Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   resources :expense_vouchers
   resources :expense_heads
+  resources :insurance_products
   resources :accounting_periods
   resources :journals
   resources :loan_utilizations
   resources :rule_books
   resources :account_types
   resources :accounts, :id => /\d+/
+  resources :rules, :id => %r(\d+)
   resources :bookmarks
   resources :audit_items
   resources :attendances
@@ -62,7 +64,9 @@ Merb::Router.prepare do
       end
     end
   end
-  resources :funders do    resources :funding_lines
+  resources :funders do    
+    resources :portfolios
+    resources :funding_lines
   end
   resources :center_meeting_days
 
@@ -112,6 +116,7 @@ Merb::Router.prepare do
   # this uses the redirect_to_show methods on the controllers to redirect some models to their appropriate urls
   match('/documents/:action(/:id)').to(:controller => "documents").name(:documents_action_link)
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
+  match('/rules/get').to(:controller => 'rules', :action => 'get') 
   default_routes
   match('/').to(:controller => 'entrance', :action =>'root')
 end

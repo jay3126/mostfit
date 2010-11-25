@@ -1,7 +1,7 @@
 class Fee
   include DataMapper::Resource
   
-  PAYABLE = [:loan_applied_on, :loan_approved_on, :loan_disbursal_date, :loan_scheduled_first_payment_date, :loan_first_payment_date, :client_grt_pass_date, :client_date_joined, :loan_installment_dates]
+  PAYABLE = [:loan_applied_on, :loan_approved_on, :loan_disbursal_date, :loan_scheduled_first_payment_date, :loan_first_payment_date, :client_grt_pass_date, :client_date_joined, :loan_installment_dates, :policy_issue_date]
   FeeDue        = Struct.new(:applicable, :paid, :due)
   FeeApplicable = Struct.new(:loan_id, :client_id, :fees_applicable)
   property :id,            Serial
@@ -14,6 +14,7 @@ class Fee
 
   has n, :loan_products, :through => Resource
   has n, :client_types, :through => Resource
+  has n, :insurance_products, :through => Resource
   # anything else will have to be ruby code - sorry
   
   validates_with_method :amount_is_okay
@@ -40,6 +41,10 @@ class Fee
     desc
   end
 
+  def Fee.fees_for_insurance_products(fees)
+    fees.select {|fee| fee.payable_on == :policy_issue_date}
+  end
+
   def self.payable_dates
     PAYABLE
   end
@@ -61,7 +66,7 @@ class Fee
     payables = Fee.properties[:payable_on].type.flag_map
     applicables = repository.adapter.query(%Q{
                                 SELECT l.id loan_id, l.client_id client_id, 
-                                       SUM(if(f.amount>0, convert(f.amount, decimal), convert(l.amount*f.percentage, decimal))) fees_applicable, 
+                                       SUM(if(f.amount>0, convert(f.amount, decimal), l.amount*f.percentage)) fees_applicable, 
                                        f.payable_on payable_on                                       
                                 FROM loan_products lp, fee_loan_products flp, fees f, loans l 
                                 WHERE flp.fee_id=f.id AND flp.loan_product_id=lp.id AND lp.id=l.loan_product_id #{query} GROUP BY l.id;})
@@ -69,9 +74,9 @@ class Fee
     applicables.each{|fee|
       if payables[fee.payable_on]==:loan_installment_dates
         installments = loans.find{|x| x.id==fee.loan_id}.installment_dates.reject{|x| x>Date.today}.length
-        fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable.to_i * installments))
+        fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable.to_f * installments))
       else
-        fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable))
+        fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable.to_f))
       end
     }
     fees
@@ -94,8 +99,8 @@ class Fee
       applicable = fees_applicable.find{|x| x.loan_id==lid}
       next if not applicable
       paid      = fees_paid.find_all{|x| x.loan_id==lid}
-      paid      = (paid and paid.length>0) ? paid.map{|x| x.amount.to_i}.inject(0){|s,x| s+=x} : 0
-      fees[lid]  = FeeDue.new((applicable ? applicable.fees_applicable.to_i : 0), paid, (applicable ? applicable.fees_applicable : 0) - paid)
+      paid      = (paid and paid.length>0) ? paid.map{|x| x.amount.to_f}.inject(0){|s,x| s+=x} : 0
+      fees[lid]  = FeeDue.new((applicable ? applicable.fees_applicable.to_f : 0), paid, (applicable ? applicable.fees_applicable : 0) - paid)
     }
     fees
   end
@@ -150,6 +155,18 @@ class Fee
       from  = "payments p, fees f"
       where = %Q{
                   p.received_by_staff_id=#{obj.id} and p.type=3 and p.fee_id=f.id
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==LoanProduct
+      from  = "loans l, payments p, fees f"
+      where = %Q{
+                  l.id = p.loan_id and l.loan_product_id = #{obj.id} and l.deleted_at is NULL and p.type=3 and p.fee_id=f.id
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==FundingLine
+      from  = "loans l, payments p, fees f"
+      where = %Q{
+                  l.id = p.loan_id and l.funding_line_id = #{obj.id} and l.deleted_at is NULL and p.type=3 and p.fee_id=f.id
                   and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
                };
     end

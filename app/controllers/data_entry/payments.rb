@@ -14,11 +14,17 @@ module DataEntry
       if params[:center_text] and not @center
         @center = Center.get(params[:center_text]) || Center.first(:name => params[:center_text]) || Center.first(:code => params[:center_text])
       end
-      if params[:for_date]
+
+      # if recieved on is present use that, else use for_date (old hidden field) or use today's date
+      if params[:received_on] and not params[:received_on].blank?
+        @date = Date.parse(params[:received_on])
+      elsif params[:for_date] and not params[:for_date].blank?
         if params[:for_date][:month] and params[:for_date][:day] and params[:for_date][:year]
-          params[:for_date] = "#{params[:for_date][:year]}-#{params[:for_date][:month]}-#{params[:for_date][:day]}"
+          params[:for_date] = "#{params[:for_date][:year]}-#{params[:for_date][:month]}-#{params[:for_date][:day]}"  
         end
         @date = Date.parse(params[:for_date])
+      else
+        @date = Date.today
       end
 
       unless @center.nil?
@@ -28,11 +34,16 @@ module DataEntry
       end
 
       if request.method == :post
-        bulk_payments_and_disbursals
-        mark_attendance
+        if Date.min_transaction_date > @date or Date.max_transaction_date < @date
+          @errors = ["Transactions attempted are outside allowed dates"]
+        else
+          bulk_payments_and_disbursals
+          mark_attendance
+        end
+
         if @errors.blank?
-          notice = 'All payments made succesfully'
           return_url = params[:return]||url(:data_entry)
+          notice = 'All payments made succesfully'
           if(request.xhr?)
             render("<div class='notice'>#{notice}<div>", :layout => layout?)
           else
@@ -40,8 +51,8 @@ module DataEntry
           end
         elsif params[:format] and params[:format]=="xml"
           display("")
-        else 
-          render      
+        else
+          params[:return] ? redirect(params[:return], :message => {:error => @errors.map{|e| e.instance_variables.include?("@errors") ? e.instance_variable_get("@errors") : e.to_s } }) : render
         end
       else
         render
@@ -137,7 +148,7 @@ module DataEntry
       @center = Center.get(params[:center_id]) || Center.first(:name => params[:center_id]) 
       @branch = @center.branch unless @center.nil?
       @clients = @center.clients(:fields => [:id, :name, :center_id, :client_group_id]) unless @center.nil?
-      @date = Date.parse(params[:for_date]) unless params[:for_date].nil?
+
       @staff = StaffMember.get(params[:payment][:received_by])
       @errors = []
       if params[:paid][:loan]
@@ -145,13 +156,14 @@ module DataEntry
           @loan = Loan.get(k.to_i)
           @loan.history_disabled = true
           amounts = params[:paid][:loan][k.to_sym].to_f
+          next if amounts<=0
           if params.key?(:payment_type) and params[:payment_type] == "fees"
             @loan.pay_fees(amounts, @date, @staff, session.user)
             next
           end
           @type = params[:payment][:type]
           style = params[:payment_style][k.to_sym].to_sym
-          next if amounts<=0          
+          next if amounts<=0
           @success, @prin, @int, @fees = @loan.repay(amounts, session.user, @date, @staff, false, style)
           if @success
             @loan.history_disabled = false

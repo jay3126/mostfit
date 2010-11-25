@@ -6,7 +6,7 @@ class Reports < Application
     :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, GuarantorReport], 
     :targets_and_projections  => [ProjectedReport, TargetReport],
     :statistics   => [LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport], 
-    :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, DuplicateClientsReport],
+    :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest],
     :accounting   => [GeneralLedgerReport, TrialBalanceReport]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
@@ -33,9 +33,6 @@ class Reports < Application
       @report   = klass.new(params[class_key], dates, session.user)
       if not params[:submit]
         render :form
-      elsif klass == TransactionLedger
-        @groups, @centers, @branches, @payments, @clients = @report.generate
-        display [@groups, @centers, @branches, @payments, @clients]
       else        
         case @report.method(:generate).arity
         when 0
@@ -111,9 +108,9 @@ class Reports < Application
   end
 
   def get_date(params, col)
-    if params and params.key?(col)
+    if params and params.key?(col) and params[col] and not params[col].blank?
       date_hash = params[col]
-      return Date.parse(date_hash)
+      return Date.strptime(date_hash, Mfi.first.date_format)
     end
   end
   

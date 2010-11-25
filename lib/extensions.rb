@@ -78,15 +78,18 @@ module Misfit
         return false unless allowed_controller
         id = @route[:id].to_i
         model = Kernel.const_get(@model.to_s.split("/")[-1].camelcase)
-        if [Browse, Report, Document, AuditTrail, Attendance].include?(model)
-          return true
-        elsif [Branch, Center, ClientGroup, Client, Loan].include?(model) and id>0 
+        if [Branch, Center, ClientGroup, Client, Loan, StaffMember, FundingLine, Funder, Portfolio].include?(model) and id>0 
           return(@funder.send(model.to_s.snake_case.pluralize, {:id => id}).length>0)
-        elsif [Branch, Center, ClientGroup, Client, Loan].include?(model) and id==0
+        elsif [Branch, Center, ClientGroup, Client, Loan, StaffMember, FundingLine, Funder, Portfolio].include?(model) and id==0
           return(@funder.send(model.to_s.snake_case.downcase.pluralize).length>0)
+        elsif [Browse, Document, AuditTrail, Attendance, Search].include?(model)
+          return true
+        elsif model == Report
+          return true unless @route[:report_type]
+          return FUNDER_ACCESSIBLE_REPORTS.include?(@route[:report_type])
         end
         return false
-      end
+     end
 
       def is_manager_of?(obj)
         @staff ||= self.staff_member
@@ -114,15 +117,15 @@ module Misfit
       def _can_access?(route,params = nil)        
         # more garbage
         user_role = self.role
-        return true if user_role == :admin
-        return true if [:graph_data, :info, :dashboard].include?(route[:controller].to_sym) and user_role!=:data_entry
+        return true  if user_role == :admin
+        return false if route[:controller] == "journals" and route[:action] == "edit"
         return true if route[:controller] == "users" and route[:action] == "change_password"
+        return false if (user_role == :read_only or user_role == :funder or user_role == :data_entry) and route[:controller] == "payments" and route[:action] == "delete"
 
         @route = route
         @controller = (route[:namespace] ? route[:namespace] + "/" : "" ) + route[:controller]
         @model = route[:controller].singularize.to_sym
         @action = route[:action]
-        @staff ||= self.staff_member
 
         #read only stuff
         return allow_read_only if user_role == :read_only
@@ -138,6 +141,7 @@ module Misfit
           end
         end
         
+        @staff ||= self.staff_member
         return true if @action == "redirect_to_show"
         if @controller=="documents" and CUD_Actions.include?(@action)
           return true  if params[:parent_model]=="Client"
@@ -156,9 +160,9 @@ module Misfit
             return false            
           end
         end
-
+        
         if @staff
-          return additional_checks if @route.has_key?(:id) and @route[:id]
+          return additional_checks if @route.has_key?(:id) and @route[:id] and @controller == "controller"
           if ["staff_members", "branches"].include?(@controller)
             if not CUD_Actions.include?(@action)
               return true

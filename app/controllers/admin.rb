@@ -23,7 +23,7 @@ class Admin < Application
   end
   
   def edit
-    @mfi  = Mfi.new($globals ? $globals[:mfi_details] : {})
+    @mfi  = Mfi.first
     render
   end
   
@@ -52,6 +52,14 @@ class Admin < Application
       send_data(File.open(File.join(Merb.root, DUMP_FOLDER, file)), :filename => file, :type => "gzip")
     end
   end
+
+  def dirty_loans
+    @loans = DirtyLoan.pending
+    render
+  end
+
+  def clear_loan
+    DirtyLoan.clear(params[:id])
+    render "done", :layout => false
+  end
 end
-
-

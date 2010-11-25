@@ -273,7 +273,7 @@ class Dashboard < Application
       ages.to_a.sort_by{|x| x[0]}.each{|key, count|
         vals.push([count, "#{(key-1)*10} to #{key*10} %"])
       }      
-      graph = BarGraph.new("Ageing analysis")
+      graph = BarGraph.new("Percentage of loans repaid")
       graph.data_type = :individual
       graph.data(vals)
       return graph.generate      
@@ -296,7 +296,7 @@ class Dashboard < Application
       graph.data(vals.map{|x|
                    branch=Branch.get(x.branch_id)
                    principal_overdue = if history = LoanHistory.defaulted_loan_info_for(branch)
-                                         history.principal_due
+                                         history.principal_due || 0
                                        else
                                          0
                                        end

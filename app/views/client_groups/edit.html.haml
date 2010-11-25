@@ -11,6 +11,12 @@
 %hr
 %h1 
   Mark GRT pass these clients 
+- if not @errors.blank?
+  .error
+    - @errors.each do |client|
+      == Problem in saving client ID: #{client.id} because #{client.instance_variable_get("@errors").values.join(", ")}
+      %br        
+
 = form_for(@client_group, :action => url(:enter_groups, :action => "create_grt_date", :id => @client_group), :method => :post) do
   %table{:width => "50%"}
     %tr{:align => "left"}
@@ -24,6 +30,7 @@
       %th
         GRT date
   
+    - min_date = Date.today
     -@client_group.clients.each do |client| 
       %tr
         %td
@@ -36,9 +43,10 @@
           =client.name
         %td
           =client.grt_pass_date ? client.grt_pass_date : " - "
+        - min_date = client.date_joined if min_date > client.date_joined
     %tr
       %td{:colspan => 4}
-        =date_select "grt_date"
+        =date_select "grt_date", Date.today, {:min_date => min_date, :max_date => Date.today}
     %tr
       %td{:colspan => 4}
         =submit "Save changes"

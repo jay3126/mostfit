@@ -1,6 +1,6 @@
 class Branch
-  extend Reporting::BranchReports
   include DataMapper::Resource
+  extend Reporting::BranchReports
 
   before :save, :convert_blank_to_nil
   
@@ -13,6 +13,7 @@ class Branch
   property :created_at,     DateTime
   property :creation_date,  Date, :default => Date.today
   property :area_id,        Integer, :nullable => true
+
   belongs_to :manager,      :child_key => [:manager_staff_id], :model => 'StaffMember'
   belongs_to :area,         :nullable => true
   has n, :centers
@@ -34,14 +35,15 @@ class Branch
   def centers_with_paginate(params, user)
     hash = {:order => [:meeting_day, :meeting_time_hours, :meeting_time_minutes]}
     # This the logged in person is a staff member and he is not a branch manager
+    hash[:branch] = self
+
     if staff = user.staff_member and not staff==self.manager
       if not staff.branches.include?(self) and not staff.areas.branches.include?(self) and not staff.regions.areas.branches.include?(self)
         hash[:manager] = user.staff_member
       end
-    elsif user.role == :funder and funding_lines = Funder.first(:user_id => user.id).funding_lines
-      hash[:id] = LoanHistory.parents_where_loans_of(Center, {:loan => {:funding_line_id => funding_lines.map{|x| x.id}}})
+    elsif user.role == :funder 
+      hash[:id] = Funder.first(:user_id => user.id).centers({:branch_id => self.id}).map{|c| c.id}
     end
-    hash[:branch] = self    
 
     if params[:meeting_day] and Center::DAYS.include?(params[:meeting_day].to_sym)
       hash[:meeting_day]= params[:meeting_day].to_sym
@@ -64,11 +66,11 @@ class Branch
     self.centers.clients.loans(hash)
   end
 
-  def self.search(q)
+  def self.search(q, per_page=10)
     if /^\d+$/.match(q)
-      Branch.all(:conditions => {:id => q})
+      Branch.all(:conditions => {:id => q}, :limit => per_page)
     else
-      Branch.all(:conditions => ["code=? or name like ?", q, q+'%'])
+      Branch.all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
     end
   end
   
@@ -88,7 +90,7 @@ class Branch
 
   def convert_blank_to_nil
     self.attributes.each{|k, v|
-      if v.is_a?(String) and v.empty? and self.class.send(k).type==Integer
+      if v.is_a?(String) and v.empty? and self.class.properties.find{|x| x.name == k}.type==Integer
         self.send("#{k}=", nil)
       end
     }

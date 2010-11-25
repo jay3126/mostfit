@@ -2,6 +2,7 @@ module Merb
   module GlobalHelpers
     CRUD_ACTIONS = ["list", "index", "show", "edit", "new"]
     MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    TRANSACTION_MODELS = [Branch, Center, ClientGroup, Cgt, Grt, Client, Loan, Payment]
     
     def page_title
       begin
@@ -43,8 +44,15 @@ module Merb
     def select_staff_member_for(obj, col, attrs = {}, allow_unassigned=false)
       id_col = "#{col.to_s}_staff_id".to_sym
       selected = ((obj.send(id_col) and obj.send(id_col)!="") ? obj.send(id_col).to_s : attrs[:selected] || "0")
+      allow_inactive = false
+
+      if selected and selected.to_i>0
+        staff = StaffMember.get(selected)
+        allow_inactive = true unless staff.active
+      end
+      
       select(col,
-             :collection   => staff_members_collection(allow_unassigned),
+             :collection   => staff_members_collection(allow_unassigned, allow_inactive),
              :name         => "#{obj.class.to_s.snake_case}[#{id_col}]",
              :id           => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
              :selected     => selected)
@@ -84,7 +92,6 @@ module Merb
       html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
     end
 
-
     def date_select(name, date=Date.today, opts={})
       # defaults to Date.today
       # should refactor
@@ -92,29 +99,37 @@ module Merb
       attrs.merge!(:name => name)
       attrs.merge!(:date => date)
       attrs.merge!(:id => opts[:id]||name)
+      attrs.merge!(:nullable => (opts.key?(:nullable) ? opts[:nullable] : Mfi.first.date_box_editable))
       attrs.merge!(:date     => date)
+      attrs.merge!(:size     => opts[:size]||20)
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
       date_select_html(attrs) 
     end
 
     def date_select_for(obj, col = nil, attrs = {})
-      attrs.merge!(:name => "#{obj.class.to_s.snake_case}[#{col.to_s}]")
-      attrs.merge!(:id   => "#{obj.class.to_s.snake_case}_#{col.to_s}")
-      nullable = attrs[:nullable] ? true : false
+      klass = obj.class
+      attrs.merge!(:name => "#{klass.to_s.snake_case}[#{col.to_s}]")
+      attrs.merge!(:id   => "#{klass.to_s.snake_case}_#{col.to_s}")
+      attrs[:nullable]   = (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable)
       date = obj.send(col) 
-      date = Date.today if date.blank? and not nullable
-      date = nil        if date.blank? and nullable
+      date = Date.today if date.blank? and not attrs[:nullable]
+      date = nil        if date.blank? and attrs[:nullable]
       attrs.merge!(:date => date)
-      attrs.merge!(:min_date => attrs[:min_date]||Date.min_date)
-      attrs.merge!(:max_date => attrs[:max_date]||Date.max_date)
+      if TRANSACTION_MODELS.include?(klass) or TRANSACTION_MODELS.include?(klass.superclass) or TRANSACTION_MODELS.include?(klass.superclass.superclass)
+        attrs.merge!(:min_date => attrs[:min_date]||Date.min_transaction_date)
+        attrs.merge!(:max_date => attrs[:max_date]||Date.max_transaction_date)
+      else
+        attrs.merge!(:min_date => attrs[:min_date]||Date.min_date)
+        attrs.merge!(:max_date => attrs[:max_date]||Date.max_date)
+      end
       date_select_html(attrs, obj, col)
 #       errorify_field(attrs, col)
     end
 
-    def date_select_html (attrs, obj = nil, col = nil)
+    def date_select_html (attrs, obj = nil, col = nil)      
       str = %Q{
-        <input type='text' name="#{attrs[:name]}" id="#{attrs[:id]}" value="#{attrs[:date]}" size="20">
+        <input type='text' name="#{attrs[:name]}" id="#{attrs[:id]}" value="#{attrs[:date]}" size="#{attrs[:size]}" #{attrs[:nullable] ? "" : "readonly='true'"}>
         <script type="text/javascript">
           $(function(){
             $("##{attrs[:id]}").datepicker('destroy').datepicker({altField: '##{attrs[:id]}', buttonImage: "/images/calendar.png", changeYear: true, buttonImageOnly: true,
@@ -129,8 +144,8 @@ module Merb
     end
 
     def datepicker_dateformat
-      if $globals and $globals[:mfi_details] and $globals[:mfi_details][:date_format]
-        ourDateFormat = $globals[:mfi_details][:date_format]
+      if Mfi.first and not Mfi.first.date_format.blank?
+        ourDateFormat = Mfi.first.date_format
       else
         ourDateFormat = "%Y-%m-%d"
       end
@@ -185,7 +200,7 @@ module Merb
           swfobject.embedSWF(
             "#{swf_base}open-flash-chart.swf", "flashcontent_#{id}",
             "#{width}", "#{height}", "9.0.0", "expressInstall.swf",
-            {"data-file":"#{url}", "loading":"Waiting for data... (reload page when it takes too long)"} );
+            {"data-file":"#{url}", "loading":"Waiting for data... (reload page when it takes too long)"}, {"wmode": "transparent"} );
         </script>
       HTML
     end
@@ -249,6 +264,26 @@ module Merb
     def paginate(pagination, *args, &block)
       DmPagination::PaginationBuilder.new(self, pagination, *args, &block)
     end
+
+    def paginate_array(arr, params, length)
+      page = ((params[:page] and not params[:page].blank?) ? params[:page].to_i : 1)
+      str  = ""
+      if page <= 1
+        page = 1
+      else
+        params[:page] = page - 1
+        str += link_to("prev", url(params))
+      end
+
+      params[:page] = page + 1
+
+      if (length / 20.0).ceil <= page
+        str
+      else
+        str + " | " + link_to("next", url(params))
+      end
+    end
+
     def chart(url, width=430, height=200, id=nil)
       id||= (rand()*100000).to_i + 100
       "<div id='flashcontent_#{id}'></div>
@@ -268,18 +303,38 @@ module Merb
       "/audit_trails?"+params.to_a.map{|x| "audit_for[#{x[0]}]=#{x[1]}"}.join("&")
     end
 
-    def diff_display(arr, model, action)      
+    def diff_display(arr, obj, action)      
+      relations = {}
+      if obj.class == String
+        model = Kernel.const_get(obj)
+      else
+        model = obj.class
+        relations = model.relationships.map{|k,v| {v.child_key.first.name => k}}.reduce({}){|s,x| s+=x}
+      end
+
       arr.map{|change|
         next unless change
         change.map{|k, v|
-          str="<tr><td>#{k.humanize}</td><td>"
-          str+=if action==:update and v.class==Array
-                 "changed from #{v.first}</td><td>to #{v.last}"
-               elsif action==:create and v.class==Array
-                 "#{v}"
-               else
-                 "#{v}"
-               end
+          if relations.key?(k)
+            str = "<tr><td>#{relations[k].to_s.humanize}</td><td>"
+            str += if action==:update and v.class==Array                 
+                     "changed from #{obj.send(relations[k]).name}</td><td>to #{obj.send(relations[k]).name}"
+                   elsif action==:create and v.class==Array                 
+                     "#{obj.send(relations[k]).name}"
+                   else
+                     "#{v}"       
+                   end
+            
+          else
+            str="<tr><td>#{k.humanize}</td><td>"
+            str+=if action==:update and v.class==Array                 
+                   "changed from #{v.first}</td><td>to #{v.last}"
+                 elsif action==:create and v.class==Array                 
+                   "#{v}"
+                 else
+                   "#{v}"                 
+                 end
+          end
           str+="</td></tr>"
         }
       }
@@ -339,6 +394,14 @@ module Merb
       staff_members.sort_by{|x| x.name}.map{|x| [x.id, x.name]}
     end
 
+    def get_accessible_funders
+      (if session.user.role == :funder
+        Funder.all(:user => session.user)
+      else
+        Funder.all
+      end).map{|x| [x.id, "#{x.name}"]}
+    end
+
     def select_mass_entry_field(attrs)
       collection = []
       MASS_ENTRY_FIELDS.keys.each do |model|
@@ -363,17 +426,33 @@ module Merb
       }.join(' | ')
     end
 
+    def select_accounts(name, branch=nil, attrs = {})
+      collection = []
+      Account.all(:branch => branch).group_by{|a| a.account_type}.sort_by{|at, as| at.name}.each do |account_type, accounts|
+        collection << ['', "#{account_type.name}"]
+        accounts.sort_by{|a| a.name}.each{|a| collection << [a.id.to_s, "!!!!!!!!!#{a.name}"] }
+      end
+      html = select(
+        :collection   => collection,
+        :name         => name,
+        :id           => attrs[:id],
+        :selected     => attrs[:selected],
+        :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
+      html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
+    end
+
     private
-    def staff_members_collection(allow_unassigned=false)
+    def staff_members_collection(allow_unassigned=false, allow_inactive=false)
+      hash = allow_inactive ? {} : {:active => true}
       if session.user.staff_member
         staff = session.user.staff_member
         bms  = staff.branches.collect{|x| x.manager}
         cms  = staff.branches.centers.collect{|x| x.manager}               
         managers = [bms, cms, staff].flatten.uniq
-        managers+= (StaffMember.all(:active => true) - Branch.all.managers - Center.all.managers - Region.all.managers - Area.all.managers) if allow_unassigned
+        managers+= (StaffMember.all(hash) - Branch.all.managers - Center.all.managers - Region.all.managers - Area.all.managers) if allow_unassigned
         [["0", "<Select a staff member"]] + managers.sort_by{|x| x.name}.map{|x| [x.id, x.name]}
       else
-        [["0", "<Select a staff member"]] + StaffMember.all(:active => true).sort_by{|x| x.name}.map{|x| [x.id, x.name]}
+        [["0", "<Select a staff member"]] + StaffMember.all(hash).sort_by{|x| x.name}.map{|x| [x.id, x.name]}
       end
     end
     
@@ -407,5 +486,25 @@ module Merb
       #catch all
       return join_segments(prefix, controller_name, postfix)
     end    
+
+    def self.pretty_name_of_comparator(comparator)
+      if comparator == "less_than" then return "<"
+      elsif comparator == "less_than_equal" then return "<="
+      elsif comparator == "greater_than" then return ">"
+      elsif comparator == "greater_than_equal" then return ">="
+      elsif comparator == "equal" then return "="
+      elsif comparator == "equal1" then return "="
+      elsif comparator == "equal2" then return "="
+      elsif comparator == "not" then return "!="
+      elsif comparator == "not1" then return "!="
+      elsif comparator == "not2" then return "!="
+      else return comparator
+      end
+    end
+
+    def getPages(current_page, minimum=1, maximum=20, window=2)
+      return((minimum + window < current_page ? minimum.upto(window).collect : minimum.upto(current_page + window).collect) + (current_page - window > minimum+window ? [".."] : []) + (current_page > minimum + window ? (current_page - window > minimum + window ? current_page - window : minimum + window).upto(current_page + window > maximum ? maximum : current_page + window).collect : []) + (current_page + window + 1 < maximum - window ? [".."] : []) + (current_page < maximum - 2 * window ? maximum-window : current_page + window + 1).upto(maximum).collect)
+    end
+
   end
 end

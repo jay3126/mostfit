@@ -274,8 +274,9 @@ class Client
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
+  validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
-  validates_with_method :dates_make_sense
+  validates_with_method :dates_make_sense, :when => [:create, :update, :save]
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
@@ -305,11 +306,11 @@ class Client
     [obj.save, obj]
   end
 
-  def self.search(q)
+  def self.search(q, per_page=10)
     if /^\d+$/.match(q)
-      all(:conditions => {:id => q})
+      all(:conditions => {:id => q}, :limit => per_page)
     else
-      all(:conditions => ["reference=? or name like ?", q, q+'%'])
+      all(:conditions => ["reference=? or name like ?", q, q+'%'], :limit => per_page)
     end
   end
 
@@ -379,9 +380,9 @@ class Client
     pay_order = fee_schedule.keys.sort.map{|d| fee_schedule[d].keys}.flatten
     pay_order.each do |k|
       if fees_payable_on(date).has_key?(k)
-        if pay = Payment.create(:amount => [fp[k], amount].min, :type => :fees, :received_on => date, :comment => k.name, :fee => k,
-                                :received_by => received_by, :created_by => created_by, :client => self)
-
+        pay = Payment.new(:amount => [fp[k], amount].min, :type => :fees, :received_on => date, :comment => k.name, :fee => k,
+                          :received_by => received_by, :created_by => created_by, :client => self)        
+        if pay.save_self
           amount -= pay.amount
           fp[k] -= pay.amount
         else
@@ -452,5 +453,11 @@ class Client
     return [false, "Client cannot die before he became a client"] if deceased_on and (deceased_on < date_joined or deceased_on < grt_pass_date)
     true
   end
+
+  def verified_cannot_be_deleted
+    return true unless verified_by_user_id
+    throw :halt
+    [false, "Verified client. Cannot be deleted"]
+  end  
 end
 

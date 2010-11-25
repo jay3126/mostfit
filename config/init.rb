@@ -26,10 +26,13 @@ Merb::BootLoader.before_app_loads do
   Numeric::Transformer.add_format(
     :mostfit_default => { :number =>   { :precision => 3, :delimiter => ' ',  :separator => '.'},
                           :currency => { :unit => '',     :format => '%n',    :precision => 0 } },
-    :in              => { :number =>   { :precision => 3, :delimiter => ',',  :separator => '.'},
-                          :currency => { :unit => 'Rs.',  :format => '%u %n', :precision => 0 } })
+    :in              => { :number =>   {:precision => 3, :delimiter => ',',  :separator => '.', :regex => /(\d+?)(?=(\d\d)+(\d)(?!\d))(\.\d+)?/},
+                          :currency => { :format => '%u %n', :precision => 0, :delimiter => ',' } },
+    :in_with_paise   => { :number =>   {:precision => 3, :delimiter => ',',  :separator => '.', :regex => /(\d+?)(?=(\d\d)+(\d)(?!\d))(\.\d+)?/},
+                          :currency => { :format => '%u %n', :precision => 2, :delimiter => ',' } })
   Numeric::Transformer.change_default_format(:mostfit_default)
   require 'config/constants.rb'
+  require 'lib/rules'
 #  require 'csv'
   require 'uuid'
   require 'ftools'
@@ -45,6 +48,7 @@ Merb::BootLoader.before_app_loads do
     require 'lib/grapher.rb'
     require("lib/pdfs/day_sheet.rb")
     require("lib/functions.rb")
+    require("lib/core_ext.rb")
     PDF_WRITER = true
   rescue
     PDF_WRITER = false
@@ -96,7 +100,8 @@ Merb::BootLoader.after_app_loads do
 
   # set the rights
   require 'config/misfit'
-
+  
+  Mostfit::Business::Rules.deploy
   # enable the extensions
   Misfit::Extensions.hook
 
@@ -156,15 +161,21 @@ Merb::BootLoader.after_app_loads do
   end
   
 #  Mime::Type.register 'application/pdf', :pdf
-  if File.exists?(File.join(Merb.root, "config", "mfi.yml"))
-    $globals ||= {}
-    begin
-      $globals[:mfi_details] = YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml")))
-    rescue
-      Merb.logger.info("Couldn't not load MFI details from config/mfi.yml. Possibly a wrong YAML file specification.")
+  $globals ||= {}
+  begin
+    $globals[:mfi_details] = Mfi.first
+    Merb.logger.info("Loaded MFI details from config/mfi.yml. Loaded on #{Mfi.first.fetched}")
+    if DirtyLoan.start_thread
+      Merb.logger.info("Starting cleaner thread")
+    else
+      Merb.logger.info("Cleaner not enabled")
     end
+  rescue
+    # create a new mfi_details object anyways
+    $globals[:mfi_details] = Mfi.new(:name => "Mostfit", :fetched => Date.today)
+    Misfit::Config::DateFormat.compile
+    Merb.logger.info("Couldn't not load MFI details from config/mfi.yml. Possibly a wrong YAML file specification.")
   end
-  Misfit::Config::DateFormat.compile
 
   module DmPagination
     class PaginationBuilder
@@ -175,6 +186,15 @@ Merb::BootLoader.after_app_loads do
     end
   end
 
-
+  if defined?(PhusionPassenger)
+    PhusionPassenger.on_event(:starting_worker_process) do |forked|
+      if forked
+        DirtyLoan.start_thread
+      end
+    end
+  end
+  
+  # change default format to whatever is selected
+  Mfi.first.set_currency_format
 end
 

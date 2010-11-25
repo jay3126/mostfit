@@ -18,11 +18,21 @@ class StaffMember
   has n, :rejected_loans,    :child_key => [:rejected_by_staff_id],    :model => 'Loan'
   has n, :disbursed_loans,   :child_key => [:disbursed_by_staff_id],   :model => 'Loan'
   has n, :written_off_loans, :child_key => [:written_off_by_staff_id], :model => 'Loan'
-
   has n, :payments, :child_key  => [:received_by_staff_id]
+
   belongs_to :user
+
   validates_is_unique :name
   validates_length :name, :min => 3
+
+  def self.search(q, per_page)
+    if /^\d+$/.match(q)
+      all(:conditions => {:id => q}, :limit => per_page)
+    else
+      all(:conditions => ["name like ?", q+'%'], :limit => per_page)
+    end
+  end
+  
   
   def self.from_csv(row, headers)
     user = User.new(:login => row[headers[:name]], :role => :staff_member,

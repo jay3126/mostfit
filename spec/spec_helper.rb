@@ -1,5 +1,5 @@
 require "rubygems"
-
+require "erb"
 # Add the local gems dir if found within the app root; any dependencies loaded
 # hereafter will try to load from the local gems before loading system gems.
 if (local_gem_dir = File.join(File.dirname(__FILE__), '..', 'gems')) && $BUNDLE.nil?
@@ -12,16 +12,21 @@ require "spec" # Satisfies Autotest and anyone else not using the Rake tasks
 # this loads all plugins required in your init file so don't add them
 # here again, Merb will do it for you
 Merb.start_environment(:testing => true, :adapter => 'runner', :environment => ENV['MERB_ENV'] || 'test')
+DataMapper.auto_upgrade!
 
 Spec::Runner.configure do |config|
 #  config.include(Merb::Test::ViewHelper)
   config.include(Merb::Test::RouteHelper)
   config.include(Merb::Test::ControllerHelper)
-
+  
   config.before(:all) do
     DataMapper.auto_migrate! if Merb.orm == :datamapper
+
+    mfi = Mfi.first
+    mfi.accounting_enabled = false
+    mfi.dirty_queue_enabled = false
+    mfi.save
   end
-  
 end
 
 def load_fixtures(*files)
@@ -29,12 +34,12 @@ def load_fixtures(*files)
   files.each do |name|
     klass = Kernel::const_get(name.to_s.singularize.camel_case)
     yml_file =  "spec/fixtures/#{name}.yml"
-    entries = YAML::load_file(Merb.root / yml_file)
+    entries = YAML::load_file(ERB.new(Merb.root / yml_file).result)
     entries.each do |name, entry|
       k = klass::new(entry)
       k.history_disabled = true if k.class == Loan  # do not update the hisotry for loans
       k.client_type = ClientType.first if k.class==Client
-      unless k.save        
+      unless (klass==RuleBook and k.save!) or k.save
         puts "Validation errors saving a #{klass} (##{k.id}):"
         p k.errors
       end
