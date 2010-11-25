@@ -28,11 +28,16 @@ module DataEntry
       end
 
       if request.method == :post
-        bulk_payments_and_disbursals
-        mark_attendance
+        if Date.min_transaction_date > @date or Date.max_transaction_date < @date
+          @errors = ["Transactions attempted are outside allowed dates"]
+        else
+          bulk_payments_and_disbursals
+          mark_attendance
+        end
+
         if @errors.blank?
-          notice = 'All payments made succesfully'
           return_url = params[:return]||url(:data_entry)
+          notice = 'All payments made succesfully'
           if(request.xhr?)
             render("<div class='notice'>#{notice}<div>", :layout => layout?)
           else
@@ -40,8 +45,8 @@ module DataEntry
           end
         elsif params[:format] and params[:format]=="xml"
           display("")
-        else 
-          render      
+        else
+          params[:return] ? redirect(params[:return], :message => {:error => @errors}) : render
         end
       else
         render
@@ -145,13 +150,14 @@ module DataEntry
           @loan = Loan.get(k.to_i)
           @loan.history_disabled = true
           amounts = params[:paid][:loan][k.to_sym].to_f
+          next if amounts<=0
           if params.key?(:payment_type) and params[:payment_type] == "fees"
             @loan.pay_fees(amounts, @date, @staff, session.user)
             next
           end
           @type = params[:payment][:type]
           style = params[:payment_style][k.to_sym].to_sym
-          next if amounts<=0          
+          next if amounts<=0
           @success, @prin, @int, @fees = @loan.repay(amounts, session.user, @date, @staff, false, style)
           if @success
             @loan.history_disabled = false

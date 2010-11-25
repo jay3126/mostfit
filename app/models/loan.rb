@@ -71,6 +71,7 @@ class Loan
   belongs_to :validated_by,   :child_key => [:validated_by_staff_id],     :model => 'StaffMember'
   belongs_to :created_by,     :child_key => [:created_by_user_id],        :model => 'User'
   belongs_to :loan_utilization
+
   has n, :history,                                                        :model => 'LoanHistory'
   has n, :payments
   has n, :audit_trails,       :child_key => [:auditable_id], :auditable_type => "Loan"
@@ -325,7 +326,8 @@ class Loan
     raise "cannot repay a loan that has not been saved" if new?
 
     principal, interest, total, fees_paid = 0, 0, nil, 0
-    if input.is_a? Fixnum  or input.is_a? Float # in case only one amount is specified
+
+    if input.is_a? Fixnum or input.is_a? Float  # in case only one amount is specified
       # interest is paid first, the rest goes in as principal
       # the payment is filed on received_on without knowing about the future
       # it could happen that payment have been made after this payment
@@ -637,17 +639,15 @@ class Loan
   def total_principal_to_be_received; get_scheduled(:total_principal, self.scheduled_maturity_date); end
   def total_interest_to_be_received; get_scheduled(:total_interest, self.scheduled_maturity_date); end
   def total_to_be_received
-    ((total_principal_to_be_received>0 ? total_principal_to_be_received : amount) + total_interest_to_be_received).to_i
+    ((total_principal_to_be_received>0 ? total_principal_to_be_received : amount) + total_interest_to_be_received)
   end
 
-  def scheduled_principal_up_to(date); get_scheduled(:total_principal, date).round(2); end
-  def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date).round(2); end
-  def scheduled_total_up_to(date); (scheduled_principal_up_to(date) + scheduled_interest_up_to(date)).round(2);  end
-
-
-  def scheduled_principal_due_on(date); get_scheduled(:principal, date).round(2); end
-  def scheduled_interest_due_on(date); get_scheduled(:interest, date).round(2); end
-  def scheduled_total_due_on(date); (scheduled_principal_due_on(dqte) + scheduled_interest_due_on(date)).round(2); end
+  def scheduled_principal_up_to(date); get_scheduled(:total_principal, date); end
+  def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date); end
+  def scheduled_total_up_to(date); (scheduled_principal_up_to(date) + scheduled_interest_up_to(date));  end
+  def scheduled_principal_due_on(date); get_scheduled(:principal, date); end
+  def scheduled_interest_due_on(date); get_scheduled(:interest, date); end
+  def scheduled_total_due_on(date); (scheduled_principal_due_on(dqte) + scheduled_interest_due_on(date)); end
   # these 3 methods return scheduled amounts from a LOAN-OUTSTANDING perspective
   # they are purely calculated -- no calls to its payments or loan_history)
   def scheduled_outstanding_principal_on(date)  # typically reimplemented in subclasses
