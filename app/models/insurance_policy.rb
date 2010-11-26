@@ -24,7 +24,8 @@ class InsurancePolicy
   end
 
   def description
-    "#{insurance_product.name}: Rs.#{sum_insured}"
+    product_name = insurance_product ? insurance_product.name : nil
+    product_name ? "#{product_name}: Rs.#{sum_insured}" : "Rs.#{sum_insured}"
   end
 
   private
