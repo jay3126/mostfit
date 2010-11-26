@@ -46,11 +46,11 @@ class Center
     [obj.save, obj]
   end
 
-  def self.search(q)
+  def self.search(q, per_page=10)
     if /^\d+$/.match(q)
-      all(:conditions => ["id = ? or code=?", q, q])
+      all(:conditions => ["id = ? or code=?", q, q], :limit => per_page)
     else
-      all(:conditions => ["code=? or name like ?", q, q+'%'])
+      all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
     end
   end
 
@@ -94,19 +94,23 @@ class Center
       @meeting_days[-1].meeting_day
     end
   end
-
+    
   def next_meeting_date_from(date)
-    meeting_wday = Center.meeting_days.index(meeting_day_for(date+7))
-    next_meeting_date = date - date.wday + meeting_wday
-    next_meeting_date += 7 if next_meeting_date <= date
-    next_meeting_date.holiday_bump
+    number = get_meeting_date(date, :next)
+    if (date + number - get_meeting_date(date + number, :previous)).cweek == (date + number).cweek
+      (date + number + get_meeting_date(date + number, :next)).holiday_bump
+    else
+      (date + number).holiday_bump
+    end
   end
 
   def previous_meeting_date_from(date)
-    meeting_wday = Center.meeting_days.index(meeting_day_for(date-7))
-    previous_meeting_date = date - date.wday + meeting_wday
-    previous_meeting_date -= 7 if previous_meeting_date >= date
-    previous_meeting_date.holiday_bump
+    number = get_meeting_date(date, :previous)
+    if (date - number - get_meeting_date(date - number, :previous)).cweek == (date - number).cweek
+      (date - number - get_meeting_date(date - number, :previous)).holiday_bump
+    else
+      (date - number).holiday_bump
+    end
   end
 
 
@@ -162,7 +166,7 @@ class Center
 
   def handle_meeting_date_change
     self.meeting_day_change_date = parse_date(self.meeting_day_change_date) if self.meeting_day_change_date.class==String and not self.meeting_day_change_date.blank?
-    return unless self.meeting_day_change_date
+    return if not self.meeting_day_change_date or self.meeting_day_change_date.blank?
     date = self.meeting_day_change_date||Date.today
 
     if not CenterMeetingDay.first(:center => self)
@@ -182,7 +186,9 @@ class Center
       end
       CenterMeetingDay.create!(:center_id => self.id, :valid_from => date, :meeting_day => self.meeting_day, :valid_upto => valid_upto)
     end
-    self.clients.loans.each{|l|
+    #clear cache
+    @meeting_days = nil 
+    self.reload.clients.loans.each{|l|
       if [:outstanding, :disbursed].include?(l.status)
         l.update_history
       end
@@ -194,4 +200,25 @@ class Center
   def set_meeting_change_date
     self.meeting_day_change_date = self.creation_date
   end
+
+  def get_meeting_date(date, direction)
+    number = 1
+    if direction == :next
+      nwday = (date + number).wday
+      while nwday != Center.meeting_days.index(meeting_day_for(date + number))
+        number += 1
+        nwday = (date + number).wday
+        nwday = 7 if nwday == 0
+      end
+    else
+      nwday = (date + number).wday
+      while (date - number).wday != Center.meeting_days.index(meeting_day_for(date - number))
+        number += 1
+        nwday = (date - number).wday
+        nwday = 7 if nwday == 0
+      end
+    end
+    return number
+  end
+
 end

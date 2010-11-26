@@ -1,7 +1,7 @@
 class Fee
   include DataMapper::Resource
   
-  PAYABLE = [:loan_applied_on, :loan_approved_on, :loan_disbursal_date, :loan_scheduled_first_payment_date, :loan_first_payment_date, :client_grt_pass_date, :client_date_joined, :loan_installment_dates]
+  PAYABLE = [:loan_applied_on, :loan_approved_on, :loan_disbursal_date, :loan_scheduled_first_payment_date, :loan_first_payment_date, :client_grt_pass_date, :client_date_joined, :loan_installment_dates, :policy_issue_date]
   FeeDue        = Struct.new(:applicable, :paid, :due)
   FeeApplicable = Struct.new(:loan_id, :client_id, :fees_applicable)
   property :id,            Serial
@@ -14,6 +14,7 @@ class Fee
 
   has n, :loan_products, :through => Resource
   has n, :client_types, :through => Resource
+  has n, :insurance_products, :through => Resource
   # anything else will have to be ruby code - sorry
   
   validates_with_method :amount_is_okay
@@ -38,6 +39,10 @@ class Fee
       desc += ", maximum of Rs. #{max_amount}" if max_amount
     end
     desc
+  end
+
+  def Fee.fees_for_insurance_products(fees)
+    fees.select {|fee| fee.payable_on == :policy_issue_date}
   end
 
   def self.payable_dates
@@ -150,6 +155,18 @@ class Fee
       from  = "payments p, fees f"
       where = %Q{
                   p.received_by_staff_id=#{obj.id} and p.type=3 and p.fee_id=f.id
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==LoanProduct
+      from  = "loans l, payments p, fees f"
+      where = %Q{
+                  l.id = p.loan_id and l.loan_product_id = #{obj.id} and l.deleted_at is NULL and p.type=3 and p.fee_id=f.id
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==FundingLine
+      from  = "loans l, payments p, fees f"
+      where = %Q{
+                  l.id = p.loan_id and l.funding_line_id = #{obj.id} and l.deleted_at is NULL and p.type=3 and p.fee_id=f.id
                   and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
                };
     end

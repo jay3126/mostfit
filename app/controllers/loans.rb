@@ -17,7 +17,7 @@ class Loans < Application
   def show(id)
     @loan = Loan.get(id)
     raise NotFound unless @loan
-    @payments = @loan.payments
+    @payments = @loan.payments(:order => [:received_on, :id])
     display [@loan, @payments], 'payments/index'
   end
 
@@ -205,6 +205,13 @@ class Loans < Application
     else
       request.xhr? ? render(@loan.errors.to_a.map{|x| x.join(":")}.join(", "), :layout => false, :status => 400) : render(resource(@loan, :edit))
     end
+  end
+
+  def repair(id)
+    loan = Loan.get(id)
+    raise NotFound unless loan
+    loan.update_history
+    redirect("/loans/#{loan.id}")
   end
 
   private

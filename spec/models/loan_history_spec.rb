@@ -1,43 +1,24 @@
 require File.join( File.dirname(__FILE__), '..', "spec_helper" )
 
 describe LoanHistory do
-
   before(:all) do
-    DataMapper.auto_migrate! if Merb.orm == :datamapper
-    @user = User.new(:id => 234, :login => 'Joey', :password => 'password', :password_confirmation => 'password', :role => :admin)
-    @user.save
-    @user.should be_valid
+    load_fixtures :users, :staff_members, :branches, :funders, :funding_lines
+    $holidays = {}
+    Center.all.destroy
+    CenterMeetingDay.all.destroy
+    @user = User.first
+    @manager = StaffMember.first
+    @funder = Funder.first
+    @funding_line = FundingLine.first
+    @branch = Branch.first
 
-    @manager = StaffMember.new(:name => "Mrs. M.A. Nerger")
-    @manager.save
-    @manager.should be_valid
-
-    @funder = Funder.new(:name => "FWWB", :id => 1)
-    @funder.save
-    @funder.should be_valid
-
-    @funding_line = FundingLine.new(:id => 1, :amount => 10_000_000, :interest_rate => 0.15, :purpose => "for women", :disbursal_date => "2006-02-02", :first_payment_date => "2007-05-05", :last_payment_date => "2009-03-03")
-    @funding_line.funder = @funder
-    @funding_line.save
-    @funding_line.should be_valid
-
-    @branch = Branch.new(:name => "Kerela branch", :id => 1)
-    @branch.manager = @manager
-    @branch.code = "bra"
-    @branch.save
-    @branch.should be_valid
-
-    @center = Center.new(:name => "Munnar hill center", :id => 1)
-    @center.manager = @manager
-    @center.branch  = @branch
-    @center.code = "cen"
+    @center = Center.new(:name => "Munnar hill center", :id => 1, :manager => @manager, :branch => @branch, :code => "cen", :meeting_day => :wednesday)
     @center.save
     @center.should be_valid
     ClientType.create(:type => "Standard")
 
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => 'XW000-2009.01.05', :date_joined => Date.parse('2000-01-01'), 
-                         :client_type => ClientType.first, :created_by => User.first)
-    @client.center  = @center
+                         :client_type => ClientType.first, :created_by => @user, :center => @center)
     @client.save
     @client.errors.each{|e| puts e}
     @client.should be_valid
@@ -59,7 +40,8 @@ describe LoanHistory do
     @loan_product.should be_valid
 
 
-    @loan = Loan.new( :amount => 1000, :interest_rate => 0.2, :installment_frequency => :weekly, :number_of_installments => 25, :scheduled_first_payment_date => "2000-12-06", :applied_on => "2000-02-01", :scheduled_disbursal_date => "2000-06-13")
+    @loan = Loan.new(:amount => 1000, :interest_rate => 0.2, :installment_frequency => :weekly, :number_of_installments => 25, 
+                     :scheduled_first_payment_date => "2000-12-06", :applied_on => "2000-02-01", :scheduled_disbursal_date => "2000-06-13")
     @loan.applied_by       = @manager
     @loan.funding_line     = @funding_line
     @loan.client           = @client
@@ -71,8 +53,10 @@ describe LoanHistory do
     @loan.disbursal_date = @loan.scheduled_disbursal_date
     @loan.disbursed_by = @manager
     @loan.save
+    @loan.history_disabled = false
+    @loan.update_history
     @loan.should be_valid
-    @history = LoanHistory.all(:loan_id => 1)
+    @history = LoanHistory.all(:loan_id => @loan.id)
     @history.should_not be_blank
     @loanhistory = @history.first
     @loanhistory.should_not be_nil
@@ -107,12 +91,12 @@ describe LoanHistory do
   end
 
   it "should not be valid if the combination if loan id and date is not unique" do
-    @loanhistory1=LoanHistory.new(:loan_id=>12345,:date=>"2001-02-02",:scheduled_outstanding_principal=>800,
-                                  :scheduled_outstanding_total=>900,:actual_outstanding_principal=>820,:actual_outstanding_total=>920 ,:status=>:approved)
+    @loanhistory1=LoanHistory.new(:loan_id => 12345, :date => "2001-02-02", :scheduled_outstanding_principal => 800,
+                                  :scheduled_outstanding_total => 900, :actual_outstanding_principal => 820, :actual_outstanding_total => 920 , :status => :approved)
     @loanhistory1.save
-    @loanhistory2=LoanHistory.new(:loan_id=>12345,:date=>"2001-02-02",:scheduled_outstanding_principal=>800,
-                                  :scheduled_outstanding_total=>900,:actual_outstanding_principal=>820,:actual_outstanding_total=>920 ,:status=>:approved)
-    @loanhistory2.save	
+    @loanhistory2=LoanHistory.new(:loan_id => 12345, :date=> "2001-02-02", :scheduled_outstanding_principal => 800,
+                                  :scheduled_outstanding_total => 900, :actual_outstanding_principal => 820, :actual_outstanding_total => 920 ,:status => :approved)
+    @loanhistory2.save
     @loanhistory2.should_not be_valid
   end
 
@@ -120,8 +104,8 @@ describe LoanHistory do
     @loan.save
     begin; @loan.should be_valid; rescue; puts @loan.errors.inspect; end
     @loan.update_history
-    history = LoanHistory.all(:loan_id => 1)
-    history.size.should == 28 # applied_on, approved_on, disbursal_date and 30 installments
+    history = LoanHistory.all(:loan_id => @loan.id)
+    history.size.should == 28 # applied_on, approved_on, disbursal_date and 25 installments
   end
 
   it "should start with the application date, approval date, disbursal date and first payment date" do
@@ -149,5 +133,136 @@ describe LoanHistory do
     @history[27].status.should == :outstanding
   end
 
+
+  it "should give correct number of loans outstanding" do
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_disbursal_date, [:loan]).first.scheduled_outstanding_principal.should == 1000
+    @loan.repay(96, @user, @loan.scheduled_first_payment_date, @manager)
+    data = LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date, [:loan]).first
+    data.scheduled_outstanding_principal.should == 960
+    data.actual_outstanding_principal.should == 912
+    
+    @loan.repay(48, @user, @loan.scheduled_first_payment_date + 7, @manager)
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 7, [:loan]).first.scheduled_outstanding_principal.should == 920
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 7, [:loan]).first.actual_outstanding_principal.should == 872
+
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 14, [:loan]).first.scheduled_outstanding_principal.should == 880
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 14, [:loan]).first.actual_outstanding_principal.should == 872    
+  end
+
+  it "should give correct amount for loans defaulted" do
+    default =  LoanHistory.defaulted_loan_info_by(:loan, @loan.scheduled_first_payment_date + 21).first
+    default.pdiff.should == 32
+    default.tdiff.should == 48
+
+    default =  LoanHistory.defaulted_loan_info_by(:loan, @loan.scheduled_first_payment_date + 28).first
+    default.pdiff.should == 72
+    default.tdiff.should == 96
+
+    default =  LoanHistory.defaulted_loan_info_by(:loan, @loan.scheduled_first_payment_date + 35).first
+    default.pdiff.should == 112
+    default.tdiff.should == 144
+  end
+
+  it "should give correct loans defaulted for" do
+    due = LoanHistory.defaulted_loan_info_for(@loan.client, @loan.scheduled_first_payment_date + 35)
+    due.principal_due.should == 112
+    due.total_due.should == 144
+    
+    @client_2 = Client.new
+    attr    = @client.attributes.dup
+    attr.delete(:id)
+    @client_2.attributes = attr
+    @client_2.reference = @client.reference + "1"
+    @client_2.save
+
+    @loan_2 = Loan.new
+    attr    = @loan.attributes.dup
+    attr.delete(:id)
+    @loan_2.attributes = attr
+    @loan_2.client = @client_2
+    @loan_2.save
+    
+    due = LoanHistory.defaulted_loan_info_for(@center, @loan.scheduled_first_payment_date + 7)
+    due.principal_due.should == 80
+    due.total_due.should == 96
+    
+    due = LoanHistory.defaulted_loan_info_for(@center, @loan.scheduled_first_payment_date + 14)
+    due.principal_due.should == 120
+    due.total_due.should == 144
+
+    due = LoanHistory.defaulted_loan_info_for(@center, @loan.scheduled_first_payment_date + 21)
+    due.principal_due.should == 160 + 32
+    due.total_due.should     == 192 + 48
+
+    due = LoanHistory.defaulted_loan_info_for(@center, @loan.scheduled_first_payment_date + 28)
+    due.principal_due.should == 200 + 72
+    due.total_due.should     == 240 + 96
+
+    @center_2 = Center.new
+    attr      = @center.attributes.dup
+    attr.delete(:id)
+    @center_2.attributes = attr
+    @center_2.code = @center.code + "1"
+    @center_2.save
+
+    @client_3 = Client.new
+    attr    = @client.attributes.dup
+    attr.delete(:id)
+    @client_3.center = @center_2
+    @client_3.attributes = attr
+    @client_3.reference = @client.reference + "2"
+    @client_3.save
+
+    @loan_3 = Loan.new
+    attr    = @loan.attributes.dup
+    attr.delete(:id)
+    @loan_3.attributes = attr
+    @loan_3.client = @client_3
+    @loan_3.save
+    
+    due = LoanHistory.defaulted_loan_info_for(@center, @loan.scheduled_first_payment_date + 28)
+    due.principal_due.should == 200 + 72
+    due.total_due.should     == 240 + 96
+
+    due = LoanHistory.defaulted_loan_info_for(@center_2, @loan.scheduled_first_payment_date + 7)    
+    due.principal_due.should == 2 * 40
+    due.total_due.should     == 2 * 48
+
+    due = LoanHistory.defaulted_loan_info_for(@center_2, @loan.scheduled_first_payment_date + 28)    
+    due.principal_due.should == 5 * 40
+    due.total_due.should     == 5 * 48
+
+    due = LoanHistory.defaulted_loan_info_for(@branch, @loan.scheduled_first_payment_date + 28)
+    due.principal_due.should == 5 * 40 + 272
+    due.total_due.should     == 5 * 48 + 336
+  end
+
+  it "should get correct scheduled outstanding grouped by" do
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date - 7, [:loan]).map{|lh|
+      lh.scheduled_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000
+
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date, [:loan]).map{|lh|
+      lh.scheduled_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000 - 120
+
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 7, [:loan]).map{|lh|
+      lh.scheduled_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000 - 120 -120
+  end
+
+  it "should get correct actual outstanding grouped by" do
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date - 7, [:loan]).map{|lh|
+      lh.actual_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000
+
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date, [:loan]).map{|lh|
+      lh.actual_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000 - 96 + 8
+
+    LoanHistory.sum_outstanding_grouped_by(@loan.scheduled_first_payment_date + 7, [:loan]).map{|lh|
+      lh.actual_outstanding_principal
+    }.reduce(0){|s, x| s+=x}.should == 3000 - 96 + 8 - 40
+  end
 
 end

@@ -33,6 +33,7 @@ class Payment
   belongs_to :created_by,  :child_key => [:created_by_user_id],   :model => 'User'
   belongs_to :received_by, :child_key => [:received_by_staff_id], :model => 'StaffMember'
   belongs_to :deleted_by,  :child_key => [:deleted_by_user_id],   :model => 'User'
+  belongs_to :verified_by,  :child_key => [:verified_by_user_id],        :model => 'User'
 
   validates_present     :created_by, :received_by
   validates_with_method :loan_or_client_present?
@@ -46,6 +47,8 @@ class Payment
   validates_with_method :received_on, :method => :not_received_in_the_future?, :unless => Proc.new{|t| Merb.env=="test"}
   validates_with_method :received_on, :method => :not_received_before_loan_is_disbursed?, :if => Proc.new{|p| (p.type == :principal or p.type == :interest)}
   validates_with_method :principal,   :method => :is_positive?
+  validates_with_method :verified_by_user_id, :method => :verified_cannot_be_deleted, :on => [:destroy]
+  validates_with_method :verified_by_user_id, :method => :verified_cannot_be_deleted, :if => Proc.new{|p| p.deleted_at != nil and p.deleted_by!=nil}
   
   def self.from_csv(row, headers, loans)
     if row[headers[:principal]]
@@ -63,6 +66,10 @@ class Payment
     [obj.save, obj]
   end
 
+  def verified_cannot_be_deleted
+    return true unless verified_by_user_id
+    [false, "Verified payment. Cannot be deleted"]    
+  end
 
   def total
     amount
@@ -110,6 +117,18 @@ class Payment
       from  = "payments p"
       where = %Q{                  
                   p.received_by_staff_id=#{obj.id} and p.type in (#{types.join(',')})
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==LoanProduct
+      from  = "loans l, payments p"
+      where = %Q{                  
+                  l.id = p.loan_id and l.deleted_at is NULL and l.loan_product_id = #{obj.id} and p.type in (#{types.join(',')})
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+    elsif obj.class==FundingLine
+      from  = "loans l, payments p"
+      where = %Q{                  
+                  l.id = p.loan_id and l.deleted_at is NULL and l.funding_line_id = #{obj.id} and p.type in (#{types.join(',')})
                   and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
                };
     end
@@ -227,4 +246,5 @@ class Payment
     return true if amount.blank? ? true : amount >= 0
     [false, "Amount cannot be less than zero"]
   end
+
 end

@@ -38,13 +38,18 @@ class ClientGroup
   end
 
   def sync_clients
+    return unless self.valid?
     Client.all(:client_group_id => self.id).each{|client|
       client.center = self.center
-      if client.save    
-        client.loans.each{|l|
+      client.save_self
+
+      client.loans.each{|l|
+        if [:rejected, :repaid, :written_off, :claim_settlement].include?(l.status)
+          repository.adapter.execute("update loan_history set center_id=#{self.center.id}, client_group_id=#{self.id} where loan_id=#{l.id}")
+        else
           l.update_history
-        }
-      end
+        end
+      }
     }
   end
 
@@ -54,11 +59,11 @@ class ClientGroup
     [obj.save, obj]
   end
 
-  def self.search(q)
+  def self.search(q, per_page=10)
     if /^\d+$/.match(q)
-      all(:conditions => ["id = ? or code=?", q, q])
+      all(:conditions => ["id = ? or code=?", q, q], :limit => per_page)
     else
-      all(:conditions => ["code=? or name like ?", q, q+'%'])
+      all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
     end
   end
 

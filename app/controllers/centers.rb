@@ -13,7 +13,8 @@ class Centers < Application
   end
 
   def list
-    @centers = @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
+    @centers = @centers ? @centers.all(:meeting_day => params[:meeting_day]||Date.today) : @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, 
+                                                                                                                         session.user)
     partial "centers/list", :layout => layout?
   end
 
@@ -109,7 +110,8 @@ class Centers < Application
   def update(id, center)
     @center = Center.get(id)
     raise NotFound unless @center
-    if @center.update_attributes(center)
+    @center.attributes = center
+    if @center.save
       redirect(params[:return]||resource(@center), :message => {:notice => "Center '#{@center.name}' has been successfully edited"})
     else
       display @center, :edit  # error messages will be shown
@@ -187,7 +189,7 @@ class Centers < Application
   
   def grouped_clients
     clients = {}
-    (@clients || @center.clients).each{|c|
+    (@clients ? @clients.all(:center => @center) : @center.clients).each{|c|      
       group_name = c.client_group ? c.client_group.name : "No group"
       clients[group_name]||=[]
       clients[group_name] << c

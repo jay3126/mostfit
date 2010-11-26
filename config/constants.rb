@@ -1,5 +1,5 @@
 DEFAULT_JOURNAL_TYPES = ['Payment','Receipt','Journal']
-INSTALLMENT_FREQUENCIES = [:daily, :weekly, :biweekly, :monthly]
+INSTALLMENT_FREQUENCIES = [:daily, :weekly, :biweekly, :monthly, :quadweekly]
 STATUSES = [:applied_in_future, :pending_approval, :rejected, :approved, :disbursed, :outstanding, :repaid, :written_off, :claim_settlement]
 EPSILON  = 0.001
 INACTIVE_REASONS = ['', 'no_further_loans', 'death_of_client', 'death_of_spouse']
@@ -23,3 +23,6 @@ MASS_ENTRY_FIELDS = {
               :client_type], 
   :loan => [:loan_utilization, :purpose]
 }
+CLEANER_INTERVAL = 120
+FUNDER_ACCESSIBLE_REPORTS = ["ConsolidatedReport", "GroupConsolidatedReport", "StaffConsolidatedReport", "RepaymentOverdue"]
+INFINITY  = 1.0/0

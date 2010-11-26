@@ -1,5 +1,6 @@
 class Account
   include DataMapper::Resource
+  attr_accessor :debit, :credit, :balance, :balance_debit, :balance_credit, :opening_balance_debit, :opening_balance_credit
   before :save, :convert_blank_to_nil
 
   property :id,                     Serial  
@@ -28,7 +29,7 @@ class Account
   validates_present   :gl_code
   validates_length    :name,     :minimum => 3
   validates_length    :gl_code,  :minimum => 3  
-  validates_is_unique :name
+  validates_is_unique :name, :scope => :branch
   validates_is_unique :gl_code
   validates_is_number :opening_balance
   
