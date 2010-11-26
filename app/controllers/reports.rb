@@ -1,7 +1,7 @@
 class Reports < Application
   include DateParser
   Types = {
-    :periodic     => [DailyReport, WeeklyReport], 
+    :periodic     => [DailyReport, WeeklyReport, IncentiveReport], 
     :consolidated => [ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport], 
     :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, GuarantorReport], 
     :targets_and_projections  => [ProjectedReport, TargetReport],
@@ -11,7 +11,7 @@ class Reports < Application
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout 
-
+  
   # provides :xml, :yaml, :js
   def index
     @reports = Report.all
@@ -28,7 +28,7 @@ class Reports < Application
 
     if @report
       display @report
-    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport
+    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport
       #Generating report
       @report   = klass.new(params[class_key], dates, session.user)
       if not params[:submit]
