@@ -4,7 +4,7 @@ class Journal
   include DateParser
   
   before :valid?, :parse_dates
- 
+  
   property :id,             Serial
   property :comment,        String
   property :transaction_id, String, :index => true  
@@ -14,7 +14,7 @@ class Journal
   belongs_to :batch
   belongs_to :journal_type
   has n, :postings
- 
+  
   
   def validity_check
     return false if self.postings.length<2 #minimum one posting for credit n one for debit
@@ -23,6 +23,7 @@ class Journal
     return false if credit_account_postings.nil? or credit_account_postings.length==0 
     return false if (credit_account_postings.map{|x| x.account_id} & debit_account_postings.map{|x| x.account_id}).length > 0
     return false if self.postings.accounts.map{|x| x.branch_id}.uniq.length > 1
+    return false if self.postings.map{|x| x.account_id}.compact.length != self.postings.length
     return true
   end
 
@@ -34,7 +35,7 @@ class Journal
     # credit_accounts => {Account.get(3) => 200}
     # Otherwise we have account object as credit_account & debit_account 
     # and we have a amount key in journal_params which has the amount
-    
+
     status = false
     journal = nil
 
@@ -48,20 +49,20 @@ class Journal
       #debit entries
       if debit_accounts.is_a?(Hash)
         debit_accounts.each{|debit_account, amount|
-          Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => journal_params[:amount].to_i * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => journal_params[:amount].to_i * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       #credit entries
 
       if credit_accounts.is_a?(Hash)
         credit_accounts.each{|credit_account, amount|
-          Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => journal_params[:amount].to_i, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => journal_params[:amount].to_i, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       # Rollback in case of both accounts being the same      
@@ -92,7 +93,9 @@ class Journal
     repository.adapter.query(sql)
   end
   
-# This function will create multiple vouchers 
+
+  
+  # This function will create multiple vouchers 
   def self.xml_tally(hash={})
     xml_file = '/tmp/voucher.xml'
     f = File.open(xml_file,'w')
@@ -140,7 +143,7 @@ class Journal
     f.write(x)
     f.close
   end 
-#this function will create single voucher 
+  #this function will create single voucher 
   def self.voucher(hash={})
     xml_file = '/tmp/single1.xml'
     f = File.open(xml_file,'w')
@@ -206,5 +209,5 @@ class Journal
     } 
     f.write(x)
     f.close
-  end 
+  end   
 end
