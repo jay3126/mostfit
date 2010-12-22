@@ -27,7 +27,6 @@ class Journal
     return true
   end
 
-
   def self.create_transaction(journal_params, debit_accounts, credit_accounts)
     # debit and credit accounts can be either hashes or objects
     # In case of hashes, this is the structure
@@ -35,7 +34,7 @@ class Journal
     # credit_accounts => {Account.get(3) => 200}
     # Otherwise we have account object as credit_account & debit_account 
     # and we have a amount key in journal_params which has the amount
-
+    
     status = false
     journal = nil
 
@@ -47,22 +46,29 @@ class Journal
       amount = journal_params.key?(:amount) ? journal_params[:amount].to_i : nil
 
       #debit entries
-      if debit_accounts.is_a?(Hash)
-        debit_accounts.each{|debit_account, amount|
-          Posting.create(:amount => journal_params[:amount].to_i * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+      if debit_accounts.is_a?(Hash) and not amount
+        debit_accounts.each{|debit_account, debit_amount|
+          Posting.create(:amount => debit_amount * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        }
+      elsif debit_accounts.is_a?(Hash) and amount
+        debit_accounts.each{|debit_account, a|
+          Posting.create(:amount => a * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => journal_params[:amount].to_i * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       #credit entries
-
-      if credit_accounts.is_a?(Hash)
-        credit_accounts.each{|credit_account, amount|
-          Posting.create(:amount => journal_params[:amount].to_i, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+      if credit_accounts.is_a?(Hash) and not amount
+        credit_accounts.each{|credit_account, credit_amount|
+          Posting.create(:amount => credit_amount, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        }
+      elsif credit_accounts.is_a?(Hash) and amount
+        credit_accounts.each{|credit_account, a|
+          Posting.create(:amount => a , :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
-        Posting.create(:amount => journal_params[:amount].to_i, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       # Rollback in case of both accounts being the same      
@@ -73,7 +79,6 @@ class Journal
         status = false
       end
     end
-
     return [status, journal]
   end
   
@@ -92,9 +97,6 @@ class Journal
               }
     repository.adapter.query(sql)
   end
-  
-
-  
   # This function will create multiple vouchers 
   def self.xml_tally(hash={})
     xml_file = '/tmp/voucher.xml'
