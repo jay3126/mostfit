@@ -43,6 +43,12 @@ class Report
                 Branch.all(:order => [:name])
               end
     
+    @account = Account.all(:order => [:name])
+      # if (params and params[:account_id] and not params[:account_id].blank?)
+      #           Account.all(:id => params[:account_id])
+      #         else
+               
+      #         end
     # if the user is staff member or a funder then filter the branches against their managed branches list
     if user and st
       @branch = @branch & [st.centers.branches, st.branches].flatten
@@ -88,7 +94,7 @@ class Report
                                          nil
                                        end)
     }
-    [:late_by_less_than_days, :absent_more_than].each{|key|
+    [:late_by_less_than_days, :absent_more_than, :include_past_data, :include_unapproved_loans].each{|key|
       instance_variable_set("@#{key}", if params and params[key] and params[key].to_i>0
                                          params[key].to_i
                                        else

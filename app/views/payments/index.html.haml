@@ -89,14 +89,14 @@
         %br/
         %span.greytext (scheduled, no payments yet)
       - else
-        = actual_first_payment = @loan.payments.first(:order => [:received_on]).received_on
+        = actual_first_payment = @loan.payments(:type => [:principal, :interest]).min(:received_on)
         %br/
         %span.greytext
           - if actual_first_payment == @loan.scheduled_first_payment_date
             as scheduled
-          - else
+          - elsif actual_first_payment
             = difference_in_days(@loan.scheduled_first_payment_date, actual_first_payment, ['days earlier', 'days later'])
-            then scheduled
+            than scheduled
             == (#{@loan.scheduled_first_payment_date})
       - if @loan.class.to_s.match(/^TakeOver/)
         %br

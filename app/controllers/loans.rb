@@ -1,5 +1,5 @@
 class Loans < Application
-  before :get_context, :exclude => ['redirect_to_show', 'approve', 'disburse', 'reject']
+  before :get_context, :exclude => ['redirect_to_show', 'approve', 'disburse', 'reject', 'write_off_reject', 'write_off_suggested', 'collection_sheet']
   provides :xml, :yaml, :js
 
   def index
@@ -143,6 +143,7 @@ class Loans < Application
   end
 
   def approve
+    debugger
     if request.method == :get
       if params[:center_id]
         @loans_to_approve = @loan.all("client.center" => Center.get(params[:center_id]))
@@ -193,11 +194,95 @@ class Loans < Application
     end
   end
 
+  def write_off_reject
+    if request.method == :post
+      @errors = []
+      @loans = params[:loans].select{|k,v| v[:write_off?] == "on"}.to_hash
+      @loans.keys.each do |id|
+        loan = Loan.get(id)
+        params[:loans][id].delete("write_off?")
+        loan.write_off_rejected_on = params[:loans][id][:written_off_on]
+        loan.write_off_rejected_by_staff_id = params[:loans][id][:written_off_by_staff_id]
+        @errors << loan.errors unless loan.save_self
+      end
+      if @errors.blank?
+        redirect(params[:return]||"/data_entry", :message => {:notice => 'loan write off rejected'})
+      else
+        @loans_to_write_off = Loan.all(:id.in => @loans.keys)
+        @clients =  @loans_to_write_off.clients
+        render
+      end
+    end
+  end
+
+  def write_off(id)
+    if request.method == :post 
+      @loan = Loan.get(id)
+      raise NotFound unless @loan
+      hash = params[@loan.class.to_s.snake_case]
+      if @loan.write_off(hash[:written_off_on], hash[:written_off_by_staff_id])
+        redirect(resource(@branch, @center, @client), :message => {:notice => "Loan was successfully written off"})
+      else
+        render
+      end
+    end
+  end
+  
+  def write_off_suggested
+    if request.method == :get
+      if params[:center_id]
+        @loans_to_write_off = @loan.all("client.center" => Center.get(params[:center_id]))
+      else
+        @loans_to_write_off = Loan.all(:write_off_rejected_on => nil, :written_off_on => nil, 
+                                       :suggested_written_off_on.lte => Date.today).paginate(:page => params[:page], :per_page => 10)
+      end
+      @loans_to_write_off.each {|l| l.clear_cache}
+      @clients =  @loans_to_write_off.clients
+      render
+    else
+      if request.method == :post
+        @errors = []
+        params[:loans].map{|loan_id, data|
+          if (data["write_off?"] == "on")
+            loan = Loan.get(loan_id)
+            next unless loan
+            unless loan = loan.write_off(data[:written_off_on], data[:written_off_by_staff_id])
+              @errors << loan.errors
+            end
+          end
+        }
+        if @errors.length == 0
+          redirect("/data_entry", :message => {:notice => "Loan was successfully written off"})
+        else
+          render
+        end
+      end
+    end
+  end
+    
+  def suggest_write_off(id)
+    if request.method == :post
+      @loan = Loan.get(id)
+      raise NotFound unless @loan
+      hash = params[@loan.class.to_s.snake_case]
+      @loan.suggested_written_off_on = hash[:suggested_written_off_on]
+      @loan.suggested_written_off_by_staff_id = hash[:suggested_written_off_by_staff_id]
+      client = @loan.client
+      center = client.center
+      branch = center.branch
+      if @loan.save_self
+        redirect(resource(branch, center, client), :message => {:notice => "Loan was successfully suggested for written off"})
+      else
+        redirect(resource(branch, center, client), :message => {:notice => "Unable to suggest loan for write off"})
+      end
+    end
+  end
+  
   def misc(id)
     @loan = Loan.get(id)
     request.xhr? ? render(:layout => false) : render
   end
-
+  
   def update_utilization(id)
     @loan =  Loan.get(id)    
     if @loan.update!(:loan_utilization_id => params[:loan][:loan_utilization_id])
@@ -213,6 +298,12 @@ class Loans < Application
     loan.update_history
     redirect("/loans/#{loan.id}")
   end
+
+
+  # def make_loan_utilization
+    
+  #   render
+  # end
 
   private
   def get_context
@@ -244,4 +335,9 @@ class Loans < Application
   def disallow_updation_of_verified_loans
     raise NotPrivileged if @loan.verified_by_user_id and not session.user.admin?
   end
+
+  def collection_sheet
+    render
+  end
+  
 end # Loans

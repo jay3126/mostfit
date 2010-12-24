@@ -35,10 +35,10 @@ module Misfit
       :admin => all_models,
       :mis_manager => all_models_except([:user, :admin]),
       :data_entry => {
-        :all => [:client, :loan, :payment, :document, :client_group, :group, :insurance_company, :insurance_policy],
+        :all => [:client, :loan, :payment, :document, :client_group, :group, :insurance_company, :insurance_policy, :cgt, :grt, :staff_member],
       },
       :staff_member => {
-        :all => [:center, :client, :loan, :payment, :document, :client_group, :group, :comment, :insurance_company, :staff_member]
+        :all => [:center, :client, :loan, :payment, :document, :client_group, :group, :comment, :insurance_company, :staff_member, :location, :branch_diary, :stock_register]
       },
       :funder => {
         :all => []
@@ -53,23 +53,24 @@ module Misfit
       :mis_manager => all_controllers_except([:users, :admin]),
       :data_entry => {
         :all => [:search, :comments, :documents, :"data_entry/client_groups", :"data_entry/payments", :"data_entry/clients",:"data_entry/loans", :"data_entry/index", 
-                :clients, :loans, :client_groups]
+                 :clients, :loans, :client_groups, :cgts, :grts, :staff_members]
       },
       :read_only => {
-        :all => [:searches, :browse, :branches, :centers, :payments, :clients, :loans, :dashboard, :regions, :reports, :documents, :comments, :insurance_policies, 
-                 :insurance_companies, :areas, :staff_members, :loan_products, :holidays, :document_types, :occupations, :client_types, :fees, :funders, :attendances, :dashboard, :graph_data]
+        :all => [:searches, :browse, :branches, :centers, :payments, :clients, :loans, :dashboard, :regions, :reports, :documents, :comments, :insurance_policies, :audit_trails, :info,
+                 :insurance_companies, :areas, :staff_members, :loan_products, :holidays, :document_types, :occupations, :client_types, :fees, :funders, :attendances, :dashboard, :graph_data,
+                :locations, :branch_diaries, :stock_registers]
       },
       :staff_member => {
         :all => [:documents, :searches, :browse, :branches, :centers, :payments, :clients, :client_groups, :groups, :audit_trails, :comments, :insurance_policies, 
-                 :reports, :"data_entry/centers", :"data_entry/client_groups", :"data_entry/payments", :"data_entry/clients", :staff_members, :audit_items,
-                 :"data_entry/loans", :"data_entry/index", :insurance_companies, :info, :dashboard, :graph_data]
+                 :reports, :"data_entry/centers", :"data_entry/client_groups", :"data_entry/payments", :"data_entry/clients", :staff_members, :audit_items, :locations,
+                 :"data_entry/loans", :"data_entry/index", :insurance_companies, :info, :dashboard, :graph_data, :branch_diaries, :stock_registers]
       },
       :funder => {
-        :all => [:searches, :browse, :branches, :centers, :client_groups, :payments, :clients, :loans, :dashboard, :regions, :documents, :comments, :areas, 
+        :all => [:searches, :browse, :branches, :centers, :client_groups, :payments, :clients, :loans, :dashboard, :regions, :documents, :comments, :areas, :info, :locations,
                  :audit_trails, :documents, :attendances, :staff_members, :funders, :portfolios, :funding_lines, :reports, :graph_data, :dashboard]
       },
       :accountant => {
-        :all => [:browse, :branches, :accounts, :journals, :rule_books, :account_types, :accounting_periods, :info, :reports]
+        :all => [:browse, :branches, :accounts, :journals, :rule_books, :account_types, :accounting_periods, :info, :reports, :reports, :dashboard, :graph_data]
       }
     }
 

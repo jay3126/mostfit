@@ -51,7 +51,10 @@ describe Client do
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => 'XW000-2009.01.05', :date_joined => Date.today, 
                          :client_type => @client_type, :created_by => User.first)
     @client.center  = @center
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
+    @client.errors.each{|e| puts e}
     @client.should be_valid
   end
 
@@ -135,8 +138,8 @@ describe Client do
     @client.destroy.should be_true
   end
 
-  it "should not have more than one outstanding loan at a time if so specified"
-
+  it "should not have more than one outstanding loan at a time if so specified" do
+  end
   it "should deal with death of a client" do
     @client.deceased_on = Date.today
   end

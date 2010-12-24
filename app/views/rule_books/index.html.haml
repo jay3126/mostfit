@@ -8,6 +8,12 @@
     %th 
       Action
     %th
+      From date
+    %th
+      To date
+    %th
+      Active
+    %th
       Credit accounts
     %th
       Debit accounts
@@ -23,6 +29,12 @@
         = branch_name
       %td 
         = rule_book.action
+      %td
+        = rule_book.from_date
+      %td
+        = rule_book.to_date
+      %td
+        = rule_book.active
       %td 
         - rule_book.credit_accounts.map do |credit_account|
           =credit_account.name
@@ -36,5 +48,3 @@
 
 = paginate @rule_books
 = link_to 'New', url(:new_rule_book)
-|
-= link_to 'Back', url(:accounts)

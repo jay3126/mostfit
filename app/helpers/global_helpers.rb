@@ -92,27 +92,26 @@ module Merb
       html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
     end
 
-    def date_select(name, date=Date.today, opts={})
+    def date_select(name, date = Date.today, opts={})
       # defaults to Date.today
       # should refactor
       attrs = {}
       attrs.merge!(:name => name)
       attrs.merge!(:date => date)
       attrs.merge!(:id => opts[:id]||name)
-      attrs.merge!(:nullable => (opts.key?(:nullable) ? opts[:nullable] : Mfi.first.date_box_editable))
       attrs.merge!(:date     => date)
       attrs.merge!(:size     => opts[:size]||20)
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
       date_select_html(attrs) 
     end
-
+ 
     def date_select_for(obj, col = nil, attrs = {})
       klass = obj.class
       attrs.merge!(:name => "#{klass.to_s.snake_case}[#{col.to_s}]")
       attrs.merge!(:id   => "#{klass.to_s.snake_case}_#{col.to_s}")
       attrs[:nullable]   = (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable)
-      date = obj.send(col) 
+      date = attrs[:date] || obj.send(col)
       date = Date.today if date.blank? and not attrs[:nullable]
       date = nil        if date.blank? and attrs[:nullable]
       attrs.merge!(:date => date)
@@ -406,7 +405,10 @@ module Merb
         Funder.all
       end).map{|x| [x.id, "#{x.name}"]}
     end
-
+    
+    def get_accessible_accounts
+      Account.all(:order => [:name])
+    end
     def select_mass_entry_field(attrs)
       collection = []
       MASS_ENTRY_FIELDS.keys.each do |model|
@@ -444,6 +446,20 @@ module Merb
         :selected     => attrs[:selected],
         :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
       html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
+    end
+    
+    def approx_address(obj)
+      if obj.class == Center
+        if obj.name.include?(obj.branch.name)
+          obj.name
+        else
+          "#{obj.name}, #{obj.branch.name}, #{obj.branch.area.name}"
+        end
+      elsif obj.respond_to?(:address) and not obj.address.blank?
+        obj.address
+      elsif obj.class == Branch
+        obj.address.blank? ? obj.name : obj.address
+      end
     end
 
     private

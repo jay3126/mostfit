@@ -14,7 +14,8 @@ class Journal
   belongs_to :batch
   belongs_to :journal_type
   has n, :postings
-  
+  has n, :accounts, :through => :postings
+
   
   def validity_check
     return false if self.postings.length<2 #minimum one posting for credit n one for debit
@@ -39,33 +40,26 @@ class Journal
     journal = nil
 
     transaction do |t|
-      journal = Journal.create(:comment => journal_params[:comment], :date => journal_params[:date]||Date.today,
-                               :transaction_id => journal_params[:transaction_id],
-                               :journal_type_id => journal_params[:journal_type_id])
+     
+      journal = Journal.create(:comment => journal_params[:comment], :date => journal_params[:date]||Date.today,:transaction_id => journal_params[:transaction_id],:journal_type_id => journal_params[:journal_type_id])
       
       amount = journal_params.key?(:amount) ? journal_params[:amount].to_i : nil
 
       #debit entries
-      if debit_accounts.is_a?(Hash) and not amount
+      # when a voucher is created manually, debit_accounts and credit_accounts are not hasahes.
+      # TODO: fix this
+      if debit_accounts.is_a?(Hash)
         debit_accounts.each{|debit_account, debit_amount|
-          Posting.create(:amount => debit_amount * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
-        }
-      elsif debit_accounts.is_a?(Hash) and amount
-        debit_accounts.each{|debit_account, a|
-          Posting.create(:amount => a * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => (debit_amount||amount) * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
         Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
       end
       
       #credit entries
-      if credit_accounts.is_a?(Hash) and not amount
+      if credit_accounts.is_a?(Hash)
         credit_accounts.each{|credit_account, credit_amount|
-          Posting.create(:amount => credit_amount, :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
-        }
-      elsif credit_accounts.is_a?(Hash) and amount
-        credit_accounts.each{|credit_account, a|
-          Posting.create(:amount => a , :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => (credit_amount||amount), :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
         }
       else
         Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)

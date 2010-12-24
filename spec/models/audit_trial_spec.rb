@@ -51,6 +51,9 @@ describe AuditTrail do
     old_count = AuditTrail.count
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => 'XW000-2009.01.05', :date_joined => Date.parse('2000-01-01'), 
                          :client_type => ClientType.first, :created_by => @user, :center => Center.first)
+   
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
     @client.errors.each{|e| puts e}
     @client.should be_valid

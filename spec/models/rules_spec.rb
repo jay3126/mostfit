@@ -34,6 +34,8 @@ describe Rules do
                                  :center  => @center, :date_joined => Date.parse('2010-01-01') )
     @c1.created_by_user_id = @branch_manager.id
     @c1.client_group = @cg
+    @c1.gender = 'male'
+    @c1.type_of_id = 'voter_id'
     @c1.save
     @c1.should be_valid
     
@@ -429,6 +431,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c1.created_by_user_id = @branch_manager.id
     c1.client_group = cg
+    c1.gender = 'male'
+    c1.type_of_id = 'voter_id'
     c1.save
     c1.should be_valid
 
@@ -437,6 +441,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c2.created_by_user_id = @branch_manager.id
     c2.client_group = cg
+    c2.gender = 'male'
+    c2.type_of_id = 'voter_id'
     c2.save
     c2.should be_valid
 
@@ -445,6 +451,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c3.created_by_user_id = @branch_manager.id
     c3.client_group = cg
+    c3.gender = 'male'
+    c3.type_of_id = 'voter_id'
     c3.save
     c3.should be_valid
 
@@ -453,6 +461,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c4.created_by_user_id = @branch_manager.id
     c4.client_group = cg
+    c4.gender = 'male'
+    c4.type_of_id = 'voter_id'
     c4.save
     c4.should be_valid
 
@@ -461,6 +471,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c5.created_by_user_id = @branch_manager.id
     c5.client_group = cg
+    c5.gender = 'male'
+    c5.type_of_id = 'voter_id'
     c5.save
     c5.should_not be_valid
 
@@ -469,6 +481,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c6.created_by_user_id = @branch_manager.id
     c6.client_group = cg
+    c6.gender = 'male'
+    c6.type_of_id = 'voter_id'
     c6.save
     c6.should_not be_valid
 
@@ -498,6 +512,8 @@ describe Rules do
                                 :center  => @center, :date_joined => Date.parse('2010-01-01') )
     c2.created_by_user_id = @branch_manager.id
     c2.client_group = cg
+    c2.gender = 'male'
+    c2.type_of_id = 'voter_id'
     c2.save
     c2.should be_valid
     
@@ -594,6 +610,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c1.created_by_user_id = branch_manager.id
+    c1.gender = 'male'
+    c1.type_of_id = 'voter_id'
     c1.save
     c1.should be_valid
 
@@ -601,6 +619,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c2.created_by_user_id = branch_manager.id
+    c2.gender = 'male'
+    c2.type_of_id = 'voter_id'
     c2.save
     c2.should_not be_valid
 
@@ -608,6 +628,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c3.created_by_user_id = branch_manager.id
+    c3.gender = 'male'
+    c3.type_of_id = 'voter_id'
     c3.save
     c3.should_not be_valid
 
@@ -615,6 +637,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center2, :date_joined => Date.parse('2010-01-01') )
     c4.created_by_user_id = branch_manager.id
+    c4.gender = 'male'
+    c4.type_of_id = 'voter_id'
     c4.save
     c4.should be_valid
 
@@ -622,6 +646,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center2, :date_joined => Date.parse('2010-01-01') )
     c5.created_by_user_id = branch_manager.id
+    c5.gender = 'male'
+    c5.type_of_id = 'voter_id'
     c5.save
     c5.should be_valid
     
@@ -629,6 +655,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center2, :date_joined => Date.parse('2010-01-01') )
     c6.created_by_user_id = branch_manager.id
+    c6.gender = 'male'
+    c6.type_of_id = 'voter_id'
     c6.save
     c6.should be_valid
 
@@ -799,6 +827,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c1.created_by_user_id = branch_manager.id
+    c1.gender = 'male'
+    c1.type_of_id = 'voter_id'
     c1.save
     c1.should be_valid
 
@@ -806,6 +836,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c2.created_by_user_id = branch_manager.id
+    c2.gender = 'male'
+    c2.type_of_id = 'voter_id'
     c2.save
     c2.should be_valid
 
@@ -813,6 +845,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c3.created_by_user_id = branch_manager.id
+    c3.gender = 'male'
+    c3.type_of_id = 'voter_id'
     c3.save
     c3.should be_valid
 
@@ -820,6 +854,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center1, :date_joined => Date.parse('2010-01-01') )
     c4.created_by_user_id = branch_manager.id
+    c4.gender = 'male'
+    c4.type_of_id = 'voter_id'
     c4.save
     c4.should be_valid
 
@@ -827,6 +863,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center2, :date_joined => Date.parse('2010-01-01') )
     c5.created_by_user_id = branch_manager.id
+    c5.gender = 'male'
+    c5.type_of_id = 'voter_id'
     c5.save
     c5.should_not be_valid
 
@@ -834,6 +872,8 @@ describe Rules do
                                 :client_type => ClientType.create(:type => "Standard"),
                                 :center  => center2, :date_joined => Date.parse('2010-01-01') )
     c6.created_by_user_id = branch_manager.id
+    c6.gender = 'male'
+    c6.type_of_id = 'voter_id'
     c6.save
     c6.should_not be_valid
 

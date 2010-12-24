@@ -330,6 +330,19 @@ class LoanHistory
     repository.adapter.query("SELECT #{selects} FROM #{froms.join(', ')} WHERE #{conditions.join(' AND ')}")
   end
   
+  def self.payment_due_by_center(date, hash)
+    hash[:date.lt] = Date.new(2010, 12, 31)
+    last_due_dates_query = LoanHistory.all(hash).aggregate(:center_id, :date.max).map{|x| "(#{x[0]}, '#{x[1].strftime('%Y-%m-%d')}')"}.join(", ")
+    return [] if last_due_dates_query.length==0
+
+    repository.adapter.query(%Q{
+      SELECT SUM(lh.principal_due) principal_due, SUM(lh.interest_due) interest_due, branch_id, center_id
+      FROM loan_history lh, loans l
+      WHERE (lh.center_id, lh.date) in (#{last_due_dates_query}) AND lh.status in (5,6) AND lh.loan_id=l.id AND l.deleted_at is NULL
+      GROUP BY center_id
+    })
+  end
+
   private
   def self.get_class_of(obj)
     if [Array, DataMapper::Associations::OneToMany::Collection, DataMapper::Associations::ManyToMany::Collection, DataMapper::Collection].include?(obj.class)
@@ -452,4 +465,38 @@ class LoanHistory
     end
     group_by.gsub("date_id", "date")
   end
+
+
+
+    def self.loan_repaid_count(obj,from_date, to_date)
+ 
+    if obj.class == Branch 
+      from  = "branches b, centers c, clients cl, loans l, loan_history lh"
+      
+      where = %Q{
+                  lh.status = 7 AND lh.date >= #{from_date.strftime('%Y-%m-%d')} AND  lh.date <= #{to_date.strftime('%Y-%m-%d')} AND lh.loan_id = l.id AND l.client_id = cl.id AND cl.center_id = c.id AND c.branch_id = #{obj.id}
+                };
+      
+    elsif obj.class == Center
+       from  = "centers c, clients cl,loans l, loan_history lh"
+     
+     # status = STATUSES.index(:repaid) + 1
+      where = %Q{
+               lh.status = 'status' AND lh.date >= #{from_date.strftime('%Y-%m-%d')} AND  lh.date <= #{to_date.strftime('%Y-%m-%d')} AND lh.loan_id = l.id AND l.client_id =cl.id AND cl.center_id = #{obj.id} 
+                };
+
+    elsif obj.class == StaffMember
+       from  = "loans l, loan_history lh, staff_members sm"
+       where = %Q{
+               lh.status = 'status' AND lh.date >= #{from_date.strftime('%Y-%m-%d')} AND  lh.date <= #{to_date.strftime('%Y-%m-%d')} AND lh.loan_id = l.id AND l.disbursed_by_staff_id = #{obj.id} AND sm.id = #{obj.id} 
+                };
+
+    end
+    repository.adapter.query(%Q{
+                             SELECT COUNT(DISTINCT(lh.loan_id))loan_count
+                             FROM #{from}
+                             WHERE #{where}
+                           })
+  end
+
 end

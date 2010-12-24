@@ -27,6 +27,8 @@ describe Attendance do
 
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => 'XW000-2009.01.05', :date_joined => '2008-01-01', :created_by => @user, :client_type => @client_type)
     @client.center  = @center
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
     @client.errors.each {|e| puts e}
     @client.should be_valid

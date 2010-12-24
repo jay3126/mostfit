@@ -95,9 +95,9 @@ class Center
     end
   end
     
-  def next_meeting_date_from(date)
+  def next_meeting_date_from(date)    
     number = get_meeting_date(date, :next)
-    if (date + number - get_meeting_date(date + number, :previous)).cweek == (date + number).cweek
+    if meeting_day != :none and (date + number - get_meeting_date(date + number, :previous)).cweek == (date + number).cweek
       (date + number + get_meeting_date(date + number, :next)).holiday_bump
     else
       (date + number).holiday_bump
@@ -106,7 +106,7 @@ class Center
 
   def previous_meeting_date_from(date)
     number = get_meeting_date(date, :previous)
-    if (date - number - get_meeting_date(date - number, :previous)).cweek == (date - number).cweek
+    if meeting_day != :none and (date - number - get_meeting_date(date - number, :previous)).cweek == (date - number).cweek
       (date - number - get_meeting_date(date - number, :previous)).holiday_bump
     else
       (date - number).holiday_bump
@@ -149,6 +149,21 @@ class Center
       client.make_center_leader
     end
   end
+
+  def location
+    Location.first(:parent_id => self.id, :parent_type => "center")
+  end
+  
+  def self.meeting_today(date=Date.today, user=nil)
+    user = User.first
+    center_ids = LoanHistory.all(:date => date).map{|x| x.center_id}.uniq
+    # restrict branch manager and center managers to their own branches
+    if user.role==:staff_member
+      st = user.staff_member
+      center_ids = ([st.branches.centers.map{|x| x.id}, st.centers.map{|x| x.id}].flatten.compact) & center_ids
+    end
+    Center.all(:id => center_ids)
+  end
   
   private
   def hours_valid?
@@ -188,7 +203,7 @@ class Center
     end
     #clear cache
     @meeting_days = nil 
-    self.reload.clients.loans.each{|l|
+    Center.get(self.id).clients(:fields => [:id, :center_id]).loans.each{|l|
       if [:outstanding, :disbursed].include?(l.status)
         l.update_history
       end
@@ -202,6 +217,7 @@ class Center
   end
 
   def get_meeting_date(date, direction)
+    return 1 if meeting_day == :none
     number = 1
     if direction == :next
       nwday = (date + number).wday

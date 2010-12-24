@@ -155,40 +155,11 @@ h1.logo span{
   font-size: 13px;
 }
 
-/*.box
-{
-  margin-bottom: 15px;
-}
-.box-narrowed
+.box
 {
   padding-left: 10px;
   padding-right: 10px;
 }
-.box-title
-{
-  background: url(../images/home-header-bg.gif) 0 0 repeat-x #003568;
-  padding: 3px 5px 2px 5px;
-}
-.box-title h1, .box-title h2, .box-title h3
-{
-  margin: 0px;
-  color: #fff;
-  padding: 0px;
-}
-.box-title h1 {  font-size: 150%; padding: 5px; }  
-.box-title h2 {  font-size: 118%; padding: 5px; }
-.box-title h3 {  font-size: 110%; }
-
-.box-content
-{
-  padding: 3px 5px 0px 5px;
-border: 1px solid #8c9292;
-}
-.box-content.topless
-{
-  border-top: 0px;
-}*/
-
 #content h1{
   font-size: 200%;
 }
@@ -451,7 +422,7 @@ a.button:visited {
 
 #header_search_div {
     position: absolute; 
-    right: 10%;
+    right: -4%;
     padding: 3px;
     padding-bottom: 0px;    
     vertical-align: top;
@@ -460,6 +431,9 @@ a.button:visited {
 #header_search_div input{
     font-size: 1.5em;
     border: 1px solid #75b516;
+}
+#header_search_div input:first{
+    width: 100px;
 }
 
 div.log_box{
@@ -478,23 +452,20 @@ table#data_entry_index tr td{
 table#data_entry_index tr td img{
     padding-left: 2em;   
 }
-
-
 #darkenBackground {
-background-color: rgb(0, 0, 0);
-opacity: 0.7; /* Safari, Opera */
--moz-opacity:0.70; /* FireFox */
-filter: alpha(opacity=70); /* IE */
-z-index: 20;
-height: 100%;
-width: 100%;
-background-repeat:repeat;
-position:fixed;
-top: 0px;
-left: 0px;
-display: none;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.7; /* Safari, Opera */
+    -moz-opacity:0.70; /* FireFox */
+    filter: alpha(opacity=70); /* IE */
+    z-index: 20;
+    height: 100%;
+    width: 100%;
+    background-repeat:repeat;
+    position:fixed;
+    top: 0px;
+    left: 0px;
+    display: none;
 }
-
 #loading {
   width:66%;
   position: relative;
@@ -970,64 +941,53 @@ span.branchName{
 }
 ul#tree li{
     margin-bottom: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 10px
 }
 ul#tree li ul{
     margin-top: 10px;
 }
-ul#tree li span.spacer1{
-    position: absolute;
-    margin-left: 100px;
+ul#tree li span{
     padding-bottom: 10px;
+    position: absolute;
+}
+ul#tree li span{
+    margin-left: 20px;
+    margin-bottom: 5px;
+}
+ul#tree li span.spacer1{
+    width: 200px;
 }
 ul#tree li span.spacer2{
-    position: absolute;
-    margin-left: 350px;
-    padding-bottom: 10px;
+    left: 400px;
 }
 ul#tree li span.spacer2a{
-    position: absolute;
-    margin-left: 300px;
-    padding-bottom: 10px;
+    left: 350px;
 }
 ul#tree li span.spacer2b{
-    position: absolute;
-    margin-left: 400px;
-    padding-bottom: 10px;
+    left: 450px;
 }
 ul#tree li span.spacer3{
-    position: absolute;
-    margin-left: 600px;
-    padding-bottom: 10px;
+    left: 600px;
 }
 ul#tree li span.spacer3a{
-    position: absolute;
-    margin-left: 550px;
-    padding-bottom: 10px;
+    left: 550px;
 }
 ul#tree li span.spacer3b{
-    position: absolute;
-    margin-left: 650px;
-    padding-bottom: 10px;
+    left: 650px;
 }
 ul#tree li span.spacer4{
-    position: absolute;
-    margin-left: 800px;
-    padding-bottom: 10px;
+    left: 800px;
 }
 ul#tree li span.spacer4a{
-    position: absolute;
-    margin-left: 750px;
-    padding-bottom: 10px;
+    left: 750px;
 }
 ul#tree li span.spacer4b{
-    position: absolute;
-    margin-left: 850px;
-    padding-bottom: 10px;
+    left: 850px;
 }
 ul#tree li span.spacer5{
-    position: absolute;
     margin-left: 800px;
-    padding-bottom: 10px;
+}
+.infobox{
+    overflow-x: none;
+    height: 80px;
 }

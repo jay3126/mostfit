@@ -43,6 +43,8 @@ describe Loan do
     @client.date_joined = Date.parse('2006-01-01')
     @client.created_by_user_id = 1
     @client.client_type_id = 1
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
     @client.errors.each {|e| puts e}
     @client.should be_valid
@@ -63,6 +65,7 @@ describe Loan do
     @loan_product.errors.each {|e| puts e}
     @loan_product.should be_valid
   end
+
   before(:each) do
     @loan = Loan.new(:amount => 1000, :interest_rate => 0.2, :installment_frequency => :weekly, :number_of_installments => 25, :scheduled_first_payment_date => "2000-12-06", :applied_on => "2000-02-01", :scheduled_disbursal_date => "2000-06-13")
     @loan.history_disabled = true
@@ -256,7 +259,6 @@ describe Loan do
   end
   it "should not be valid if scheduled disbursal date and scheduled first payment date are not center meeting dates" do
   end
-
 
 
   it ".shift_date_by_installments should shift dates properly, even odd ones.. and backwards." do
@@ -574,17 +576,73 @@ describe Loan do
     @loan.save
     @loan.should be_valid
 
-    @center.meeting_day_change_date = Date.new(2001, 02, 1)
+    @center.meeting_day_change_date = Date.new(2001, 01, 26)
     @center.meeting_day = :thursday
     @center.save
     @center = Center.get(@center.id)
+    @center.meeting_day_for(Date.new(2001, 01, 25)).should eql(:wednesday)
+    @center.meeting_day_for(Date.new(2001, 02, 2)).should eql(:thursday)
+    @center.meeting_day_for(Date.new(2001, 02, 27)).should eql(:thursday)
+    @center.meeting_day_for(Date.new(2001, 01, 24)).should eql(:wednesday)
 
-    @center.meeting_day_for(Date.new(2001, 01, 31)).should eql(:wednesday)
+    @center.next_meeting_date_from(Date.new(2001, 01, 24)).should eql(Date.new(2001, 02, 1))
+    @center.previous_meeting_date_from(Date.new(2001, 02, 1)).should eql(Date.new(2001, 01, 24))
+
+    @center.next_meeting_date_from(Date.new(2001, 02, 1)).should eql(Date.new(2001, 02, 8))
+    @center.previous_meeting_date_from(Date.new(2001, 02, 8)).should eql(Date.new(2001, 02, 01))
+
     @center.meeting_day_for(Date.new(2001, 02, 2)).should eql(:thursday)
 
     @loan = Loan.get(@loan.id)
     new_dates =  @loan.installment_dates
-    (old_dates.find_all{|x| x<=Date.new(2001, 01, 31)} - new_dates.find_all{|x| x<=Date.new(2001, 01, 31)}).length.should eql(0)
-    (old_dates.find_all{|x| x>Date.new(2001, 01, 31)} - new_dates.find_all{|x| x>Date.new(2001, 01, 31)}.map{|x| x-1}).length.should eql(0)
+    (old_dates.find_all{|x| x <= Date.new(2001, 01, 26)} - new_dates.find_all{|x| x <= Date.new(2001, 01, 26)}).length.should eql(0)
+    (old_dates.find_all{|x| x >  Date.new(2001, 01, 26)} - new_dates.find_all{|x| x >  Date.new(2001, 01, 26)}.map{|x| x-1}).length.should eql(0)
+
+    @loan_product.loan_validation_methods = ""
+    @loan_product.save
+  end
+
+  it "should change with center meeting date change" do
+    @loan_product.loan_validation_methods = "scheduled_dates_must_be_center_meeting_days"
+    @loan_product.save
+    @center.center_meeting_days.destroy!
+    @center = Center.get(@center.id)
+    @center.meeting_day_change_date = Date.new(2000, 1, 1)
+    @center.meeting_day = :wednesday
+    @center.save
+
+    @loan_product.loan_validation_methods = "scheduled_dates_must_be_center_meeting_days"
+    @loan_product.save
+    @loan = Loan.new(:amount => 1000, :interest_rate => 0.2, :installment_frequency => :weekly, :number_of_installments => 25, :scheduled_first_payment_date => "2000-12-06", 
+                     :applied_on => "2000-02-01", :scheduled_disbursal_date => "2000-06-14", :applied_by => @manager, :client => Client.get(@client.id), :funding_line => @funding_line, 
+                     :loan_product => @loan_product, :approved_by => @manager, :approved_on => "2000-02-03")
+    old_dates = @loan.installment_dates
+    @loan.save
+    unless @loan.valid?
+      p @loan.errors
+    end
+    @loan.should be_valid
+    
+    @center.meeting_day_change_date = Date.new(2001, 01, 27)
+    @center.meeting_day = :tuesday
+    @center.save
+    @center = Center.get(@center.id)
+    @center.meeting_day_for(Date.new(2001, 01, 24)).should eql(:wednesday)
+    @center.meeting_day_for(Date.new(2001, 01, 26)).should eql(:wednesday)
+    @center.meeting_day_for(Date.new(2001, 01, 28)).should eql(:tuesday)
+    @center.meeting_day_for(Date.new(2001, 01, 30)).should eql(:tuesday)
+
+
+    @center.next_meeting_date_from(Date.new(2001, 01, 24)).should eql(Date.new(2001, 01, 30))
+    @center.previous_meeting_date_from(Date.new(2001, 01, 30)).should eql(Date.new(2001, 01, 24))
+
+    @center.next_meeting_date_from(Date.new(2001, 01, 30)).should eql(Date.new(2001, 02, 6))
+    @center.previous_meeting_date_from(Date.new(2001, 02, 6)).should eql(Date.new(2001, 01, 30))
+
+    @loan = Loan.get(@loan.id)
+    new_dates =  @loan.installment_dates
+
+    (old_dates.find_all{|x| x <= Date.new(2001, 01, 26)} - new_dates.find_all{|x| x <= Date.new(2001, 01, 26)}).length.should eql(0)
+    (old_dates.find_all{|x| x >  Date.new(2001, 01, 26)} - new_dates.find_all{|x| x >  Date.new(2001, 01, 26)}.map{|x| x + 1}).length.should eql(0)
   end
 end

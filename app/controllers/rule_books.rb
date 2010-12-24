@@ -3,7 +3,7 @@ class RuleBooks < Application
 
   def index
     @rule_books = RuleBook.all.paginate(:page =>params[:page],:per_page => 5)
-    display @rule_books
+    display @rule_books, :layout => layout?
   end
 
   def show(id)
@@ -28,14 +28,9 @@ class RuleBooks < Application
   def create(rule_book)
     rule_book, credit_accounts, debit_accounts = get_credit_and_debit_accounts(rule_book)
     @rule_book = RuleBook.new(rule_book)
-
-    credit_accounts.each{|ca| 
-      @rule_book.credit_account_rules << CreditAccountRule.new(:credit_account => ca[:account], :percentage => ca[:percentage])
-    }
-    
-    debit_accounts.each{|da| 
-      @rule_book.debit_account_rules  << DebitAccountRule.new(:debit_account => da[:account], :percentage => da[:percentage])
-    }
+    @rule_book.created_by_user_id = session.user.id
+    credit_accounts.each{|ca| @rule_book.credit_account_rules << CreditAccountRule.new(:credit_account => ca[:account], :percentage => ca[:percentage])}
+    debit_accounts.each{|da|  @rule_book.debit_account_rules  << DebitAccountRule.new(:debit_account => da[:account], :percentage => da[:percentage])}
 
     if @rule_book.save
       redirect resource(:rule_books), :message => {:notice => "RuleBook was successfully created"}
@@ -50,6 +45,7 @@ class RuleBooks < Application
     @rule_book = RuleBook.get(id)
     raise NotFound unless @rule_book
     RuleBook.transaction do
+      @rule_book.updated_by_user_id = session.user.id
       @rule_book.attributes = rule_book
       @rule_book.credit_accounts, @rule_book.debit_accounts = [], []
       @rule_book.credit_account_rules , @rule_book.debit_account_rules = [], []

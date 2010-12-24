@@ -39,6 +39,8 @@ describe Fee do
 
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => Time.now.to_s, :created_by => @user, :date_joined => Date.parse('2006-01-01'),
                          :client_type => ClientType.create(:type => "Standard"), :center => @center)
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
     @client.errors.each {|e| puts e}
     @client.should be_valid
@@ -212,6 +214,8 @@ describe Fee do
 
     @client = Client.new(:name => 'Ramesh bhai', :reference => "foo132431", :created_by => @user, :date_joined => Date.parse('2006-01-01'),
                          :client_type => ct, :center => @center, :grt_pass_date => Date.today)
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
 
     @client.fee_schedule.should == {@client.date_joined => {@fee1 => 20}, Date.today => {@fee2 => 10}}
