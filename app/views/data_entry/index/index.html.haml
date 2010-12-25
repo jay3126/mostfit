@@ -56,7 +56,3 @@
           %br
           - cl = Client.all(:active => false).size
           = link_to ("Inactive Clients(#{cl})", url(:client_actions,:action => 'inactive_client_count'), :class => 'edit_small')
-        - if thing == :center
-          %br
-          = link_to_with_rights("Loan Utilization", url(:enter_loans,:action => 'make_loan_utilization'), :class => 'edit_small')
-          
