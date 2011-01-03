@@ -1,0 +1,32 @@
+
+- if @center
+  %h2 
+    Center: 
+    = @center.name
+  %table.form
+    - @center.clients.each do |client|
+      %tr
+        %td &nbsp;
+        %td
+          %b= client.name
+        %td
+          = client.reference          
+        %td
+          - client.guarantors.each do |x|
+            = x.name
+        %td
+          %b= link_to 'add guarantor', resource(client, :guarantors, :new)
+- else
+  %h1 Add Guarantor
+  %p
+    Please select a center to add gurantor for clients in that center
+  %table.form
+    = form_for(@client, :action => url(:enter_clients, :action => 'add_guarantor'), :method => :get) do
+      %tr
+        %td &nbsp;
+        %td
+          Center:
+        %td
+          = select_center_for Client.new, :center
+        %td
+          = submit "Proceed..."

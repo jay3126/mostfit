@@ -25,7 +25,6 @@
           = link_to "By Staff Member", url("enter_#{plural}".to_sym, :action => 'by_staff_member'), :class => 'add_small'
           %br
           = link_to "Delete a repayment <br/>", url("enter_#{plural}".to_sym, :action => 'delete'), :class => 'add_small' 
-          = link_to_with_rights("Collection sheet<br/>", url(:enter_payments,:action => 'staff_collection_sheet'), :class => 'edit_small')
               
         - else
           = link_to_with_rights "Add new #{thing.to_s}", url("enter_#{plural}".to_sym, :action => 'new'), :class => 'add_small'
@@ -42,10 +41,8 @@
           - sg = Loan.all(:write_off_rejected_on => nil, :written_off_on => nil, :suggested_written_off_on.lte => Date.today).size
           = link_to_with_rights("Write Off Loans (#{sg})<br/>", url(:loan_actions, :action => 'write_off_suggested'), :class => 'edit_small')
                 
-          = link_to_with_rights("Disbursement Sheet <br/>", url(:enter_loans,:action => 'staff_disbursement_sheet'), :class => 'edit_small')
         - @i += 1
       
         - if thing == :client
           %br
-          - cl = Client.all(:active => false).size
-          = link_to ("Inactive Clients(#{cl})", url(:client_actions,:action => 'inactive_client_count'), :class => 'edit_small')
+          = link_to ("Add Guarantors", url(:enter_clients, :action => 'add_guarantor'), :class => 'edit_small')

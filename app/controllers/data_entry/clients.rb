@@ -25,5 +25,16 @@ module DataEntry
         display([], "clients/search")
       end
     end
-  end  
+    
+    def add_guarantor
+      
+      if params[:client] and params[:client][:center_id]
+        @center  = Center.get(params[:client][:center_id])
+        display([@center], "clients/add_guarantor_by_center")
+      else
+        display([], "clients/add_guarantor_by_center")
+      end
+    end
+    
+  end
 end
