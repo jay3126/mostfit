@@ -94,8 +94,8 @@ class Journal
   # This function will create multiple vouchers 
   def self.xml_tally(hash={})
     xml_file = '/tmp/voucher.xml'
-    f = File.open(xml_file,'w')
-    x = Builder::XmlMarkup.new(:indent => 1)
+    f = File.open(xml_file,"w")
+    x = Builder::XmlMarkup.new(:target => f,:indent => 1)
     x.ENVELOPE{
       x.HEADER {    
         x.VERSION "1"
@@ -136,14 +136,13 @@ class Journal
         }
       }
     } 
-    f.write(x)
     f.close
   end 
   #this function will create single voucher 
   def self.voucher(hash={})
     xml_file = '/tmp/single1.xml'
-    f = File.open(xml_file,'w')
-    x = Builder::XmlMarkup.new(:indent => 1)
+    f = File.open(xml_file,"w")
+    x = Builder::XmlMarkup.new(:target => f,:indent => 1)
     x.ENVELOPE{
       x.HEADER {    
         x.VERSION "1"
@@ -203,7 +202,6 @@ class Journal
         }
       }
     } 
-    f.write(x)
     f.close
   end   
 end
