@@ -35,12 +35,12 @@
       %td Center leader
       - leader = @center.leader
       %td=leader.client.name if leader
-    - if total_attendance_at_branch = Attendance.count("client.center_id" => @center.id) and total_attendance_at_branch > 0
+    - if total_attendance_at_center = Attendance.count("client.center_id" => @center.id) and total_attendance_at_center > 0
       %tr
         %td
           Attendance
         %td
-          = (Attendance.count("client.center_id" => @center.id, :status => "present") * 100.0 / total_attendance_at_branch).round(2)
+          = ((total_attendance_at_center - Attendance.count("client.center_id" => @center.id, :status => "absent")) * 100.0 / total_attendance_at_center).round(2)
           = "%"
 
   %p

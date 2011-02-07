@@ -63,7 +63,7 @@
         %td
           Attendance
         %td
-          = (Attendance.count("client_id" => @client.id, :status => "present") * 100.0 / total_attendance_client).round(2)
+          = ((total_attendance_client - Attendance.count("client_id" => @client.id, :status => "absent")) * 100.0 / total_attendance_client).round(2)
           = "%"
 
   %p

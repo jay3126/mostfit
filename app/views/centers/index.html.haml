@@ -34,7 +34,7 @@
         %td
           Attendance
         %td
-          = (Attendance.count("client.center.branch_id" => @branch.id, :status => "present") * 100.0 / total_attendance_at_branch).round(2)
+          = ((total_attendance_at_branch - Attendance.count("client.center.branch_id" => @branch.id, :status => "absent")) * 100.0 / total_attendance_at_branch).round(2)
           = "%"
   %p
     = link_to_with_rights 'edit this branch\'s details ', resource(@branch, :edit), :class => "edit"
