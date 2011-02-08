@@ -41,29 +41,35 @@ class Mfi
   property :map_enabled, Boolean, :default => false, :index => true
   property :branch_diary_enabled, Boolean, :default => false, :index => true
   property :stock_register_enabled, Boolean, :default => false, :index => true
+  property :asset_register_enabled, Boolean, :default => false, :index => true
 
-  property :currency_format,  String, :nullable => true, :length => 20
+  property :currency_format,  String,  :nullable => true, :length => 20
+  property :session_expiry,   Integer, :nullable => true, :min => 60, :max => 86400
+  property :password_change_in, Integer, :nullable => true
 
   property :main_text, Text, :nullable => true, :lazy => true
   validates_length :name, :min => 0, :max => 20
   before :valid?, :save_image
-  #after :save, :set_currency_format
   
   def self.first
     if $globals and $globals[:mfi_details] and $globals[:mfi_details].fetched==Date.today
       $globals[:mfi_details]
-    elsif File.exists?(File.join(Merb.root, "config", "mfi.yml"))
-      mfi = Mfi.new(YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml"))))
+    else
+      mfi = if File.exists?(File.join(Merb.root, "config", "mfi.yml"))
+              Mfi.new(YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml"))))
+            else
+              Mfi.new(:name => "Mostfit", :fetched => Date.today)  
+            end
       mfi.fetched = Date.today
-      $globals ||= {}      
+      $globals ||= {}
       $globals[:mfi_details] = mfi
-      Misfit::Config::DateFormat.compile
-      return mfi
-    else      
-      mfi = Mfi.new(:name => "Mostfit", :fetched => Date.today)
-      Misfit::Config::DateFormat.compile
       return mfi
     end
+  end
+  
+  def self.activate
+    mfi = Mfi.first
+    mfi.set_variables
   end
   
   def save
@@ -73,10 +79,8 @@ class Mfi
     File.open(File.join(Merb.root, "config", "mfi.yml"), "w"){|f|
       f.puts self.to_yaml
     }
-    FileUtils.touch(File.join(Merb.root, "tmp", "restart.txt"))
-    Misfit::Config::DateFormat.compile
-    set_currency_format
-    DirtyLoan.start_thread
+    FileUtils.touch(File.join(Merb.root, "tmp", "restart.txt"))    
+    Mfi.activate
   end
 
   def save_image
@@ -94,5 +98,12 @@ class Mfi
     else
       Numeric::Transformer.change_default_format(:mostfit_default)
     end
+  end
+  
+  def set_variables
+    Merb::Config.session_expiry = Mfi.first.session_expiry if Mfi.first.session_expiry
+    Misfit::Config::DateFormat.compile
+    set_currency_format
+    DirtyLoan.start_thread
   end
 end

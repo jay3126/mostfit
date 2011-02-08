@@ -1,8 +1,11 @@
 class Portfolio
   include DataMapper::Resource
-  attr_accessor :centers
+  include DateParser
+
+  attr_accessor :centers, :added_on, :branch_id
 
   before :destroy, :verified_cannot_be_deleted
+  before :valid?,  :parse_dates
   after  :save,    :process_portfolio_details
   after  :save,    :update_portfolio_value
   
@@ -44,19 +47,32 @@ class Portfolio
   
   def eligible_loans
     centers_hash = {}
+    row = Struct.new(:loan_count, :actual_outstanding_principal)
+
     Center.all(:fields => [:id, :name]).each{|c| centers_hash[c.id] = c}
     
     hash = self.new? ? {} : {:portfolio_id.not => id}
     hash[:active] = true
     pids = (PortfolioLoan.all(hash).map{|x| x.loan_id})
+    repaid_loans = LoanHistory.all(:current => true, :loan_id => PortfolioLoan.all(:portfolio_id => self.id).map{|pl| pl.loan_id}, :status => [:repaid, :written_off, :claim_settlement])
+    
     taken_loans = []
-    if pids.length > 0
-      taken_loans << "l.id not in (#{pids.join(', ')})"
-    end
+    
+    taken_loans << "l.id not in (#{pids.join(', ')})" if pids.length > 0
+    taken_loans << "lh.branch_id = #{self.branch_id}" if self.branch_id and self.branch_id.to_i > 0
 
-    data = LoanHistory.sum_outstanding_grouped_by(Date.today, [:center, :branch], taken_loans).group_by{|x| x.branch_id}.map{|bid, centers| 
+    date = self.added_on || Date.today
+
+    data = LoanHistory.sum_outstanding_grouped_by(date, [:center, :branch], taken_loans).group_by{|x| x.branch_id}.map{|bid, centers| 
       [Branch.get(bid), centers.group_by{|x| x.center_id}.map{|cid, rows| [centers_hash[cid], rows.first]}.to_hash]
     }.to_hash
+
+    repaid_loans.each{|lh|
+      data[lh.branch][lh.center] ||= row.new(0, 0)
+      data[lh.branch][lh.center].loan_count += 1
+      data[lh.branch][lh.center].actual_outstanding_principal += lh.actual_outstanding_principal
+    }
+    data
   end
 
   def process_portfolio_details
@@ -70,8 +86,9 @@ class Portfolio
 
       centers = Center.all(:id => self.centers.reject{|cid, status| status != "on"}.keys)
       inactive_loans = PortfolioLoan.all(:portfolio_id => self.id, :active => false, :fields => [:id, :loan_id]).map{|x| x.loan_id}
+      self.added_on  = Date.parse(self.added_on) if self.added_on.is_a?(String)
 
-      LoanHistory.loans_outstanding_for(centers).each{|loan|
+      LoanHistory.loans_outstanding_for(centers, self.added_on).each{|loan|
         if existing_loans.include?(loan.loan_id)
           accounted_for << loan.loan_id
         elsif inactive_loans.include?(loan.loan_id)
@@ -80,7 +97,7 @@ class Portfolio
           pl.active = true
           pl.save
         else
-          PortfolioLoan.create!(:loan_id => loan.loan_id, :original_value => loan.amount, :added_on => Date.today, :portfolio => self,
+          PortfolioLoan.create!(:loan_id => loan.loan_id, :original_value => loan.amount, :added_on => self.added_on, :portfolio => self,
                                 :starting_value => loan.actual_outstanding_principal, :current_value => loan.actual_outstanding_principal)
         end
       }
@@ -108,8 +125,11 @@ class Portfolio
         loan_values[loan.loan_id] = loan
       }
       self.portfolio_loans(:active => true).each{|l|
-        next unless loan_values.key?(l.loan_id)
-        l.current_value = loan_values[l.loan_id].actual_outstanding_principal
+        if loan_values.key?(l.loan_id)
+          l.current_value = loan_values[l.loan_id].actual_outstanding_principal
+        else
+          l.current_value = 0
+        end
         l.save!
         loan_ids << l.loan_id
       }

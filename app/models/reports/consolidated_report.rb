@@ -1,5 +1,6 @@
 class ConsolidatedReport < Report
   attr_accessor :from_date, :to_date, :branch, :center, :funder, :branch_id, :center_id, :staff_member_id, :loan_product_id, :funder_id
+  validates_with_method :from_date, :date_should_not_be_in_future
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -20,8 +21,8 @@ class ConsolidatedReport < Report
     branches, centers, data, clients, loans = {}, {}, {}, {}, {}
     extra     = []
     extra    << "l.loan_product_id = #{loan_product_id}" if loan_product_id
-    extra    << "lh.branch_id = #{@branch.first.id}" if @branch.length == 1
-    extra    << "lh.center_id = #{@center.first.id}" if @center.length == 1
+    extra    << "lh.branch_id in (#{@branch.map{|b| b.id}.join(', ')})" if @branch.length > 0 and @branch.length != Branch.count
+    extra    << "lh.center_id in (#{@center.map{|c| c.id}.join(', ')})" if @center.length > 0 and @center.length != Center.count
     # if a funder is selected
     if @funder
       funder_loan_ids = @funder.loan_ids
@@ -33,6 +34,7 @@ class ConsolidatedReport < Report
     advances  = LoanHistory.sum_advance_payment(self.from_date, self.to_date, [:branch, :center], extra)||[]
     balances  = LoanHistory.advance_balance(self.to_date, :center, extra)||[]
     old_balances = LoanHistory.advance_balance(self.from_date-1, :center, extra)||[]
+    defaults   = LoanHistory.defaulted_loan_info_by(:center, @to_date, extra).group_by{|x| x.center_id}.map{|cid, row| [cid, row[0]]}.to_hash
 
     @branch.each{|b|
       data[b]||= {}
@@ -63,28 +65,27 @@ class ConsolidatedReport < Report
         data[b][c][7] += principal_actual
         data[b][c][9] += total_actual
         data[b][c][8] += total_actual - principal_actual
+        #overdue
+        if defaults[c.id]
+          data[b][c][10] += defaults[c.id].pdiff
+          data[b][c][12] += defaults[c.id].tdiff
+          data[b][c][11] += (data[b][c][12] - data[b][c][10])
+        end
 
-        data[b][c][10]  += (principal_actual > principal_scheduled ? principal_actual-principal_scheduled : 0)
-        data[b][c][11] += ((total_actual-principal_actual) > (total_scheduled-principal_scheduled) ? (total_actual-principal_actual - (total_scheduled-principal_scheduled)) : 0)
-        data[b][c][12] += total_actual > total_scheduled ? total_actual - total_scheduled : 0
-        
-        advance_total = advance ? advance.advance_total : 0
-        balance_total = balance ? balance.balance_total : 0
-        old_balance_total = old_balance ? old_balance.balance_total : 0
-        
-        data[b][c][13]  += advance_total
-        data[b][c][15]  += balance_total
-        data[b][c][14]  += advance_total - balance_total + old_balance_total
+        new_advance         = advance ? advance.advance_total : 0
+        new_advance_balance = balance ? balance.balance_total : 0
+        old_advance_balance = old_balance ? old_balance.balance_total : 0
+        #advance
+        data[b][c][13]  += new_advance
+        data[b][c][14]  += new_advance + old_advance_balance - new_advance_balance 
+        data[b][c][15]  += new_advance_balance
       }
     }
     
     center_ids  = centers.keys.length>0 ? centers.keys.join(',') : "NULL"
-    repository.adapter.query("select id, center_id from clients where center_id in (#{center_ids}) AND deleted_at is NULL").each{|c|
-      clients[c.id] = c
-    }
-    
     extra_condition = ""
     froms = "payments p, clients cl, centers c"
+
     if self.loan_product_id
       froms += ", loans l"
       extra_condition = " and p.loan_id=l.id and l.loan_product_id=#{self.loan_product_id}"
@@ -114,7 +115,6 @@ class ConsolidatedReport < Report
         end
       end
     }
-
 
     #1: Applied on
     hash = {:applied_on.gte => from_date, :applied_on.lte => to_date}

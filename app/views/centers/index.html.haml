@@ -13,19 +13,19 @@
     %tr
       %td Manager
       %td= link_to @branch.manager.name, resource(@branch.manager)
-    %tr
+    %tr.odd
       %td No. of centers
       %td=@branch.centers.count
     %tr
       %td Address
       %td=@branch.address
-    %tr
+    %tr.odd
       %td Contact number
       %td=@branch.contact_number
     %tr
       %td Landmark
       %td=@branch.landmark
-    %tr
+    %tr.odd
       %td Area
       - area = @branch.area
       %td=link_to(area.name, resource(area)) if area
@@ -64,12 +64,15 @@
       - if Mfi.first.stock_register_enabled
         %li#stock_register
           Stock
+      - if Mfi.first.asset_register_enabled
+        %li#asset_register
+          Asset
       - if Mfi.first.map_enabled
         %li#map
           Map
                
     %div.tab
-      %div#centers_list
+      %div#container_centers_list
         =partial "centers/list"
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@branch.id}?for=branch"}
@@ -88,12 +91,11 @@
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/accounts/branch?branch_id=#{@branch.id}"}
-    - if Mfi.first.branch_diary_enabled
-      %div.tab
-        %input{:type => "hidden", :name => "_load_remote", :value => resource(:branch_diaries, :branch_id => @branch.id, :model => "Branch")}
-    - if Mfi.first.stock_register_enabled
-      %div.tab
-        %input{:type => "hidden", :name => "_load_remote", :value => resource(:stock_registers, :branch_id => @branch.id, :model => "Branch")}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => resource(:branch_diaries, :branch_id => @branch.id, :model => "Branch")}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => resource(:stock_registers, :branch_id => @branch.id, :model => "Branch")}
+    %div.tab
     - if Mfi.first.map_enabled        
       %div.tab
         = js_include_tag :map

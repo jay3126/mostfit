@@ -1,14 +1,14 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
-
   resources :expense_vouchers
   resources :expense_heads
   resources :branch_diaries
   resources :stock_registers  
+  resources :asset_registers
   resources :locations, :id => %r(\d+)
   resources :insurance_products
   resources :accounting_periods
-  resources :journals
+  resources :journals, :id => %r(\d+)
   resources :loan_utilizations
   resources :rule_books
   resources :account_types

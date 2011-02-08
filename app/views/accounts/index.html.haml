@@ -4,7 +4,6 @@
 = link_to "Back", url(:admin), :style => "float:right"
 %h1  Manage Book Keeping
 
-
 %div.tab_container
   %ul.tabs
     %li#accounts
@@ -45,7 +44,9 @@
           %b
             = account_type.name
           %ul
-            = show_accounts(accounts)
+            - if accounts
+              - accounts.each do |account|
+                = show_accounts(account)
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:accounting_periods)}
   %div.tab
@@ -55,9 +56,8 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:rule_books)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:journal, :new)}
+    %input{:type => "hidden", :name => "_load_remote", :value => url({:controller => :journals, :action => :new, :return => url(:accounts)})}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:journals)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:action => :duplicate)}
-

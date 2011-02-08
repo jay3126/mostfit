@@ -33,7 +33,7 @@
         %span.greytext
           center managed by:
           = link_to @center.branch.manager.name, resource(@center.manager)
-    %tr
+    %tr.odd
       %td
         Group
       %td
@@ -50,14 +50,13 @@
         - @client.fee_schedule.each do |date, fees|
           - fees.each do |fee, amount|
             = fee.description
-    %tr
+    %tr.odd
       %td
         Fees paid
       %td
         == #{(@client.total_fees_paid).to_currency} / #{(@client.total_fees_due).to_currency}
         - if @client.fees_paid?
           %span.green Paid
-
     - if total_attendance_client = Attendance.count("client_id" => @client.id) and total_attendance_client > 0
       %tr
         %td

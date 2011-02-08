@@ -1,10 +1,17 @@
 class Application < Merb::Controller
   before :ensure_authenticated
+  before :ensure_password_fresh
   before :ensure_can_do
   before :insert_session_to_observer
   before :add_collections, :only => [:index, :show]
   
   @@controllers  = ["regions", "area", "branches", "centers", "clients", "loans", "payments", "staff_members", "funders", "portfolios", "funding_lines"]
+
+  def ensure_password_fresh
+    if session.key?(:change_password) and session[:change_password] and not params[:action] == "change_password"
+      redirect url(:change_password)
+    end
+  end
 
   def insert_session_to_observer
     DataAccessObserver.insert_session(session.object_id)
@@ -58,6 +65,12 @@ class Application < Merb::Controller
       Attendance.all(:client_id => obj.id).destroy if model == Client
       PortfolioLoan.all(:portfolio_id => obj.id).destroy if model == Portfolio
       Posting.all(:journal_id => obj.id).destroy if model == Journal
+
+      if model == RuleBook
+        CreditAccountRule.all(:rule_book_id => obj.id).destroy!
+        DebitAccountRule.all(:rule_book_id => obj.id).destroy!
+      end
+
       return_url = params[:return].split("/")[0..-3].join("/")
       redirect(return_url, :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
     else
@@ -82,8 +95,9 @@ class Application < Merb::Controller
     flag  = true
     model =  obj.class
     # add child definitions to children; For loan model do not add history
+
     children = model.relationships.find_all{|x|
-      if x[1].class==DataMapper::Associations::OneToMany::Relationship and not x[0]=="history" and not x[0]=="audit_trails" and not x[0]=="attendances" and not x[0]=="portfolio_loans" and not x[0] == "postings"
+      if x[1].class==DataMapper::Associations::OneToMany::Relationship and not x[0]=="history" and not x[0]=="audit_trails" and not x[0]=="attendances" and not x[0]=="portfolio_loans" and not x[0] == "postings" and not x[0] == "credit_account_rules" and not x[0] == "debit_account_rules"
         x[0]
       end
     }

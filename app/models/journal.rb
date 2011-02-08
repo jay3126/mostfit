@@ -15,17 +15,31 @@ class Journal
   belongs_to :journal_type
   has n, :postings
   has n, :accounts, :through => :postings
-
   
   def validity_check
     return false if self.postings.length<2 #minimum one posting for credit n one for debit
     debit_account_postings, credit_account_postings = self.postings.group_by{|x| x.amount>0}.values
-    return false if debit_account_postings.nil?  or debit_account_postings.length==0
-    return false if credit_account_postings.nil? or credit_account_postings.length==0 
-    return false if (credit_account_postings.map{|x| x.account_id} & debit_account_postings.map{|x| x.account_id}).length > 0
-    return false if self.postings.accounts.map{|x| x.branch_id}.uniq.length > 1
-    return false if self.postings.map{|x| x.account_id}.compact.length != self.postings.length
-    return true
+
+    #no debit account posting
+    return [false, "no debit account posting"] if debit_account_postings.nil?  or debit_account_postings.length==0
+    
+    #no credit account posting
+    return [false, "no credit account posting"] if credit_account_postings.nil? or credit_account_postings.length==0 
+    
+    #same debit and credit accounts
+    return [false, "same debit and credit accounts"] if (credit_account_postings.map{|x| x.account_id} & debit_account_postings.map{|x| x.account_id}).length > 0
+    
+    #cross branch posting
+    return [false, "cross branch posting"] if self.postings.accounts.map{|x| x.branch_id}.uniq.length > 1
+    
+    #duplicate postings
+    return [false, "duplicate accounts"] if self.postings.map{|x| x.account_id}.compact.length != self.postings.length
+    
+    #amount mismatch
+    return [false, "debit and credit amount mismatch"] if credit_account_postings.map{|x| x.amount}.reduce(0){|s,x| s+=x} + debit_account_postings.map{|x| x.amount}.reduce(0){|s,x| s+=x} != 0
+    
+    return [true, ""]
+
   end
 
   def self.create_transaction(journal_params, debit_accounts, credit_accounts)
@@ -50,27 +64,27 @@ class Journal
       # TODO: fix this
       if debit_accounts.is_a?(Hash)
         debit_accounts.each{|debit_account, debit_amount|
-          Posting.create(:amount => (debit_amount||amount) * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency],:journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => (debit_amount||amount) * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency])
         }
       else
-        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency])
       end
       
       #credit entries
       if credit_accounts.is_a?(Hash)
         credit_accounts.each{|credit_account, credit_amount|
-          Posting.create(:amount => (credit_amount||amount), :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+          Posting.create(:amount => (credit_amount||amount), :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency])
         }
       else
-        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency], :journal_type_id => journal_params[:journal_type_id],:date => journal_params[:date]||Date.today)
+        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency])
       end
       
       # Rollback in case of both accounts being the same      
-      if journal.validity_check
-        status = true
-      else
+      status, reason = journal.validity_check
+      unless status
         t.rollback
         status = false
+        journal.errors.add(:postings, reason)
       end
     end
     return [status, journal]
@@ -138,70 +152,5 @@ class Journal
     } 
     f.close
   end 
-  #this function will create single voucher 
-  def self.voucher(hash={})
-    xml_file = '/tmp/single1.xml'
-    f = File.open(xml_file,"w")
-    x = Builder::XmlMarkup.new(:target => f,:indent => 1)
-    x.ENVELOPE{
-      x.HEADER {    
-        x.VERSION "1"
-        x.TALLYREQUEST "Import"
-        x.TYPE "Data"
-        x.ID "Vouchers"  
-      }
-      
-      x.BODY { 
-        x.DESC{
-        }
-        x.DATA{
-          x.TALLYMESSAGE{           
-            credit = Journal.all.postings(hash.merge(:amount.gt => 0)).aggregate(:account_id,:journal_type_id,:amount.sum)
-            debit = Journal.all.postings(hash.merge(:amount.lt => 0)).aggregate(:account_id,:journal_type_id,:amount.sum)
-            ledger = Account.all
-            [1,2].map{|y|
-              x.VOUCHER{
-                x.DATE Date.today.strftime("%Y%m%d")
-                x.NARRATION "#{Date.today}" + " combined journal entry"
-                if y==1 
-                  name = "Payment" 
-                elsif y == 2 
-                  name = "Receipt" 
-                end
-                x.VOUCHERTYPENAME name 
-                x.VOUCHERNUMBER Date.today.strftime("%Y%m%d") + " " + name
-                credit.each { |c|
-                  if c[1] == y
-                    x.tag! 'ALLLEDGERENTRIES.LIST' do
-                      ledger.each{ |l|
-                        if l.id == c[0]
-                          x.LEDGERNAME l.name
-                        end
-                      }
-                      x.ISDEEMEDPOSITIVE("No")
-                      x.AMOUNT c[2].round(2)
-                    end
-                  end
-                }
-                debit.each {|d|
-                  if d[1] == y
-                    x.tag! 'ALLLEDGERENTRIES.LIST' do
-                      ledger.each { |l|
-                        if l.id == d[0]
-                          x.LEDGERNAME l.name
-                        end
-                      }
-                      x.ISDEEMEDPOSITIVE("Yes")  
-                      x.AMOUNT d[2].round(2)
-                    end 
-                  end
-                }
-              }
-            }
-          }
-        }
-      }
-    } 
-    f.close
-  end   
+    
 end

@@ -55,13 +55,15 @@ class Fee
   end
   
   def self.applicable(loan_ids, hash = {})
+    date = hash[:date] || Date.today
+
     if loan_ids == :all
       query    = " AND l.disbursal_date is not NULL"
-      query   += " AND l.disbursal_date<='#{hash[:date].strftime('%Y-%m-%d')}'" if hash[:date]
+      query   += " AND l.disbursal_date<='#{date.strftime('%Y-%m-%d')}'"
     else
       loan_ids = loan_ids.length>0 ? loan_ids.join(",") : "NULL"
       query    = "AND l.id IN (#{loan_ids})"
-    end
+    end   
 
     payables = Fee.properties[:payable_on].type.flag_map
     applicables = repository.adapter.query(%Q{
@@ -69,11 +71,14 @@ class Fee
                                        SUM(if(f.amount>0, convert(f.amount, decimal), l.amount*f.percentage)) fees_applicable, 
                                        f.payable_on payable_on                                       
                                 FROM loan_products lp, fee_loan_products flp, fees f, loans l 
-                                WHERE flp.fee_id=f.id AND flp.loan_product_id=lp.id AND lp.id=l.loan_product_id #{query} GROUP BY l.id;})
+                                WHERE flp.fee_id=f.id AND flp.loan_product_id=lp.id AND lp.id=l.loan_product_id #{query}
+                                      AND l.deleted_at is NULL AND l.rejected_on is NULL
+                                GROUP BY l.id;})
     fees = []
+
     applicables.each{|fee|
       if payables[fee.payable_on]==:loan_installment_dates
-        installments = loans.find{|x| x.id==fee.loan_id}.installment_dates.reject{|x| x>Date.today}.length
+        installments = loans.find{|x| x.id==fee.loan_id}.installment_dates.reject{|x| x > date}.length
         fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable.to_f * installments))
       else
         fees.push(FeeApplicable.new(fee.loan_id, fee.client_id, fee.fees_applicable.to_f))
@@ -82,25 +87,19 @@ class Fee
     fees
   end
 
-  def self.paid(loan_ids)
-    client_ids = Loan.all(:fields => [:id, :client_id], :id => loan_ids).map{|x| x.client_id}.uniq
-    client_ids = client_ids.length>0 ? client_ids.join(",") : "NULL"
-    repository.adapter.query(%Q{
-                                SELECT loan_id, client_id, SUM(amount) amount
-                                FROM payments p
-                                WHERE p.client_id IN (#{client_ids}) AND p.type=3 AND deleted_at is NULL GROUP BY p.loan_id;})
+  def self.paid(loan_ids, date=Date.today)    
+    Payment.all(:type => :fees, :loan_id => loan_ids, :received_on.lte => date).aggregate(:loan_id, :amount.sum).to_hash
   end
 
-  def self.due(loan_ids)
-    fees_applicable = self.applicable(loan_ids)
-    fees_paid       = self.paid(loan_ids)
+  def self.due(loan_ids, date=Date.today)
+    fees_applicable = self.applicable(loan_ids, {:date => date}).group_by{|x| x.loan_id}
+    fees_paid       = self.paid(loan_ids, {:date => date})
     fees = {}
     loan_ids.each{|lid|
-      applicable = fees_applicable.find{|x| x.loan_id==lid}
+      applicable = fees_applicable[lid].first if fees_applicable.key?(lid) and fees_applicable[lid].length>0
       next if not applicable
-      paid      = fees_paid.find_all{|x| x.loan_id==lid}
-      paid      = (paid and paid.length>0) ? paid.map{|x| x.amount.to_f}.inject(0){|s,x| s+=x} : 0
-      fees[lid]  = FeeDue.new((applicable ? applicable.fees_applicable.to_f : 0), paid, (applicable ? applicable.fees_applicable : 0) - paid)
+      paid      = fees_paid.key?(lid) ? fees_paid[lid] : 0
+      fees[lid]  = FeeDue.new((applicable ? applicable.fees_applicable.to_f : 0), paid, ((applicable ? applicable.fees_applicable : 0) - paid).to_i)
     }
     fees
   end
@@ -111,8 +110,11 @@ class Fee
     (fees - paid).reject{|lid, a| a<=0}
   end
 
-   # faster compilation of fee collected for/by a given obj. This obj can be a branch, center, area, region or staff member
-  def self.collected_for(obj, from_date=Date.min_date, to_date=Date.max_date)
+  # faster compilation of fee collected for/by a given obj. This obj can be a branch, center, area, region or staff member
+  # fee_collected_type here is relevant only for the case of staff member. This comes into play when we need all the fee collected under centers
+  # managed by the staff member.
+  # TODO:  rewrite it using Datamapper
+  def self.collected_for(obj, from_date=Date.min_date, to_date=Date.max_date, fee_collected_type = :created)
     if obj.class==Branch
       from  = "branches b, centers c, clients cl, payments p, fees f"
       where = %Q{
@@ -152,11 +154,19 @@ class Fee
                   and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
                };
     elsif obj.class==StaffMember
-      from  = "payments p, fees f"
-      where = %Q{
+      if fee_collected_type == :created
+        from  = "payments p, fees f"
+        where = %Q{
                   p.received_by_staff_id=#{obj.id} and p.type=3 and p.fee_id=f.id
                   and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
                };
+      elsif fee_collected_type == :managed
+        from  = "centers c, clients cl, payments p, fees f"
+        where = %Q{
+                  c.manager_staff_id=#{obj.id} and cl.center_id=c.id and p.client_id=cl.id and p.type=3 and p.fee_id=f.id
+                  and p.deleted_at is NULL and p.received_on>='#{from_date.strftime('%Y-%m-%d')}' and p.received_on<='#{to_date.strftime('%Y-%m-%d')}'
+               };
+      end
     elsif obj.class==LoanProduct
       from  = "loans l, payments p, fees f"
       where = %Q{

@@ -1,5 +1,7 @@
-%table
+%table.report.nojs
   %tr
+    %th 
+      Created at
     %th
       Date
     %th 
@@ -14,27 +16,26 @@
       Amount
     %th 
       Comment
-  - Account.all(:branch => @branch).postings.journals(:order => [:date.desc], :order => [:id.desc]).each do |journal|
+  - journals.each do |journal|
     - postings = journal.postings.sort_by{|x| x.amount}
     %tr
-      %td
+      %td.text
+        = journal.created_at.strftime(Mfi.first.date_format + " at %H:%m")
+      %td.text
         = journal.date
-      %td 
+      %td
         = journal.id
       - debit_postings, credit_postings = journal.postings.group_by{|x| x.amount>0}.values
-      %td 
+      %td.text 
         - debit_postings.each do |p|
           = p.account.name
           %br
-      %td
-        = "<br>"*debit_postings.length 
+      %td.text
         - credit_postings.each do |p|
           = p.account.name
           %br
-        
-      %td
-        = (debit_postings + credit_postings).collect{|p| p.amount.abs}.join("<br/>")  
       %td
         = postings.map{|x| x.amount>0 ? x.amount : 0}.inject(0){|s,x| s+=x}
-      %td 
+      %td.text
         = journal.comment
+= paginate(journals).to_s.gsub("<a", "<a class='_remote_' id='journal_entries'")

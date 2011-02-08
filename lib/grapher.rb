@@ -54,11 +54,22 @@ module Grapher
       @y_axis.smoothen(@elements[:values]) if @y_axis and @elements[:values].length>0
       hash = {:title => (@title ? @title.generate : ""), :bg_colour => "#FFFFFF"}
       # change in lakh!
-      if figures_in_lakhs? and @elements[:values].length>0 and @elements[:values].max > 1_00_000
-        @elements[:values] = @y_axis.change_to_lakh(@elements[:values]) if @y_axis
-        y_legend = Title.new("figures in lakhs")
-        y_legend.style = '{color: #ff4500; font-size: 14px; font-weight: bold}'
-        hash[:y_legend] = y_legend.generate
+      if figures_in_lakhs?         
+        if @elements[:values].length>0 and (@elements[:values].first.is_a?(Numeric) or @elements[:values].first.is_a?(Float))          
+          if @y_axis and @elements[:values].max > 1_00_000
+            y_legend = Title.new("figures in lakhs")
+            y_legend.style = '{color: #ff4500; font-size: 14px; font-weight: bold}'            
+            @elements[:values] = @y_axis.change_to_lakh(@elements[:values])
+            hash[:y_legend] = y_legend.generate
+          end          
+        elsif @elements[:values].map{|x| x[:value]}.max > 1_00_000
+          @elements[:values].each{|ele| 
+            ele[:value] = @y_axis.change_to_lakh(ele[:value])
+          } if @y_axis
+          y_legend = Title.new("figures in lakhs")
+          y_legend.style = '{color: #ff4500; font-size: 14px; font-weight: bold}'
+          hash[:y_legend] = y_legend.generate          
+        end
       end
 
       hash += {:elements => [@elements], :x_axis => (@x_axis ? @x_axis.generate : ""), :y_axis => (@y_axis ? @y_axis.generate : "")}

@@ -6,7 +6,7 @@ module Merb
     
     def page_title
       begin
-        generate_page_title
+        generate_page_title(params)
       rescue
         return "MostFit" rescue Exception
       end
@@ -103,6 +103,7 @@ module Merb
       attrs.merge!(:size     => opts[:size]||20)
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
+      attrs.merge!(:nullable => opts[:nullable]) if opts.key?(:nullable)
       date_select_html(attrs) 
     end
  
@@ -308,6 +309,7 @@ module Merb
         model = Kernel.const_get(obj)
       else
         model = obj.class
+        return unless obj
         relations = model.relationships.find_all{|k, v|
           v.class ==  DataMapper::Associations::ManyToOne::Relationship
         }.map{|k,v| {v.child_key.first.name => [k, v.parent_key.first.model]}}.reduce({}){|s,x| s+=x}
@@ -319,24 +321,41 @@ module Merb
           if relations.key?(k)
             str = "<tr><td>#{relations[k].first.to_s.humanize}</td><td>"
             str += (if action==:update and v.class==Array
-                     "changed from #{relations[k].last.get(v.first).name}</td><td>to #{relations[k].last.get(v.last).name}"
+                      str = "changed from "
+                      if v.first and relations[k] and obj=relations[k].last.get(v.first)
+                        str += obj.name
+                      else
+                        str += "nil"
+                      end
+                      str += "</td><td>to "
+
+                      if v.last and relations[k] and obj=relations[k].last.get(v.last)
+                        str += obj.name
+                      else
+                        str += "nil"
+                      end
+                      str
                     elsif action==:create and v.class==Array
                       child_obj = relations[k].last.get(v.last)
                       ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
                     elsif action==:create
                       child_obj = relations[k].last.get(v)
-                      ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")                      
+                      ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
                     else
                       "#{v}"
                     end)||""
           else
             str="<tr><td>#{k.humanize}</td><td>"
-            str+=if action==:update and v.class==Array                 
-                   "changed from #{v.first}</td><td>to #{v.last}"
-                 elsif action==:create and v.class==Array                 
+            str+=if action==:update and v.class==Array
+                   if model.properties.find{|x| x.name == k}.type.respond_to?(:flag_map)
+                     "changed from #{model.properties.find{|x| x.name == k}.type.flag_map[v.first]}</td><td>to #{v.last}"                     
+                   else
+                     "changed from #{v.first}</td><td>to #{v.last}"
+                   end
+                 elsif action==:create and v.class==Array
                    "#{v}"
                  else
-                   "#{v}"                 
+                   "#{v}"
                  end
           end
           str+="</td></tr>"
@@ -365,17 +384,25 @@ module Merb
       end
     end
 
-    def get_accessible_branches
-      if session.user.staff_member
-        [session.user.staff_member.centers.branches, session.user.staff_member.branches].flatten
+    def get_accessible_areas(staff)
+      if staff or staff = session.user.staff_member
+        [staff.branches.areas, staff.areas].flatten
+      else
+        Area.all(:order => [:name])
+      end
+    end
+
+    def get_accessible_branches(staff=nil)
+      if staff or staff=session.user.staff_member
+        [staff.centers.branches, staff.branches, staff.areas.branches, staff.regions.areas.branches].flatten
       else
         Branch.all(:order => [:name])
       end
     end
     
-    def get_accessible_centers(branch_id)
-      centers = if st = session.user.staff_member
-                  [st.centers, st.branches.centers].flatten
+    def get_accessible_centers(branch_id, staff=nil)
+      centers = if staff or session.user.staff_member
+                  Center.all(:branch => get_accessible_branches, :order => [:name])
                 elsif branch_id and not branch_id.blank?
                   Center.all(:branch_id => branch_id, :order => [:name])
                 else 
@@ -384,23 +411,24 @@ module Merb
       centers.map{|x| [x.id, "#{x.name}"]}
     end
 
-    def get_accessible_staff_members      
-      staff_members   =  if session.user.staff_member
-                           st = session.user.staff_member
-                           if branches = st.branches and branches.length>0
-                             [st] + branches.centers.managers 
+    def get_accessible_staff_members(staff=nil)
+      staff_members   =  if staff or staff = session.user.staff_member
+                           if branches = staff.branches and branches.length>0
+                             [staff] + branches.centers.managers(:order => [:name])
+                           elsif centers = staff.centers and centers.length>0
+                             [staff] + centers.managers(:order => [:name])
                            else
-                             st
+                             [staff] + [staff]
                            end
                          else
-                           StaffMember.all
+                           StaffMember.all(:order => [:name])
                          end      
-      staff_members.sort_by{|x| x.name}.map{|x| [x.id, x.name]}
+      staff_members.map{|x| [x.id, x.name]}
     end
 
-    def get_accessible_funders
-      (if session.user.role == :funder
-        Funder.all(:user => session.user)
+    def get_accessible_funders(user=nil)
+      (if user.role == :funder
+        Funder.all(:user => user)
       else
         Funder.all
       end).map{|x| [x.id, "#{x.name}"]}
@@ -450,11 +478,10 @@ module Merb
     
     def approx_address(obj)
       if obj.class == Center
-        if obj.name.include?(obj.branch.name)
-          obj.name
-        else
-          "#{obj.name}, #{obj.branch.name}, #{obj.branch.area.name}"
-        end
+        str  =  obj.name
+        str += obj.branch.name      if obj.branch and not obj.name.include?(obj.branch.name)
+        str += obj.branch.area.name if obj.branch.area
+        return str
       elsif obj.respond_to?(:address) and not obj.address.blank?
         obj.address
       elsif obj.class == Branch
@@ -465,15 +492,14 @@ module Merb
     private
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)
       hash = allow_inactive ? {} : {:active => true}
-      if session.user.staff_member
-        staff = session.user.staff_member
+      if staff = session.user.staff_member
         bms  = staff.branches.collect{|x| x.manager}
         cms  = staff.branches.centers.collect{|x| x.manager}               
         managers = [bms, cms, staff].flatten.uniq
-        managers+= (StaffMember.all(hash) - Branch.all.managers - Center.all.managers - Region.all.managers - Area.all.managers) if allow_unassigned
-        [["0", "<Select a staff member"]] + managers.sort_by{|x| x.name}.map{|x| [x.id, x.name]}
+        managers+= (StaffMember.all(hash.merge(:order => [:name])) - Branch.all.managers - Center.all.managers - Region.all.managers - Area.all.managers) if allow_unassigned
+        [["0", "<Select a staff member"]] + managers.map{|x| [x.id, x.name]}
       else
-        [["0", "<Select a staff member"]] + StaffMember.all(hash).sort_by{|x| x.name}.map{|x| [x.id, x.name]}
+        [["0", "<Select a staff member"]] + StaffMember.all(hash.merge(:order => [:name])).map{|x| [x.id, x.name]}
       end
     end
     
@@ -481,7 +507,7 @@ module Merb
       args.map{|x| x.class==Array ? x.uniq : x}.flatten.reject{|x| not x or x.blank?}.join(' - ').capitalize
     end
 
-    def generate_page_title
+    def generate_page_title(params)
       prefix, postfix = [], []
       controller=params[:controller].split("/")[-1]
       controller_name = (params[:action]=="list" or params[:action]=="index") ? controller.join_snake(' ') : controller.singularize.join_snake(' ')
@@ -527,5 +553,12 @@ module Merb
       return((minimum + window < current_page ? minimum.upto(window).collect : minimum.upto(current_page + window).collect) + (current_page - window > minimum+window ? [".."] : []) + (current_page > minimum + window ? (current_page - window > minimum + window ? current_page - window : minimum + window).upto(current_page + window > maximum ? maximum : current_page + window).collect : []) + (current_page + window + 1 < maximum - window ? [".."] : []) + (current_page < maximum - 2 * window ? maximum-window : current_page + window + 1).upto(maximum).collect)
     end
 
+    # get the loans which are accessible by the user
+    def get_loans(hash)
+      if staff = session.user.staff_member
+        hash["client.center.branch_id"] = [staff.branches, staff.areas.branches, staff.regions.areas.branches].flatten.map{|x| x.id}
+      end
+      Loan.all(hash)
+    end
   end
 end

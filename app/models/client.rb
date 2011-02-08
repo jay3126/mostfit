@@ -276,7 +276,8 @@ class Client
   validates_is_unique :reference
   validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
-  validates_with_method :dates_make_sense, :when => [:create, :update, :save]
+  validates_with_method :date_joined, :method => :dates_make_sense
+  validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
@@ -519,6 +520,10 @@ class Client
                                 })
      end
    end
+   
+   def cannot_have_inactive_reason_if_active
+     return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
+     return true
+   end
+
  end
- 
- 

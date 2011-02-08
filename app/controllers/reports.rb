@@ -1,16 +1,17 @@
 class Reports < Application
   include DateParser
   Types = {
-    :periodic     => [DailyReport, WeeklyReport, IncentiveReport], 
-    :consolidated => [ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport], 
-    :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, GuarantorReport], 
-    :targets_and_projections  => [ProjectedReport, TargetReport],
+    :periodic     => [DailyReport, WeeklyReport], 
+    :consolidated => [ConsolidatedReport, GroupConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport], 
+    :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport], 
+    :targets_and_projections  => [ProjectedReport, TargetReport, StaffTargetReport, IncentiveReport],
     :statistics   => [LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport], 
     :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ClientAbsenteeismReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest],
     :accounting   => [GeneralLedgerReport, TrialBalanceReport]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout 
+  before :set_staff_and_user, :only => [:index, :show]
   
   # provides :xml, :yaml, :js
   def index
@@ -33,14 +34,20 @@ class Reports < Application
       @report   = klass.new(params[class_key], dates, session.user)
       if not params[:submit]
         render :form
-      else        
-        case @report.method(:generate).arity
-        when 0
-          @data = @report.generate
-        when 1
-          @data = @report.generate(params)
+      else
+        if @report.valid?
+          case @report.method(:generate).arity
+          when 0
+            @data = @report.generate
+          when 1
+            @data = @report.generate(params)
+          end
+          display @data
+        else
+          params.delete(:submit)
+          message[:error] = "Report cannot be generated"          
+          render :form
         end
-        display @data
       end
     elsif id.nil?
       @reports = klass.all(:order => [:start_date.desc])
@@ -117,4 +124,10 @@ class Reports < Application
   def determine_layout
     return "printer" if params[:layout] and params[:layout]=="printer"
   end
+  
+  def set_staff_and_user
+    @user = session.user
+    @staff_member = @user.staff_member
+  end
+  
 end # Reports

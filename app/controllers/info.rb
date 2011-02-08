@@ -49,7 +49,6 @@ class Info < Application
       @areas[:new]  = LoanHistory.parents_where_loans_of(Area, {:loan => {:funding_line_id => @obj.id}, :area => new_date_hash})
       @areas[:upto] = LoanHistory.parents_where_loans_of(Area, {:loan => {:funding_line_id => @obj.id}, :area => upto_date_hash})
       
-     
       @branches[:new]  = @obj.branches(new_date_hash)
       @branches[:upto] = @obj.branches(upto_date_hash)
 
@@ -60,15 +59,23 @@ class Info < Application
       @clients[:upto] = @obj.clients(client_hash(:upto))
     elsif @obj.class == StaffMember
       @areas     = @obj.areas
-      @branches, @centers, @managed_clients  = {}, {}, {}
+      @branches, @centers, @clients, @loans = {}, {}, {}, {}
+
+      owner_type = (params[:type] and params[:type] == "managed" ? :managed : :created)
+
       @branches[:new]  = @obj.branches(new_date_hash)
       @branches[:upto] = @obj.branches(upto_date_hash)
-
+      
       @centers[:new]   = @obj.centers(new_date_hash)
       @centers[:upto]  = @obj.centers(upto_date_hash)
 
-      @managed_clients[:new] = @obj.clients #(client_hash(:new))
-      @managed_clients[:upto] = @obj.clients #(client_hash(:upto))
+      @clients[:new]  = @obj.clients(client_hash(:new), owner_type)
+      @clients[:upto] = @obj.clients(client_hash(:upto), owner_type)
+
+      if owner_type == :created
+        @groups_new_count  = @clients[:new] and @clients[:new].count > 0 ? @clients[:new].client_groups(:created_by_staff => @obj).count : 0
+        @groups_upto_count = @clients[:upto] and @clients[:upto].count > 0 ? @clients[:upto].client_groups(:created_by_staff => @obj).count : 0
+      end
     else
       raise "Unknown obj class"
     end
@@ -86,13 +93,17 @@ class Info < Application
     end
     
     unless @clients 
-      @clients        = {} 
-      @clients[:new]  = (@centers.class == Hash ? @centers[:upto] : @centers).clients(client_hash(:new) + {:fields => [:id]})
-      @clients[:upto] = (@centers.class == Hash ? @centers[:upto] : @centers).clients(client_hash(:upto) + {:fields => [:id]})
+      @clients        = {}
+      if (@centers.class == Hash) and (@centers[:upto].count == 0)
+        @clients[:new]
+        @clients[:upto]
+      else
+        @clients[:new]  = (@centers.class == Hash ? @centers[:upto] : @centers).clients(client_hash(:new) + {:fields => [:id]})
+        @clients[:upto] = (@centers.class == Hash ? @centers[:upto] : @centers).clients(client_hash(:upto) + {:fields => [:id]})
+      end
     end
 
-    
-    set_more_info(@obj)
+    set_more_info(@obj, owner_type||:managed)
     render :file => 'info/moreinfo', :layout => false
   end
 
@@ -149,29 +160,31 @@ private
     end
   end
 
-  def set_more_info(obj)
+  def set_more_info(obj, child_type = :managed)
     @centers_new_count  = @centers.key?(:new) ? @centers[:new].count : 0
     @centers_upto_count = @centers.key?(:upto) ? @centers[:upto].count : 0
 
-    @groups_new_count  = (@centers_new_count>0) ? @centers[:new].client_groups(:fields => [:id]).count : 0
-    @groups_upto_count = (@centers_upto_count>0) ? @centers[:upto].client_groups(:fields => [:id]).count : 0
+    @groups_new_count  = (@centers_new_count>0 and @centers[:new] and not @groups_new_count) ? @centers[:new].client_groups(:fields => [:id]).count : 0 
+    @groups_upto_count = (@centers_upto_count>0 and @centers[:upto] and not @groups_upto_count) ? @centers[:upto].client_groups(:fields => [:id]).count : 0
 
-    @clients_new_count  = (@centers_new_count>0) ?  @clients[:new].count : 0
-    @clients_upto_count = (@centers_upto_count>0) ? @clients[:upto].count : 0
+    @clients_new_count  = (@clients and @clients[:new]) ?  @clients[:new].count : 0
+    @clients_upto_count = (@clients and @clients[:upto]) ? @clients[:upto].count : 0
 
-    @payments        = Payment.collected_for(obj, @from_date, @to_date)
-    @total_payments  = Payment.collected_for(obj, Date.min_date, @to_date)
-    @fees            = Fee.collected_for(obj, @from_date, @to_date)
-    @total_fees      = Fee.collected_for(obj, Date.min_date, @to_date)
-    @total_disbursed = LoanHistory.amount_disbursed_for(obj, Date.min_date, @to_date)
-    @loan_disbursed  = LoanHistory.amount_disbursed_for(obj, @from_date, @to_date)
-    @loan_data       = LoanHistory.sum_outstanding_for(obj, @to_date)
-    @defaulted       = LoanHistory.defaulted_loan_info_for(obj, @to_date)
-    @total_death_cases = Client.death_cases(obj,Date.min_date,@to_date)  
-    @death_cases = Client.death_cases(obj,@from_date,@to_date) 
-    @pending_death_cases = Client.pending_death_cases(obj,@from_date,@to_date)
-    @loans_repaid  = LoanHistory.loan_repaid_count(obj,@from_date, @to_date)
-    @loans_repaid_total =  LoanHistory.loan_repaid_count(obj,Date.min_date, @to_date)
+    @payments        = Payment.collected_for(obj, @from_date, @to_date, [1, 2], child_type)
+    @total_payments  = Payment.collected_for(obj, Date.min_date, @to_date, [1, 2], child_type)
+    @fees            = Fee.collected_for(obj, @from_date, @to_date, child_type)
+    @total_fees      = Fee.collected_for(obj, Date.min_date, @to_date, child_type)
+
+    @total_disbursed = LoanHistory.amount_disbursed_for(obj, Date.min_date, @to_date, child_type)
+    @loan_disbursed  = LoanHistory.amount_disbursed_for(obj, @from_date, @to_date, child_type)
+
+    @loan_data       = LoanHistory.sum_outstanding_for(obj, @to_date, child_type)
+    @defaulted       = LoanHistory.defaulted_loan_info_for(obj, @to_date, nil, :aggregate, child_type)
+    # @total_death_cases = Client.death_cases(obj,Date.min_date,@to_date)  
+    # @death_cases = Client.death_cases(obj,@from_date,@to_date) 
+    # @pending_death_cases = Client.pending_death_cases(obj,@from_date,@to_date)
+    @loans_repaid  = LoanHistory.loan_repaid_count(obj,@from_date, @to_date, child_type)
+    @loans_repaid_total =  LoanHistory.loan_repaid_count(obj,Date.min_date, @to_date, child_type)
   end
 end
   

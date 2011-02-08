@@ -30,23 +30,104 @@ class Browse < Application
     hash  = {:date => @date}
     hash  = {:branch_id => params[:branch_id]} if params[:branch_id] and not params[:branch_id].blank?
     center_ids = LoanHistory.all(hash).aggregate(:center_id)
-    @locations = Location.all(:parent_id => center_ids, :parent_type => "center").group_by{|x| x.parent_id}
+    loans      = LoanHistory.all(hash).aggregate(:loan_id, :center_id).to_hash
+
     # restrict branch manager and center managers to their own branches
-    if session.user.role==:staff_member
-      st = session.user.staff_member
-      center_ids = ([st.branches.centers.map{|x| x.id}, st.centers.map{|x| x.id}].flatten.compact) & center_ids
+    if user = session.user and staff = user.staff_member
+      hash[:branch_id] = [staff.related_branches.map{|x| x.id}, staff.centers.branches.map{|x| x.id}].uniq
+      center_ids = staff.related_centers.map{|x| x.id} & center_ids
     end
     
-    center_ids = ["NULL"] if center_ids.length==0
-    center_ids = center_ids.join(',')
-    client_ids = repository.adapter.query(%Q{SELECT c.id FROM clients c WHERE c.center_id IN (#{center_ids})})
-    @data = repository.adapter.query(%Q{SELECT c.id as id, c.branch_id as branch_id, c.name name, SUM(lh.principal_due) pd, SUM(lh.interest_due) intd, 
-                                                   SUM(lh.principal_paid) pp, SUM(lh.interest_paid) intp, c.meeting_time_hours, c.meeting_time_minutes
-                                        FROM loan_history lh, centers c, loans l
-                                        WHERE lh.center_id IN (#{center_ids}) AND lh.date='#{@date.strftime('%Y-%m-%d')}' AND c.id=lh.center_id AND lh.status in (5,6) AND lh.loan_id=l.id
-                                              AND l.deleted_at is NULL
-                                        GROUP BY lh.center_id ORDER BY c.name}).group_by{|x| Branch.get(x.branch_id)}
-    @disbursals = Loan.all(:client_id => client_ids, :scheduled_disbursal_date => @date)
+    if Mfi.first.map_enabled
+      @locations = Location.all(:parent_id => center_ids, :parent_type => "center").group_by{|x| x.parent_id}
+    end
+
+    @fees_due, @fees_paid, @fees_overdue  = Hash.new(0), Hash.new(0), Hash.new(0)
+    Fee.applicable(loans.keys, {:date => @date}).each{|fa|
+      @fees_due[loans[fa.loan_id]] += fa.fees_applicable
+    }
+
+    Payment.all(:type => :fees, "client.center_id" => center_ids, :received_on.lt => @date).aggregate(:loan_id, :amount.sum).each{|fp|
+      @fees_due[loans[fp[0]]] -= fp[1]
+    }
+    
+    Payment.all(:type => :fees, :received_on => @date, "client.center_id" => center_ids).aggregate(:loan_id, :amount.sum).each{|fp|
+     @fees_paid[loans[fp[0]]] += fp[1]
+    }
+
+    @disbursals = {}
+    @disbursals[:scheduled] = LoanHistory.all("loan.scheduled_disbursal_date" => @date, :date => @date).aggregate(:center_id, :scheduled_outstanding_principal.sum).to_hash
+    
+    @disbursals[:actual]    = LoanHistory.all("loan.scheduled_disbursal_date" => @date, :date => @date, 
+                                              :status => [:disbursed]).aggregate(:center_id, :scheduled_outstanding_principal.sum).to_hash
+
+    # caclulating old outstanding for loans, paying today, as of last payment date
+    old_outstanding = {}
+    LoanHistory.sum_outstanding_grouped_by(@date - 1, [:loan], {:center_id => center_ids}).group_by{|x| old_outstanding[x.loan_id] = x}
+
+    # calculating outstanding for loans, paying today, as of today
+    new_outstanding = LoanHistory.sum_outstanding_grouped_by(@date, [:loan], {:center_id => center_ids}, [:branch, :center, :principal_due, 
+                                                                                                          :interest_due, :principal_paid, :interest_paid]).group_by{|x| 
+      x.branch_id
+    }.map{|branch_id, centers|
+      {branch_id => centers.group_by{|loan| loan.center_id}}
+    }.reduce({}){|s,x| s+=x}
+
+    @centers  = Center.all(:id => center_ids)
+    @branches = @centers.branches.map{|b| [b.id, b.name]}.to_hash
+    @centers  = @centers.map{|c| [c.id, c]}.to_hash
+
+    #get payments done on @date in format of {<loan_id> => [<principal>, <interest>]}
+    @payments = LoanHistory.all(:date => @date, :center_id => center_ids).aggregate(:loan_id, :principal_paid.sum, :interest_paid.sum).group_by{|x| 
+      x[0]
+    }
+
+    #advance balance
+    new_advance_balances = LoanHistory.advance_balance(@date, [:center],   {:center_id => center_ids}).group_by{|x| x.center_id}
+    old_advance_balances = LoanHistory.advance_balance(@date - 1, [:center], {:center_id => center_ids}).group_by{|x| x.center_id}
+
+    # fill out @data with {branch => {center => row}}
+    @data = {}
+    new_outstanding.each{|branch_id, centers|
+      @data[branch_id] ||= {}
+      centers.each{|center_id, loans|        
+        @data[branch_id][center_id] ||= Array.new(11, 0)
+        
+        loans.each{|loan|
+          if old_outstanding.key?(loan.loan_id)
+            # scheduled due
+            @data[branch_id][center_id][2] += old_outstanding[loan.loan_id].actual_outstanding_principal - loan.scheduled_outstanding_principal
+            @data[branch_id][center_id][3] += old_outstanding[loan.loan_id].actual_outstanding_total - old_outstanding[loan.loan_id].actual_outstanding_principal - loan.scheduled_outstanding_total + loan.scheduled_outstanding_principal
+
+            #payments
+            if @payments.key?(loan.loan_id)
+              @data[branch_id][center_id][4] += @payments[loan.loan_id][0][1]
+              @data[branch_id][center_id][5] += @payments[loan.loan_id][0][2]
+            end
+
+            # overdue
+            @data[branch_id][center_id][6] += loan.actual_outstanding_principal - loan.scheduled_outstanding_principal if loan.actual_outstanding_principal > loan.scheduled_outstanding_principal
+            @data[branch_id][center_id][7] += loan.actual_outstanding_total     - loan.scheduled_outstanding_total if loan.actual_outstanding_total > loan.scheduled_outstanding_total 
+
+            #advance collected
+            @data[branch_id][center_id][8] += (-1 * loan.principal_due) if loan.principal_due < 0 and loan.principal_paid > 0
+            @data[branch_id][center_id][8] += (-1 * loan.interest_due) if loan.interest_due < 0 and loan.interest_paid > 0
+          end
+        }
+
+        collected  = @data[branch_id][center_id][8]
+
+        #advance balance
+        new_balance = 0
+        new_balance = new_advance_balances[center_id][0].balance_total if new_advance_balances[center_id]
+        @data[branch_id][center_id][10]  += new_balance
+        
+        # adjusted
+        old_balance = old_advance_balances[center_id] ? old_advance_balances[center_id][0].balance_total : 0
+        @data[branch_id][center_id][9] += old_balance + collected - new_balance
+
+      }
+    }
     render :template => 'dashboard/today'
   end
 

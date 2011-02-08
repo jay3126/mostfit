@@ -1,5 +1,6 @@
 class StaffConsolidatedReport < Report
   attr_accessor :from_date, :to_date, :branch, :center, :branch_id, :center_id, :staff_member_id, :loan_product_id, :funder_id
+  validates_with_method :from_date, :date_should_not_be_in_future
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -21,6 +22,8 @@ class StaffConsolidatedReport < Report
 
     extra     = []
     extra    << "l.loan_product_id = #{loan_product_id}" if loan_product_id
+    extra    << "lh.branch_id in (#{@branch.map{|b| b.id}.join(', ')})" if @branch.length > 0
+    extra    << "lh.center_id in (#{@center.map{|c| c.id}.join(', ')})" if @center.length > 0
     # if a funder is selected
     if @funder
       funder_loan_ids = @funder.loan_ids

@@ -3,9 +3,11 @@ class QuarterConsolidatedReport < Report
   QUARTERS = {1 => [:april, :may, :june], 2 => [:july, :august, :september], 3 => [:october, :november, :december], 4 => [:january, :february, :march]}
   MONTHS  = [:january, :february, :march, :april, :may, :june, :july, :august, :september, :october, :november, :december]
 
+  validates_with_method :from_date, :date_should_not_be_in_future
+
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.min_date
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.new(Date.today.year, Date.today.month-1, -1)
+    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] :(Date.today.month == 1) ? Date.new(Date.today.year-1,12,31):Date.new(Date.today.year, Date.today.month-1,-1)
     @name   = "Report from #{@from_date} to #{@to_date}"
     get_parameters(params, user)
   end
@@ -37,6 +39,8 @@ class QuarterConsolidatedReport < Report
             next if @to_date   < Date.new(y, month_number, 1)
             query = []
             query = ["l.loan_product_id = #{self.loan_product_id}"] if self.loan_product_id
+            query    << "lh.branch_id in (#{@branch.map{|b| b.id}.join(', ')})" if @branch.length > 0
+
             histories = LoanHistory.sum_outstanding_by_month(month_number, y, branch, query)
             next if not histories
             query              << ["lh.branch_id=#{branch.id}"]

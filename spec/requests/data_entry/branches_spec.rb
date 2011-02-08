@@ -4,19 +4,33 @@ given "a branch exists" do
   Branch.all.destroy!
 end
 
-describe "/data_entry/branches" do
+given "an admin user exist" do
+  User.all.destroy!
+  load_fixtures :users
+  response = request url(:perform_login), :method => "PUT", :params => {:login => 'admin', :password => 'password'}
+  response.should redirect
+end
+
+describe "/data_entry/branches", :given => "an admin user exist" do
   describe "GET" do
-    
     before(:each) do
-      u = User.new(:login => 'abcde', :password => 'abcde', :password_confirmation => 'abcde')
-      p u.save
-      request("/login", :method => 'PUT', :params => {:login => 'abcde', :password => 'abcde'})
-      @response = request(resource(:enter_branch))
+      @response = request("/branches/new")
     end
-    
+
     it "responds successfully" do
       @response.should be_successful
     end
   end
 end
 
+describe "/data_entry/branches/edit", :given => "an admin user exist" do
+  describe "PUT" do
+    before(:each) do
+      @response = request("/data_entry/branches/edit")
+    end
+
+    it "responds successsfully" do
+      @response.should be_successful
+    end
+  end
+end

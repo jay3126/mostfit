@@ -1,5 +1,5 @@
 # Go to http://wiki.merbivore.com/pages/init-rb
-
+require 'yaml'
 require 'config/dependencies.rb'
 
 use_orm :datamapper
@@ -14,7 +14,16 @@ Merb::Config.use do |c|
 
   # cookie session store configuration
   c[:session_secret_key]  = '573a2e64628a0656a8149f6f6b802d11bfc74123'  # required for cookie session store
-  c[:session_id_key] = '_mostfit_session_id' # cookie session id key, defaults to "_session_id"
+  c[:session_id_key]      = '_mostfit_session_id' # cookie session id key, defaults to "_session_id"
+  
+  # set cookie expiry
+  begin
+    config = YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml")))
+    c[:session_expiry]      = config[:session_expiry].to_i
+  rescue Exception => e
+    puts e
+    c[:session_expiry]      = 86400
+  end
 end
 
 Merb::BootLoader.before_app_loads do
@@ -33,24 +42,23 @@ Merb::BootLoader.before_app_loads do
   Numeric::Transformer.change_default_format(:mostfit_default)
   require 'config/constants.rb'
   require 'lib/rules'
-#  require 'csv'
   require 'uuid'
   require 'ftools'
   require 'logger'
-
+  require 'dm-pagination'
+  require 'dm-pagination/paginatable'
+  require 'dm-pagination/pagination_builder'
+  require 'lib/string.rb'
+  require 'lib/grapher.rb'
+  require("lib/functions.rb")
+  require("lib/core_ext.rb")
+  
   begin
-    require 'dm-pagination'
-    require 'dm-pagination/paginatable'
-    require 'dm-pagination/pagination_builder'
     require "pdf/writer"
     require "pdf/simpletable"
-    require 'lib/string.rb'
-    require 'lib/grapher.rb'
     require("lib/pdfs/day_sheet.rb")
-    require("lib/functions.rb")
-    require("lib/core_ext.rb")
     PDF_WRITER = true
-  rescue
+  rescue LoadError
     PDF_WRITER = false
     puts "--------------------------------------------------------------------------------"
     puts "--------Do a gem install pdf-writer otherwise pdf generation won't work---------"
@@ -87,6 +95,7 @@ Merb::BootLoader.after_app_loads do
       Payment.send(:add_validator_to_context, {:context => [:default], :if => clause}, [s], DataMapper::Validate::MethodValidator)
     end
   end
+
   Misfit::LoanValidators.instance_methods.map{|m| m.to_sym}.each do |s|
     clause = Proc.new{|t| t.loan_product.loan_validations.include?(s)}
     Loan.descendants.each do |loan|
@@ -107,6 +116,7 @@ Merb::BootLoader.after_app_loads do
 
   Merb.add_mime_type(:pdf, :to_pdf, %w[application/pdf], "Content-Encoding" => "gzip")
   LoanProduct.property(:loan_type, LoanProduct::Enum.send('[]', *Loan.descendants.map{|x| x.to_s}), :nullable => false, :index => true)
+
   begin
     if User.all.empty?
       u = User.new(:login => 'admin', :password => 'password', :password_confirmation => 'password', :role => :admin)
@@ -159,32 +169,8 @@ Merb::BootLoader.after_app_loads do
   rescue
     Merb.logger.info("Couldn't create the voucher, Possibly unable to access the database.")
   end
-  
-#  Mime::Type.register 'application/pdf', :pdf
-  $globals ||= {}
-  begin
-    $globals[:mfi_details] = Mfi.first
-    Merb.logger.info("Loaded MFI details from config/mfi.yml. Loaded on #{Mfi.first.fetched}")
-    if DirtyLoan.start_thread
-      Merb.logger.info("Starting cleaner thread")
-    else
-      Merb.logger.info("Cleaner not enabled")
-    end
-  rescue
-    # create a new mfi_details object anyways
-    $globals[:mfi_details] = Mfi.new(:name => "Mostfit", :fetched => Date.today)
-    Misfit::Config::DateFormat.compile
-    Merb.logger.info("Couldn't not load MFI details from config/mfi.yml. Possibly a wrong YAML file specification.")
-  end
-
-  module DmPagination
-    class PaginationBuilder
-      def url(params)
-        @context.params.delete(:action) if @context.params[:action] == 'index'
-        @context.url(@context.params.merge(params).reject{|k,v| k=="_message"})
-      end
-    end
-  end
+    
+  Mfi.activate
 
   if defined?(PhusionPassenger)
     PhusionPassenger.on_event(:starting_worker_process) do |forked|
@@ -192,9 +178,6 @@ Merb::BootLoader.after_app_loads do
         DirtyLoan.start_thread
       end
     end
-  end
-  
-  # change default format to whatever is selected
-  Mfi.first.set_currency_format
+  end  
 end
 

@@ -51,7 +51,6 @@ class RuleBook
       client = obj.first.client_id > 0 ? obj.first.client : obj.first.loan.client
       branch  = client.center.branch
       date = obj.first.loan.disbursal_date
-
       credit_accounts, debit_accounts  = {}, {}
       obj.each{|p|  
         rule = if p.type==:fees
