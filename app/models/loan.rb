@@ -14,9 +14,9 @@ class Loan
   property :id,                             Serial
   property :discriminator,                  Discriminator, :nullable => false, :index => true
 
-  property :amount,                         Integer, :nullable => false, :index => true  # this is the disbursed amount
-  property :amount_applied_for,             Integer, :index => true
-  property :amount_sanctioned,              Integer, :index => true
+  property :amount,                         Float, :nullable => false, :index => true  # this is the disbursed amount
+  property :amount_applied_for,             Float, :index => true
+  property :amount_sanctioned,              Float, :index => true
 
   property :interest_rate,                  Float, :nullable => false, :index => true
   property :installment_frequency,          Enum.send('[]', *INSTALLMENT_FREQUENCIES), :nullable => false, :index => true
@@ -160,8 +160,8 @@ class Loan
     [obj.save, obj]
   end
 
-  def is_valid_loan_product_amount; is_valid_loan_product(:amount); end
-  def is_valid_loan_product_interest_rate; is_valid_loan_product(:interest_rate); end
+  def is_valid_loan_product_amount; true; end #is_valid_loan_product(:amount); end
+  def is_valid_loan_product_interest_rate; true; end #is_valid_loan_product(:interest_rate); end
   def is_valid_loan_product_number_of_installments; is_valid_loan_product(:number_of_installments); end
 
   def is_valid_loan_product(method)
@@ -189,7 +189,7 @@ class Loan
       loan_attr = loan_attr*100 if method==:interest_rate
       remainder = loan_attr.remainder(product_attr)
       remainder = remainder/100 if method==:interest_rate
-      return  [false, "#{method.to_s.capitalize} should be in multiples of #{product_attr}"]  if not loan_attr or remainder > EPSILON
+      return  [false, "#{method.to_s.capitalize} should be in multiples of #{product_attr}"]  if not loan_attr or remainder > 0
     end
     return true
   end
