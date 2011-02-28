@@ -110,6 +110,9 @@ class Searches < Application
     elsif property.type==DataMapper::Types::Boolean
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]", 
                     :collection => [["true", "yes"], ["false", "no"]], :prompt => "Choose #{property.name}", :selected => value)
+    elsif property.type == DataMapper::Types::Discriminator
+      return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]",
+                    :collection => property.model.descendants.to_a.map{|e| [e.to_s, e.to_s]}, :prompt => "Choose #{property.name}", :selected => value)      
     elsif property.type.class==Class
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]", 
                     :collection => property.type.flag_map.to_a, :prompt => "Choose #{property.name}", :selected => value)

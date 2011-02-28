@@ -1,7 +1,7 @@
 class Application < Merb::Controller
-  before :ensure_authenticated
-  before :ensure_password_fresh
-  before :ensure_can_do
+#  before :ensure_authenticated
+#  before :ensure_password_fresh
+#  before :ensure_can_do
   before :insert_session_to_observer
   before :add_collections, :only => [:index, :show]
   
@@ -19,7 +19,13 @@ class Application < Merb::Controller
 
   def ensure_can_do
     @route = Merb::Router.match(request)
-    raise NotPrivileged unless session.user.can_access?(@route[1], params)
+    unless session.user and session.user.can_access?(@route[1], params)
+      raise NotPrivileged
+    end
+  end
+
+  def determine_layout
+    return params[:layout] if params[:layout] and not params[:layout].blank?
   end
 
   def render_to_pdf(options = nil)

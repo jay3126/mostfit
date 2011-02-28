@@ -3,6 +3,8 @@ class Browse < Application
   before :display_from_cache, :only => [:hq_tab]
   after  :store_to_cache,     :only => [:hq_tab]
   
+  Line = Struct.new(:ip, :date_time, :method, :model, :url, :status, :response_time)
+  
   def index
     render :template => @template
   end
@@ -49,11 +51,11 @@ class Browse < Application
 
     Payment.all(:type => :fees, "client.center_id" => center_ids, :received_on.lt => @date).aggregate(:loan_id, :amount.sum).each{|fp|
       @fees_due[loans[fp[0]]] -= fp[1]
-    }
+    } if center_ids.length>0
     
     Payment.all(:type => :fees, :received_on => @date, "client.center_id" => center_ids).aggregate(:loan_id, :amount.sum).each{|fp|
-     @fees_paid[loans[fp[0]]] += fp[1]
-    }
+      @fees_paid[loans[fp[0]]] += fp[1]
+    } if center_ids.length>0
 
     @disbursals = {}
     @disbursals[:scheduled] = LoanHistory.all("loan.scheduled_disbursal_date" => @date, :date => @date).aggregate(:center_id, :scheduled_outstanding_principal.sum).to_hash
@@ -78,9 +80,10 @@ class Browse < Application
     @centers  = @centers.map{|c| [c.id, c]}.to_hash
 
     #get payments done on @date in format of {<loan_id> => [<principal>, <interest>]}
+    @payments = {}
     @payments = LoanHistory.all(:date => @date, :center_id => center_ids).aggregate(:loan_id, :principal_paid.sum, :interest_paid.sum).group_by{|x| 
       x[0]
-    }
+    } if center_ids.length > 0
 
     #advance balance
     new_advance_balances = LoanHistory.advance_balance(@date, [:center],   {:center_id => center_ids}).group_by{|x| x.center_id}
@@ -129,6 +132,31 @@ class Browse < Application
       }
     }
     render :template => 'dashboard/today'
+  end
+
+  # method to parse log file and show activity. 
+  def show_log
+    @@models ||=  DataMapper::Model.descendants.map{|d| [d.to_s.snake_case.pluralize, d]}.to_hash
+    @@not_reported_controllers ||= ["merb_auth_slice_password/sessions", "exceptions", "entrance", "login", "searches"]
+    @lines = []
+    ignore_regex = /\/images|\/javascripts|\/stylesheets|\/open-flash-chart|\/searches|\/dashboard|\/graph_data|\/browse/
+    `tail -500 log/#{Merb.env}.log`.split(/\n/).reverse.each{|line|
+      next if ignore_regex.match(line)
+      ip, date_time, timezone, method, uri, http_type, status, size, response_time  = line.strip.gsub(/(\s\-\s)|\[|\]|\"/, "").split(/\s/).reject{|x| x==""}
+      uri = URI.parse(uri)
+      method = method.to_s.upcase || "GET"
+      request = Merb::Request.new(
+                                  Merb::Const::REQUEST_PATH => uri.path,
+                                  Merb::Const::REQUEST_METHOD => method,
+                                  Merb::Const::QUERY_STRING => uri.query ? CGI.unescape(uri.query) : "")
+      route = Merb::Router.match(request)[1] rescue nil
+      route.merge!(uri.query.split("&").map{|x| x.split("=")}.to_hash) if uri.query
+
+      next if not route[:controller] or @@not_reported_controllers.include?(route[:controller])
+      model = @@models[route[:controller]] if @@models.key?(route[:controller])
+      @lines.push(Line.new(ip, date_time, method.downcase.to_sym, model, route, status.to_i, response_time.split(/\//)[0]))
+    }
+    render
   end
 
   private

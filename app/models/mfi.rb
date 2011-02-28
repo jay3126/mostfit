@@ -101,7 +101,6 @@ class Mfi
   end
   
   def set_variables
-    Merb::Config.session_expiry = Mfi.first.session_expiry if Mfi.first.session_expiry
     Misfit::Config::DateFormat.compile
     set_currency_format
     DirtyLoan.start_thread

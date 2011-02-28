@@ -82,9 +82,10 @@ class Loan
   belongs_to :loan_utilization
   belongs_to :verified_by,               :child_key => [:verified_by_user_id],                :model => 'User'
 
-  has n, :history,                                                                            :model => 'LoanHistory'
+  has n, :loan_history,                                                                       :model => 'LoanHistory'
   has n, :payments
   has n, :audit_trails,       :child_key => [:auditable_id], :auditable_type => "Loan"
+  has n,  :portfolio_loans
   #validations
 
   validates_present      :client, :funding_line, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
@@ -904,7 +905,7 @@ class Loan
   def update_history_bulk_insert
     # this gets the history from calculate_history and does one single insert into the database
     t = Time.now
-    Merb.logger.error! "could not destroy the history" unless self.history.destroy!
+    Merb.logger.error! "could not destroy the history" unless self.loan_history.destroy!
     d0 = Date.parse('2000-01-03')
     sql = %Q{ INSERT INTO loan_history(loan_id, date, status, scheduled_outstanding_principal, scheduled_outstanding_total,
                                        actual_outstanding_principal, actual_outstanding_total, current, amount_in_default, client_group_id, center_id, client_id, 
@@ -1216,6 +1217,20 @@ class BulletLoan < Loan
   def scheduled_principal_for_installment(number = 1)
     amount
   end
+
+  def scheduled_interest_up_to(date)
+    return scheduled_interest_for_installment if date > scheduled_first_payment_date
+    scheduled_interest_for_installment * (1 - (scheduled_first_payment_date - date) / (scheduled_first_payment_date - disbursal_date||scheduled_disbursal_date))
+  end
+
+  def pay_prorata(total, received_on)
+    #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
+    int  = scheduled_interest_up_to(received_on)
+    int -= interest_received_up_to(received_on)
+    prin = total - int
+    [int, prin]
+  end
+
   
   private
   def set_installments_to_1

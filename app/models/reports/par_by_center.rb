@@ -15,11 +15,11 @@ class ParByCenterReport < Report
     extra = []    
     extra << "more than #{late_by_more_than_days} days" if late_by_more_than_days
     extra << "less than #{late_by_less_than_days} days" if late_by_less_than_days
-    "PAR as on #{@date}: late by #{extra.join(' and ')}"
+    "PAR by center as on #{@date}: late by #{extra.join(' and ')}"
   end
 
   def self.name
-    "PAR Report"
+    "PAR Report by center"
   end
 
   def include_late_day?(late_days)    

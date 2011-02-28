@@ -33,7 +33,7 @@ Merb::Router.prepare do
     end
   end
   resources :areas
-  resources :targets
+  resources :targets, :id => %r(\d+)
   resources :holidays
   resources :fees
   resources :verifications

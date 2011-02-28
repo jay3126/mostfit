@@ -1,5 +1,10 @@
 class Users < Application
 
+  def show(id)
+    u = User.get(id)
+    u ? u : nil
+  end
+
   def index
     @users = User.all
     display @users
@@ -88,9 +93,12 @@ class Users < Application
     end
     render
   end
-  
+ 
+=begin 
   private
   def ensure_is_admin
-    raise Unauthenticted unless session.user.id == 1
+    raise Unauthenticted unless session.user.id == 3
   end
+=end
+
 end # Users

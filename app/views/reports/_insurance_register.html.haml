@@ -40,7 +40,8 @@
       %td
         = client.name
       %td
-        = client.gender.to_s.capitalize
+        - gender = client.respond_to?(:gender) ? client.gender.to_s.capitalize : ""  
+        = gender
       %td
         - age = client.date_of_birth ? (Time.now.year - client.date_of_birth.year) : "" 
         = age
