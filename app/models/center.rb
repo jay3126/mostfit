@@ -2,10 +2,14 @@ class Center
   include DataMapper::Resource
   include DateParser
   attr_accessor :meeting_day_change_date
+
+  before :save, :convert_blank_to_nil
   
   DAYS = [:none, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
   after :save, :handle_meeting_date_change
+  before :save, :set_meeting_change_date
   before :create, :set_meeting_change_date
+  before :valid?, :convert_blank_to_nil
 
   property :id,                   Serial
   property :name,                 String, :length => 100, :nullable => false, :index => true
@@ -37,8 +41,9 @@ class Center
 
   def self.from_csv(row, headers)
     hour, minute = row[headers[:center_meeting_time_in_24h_format]].split(":")
-    branch       = Branch.first(:name => row[headers[:branch_name]].strip)
-    staff_member = StaffMember.first(:name => row[headers[:staff_name]])
+    branch       = Branch.first(:name => row[headers[:branch]].strip)
+    staff_member = StaffMember.first(:name => row[headers[:manager]])
+
     creation_date = ((headers[:creation_date] and row[headers[:creation_date]]) ? row[headers[:creation_date]] : Date.today)
     obj = new(:name => row[headers[:center_name]], :meeting_day => row[headers[:meeting_day]].downcase.to_s.to_sym, :code => row[headers[:code]],
               :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
@@ -181,18 +186,23 @@ class Center
 
   def handle_meeting_date_change
     self.meeting_day_change_date = parse_date(self.meeting_day_change_date) if self.meeting_day_change_date.class==String and not self.meeting_day_change_date.blank?
-    return if not self.meeting_day_change_date or self.meeting_day_change_date.blank?
-    date = self.meeting_day_change_date||Date.today
+    if not self.meeting_day_change_date or self.meeting_day_change_date.blank? or not self.meeting_day_change_date.is_a?(Date)
+      self.meeting_day_change_date = Date.today
+    end
+
+    date = self.meeting_day_change_date
 
     if not CenterMeetingDay.first(:center => self)
       CenterMeetingDay.create(:center_id => self.id, :valid_from => creation_date||date, :meeting_day => self.meeting_day)
     elsif self.meeting_day != self.meeting_day_for(date)
       if prev_cm = CenterMeetingDay.first(:center_id => self.id, :valid_from.lte => date, :order => [:valid_from.desc])
         # previous CMD should be valid upto date - 1
-        prev_cm.valid_upto = date - 1
+        prev_cm
+        prev_cm.valid_upto = date - 1        
+        prev_cm
         prev_cm.save!
       end
-
+      
       # next CMD's valid from date should be valid upto limit for this CMD
       if next_cm = CenterMeetingDay.first(:center => self, :valid_from.gt => date, :order => [:valid_from])
         valid_upto = next_cm.valid_from - 1
@@ -213,28 +223,35 @@ class Center
 
 
   def set_meeting_change_date
-    self.meeting_day_change_date = self.creation_date
+    self.meeting_day_change_date = self.creation_date if self.new?
   end
 
   def get_meeting_date(date, direction)
-    return 1 if meeting_day == :none
     number = 1
     if direction == :next
       nwday = (date + number).wday
-      while nwday != Center.meeting_days.index(meeting_day_for(date + number))
+      while (meet_day = Center.meeting_days.index(meeting_day_for(date + number)) and meet_day > 0 and nwday != meet_day)
         number += 1
         nwday = (date + number).wday
         nwday = 7 if nwday == 0
       end
     else
-      nwday = (date + number).wday
-      while (date - number).wday != Center.meeting_days.index(meeting_day_for(date - number))
+      nwday = (date - number).wday
+      while (meet_day = Center.meeting_days.index(meeting_day_for(date - number)) and meet_day > 0 and nwday != meet_day)
         number += 1
         nwday = (date - number).wday
         nwday = 7 if nwday == 0
       end
     end
     return number
+  end
+
+  def convert_blank_to_nil
+    self.attributes.each{|k, v|
+      if v.is_a?(String) and v.empty? and self.class.properties.find{|x| x.name == k}.type==Integer
+        self.send("#{k}=", nil)
+      end
+    }
   end
 
 end
