@@ -24,8 +24,8 @@ class Loans < Application
   def new
     only_provides :html
     if params[:product_id] and @loan_product = LoanProduct.is_valid(params[:product_id])      
-      if Loan.descendants.map{|x| x.to_s}.include?(@loan_product.loan_type)
-        klass = Kernel::const_get(@loan_product.loan_type)
+      if Loan.descendants.map{|x| x.to_s}.include?(@loan_product.loan_type_string)
+        klass = Kernel::const_get(@loan_product.loan_type_string)
         @loan = klass.new
         set_insurance_policy(@loan_product)
       end
@@ -42,7 +42,7 @@ class Loans < Application
     raise BadRequest unless @loan_product
     @loan = klass.new(attrs)
     @loan.loan_product = @loan_product
-    if  @loan.save
+    if @loan.save
       if params[:return]
         redirect(params[:return], :message => {:notice => "Loan '#{@loan.id}' was successfully created"})
       else
@@ -114,7 +114,6 @@ class Loans < Application
       @insurance_policy.client = @loan.client
       @insurance_policy.attributes = attrs.delete(:insurance_policy)
     end
-    
     @loan.attributes = attrs
     @loan_product = @loan.loan_product
     @loan.insurance_policy = @insurance_policy if @loan_product.linked_to_insurance and @insurance_policy   
@@ -226,6 +225,7 @@ class Loans < Application
     end
   end
 
+
   def reject
     if request.method == :post
       @errors = []
@@ -276,7 +276,9 @@ class Loans < Application
       if @loan.write_off(hash[:written_off_on], hash[:written_off_by_staff_id])
         redirect(resource(@branch, @center, @client), :message => {:notice => "Loan was successfully written off"})
       else
-        render
+        message[:error] = "Please select staff member who writes off the loan and date on which it is written off"
+        @payments = @loan.payments(:order => [:received_on, :id])
+        display [@loan, @payments], 'payments/index'
       end
     end
   end
@@ -333,15 +335,23 @@ class Loans < Application
   
   def misc(id)
     @loan = Loan.get(id)
+    @applicable_fee = ApplicableFee.new(:applicable_type => 'Loan', :applicable_id => @loan.id)
     request.xhr? ? render(:layout => false) : render
   end
   
   def update_utilization(id)
     @loan =  Loan.get(id)    
-    if @loan.update!(:loan_utilization_id => params[:loan][:loan_utilization_id])
+    @loan.history_disabled = true
+    if params[:loan] and params[:loan][:loan_utilization_id] and not params[:loan][:loan_utilization_id].blank?
+      @loan.loan_utilization_id = params[:loan][:loan_utilization_id]
+    else
+      @loan.loan_utilization_id = nil
+    end
+    
+    if @loan.save_self
       request.xhr? ? render("Saved loan utilization", :layout => false) : redirect(resource(@loan))
     else
-      request.xhr? ? render(@loan.errors.to_a.map{|x| x.join(":")}.join(", "), :layout => false, :status => 400) : render(resource(@loan, :edit))
+      request.xhr? ? render(@loan.errors.to_a.map{|x| x.join(":")}.join(", "), :layout => false) : render(resource(@loan, :edit))
     end
   end
 
@@ -352,11 +362,59 @@ class Loans < Application
     redirect("/loans/#{loan.id}")
   end
 
+  def prepay(id)
+    @loan = Loan.get(id)
+    raise NotFound unless @loan
+    if request.method == :get
+      display @loan, :layout => layout?
+    else
+      staff = StaffMember.get(params[:received_by])
+      raise ArgumentError.new("No staff member selected") unless staff
+      raise ArgumentError.new("No applicable fee for penalty") if (params[:fee].blank? and (not params[:penalty_amount].blank?))
+      @date = Date.parse(params[:date])
 
-  # def make_loan_utilization
-    
-  #   render
-  # end
+      # make new applicable fee for the penalty
+      pmt_params = {:received_by => staff, :loan_id => @loan.id, :created_by => session.user, :client => @loan.client, :received_on => @date}
+      if params[:penalty_amount].to_i > 0
+        af = ApplicableFee.new(:amount => params[:penalty_amount], :applicable_type => 'Loan', :applicable_id => @loan.id, :fee_id => params[:fee], :applicable_on => @date)
+        af.save
+        penalty_pmt =  Payment.new({:amount => params[:penalty_amount].to_f, :fee_id => params[:fee], :comment => af.fee.name, :type => :fees}.merge(pmt_params))
+      end
+      if params[:fees].blank?
+        fee_payments = []
+      else
+        fee_payments = params[:fees].map do |k,v| 
+          fee = Fee.get(k)
+          Payment.new({:amount => v.to_f, :fee => fee, :comment => fee.name, :type => :fees}.merge(pmt_params))
+        end.compact
+      end
+
+      ppmt = Payment.new({:amount => params[:principal].to_f, :type => :principal}.merge(pmt_params))
+      ipmt = Payment.new({:amount => params[:interest].to_f, :type => :interest}.merge(pmt_params))
+      pmts = (fee_payments + [penalty_pmt, ppmt, ipmt].compact).select{|p| p.amount > 0}
+
+      if pmts.blank?
+        success = true
+      else
+        success, @p, @i, @f = @loan.make_payments(pmts)
+      end
+            
+      if success
+        if params[:writeoff]
+          @loan.preclosed_on = @date
+          @loan.preclosed_by = staff
+        end
+        @loan.save
+        @loan.history_disabled = false
+        # update history after reloading object
+        Loan.first(:id => @loan.id).reload.update_history(true)
+        redirect url_for_loan(@loan), :message => {:notice => "Loan has been prepayed"} 
+      else
+        af.destroy! if af
+        render :layout => layout?
+      end
+    end
+  end
 
   private
   def get_context
@@ -382,8 +440,13 @@ class Loans < Application
   # the loan is not of type Loan of a derived type, therefor we cannot just assume its name..
   # this method gets the loans type from a hidden field value and uses that to get the attrs
   def get_loan_and_attrs   # FIXME: this is a code dup with data_entry/loans
-    loan_product = LoanProduct.get(params[:loan_product_id])
-    attrs = params[loan_product.loan_type.snake_case.to_sym]
+    if params[:id] and not params[:id].blank?
+      loan =  Loan.get(params[:id])      
+      attrs = params[loan.discriminator.to_s.snake_case.to_sym]
+    else
+      loan_product = LoanProduct.get(params[:loan_product_id])
+      attrs = params[loan_product.loan_type_string.snake_case.to_sym]
+    end
     attrs[:client_id] = params[:client_id] if params[:client_id]
     attrs[:insurance_policy] = params[:insurance_policy] if params[:insurance_policy]
     raise NotFound if not params[:loan_type]

@@ -11,6 +11,10 @@
   - account_id = (params[report] and params[report][:account_id] and not params[report][:account_id].blank?) ? params[report][:account_id] : nil
   - type_of_target = (params[report] and params[report][:type_of_target] and not params[report][:type_of_target].blank?) ? params[report][:type_of_target] : nil
   - type_of_journal = (params[report] and params[report][:type_of_journal] and not params[report][:type_of_journal].blank?) ? params[report][:type_of_journal] : nil
+  - month = (params[report] and params[report][:month] and not params[report][:month].blank?) ? params[report][:month] : nil
+  - chosen_year = (params[report] and params[report][:chosen_year] and not params[report][:chosen_year].blank?) ? params[report][:chosen_year] : nil
+  - cash_account = (params[report] and params[report][:cash_account] and not params[report][:cash_account].blank?) ? params[report][:cash_account] : nil
+  - bank_account = (params[report] and params[report][:bank_account] and not params[report][:bank_account].blank?) ? params[report][:bank_account] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -51,6 +55,22 @@
         |
         Journal Type:
         = JournalType.get(type_of_journal).name
+      - if month
+        |
+        Month:
+        = MONTHS[month.to_i]
+      - if chosen_year
+        |
+        Year:
+        = chosen_year
+      - if cash_account
+        |
+        Account:
+        = Account.get(cash_account).name
+      - if bank_account
+        |
+        Account:
+        = Account.get(bank_account).name
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed' : ''}"}
@@ -88,6 +108,14 @@
               Absent by more than:
               = text_field(:absent_more_than, :size => 3)
               days
+          - if @report.respond_to?(:month)
+            %td
+              Month:
+              = select(:month, :collection => MONTHS.map{|m| [MONTHS.index(m), m.to_s]}, :selected => month)
+          - if @report.respond_to?(:chosen_year)
+            %td
+              Year:
+              = select(:chosen_year, :collection => ["2010", "2011"])
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:area_id)
@@ -112,12 +140,12 @@
               = select(:funder_id , :collection => get_accessible_funders(@user), :include_blank => true, :selected => funder_id, :id => "funder_selector")
           - if @report.respond_to?(:funding_line_id)
             %td
-            /  Funding Line:
-            /  = select(:funding_line_id, :collection => get_accessible_funding_lines(funder_id, @user), :include_blank => true, :selected => funding_line_id, :id => "funding_line_selector")
+              Funding Line:
+              = select(:funding_line_id, :collection => get_accessible_funding_lines(funder_id, @user), :include_blank => true, :selected => funding_line_id, :id => "funding_line_selector")
           - if @report.respond_to?(:account_id)
             %td
               Account:
-              = select(:account_id, :collection => get_accessible_accounts, :value_method => :id, :text_method => :name, :include_blank => true, :selected => branch_id, :id => "account_selector")
+              = select(:account_id, :collection => get_accessible_accounts(branch_id), :include_blank => true, :selected => account_id, :id => "account_selector")
           - if @report.respond_to?(:include_past_data)
             %td
               Include past data ?
@@ -152,6 +180,14 @@
             %td
               Journal Type:
               = select(:type_of_journal, :collection => JournalType.all.map{|m| [m.id, m.name]}, :prompt => "All Journal Types", :selected => type_of_journal, :include_blank => true)
+          - if @report.respond_to?(:cash_account)
+            %td
+              Account:
+              = select(:cash_account, :collection => get_accessible_cash_accounts(branch_id), :include_blank => true, :selected => cash_account, :id => "cash_account_selector")
+          - if @report.respond_to?(:bank_account)
+            %td
+              Account:
+              = select(:bank_account, :collection => get_accessible_bank_accounts(branch_id), :include_blank => true, :selected => bank_account, :id => "bank_account_selector")
         %tr
           %td
             %div{:style => "float: left"}

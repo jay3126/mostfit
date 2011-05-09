@@ -1,0 +1,12 @@
+%h1
+  Edit Applicable Fee
+
+= error_messages_for @applicable_fee
+
+= form_for(@applicable_fee, :action => url(:applicable_fee, @applicable_fee)) do
+  = partial :fields
+  = submit "Update"
+
+= link_to 'Show', url(:applicable_fee, @applicable_fee)
+|
+= link_to 'Back', url(:applicable_fees)

@@ -154,7 +154,8 @@ describe Payment do
   it "should not be deleteable if verified" do    
     payment = Payment.first(:loan_id => @loan.id)
     payment.verified_by = @user
-    payment.save.should be_true
+    payment.should be_valid
+    payment.save
     payment.deleted_by=@user
     payment.deleted_at=Date.parse("2009-02-02")
     payment.save.should be_false
@@ -165,7 +166,7 @@ describe Payment do
     
     payment.deleted_by=@user
     payment.deleted_at=Date.parse("2009-02-02")
-    payment.save.should be_true
+    payment.should be_valid
   end
 
   it "should give correct payment collected for" do

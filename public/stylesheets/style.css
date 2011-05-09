@@ -1085,3 +1085,52 @@ ul.bookmarks li{
     font-size: 1.25em;
     padding-top: 10px;
 }
+
+.help {
+  background-color: #D4EE90;
+  margin: 5px 0px;
+  padding: 15px;
+  font-size: 1.4em;
+  border: solid 1px green;
+}
+
+.help h3 {
+  color: black;
+}
+
+td.left-numeric {
+  border-left: solid 1px black;
+}  
+
+td.right-numeric {
+  border-right: solid 1px black;
+}  
+tr.even td.paid {
+  background: #E8FFD1;
+}
+tr.odd td.paid {
+  background: #E0F2CE;
+}
+
+tr.odd td.due {
+  background: #F2CED3;
+}
+tr.even td.due {
+  background: #FFD1D8;
+}
+
+
+th.left-numeric {
+  border-left: solid 1px black;
+}  
+
+th.right-numeric {
+  border-right: solid 1px black;
+}  
+th.paid {
+  background: #DBFFB8;
+}
+th.due {
+  background: lightpink;
+}
+

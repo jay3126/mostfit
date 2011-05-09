@@ -2,6 +2,7 @@ Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   resources :expense_vouchers
   resources :expense_heads
+  resources :monthly_targets
   resources :account_balances
   resources :bookmarks
   resources :branch_diaries
@@ -13,6 +14,7 @@ Merb::Router.prepare do
   resources :journals, :id => %r(\d+)
   resources :loan_utilizations
   resources :rule_books
+  resources :applicable_fees
   resources :account_types
   resources :accounts, :id => %r(\d+) do
     resources :accounting_periods do
@@ -45,7 +47,7 @@ Merb::Router.prepare do
   resources :verifications
   resources :ledger_entries
   resources :loan_products
-  resources :users
+  resources :users, :id => %r(\d+)
   resources :staff_members
   resources :clients, :id => %r(\d+) do
     resources :guarantors
@@ -57,7 +59,7 @@ Merb::Router.prepare do
     resources :grts
     resources :cgts
   end
-  resources :loans, :id => %r(\d+)
+  resources :loans, :id => %r(\d+), :member => {:prepay => [:get, :put]} 
   resources :centers, :id => %r(\d+)
   resources :payments
   resources :villages
@@ -68,7 +70,7 @@ Merb::Router.prepare do
       resources :clients do
         resources :payments
         resources :comments        
-        resources :loans  do
+        resources :loans do
           resources :payments
         end
       end
@@ -130,6 +132,7 @@ Merb::Router.prepare do
   match('/rules/get').to(:controller => 'rules', :action => 'get') 
   match('/login.xml').to(:controller => 'merb_auth_slice_password/sessions', :action => 'update', :format => 'xml') 
   match('/accounts/:account_id/accounting_periods/:accounting_period_id/account_balances/:id/verify').to(:controller => 'account_balances', :action => 'verify').name(:verify_account_balance)
+  match("/accounting_periods/:id/period_balances").to(:controller => "accounting_periods", :action => "period_balances").name(:period_balances)
   default_routes
   match('/').to(:controller => 'entrance', :action =>'root')
 end

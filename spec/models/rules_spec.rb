@@ -165,7 +165,7 @@ describe Rules do
   end
 
   it "should be able to handle rule on branch (model)" do
-    h = {:name => :number_of_branches_in_area,
+    h = {:name => :number_of_branches_in_area, :active => true,
       :model_name => Branch, :on_action => :create,
       :condition => {:var1 => "area.branches.count", :var2 => 0, :binaryoperator => "",
         :comparator => :less_than, :const_value => 2} }
@@ -203,7 +203,7 @@ describe Rules do
   end
 
   it "should be able to remove a rule" do
-    h = {:name => :number_of_branches_in_area,
+    h = {:name => :number_of_branches_in_area, :active => true,
       :model_name => Branch, :on_action => :create,
       :condition => {:var1 => "area.branches.count", :var2 => 0, :binaryoperator => "",
         :comparator => :less_than, :const_value => 2} }
@@ -244,7 +244,7 @@ describe Rules do
   end
 
   it "should be able to handle rules on center model" do
-    h = {:name => :max_centers_in_area, :model_name => Center, :on_action => :create,
+    h = {:name => :max_centers_in_area, :model_name => Center, :on_action => :create, :active => true,
       :condition => { :linking_operator => :not,
         :first_condition => { :var1 => "branch.area.branches.centers.count",
           :var2 => 0, :binaryoperator => "", :comparator => :greater_than_equal,
@@ -301,7 +301,7 @@ describe Rules do
   end
 
   it "should handle rule on Area model" do
-    h = {:name => :area_should_be_part_of_region,
+    h = {:name => :area_should_be_part_of_region, :active => true,
       :model_name => Area, :on_action => :create,
       :condition => {:var1 => "region", :var2 => 0, :comparator => :not, :const_value => nil}}
     Mostfit::Business::Rules.add h
@@ -324,7 +324,7 @@ describe Rules do
   end
 
   it "should handle rule on Region model" do
-    h = {:name => :max_areas_in_region, :model_name => Region, :on_action => :save,
+    h = {:name => :max_areas_in_region, :model_name => Region, :on_action => :save, :active => true,
       :condition => { :var1 => "areas.count", :var2 => 0, :binaryoperator => "",
         :comparator => :less_than, :const_value => 3} }
     Mostfit::Business::Rules.add h
@@ -348,7 +348,7 @@ describe Rules do
 
   it "should handle string comparison rule" do
     forbidden_region_name = "lalbagh"
-    h = {:name => :name_of_region, :model_name => Region, :on_action => :save,
+    h = {:name => :name_of_region, :model_name => Region, :on_action => :save, :active => true,
       :condition => { :var1 => "name", :var2 => 0, :binaryoperator => "",
         :comparator => :not, :const_value => forbidden_region_name} }
     Mostfit::Business::Rules.add h
@@ -364,7 +364,7 @@ describe Rules do
 
   it "should handle date comparison rule" do
     forbidden_date = Date.parse("2009-01-01")
-    h = {:name => :creation_date_of_region, :model_name => Region, :on_action => :save,
+    h = {:name => :creation_date_of_region, :model_name => Region, :on_action => :save, :active => true,
       :condition => { :var1 => "creation_date", :var2 => 0, :binaryoperator => "",
         :comparator => :not, :const_value => forbidden_date} }
     Mostfit::Business::Rules.add h
@@ -381,7 +381,7 @@ describe Rules do
 
   it "should handle two variable date comparison rule" do
     date1 = Date.today
-    h = {:name => :creation_date_of_region, :model_name => Region, :on_action => :save,
+    h = {:name => :creation_date_of_region, :model_name => Region, :on_action => :save, :active => true,
       :condition => { :var1 => "creation_date", :var2 => "manager.creation_date",
         :binaryoperator => "minus", :comparator => :greater_than, :const_value => 1} }
     Mostfit::Business::Rules.add h
@@ -399,7 +399,7 @@ describe Rules do
 
 
   it "TESTCASE01:should not permit more than 5 clients in a client group" do
-    h = {:name => :max_clients_in_a_group, :model_name => Client, :on_action => :save,
+    h = {:name => :max_clients_in_a_group, :model_name => Client, :on_action => :save, :active => true,
       :condition => { :var1 => "client_group.clients.count", :var2 => 0,
         :binaryoperator => "", :comparator => :less_than_equal , :const_value => 5} }
     Mostfit::Business::Rules.add h
@@ -498,7 +498,7 @@ describe Rules do
   end
 
   it "(TESTCASE02) should not allow less than 3 clients in group" do     
-    h = {:name => :min_clients_limit_in_group, :model_name => Loan, :on_action => :save,
+    h = {:name => :min_clients_limit_in_group, :model_name => Loan, :on_action => :save, :active => true,
       :condition => { :var1 => "client.client_group.clients.count", :var2 => 0,
         :binaryoperator => "", :comparator => :greater_than_equal, :const_value => 3} }
     Mostfit::Business::Rules.add h
@@ -535,7 +535,7 @@ describe Rules do
 
 
   it "(TESTCASE03) should not disburse loan if no of clients in group less than 3" do     
-    h = {:name => :min_clients_limit_in_group, :model_name => Loan, :on_action => :save,
+    h = {:name => :min_clients_limit_in_group, :model_name => Loan, :on_action => :save, :active => true,
       :condition => { :var1 => "client.client_group.clients.count", :var2 => 0,
         :binaryoperator => "", :comparator => :greater_than_equal, :const_value => 3} }
     Mostfit::Business::Rules.add h
@@ -555,7 +555,7 @@ describe Rules do
 
   it "(TESTCASE04) should not allow centers of branch1 to have more than 2 clients while centers of other branches can have as many clients as they want" do
     branch1_name = "Dummy Branch1"
-    h = {:name => :max_clients_limit_for_a_particular_branch, :model_name => Client, :on_action => :save,
+    h = {:name => :max_clients_limit_for_a_particular_branch, :model_name => Client, :on_action => :save, :active => true,
       :precondition => { :var1 => "center.branch.name", :comparator => :equal, :var2 => 0,
         :const_value => branch1_name },
       :condition => { :var1 => "center.branch.centers.clients.count", :var2 => 0,
@@ -682,7 +682,7 @@ describe Rules do
 
   it "(TESTCASE05) branch manager should not be able to disburse more than 10K loan" do     
     
-    h = {:name => :should_not_disburse_more_than_10k_loan, :model_name => Loan, :on_action => :save, 
+    h = {:name => :should_not_disburse_more_than_10k_loan, :model_name => Loan, :on_action => :save,  :active => true,
       :precondition => { :var1 => "disbursed_by_staff_id", :var2 => 0,
         :binaryoperator => "", :comparator => :equal,:const_value => @branch_manager.id},
       :condition => { :var1 => "amount_sanctioned", :var2 => 0 ,:binaryoperator => "", :comparator => :less_than_equal ,:const_value =>10000 }}
@@ -710,7 +710,7 @@ describe Rules do
   end
 
   it "(TESTCASE06) loan should not be disbursed if it is older than 5 days" do     
-    h = {:name => :should_not_disburse_5days_old_loan, :model_name => Loan, :on_action => :save,
+    h = {:name => :should_not_disburse_5days_old_loan, :model_name => Loan, :on_action => :save, :active => true,
       :condition => { :var1 => "scheduled_disbursal_date", :var2 => 0,
         :binaryoperator => "", :comparator => :minus, :var3 => "applied_on",:binaryoperator => "", :comparator => :less_than_equal,:const_value => 5 } }
     Mostfit::Business::Rules.add h
@@ -752,7 +752,7 @@ describe Rules do
     @area.save
     @area.should be_valid
 
-    h = {:name => :should_not_disburse_more_than_50k_loan, :model_name => Loan, :on_action => :save,
+    h = {:name => :should_not_disburse_more_than_50k_loan, :model_name => Loan, :on_action => :save, :active => true,
       #       :precondition => { :var1 => "disbursed_by_staff_id", :var2 => 0, #why this (pre)condition, it looks meaningless to me - ashishb
       #         :binaryoperator => "", :comparator => :equal,:const_value => 1},
       :condition => {:var1 => "amount_sanctioned",:var2 => 0 ,:binaryoperator => "", :comparator => :less_than_equal,:const_value =>50000 } }
@@ -781,7 +781,7 @@ describe Rules do
   end
 
   it "(TESTCASE08)should not allow a new client in a branch when total clients in all centers of a branch are more equals 5" do
-    h = {:name => :max_clients_per_branch, :model_name => Client, :on_action => :save,
+    h = {:name => :max_clients_per_branch, :model_name => Client, :on_action => :save, :active => true,
       :condition => { :var1 => "center.branch.centers.clients.count", :var2 => 0,
         :binaryoperator => "", :comparator => :less_than_equal, :const_value => 5} }
     Mostfit::Business::Rules.add h 
@@ -897,7 +897,7 @@ describe Rules do
   end
 
   it "(TESTCASE09) should not allow more than 5 areas in a region" do
-    h = {:name => :max_areas_in_region, :model_name => Area, :on_action => :save,
+    h = {:name => :max_areas_in_region, :model_name => Area, :on_action => :save, :active => true,
       :condition => { :var1 => "region.areas.count", :var2 => 0, :binaryoperator => "",
         :comparator => :less_than, :const_value => 6} }
     Mostfit::Business::Rules.add h
@@ -933,7 +933,7 @@ describe Rules do
   end
 
   it "(TESTCASE10) should not allow more than 4 centers per Staff Member" do
-    h = {:name => :max_centers_per_staff_member, :model_name => Center, :on_action => :save,
+    h = {:name => :max_centers_per_staff_member, :model_name => Center, :on_action => :save, :active => true,
       :condition => { :var1 => "manager.centers.count", :var2 => 0, :binaryoperator => "",
         :comparator => :less_than_equal, :const_value => 4} }
     Mostfit::Business::Rules.add h
@@ -1015,7 +1015,7 @@ describe Rules do
   
   it "(TESTCASE11)Loan product of 50k & interest rate 10%-15%, 1k-10k interest 15%, 11k-25k interest 12.5% & 26k-50k interest 10%" do
     
-    h = {:name => :should_disburse_loan_with_different_limit_and_interest_rate, :model_name => Loan, :on_action => :update,
+    h = {:name => :should_disburse_loan_with_different_limit_and_interest_rate, :model_name => Loan, :on_action => :update, :active => true,
       :precondition => { :linking_operator => :and ,
         :first_condition => { :var1 => "amount", :var2 => 0, :binaryoperator => "", :comparator => :less_than_equal, :const_value => 50000 },
         :second_condition => { :var1 => "amount", :var2 => 0, :binaryoperator => "", :comparator => :greater_than_equal, :const_value => 26000 } },

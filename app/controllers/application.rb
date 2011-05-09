@@ -6,7 +6,7 @@ class Application < Merb::Controller
   before :add_collections, :only => [:index, :show]
   
   @@controllers  = ["regions", "area", "branches", "centers", "clients", "loans", "payments", "staff_members", "funders", "portfolios", "funding_lines"]
-  @@dependant_deletable_associations = ["history", "loan_history", "audit_trails", "attendances", "portfolio_loans", "postings", "credit_account_rules", "debit_account_rules", "center_meeting_days"]
+  @@dependant_deletable_associations = ["history", "loan_history", "audit_trails", "attendances", "portfolio_loans", "postings", "credit_account_rules", "debit_account_rules", "center_meeting_days", "applicable_fees"]
 
   def ensure_password_fresh
     if session.key?(:change_password) and session[:change_password] and not params[:action] == "change_password"
@@ -21,6 +21,12 @@ class Application < Merb::Controller
   def ensure_can_do
     @route = Merb::Router.match(request)
     unless session.user and session.user.can_access?(@route[1], params)
+      raise NotPrivileged
+    end
+  end
+
+  def ensure_admin
+    unless (session.user and session.user.role == :admin)
       raise NotPrivileged
     end
   end
@@ -78,9 +84,15 @@ class Application < Merb::Controller
         DebitAccountRule.all(:rule_book_id => obj.id).destroy!
       end
 
+
       return_url = params[:return].split("/")[0..-3].join("/")
       redirect(return_url, :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
     else
+      if model == ApplicableFee
+        obj.destroy! #skip validations. they fail on the duplicate one
+        redirect(params[:return], :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
+      end
+
       # spitting out the error message
       error   = "Cannot delete #{model} (id: #{id}) because " + error
       error  += obj.errors.to_hash.values.flatten.join(" and ").downcase

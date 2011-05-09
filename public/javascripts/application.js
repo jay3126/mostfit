@@ -649,6 +649,30 @@ function fillAccounts(){
 	                         });
 }
 
+function fillCashAccounts(){
+    $("#branch_selector").change(function(){
+	                             $.ajax({
+					         type: "GET",
+						 url: "/branches/cash_accounts/"+$("#branch_selector").val(),
+						 success: function(data){
+						     $("#cash_account_selector").html(data);
+					     }
+					 });
+	                        });
+}
+
+function fillBankAccounts(){
+    $("#branch_selector").change(function(){
+	                             $.ajax({
+					         type: "GET",
+						 url: "/branches/bank_accounts/"+$("#branch_selector").val(),
+						 success: function(data){
+						     $("#bank_account_selector").html(data);
+					     }
+					 });
+	                       });
+}
+
 function fillFundingLines(){
     $("#funder_selector").change(function(){
 	                             $.ajax({
@@ -757,6 +781,8 @@ $(document).ready(function(){
 				  });
 			  });
 
+		      fillCashAccounts();
+		      fillBankAccounts();
 		      //Handling targets form
 		      $("select#target_attached_to").change(function(){
 								$.ajax({
@@ -1009,7 +1035,7 @@ $(document).ready(function(){
 							    showHideFees();
 							});
 		      }
-		      $("form._disable_button_").submit(function(form){
+		      $("form._disable_button_").live('submit', function(form){
 							    $(form.currentTarget).find("input[type='submit']").attr('disabled', true);
 							    return(true);
 							});

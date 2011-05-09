@@ -85,7 +85,7 @@
   %tr.odd
     %td First repayment
     %td
-      - if @loan.payments.empty?
+      - if @loan.payments(:type => [:principal, :interest]).empty?
         = @loan.scheduled_first_payment_date
         %br/
         %span.greytext (scheduled, no payments yet)
@@ -104,19 +104,19 @@
         %i 
           Original first payment date
           = @loan.original_first_payment_date
-
   %tr
     %td
       Fees applicable
     %td
-      - @loan.loan_product.fees.each do |f|
-        = f.description
-        %br
+      %ul
+        - @loan.applicable_fees.each do |f|
+          %li
+            = f.description
   %tr.odd
     %td
       Fees paid
     %td
-      == #{(@loan.total_fees_paid).to_currency} / #{(@loan.total_fees_due).to_currency}
+      == #{(@loan.total_fees_paid).to_currency} / #{(@loan.total_fees_applicable).to_currency}
       - if @loan.fees_paid?
         %span.green Paid
   %tr
@@ -175,14 +175,16 @@
           %td
             = lh.date
           %td
-            %b= lh.scheduled_outstanding_principal
+            %b= lh.scheduled_outstanding_principal.round(2)
+
           %td
-            %b= (scheduled_principal + scheduled_interest)
+            %b= (scheduled_principal + scheduled_interest).to_currency
             %br/
-            %span.greytext== #{scheduled_principal.to_currency} principal + #{scheduled_interest.to_currency} interest
+            %span.greytext== #{scheduled_principal.round(2)} principal + #{scheduled_interest.round(2)} interest
           %td
             - if last_payment_date and (lh.date <= last_payment_date or lh.date <= Date.today)
-              %b= lh.actual_outstanding_principal
+              %b= lh.actual_outstanding_principal.round(2)
+
           %td
             - if last_payment_date and (lh.date <= last_payment_date or lh.date <= Date.today)
               %b= (lh.principal_paid + lh.interest_paid).to_currency
