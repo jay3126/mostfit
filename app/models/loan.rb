@@ -1663,7 +1663,7 @@ class EquatedWeeklyRoundedNewInterest < Loan
   def self.display_name
     "Reducing balance schedule with new interest (Equated Weekly)"
   end
-  
+
   def scheduled_principal_for_installment(number)
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
@@ -1677,7 +1677,7 @@ class EquatedWeeklyRoundedNewInterest < Loan
     raise "number out of range, got #{number}" if number < 0 or number > number_of_installments
     return reducing_schedule[number][:interest_payable]
   end
-  
+
 private
   def reducing_schedule
     return @reducing_schedule if @reducing_schedule
@@ -1694,7 +1694,7 @@ private
     }
     return @reducing_schedule
   end
-  
+
   def get_divider
     case installment_frequency
     when :weekly
