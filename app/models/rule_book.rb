@@ -81,7 +81,7 @@ class RuleBook
         }
         rules.push(rule)
       }
-      raise "NoRuleFoundError" unless rules.compact.length == 1
+      raise "NoRuleFoundError" unless rules.compact.length > 0
       return [credit_accounts, debit_accounts, rules]
     end
 
