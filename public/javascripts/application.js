@@ -637,13 +637,13 @@ function fillCenters(){
 				 });
 }
 
-function fillBranches(){
+function fillComboBranches(){
     $("#area_selector").change(function(){
 	$.ajax({
 	    type: "GET",
 	    url: "/areas/branches/"+$("#area_selector").val(),
 	    success: function(data){
-		$("#branch_selector").html(data);
+		$("#combo_branch_selector").html(data);
 	    }
 	});
     });
@@ -776,7 +776,7 @@ $(document).ready(function(){
 		      create_remotes();
 		      attachFormRemote();
                       fillCenters();
-                      fillBranches();
+                      fillComboBranches();
 		      fillAccounts();
 		      fillFundingLines();
 		      //function for Intellecash Income calculation in Client Form.
