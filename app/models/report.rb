@@ -37,7 +37,7 @@ class Report
     set_centers(params, user, staff)
     @funder = Funder.get(params[:funder_id]) if not @funder and params and params[:funder_id] and not params[:funder_id].blank?
 
-    [:loan_product_id, :late_by_more_than_days, :absent_more_than, :late_by_less_than_days, :absent_more_than, :include_past_data, :include_unapproved_loans].each{|key|
+    [:loan_product_id, :late_by_more_than_days, :more_than, :late_by_less_tehan_days, :attendance_status, :include_past_data, :include_unapproved_loans].each{|key|
       if params and params[key] and params[key].to_i>0
         instance_variable_set("@#{key}", params[key].to_i)
       end
@@ -89,14 +89,14 @@ class Report
   end
 
   def get_xls
-    f   = File.read("app/views/reports/_#{name.snake_case.gsub(' ', '_')}.html.haml").gsub("=partial :form\n", "")
+    f   = File.read("app/views/reports/_#{self.class.to_s.snake_case.gsub(' ', '_')}.html.haml").gsub("=partial :form\n", "")
     doc = Hpricot(Haml::Engine.new(f).render(Object.new, "@data" => self.generate))
     headers = doc.search("tr.header").map{|tr|
-      tr.search("th").map{|td| 
-        {td.inner_text.strip => td.attributes["colspan"].blank? ? 1 : td.attributes["colspan"].to_i}
+      tr.search("th").map{|td|
+        [td.inner_text.strip => td.attributes["colspan"].blank? ? 1 : td.attributes["colspan"].to_i]
       }
     }.map{|x| 
-      x.reduce({}){|s,x| s+=x}
+      x.reduce([]){|s,x| s+=x}
     }
     
   end
@@ -226,7 +226,7 @@ class Report
       else
         @center
       end
-    @center = @branch.collect{|b| b.centers}.flatten unless @center
+    @center = @branch.centers if not @center and @branch.length == 1
   end
 
   def set_instance_variables(params)

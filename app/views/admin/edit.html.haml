@@ -106,6 +106,16 @@
             = check_box :date_box_editable
         %tr
           %td
+            Default repayment style
+          %td
+            = select :default_repayment_style, :collection => [[NORMAL_REPAYMENT_STYLE,"fees=>int=>prin"], [PRORATA_REPAYMENT_STYLE,"pro rata"]]
+        %tr
+          %td
+            Allow choice of repayment style in weeksheets?
+          %td
+            = check_box :allow_choice_of_repayment_style
+        %tr
+          %td
             Allow GRT date on new client form
           %td
             = check_box :allow_grt_date_on_form
@@ -127,6 +137,18 @@
             Enable Maps ?
           %td
             = check_box :map_enabled
+        %tr
+          %td{:colspan => 2}
+            %hr
+        %tr
+          %td
+            %h3 Day Sheet Generation
+        %tr
+          %td
+            Generate Day Sheet before 
+          %td
+            = text_field :generate_day_sheet_before, :size => 1
+            day(s)
         %tr
           %td{:colspan => 2}
             %hr

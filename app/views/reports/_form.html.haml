@@ -13,6 +13,7 @@
   - type_of_target = (params[report] and params[report][:type_of_target] and not params[report][:type_of_target].blank?) ? params[report][:type_of_target] : nil
   - type_of_journal = (params[report] and params[report][:type_of_journal] and not params[report][:type_of_journal].blank?) ? params[report][:type_of_journal] : nil
   - month = (params[report] and params[report][:month] and not params[report][:month].blank?) ? params[report][:month] : nil
+  - period = (params[report] and params[report][:period] and not params[report][:period].blank?) ? params[report][:period] : nil
   - chosen_year = (params[report] and params[report][:chosen_year] and not params[report][:chosen_year].blank?) ? params[report][:chosen_year] : nil
   - cash_account = (params[report] and params[report][:cash_account] and not params[report][:cash_account].blank?) ? params[report][:cash_account] : nil
   - bank_account = (params[report] and params[report][:bank_account] and not params[report][:bank_account].blank?) ? params[report][:bank_account] : nil
@@ -65,6 +66,10 @@
         |
         Month:
         = MONTHS[month.to_i]
+      - if period
+        |
+        Period:
+        = AccountingPeriod.get(period).to_s
       - if chosen_year
         |
         Year:
@@ -113,15 +118,26 @@
               Late by less than:
               = text_field(:late_by_less_than_days, :size => 10)
               days
-          - if @report.respond_to?(:absent_more_than)
+          - if @report.respond_to?(:attendance_status)
+            - attendance_status_list = Attendance.attendancy_states.map{|a| [(Attendance.attendancy_states.index(a)+1), a.to_s]}
+            /- attendance_status_list.delete(attendance_status_list.first)
             %td
-              Absent by more than:
-              = text_field(:absent_more_than, :size => 3)
-              days
+              = select(:attendance_status, :collection => attendance_status_list)
+          - if @report.respond_to?(:more_than)
+            %td
+              by more than:
+              = text_field(:more_than, :size => 3)
+          - if @report.respond_to?(:days_percentage)
+            %td
+              = select(:days_percentage, :collection => [[1, "days"], [2, "%"]])
           - if @report.respond_to?(:month)
             %td
               Month:
               = select(:month, :collection => MONTHS.map{|m| [MONTHS.index(m), m.to_s]}, :selected => month)
+          - if @report.respond_to?(:period)
+            %td
+              Period:
+              = select(:period, :collection => (AccountingPeriod.get_all_previous_periods ? AccountingPeriod.get_all_previous_periods.map {|p| [p.id, p.name]} : [[nil, "No periods defined"]]), :selected => period)
           - if @report.respond_to?(:chosen_year)
             %td
               Year:

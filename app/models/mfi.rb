@@ -43,6 +43,10 @@ class Mfi
   property :stock_register_enabled, Boolean, :default => false, :index => true
   property :asset_register_enabled, Boolean, :default => false, :index => true
 
+  property :allow_choice_of_repayment_style, Boolean, :default => true, :index => true
+  property :default_repayment_style, Enum.send('[]', *REPAYMENT_STYLES), :default => NORMAL_REPAYMENT_STYLE, :index => true
+  property :generate_day_sheet_before, Integer, :default => 1, :max => 5
+
   property :currency_format,  String,  :nullable => true, :length => 20
   property :session_expiry,   Integer, :nullable => true, :min => 60, :max => 86400
   property :password_change_in, Integer, :nullable => true
