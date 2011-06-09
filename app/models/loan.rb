@@ -1720,4 +1720,52 @@ private
   end
 end
 
+class DairyLoan < Loan
+  
+  after :create, :apply_second_insurance_fee
+
+  def get_prin_for_installment(number)
+    case amount
+    when 16000
+      number < number_of_installments ? 415 : 350
+    when 18000
+      number < number_of_installments ? 470 : 190
+    when
+      number < number_of_installments ? 520 : 360
+    end
+  end
+
+  def reducing_schedule
+    return @reducing_schedule if @reducing_schedule
+    @reducing_schedule = {}    
+    balance = amount
+    1.upto(number_of_installments){|installment|
+      @reducing_schedule[installment] = {}
+      @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
+      @reducing_schedule[installment][:principal_payable] = get_prin_for_installment(installment)
+      balance = balance - @reducing_schedule[installment][:principal_payable]
+    }
+    return @reducing_schedule
+  end    
+
+
+  def scheduled_principal_for_installment(number)
+    raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
+    return reducing_schedule[number][:principal_payable]
+  end
+      
+  def scheduled_interest_for_installment(number)
+    raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
+    return reducing_schedule[number][:principal_payable]
+  end
+
+  def apply_second_insurance_fee
+
+  end
+    
+
+
+end
+
+
 # always add new loan types here i.e. at last
