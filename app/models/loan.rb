@@ -1723,9 +1723,8 @@ end
 
 class DairyLoan < Loan
   
-  after :create, :apply_second_insurance_fee
 
-  def get_prin_for_installment(number)
+  def get_total_for_installment(number)
     case amount
     when 16000
       number < number_of_installments ? 415 : 350
@@ -1743,9 +1742,10 @@ class DairyLoan < Loan
     1.upto(number_of_installments){|installment|
       @reducing_schedule[installment] = {}
       @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
-      @reducing_schedule[installment][:principal_payable] = get_prin_for_installment(installment)
+      @reducing_schedule[installment][:total_payable]     = get_total_for_installment(installment)
+      @reducing_schedule[installment][:principal_payable] = @reducing_schedule[installment][:total_payable] - @reducing_schedule[installment][:interest_payable]
       balance = balance - @reducing_schedule[installment][:principal_payable]
-    }
+     }
     return @reducing_schedule
   end    
 
