@@ -1723,7 +1723,10 @@ end
 
 class DairyLoan < Loan
   
-
+  def self.display_name
+    "Dairy Loan with Attached Insurance product"
+  end
+  
   def get_total_for_installment(number)
     case amount
     when 16000
@@ -1744,12 +1747,80 @@ class DairyLoan < Loan
       @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
       @reducing_schedule[installment][:total_payable]     = get_total_for_installment(installment)
       @reducing_schedule[installment][:principal_payable] = @reducing_schedule[installment][:total_payable] - @reducing_schedule[installment][:interest_payable]
+      if installment == number_of_installments
+        tp  = get_total_for_installment(installment)
+        @reducing_schedule[installment][:total_payable]   = tp
+        @reducing_schedule[installment][:principal_payable] = balance
+        @reducing_schedule[installment][:interest_payable] = tp - balance
+      end
       balance = balance - @reducing_schedule[installment][:principal_payable]
+      if (installment == 26)
+        balance += self.insurance_policy.premium 
+      end
+
      }
     return @reducing_schedule
   end    
+  
+  def payment_schedule
+    # this is the fount of all knowledge regarding the scheduled payments for the loan. 
+    # it feeds into every other calculation about the loan schedule such as get_scheduled, calculate_history, etc.
+    # if this is wrong, everything about this loan is wrong.
+    return @schedule if @schedule
+    @schedule = {}
+    return @schedule unless amount.to_f > 0
 
+    #if self.respond_to?(:repayment_style) and self.repayment_style
+    #  extend Kernel.module_eval("Mostfit::RepaymentStyles:#{repayment_style.camel_case}")
+    #end
 
+    principal_so_far = interest_so_far = fees_so_far = total = 0
+    balance = amount
+    fs = fee_schedule
+    dd = disbursal_date || scheduled_disbursal_date
+    fees_so_far = fs.has_key?(dd) ? fs[dd].values.inject(0){|a,b| a+b} : 0
+
+    @schedule[dd] = {:principal => 0, :interest => 0, :total_principal => 0, :total_interest => 0, :balance => balance, :total => 0, :fees => fees_so_far}
+
+    repayed =  false
+
+    ensure_meeting_day = false
+    # commenting this code so that meeting dates not automatically set
+    #ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
+    ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
+    (1..actual_number_of_installments).each do |number|
+      date      = installment_dates[number-1] #shift_date_by_installments(scheduled_first_payment_date, number - 1, ensure_meeting_day)
+      principal = scheduled_principal_for_installment(number)
+      interest  = scheduled_interest_for_installment(number)
+      next if repayed
+      repayed   = true if amount <= principal_received_up_to(date)
+      
+      principal_so_far += principal
+      interest_so_far  += interest
+      fees = fs.has_key?(date) ? fs[date].values.inject(0){|a,b| a+b} : 0
+      fees_so_far += fees || 0
+      balance -= principal
+      if number == 26
+        balance += self.insurance_policy.premium
+      end
+      puts "#{balance} : #{principal} : #{interest}"
+      @schedule[date] = {
+        :principal                  => principal,
+        :interest                   => interest,
+        :fees                       => fees,
+        :total_principal            => principal_so_far,
+        :total_interest             => interest_so_far,
+        :total                      => (principal_so_far + interest_so_far),
+        :balance                    => balance
+      }
+    end
+    # we have to do the following to avoid the circular reference from total_to_be_received.
+    total = @schedule[@schedule.keys.max][:total]
+    @schedule.each { |k,v| v[:total_balance] = (total - v[:total]).round(2)}
+    @schedule
+  end
+
+ 
   def scheduled_principal_for_installment(number)
     raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
     return reducing_schedule[number][:principal_payable]
@@ -1757,15 +1828,8 @@ class DairyLoan < Loan
       
   def scheduled_interest_for_installment(number)
     raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
-    return reducing_schedule[number][:principal_payable]
+    return reducing_schedule[number][:interest_payable]
   end
-
-  def apply_second_insurance_fee
-
-  end
-    
-
-
 end
 
 
