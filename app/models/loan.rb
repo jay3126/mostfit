@@ -942,7 +942,7 @@ class Loan
     hist = calculate_history.sort_by{|x| x[:date]}
     puts title_order.map{|t| t.to_s.rjust(width - padding/2).ljust(width)}.join("|")
     hist.each do |h|
-      puts (["#{h[:date]}\t"] + title_order[1..-1].map{|t| h[titles[t]].round(4)}.map{|v| v.to_s}.map{|s| s.rjust(width - padding/2).ljust(width)}).join("|")
+      puts (["#{h[:date]}"] + title_order[1..-1].map{|t| h[titles[t]].round(4)}.map{|v| v.to_s}.map{|s| s.rjust(width - padding/2).ljust(width)}).join("|")
     end
   end
 
