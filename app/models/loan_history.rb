@@ -15,6 +15,8 @@ class LoanHistory
   # some properties for similarly named methods of a loan:
   property :scheduled_outstanding_total,     Float, :nullable => false, :index => true
   property :scheduled_outstanding_principal, Float, :nullable => false, :index => true
+  property :scheduled_principal_to_be_paid,  Float, :nullable => false, :index => true
+  property :scheduled_interest_to_be_paid,   Float, :nullable => false, :index => true
   property :actual_outstanding_total,        Float, :nullable => false, :index => true
   property :actual_outstanding_principal,    Float, :nullable => false, :index => true
   property :principal_due,                   Float, :nullable => false, :index => true

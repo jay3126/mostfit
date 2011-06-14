@@ -920,6 +920,8 @@ class Loan
         :status                              => STATUSES.index(get_status(date)) + 1,
         :scheduled_outstanding_principal     => scheduled[:balance].round(2),
         :scheduled_outstanding_total         => scheduled[:total_balance].round(2),
+        :scheduled_principal_to_be_paid      => scheduled[:principal].round(2),
+        :scheduled_interest_to_be_paid       => scheduled[:interest].round(2),
         :actual_outstanding_principal        => actual[:balance].round(2),
         :actual_outstanding_total            => actual[:total_balance].round(2),
         :amount_in_default                   => actual[:balance].round(2) - scheduled[:balance].round(2),
@@ -952,13 +954,15 @@ class Loan
     Merb.logger.error! "could not destroy the history" unless self.loan_history.destroy!
     d0 = Date.parse('2000-01-03')
     sql = %Q{ INSERT INTO loan_history(loan_id, date, status, scheduled_outstanding_principal, scheduled_outstanding_total,
+                                       scheduled_principal_to_be_paid, scheduled_interest_to_be_paid,
                                        actual_outstanding_principal, actual_outstanding_total, current, amount_in_default, client_group_id, center_id, client_id, 
                                        branch_id, days_overdue, week_id, principal_due, interest_due, principal_paid, interest_paid, created_at)
               VALUES }
     values = []
     calculate_history.each do |history|
       value = %Q{(#{id}, '#{history[:date].strftime('%Y-%m-%d')}', #{history[:status]}, #{history[:scheduled_outstanding_principal]},
-                          #{history[:scheduled_outstanding_total]}, #{history[:actual_outstanding_principal]},
+                          #{history[:scheduled_outstanding_total]}, #{history[:scheduled_principal_to_be_paid]},
+                          #{history[:scheduled_interest_to_be_paid]}, #{history[:actual_outstanding_principal]},
                           #{history[:actual_outstanding_total]},#{history[:current] ? 1 : 0}, #{history[:amount_in_default]}, #{client.client_group_id || "NULL"}, 
                           #{client.center.id},#{client.id},#{client.center.branch.id}, #{history[:days_overdue]}, #{((history[:date] - d0) / 7).to_i + 1},
                           #{history[:principal_due]},#{history[:interest_due]}, #{history[:principal_paid]},#{history[:interest_paid]}, 
