@@ -1824,6 +1824,44 @@ class DairyLoan < Loan
     @schedule
   end
 
+  def payments_hash
+    # this is the fount of knowledge for actual payments on the loan
+    return @payments_cache if @payments_cache
+    sql = %Q{
+        SELECT SUM(amount * IF(type=1,1,0)) AS principal,
+               SUM(amount * IF(type=2,1,0)) AS interest,
+               received_on
+        FROM payments
+        WHERE (deleted_at IS NULL) AND (loan_id = #{self.id})
+        GROUP BY received_on ORDER BY received_on}
+    structs = id ? repository.adapter.query(sql) : []
+    @payments_cache = {}
+    total_balance = total_to_be_received
+    @payments_cache[disbursal_date || scheduled_disbursal_date] = {
+      :principal => 0, :interest => 0, :total_principal => 0, :total_interest => 0, :total => 0, :balance => amount, :total_balance => total_balance
+    }
+    principal, interest, total = 0, 0, 0
+    structs.each do |payment|
+      # we know the received_on dates are in ascending order as we
+      # walk through (so we can do the += thingy)
+      @payments_cache[payment.received_on] = {
+        :principal                 => payment.principal,
+        :interest                  => payment.interest,
+        :total_principal           => (principal += payment.principal),
+        :total_interest            => (interest  += payment.interest),
+        :total                     => (total     += payment.principal + payment.interest),
+        :balance                   => (installment_for_date(payment.received_on) == 26 ? amount - principal + 960 : amount - principal),
+        :total_balance             => total_balance - total}
+    end
+
+    # if the number of actual payments is less than the number of scheduled payments pad the rest of the array with zeroes
+    dates = (installment_dates + payment_dates)
+    dates = dates.uniq.sort.reject{|d| d <= structs[-1].received_on} unless structs.blank?
+    dates.each do |date|
+      @payments_cache[date] = {:principal => 0, :interest => 0, :total_principal => principal, :total_interest => interest, :total => total, :balance => amount - principal, :total_balance => total_balance - total}
+    end
+    @payments_cache
+  end
  
   def scheduled_principal_for_installment(number)
     raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
