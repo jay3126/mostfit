@@ -1,0 +1,49 @@
+= partial :form
+%table.report.nojs
+  %tr.header
+    %th
+      Client Id
+    %th
+      Client Name
+    %th
+      Reference No.
+    %th
+      Gender
+    %th
+      Date Of Birth
+    %th
+      Branch
+    %th
+      Occupation
+    %th
+      Loan Id
+    %th
+      Loan Amount
+    %th
+      Disbursal Date
+    %th
+      Loan Status
+    - @data.sort_by{|client, branches| client}.each do |client, branches|
+      %tr
+        %td
+          = branches[:id]
+        %td
+          = branches[:name]
+        %td
+          = branches[:reference]
+        %td
+          = branches[:gender]
+        %td
+          = branches[:date_of_birth]
+        %td
+          = branches[:branch]
+        %td
+          = branches[:occupation]
+        %td
+          = branches[:loan_id]
+        %td
+          = branches[:loan_amount]
+        %td
+          = branches[:loan_disbursal_date]
+        %td
+          = branches[:loan_status]
