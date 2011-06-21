@@ -11,7 +11,7 @@ class MissingGuarantorReport < Report
   end
 
   def name
-    "Missing Guarantor Report for #{@branch.name}"
+    "Missing Guarantor Report"
   end
 
   def self.name
