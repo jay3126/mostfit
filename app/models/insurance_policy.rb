@@ -34,7 +34,7 @@ class InsurancePolicy
     product_name ? "#{product_name}: Rs.#{sum_insured}" : "Rs.#{sum_insured}"
   end
 
-  [:applied_on, :approved_on, :disbursal_date].each do |p|
+  [:applied_on, :scheduled_disbursal_date].each do |p|
     define_method "loan_#{p}" do 
       loan.send(p) if loan
     end
