@@ -3,7 +3,7 @@ class InsurancePolicy
   include FeesContainer
 
   POLICY_STATUSES = [:active, :expired, :claim_pending, :claim_settled]
-  COVER_FOR       = [:self, :spouse, :both, :son, :daughter, :mother, :father]
+  COVER_FOR       = [:self, :spouse, :both, :son, :daughter, :mother, :father, :cattle]
   property :id, Serial
   property :application_number, String, :nullable => true
   property :policy_no, String, :nullable => true
