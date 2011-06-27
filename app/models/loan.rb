@@ -74,6 +74,21 @@ class Loan
 
   property :_scheduled_maturity_date,           Date
 
+  # Caching baby!
+
+  property :staleness_frequency, Integer
+
+  property :c_center_id, Integer
+  property :c_branch_id, Integer
+  property :c_scheduled_maturity_date, Date
+  property :c_maturity_date, Date
+  property :c_actual_first_payment_date, Date
+  property :c_last_status, Integer
+  property :c_principal_received, Float
+  property :c_interest_received, Float
+  property :c_last_payment_received_on, Date
+  property :c_last_payment_id, Integer
+  property :c_stale?, Boolean
   
 #  property :taken_over_on,                     Date
 #  property :taken_over_on_installment_number,  Integer 
@@ -1740,6 +1755,35 @@ class DairyLoan < Loan
     when
       number < number_of_installments ? 520 : 360
     end
+  end
+
+  def installment_dates
+    insts = reducing_schedule.count
+    return @_installment_dates if @_installment_dates
+    if installment_frequency == :daily
+      # we have to br careful that when we do a holiday bump, we do not get stuck in an endless loop
+      ld = scheduled_first_payment_date - 1
+      @_installment_dates = []
+      (1..insts).each do |i|
+        ld += 1
+        if ld.cwday == weekly_off
+          ld +=1
+        end
+        if ld.holiday_bump.cwday == weekly_off # endless loop
+          ld.holiday_bump(:after)
+        end
+        @_installment_dates << ld
+      end
+      return @_installment_dates
+    end
+        
+    ensure_meeting_day = false
+    ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
+    ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
+    @_installment_dates = (0..(insts-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) } 
+    scheduled_last_payment_date = (scheduled_disbursal_date >> 24)
+    @_installment_dates[-1] = scheduled_last_payment_date
+    return @_installment_dates
   end
 
   def reducing_schedule
