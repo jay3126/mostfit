@@ -40,39 +40,17 @@ class Loans < Application
     attrs[:interest_rate] = attrs[:interest_rate].to_f / 100 if attrs[:interest_rate].to_f > 0
     @loan_product = LoanProduct.is_valid(params[:loan_product_id])
     raise BadRequest unless @loan_product
-    fee_params = params.delete(:fees)
     @loan = klass.new(attrs)
     @loan.loan_product = @loan_product
-    msg = {}
     if @loan.save
-      result = []
-      msg[:notice] = "Loan '#{@loan.id}' was successfully created"
-      @fees = Fee.all(:id => params.keys.select{|l| l.match(/fee_\d/)}.map{|l| l.split("_")[1]})
-      @fees.each do |fee|
-        # @app_fees = []
-        # @fee = Fee.get(fee_id)
-        if fee
-          payable_models ||= Fee::PAYABLE.map{|m| [m[0], [m[1], m[2]]]}.to_hash
-          method = payable_models[fee.payable_on][1] if fee
-          if params.include?(:fee_date)
-            if params[:fee_date].empty?
-              date = (@loan.insurance_policy.send(method) if @loan.insurance_policy.respond_to?(method))
-            else
-              date = (Date.strptime(params[:fee_date], Mfi.first.date_format || "%Y-%m-%d"))
-            end
-          end
-          if date
-            app_fee = ApplicableFee.new(:applicable_on => date, :amount => fee.amount.nil? ? params[:insurance_policy][:premium] : fee.amount, :fee => fee, :applicable_id => @loan.id, :applicable_type => 'Loan')
-            result << app_fee.save
-          end
-        end
-        #result = @app_fees.map{|f| f.save}
-        msg[:error] =  "However, #{result.select{|r| false}.count} insurance premium could not be applied as a fee" if result.include?(false)
+      if params[:return]
+        redirect(params[:return], :message => {:notice => "Loan '#{@loan.id}' was successfully created"})
+      else
+        redirect resource(@branch, @center, @client), :message => {:notice => "Loan '#{@loan.id}' was successfully created"}
       end
-      redirect(params[:return] || resource(@branch, @center, @client), :message => msg)
     else
       set_insurance_policy(@loan_product)
-      @loan.interest_rate *= 100 if @loan.interest_rate
+      @loan.interest_rate *= 100
       render :new # error messages will be shown
     end
   end
@@ -496,15 +474,10 @@ class Loans < Application
     end
   end
 
-  def collection_sheet
-    render
-  end
-
   def set_insurance_policy(loan_product)
     if @loan_product.linked_to_insurance
       @insurance_policy = @loan.insurance_policy || InsurancePolicy.new
       @insurance_policy.client = @client
     end
   end
-
 end # Loans
