@@ -144,7 +144,7 @@
     %table.narrow.form{ :width => '100%' }
       %thead
         %tr
-          %th
+          %th 
           %th date due
           %th scheduled balance
           %th scheduled repayment
@@ -170,8 +170,9 @@
               %td{ :colspan => 6, :style => "text-align: center;" }
                 %span.greytext== today (#{Date.today})
         - first = false
-        %tr{ :class => cycle('odd','') }
-          %td &nbsp;
+        %tr{ :class => cycle('odd','even') }
+          %td.paid
+            = i - 1 if i >= 2
           %td
             = lh.date
           %td
