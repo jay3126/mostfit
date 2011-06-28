@@ -1781,7 +1781,7 @@ class DairyLoan < Loan
     ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
     ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
     @_installment_dates = (0..(insts-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) } 
-    scheduled_last_payment_date = (scheduled_disbursal_date >> 24)
+    scheduled_last_payment_date = ((disbursal_date || scheduled_disbursal_date) >> 24) + 1
     @_installment_dates[-1] = scheduled_last_payment_date
     return @_installment_dates
   end
