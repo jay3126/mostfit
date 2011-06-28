@@ -1752,8 +1752,10 @@ class DairyLoan < Loan
       number < number_of_installments ? 415 : 350
     when 18000
       number < number_of_installments ? 470 : 190
-    when
+    when 20000
       number < number_of_installments ? 520 : 360
+    else
+      0
     end
   end
 
