@@ -37,11 +37,11 @@
       %td
         Group
       %td
-        -if @client.client_group
-          =@client.client_group.name
-        -else
+        - if @client.client_group
+          = @client.client_group.name
+        - else
           Not associated with a group yet (
-          =link_to('Edit', resource(@branch, @center, @client, :edit))
+          = link_to('Edit', resource(@branch, @center, @client, :edit))
           to change)
     %tr
       %td
@@ -73,8 +73,8 @@
     - elsif not @client.active
       %h3.blocked
         This client is not active anymore. 
-        -if @client.inactive_reason=='death_of_client' or @client.inactive_reason=='death_of_spouse'
-          =link_to('Click here for claim processing', resource(@client, :claims))
+        - if @client.inactive_reason=='death_of_client' or @client.inactive_reason=='death_of_spouse'
+          = link_to('Click here for claim processing', resource(@client, :claims))
     - else
       = link_to 'add a new loan', resource(@branch, @center, @client, :loans, :new), :class => "add"
     
@@ -189,8 +189,19 @@
             No insurance policies.
             = link_to "[Add one]", resource(@client, :insurance_policies, :new)
           - else
+            %b
+              = "Insurance Policies attached to #{@client.name}"
+            %br
             - @client.insurance_policies.each do |ip|
               = link_to ip.description, resource(@client, ip)
+              %br
+            %b
+              = "Insurance Policies attached to loans for #{@client.name}"
+              %br
+            - @client.loans.insurance_policy.each do |cip|
+              = link_to "For Loan Id #{cip.loan_id}", url(:quick_link, "loans", cip.loan.id)
+              = " - "
+              = link_to cip.description, resource(@client, cip)
               %br
             %td
               = link_to "Add new insurance policy", resource(@client, :insurance_policies, :new), :class => 'add'
