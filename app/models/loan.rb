@@ -1785,7 +1785,7 @@ class DairyLoan < Loan
     @_installment_dates = (0..(insts-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) } 
     scheduled_last_payment_date = ((disbursal_date || scheduled_disbursal_date) >> 24) + 1
     #to check whether the day is sunday or not. Done on Intellecash request.
-    if (scheduled_last_payment_date.strftime("%A") == "Sunday" or scheduled_last_payment_date.strftime("%A") == "Sunday")
+    if (scheduled_last_payment_date.strftime("%A") == "Sunday")
       scheduled_last_payment_date += 1
     else
       scheduled_last_payment_date
