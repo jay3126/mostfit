@@ -191,8 +191,9 @@
           - else
             - @client.insurance_policies.each do |ip|
               = link_to ip.description, resource(@client, ip)
-              %td
-                = link_to "Add new insurance policy", resource(@client, :insurance_policies, :new), :class => 'add'
+              %br
+            %td
+              = link_to "Add new insurance policy", resource(@client, :insurance_policies, :new), :class => 'add'
   %div.tab 
     %input{:type => "hidden", :name => "_load_remote", :value => resource(@branch, @center, @client, :payments)}
   %div.tab 
