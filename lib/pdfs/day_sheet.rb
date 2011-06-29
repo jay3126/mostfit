@@ -22,7 +22,7 @@ module Pdf
         pdf.text("\n")
         table = PDF::SimpleTable.new
         table.data = []
-        tot_amount, tot_outstanding, tot_installments, tot_principal, tot_interest, total_due = 0, 0, 0, 0, 0, 0
+        tot_amount, tot_outstanding, tot_installments, tot_principal, tot_interest, total_due, tot_installment_amount = 0, 0, 0, 0, 0, 0, 0
         #Prefecth some data for speed
         loans = center.loans
         puts "#{center.name} : #{loans.aggregate(:id)}"
@@ -32,7 +32,7 @@ module Pdf
 
         #grouping by client groups
         center.clients(:fields => [:id, :name]).group_by{|x| x.client_group}.sort_by{|x| x[0] ? x[0].name : "none"}.each{|group, clients|
-          group_amount, group_outstanding, group_installments, group_principal, group_interest, group_fee, group_due = 0, 0, 0, 0, 0, 0, 0
+          group_amount, group_outstanding, group_installments, group_principal, group_interest, group_fee, group_due, group_installment_amount = 0, 0, 0, 0, 0, 0, 0, 0
           table.data.push({"disbursed" => group ? group.name : "No group"})
           #absent days
           #Grouped clients
@@ -49,27 +49,28 @@ module Pdf
               principal_due      = [(lh ? lh.principal_due : 0), 0].max
               interest_due       = [(lh ? lh.interest_due : 0), 0].max
               total_due          = [(lh ? (fee+lh.principal_due+lh.interest_due): 0), 0].max
-              number_of_installments = loan.number_of_installments_before(date)
+              installment_number = loan.installment_for_date(date)
+              installment_amount = loan.scheduled_principal_for_installment(installment_number) + loan.scheduled_interest_for_installment(installment_number)
               
               table.data.push({"name" => client.name, "loan id" => loan.id, "amount" => loan.amount.to_currency, 
-                                "outstanding" => actual_outstanding.to_currency, "status" => lh.status.to_s,                                
-                                "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
-                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,"fee" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
+                                "outstanding" => actual_outstanding.to_currency, "installment" =>  installment_number,
+                                "installment amount" => installment_amount,
+                                "total due" =>  total_due.to_currency, "collected amount" => "", "signature" => "" })
               group_amount       += loan.amount
               group_outstanding  += actual_outstanding
-              group_installments += number_of_installments
+              group_installments += installment_number
               group_principal    += principal_due
               group_interest     += interest_due
               group_fee          += fee
               group_due          += total_due
+              group_installment_amount += installment_amount
             } # loans end
             if loan_row_count==0
               table.data.push({"name" => client.name, "signature" => "", "status" => "nothing outstanding"})              
             end
           } #clients end
           table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
-                            "principal" => group_principal.to_currency, "interest" => group_interest.to_currency,
-                            "fee" => group_fee.to_currency, "total due" => group_due.to_currency                            
+                            "installment amount" => group_installment_amount.to_currency, "total due" => group_due.to_currency
                           })
           tot_amount         += group_amount
           tot_outstanding    += group_outstanding
@@ -78,14 +79,15 @@ module Pdf
           tot_interest       += group_interest
           tot_fee            += group_fee
           total_due          += (group_principal + group_interest + group_fee)
+          tot_installment_amount += group_installment_amount
         } #groups end
         table.data.push({"amount" => tot_amount.to_currency, "outstanding" => tot_outstanding.to_currency,
-                          "principal" => tot_principal.to_currency,
-                          "interest" => tot_interest.to_currency, "fee" => tot_fee.to_currency,
+                          "installment amount" => tot_installment_amount.to_currency, 
                           "total due" => (tot_principal + tot_interest + tot_fee).to_currency
                         })
-        
-        table.column_order  = ["name", "loan id" , "amount", "outstanding", "status", "disbursed", "installment", "principal", "interest", "fee", "total due", "days absent/total", "signature"]
+
+        debugger
+        table.column_order  = ["name", "loan id" , "amount", "outstanding", "installment amount" ,"installment", "total due", "collected amount", "signature"]
         table.show_lines    = :all
         table.show_headings = true
         table.shade_rows    = :none
