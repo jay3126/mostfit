@@ -157,13 +157,11 @@ module Pdf
           tot_amount = 0
           loans_to_disburse.each do |loan|
             tot_amount += loan.amount
-            premia, amount_to_disburse = 0, nil
-            debugger
+            premia = 0 
+            amount_to_disburse = nil
             if loan.loan_product.linked_to_insurance and loan.insurance_policy
               premia = loan.insurance_policy.premium 
               amount_to_disburse = loan.amount - premia
-            else
-              premia = "NA"
             end
             processing_fee = 0
             others = 0
@@ -181,7 +179,7 @@ module Pdf
                               "Amount\nDisbursed" => loan.amount.to_currency,
                               "Insurance\nPremimum" => premia, "Loan Fee\n(Processing)" => processing_fee, 
                               "Others" => others, 
-                              "Total\nReceivable" =>(amount_to_disburse||loan.amount.to_currency),  
+                              "Total\nReceivable" => (processing_fee + others + premia),  
                               "Customer\nSign" => "", "FO\nsign" => '', "ABM\nsign" => '' 
                             })
           end
