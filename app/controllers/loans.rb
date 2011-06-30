@@ -15,10 +15,15 @@ class Loans < Application
   end
 
   def show(id)
+    @option = params[:option] if params[:option]
     @loan = Loan.get(id)
     raise NotFound unless @loan
     @payments = @loan.payments(:order => [:received_on, :id])
-    display [@loan, @payments], 'payments/index'
+    if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
+      display [@loan, @payments]
+    else
+      display [@loan, @payments], 'payments/index'
+    end
   end
 
   def new
@@ -54,7 +59,6 @@ class Loans < Application
       render :new # error messages will be shown
     end
   end
-
   def bulk_create
     klass, attrs = get_loan_and_attrs
     attrs[:interest_rate] = attrs[:interest_rate].to_f / 100 if attrs[:interest_rate].to_f > 0
@@ -73,7 +77,7 @@ class Loans < Application
       statuses = loans.map{|l| l.save}
       t.rollback if statuses.include?(false)
     end
-    
+
     if not statuses.include?(false)
       if params[:return]
         redirect(params[:return], :message => {:notice => "'#{statuses.count}' loans were successfully created"})
@@ -153,7 +157,7 @@ class Loans < Application
     @branch, @center, @client = @loan.client.center.branch, @loan.client.center, @loan.client
     redirect url_for_loan(@loan)
   end
-  
+
   def disburse
     @date = params[:date] ? Date.parse(params[:date]) : Date.today
     hash   = {:scheduled_disbursal_date.lte => @date, :disbursal_date => nil, :approved_on.not => nil, :rejected_on => nil}
