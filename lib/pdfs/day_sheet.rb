@@ -158,21 +158,38 @@ module Pdf
           loans_to_disburse.each do |loan|
             tot_amount += loan.amount
             premia, amount_to_disburse = 0, nil
-            if loan.loan_product.linked_to_insurance
-               premia = loan.insurance_policy.premium
-               amount_to_disburse = loan.amount - loan.insurance_policy.premium
+            debugger
+            if loan.loan_product.linked_to_insurance and loan.insurance_policy
+              premia = loan.insurance_policy.premium 
+              amount_to_disburse = loan.amount - premia
             else
-               premia = "NA"
+              premia = "NA"
             end
-            table.data.push({"amount" => loan.amount.to_currency, "name" => loan.client.name,
-                              "group" => loan.client.client_group.name,
-                              "loan product" => loan.loan_product.name, "first payment" => loan.scheduled_first_payment_date, 
-                              "spouse name" => loan.client.spouse_name, "loan status" => loan.status,
-                              "insurance premium" => premia, "balance to disburse" => (amount_to_disburse||loan.amount.to_currency)
+            processing_fee = 0
+            others = 0
+            if loan.applicable_fees
+              loan.applicable_fees.each do |fee|
+                if Fee.get(fee.fee_id).name =~ /rocessing/
+                  processing_fee += fee.amount
+                else
+                  others += fee.amount
+                end
+              end
+            end
+            table.data.push({"Loan\nID" => loan.id, "Customer\nID" => loan.client.id, "Customer\nname" => loan.client.name, 
+                              "Loan\nProduct" => loan.loan_product.name, "Amount\nApplied" => loan.amount_applied_for, 
+                              "Amount\nDisbursed" => loan.amount.to_currency,
+                              "Insurance\nPremimum" => premia, "Loan Fee\n(Processing)" => processing_fee, 
+                              "Others" => others, 
+                              "Total\nReceivable" =>(amount_to_disburse||loan.amount.to_currency),  
+                              "Customer\nSign" => "", "FO\nsign" => '', "ABM\nsign" => '' 
                             })
           end
-          table.data.push({"amount" => tot_amount.to_currency})
-          table.column_order  = ["name", "spouse name",  "group", "amount", "insurance premium", "balance to disburse", "loan product", "first payment", "loan status", "signature"]
+          table.data.push({"Amount Sanctioned \nand Disbursed" => tot_amount.to_currency})
+          table.column_order  = ["Loan\nID", "Customer\nID", "Customer\nname", "Loan\nProduct", "Amount\nApplied", 
+                                 "Amount\nDisbursed", "Insurance\nPremium", "Loan Fee\n(Processing)", 
+                                 "Others", "Total\nReceivable", "Customer\nSign", 
+                                 "FO\nSign", "ABM\nSign"]
           table.show_lines    = :all
           table.shade_rows    = :none
           table.show_headings = true          
