@@ -183,20 +183,21 @@
     %table
       %tr
         %td
-          = link_to "Insurance Policies", resource(@client, :insurance_policies)
+          %h3
+            = link_to "Insurance Policies", resource(@client, :insurance_policies)
         %td
           - if @client.insurance_policies.blank?
             No insurance policies.
             = link_to "[Add one]", resource(@client, :insurance_policies, :new)
           - else
             %b
-              = "Insurance Policies attached to #{@client.name}"
+              = "Insurance Policies attached to #{@client.name} : "
             %br
             - @client.insurance_policies.each do |ip|
               = link_to ip.description, resource(@client, ip)
               %br
             %b
-              = "Insurance Policies attached to loans for #{@client.name}"
+              = "Insurance Policies attached to loans for #{@client.name} : "
               %br
             - @client.loans.insurance_policy.each do |cip|
               = link_to "For Loan Id #{cip.loan_id}", url(:quick_link, "loans", cip.loan.id)

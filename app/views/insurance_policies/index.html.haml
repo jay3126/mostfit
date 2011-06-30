@@ -6,13 +6,19 @@
   %thead
     %tr
       %th
-        id
+        Id
       %th
-        policy details
+        Policy details
+      %th
+        Sum Insured
+      %th
+        Premium
       %th
         Insurance Product
       %th
-        actions
+        Validity
+      %th
+        Actions
       
   %tr
   - for insurance_policy in @insurance_policies
@@ -22,10 +28,66 @@
       %td
         = link_to insurance_policy.description, resource(insurance_policy.client, insurance_policy)
       %td
+        = insurance_policy.sum_insured
+      %td
+        = insurance_policy.premium
+      %td
         = link_to insurance_policy.insurance_product.name, resource(insurance_policy.insurance_product)
+      %td
+        = insurance_policy.date_from
+        = " to "
+        = insurance_policy.date_to
       %td
         = link_to 'Show', resource(@client, insurance_policy)
         |
         = link_to 'Edit', resource(@client, insurance_policy, :edit)
 
-= link_to 'New', resource(@client, :insurance_policies, :new)
+= link_to 'New', resource(@client, :insurance_policies, :new), :class => 'add'
+
+%h1
+  %br
+    Insurance Policies attached to loans
+    == for #{@client.name}
+
+%table.narrow
+  %thead
+    %tr
+      %th
+        Id
+      %th
+        Policy details
+      %th
+        Sum Insured
+      %th
+        Premium
+      %th
+        Insurance Product
+      %th
+        Validity
+      %th
+        Actions
+      
+  %tr
+  - @client.loans.insurance_policy.each do |cip|
+    %tr
+      %td
+        = cip.id
+      %td
+        = link_to cip.description, resource(@client, cip)
+      %td
+        = cip.sum_insured
+      %td
+        = cip.premium
+      %td
+        = link_to cip.insurance_product.name, resource(cip.insurance_product)
+      %td
+        = cip.date_from
+        = " to "
+        = cip.date_to
+      %td
+        = link_to 'Show', resource(@client, cip)
+        |
+        = link_to 'Edit', resource(@client, cip, :edit)
+
+
+
