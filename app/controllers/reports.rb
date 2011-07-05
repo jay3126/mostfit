@@ -104,6 +104,20 @@ class Reports < Application
     end
   end
 
+  def display_csv(id)
+    @staff_member = StaffMember.get(id)
+    raise NotFound unless @staff_member
+    date =  (Date.strptime(params[:date], Mfi.first.date_format)).strftime('%Y_%m_%d')   
+    type = params[:type_sheet]
+    @folder = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, type)
+    @files = Dir.entries(@folder).select{|f| f.match(/.*#{date}.*pdf$/)} if File.exists?(@folder)
+    display @files, :layout => false
+  end
+
+  def send_sheet(filename)
+    send_data(File.read(filename), :filename => filename)
+  end
+
   private
   def get_dates(class_key)
     dates = {}

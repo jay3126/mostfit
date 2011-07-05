@@ -1,0 +1,16 @@
+= partial :form
+
+= link_to "Common Data Format csv file from #{@from_date} to #{@to_date}", url(:controller => :reports, :action => display_csv, :filename => "Common Data Format csv file from #{@from_date} to #{@to_date}.csv"), :style => "float: right; margin-right: 25px", :class => "button" 
+
+Previous Reports Generated
+- if @files
+  - if @files.empty?
+    %h3 
+      == No #{params[:type_sheet]} exist for this staff member
+  - else
+    - @files.each do |f|
+      = link_to f, url(:controller => :reports, :action => :send_report, :filename => (File.join(@folder, f)))
+      %br
+- else
+  %h3 
+    == No #{params[:type_sheet]} exist for this staff member 
