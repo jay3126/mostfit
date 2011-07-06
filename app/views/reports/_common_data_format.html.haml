@@ -1,16 +1,17 @@
 = partial :form
 
-= link_to "Common Data Format csv file from #{@from_date} to #{@to_date}", url(:controller => :reports, :action => display_csv, :filename => "Common Data Format csv file from #{@from_date} to #{@to_date}.csv"), :style => "float: right; margin-right: 25px", :class => "button" 
-
-Previous Reports Generated
+%br
+-# - @folder = File.join(Merb.root, "doc", "csv", "reports") 
+-# - @files = Dir.entries(@folder).select{|f| f.match(/Common.Data.Format.*csv$/)} if File.exists?(@folder)
+%h1==Existing Reports
 - if @files
   - if @files.empty?
     %h3 
-      == No #{params[:type_sheet]} exist for this staff member
+      == No reports exist as yet.
   - else
     - @files.each do |f|
-      = link_to f, url(:controller => :reports, :action => :send_report, :filename => (File.join(@folder, f)))
+      = link_to f, url(:controller => :reports, :action => 'send_report', :filename => (File.join(@folder, f)))
       %br
 - else
   %h3 
-    == No #{params[:type_sheet]} exist for this staff member 
+    == No reports exist as yet 

@@ -1,7 +1,7 @@
 class Reports < Application
   include DateParser
   Types = {
-    :periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary], 
+    :periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, CommonDataFormat], 
     :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport], 
     :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport], 
     :targets_and_projections  => [ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
@@ -27,9 +27,10 @@ class Reports < Application
     class_key  =  klass.to_s.snake_case.to_sym
     dates = get_dates(class_key)
 
+    debugger
     if @report
       display @report
-    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport
+    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport and not klass==CommonDataFormat
       #Generating report
       @report   = klass.new(params[class_key], dates, session.user)
       if not params[:submit]
@@ -50,12 +51,39 @@ class Reports < Application
         end
       end
   
+    elsif klass==CommonDataFormat
+      @data = []
+      @report   = klass.new(params[class_key], dates, session.user)
+      @folder = File.join(Merb.root, "doc", "csv", "reports") 
+      @files = Dir.entries(@folder).select{|f| f.match(/Common.Data.Format.*csv$/)} if File.exists?(@folder)
+      if not params[:submit]
+        render :form
+        display @data
+      else
+        if @report.valid?
+          case @report.method(:generate).arity
+          when 0
+            @data = @report.generate
+          when 1
+            @data = @report.generate(params)
+          end
+          file = @report.get_csv(@data)
+          send_data(file.to_s)
+          display @data
+        else
+          params.delete(:submit)
+          message[:error] = "Report cannot be generated"
+          render :form
+        end
+      end
+      
     elsif id.nil?
       @reports = klass.all(:order => [:start_date.desc])
       if klass==DuplicateClientsReport and (DuplicateClientsReport.count==0 or (Date.today - DuplicateClientsReport.all.aggregate(:created_at).max).to_i>6)
         DuplicateClientsReport.new.generate
       end
       display @reports
+         
     elsif id and params[:format] == "pdf"
       send_data(@report.get_pdf.generate, :filename => 'report.pdf')
     end
@@ -104,17 +132,7 @@ class Reports < Application
     end
   end
 
-  def display_csv(id)
-    @staff_member = StaffMember.get(id)
-    raise NotFound unless @staff_member
-    date =  (Date.strptime(params[:date], Mfi.first.date_format)).strftime('%Y_%m_%d')   
-    type = params[:type_sheet]
-    @folder = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, type)
-    @files = Dir.entries(@folder).select{|f| f.match(/.*#{date}.*pdf$/)} if File.exists?(@folder)
-    display @files, :layout => false
-  end
-
-  def send_sheet(filename)
+  def send_report(filename)
     send_data(File.read(filename), :filename => filename)
   end
 
