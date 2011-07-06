@@ -46,6 +46,10 @@ Merb::BootLoader.before_app_loads do
   require 'lib/functions.rb'
   require 'lib/core_ext.rb'
   require 'lib/fees_container.rb'
+  
+  #csv generation
+  require 'csv'
+  require 'lib/csv/common_data_csv.rb'
 
   #initialize i18n
   require 'i18n'
