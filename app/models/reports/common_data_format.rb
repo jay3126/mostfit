@@ -6,9 +6,9 @@ class CommonDataFormat < Report
   include Csv::CommonDataCSV
   
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 30
+    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today << 1
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
-    @name   = "Report from #{@from_date} to #{to_date}"
+    @name   = "Report from #{@from_date} to #{@to_date}"
     get_parameters(params, user)
   end
   
@@ -22,6 +22,107 @@ class CommonDataFormat < Report
   
   def generate
     @data = []
+    @data << ["Segment Identifier",
+              "Member Identifier",
+              "Branch Identifier",
+              "Kendra/Centre Identifier",
+              "Group Identifier",
+              "Member Name 1",
+              "Member Name 2",
+              "Member Name 3",
+              "Alternate Name of Member",
+              "Member Birth Date",
+              "Member Age",
+              "Member's age as on date",
+              "Member Gender Type",
+              "Marital Status Type",
+              "Key Person's name",
+              "Key Person's relationship",
+              "Member relationship Name 1",
+              "Member relationship Type 1",
+              "Member relationship Name 2",
+              "Member relationship Type 2",
+              "Member relationship Name 3",
+              "Member relationship Type 3",
+              "Member relationship Name 4",
+              "Member relationship Type 4",
+              "Nominee Name",
+              "Nominee relationship",
+              "Nominee Age",
+              "Voter's ID",
+              "UID",
+              "PAN",
+              "Ration Card",
+              "Member Other ID 1 Type description",
+              "Member Other ID 1",
+              "Member Other ID 2 Type description",
+              "Member Other ID 2 ",
+              "Member Other ID 3 Type description",
+              "Member Other ID 3",
+              "Telephone Number 1 type Indicator",
+              "Member Telephone Number 1",
+              "Telephone Number 2 type Indicator",
+              "Member Telephone Number 2",
+              "Poverty Index",
+              "Asset ownership indicator",
+              "Number of Dependents",
+              "Bank Account - Bank Name",
+              "Bank Account - Branch Name",
+              "Bank Account - Account Number",
+              "Occupation",
+              "Total Monthly Family Income",
+              "Monthly Family Expenses",
+              "Member's Religion",
+              "Member's Caste",
+              "Group Leader indicator",
+              "Center Leader indicator",
+              "Dummy",
+              "Segment Identifier",
+              "Member's Permanent Address",
+              "State Code ( Permanent Address)",
+              "Pin Code ( Permanent Address)",
+              "Member's Current Address",
+              "State Code ( Current Address)",
+              "Pin Code ( Current Address)",
+              "Dummy",
+              "Segment Identifier",
+              "Unique Account Refernce number",
+              "Account Number",
+              "Branch Identifier",
+              "Kendra/Centre Identifier",
+              "LoA/N Officer for Originating the loan",
+              "Date of Account Information",
+              "Loan Category",
+              "Group Identifier",
+              "Loan Cycle-id",
+              "Loan Purpose",
+              "Account Status ",
+              "Application date",
+              "Sanctioned Date",
+              "Date Opened/Disbursed",
+              "Date Closed (if closed)",
+              "Date of last payment",
+              "Applied For amount",
+              "Loan amount Sanctioned",
+              "Total Amount Disbursed (Rupees)",
+              "Number of Installments",
+              "Repayment Frequency",
+              "Minimum Amt Due/Instalment Amount",
+              "Current Balance (Rupees)",
+              "Amount Overdue (Rupees)",
+              "DPD (Days past due)",
+              "Write Off Amount (Rupees)",
+              "Date Write-Off (if written-off)",
+              "Write-off reason (if written off)",
+              "No. of meetings held",
+              "No. of meetings missed",
+              "Insurance Indicator",
+              "Type of Insurance",
+              "Sum Assured/Coverage",
+              "Agreed meeting day of the week",
+              "Agreed Meeting time of the day",
+              "Dummy"
+             ]
     
     (if @branch
        Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.gte => @from_date, :applied_on.lte => @to_date)
@@ -44,7 +145,7 @@ class CommonDataFormat < Report
                 "".rjust(50),
                 "".rjust(30),
                 client.date_of_birth.strftime("%d%m%Y").rjust(8),
-                (client.date_joined -  client.date_of_birth).to_s.rjust(3),
+                (client.date_joined.year -  client.date_of_birth.year).to_s.rjust(3),
                 client.date_joined.strftime("%d%m%Y").rjust(8),
                 (client.respond_to?(:gender) ? client.send(:gender) : gender[:female]).rjust(1), # ideally it should be untagged
                 (client.spouse_name.empty? ? marital_status[:untagged] : marital_status[:married]),
@@ -66,7 +167,7 @@ class CommonDataFormat < Report
                 "".rjust(15), #PAN
                 "".rjust(20), #ration card
                 "".rjust(20), #other id type description 1
-                "".rjust(30), #other id 1
+                client.reference.rjust(30), #other id 1
                 "".rjust(20), #other id type description 2
                 "".rjust(30), #other id 2
                 "".rjust(20), #other id type description 3
@@ -77,7 +178,7 @@ class CommonDataFormat < Report
                 "".rjust(15), #telephone number 2
                 client.poverty_status.to_s.rjust(20),
                 ((client.other_productive_asset.nil? || client.other_productive_asset.empty?) ? asset_ownership_indicator[:no] : asset_ownership_indicator[:yes]),
-                "", #client. #number of dependents
+                client.number_of_family_members.to_s.rjust(2), #number of dependents
                 client.bank_name.to_s.rjust(50),
                 client.bank_branch.to_s.rjust(50),
                 client.account_number.to_s.rjust(35),
@@ -87,7 +188,7 @@ class CommonDataFormat < Report
                 religion[client.religion],
                 client.caste.rjust(30),
                 group_leader_indicator[:untagged],
-                center_leader_indicator[:untagged],
+                (CenterLeader.first(:client_id => client.id).nil? ? center_leader_indicator[:no] : center_leader_indicator[:yes]),
                 "".rjust(30), #dummy reserved for future use
                 "ADRCRD",  
                 client.address.rjust(200), #permanent address
@@ -104,16 +205,16 @@ class CommonDataFormat < Report
                 client.center_id.to_s.rjust(30),
                 l.applied_by.name.rjust(30),
                 "".rjust(8),
-                "".rjust(3), #loan category
+                loan_category[:jlg_individual].rjust(3), #loan category
                 client.client_group_id.to_s.rjust(20),
                 l.cycle_number.to_s.rjust(30),
                 l.occupation.name.rjust(20),  #purpose
                 account_status[l.get_status],
                 l.applied_on.strftime("%d%m%Y").rjust(8),
                 l.approved_on.strftime("%d%m%Y").rjust(8),
-                (l.disbursal_date.nil? ? l.disbursal_date.strftime("%d%m%Y").rjust(8) : "".rjust(8)),
-                l.scheduled_maturity_date.strftime("%d%m%Y").rjust(8), #loan closed
-                l.scheduled_maturity_date.strftime("%d%m%Y").rjust(8), #loan closed
+                (l.disbursal_date.nil? ? l.scheduled_disbursal_date : l.disbursal_date).strftime("%d%m%Y").rjust(8),
+                ((l.status == :repaid and lh.status == :repaid) ? lh.date.strftime("%d%m%Y") : "").rjust(8), #loan closed
+                lh.date.strftime("%d%m%Y").rjust(8), #loan closed
                 l.amount_applied_for.to_currency.rjust(9),
                 l.amount_sanctioned.to_currency.rjust(9), #amount approved or sanctioned
                 l.amount.to_currency.rjust(9), #amount disbursed
@@ -121,13 +222,13 @@ class CommonDataFormat < Report
                 l.installment_frequency.to_s.rjust(3), #repayment frequency
                 (l.payment_schedule[@to_date].nil? ? "" : l.payment_schedule[@to_date][:total].to_currency).rjust(9),   #installment amount / minimum amount due
                 lh.actual_outstanding_total.to_currency.rjust(9),
-                "".rjust(9), #amount overdue
-                "".rjust(3), #days past due
+                lh.amount_in_default.to_currency.rjust(9), #amount overdue
+                lh.days_overdue.to_s.rjust(3), #days past due
                 "".rjust(9), #write off amount
-                "".rjust(8), #date written off
+                (l.written_off_on.nil? ? "" : l.written_off_on.strftime("%d%m%Y")).rjust(8), #date written off
                 "".rjust(20), #write-off reason
-                "".rjust(3), #no of meetings held
-                "".rjust(3), #no of meetings missed
+                Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.rjust(3), #no of meetings held
+                Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.rjust(3), #no of meetings missed
                 insurance_indicator[(not l.insurance_policy.nil?)], #insurance indicator
                 "".rjust(3), #type of insurance
                 (l.insurance_policy.nil? ? "".rjust(10) : l.insurance_policy.premium.to_currency.rjust(10)), #sum assured / coverage
