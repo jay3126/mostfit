@@ -1019,12 +1019,13 @@ class Loan
   # repayment styles
   def pay_prorata(total, received_on)
     #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
+    debugger
     i = used = prin = int = 0.0
     d = received_on
     total = total.to_f
     while used < total
-      prin -= principal_overpaid_on(d).round(2)
-      int  -= interest_overpaid_on(d).round(2)
+      prin += scheduled_principal_for_installment(installment_for_date(d))
+      int  += scheduled_interest_for_installment(installment_for_date(d))
       used  = (prin + int)
       d = shift_date_by_installments(d, 1)
     end
