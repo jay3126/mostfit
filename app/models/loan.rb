@@ -1205,6 +1205,8 @@ class Loan
       52
     when :biweekly
       26
+    when :bi_weekly
+      26
     when :monthly
       12
     when :daily
@@ -1759,7 +1761,7 @@ private
     return @reducing_schedule if @reducing_schedule
     @reducing_schedule = {}    
     balance = amount
-    payment = equated_payment
+    actual_payment = equated_payment
     1.upto(number_of_installments){|installment|
       @reducing_schedule[installment] = {}
       @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)

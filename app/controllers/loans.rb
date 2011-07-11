@@ -48,15 +48,23 @@ class Loans < Application
     @loan = klass.new(attrs)
     @loan.loan_product = @loan_product
     if @loan.save
-      if params[:return]
-        redirect(params[:return], :message => {:notice => "Loan '#{@loan.id}' was successfully created"})
+      if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
+        display @loan
       else
-        redirect resource(@branch, @center, @client), :message => {:notice => "Loan '#{@loan.id}' was successfully created"}
+        if params[:return]
+          redirect(params[:return], :message => {:notice => "Loan '#{@loan.id}' was successfully created"})
+        else
+          redirect resource(@branch, @center, @client), :message => {:notice => "Loan '#{@loan.id}' was successfully created"}
+        end
       end
     else
-      set_insurance_policy(@loan_product)
-      @loan.interest_rate *= 100
-      render :new # error messages will be shown
+      if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
+        display @loan
+      else
+        set_insurance_policy(@loan_product)
+        @loan.interest_rate *= 100
+        render :new # error messages will be shown
+      end
     end
   end
   def bulk_create
