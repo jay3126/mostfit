@@ -106,7 +106,7 @@ class Journals < Application
         debit_accounts[jid] ||= {}
         debits.each{|debit|
           debit_accounts[jid][Account.get(debit[:account_id])] ||= 0
-          debit_accounts[jid][Account.get(debit[:account_id])] += debit[:amount].to_i
+          debit_accounts[jid][Account.get(debit[:account_id])] += debit[:amount].to_f
         }
       }
 
@@ -114,7 +114,7 @@ class Journals < Application
         credit_accounts[jid] ||= {}
         credits.each{|credit|
           credit_accounts[jid][Account.get(credit[:account_id])] ||= 0
-          credit_accounts[jid][Account.get(credit[:account_id])] += credit[:amount].to_i
+          credit_accounts[jid][Account.get(credit[:account_id])] += credit[:amount].to_f
         }
       }
 

@@ -22,8 +22,6 @@
           %tr{:class => cycle('odd','even')}
             %td
               = rule.journal_type.name
-              = hidden_field :name => "credit_accounts[][journal_type_id]", :value => rule.journal_type.id
-              = hidden_field :name => "debit_accounts[][journal_type_id]", :value => rule.journal_type.id
             %td
               %b= rule.action.camelcase(' ')
               - if rule.fee
@@ -35,9 +33,9 @@
                     %tr
                       %td{:width => "80%"}
                         = ca.credit_account.name                  
+                        = hidden_field :name => "credit_accounts[][journal_type_id]", :value => rule.journal_type.id
                         = hidden_field :name => "credit_accounts[][account_id]", :value => ca.credit_account.id
                       %td
-                        - debugger if ca.id == 103
                         - amount, changable = ca.amount(@date)
                         - credit_total += amount
                         - if false
@@ -50,8 +48,9 @@
                 %table{:style => "width: 100%"}
                   - rule.debit_account_rules.each_with_index do |da, idx|
                     %tr
-                      %td
+                      %td{:width => "80%"}
                         = da.debit_account.name
+                        = hidden_field :name => "debit_accounts[][journal_type_id]", :value => rule.journal_type.id
                         = hidden_field :name => "debit_accounts[][account_id]", :value => da.debit_account.id
                       %td
                         - amount, changable = da.amount(@date)
@@ -66,9 +65,16 @@
         %td
           %b Total
         %td
-          %b= credit_total.to_currency
+          %table{:width => "95%"}
+            %tr
+              %td{:style => "text-align:right"}
+                %b= credit_total.to_currency
+
         %td
-          %b= debit_total.to_currency
+          %table{:width => "95%"}
+            %tr
+              %td{:style => "text-align:right"}
+                %b= debit_total.to_currency
       %tr
         %td
           Date
@@ -87,4 +93,3 @@
       %tr
         %td
           = submit "Create"
-
