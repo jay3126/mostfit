@@ -7,7 +7,7 @@ class Branch
   
   property :id,      Serial
   property :name,    String, :length => 100, :nullable => false, :index => true
-  property :code,    String, :length => 10, :nullable => true, :index => true, :min => 1, :max => 10
+  property :code,    String, :length => 4, :nullable => true, :index => true, :min => 4, :max => 4
   property :address, Text,   :lazy => true
   property :contact_number, String, :length => 40, :lazy => true
   property :landmark,       String, :length => 100, :lazy => true  
@@ -23,7 +23,8 @@ class Branch
   has n, :api_accesses
 
   validates_is_unique   :code
-  validates_length      :code, :min => 1, :max => 10
+  validates_length      :code, :min => 4, :max => 4
+  validates_is_number  :code
 
   validates_length      :name, :min => 3
   validates_present     :manager

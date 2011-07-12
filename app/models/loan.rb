@@ -13,6 +13,7 @@ class Loan
   after  :save,    :levy_fees
   after  :create,  :update_cycle_number
   before :destroy, :verified_cannot_be_deleted
+  before :save, :set_nfl_id
   #  after  :destroy, :update_history
 
   attr_accessor :history_disabled  # set to true to disable history writing by this object
@@ -21,7 +22,8 @@ class Loan
 
   property :id,                             Serial
   property :discriminator,                  Discriminator, :nullable => false, :index => true
-
+  property :code,                           String, :length => 6, :nullable => false
+  property :nfl_id,                         String, :length => 14
   property :amount,                         Float, :nullable => false, :index => true  # this is the disbursed amount
   property :amount_applied_for,             Float, :index => true
   property :amount_sanctioned,              Float, :index => true
@@ -122,6 +124,7 @@ class Loan
   #validations
 
   validates_present      :client, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
+  validates_is_unique       :code, :nfl_id
 
   validates_with_method  :amount,                       :method => :amount_greater_than_zero?
   validates_with_method  :interest_rate,                :method => :interest_rate_greater_than_or_equal_to_zero?
@@ -168,6 +171,10 @@ class Loan
   validates_with_method  :number_of_installments,       :method => :is_valid_loan_product_number_of_installments
   validates_with_method  :clients,                      :method => :check_client_sincerity
   validates_with_method  :insurance_policy,             :method => :check_insurance_policy    
+
+  def set_nfl_id
+    self.nfl_id = self.client.center.branch.code + self.loan_product.code + self.code
+  end
 
   def self.display_name
     "Loan"

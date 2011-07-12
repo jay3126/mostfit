@@ -7,6 +7,11 @@
   = "This loan will be dispensed by loan product: #{@loan_product.name}"
 
 %table.form.shaded{:style => "margin-left:3%"}
+  %tr
+    %th
+      Code
+    %td
+      = text_field :code
   - if not take_over_loan
     %tr
       %th

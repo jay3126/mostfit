@@ -4,6 +4,7 @@ class LoanProduct
 
   property :id, Serial, :nullable => false, :index => true
   property :name, String, :nullable => false, :index => true, :min => 3
+  property :code, String, :length => 4, :nullable => true, :index => true, :min => 4, :max => 4
   property :max_amount, Integer, :nullable => false, :index => true
   property :min_amount, Integer, :nullable => false, :index => true
   property :amount_multiple, Float, :nullable => false, :index => true, :default => 1, :min => 0.01
@@ -42,9 +43,11 @@ class LoanProduct
   belongs_to :insurance_product, :nullable => true
 
   validates_with_method :min_is_less_than_max
-  validates_is_unique   :name
+  validates_is_unique   :name, :code
   validates_is_number   :max_amount, :min_amount
   validates_with_method :check_loan_type_correctness
+  validates_is_number :code
+  validates_length      :code, :min => 4, :max => 4
   
   def self.from_csv(row, headers)
     min_interest = row[headers[:min_interest_rate]].to_f < 1 ? row[headers[:min_interest_rate]].to_f*100 : row[headers[:min_interest_rate]]

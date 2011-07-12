@@ -9,11 +9,15 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
+  before :save,   :set_nfl_id
+
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :code,            String, :length => 7
+  property :nfl_id,          String, :length => 10
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
@@ -86,6 +90,8 @@ class Client
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500
 
+  validates_length :nfl_id, :max => 10
+
   has n, :loans
   has n, :payments
   has n, :insurance_policies
@@ -119,6 +125,7 @@ class Client
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
+  validates_length    :code, :min => 7, :max => 7
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
@@ -126,6 +133,10 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
+
+  def set_nfl_id
+    self.nfl_id = "NFL#{code}"
+  end
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip

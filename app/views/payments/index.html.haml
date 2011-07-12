@@ -11,8 +11,8 @@
       to repair
   %h1
     Loan
-    = link_to "#{@loan.description}", url_for_loan(@loan)
-    by client
+    = link_to "#{@loan.nfl_id}", url_for_loan(@loan)
+    for client
     = link_to "#{@client.name}", resource(@branch, @center, @client)
   - @history = @loan.loan_history
   %p.menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
