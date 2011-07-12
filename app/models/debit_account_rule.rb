@@ -48,7 +48,7 @@ class DebitAccountRule
     # subtract the amount for which the posting has already been made
     amount = amount * percentage / 100.0
     journals = self.rule_book.journals(date)
-    amount  -= (journals.postings(:account => self.rule_book.credit_accounts, :amount.gt => 0).aggregate(:amount.sum) || 0) if journals
+    amount  -= (journals.postings(:account_id => self.debit_account_id, :fee_id => self.rule_book.fee_id, :action => self.rule_book.action).aggregate(:amount.sum) || 0).abs if journals
     amount #[(amount > 0 ? amount : 0), false]
   end
 
@@ -62,4 +62,3 @@ class DebitAccountRule
     amount = ((advance_old_balance ? advance_old_balance.send("balance_#{ptype}") : 0) - (advance_balance ? advance_balance.send("balance_#{ptype}") : 0) + (advance_collected ? advance_collected.send("advance_#{ptype}") : 0)).to_i
   end
 end
-
