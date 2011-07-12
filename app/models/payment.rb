@@ -26,6 +26,8 @@ class Payment
   property :loan_id,             Integer, :nullable => true, :index => true
   property :client_id,           Integer, :nullable => true, :index => true
   property :fee_id,              Integer, :nullable => true, :index => true
+  property :desktop_id,          Integer
+  property :origin,              String, :default => DEFAULT_ORIGIN
 
   belongs_to :loan, :nullable => true
   belongs_to :client
@@ -213,6 +215,7 @@ class Payment
     return true if received_on <= Date.today
     [false, "Payments cannot be received in the future"]
   end
+
   def not_received_before_loan_is_disbursed?
     if loan
       return [false, "Payments cannot be received before the loan is disbursed"] if loan.disbursal_date.blank?

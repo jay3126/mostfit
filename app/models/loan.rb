@@ -1,6 +1,8 @@
 class Loan
   include DataMapper::Resource
   include FeesContainer
+  include Identified
+  include Pdf::LoanSchedule if PDF_WRITER
 
   DAYS = [:none, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
 
@@ -236,6 +238,14 @@ class Loan
     "#{id}:Rs. #{amount} @ #{interest_rate} for client #{client.name}"
   end
 
+  def short_tag
+    "#{id}:Rs. #{amount} @ #{interest_rate}"
+  end
+
+  def info(date = Date.today)
+    LoanHistory.first(:loan_id => id, :date.lte => date, :order => [:date.desc], :limit => 1)
+  end
+
   def _show_cf(width = 10, padding = 4) #convenience function to see cashflow in console
     ps = payment_schedule
     titles = [:date, :total_balance, :balance, :principal, :interest, :total_paid, :total_principal, :total_interest, :fees]
@@ -385,13 +395,13 @@ class Loan
   # principal[0] and interest[1].
 
 
-  def repay(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default)
-    pmts = get_payments(input, user, received_on, received_by, defer_update, style, context)
+  def repay(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default, desktop_id = nil, origin = nil)
+    pmts = get_payments(input, user, received_on, received_by, defer_update, style, context, desktop_id, origin)
     x = make_payments(pmts, context, defer_update)
     x
   end
 
-  def get_payments(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default)
+  def get_payments(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default, desktop_id = nil, origin = nil)
     # this is the way to repay loans, _not_ directly on the Payment model
     # this to allow validations on the Payment to be implemented in (subclasses of) the Loan
     unless input.is_a? Array or input.is_a? Fixnum or input.is_a? Float or input.is_a?(Hash)
@@ -429,25 +439,25 @@ class Loan
     if fees_paid > 0
       fee_payment = Payment.new(:loan => self, :created_by => user,
                                 :received_on => received_on, :received_by => received_by,
-                                :amount => fees_paid.round(2), :type => :fees)
+                                :amount => fees_paid.round(2), :type => :fees, :desktop_id => desktop_id, :origin => origin)
       payments.push(fee_payment)
     end
     if interest > 0
       int_payment = Payment.new(:loan => self, :created_by => user,
                                 :received_on => received_on, :received_by => received_by,
-                                :amount => interest.round(2), :type => :interest)
+                                :amount => interest.round(2), :type => :interest, :desktop_id => desktop_id, :origin => origin)
       payments.push(int_payment)
     end
     if principal > 0
       prin_payment = Payment.new(:loan => self, :created_by => user,
                                  :received_on => received_on, :received_by => received_by,
-                                 :amount => principal.round(2), :type => :principal)        
+                                 :amount => principal.round(2), :type => :principal, :desktop_id => desktop_id, :origin => origin)        
       payments.push(prin_payment)
     end
     payments             
   end
 
-  def make_payments(payments, context = :default, defer_update = :false)
+  def make_payments(payments, context = :default, defer_update = false)
     Payment.transaction do |t|
       self.history_disabled=true
       payments.each{|p| p.override_create_observer = true}    
@@ -458,7 +468,7 @@ class Loan
       end
       AccountPaymentObserver.single_voucher_entry(payments)
     end
-
+    debugger
     unless defer_update #i.e. bulk updating loans
       self.history_disabled=false
       @already_updated=false
@@ -479,13 +489,13 @@ class Loan
     if payment.destroy
       update_history
       clear_cache
-      return true
+      return [true, payment]
     end
-    false
+    [false, payment]
   end
 
   def get_fee_payments(amount, date, received_by, created_by)
-    @fees = []
+    fees = []
     fp = fees_payable_on(date)
     fs = fee_schedule
     pay_order = fs.keys.sort.map{|d| fs[d].keys}.flatten.uniq
@@ -495,18 +505,16 @@ class Loan
                         :received_by => received_by, :created_by => created_by, :client => client, :loan => self)
         amount -= p.amount
         fp[k]  -= p.amount
-        @fees << p
+        fees << p if p.amount > 0
       end
     end
-    @fees
+    fees
   end
     
 
   def pay_fees(amount, date, received_by, created_by)
-    status = true
-    @fees = get_fee_payments(amount, date, received_by, created_by)
-    @fees.map{|f| f.save}
-    [status, @fees]
+    success, @prin, @int, @fees = make_payments(get_fee_payments(amount, date, received_by, created_by))
+    return success, @fees
   end
   # LOAN INFO FUNCTIONS - CALCULATIONS
 
@@ -813,6 +821,7 @@ class Loan
                                                           # considerably by passing total_received, i.e. from history_for
     #return @status if @status
     date = Date.parse(date)      if date.is_a? String
+
     return :applied_in_future    if applied_on.holiday_bump > date  # non existant
     return :pending_approval     if applied_on.holiday_bump <= date and
                                  not (approved_on and approved_on.holiday_bump <= date) and
@@ -1051,7 +1060,8 @@ class Loan
       else
         keys.each_with_index do |k,i|
           if keys[[i+1,keys.size - 1].min] > date
-            rv = (column == :all ? cache[k] : cache[k][column])
+            # http://thingsaaronmade.com/blog/ruby-shallow-copy-surprise.html
+            rv = (column == :all ? Marshal.load(Marshal.dump(cache[k])) : cache[k][column])
             break
           end
         end
@@ -1189,6 +1199,8 @@ class Loan
     when :weekly
       52
     when :biweekly
+      26
+    when :bi_weekly
       26
     when :monthly
       12
@@ -1744,7 +1756,7 @@ private
     return @reducing_schedule if @reducing_schedule
     @reducing_schedule = {}    
     balance = amount
-    payment = equated_payment
+    actual_payment = equated_payment
     1.upto(number_of_installments){|installment|
       @reducing_schedule[installment] = {}
       @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
