@@ -601,7 +601,7 @@ var uniqueID = (function() {
 	return function() { return id++; };  // Return and increment
     })();
 
-//This function is used to calculate net surplus value for intellecash  
+//This function is used to calculate net surplus value for intellecash
 function calculateSum(toField, addTheseFields) {
     var sum = 0, net = 0, net1 = 0;
     status = uniqueID();
@@ -618,11 +618,11 @@ function calculateSum(toField, addTheseFields) {
      else if(toField == "client_total_expenses"){
 	     net1 = net1 + sum;
      }
-     if(status){	 
+     if(status){
 	 $("#client_net_surplus").val((val1 - net1));
      }
 }
- 
+
 function fillCenters(){
     $("#branch_selector").change(function(){
 				     $.ajax({
@@ -1015,14 +1015,35 @@ $(document).ready(function(){
 													       });
 								       $("#bookmark_form input[value='none']").attr("checked", "true");
 								   }
-			  });
+
+							       });
+		      /*sample = function(select){
+			  val=$("#account_branch_id").val();
+			  val1=$("#account_account_type_id").val();
+			  $.ajax({
+				  url: "/accounts?branch_id="+val+"&account_type_id="+val1,
+				      success: function(data){$("#account_parent_id").html(data);}
+			      });
+		      }
+		      $("#account_account_type_id").live('change', sample);
+		      $("#account_branch_type_id").live('change', sample);*/
+
 		      $("#account_account_type_id").live('change', function(select){
-							     val=$("#account_account_type_id").val();
+							     val=$("#account_branch_id").val();
+							     val1=$("#account_account_type_id").val();
 							     $.ajax({
-									url: "/accounts?account_type_id="+val,
-									success: function(data){$("#account_parent_id").html(data);}
-								    });
-							 });
+								     url: "/accounts?branch_id="+val+"&account_type_id="+val1,
+									 success: function(data){$("#account_parent_id").html(data);}
+								 });
+			  });
+		      $("#account_branch_id").live('change', function(select){
+							     val=$("#account_branch_id").val();
+							     val1=$("#account_account_type_id").val();
+							     $.ajax({
+								     url: "/accounts?branch_id="+val+"&account_type_id="+val1,
+									 success: function(data){$("#account_parent_id").html(data);}
+								 });
+			  });
 		      attachReportingFormEvents("formdiv_1");
 		      attachRulesFormEvents("condition", 0);
 		      attachRulesFormEvents("condition", 1);
