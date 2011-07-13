@@ -58,7 +58,7 @@ class Journal
 
   end
 
-  def self.create_transaction(journal_params, debit_accounts, credit_accounts)
+  def self.create_transaction(journal_params, debit_accounts, credit_accounts, rules = nil)
     # debit and credit accounts can be either hashes or objects
     # In case of hashes, this is the structure
     # debit_accounts =>  {Account.get(1) => 100, Account.get(2) => 30}
@@ -93,10 +93,10 @@ class Journal
         }
       elsif debit_accounts.is_a?(Hash)  # for entries of the form {Account => amount}
         debit_accounts.each{|debit_account, debit_amount|
-          Posting.create(:amount => (debit_amount||amount) * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency])
+          Posting.create(:amount => (debit_amount||amount) * -1, :journal_id => journal.id, :account => debit_account, :currency => journal_params[:currency], :fee_id => rules.first.fee_id, :action => rules.first.action)
         }
       else
-        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency])
+        Posting.create(:amount => amount * -1, :journal_id => journal.id, :account => debit_accounts, :currency => journal_params[:currency], :fee_id => rules.first.fee_id, :action => rules.first..action)
       end
       
 
@@ -113,10 +113,11 @@ class Journal
         }
       elsif credit_accounts.is_a?(Hash) # for entries of the form {Account => amount}
         credit_accounts.each{|credit_account, credit_amount|
-          Posting.create(:amount => (credit_amount||amount), :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency])
+          Posting.create(:amount => (credit_amount||amount), :journal_id => journal.id, :account => credit_account, :currency => journal_params[:currency], :fee_id => rules.first.fee_id, :action => rules.first.action)
         }
       else
-        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency])
+
+        Posting.create(:amount => amount, :journal_id => journal.id, :account => credit_accounts, :currency => journal_params[:currency], :fee_id => rules.first.fee_id, :action => rules.first.action)
       end
       
       # Rollback in case of both accounts being the same      

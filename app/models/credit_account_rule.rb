@@ -49,7 +49,7 @@ class CreditAccountRule
     amount = amount * percentage / 100.0
     journals = self.rule_book.journals(date)
     amount  -= (journals.postings(:account_id => self.credit_account_id, :fee_id => self.rule_book.fee_id, :action => self.rule_book.action).aggregate(:amount.sum) || 0).abs if journals
-    amount #[(amount > 0 ? amount : 0), false]    
+    amount.round(2) #[(amount > 0 ? amount : 0), false]
   end
 
   private
