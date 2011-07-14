@@ -59,6 +59,7 @@
               %input{:type => 'submit', :value=>'search'}
     #content
       .container
+        %p
         #breadcrums= breadcrumbs
         - if message
           #flash-messages.span-17.prefix-5.suffix-5.last            
@@ -68,7 +69,6 @@
         - if params[:action]=="edit" and session.user.admin?
           %p{:style => "float: right; border: 1px solid orange; padding: 4px;"}
             = link_to("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
-        %p
         = catch_content :for_layout
     #footer
       %p{:style => "position: relative; right: 10%; float: right;"}

@@ -1,5 +1,5 @@
 class Exceptions < Merb::Controller
-  
+  provides :xml, :yaml, :js  
   # handle NotFound exceptions (404)
   def not_found
     if request.xhr?
@@ -7,6 +7,7 @@ class Exceptions < Merb::Controller
     elsif request.env['HTTP_REFERER']
       redirect request.env['HTTP_REFERER'], :message => { :error => 'Sorry, page not found' }
     else
+#      only_provides :xml
       render :status => 404
     end
   end
@@ -43,6 +44,11 @@ class Exceptions < Merb::Controller
     end
   end
 
+  def not_supported_pattern
+    render :status => 403
+  end
+
+
   def not_authorized
     return "Not privileged" if request.xhr?
     render :status => 403
@@ -65,11 +71,16 @@ class Exceptions < Merb::Controller
       redirect request.env['HTTP_REFERER'], :message => { :error => 'Sorry, Not allowed to change verified data.' }
     else
       render
-    end
-    
+    end    
+  end
+ 
+  #get list of errors handle 
+  def index
+    display @template
   end
 end
 
 class NotPrivileged <  Merb::ControllerExceptions::Unauthorized; end
 class NotChangeable <  Merb::ControllerExceptions::Unauthorized; end
 class SessionExpired < Merb::ControllerExceptions::Unauthorized; end
+class NotSupportedPattern < Merb::ControllerExceptions::Unauthorized; end

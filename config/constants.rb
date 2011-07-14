@@ -88,7 +88,21 @@ REPORT_ACCESS_HASH = {
 NORMAL_REPAYMENT_STYLE = :normal
 PRORATA_REPAYMENT_STYLE = :prorata
 REPAYMENT_STYLES = [NORMAL_REPAYMENT_STYLE, PRORATA_REPAYMENT_STYLE]
+API_SUPPORT_FORMAT = ["xml"]
 LOAN_AGEING_BUCKETS = [0, 30, 60, 90, 180, 365, :older]
 LOSS_PROVISION_PERCENTAGES_BY_BUCKET = [0, 10, 25, 50, 75, 90, 100]
 DEFAULT_LOCALE = 'en'
 LOCALES = [["en","English"],["hi","Hindi"]]
+DEFAULT_ORIGIN = "server"
+#Date format initializers
+PREFERED_DATE_PATTERNS = ["%d-%m-%y", "%m-%d-%y", "%y-%m-%d", "%y-%d-%m", "%d-%m-%Y", "%m-%d-%Y", "%Y-%m-%d", "%Y-%d-%m"]
+PREFERED_DATE_SEPARATORS = { :hypen => "-", :slash => "/", :period => "." }
+PREFERED_DATE_STYLES = [[:SHORT, "31-12-2001"],[:MEDIUM, "Dec 31, 2001"],[:LONG, "December 31, 2001"], [:FULL,"Monday, December 31, 2001"]]
+DEFAULT_DATE_PATTERN = "%d-%m-%Y"
+DEFAULT_DATE_SEPARATOR = "-"
+DEFAULT_DATE_STYLE = "short"
+MEDIUM_DATE_PATTERN = "%b %d, %Y"
+LONG_DATE_PATTERN = "%B %d, %Y"
+FULL_DATE_PATTERN = "%A, %B %d, %Y"
+FORMAT_REG_EXP = /[- . \/]/
+
