@@ -55,7 +55,6 @@ class Journal
     return [false, "debit and credit amount mismatch"] unless ((credit_account_postings.map{|x| x.amount * -1.0}.reduce(0){|s,x| s+=x}).round(2)  ==  (debit_account_postings.map{|x| x.amount}.reduce(0){|s,x| s+=x}).round(2))
     
     return [true, ""]
-
   end
 
   def self.create_transaction(journal_params, debit_accounts, credit_accounts, rules = nil)

@@ -67,13 +67,13 @@ class RuleBook
         rule.credit_account_rules.each{|car|
           credit_accounts[rule.id] ||= {}
           credit_accounts[rule.id][car.credit_account.id] ||= 0
-          credit_accounts[rule.id][car.credit_account.id] += (p.amount * (car.percentage)/100)
+          credit_accounts[rule.id][car.credit_account.id] += (p.amount * (car.percentage)/100).round(2)
         }
         
         rule.debit_account_rules.each{|dar|
           debit_accounts[rule.id] ||= {}
           debit_accounts[rule.id][dar.debit_account.id] ||= 0
-          debit_accounts[rule.id][dar.debit_account.id] += (p.amount * (dar.percentage)/100)
+          debit_accounts[rule.id][dar.debit_account.id] += (p.amount * (dar.percentage)/100).round(2)
         }
         rules.push(rule)
       }
@@ -103,16 +103,15 @@ class RuleBook
     
     credit_accounts, debit_accounts  = {}, {}
     rule.credit_account_rules.each{|car|
-      
       credit_accounts[rule.id] ||= {}
       credit_accounts[rule.id][car.credit_account.id] ||= 0
-      credit_accounts[rule.id][car.credit_account.id] += (obj.amount * (car.percentage)/100)
+      credit_accounts[rule.id][car.credit_account.id] += (obj.amount * (car.percentage)/100).round(2)
     }
 
     rule.debit_account_rules.each{|dar|        
       debit_accounts[rule.id] ||= {}
       debit_accounts[rule.id][dar.debit_account.id] ||= 0
-      debit_accounts[rule.id][dar.debit_account.id] += (obj.amount * (dar.percentage)/100)
+      debit_accounts[rule.id][dar.debit_account.id] += (obj.amount * (dar.percentage)/100).round(2)
     }    
     [credit_accounts, debit_accounts, rule]
   end
