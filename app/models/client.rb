@@ -9,14 +9,13 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
-  before :save,   :set_nfl_id
+  after  :create,   :set_nfl_id
 
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
-  property :code,            String, :length => 7
   property :nfl_id,          String, :length => 10
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :spouse_name,     String, :length => 100, :lazy => true
@@ -125,7 +124,6 @@ class Client
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
-  validates_length    :code, :min => 7, :max => 7
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
@@ -135,7 +133,8 @@ class Client
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
 
   def set_nfl_id
-    self.nfl_id = "NFL#{code}"
+    self.nfl_id = "NFL#{self.id.to_s.rjust(7,'0')}"
+    self.save
   end
 
   def self.from_csv(row, headers)

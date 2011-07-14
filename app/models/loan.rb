@@ -8,12 +8,11 @@ class Loan
 
   before :valid?,  :parse_dates
   before :valid?,  :convert_blank_to_nil
-  before :save,    :update_scheduled_maturity_date
   after  :save,    :update_history_caller  # also seems to do updates
   after  :save,    :levy_fees
   after  :create,  :update_cycle_number
   before :destroy, :verified_cannot_be_deleted
-  before :save, :set_nfl_id
+  after :create, :set_nfl_id
   #  after  :destroy, :update_history
 
   attr_accessor :history_disabled  # set to true to disable history writing by this object
@@ -22,7 +21,6 @@ class Loan
 
   property :id,                             Serial
   property :discriminator,                  Discriminator, :nullable => false, :index => true
-  property :code,                           String, :length => 6, :nullable => false
   property :nfl_id,                         String, :length => 14
   property :amount,                         Float, :nullable => false, :index => true  # this is the disbursed amount
   property :amount_applied_for,             Float, :index => true
@@ -76,8 +74,6 @@ class Loan
   property :loan_utilization_id,                Integer, :lazy => true, :nullable => true
   property :under_claim_settlement,             Date, :nullable => true
 
-  property :_scheduled_maturity_date,           Date
-
   # Caching baby!
 
   property :staleness_frequency, Integer
@@ -124,7 +120,7 @@ class Loan
   #validations
 
   validates_present      :client, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
-  validates_is_unique       :code, :nfl_id
+  validates_is_unique    :nfl_id
 
   validates_with_method  :amount,                       :method => :amount_greater_than_zero?
   validates_with_method  :interest_rate,                :method => :interest_rate_greater_than_or_equal_to_zero?
@@ -173,7 +169,9 @@ class Loan
   validates_with_method  :insurance_policy,             :method => :check_insurance_policy    
 
   def set_nfl_id
-    self.nfl_id = self.client.center.branch.code + self.loan_product.code + self.code
+    self.nfl_id = self.client.center.branch.code.to_s + self.loan_product.code.to_s + self.id.to_s.rjust(6,'0')
+    self.history_disabled = true
+    self.save
   end
 
   def self.display_name
@@ -475,6 +473,7 @@ class Loan
       end
       AccountPaymentObserver.single_voucher_entry(payments)
     end
+    debugger
     unless defer_update #i.e. bulk updating loans
       self.history_disabled=false
       @already_updated=false
@@ -1027,9 +1026,6 @@ class Loan
     self.amount      ||= self.amount_applied_for
   end
 
-  def update_scheduled_maturity_date
-    self._scheduled_maturity_date = scheduled_maturity_date if @schedule
-  end
 
   # repayment styles
   def pay_prorata(total, received_on)

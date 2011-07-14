@@ -38,10 +38,11 @@ class Clients < Application
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
     if @client.save
+      debugger
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display @client
       else
-        redirect(params[:return]||resource(@branch, @center, :clients), :message => {:notice => "Client '#{@client.name}' successfully created"})
+        redirect((params[:return]||resource(@branch, @center, :clients)), :message => {:notice => "Client '#{@client.name}' successfully created"})
       end
     else
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
