@@ -91,6 +91,7 @@
       %li#payments Repayments
       %li#attendance Attendance
       %li#guarantor Guarantors
+      %li#misc Miscellaneous
     %div.tab
       %h2== Loans for client <i>#{@client.name}</i>
       
@@ -249,3 +250,16 @@
                         = link_to 'Edit', resource(@client, g, :edit)
         %td
           = link_to "Add Guarantor", resource(@client, :guarantors, :new), :class => 'add'
+    %div.tab
+      %fieldset
+        %legend Applicable Fees
+        - if @client.applicable_fees.empty?
+          = form_for(@loan, :action => url(:controller => 'clients', :action => :levy_fees, :id => @client.id)) do
+            = submit 'Re-apply Fees'
+        - else
+          = partial "applicable_fees/list", :layout => false, :applicable_fees => @client.applicable_fees, :return_url => resource(@branch, @center, @client) + "#misc"
+      - if [:admin, :mis_manager].include?(session.user.role)
+        .box
+          - @applicable_fee = ApplicableFee.new(:applicable_type => 'Client', :applicable_id => @client.id)
+          = partial "applicable_fees/form", :layout => false, :object => @client
+

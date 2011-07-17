@@ -2,14 +2,51 @@ class Accounts < Application
   # provides :xml, :yaml, :js
   before :get_context
 
+  # TODO the recursive functions need to be debugged and have to be used a display fully nested accounting selection box
+  # def hash_creation(account, hash_list)
+  #     if account.children
+  #       hash_list[account]||={}
+  #       account.children.each{|c|
+  #       hash_creation(c, hash_list[c])
+  #     }
+  #     else 
+  #       hash_list[account] = account.children
+  #     end
+  # end
+
+  # def list_creation(account, list)
+  #     if account.children
+  #       account.children.each{|c|
+  #       list_creation(c, list)
+  #     }
+  #     else 
+  #       list << account.children
+  #     end
+  # end
+
   def index
     if request.xhr? and params[:account_type_id] and not params[:account_type_id].blank?
-      @account_type_id = params[:account_type_id]
       if params[:branch_id] and not params[:branch_id].blank?
-        @branch = Branch.get(params[:branch_id])
-        @accounts = Account.all(:branch_id => @branch.id, :account_type_id => @account_type_id)
+        @accounts = Account.all(:branch_id => params[:branch_id].to_i, :account_type_id => params[:account_type_id].to_i, :parent_id => nil)
+        # @hash_list = {}
+        @list = []
+        @accounts.each{|account|
+          # hash_creation(account, @hash_list)
+          # list_creation(account, @list)
+          @list << account
+          if account.children 
+            account.children.each{|c|
+              @list << c
+              if c.children
+                c.children.each{|grand_child| @list << grand_child}
+              end
+            }
+          end
+        }
+        # @hash_list
+        @list
       else
-        @accounts = Account.all(:branch_id => nil, :account_type_id => @account_type_id)
+        @accounts = Account.all(:branch_id => nil, :account_type_id => params[:account_type_id].to_i)
       end
       partial :accounts_selection
     else
@@ -38,11 +75,12 @@ class Accounts < Application
   def edit(id)
     only_provides :html
     @account = Account.get(id)
+    raise NotFound unless @account
+ 
     if @account.account_type
       @branch = Branch.get(@account.branch_id) if @account.branch_id
       @parent_accounts = (Account.all(:branch_id => (@branch ? @branch.id : nil) , :account_type => @account.account_type)-[@account])
     end
-    raise NotFound unless @account
     display @account, :layout => layout?
   end
 
@@ -130,6 +168,8 @@ class Accounts < Application
 
   private
   def get_context
+    @branches_list = Branch.all.map{ |x| [x.id, x.name]}
+    @branches_list.unshift([0, 'Head Office Accounts'])
     @branch = Branch.get(params[:branch_id]) if params.key?(:branch_id)
   end
 
