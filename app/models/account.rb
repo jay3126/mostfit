@@ -53,7 +53,6 @@ class Account
 
   # check if parent belongs to the same branch
   def parent_belongs_to_same_branch?
-    debugger
     if self.parent_id == ""
       true
     elsif self.parent.branch_id == self.branch_id
