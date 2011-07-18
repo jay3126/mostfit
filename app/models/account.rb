@@ -39,7 +39,7 @@ class Account
   validates_is_unique :name, :scope => :branch
   validates_is_unique :gl_code, :scope => :branch
   validates_is_number :opening_balance
-
+  
   # check if it is a cash account
   def is_cash_account?
     @account_category ? @account_category.eql?('Cash') : false
