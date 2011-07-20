@@ -685,7 +685,7 @@ function fillBankAccounts(){
 							$("#bank_account_selector").html(data);
 						    }
 						});
-				     });	
+				     });
     }
 }
 
@@ -800,7 +800,6 @@ $(document).ready(function(){
 
 		      fillCashAccounts();
 		      fillBankAccounts();
-		      $('form').highlight();
 		      //Handling targets form
 		      $("select#target_attached_to").change(function(){
 								$.ajax({
