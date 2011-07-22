@@ -8,7 +8,6 @@ class Loan
 
   before :valid?,  :parse_dates
   before :valid?,  :convert_blank_to_nil
-  before :save,    :update_scheduled_maturity_date
   after  :save,    :update_history_caller  # also seems to do updates
   after  :create, :levy_fees_new
   after  :save,    :levy_fees
@@ -75,8 +74,6 @@ class Loan
 
   property :loan_utilization_id,                Integer, :lazy => true, :nullable => true
   property :under_claim_settlement,             Date, :nullable => true
-
-  property :_scheduled_maturity_date,           Date
 
   # Caching baby!
 
@@ -955,7 +952,7 @@ class Loan
                d.holiday_bump if d.is_a?(Date)
              } + payment_dates + installment_dates).compact.uniq.sort
     last_paid_date = nil
-
+    total_principal_due = total_interest_due = total_principal_paid = total_interest_paid = 0
     repayed=false
     dates.each_with_index do |date,i|
       current   = date == Date.today ? true : (((dates[[i,0].max] < Date.today and dates[[dates.size - 1,i+1].min] > Date.today) or 
@@ -963,7 +960,9 @@ class Loan
       scheduled = get_scheduled(:all, date)
       actual    = get_actual(:all, date)
       prin      = principal_received_on(date)
+      total_principal_paid += prin
       int       = interest_received_on(date)
+      total_interest_paid += int
       if (actual[:total_balance] - scheduled[:total_balance] > prin + int) and date >= scheduled_first_payment_date # there is a default
         last_paid_date ||= dates[[i,dates.size-1].min];        days_overdue = [0,date - last_paid_date].max
       else
@@ -972,6 +971,8 @@ class Loan
       next if repayed
       principal_due  = actual[:balance] - scheduled[:balance]
       interest_due   = actual[:total_balance] - scheduled[:total_balance] - (actual[:balance] - scheduled[:balance])
+      total_principal_due += scheduled[:principal]
+      total_interest_due += scheduled[:interest]
       repayed = true if actual[:balance]<=0 and interest_due<=0
 
       @history_array << {
@@ -990,7 +991,12 @@ class Loan
         :principal_due                       => principal_due.round(2), 
         :interest_due                        => interest_due.round(2),
         :principal_paid                      => prin.round(2),
-        :interest_paid                       => int.round(2)
+        :interest_paid                       => int.round(2),
+        :total_principal_due                 => total_principal_due.round(2),
+        :total_interest_due                  => total_interest_due.round(2),
+        :total_principal_paid                => total_principal_paid.round(2),
+        :total_interest_paid                 => total_interest_paid.round(2),
+        
       }
     end
     Merb.logger.info "History calculation took #{Time.now - t} seconds"
@@ -1016,7 +1022,9 @@ class Loan
     sql = %Q{ INSERT INTO loan_history(loan_id, date, status, scheduled_outstanding_principal, scheduled_outstanding_total,
                                        scheduled_principal_to_be_paid, scheduled_interest_to_be_paid,
                                        actual_outstanding_principal, actual_outstanding_total, current, amount_in_default, client_group_id, center_id, client_id, 
-                                       branch_id, days_overdue, week_id, principal_due, interest_due, principal_paid, interest_paid, created_at)
+                                       branch_id, days_overdue, week_id, principal_due, interest_due, principal_paid, interest_paid, 
+                                       total_principal_due, total_interest_due, total_principal_paid, total_interest_paid, 
+                                       created_at)
               VALUES }
     values = []
     calculate_history.each do |history|
@@ -1026,6 +1034,7 @@ class Loan
                           #{history[:actual_outstanding_total]},#{history[:current] ? 1 : 0}, #{history[:amount_in_default]}, #{client.client_group_id || "NULL"}, 
                           #{client.center.id},#{client.id},#{client.center.branch.id}, #{history[:days_overdue]}, #{((history[:date] - d0) / 7).to_i + 1},
                           #{history[:principal_due]},#{history[:interest_due]}, #{history[:principal_paid]},#{history[:interest_paid]}, 
+                          #{history[:total_principal_due]},#{history[:total_interest_due]}, #{history[:total_principal_paid]},#{history[:total_interest_paid]}, 
                           '#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}')}
      values << value
     end
@@ -1063,9 +1072,6 @@ class Loan
     self.amount      ||= self.amount_applied_for
   end
 
-  def update_scheduled_maturity_date
-    self._scheduled_maturity_date = scheduled_maturity_date if @schedule
-  end
 
   # repayment styles
   def pay_prorata(total, received_on)
