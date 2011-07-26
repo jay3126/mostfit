@@ -22,6 +22,7 @@ class CommonDataFormat < Report
   
   def generate
     @data = []
+    attendance_record = Center.all.map{|x| [x.id, Attendance.all(:center_id => x.id).aggregate(:client_id, :client_id.count).to_hash]}.to_hash
     @data << ["Segment Identifier",
               "Member Identifier",
               "Branch Identifier",
@@ -123,7 +124,7 @@ class CommonDataFormat < Report
               "Agreed Meeting time of the day",
               "Dummy"
              ]
-    
+
     (if @branch
        Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.gte => @from_date, :applied_on.lte => @to_date)
      else
@@ -227,8 +228,8 @@ class CommonDataFormat < Report
                 "".rjust(9), #write off amount
                 (l.written_off_on.nil? ? "" : l.written_off_on.strftime("%d%m%Y")).rjust(8), #date written off
                 "".rjust(20), #write-off reason
-                Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.rjust(3), #no of meetings held
-                Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.rjust(3), #no of meetings missed
+                attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.rjust(3), #no of meetings held
+                attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.rjust(3), #no of meetings missed
                 insurance_indicator[(not l.insurance_policy.nil?)], #insurance indicator
                 "".rjust(3), #type of insurance
                 (l.insurance_policy.nil? ? "".rjust(10) : l.insurance_policy.premium.to_currency.rjust(10)), #sum assured / coverage
