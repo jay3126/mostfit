@@ -28,6 +28,7 @@ class Accounts < Application
     if params[:branch_id] and not params[:branch_id].blank?
       @branch =  Branch.get(params[:branch_id])
     else
+      params[:branch_id] = "0"
       @branch = nil
     end
     @accounts = Account.tree((params[:branch_id] and not params[:branch_id].blank?) ? params[:branch_id].to_i : nil )
@@ -64,11 +65,10 @@ class Accounts < Application
   end
 
   def create(account)
-    debugger
     if account.is_a?(Hash)
       @account = Account.new(account)
       if @account.save
-        redirect resource(:accounts), :message => {:notice => "Account was successfully created"}
+        redirect resource(:accounts, :branch_id => account[:branch_id] || 0), :message => {:notice => "Account was successfully created"}
       else
         message[:error] = "Account failed to be created"
         render :new
@@ -126,7 +126,6 @@ class Accounts < Application
 
   def duplicate
     unless params[:branch_id].blank?
-      debugger
       if params[:branch_id] == "0"
         @branch = Branch.new(:name => "HO", :id => 0)
       else
@@ -159,7 +158,6 @@ class Accounts < Application
   end
 
   def bulk_create_for(branch, accounts)
-    debugger
     errors = []
     accounts.each{|a|
       new_account = Account.new(a)

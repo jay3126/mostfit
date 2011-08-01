@@ -14,6 +14,9 @@ class Account
   property :asset_class,            Enum.send('[]', *(['', ASSET_CLASSES].flatten)), :default => '', :nullable => true, :index => true
   property :income_head,           Enum.send('[]', *(['', INCOME_HEADS].flatten)), :default => '', :nullable => true, :index => true
 
+  property :created_at,            DateTime
+  property :deleted_at,            DateTime
+
   belongs_to :account, :model => 'Account', :child_key => [:parent_id]
   belongs_to :account_type
   
