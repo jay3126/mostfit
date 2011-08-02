@@ -13,6 +13,7 @@ class Client
 
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
+  after  :save,   :update_loan_cache
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
@@ -135,6 +136,9 @@ class Client
   def set_nfl_id
     self.nfl_id = "NFL#{self.id.to_s.rjust(7,'0')}"
     self.save
+
+  def update_loan_cache
+    loans.each{|l| l.update_loan_cache(true); l.save}
   end
 
   def self.from_csv(row, headers)
