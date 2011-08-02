@@ -382,8 +382,23 @@ class Loans < Application
     loan = Loan.get(id)
     raise NotFound unless loan
     loan.update_history
-    redirect("/loans/#{loan.id}")
+    redirect url_for_loan(loan)
   end
+
+  def reallocate(id)
+    debugger
+    @loan = Loan.get(id)
+    raise NotFound unless @loan
+    debugger
+    status, @payments = @loan.reallocate(params[:style].to_sym, session.user)
+    if status
+      redirect url_for_loan(@loan), :message => {:notice => "Loan payments succesfully reallocated"}
+    else
+      render 
+    end
+  end
+    
+
 
   def repayment_sheet(id)
     @loan = Loan.get(id)
@@ -479,16 +494,19 @@ class Loans < Application
   def get_loan_and_attrs   # FIXME: this is a code dup with data_entry/loans
     if params[:id] and not params[:id].blank?
       loan =  Loan.get(params[:id])      
+      loan_product = loan.loan_product
       attrs = params[loan.discriminator.to_s.snake_case.to_sym] || {}
       klass = loan.class
     else
       loan_product = LoanProduct.get(params[:loan_product_id])
-      attrs = params[loan_product.loan_type_string.snake_case.to_sym]
+      attrs = params[loan_product.loan_type_string.snake_case.to_sym] || params[:loan]
       raise NotFound if not params[:loan_type]
       klass = Kernel::const_get(params[:loan_type])
     end
     attrs[:client_id] = params[:client_id] if params[:client_id]
     attrs[:insurance_policy] = params[:insurance_policy] if params[:insurance_policy]
+    debugger
+    attrs[:repayment_style_id] ||= loan_product.repayment_style.id
     [klass, attrs]
   end
 
