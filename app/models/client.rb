@@ -136,6 +136,7 @@ class Client
   def set_nfl_id
     self.nfl_id = "NFL#{self.id.to_s.rjust(7,'0')}"
     self.save
+  end
 
   def update_loan_cache
     loans.each{|l| l.update_loan_cache(true); l.save}

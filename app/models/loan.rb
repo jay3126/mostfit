@@ -197,7 +197,7 @@ class Loan
     self.nfl_id = self.client.center.branch.code.to_s + self.loan_product.code.to_s + self.id.to_s.rjust(6,'0')
     self.history_disabled = true
     self.save
-
+  end
 
   def update_loan_cache(force = false)
     self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
@@ -1170,12 +1170,6 @@ class Loan
     prin = total - int
     [int, prin]
   end
-
-
-  def correct_prepayments
-    
-  end
-
 
   def reallocate(style, user)
     self.extend_loan
