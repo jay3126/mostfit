@@ -41,9 +41,6 @@ class Client
 
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
   property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
-  validates_length :number_of_family_members, :max => 20
-  validates_length :school_distance, :max => 200
-  validates_length :phc_distance, :max => 500
 
   validates_length :nfl_id, :max => 10
 
@@ -194,9 +191,7 @@ class Client
         self.send("#{k}=", nil)
       end
     }
-    self.type_of_account = 0 if self.type_of_account == nil
     self.occupation = nil if self.occupation.blank?
-    self.type_of_account = '' if self.type_of_account.nil? or self.type_of_account=="0"
   end
 
   def add_created_by_staff_member
@@ -285,7 +280,7 @@ class Client
 
  end
 
-class OrigClient < Client
+class IndividualClient < Client
 
   property :account_number, String, :length => 20, :nullable => true, :lazy => true
   property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
@@ -334,5 +329,35 @@ class OrigClient < Client
   property :not_irrigated_land_leased_wasteland, Integer, :lazy => true
   property :not_irrigated_land_shared_wasteland, Integer, :lazy => true
 
+  validates_length :school_distance, :max => 200
+  validates_length :phc_distance, :max => 500
 
+  def convert_blank_to_nil
+    self.attributes.each{|k, v|
+      if v.is_a?(String) and v.empty? and self.class.send(k).type==Integer
+        self.send("#{k}=", nil)
+      end
+    }
+    self.type_of_account = 0 if self.type_of_account == nil
+    self.occupation = nil if self.occupation.blank?
+    self.type_of_account = '' if self.type_of_account.nil? or self.type_of_account=="0"
+  end
+
+
+end
+
+
+class JlgClient < Client
+
+  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
+  property :number_of_earning_members, Integer, :nullable => true, :lazy => true
+  property :member_details, Text, :nullable => true, :lazy => true
+  property :household_income, Integer, :nullable => true, :lazy => true
+  property :other_income, Integer, :nullable => true, :lazy => true
+  property :total_income, Integer, :nullable => true, :lazy => true
+  property :expenses, Text, :nullable => true, :lazy => true
+  property :property_type, String, :nullable => true, :lazy => true
+  property :house_type, String, :nullable => true, :lazy => true
+  property :years_of_stay, Integer, :nullable => true, :lazy => true
+  property :date_of_house_verification, Date, :nullable => true, :lazy => true
 end

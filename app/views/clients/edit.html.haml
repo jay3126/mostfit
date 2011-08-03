@@ -8,7 +8,11 @@
 - form_url   = (params[:return] ? resource(@branch, @center, @client, {:return => params[:return]}) : resource(@branch, @center, @client))
 
 = form_for(@client, :action => form_url, :multipart => true) do
-  = partial "clients/fields", :submit_text => "Save changes", :cancel_link => cancel_url
+  = hidden_field :name => :client_type, :value => @client.class
+  - if File.exists?("app/views/clients/#{@client.class.to_s.pluralize.snake_case}/_fields.html.haml")
+    = partial ("clients/#{@client.class.to_s.pluralize.snake_case}/fields")
+  - else
+    = partial("clients/fields", :submit_text => "Save changes", :cancel_link => cancel_url)
 
   = submit "Save client"
 &nbsp;&nbsp;

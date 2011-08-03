@@ -15,6 +15,7 @@ class Clients < Application
   end
 
   def show(id)
+    debugger
     @option = params[:option] if params[:option]    
     @client = Client.get(id)
     raise NotFound unless @client
@@ -28,13 +29,25 @@ class Clients < Application
   end
 
   def new
-    only_provides :html
-    @client = Client.new
-    display @client
+    if Client.descendants.count == 1
+      only_provides :html
+      @client = Client.new
+      display @client
+    else
+      if params[:client_type]
+        @client = Kernel.const_get(params[:client_type].camel_case).new
+        display @client
+      else
+        render
+      end
+    end
   end
 
   def create(client)
-    @client = Client.new(client)
+    model_name = (params[:client_type])
+    model = Kernel.const_get(model_name)
+    client = params[:client].merge(params[model_name.snake_case])
+    @client = model.new(client)
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
     if @client.save
@@ -54,11 +67,12 @@ class Clients < Application
   end
 
   def edit(id)
+    debugger
     only_provides :html
     @client = Client.get(id)
     raise NotFound unless @client
     disallow_updation_of_verified_clients
-    display @client
+    display @client, :template => "clients/edit"
   end
 
   def update(id, client)
@@ -136,6 +150,7 @@ class Clients < Application
   
   # this redirects to the proper url, used from the router
   def redirect_to_show(id)
+    debugger
     raise NotFound unless @client = Client.get(id)
     if @client.center
       redirect resource(@client.center.branch, @client.center, @client)
@@ -152,6 +167,7 @@ class Clients < Application
 
   private
   def get_context
+    debugger
     if params[:branch_id] and params[:center_id] 
       @branch = Branch.get(params[:branch_id]) 
       @center = Center.get(params[:center_id]) 
@@ -164,5 +180,8 @@ class Clients < Application
 
 end # Clients
 
-class OrigClients < Clients
+class IndividualClients < Clients
+end
+
+class JlgClients < Clients
 end

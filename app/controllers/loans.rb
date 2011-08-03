@@ -477,9 +477,15 @@ class Loans < Application
       @center = @client.center
       @branch = @center.branch
     else
-      if params[:client_id]
-        @client = Client.get(params[:client_id])
-      elsif params[:client_ids]
+      debugger
+      client_types = Client.descendants.map{|c| c.to_s.snake_case}
+      client_types.each do |client_type|
+        debugger
+        if params["#{client_type}_id"]
+          @client = Client.get(params["#{client_type}_id"])
+        end
+      end
+      if params[:client_ids]
         @clients = Client.all(:id => params[:client_id])
       end
       @center = Center.get(params[:center_id])
@@ -492,6 +498,7 @@ class Loans < Application
   # the loan is not of type Loan of a derived type, therefor we cannot just assume its name..
   # this method gets the loans type from a hidden field value and uses that to get the attrs
   def get_loan_and_attrs   # FIXME: this is a code dup with data_entry/loans
+    debugger
     if params[:id] and not params[:id].blank?
       loan =  Loan.get(params[:id])      
       loan_product = loan.loan_product
@@ -503,7 +510,7 @@ class Loans < Application
       raise NotFound if not params[:loan_type]
       klass = Kernel::const_get(params[:loan_type])
     end
-    attrs[:client_id] = params[:client_id] if params[:client_id]
+    Client.descendants.each{|c| attrs[:client_id] = params["#{c.to_s.snake_case}_id"] if params["#{c.to_s.snake_case}_id"]}
     attrs[:insurance_policy] = params[:insurance_policy] if params[:insurance_policy]
     debugger
     attrs[:repayment_style_id] ||= loan_product.repayment_style.id

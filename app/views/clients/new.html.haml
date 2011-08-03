@@ -1,12 +1,29 @@
-%h1 Add a new client
-
-= error_messages_for @client
-- form_url   = (@branch ? resource(@branch, @center, :clients) : resource(:clients, {:return => params[:return]}))
-- cancel_url = params[:return] ? "/"+params[:return] : resource(@branch, @center)
-
-= form_for(@client, :action => form_url, :multipart => true) do
-  = partial("clients/fields")
-
-  = submit "Add client", :class => "grey_button"
-= link_to 'cancel', cancel_url
+- if @client
+  %h1 Add a new client
+  
+  = error_messages_for @client
+  - form_url   = (@branch ? resource(@branch, @center, :clients) : resource(:clients, {:return => params[:return]}))
+  - cancel_url = params[:return] ? "/"+params[:return] : resource(@branch, @center)
+  
+  = form_for(@client, :action => form_url, :multipart => true) do
+    = hidden_field :name => :client_type, :value => @client.class
+    - if File.exists?("app/views/clients/#{@client.class.to_s.pluralize.snake_case}/_fields.html.haml")
+      = partial ("clients/#{@client.class.to_s.pluralize.snake_case}/fields")
+    - else
+      = partial("clients/fields")
+  
+    = submit "Add client", :class => "grey_button"
+  = link_to 'cancel', cancel_url
+  
+- else
+  %table.shaded
+    - Client.descendants.each do |client_type|
+      = form_for(Client.new, :action => resource(@branch, @center, :clients, :new), :method => 'get') do
+        %tr
+          %td
+            %h3
+              = client_type
+              = hidden_field :name => "client_type", :value => client_type
+          %td
+            = submit "Proceed"
 

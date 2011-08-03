@@ -65,7 +65,6 @@
         %p
         #breadcrums= breadcrumbs
         - unless message.blank?
-          - debugger
           #flash-messages.span-17.prefix-5.suffix-5.last            
             - message.each do |key, value|
               .flash{ :class => key.to_s }
