@@ -9,6 +9,8 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
+  after  :create,   :set_nfl_id
+
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
   after  :save,   :update_loan_cache
@@ -16,6 +18,7 @@ class Client
   property :id,              Serial
   property :discriminator,   Discriminator
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :nfl_id,          String, :length => 10
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
@@ -41,6 +44,8 @@ class Client
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500
+
+  validates_length :nfl_id, :max => 10
 
   has n, :loans
   has n, :payments
@@ -82,6 +87,11 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
+
+  def set_nfl_id
+    self.nfl_id = "NFL#{self.id.to_s.rjust(7,'0')}"
+    self.save
+  end
 
   def update_loan_cache
     loans.each{|l| l.update_loan_cache(true); l.save}

@@ -2,7 +2,7 @@
   .tab      
     - if @client.loans.size > 0
       .graph
-        = ofc2(550, 300, 'http://' + request.env['HTTP_HOST'] + url(:graph_data, :action => 'client', :id => @client.id, :scope_unit => 'months', :scope_size => 3) )
+        = ofc2(550, 280, 'http://' + request.env['HTTP_HOST'] + url(:graph_data, :action => 'client', :id => @client.id, :scope_unit => 'months', :scope_size => 3) )
     %h1{:width => '50%' }== Client: <i>#{@client.name}</i>
     %p.menu-strip
       = link_to('edit client details', params[:controller]=="data_entry/clients" ? url(:enter_clients, :action => 'edit', :id => @client) : resource(@branch, @center, @client, :edit), :class => "edit")
@@ -31,6 +31,10 @@
           %b
             = @client.name
           == (id: #{@client.id}, ref: #{@client.reference})
+      %tr.odd
+        %td NFL Id
+        %td
+          = @client.nfl_id
       %tr
         %td Spouse name
         %td

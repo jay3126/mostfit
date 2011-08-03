@@ -150,6 +150,7 @@ h1.logo span{
 
 .graph{
   float: right;
+  margin-top: 0px;
 }
 .graph_page{
   float: left;
