@@ -162,3 +162,6 @@ class Clients < Application
   end
 
 end # Clients
+
+class OrigClients < Clients
+end

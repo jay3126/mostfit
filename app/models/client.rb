@@ -14,6 +14,7 @@ class Client
   after  :save,   :update_loan_cache
   
   property :id,              Serial
+  property :discriminator,   Discriminator
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :spouse_name,     String, :length => 100, :lazy => true
@@ -35,52 +36,6 @@ class Client
   property :verified_by_user_id, Integer, :nullable => true, :index => true
   property :tags, Flag.send("[]", *FLAGS)
 
-  property :account_number, String, :length => 20, :nullable => true, :lazy => true
-  property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
-  property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
-  property :bank_branch,         String, :length => 20, :nullable => true, :lazy => true
-  property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
-#  property :client_type,    Enum[:default], :default => :default
-  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
-  property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :other_productive_asset, String, :length => 30, :nullable => true, :lazy => true
-  property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :pr_loan_amount, Integer, :length => 10, :nullable => true, :lazy => true
-  property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
-  property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
-  property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
-  property :children_girls_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_girls_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_girls_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_working_girls, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_bonded_girls, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_working_sons, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_bonded_sons, Integer, :length => 10, :default => 0, :lazy => true
-  property :irrigated_land_own_fertile, Integer, :lazy => true
-  property :irrigated_land_leased_fertile, Integer, :lazy => true
-  property :irrigated_land_shared_fertile, Integer, :lazy => true
-  property :irrigated_land_own_semifertile, Integer, :lazy => true
-  property :irrigated_land_leased_semifertile, Integer, :lazy => true
-  property :irrigated_land_shared_semifertile, Integer, :lazy => true
-  property :irrigated_land_own_wasteland, Integer, :lazy => true
-  property :irrigated_land_leased_wasteland, Integer, :lazy => true
-  property :irrigated_land_shared_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_own_fertile, Integer, :lazy => true
-  property :not_irrigated_land_leased_fertile, Integer, :lazy => true
-  property :not_irrigated_land_shared_fertile, Integer, :lazy => true
-  property :not_irrigated_land_own_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_leased_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_shared_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_own_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_leased_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_shared_wasteland, Integer, :lazy => true
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
   property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
   validates_length :number_of_family_members, :max => 20
@@ -319,3 +274,55 @@ class Client
    end
 
  end
+
+class OrigClient < Client
+
+  property :account_number, String, :length => 20, :nullable => true, :lazy => true
+  property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
+  property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
+  property :bank_branch,         String, :length => 20, :nullable => true, :lazy => true
+  property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
+#  property :client_type,    Enum[:default], :default => :default
+  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
+  property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
+  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
+  property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :other_productive_asset, String, :length => 30, :nullable => true, :lazy => true
+  property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
+  property :pr_loan_amount, Integer, :length => 10, :nullable => true, :lazy => true
+  property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
+  property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
+  property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
+  property :children_girls_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_girls_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_girls_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_sons_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_sons_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :children_sons_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
+  property :not_in_school_working_girls, Integer, :length => 10, :default => 0, :lazy => true
+  property :not_in_school_bonded_girls, Integer, :length => 10, :default => 0, :lazy => true
+  property :not_in_school_working_sons, Integer, :length => 10, :default => 0, :lazy => true
+  property :not_in_school_bonded_sons, Integer, :length => 10, :default => 0, :lazy => true
+  property :irrigated_land_own_fertile, Integer, :lazy => true
+  property :irrigated_land_leased_fertile, Integer, :lazy => true
+  property :irrigated_land_shared_fertile, Integer, :lazy => true
+  property :irrigated_land_own_semifertile, Integer, :lazy => true
+  property :irrigated_land_leased_semifertile, Integer, :lazy => true
+  property :irrigated_land_shared_semifertile, Integer, :lazy => true
+  property :irrigated_land_own_wasteland, Integer, :lazy => true
+  property :irrigated_land_leased_wasteland, Integer, :lazy => true
+  property :irrigated_land_shared_wasteland, Integer, :lazy => true
+  property :not_irrigated_land_own_fertile, Integer, :lazy => true
+  property :not_irrigated_land_leased_fertile, Integer, :lazy => true
+  property :not_irrigated_land_shared_fertile, Integer, :lazy => true
+  property :not_irrigated_land_own_semifertile, Integer, :lazy => true
+  property :not_irrigated_land_leased_semifertile, Integer, :lazy => true
+  property :not_irrigated_land_shared_semifertile, Integer, :lazy => true
+  property :not_irrigated_land_own_wasteland, Integer, :lazy => true
+  property :not_irrigated_land_leased_wasteland, Integer, :lazy => true
+  property :not_irrigated_land_shared_wasteland, Integer, :lazy => true
+
+
+end

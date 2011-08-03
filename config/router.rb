@@ -47,10 +47,12 @@ Merb::Router.prepare do
   resources :loan_products
   resources :users, :id => %r(\d+)
   resources :staff_members, :id => %r(\d+) 
-  resources :clients, :id => %r(\d+) do
-    resources :insurance_policies
-    resources :attendances
-    resources :claims
+  ([Client] + Client.descendants).uniq.each do |cl|
+    resources cl.to_s.pluralize.snake_case.to_sym, :id => %r(\d+) do
+      resources :insurance_policies
+      resources :attendances
+      resources :claims
+    end
   end
   resources :client_groups do
     resources :grts
@@ -63,11 +65,13 @@ Merb::Router.prepare do
     resources :journals
     resources :centers, :id => %r(\d+) do
       resources :client_groups
-      resources :clients do
-        resources :payments
-        resources :comments        
-        resources :loans do
+      ([Client] + Client.descendants).uniq.each do |cl|
+        resources cl.to_s.pluralize.snake_case.to_sym do
           resources :payments
+          resources :comments        
+          resources :loans do
+            resources :payments
+          end
         end
       end
     end
