@@ -52,7 +52,7 @@
       %td
         = @report.branch.name
       %td
-        = c.occupation.name
+        = c.occupation.name if c.occupation
       %td
         = "M"
     - ip.client.guarantors.each do |g|
@@ -77,6 +77,6 @@
         %td
           = @report.branch.name
         %td
-          = g.guarantor_occupation.name
+          = g.guarantor_occupation.name if g.guarantor_occupation
         %td
           = "G"
