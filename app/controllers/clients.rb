@@ -15,7 +15,6 @@ class Clients < Application
   end
 
   def show(id)
-    debugger
     @option = params[:option] if params[:option]    
     @client = Client.get(id)
     raise NotFound unless @client
@@ -51,7 +50,6 @@ class Clients < Application
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
     if @client.save
-      debugger
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display @client
       else
@@ -67,7 +65,6 @@ class Clients < Application
   end
 
   def edit(id)
-    debugger
     only_provides :html
     @client = Client.get(id)
     raise NotFound unless @client
@@ -79,6 +76,7 @@ class Clients < Application
     @client = Client.get(id)
     raise NotFound unless @client
     disallow_updation_of_verified_clients
+    client = params[:client].merge(params[@client.class.to_s.snake_case])
     @client.update_attributes(client)      
     if @client.errors.blank?
       if params[:tags]
@@ -150,7 +148,6 @@ class Clients < Application
   
   # this redirects to the proper url, used from the router
   def redirect_to_show(id)
-    debugger
     raise NotFound unless @client = Client.get(id)
     if @client.center
       redirect resource(@client.center.branch, @client.center, @client)
@@ -167,7 +164,6 @@ class Clients < Application
 
   private
   def get_context
-    debugger
     if params[:branch_id] and params[:center_id] 
       @branch = Branch.get(params[:branch_id]) 
       @center = Center.get(params[:center_id]) 
@@ -184,4 +180,12 @@ class IndividualClients < Clients
 end
 
 class JlgClients < Clients
+
+  before :do_params, :only => [:create, :update]
+
+  def do_params
+    params[:jlg_client][:member_details] = Marshal.dump(params[:jlg_client][:member_details])
+    params[:jlg_client][:expenses] = Marshal.dump(params[:jlg_client][:expenses])
+  end
+
 end

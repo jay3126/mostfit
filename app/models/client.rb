@@ -360,4 +360,6 @@ class JlgClient < Client
   property :house_type, String, :nullable => true, :lazy => true
   property :years_of_stay, Integer, :nullable => true, :lazy => true
   property :date_of_house_verification, Date, :nullable => true, :lazy => true
+
+
 end

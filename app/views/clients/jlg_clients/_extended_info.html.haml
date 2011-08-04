@@ -1,0 +1,88 @@
+%table.tall.shaded
+  %tr
+    %th
+      No. of family members
+    %td
+      = text_field :number_of_family_members
+  %tr
+    %th
+      No. of earning members
+    %td
+      = text_field :number_of_earning_members
+  %tr
+    %th
+      Details of members
+    %td
+      %table
+        %tr
+          %thead
+            %th
+              Relationship
+            %th
+              Education
+            %th
+              Age
+            %th
+              Occupation
+            %th
+              Monthly Income
+            %th
+              Health Status (H/U/D)
+        - member_details = Marshal.load(@client.member_details)
+        - 5.times do |i|
+          %tr
+            - ["relationship","education","age","occupation","income","health_status"].each do |item|
+              %td
+                = text_field :name => "jlg_client[member_details][member_#{i}][#{item}]", :value => member_details["member_#{i}"][item]
+    %tr
+      %th
+        Total Household Income
+      %td
+        = text_field :household_income
+    %tr
+      %th
+        Other Income
+      %td
+        = text_field :other_income
+    %tr
+      %th
+        Total Income
+      %td
+        = text_field :total_income
+    %tr
+      %th
+        Expenses
+      %td
+        - expenses = Marshal.load(@client.expenses)
+        - categories = %w(rent food education medical travel others total)
+        %table{:style => "max_width: 80%"}
+          %tr
+            %thead
+              - categories.each do |item|
+                %th 
+                  = item
+          %tr
+            - categories.each do |item|
+              %td
+                = text_field :name => "jlg_client[expenses][#{item}]", :value => expenses[item]
+    %tr
+      %th
+        Property Type
+      %td
+        = text_field :property_type
+    %tr
+      %th
+        House Type
+      %td
+        = text_field :house_type
+    %tr
+      %th
+        Years of Stay
+      %td
+        = text_field :years_of_stay
+    %tr
+      %th
+        Date of House Verification
+      %td
+        = date_select_for @client, :date_of_house_verification
+      

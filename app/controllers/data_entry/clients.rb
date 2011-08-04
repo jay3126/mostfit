@@ -2,11 +2,22 @@ module DataEntry
   class Clients < DataEntry::Controller
     provides :html, :xml
     def new
-      @center  = Center.get(params[:center_id]) if params[:center_id] 
-      @branch = @center.branch if @center
-      @client = Client.new
+      debugger
       params[:return] = "/data_entry"
-      request.xhr? ? display([@client], "clients/new", :layout => false) : display([@client], "clients/new")
+      @center  = Center.get(params[:client][:center_id]) if params[:client] and params[:client][:center_id] 
+      @branch = @center.branch if @center
+      if Client.descendants.count == 1
+        only_provides :html
+        @client = Client.new
+        display @client, "clients/new"
+      else
+        if params[:client_type]
+          @client = Kernel.const_get(params[:client_type].camel_case).new
+          display @client, "clients/new"
+        else
+          render :template => "clients/new"
+        end
+      end
     end
     
     def edit
