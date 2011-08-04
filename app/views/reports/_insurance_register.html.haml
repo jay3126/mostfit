@@ -28,55 +28,61 @@
   - insurance_policies = @data[:insurance_policies]
   - guarantors = @data[:guarantors]
   - insurance_policies.each do |ip|
-    - debugger
-    - c = clients[ip.client_id]
-    - l = loans[ip.loan_id]
-    %tr 
-      %td{:width => "10px"}
-        = ip.loan_id
-      %td
-        = c.id
-      %td
-        = l.amount
-      %td
-        = c.name
-      %td
-        = c.gender
-      %td
-        - age = ((@report.from_date - c.date_of_birth) / 365).floor if c.date_of_birth
-        = age
-      %td
-        = c.date_of_birth
-      %td
-        = l.disbursal_date
-      %td
-        = @report.branch.name
-      %td
-        = c.occupation.name if c.occupation
-      %td
-        = "M"
-    - ip.client.guarantors.each do |g|
-      %tr
+    - begin
+      - c = clients[ip.client_id]
+      - l = loans[ip.loan_id]
+      %tr 
         %td{:width => "10px"}
           = ip.loan_id
         %td
-          = "G-" + g.id.to_s
+          = c.id
         %td
-          = l.amount
+          = l.amount if l
         %td
-          = g.name
+          = c.name
         %td
-          = g.gender
+          = c.gender
         %td
-          - age = ((@report.from_date - g.date_of_birth)/365).floor if g.date_of_birth
+          - age = ((@report.from_date - c.date_of_birth) / 365).floor if c.date_of_birth
           = age
         %td
-          = g.date_of_birth
+          = c.date_of_birth
         %td
-          = l.disbursal_date
+          = l.disbursal_date if l
         %td
           = @report.branch.name
         %td
-          = g.guarantor_occupation.name if g.guarantor_occupation
+          = c.occupation.name if c.occupation
         %td
-          = "G"
+          = "M"
+      - ip.client.guarantors.each do |g|
+        %tr
+          %td{:width => "10px"}
+            = ip.loan_id
+          %td
+            = "G-" + g.id.to_s
+          %td
+            = l.amount if l
+          %td
+            = g.name
+          %td
+            = g.gender
+          %td
+            - age = ((@report.from_date - g.date_of_birth)/365).floor if g.date_of_birth
+            = age
+          %td
+            = g.date_of_birth
+          %td
+            = l.disbursal_date if l
+          %td
+            = @report.branch.name
+          %td
+            = g.guarantor_occupation.name if g.guarantor_occupation
+          %td
+            = "G"
+    - rescue
+      %tr
+        %td
+          = link_to ip.id, resource(ip)
+        %td{:colspan => 20, :class => "error"}
+          Something went wrong
