@@ -28,12 +28,12 @@
               Monthly Income
             %th
               Health Status (H/U/D)
-        - member_details = Marshal.load(@client.member_details)
+        - member_details = (Marshal.load(@client.member_details) rescue nil)
         - 5.times do |i|
           %tr
             - ["relationship","education","age","occupation","income","health_status"].each do |item|
               %td
-                = text_field :name => "jlg_client[member_details][member_#{i}][#{item}]", :value => member_details["member_#{i}"][item]
+                = text_field :name => "jlg_client[member_details][member_#{i}][#{item}]", :value => (member_details["member_#{i}"][item] if member_details)
     %tr
       %th
         Total Household Income
@@ -53,7 +53,7 @@
       %th
         Expenses
       %td
-        - expenses = Marshal.load(@client.expenses)
+        - expenses = (Marshal.load(@client.expenses) rescue nil)
         - categories = %w(rent food education medical travel others total)
         %table{:style => "max_width: 80%"}
           %tr
@@ -64,7 +64,7 @@
           %tr
             - categories.each do |item|
               %td
-                = text_field :name => "jlg_client[expenses][#{item}]", :value => expenses[item]
+                = text_field :name => "jlg_client[expenses][#{item}]", :value => (expenses[item] if expenses)
     %tr
       %th
         Property Type
