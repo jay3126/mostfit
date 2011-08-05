@@ -35,7 +35,7 @@ module Misfit
       :admin => all_models,
       :mis_manager => all_models_except([:user, :admin]),
       :data_entry => {
-        :all => [:client, :loan, :payment, :document, :client_group, :group, :insurance_company, :insurance_policy, :cgt, :grt, :staff_member],
+        :all => [:client, :loan, :payment, :center, :document, :client_group, :group, :insurance_company, :insurance_policy, :cgt, :grt, :staff_member],
       },
       :staff_member => {
         :all => [:center, :client, :loan, :payment, :document, :client_group, :group, :comment, :insurance_company, :staff_member, :location, :branch_diary, :stock_register, :asset_register]
@@ -52,7 +52,7 @@ module Misfit
       :admin => all_controllers,
       :mis_manager => all_controllers_except([:users, :admin]),
       :data_entry => {
-        :all => [:search, :comments, :documents, :"data_entry/client_groups", :"data_entry/payments", :"data_entry/clients",:"data_entry/loans", :"data_entry/index", 
+        :all => [:search, :comments, :documents, :centers, :"data_entry/centers", :"data_entry/client_groups", :"data_entry/payments", :"data_entry/clients",:"data_entry/loans", :"data_entry/index", 
                  :clients, :loans, :client_groups, :cgts, :grts, :staff_members, :bookmarks]
       },
       :read_only => {
