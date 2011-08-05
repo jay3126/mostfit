@@ -3,7 +3,6 @@
 = error_messages_for @loan
 = error_messages_for @insurance_policy
 = error_messages_for @af
-
 - if @loan.nil?
   - if @client
     %p== Please select the type of loan product you want to create for #{@client.name}.

@@ -1,3 +1,31 @@
+:javascript
+  function calcSurplus() {
+    total = 0;
+    $('.income').map(function(){return (isNaN(parseFloat($(this).attr('value'))) ? 0 : parseFloat($(this).attr('value')))}).each(function(){total += this;});
+    $('#jlg_client_household_income').attr('value',total);
+    other_income = (isNaN(parseFloat($('#jlg_client_other_income').attr('value'))) ? 0 : parseFloat($('#jlg_client_other_income').attr('value')));
+    total_income = total + other_income;
+    $('#jlg_client_total_income').attr('value',total_income);
+    annual_income = total_income * 12;
+    $('#jlg_client_annual_household_income').attr('value',annual_income);
+    total_expenses = 0;
+    $('.expenses').map(function(){return (isNaN(parseFloat($(this).attr('value'))) ? 0 : parseFloat($(this).attr('value')))}).each(function(){total_expenses += this;});
+    $('#jlg_client_total_expenses').attr('value',total_expenses);
+    annual_expenses = total_expenses * 12;
+    $('#jlg_client_annual_expenses').attr('value',annual_expenses);
+    monthly_surplus = total_income - total_expenses;
+    annual_surplus = monthly_surplus * 12;
+    $('#monthly_surplus').html(monthly_surplus);
+    $('#jlg_client_monthly_surplus').attr('value',monthly_surplus);
+    $('#annual_surplus').html(annual_surplus);
+    $('#jlg_client_annual_surplus').attr('value',annual_surplus);
+
+  }
+  $(document).ready(function() {
+    $('.expenses').blur(calcSurplus);
+    $('.income').blur(calcSurplus);
+    $('#jlg_client_other_income').blur(calcSurplus);
+  });
 %table.tall.shaded
   %tr
     %th
@@ -33,12 +61,7 @@
           %tr
             - ["relationship","education","age","occupation","income","health_status"].each do |item|
               %td
-                = text_field :name => "jlg_client[member_details][member_#{i}][#{item}]", :value => (member_details["member_#{i}"][item] if member_details)
-    %tr
-      %th
-        Total Household Income
-      %td
-        = text_field :household_income
+                = text_field :name => "jlg_client[member_details][member_#{i}][#{item}]", :value => (member_details["member_#{i}"][item] if member_details), :class => item
     %tr
       %th
         Other Income
@@ -46,9 +69,15 @@
         = text_field :other_income
     %tr
       %th
-        Total Income
+        Total Incomes
       %td
-        = text_field :total_income
+        %b{:style => "font-size:0.9em;"} Total Household Income
+        = text_field :household_income, :disabled => true
+        %b{:style => "font-size:0.9em;"} Total Income
+        = text_field :total_income, :disabled => true
+        %b{:style => "font-size:0.9em;"}
+          Annual Household Income
+          = text_field :annual_household_income, :disabled => true
     %tr
       %th
         Expenses
@@ -64,7 +93,23 @@
           %tr
             - categories.each do |item|
               %td
-                = text_field :name => "jlg_client[expenses][#{item}]", :value => (expenses[item] if expenses)
+                = text_field :name => "jlg_client[expenses][#{item}]", :value => (expenses[item] if expenses), :class => "expenses"
+        %b{:style => "font-size:0.9em;"} Total Expenses
+        = text_field :total_expenses, :disabled => true
+        %b{:style => "font-size:0.9em;"}
+          Total Annual Expenses
+          = text_field :annual_expenses, :disabled => true
+    %tr
+      %th
+        Surplus
+      %td
+        %b
+          Monthly Surplus
+          %span#monthly_surplus{:style => "margin-right: 45px"} 0.00
+          Annual Surplus
+          %span#annual_surplus 0.00
+          = hidden_field :monthly_surplus
+          = hidden_field :annual_surplus
     %tr
       %th
         Property Type

@@ -40,7 +40,7 @@ class Client
   property :tags, Flag.send("[]", *FLAGS)
 
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
-  property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
+  property :religion, Enum.send('[]', *([''] + RELIGIONS) ), :default => '', :nullable => true, :lazy => true
 
   validates_length :nfl_id, :max => 10
 
@@ -349,17 +349,27 @@ end
 
 class JlgClient < Client
 
+  
+  property :contact_number, String
+  property :fathers_name, String, :length => 200
   property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
   property :number_of_earning_members, Integer, :nullable => true, :lazy => true
   property :member_details, Text, :nullable => true, :lazy => true
   property :household_income, Integer, :nullable => true, :lazy => true
+  property :annual_household_income, Integer, :nullable => true, :lazy => true
   property :other_income, Integer, :nullable => true, :lazy => true
   property :total_income, Integer, :nullable => true, :lazy => true
   property :expenses, Text, :nullable => true, :lazy => true
+  property :total_expenses, Integer, :nullable => true, :lazy => true
+  property :annual_expenses, Integer, :nullable => true, :lazy => true
+  property :annual_surplus, Integer, :nullable => true, :lazy => true
+  property :monthly_surplus, Integer, :nullable => true, :lazy => true
   property :property_type, String, :nullable => true, :lazy => true
   property :house_type, String, :nullable => true, :lazy => true
   property :years_of_stay, Integer, :nullable => true, :lazy => true
   property :date_of_house_verification, Date, :nullable => true, :lazy => true
+  property :occupation_type, Enum.send('[]', *([''] + OCCUPATION_TYPES))
+  belongs_to :document_type, :nullable => true;
 
 
 end
