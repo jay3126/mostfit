@@ -107,4 +107,4 @@ LONG_DATE_PATTERN = "%B %d, %Y"
 FULL_DATE_PATTERN = "%A, %B %d, %Y"
 FORMAT_REG_EXP = /[- . \/]/
 RELIGIONS = ['hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']
-OCCUPATION_TYPES = %w(Salaried, Self Employed, Piece Rate Worker, Housewife)
+OCCUPATION_TYPES = ["Salaried", "Self Employed", "Piece Rate Worker", "Housewife"]

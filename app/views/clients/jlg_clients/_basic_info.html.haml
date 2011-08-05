@@ -1,0 +1,133 @@
+%table.tall.shaded
+  - if @center.blank? 
+    %tr
+      %th
+        For center:
+      %td
+        = select_center_for @client, :center
+  - elsif not @client.new? 
+    %tr
+      %th
+        For center:
+      %td
+        = select :center_id, :collection => Center.all(:branch => @client.center.branch), :value_method => :id, :text_method => :name, :selected => @client.center.id.to_s
+  -else
+    %tr
+      %th 
+        For center
+      %td
+        = @center.name
+        %input{:id => "client_center_id", :value => "#{@center.id}", :type => "hidden"}
+  %tr
+    %th
+      Group name
+    %td
+      %select{:id => "client_group_id", :name => "client[client_group_id]"}
+        %option{:value => ""}
+          Select the group for this person
+        -if @center
+          = @center.client_groups.collect{|g| "<option #{'selected=\"selected\"' if g.id==@client.client_group_id} value='#{g.id}'>#{g.name}</option>"}.join
+      %a{:href => "#", :id => "new_client_group_link", :style => "#{@center ? 'display:block' : 'display: none;'}"}
+        Add new group
+      %div#new_client_group_form
+  %tr
+    %th
+      Name:
+    %td
+      = text_field :name, :size => 40
+      %br
+      - unless @client.new?
+        %b 
+          Mark this user as:
+          %br
+        - Client.flags.each do |f|
+          = f
+          = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
+  %tr
+    %th
+      Contact Number
+    %td
+      = text_field :contact_number, :size => 40
+  %tr
+    %th
+      Client Type
+    %td
+      = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
+  %tr
+    %th
+      Reference:
+    %td
+      = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
+      %br/
+      = select :document_type_id, :collection => DocumentType.all(:parent_model => "Client"), :value_method => :id, :text_method => :name, :prompt => "-- Please select a document type --"
+      %br/
+      %span.greytext
+        references are unique, a way to check that this is the only record of a client
+        %br/
+        for this reason it is advisable to use a government ID as reference
+  %tr
+    %th
+      Religion
+    %td
+      = select :religion, :collection => RELIGIONS, :prompt => '---'
+  %tr
+    %th
+      Date of birth:
+    %td
+      = date_select_for @client, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %th
+      Date joined
+    %td
+      = date_select_for @client, :date_joined, :max_date => Date.today
+  - if not @client.new? or (@client.new? and mfi = Mfi.first and mfi.allow_grt_date_on_form)
+    %tr
+      %th
+        Date of sucessful group recognization test:
+      %td
+        = date_select_for @client, :grt_pass_date, :nullable => true, :max_date => Date.today
+  %tr
+    %th
+      Spouse name:
+    %td
+      = text_field :spouse_name, :size => 40
+  %tr
+    %th
+      Father's Name:
+    %td
+      = text_field :fathers_name, :size => 40
+  %tr
+    %th
+      Address:
+    %td
+      ~ text_area :address, :rows => 6, :cols => 38
+  %tr
+    %th
+      Occupation
+    %td
+      = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"
+  %tr
+    %th
+      Occupation Type
+    %td
+      = select :occupation_type, :collection => OCCUPATION_TYPES, :prompt => "---"
+  - if not @client.new?
+    %tr
+      %th
+        Active:
+      %td
+        = check_box :active
+        &nbsp;&nbsp;
+        %span.greytext inactive member are not counted for attendancy
+    %tr#inactive_options{:style => @client.active ? "display: none" : "display: block"}
+      %th
+        Reason
+      %td
+        = select :inactive_reason, :collection => INACTIVE_REASONS.reject{|x| x.blank?}.map{|x| [x.to_s, x.to_s.camelcase(' ')]}, :prompt => "Select reason for being inactive"
+     
+  %tr
+    %th
+      Photo
+    %td
+      = image_tag @client.picture.url(:medium)
+      = file_field :picture
