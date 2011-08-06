@@ -46,6 +46,8 @@
           %br
           = link_to_with_rights("Bulk entry of loans", url(:enter_loans, :action => :bulk_form), :class => 'edit_small')
           %br
+          = link_to_with_rights("Add an insurance policy", resource(:insurance_policies, :new), :class => "add_small")
+          %br
           - fl = Loan.all(:funding_line => nil).count
           = link_to_with_rights("Bulk Edit Funding Lines", url(:enter_loans, :action => :bulk_update_funding_line), :class => 'edit_small')
           %span{:class => "number-hint"} #{fl}

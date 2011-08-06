@@ -1,6 +1,6 @@
 class InsurancePolicies < Application
   # provides :xml, :yaml, :js
-  before :get_context
+  before :get_context, :exclude => [:new]
 
   def index
     @insurance_policies = @client ? @client.insurance_policies : InsurancePolicy.all
@@ -14,7 +14,14 @@ class InsurancePolicies < Application
   end
 
   def new
+    debugger
     only_provides :html
+    q = params[params.keys.select{|k| k.match(/client_id$/)}[0]]
+    @clients = Client.search(q) if q
+    if (@clients.is_a? Array and @clients.length == 1)
+      @client = @clients.first 
+      @clients = nil
+    end
     @insurance_policy = InsurancePolicy.new
     display @insurance_policy
   end

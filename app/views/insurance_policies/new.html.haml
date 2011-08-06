@@ -1,10 +1,36 @@
-%h1 
-  == New Insurance Policy for Client #{@client.name}
+- if @clients
+  %h1 Please choose a client
+  %ul
+  - @clients.each do |c|
+    %li
+      = link_to c.name, resource(c, :insurance_policies, :new)
+- elsif @client
+  %h1 
+    == New Insurance Policy for Client #{@client.name}
 
-= error_messages_for @insurance_policy
+  = error_messages_for @insurance_policy
 
-= form_for(@insurance_policy, :action => resource(@client, :insurance_policies) ) do
-  = partial :fields
-  = submit "Create new Insurance Policy"
+  = form_for(@insurance_policy, :action => resource(@client, :insurance_policies) ) do
+    = partial :fields
+    = submit "Create new Insurance Policy"
 
-= link_to 'Back', resource(@client)
+  = link_to 'Back', resource(@client)
+
+- else
+  %h3
+    Please select the client that you want to create an insurance policy for by entering its client ID.
+
+  %table.form
+    = form_for(@insurance_policy, :action =>resource(:insurance_policies,:new)) do
+      %tr
+        %td &nbsp;
+      %tr
+        %td &nbsp;
+        %td
+          %b
+            Client ID, Name or Ref.:
+        %td
+          = text_field :name => :client_id, :size => 25, :style => "height: 20px"
+        %td
+          = submit "Proceed..."
+
