@@ -15,6 +15,7 @@ module Misfit
       end
 
       def additional_checks
+        debugger
         id = @route[:id].to_i
         model = Kernel.const_get(@model.to_s.split("/")[-1].camelcase)
         if model == StaffMember
@@ -70,7 +71,7 @@ module Misfit
           return(obj.manager == @staff or is_manager_of?(obj.area))
         elsif obj.class == Center
           return(obj.manager == @staff or is_manager_of?(obj.branch))
-        elsif obj.class == Client
+        elsif obj.is_a?(Client)
           return(is_manager_of?(obj.center))
         elsif obj.class == ClientGroup
           return(obj.center.manager == @staff or is_manager_of?(obj.center))
@@ -116,6 +117,7 @@ module Misfit
         return true  if route[:controller] == "reports" and route[:action] == "index" and not user_role == :data_entry
         return false if (user_role == :read_only or user_role == :funder or user_role == :data_entry) and route[:controller] == "payments" and route[:action] == "delete"
         return false if (user_role != :admin) and route[:controller] == "loans" and route[:action] == "write_off_suggested"
+        debugger
 
         @route = route
         @params = params
