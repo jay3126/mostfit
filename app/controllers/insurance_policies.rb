@@ -60,12 +60,13 @@ class InsurancePolicies < Application
 
   private
   def get_context
-    @client = Client.get(params[:client_id])
+    @client = Client.get(params[params.keys.select{|k| k.match(/client_id$/)}[0]])
     if params[:id]
       @insurance_policy = InsurancePolicy.get(params[:id])
       @client = @insurance_policy.client
     end
     raise NotFound unless @client
   end
+
 
 end # InsurancePolicies

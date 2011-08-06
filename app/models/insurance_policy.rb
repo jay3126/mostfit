@@ -2,6 +2,8 @@ class InsurancePolicy
   include DataMapper::Resource
   include FeesContainer
 
+  before :save, :convert_blank_to_nil
+
   POLICY_STATUSES = [:active, :expired, :claim_pending, :claim_settled]
   COVER_FOR       = [:self, :spouse, :both, :son, :daughter, :mother, :father, :other]
   property :id, Serial
@@ -58,4 +60,14 @@ class InsurancePolicy
     return [false, "End date must be after start date"] if date_to.is_a?(Date) and date_from.is_a?(Date) and date_to < date_from
     true
   end
+
+  def convert_blank_to_nil
+    self.attributes.each{|k, v|
+      if v.is_a?(String) and v.empty? and self.class.properties.find{|x| x.name == k}.type==Integer
+        self.send("#{k}=", nil)
+      end
+    }
+  end
+
+
 end

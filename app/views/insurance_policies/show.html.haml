@@ -5,36 +5,35 @@
 %h2
   = @insurance_policy.description
 
-%table
+.menu-strip
+  = link_to 'Edit',  resource(@client, @insurance_policy,  :edit), :class => "edit"
+
+%table.tall.shaded
   %tr
-    %td Policy number
+    %th Policy number
     %td
       = @insurance_policy.policy_no
   %tr
-    %td Sum insured
+    %th Sum insured
     %td
       = @insurance_policy.sum_insured
   %tr
-    %td Premium
+    %th Premium
     %td
       = @insurance_policy.premium
   %tr
-    %td Valid from
+    %th Valid from
     %td
       = @insurance_policy.date_from
   %tr
-    %td Valid upto
+    %th Valid upto
     %td
       = @insurance_policy.date_to
   %tr
-    %td Cover for
+    %th Cover for
     %td
       = @insurance_policy.cover_for
   %tr
-    %td Status
+    %th Status
     %td
       = @insurance_policy.status
-  %tr
-    %td
-    %td
-      = link_to 'Edit',  resource(@client, @insurance_policy,  :edit)
