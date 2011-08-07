@@ -9,6 +9,8 @@ class Loan
 
   before :valid?,  :parse_dates
   before :valid?,  :convert_blank_to_nil
+  before :valid?, :set_loan_product_parameters
+
   after  :save,    :update_history_caller  # also seems to do updates
   after  :create,  :levy_fees_new          # we need a separate one for create for a variety of reasons to  do with overwriting old fees
   before :save,    :levy_fees
@@ -200,7 +202,6 @@ class Loan
   end
 
   def update_loan_cache(force = false)
-    self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
     @orig_attrs = self.original_attributes
     t = Time.now
     self.c_center_id = self.client.center.id if force
@@ -1155,7 +1156,7 @@ class Loan
   end
 
   def set_loan_product_parameters
-    repayment_style = self.loan_product.repayment_style unless repayment_style
+    self.repayment_style = self.loan_product.repayment_style unless repayment_style
   end
 
   def interest_calculation(balance)

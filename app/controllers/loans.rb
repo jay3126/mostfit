@@ -1,5 +1,5 @@
 class Loans < Application
-  before :get_context, :exclude => ['redirect_to_show', 'approve', 'disburse', 'reject', 'write_off_reject', 'write_off_suggested', 'collection_sheet']
+  before :get_context, :exclude => ['redirect_to_show', 'approve', 'disburse', 'reject', 'write_off_reject', 'write_off_suggested', 'collection_sheet', 'bulk_create']
   provides :xml, :yaml, :js
   
   def index
@@ -67,25 +67,30 @@ class Loans < Application
       end
     end
   end
+
   def bulk_create
-    klass, attrs = get_loan_and_attrs
-    attrs[:interest_rate] = attrs[:interest_rate].to_f / 100 if attrs[:interest_rate].to_f > 0
-    loan_product = LoanProduct.is_valid(params[:loan_product_id])
-    raise BadRequest unless loan_product
-    loans = statuses = []
-
-    # create loans for all the clients
-    Loan.transaction do |t|
-      params[:client_ids].each{|client_id|
-        attrs[:client_id] = client_id.to_i
-        @loan = klass.new(attrs)
-        @loan.loan_product  = loan_product
-        loans.push(@loan)
-      }
-      statuses = loans.map{|l| l.save}
-      t.rollback if statuses.include?(false)
+    debugger
+    @loans = statuses = []
+    array_to_map = params[:loans] ? params[:loans].values : params[:client_ids]
+    array_to_map.each do |attrs|
+      unless params[:loans] # dealing with client ids from the first submit
+        cid = attrs
+        attrs = Marshal.load(Marshal.dump(params[:loan]))
+        attrs[:client_id] = cid
+      end
+      attrs[:interest_rate] = attrs[:interest_rate].to_f / 100 if attrs[:interest_rate].to_f > 0
+      attrs[:applied_by] = StaffMember.get(attrs[:applied_by])
+      @loan_product = LoanProduct.is_valid(params[:loan_product_id])
+      raise BadRequest unless @loan_product
+      loan = Loan.new(attrs)
+      loan.loan_product = @loan_product
+      @loans << loan
+      Loan.transaction do |t|
+        statuses = @loans.map{|l| l.save}
+        t.rollback if statuses.include?(false)
+      end
     end
-
+    debugger
     if not statuses.include?(false)
       if params[:return]
         redirect(params[:return], :message => {:notice => "'#{statuses.count}' loans were successfully created"})
@@ -96,7 +101,17 @@ class Loans < Application
       # on error recreate form with errors
       @loan_product  = @loan.loan_product if @loan
       @clients = Client.all(:id => params[:client_ids])
-      display [], "data_entry/loans/bulk_form"
+      @attrs_required = {:amount_applied_for => "Applied Amount", 
+        :interest_rate => "Interest Rate", :installment_frequency => "Installment freq.", 
+        :occupation => "Loan Purpose", :funding_line => "Funding Line", :applied_on => "Applied on", :scheduled_disbursal_date => "Scheduled Disbursal Date",
+        :scheduled_first_payment_date => "Scheduled FP Date"}
+      if @loans
+        @branch = Branch.get(params[:branch_id])
+        @center = Center.get(params[:center_id])
+        display [@loans, @loan_product], "data_entry/loans/bulk_form"
+      else
+        display [], "data_entry/loans/bulk_form"
+      end
     end
   end
 
@@ -386,10 +401,8 @@ class Loans < Application
   end
 
   def reallocate(id)
-    debugger
     @loan = Loan.get(id)
     raise NotFound unless @loan
-    debugger
     status, @payments = @loan.reallocate(params[:style].to_sym, session.user)
     if status
       redirect url_for_loan(@loan), :message => {:notice => "Loan payments succesfully reallocated"}
@@ -417,7 +430,6 @@ class Loans < Application
     if request.method == :get
       display @loan, :layout => layout?
     else
-      debugger
       staff = StaffMember.get(params[:received_by])
       raise ArgumentError.new("No staff member selected") unless staff
       raise ArgumentError.new("No applicable fee for penalty") if (params[:fee].blank? and (not params[:penalty_amount].blank?))
@@ -477,10 +489,8 @@ class Loans < Application
       @center = @client.center
       @branch = @center.branch
     else
-      debugger
       client_types = Client.descendants.map{|c| c.to_s.snake_case}
       client_types.each do |client_type|
-        debugger
         if params["#{client_type}_id"]
           @client = Client.get(params["#{client_type}_id"])
         end
@@ -498,7 +508,6 @@ class Loans < Application
   # the loan is not of type Loan of a derived type, therefor we cannot just assume its name..
   # this method gets the loans type from a hidden field value and uses that to get the attrs
   def get_loan_and_attrs   # FIXME: this is a code dup with data_entry/loans
-    debugger
     if params[:id] and not params[:id].blank?
       loan =  Loan.get(params[:id])      
       loan_product = loan.loan_product
@@ -512,7 +521,6 @@ class Loans < Application
     end
     Client.descendants.each{|c| attrs[:client_id] = params["#{c.to_s.snake_case}_id"] if params["#{c.to_s.snake_case}_id"]}
     attrs[:insurance_policy] = params[:insurance_policy] if params[:insurance_policy]
-    debugger
     attrs[:repayment_style_id] ||= loan_product.repayment_style.id
     [klass, attrs]
   end

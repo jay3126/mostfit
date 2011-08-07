@@ -1,4 +1,7 @@
-- if not @loan_product or not @clients
+- if @loans
+  = form_for(@loan, :action => url(:controller => :loans, :action => :bulk_create), :class => "_disable_button_") do
+    = partial "loans/bulk_fields", :submit_text => "Create #{@loans.count} loans", :cancel_link => "/data_entry"
+- elsif not @loan_product or not @clients
   %h1
     Bulk loan entry for
     = @center.name

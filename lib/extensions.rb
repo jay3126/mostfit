@@ -35,7 +35,7 @@ module Misfit
           else
             return(is_manager_of?(branch) or branch.centers.manager.include?(@staff))
           end
-        elsif [Comment, Document, InsurancePolicy, InsuranceCompany, Cgt, Grt, AuditTrail].include?(model)
+        elsif [Comment, Document, InsuranceCompany, Cgt, Grt, AuditTrail].include?(model)
           return true
         elsif model.respond_to?(:get)
           return is_manager_of?(model.get(id))
@@ -77,7 +77,7 @@ module Misfit
         elsif obj.class == Loan or obj.class.superclass == Loan or obj.class.superclass.superclass == Loan
           return(is_manager_of?(obj.client.center))
         elsif obj.class == StaffMember
-          return true if obj == @staff 
+          return true if obj == @staff
           #branch manager needs access to the its Center managers
           return(is_manager_of?(obj.centers)) if @staff.branches.count > 0
           #area manager needs access to the its branch managers and center managers
@@ -127,7 +127,6 @@ module Misfit
         if route[:controller] == "reports" and route[:action] == "show" and route[:report_type] and Mfi.first.report_access_rules.key?(route[:report_type])
           return Mfi.first.report_access_rules[route[:report_type]].include?(user_role.to_s)
         end
-
         #read only stuff
         return allow_read_only if user_role == :read_only
 

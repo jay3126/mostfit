@@ -201,6 +201,7 @@ table.form tr:hover {
   background: #efefef;
 }
 
+
 table.form td{
   border: 0px;
   vertical-align: middle;
@@ -238,6 +239,10 @@ table tfoot td {
 tr.odd {
   background: #fbf8f1;
 }
+td.odd {
+  background: #fbf8f1;
+}
+
 tr.total {
    border-top: 2px solid black;
    border-bottom: 2px solid black;
@@ -245,6 +250,7 @@ tr.total {
 }
 td {
   vertical-align: top;
+  background: white;
 }
 td.numeric {
   text-align: center;
@@ -1261,6 +1267,10 @@ td.left-numeric {
 td.right-numeric {
   border-right: solid 1px black;
 }  
+td.right-border {
+  border-right: solid 1px #cfcfcf;
+}  
+
 tr.even td.paid {
   background: #E8FFD1;
 }
@@ -1747,4 +1757,13 @@ table.moreinfo thead th {
 .purple
  {
   background: #C6CCF5;
+}
+
+.small {
+  font-size: 0.6em;
+}
+
+td.error {
+  background: none repeat scroll 0 0 #FBE3E4;
+  color: #8A1F11;
 }

@@ -60,7 +60,7 @@ module Merb
       
       select(col,
              :collection   => staff_members_collection(allow_unassigned, allow_inactive),
-             :name         => "#{obj.class.to_s.snake_case}[#{id_col}]",
+             :name         => attrs[:name] || "#{obj.class.to_s.snake_case}[#{id_col}]",
              :id           => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
              :selected     => selected)
     end
@@ -120,8 +120,8 @@ module Merb
  
     def date_select_for(obj, col = nil, attrs = {})
       klass = obj.class
-      attrs.merge!(:name => "#{klass.to_s.snake_case}[#{col.to_s}]")
-      attrs.merge!(:id   => "#{klass.to_s.snake_case}_#{col.to_s}")
+      attrs.merge!(:name => "#{klass.to_s.snake_case}[#{col.to_s}]") unless attrs[:name]
+      attrs.merge!(:id   => "#{klass.to_s.snake_case}_#{col.to_s}") unless attrs[:id]
       attrs[:nullable]   = (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable)
       date = attrs[:date] || obj.send(col)
       date = Date.today if date.blank? and not attrs[:nullable]
