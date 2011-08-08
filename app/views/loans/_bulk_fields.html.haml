@@ -12,10 +12,11 @@
   %thead
     %tr.shaded
       %th
-      - @loans.count.times do |i|
+      - @loans.each do |loan|
         %th{:class => cycle('purple','lightpurple'), :style => "text-align: center; border-right: 1px solid #cfcfcf;"}
-          New Loan
-          = i + 1
+          New Loan for
+          %br
+          = loan.client.name
   - unless @loans.map{|l| l.errors.values}.flatten.blank?
     %tr
       %th
@@ -42,7 +43,7 @@
     - @loans.each_with_index do |loan,i|
       %td{:class => cycle("odd right-border","even right-border")}
         - if @loan_product.min_interest_rate != @loan_product.max_interest_rate 
-          = text_field :name => "loans[#{i}][interest_rate]", :size => 15, :value => loan.interest_rate * 100
+          = text_field :name => "loans[#{i}][interest_rate]", :size => 15, :value => (loan.interest_rate ? loan.interest_rate * 100 : '')
         - else
           = @loan_product.min_interest_rate
           = hidden_field :name => "loans[#{i}][interest_rate]", :value => @loan_product.min_interest_rate
@@ -106,7 +107,7 @@
         Scheduled first payment:
       - @loans.each_with_index do |loan,i|
         %td{:class => cycle("odd right-border","even right-border")}
-          = date_select_for loan, :scheduled_first_payment_date, {:name => "loans[#{i}][scheduled_first_payment_date]", :id => "loans_#{i}_scheduled_first_payment_date", :max_date => Date.max_date, :date => (@loan.scheduled_first_payment_date || @center.next_meeting_date_from(probable_scheduled_disbursal_date))}
+          = date_select_for loan, :scheduled_first_payment_date, {:name => "loans[#{i}][scheduled_first_payment_date]", :id => "loans_#{i}_scheduled_first_payment_date", :max_date => Date.max_date, :date => (loan.scheduled_first_payment_date || @center.next_meeting_date_from(probable_scheduled_disbursal_date))}
   - else
     %tr
       %th
