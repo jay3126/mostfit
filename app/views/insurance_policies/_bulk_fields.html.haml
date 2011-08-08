@@ -1,0 +1,49 @@
+- if insurance_policy and insurance_policy.id and not insurance_policy.id.blank?
+  = hidden_field :id
+%table.tall.shaded
+  %tr
+    %th
+      Policy Number
+    %td
+      = text_field :name => "loans[#{i}][insurance_policy][policy_no]"
+  %tr
+    %th
+      Application number
+    %td
+      = text_field :name => "loans[#{i}][insurance_policy][application_number]"
+  %tr
+    %th
+      Sum Insured
+    %td
+      = text_field :name => "loans[#{i}][insurance_policy][sum_insured]"
+  %tr
+    %th
+      Premium
+    %td
+      = text_field :name => "loans[#{i}][insurance_policy][premium]"
+  %tr
+    %th
+      Date from
+    %td
+      = date_select_for(insurance_policy, "date_from", :date => insurance_policy.date_from, :name => "loans[#{i}][insurance_policy][date_from]", :id => "loans_#{i}_insurance_policy_date_from")
+  %tr
+    %th
+      Date to
+    %td
+      = date_select_for(insurance_policy, "date_to", :date => insurance_policy.date_to, :max_date => Date.today + 3650,  :name => "loans[#{i}][insurance_policy][date_from]", :id => "loans_#{i}_insurance_policy_date_to")
+      = hidden_field :name => "loans[#{i}][insurance_policy][client_id]", :value => @client.id
+  %tr
+    %th
+      Status
+    %td
+      = select(:name => "loans[#{i}][insurance_policy][status]", :collection => InsurancePolicy::POLICY_STATUSES.map{|x| [x, x]})
+  %tr
+    %th
+      Cover for
+    %td
+      = select(:name => "loans[#{i}][insurance_policy][cover_for]", :collection => InsurancePolicy::COVER_FOR.map{|x| [x, x]})
+  %tr
+    %th
+      Beneficiary Name
+    %td
+      = text_field :name => "loans[#{i}][insurance_policy][beneficiary_name]"
