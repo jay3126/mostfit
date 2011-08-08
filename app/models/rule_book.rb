@@ -3,7 +3,7 @@ class RuleBook
   before :save, :convert_blank_to_nil
   ACTIONS = [
              'principal', 'interest', 'fees', 'disbursement', 'advance_principal', 
-             'advance_interest', 'advance_principal_adjusted', 'advance_interest_adjusted'
+             'advance_interest', 'advance_principal_adjusted', 'advance_interest_adjusted', 'journal'
             ]
 
   property :id,     Serial
@@ -80,14 +80,13 @@ class RuleBook
       return [credit_accounts, debit_accounts, rules]
     end
 
-    if obj.class==Payment
+    if obj.is_a? Payment
       transaction_type = obj.type
       client = obj.client_id > 0 ? obj.client : obj.loan.client
       branch  = client.center.branch
       fee     = obj.fee
       date = obj.received_on
-      #TODO:hack alert! Write it better
-    elsif obj.class==Loan or obj.class.superclass==Loan or obj.class.superclass.superclass==Loan
+    elsif obj.is_a? Loan
       transaction_type = :disbursement
       branch  = obj.client.center.branch
       date = obj.disbursal_date
@@ -135,8 +134,8 @@ class RuleBook
   end
 
   def journals(date)
-    ids = (Posting.all("journal.date" => date, :amount.lt => 0,
-                       :account => self.debit_accounts).aggregate(:journal_id) & Posting.all("journal.date" => date, :amount.gt => 0, 
+    ids = (Posting.all("journal.date" => date,
+                       :account => self.debit_accounts).aggregate(:journal_id) & Posting.all("journal.date" => date,
                                                                                              :account => self.credit_accounts).aggregate(:journal_id))
     if ids.length > 0
       Journal.all(:id => ids)
