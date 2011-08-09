@@ -814,21 +814,14 @@ class Loan
     end
   end
 
-  # these 2 methods define the pay back scheme
-  # These are ONE BASED
-  # typically reimplemented in subclasses
   def scheduled_principal_for_installment(number)
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount.to_f / number_of_installments).round(2)
+    extend_loan
+    self.scheduled_principal_for_installment(number)
   end
 
   def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount * interest_rate / number_of_installments).round(2)
+    extend_loan
+    self.scheduled_interest_for_installment(number)
   end
 
   # These info functions need not be overridden in derived classes.
