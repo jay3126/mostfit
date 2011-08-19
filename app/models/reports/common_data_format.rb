@@ -1,3 +1,5 @@
+module Highmark
+
 class CommonDataFormat < Report
   
   attr_accessor :date 
@@ -12,7 +14,7 @@ class CommonDataFormat < Report
   end
   
   def name
-    "Common Data Format Report for #{@date}"
+    "Common Data Format Report for #{Mfi.first.name} as on #{@date}"
   end
   
   def self.name
@@ -23,7 +25,6 @@ class CommonDataFormat < Report
     @data = []
     attendance_record = Center.all.map{|x| [x.id, Attendance.all(:center_id => x.id).aggregate(:client_id, :client_id.count).to_hash]}.to_hash
     @data << headers
-    debugger
     # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
     all_loans = Loan.all.map{|x| x.id}.uniq
     cut_off_date = @date << 3 
@@ -243,7 +244,7 @@ class CommonDataFormat < Report
             (loan.amount_sanctioned ? loan.amount_sanctioned.to_currency : "").truncate(9, ""), #amount approved or sanctioned
             loan.amount.to_currency.truncate(9, ""), #amount disbursed
             loan.number_of_installments.to_s.truncate(3, ""), #number of installments
-            loan.installment_frequency.to_s.truncate(3, ""), #repayment frequency
+            repayment_frequency[loan.installment_frequency], #repayment frequency
             (loan.payment_schedule[@date].nil? ? "" : loan.payment_schedule[@date][:total].to_currency).truncate(9, ""),   #installment amount / minimum amount due
             loan_history.actual_outstanding_total.to_currency.truncate(9, ""),
             loan_history.amount_in_default.to_currency.truncate(9, ""), #amount overdue
@@ -385,7 +386,8 @@ class CommonDataFormat < Report
       :semi_annually       => "F06",
       :annually            => "F07",
       :single_payment_loan => "F08",
-      :other               => "F10"
+      :other               => "F10",
+      :quadweekly          => "F10"
     } 
   end
 
@@ -476,4 +478,5 @@ class CommonDataFormat < Report
       :pondicherry        => "PY"
     }
   end
+end
 end

@@ -16,7 +16,7 @@ namespace :mostfit do
   namespace :highmark do
     desc "This rake task generates the Common Data Format for integration with Highmark"
     task :generate do
-      report = CommonDataFormat.new({}, {:date => Date.today}, User.first)
+      report = Highmark::CommonDataFormat.new({}, {:date => Date.today}, User.first)
       data = report.generate()
       folder = File.join(Merb.root, "doc", "csv", "reports")      
       FileUtils.mkdir_p(folder)
