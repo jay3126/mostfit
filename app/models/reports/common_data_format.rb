@@ -1,19 +1,18 @@
 class CommonDataFormat < Report
   
-  attr_accessor :from_date, :to_date, :branch, :branch_id, :center, :center_id
+  attr_accessor :date 
   
   include Mostfit::Reporting
-  include Csv::CommonDataCSV
+  include Csv
   
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today << 1
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
-    @name   = "Report from #{@from_date} to #{@to_date}"
+    @date   = (dates and dates[:date]) ? dates[:date] : Date.today
+    @name   = "Report for #{@date}"
     get_parameters(params, user)
   end
   
   def name
-    "Common Data Format Report from #{@from_date} to #{@to_date}"
+    "Common Data Format Report for #{@date}"
   end
   
   def self.name
@@ -23,226 +22,246 @@ class CommonDataFormat < Report
   def generate
     @data = []
     attendance_record = Center.all.map{|x| [x.id, Attendance.all(:center_id => x.id).aggregate(:client_id, :client_id.count).to_hash]}.to_hash
-    @data << ["Segment Identifier",
-              "Member Identifier",
-              "Branch Identifier",
-              "Kendra/Centre Identifier",
-              "Group Identifier",
-              "Member Name 1",
-              "Member Name 2",
-              "Member Name 3",
-              "Alternate Name of Member",
-              "Member Birth Date",
-              "Member Age",
-              "Member's age as on date",
-              "Member Gender Type",
-              "Marital Status Type",
-              "Key Person's name",
-              "Key Person's relationship",
-              "Member relationship Name 1",
-              "Member relationship Type 1",
-              "Member relationship Name 2",
-              "Member relationship Type 2",
-              "Member relationship Name 3",
-              "Member relationship Type 3",
-              "Member relationship Name 4",
-              "Member relationship Type 4",
-              "Nominee Name",
-              "Nominee relationship",
-              "Nominee Age",
-              "Voter's ID",
-              "UID",
-              "PAN",
-              "Ration Card",
-              "Member Other ID 1 Type description",
-              "Member Other ID 1",
-              "Member Other ID 2 Type description",
-              "Member Other ID 2 ",
-              "Member Other ID 3 Type description",
-              "Member Other ID 3",
-              "Telephone Number 1 type Indicator",
-              "Member Telephone Number 1",
-              "Telephone Number 2 type Indicator",
-              "Member Telephone Number 2",
-              "Poverty Index",
-              "Asset ownership indicator",
-              "Number of Dependents",
-              "Bank Account - Bank Name",
-              "Bank Account - Branch Name",
-              "Bank Account - Account Number",
-              "Occupation",
-              "Total Monthly Family Income",
-              "Monthly Family Expenses",
-              "Member's Religion",
-              "Member's Caste",
-              "Group Leader indicator",
-              "Center Leader indicator",
-              "Dummy",
-              "Segment Identifier",
-              "Member's Permanent Address",
-              "State Code ( Permanent Address)",
-              "Pin Code ( Permanent Address)",
-              "Member's Current Address",
-              "State Code ( Current Address)",
-              "Pin Code ( Current Address)",
-              "Dummy",
-              "Segment Identifier",
-              "Unique Account Refernce number",
-              "Account Number",
-              "Branch Identifier",
-              "Kendra/Centre Identifier",
-              "LoA/N Officer for Originating the loan",
-              "Date of Account Information",
-              "Loan Category",
-              "Group Identifier",
-              "Loan Cycle-id",
-              "Loan Purpose",
-              "Account Status ",
-              "Application date",
-              "Sanctioned Date",
-              "Date Opened/Disbursed",
-              "Date Closed (if closed)",
-              "Date of last payment",
-              "Applied For amount",
-              "Loan amount Sanctioned",
-              "Total Amount Disbursed (Rupees)",
-              "Number of Installments",
-              "Repayment Frequency",
-              "Minimum Amt Due/Instalment Amount",
-              "Current Balance (Rupees)",
-              "Amount Overdue (Rupees)",
-              "DPD (Days past due)",
-              "Write Off Amount (Rupees)",
-              "Date Write-Off (if written-off)",
-              "Write-off reason (if written off)",
-              "No. of meetings held",
-              "No. of meetings missed",
-              "Insurance Indicator",
-              "Type of Insurance",
-              "Sum Assured/Coverage",
-              "Agreed meeting day of the week",
-              "Agreed Meeting time of the day",
-              "Dummy"
-             ]
+    @data << headers
+    debugger
+    # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
+    all_loans = Loan.all.map{|x| x.id}.uniq
+    cut_off_date = @date << 3 
+    ineligible_written_off_loans = LoanHistory.all(:status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+    ineligible_preclosed_loans = LoanHistory.all(:status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
+    ineligible_repaid_loans = LoanHistory.all(:status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+    eligible_loans = all_loans - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
+ 
+    loans = Loan.all(:id => eligible_loans)
 
-    (if @branch
-       Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.gte => @from_date, :applied_on.lte => @to_date)
-     else
-       Loan.all("client.center.branch.id" => @branch.map{|b| b.id}, :applied_on.gte => @from_date, :applied_on.lte => @to_date)
-     end
-     ).each do |l|
+    # if @branch_id
+    #   loans = Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.lte => @date)
+    # else
+    #   loans = Loan.all("client.center.branch.id" => @branch.map{|b| b.id}, :applied_on.lte => @date)
+    # end
+    
+    loans.each do |l|
       client = l.client
       center = client.center
       branch = center.branch
-      lh     = LoanHistory.first(:loan_id => l.id, :date.lte => Date.today, :status => [:disbursed, :outstanding], :order => [:date.desc])
+      # lh     = LoanHistory.first(:loan_id => l.id, :date.lte => Date.today, :status => [:disbursed, :outstanding], :order => [:date.desc])
+      lh     = LoanHistory.last(:loan_id => l.id, :date.lte => @date)
       
-      @data << ["CNSCRD".rjust(6),
-                client.id.to_s.rjust(35), 
-                branch.id.to_s.rjust(30), 
-                center.id.to_s.rjust(30),
-                client.client_group_id.to_s.rjust(20),
-                client.name.rjust(100),
-                "".rjust(50),
-                "".rjust(50),
-                "".rjust(30),
-                client.date_of_birth.strftime("%d%m%Y").rjust(8),
-                (client.date_joined.year -  client.date_of_birth.year).to_s.rjust(3),
-                client.date_joined.strftime("%d%m%Y").rjust(8),
-                (client.respond_to?(:gender) ? client.send(:gender) : gender[:female]).rjust(1), # ideally it should be untagged
-                (client.spouse_name.empty? ? marital_status[:untagged] : marital_status[:married]),
-                client.spouse_name.rjust(100),
-                (client.spouse_name.empty? ? key_person_relationship[:other] : marital_status[:husband]),
-                "".rjust(100), #member 1
-                "".rjust(3), #relationship with member 1
-                "".rjust(100), #member 2
-                "".rjust(3), #relationship with member 1
-                "".rjust(100), #member 3
-                "".rjust(3), #relationship with member 1
-                "".rjust(100), #member 4
-                "".rjust(3), #relationship with member 1
-                "".rjust(100), #nominee name
-                "".rjust(3), #nominee relationship
-                "".rjust(3), #nominee age
-                "".rjust(20), #voters id
-                "".rjust(40), # UID
-                "".rjust(15), #PAN
-                "".rjust(20), #ration card
-                "".rjust(20), #other id type description 1
-                client.reference.rjust(30), #other id 1
-                "".rjust(20), #other id type description 2
-                "".rjust(30), #other id 2
-                "".rjust(20), #other id type description 3
-                "".rjust(30), #other id 3
-                phone[:untagged], #telephone number type 1
-                "".rjust(15), #telephone number 1
-                phone[:untagged], #telephone number type 2
-                "".rjust(15), #telephone number 2
-                client.poverty_status.to_s.rjust(20),
-                ((client.other_productive_asset.nil? || client.other_productive_asset.empty?) ? asset_ownership_indicator[:no] : asset_ownership_indicator[:yes]),
-                client.number_of_family_members.to_s.rjust(2), #number of dependents
-                client.bank_name.to_s.rjust(50),
-                client.bank_branch.to_s.rjust(50),
-                client.account_number.to_s.rjust(35),
-                (client.occupation.nil? ? "" : client.occupation.name).rjust(50),
-                client.total_income.to_s.rjust(9),
-                "".rjust(9), #expenditure
-                religion[client.religion],
-                client.caste.rjust(30),
-                group_leader_indicator[:untagged],
-                (CenterLeader.first(:client_id => client.id).nil? ? center_leader_indicator[:no] : center_leader_indicator[:yes]),
-                "".rjust(30), #dummy reserved for future use
-                "ADRCRD",  
-                client.address.rjust(200), #permanent address
-                "".rjust(2), #state code
-                "".rjust(10), #pin code
-                client.address.rjust(200), #present address
-                "".rjust(2), #state code
-                "".rjust(10), #pin code
-                "".rjust(30), #dummy reserved for future use
-                "ACTCRD",
-                l.id.to_s.rjust(35),
-                l.id.to_s.rjust(35),
-                branch.id.to_s.rjust(30),
-                client.center_id.to_s.rjust(30),
-                l.applied_by.name.rjust(30),
-                "".rjust(8),
-                loan_category[:jlg_individual].rjust(3), #loan category
-                client.client_group_id.to_s.rjust(20),
-                l.cycle_number.to_s.rjust(30),
-                l.occupation.name.rjust(20),  #purpose
-                account_status[l.get_status],
-                l.applied_on.strftime("%d%m%Y").rjust(8),
-                l.approved_on.strftime("%d%m%Y").rjust(8),
-                (l.disbursal_date.nil? ? l.scheduled_disbursal_date : l.disbursal_date).strftime("%d%m%Y").rjust(8),
-                ((l.status == :repaid and lh.status == :repaid) ? lh.date.strftime("%d%m%Y") : "").rjust(8), #loan closed
-                lh.date.strftime("%d%m%Y").rjust(8), #loan closed
-                l.amount_applied_for.to_currency.rjust(9),
-                l.amount_sanctioned.to_currency.rjust(9), #amount approved or sanctioned
-                l.amount.to_currency.rjust(9), #amount disbursed
-                l.number_of_installments.to_s.rjust(3), #number of installments
-                l.installment_frequency.to_s.rjust(3), #repayment frequency
-                (l.payment_schedule[@to_date].nil? ? "" : l.payment_schedule[@to_date][:total].to_currency).rjust(9),   #installment amount / minimum amount due
-                lh.actual_outstanding_total.to_currency.rjust(9),
-                lh.amount_in_default.to_currency.rjust(9), #amount overdue
-                lh.days_overdue.to_s.rjust(3), #days past due
-                "".rjust(9), #write off amount
-                (l.written_off_on.nil? ? "" : l.written_off_on.strftime("%d%m%Y")).rjust(8), #date written off
-                "".rjust(20), #write-off reason
-                attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.rjust(3), #no of meetings held
-                attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.rjust(3), #no of meetings missed
-                insurance_indicator[(not l.insurance_policy.nil?)], #insurance indicator
-                "".rjust(3), #type of insurance
-                (l.insurance_policy.nil? ? "".rjust(10) : l.insurance_policy.premium.to_currency.rjust(10)), #sum assured / coverage
-                meeting_day_of_the_week[center.meeting_day].to_s.rjust(3), #meeting day of the week
-                center.meeting_time.rjust(5), #meeting time of the day
-                "".rjust(30) #dummy reserved for future use
-               ]
+      @data << row(l, client, center, branch, lh, attendance_record) 
     end
     return @data
   end
   
   private
-    
+  
+  def headers
+    @headers = ["Segment Identifier",
+                "Member Identifier",
+                "Branch Identifier",
+                "Kendra/Centre Identifier",
+                "Group Identifier",
+                "Member Name 1",
+                "Member Name 2",
+                "Member Name 3",
+                "Alternate Name of Member",
+                "Member Birth Date",
+                "Member Age",
+                "Member's age as on date",
+                "Member Gender Type",
+                "Marital Status Type",
+                "Key Person's name",
+                "Key Person's relationship",
+                "Member relationship Name 1",
+                "Member relationship Type 1",
+                "Member relationship Name 2",
+                "Member relationship Type 2",
+                "Member relationship Name 3",
+                "Member relationship Type 3",
+                "Member relationship Name 4",
+                "Member relationship Type 4",
+                "Nominee Name",
+                "Nominee relationship",
+                "Nominee Age",
+                "Voter's ID",
+                "UID",
+                "PAN",
+                "Ration Card",
+                "Member Other ID 1 Type description",
+                "Member Other ID 1",
+                "Member Other ID 2 Type description",
+                "Member Other ID 2 ",
+                "Member Other ID 3 Type description",
+                "Member Other ID 3",
+                "Telephone Number 1 type Indicator",
+                "Member Telephone Number 1",
+                "Telephone Number 2 type Indicator",
+                "Member Telephone Number 2",
+                "Poverty Index",
+                "Asset ownership indicator",
+                "Number of Dependents",
+                "Bank Account - Bank Name",
+                "Bank Account - Branch Name",
+                "Bank Account - Account Number",
+                "Occupation",
+                "Total Monthly Family Income",
+                "Monthly Family Expenses",
+                "Member's Religion",
+                "Member's Caste",
+                "Group Leader indicator",
+                "Center Leader indicator",
+                "Dummy",
+                "Segment Identifier",
+                "Member's Permanent Address",
+                "State Code ( Permanent Address)",
+                "Pin Code ( Permanent Address)",
+                "Member's Current Address",
+                "State Code ( Current Address)",
+                "Pin Code ( Current Address)",
+                "Dummy",
+                "Segment Identifier",
+                "Unique Account Refernce number",
+                "Account Number",
+                "Branch Identifier",
+                "Kendra/Centre Identifier",
+                "Loan Officer for Originating the loan",
+                "Date of Account Information",
+                "Loan Category",
+                "Group Identifier",
+                "Loan Cycle-id",
+                "Loan Purpose",
+                "Account Status ",
+                "Application date",
+                "Sanctioned Date",
+                "Date Opened/Disbursed",
+                "Date Closed (if closed)",
+                "Date of last payment",
+                "Applied For amount",
+                "Loan amount Sanctioned",
+                "Total Amount Disbursed (Rupees)",
+                "Number of Installments",
+                "Repayment Frequency",
+                "Minimum Amt Due/Instalment Amount",
+                "Current Balance (Rupees)",
+                "Amount Overdue (Rupees)",
+                "DPD (Days past due)",
+                "Write Off Amount (Rupees)",
+                "Date Write-Off (if written-off)",
+                "Write-off reason (if written off)",
+                "No. of meetings held",
+                "No. of meetings missed",
+                "Insurance Indicator",
+                "Type of Insurance",
+                "Sum Assured/Coverage",
+                "Agreed meeting day of the week",
+                "Agreed Meeting time of the day",
+                "Dummy"
+               ]
+  end
+
+  def row(loan, client, center, branch, loan_history, attendance_record)
+    @row = ["CNSCRD",
+            client.id.to_s.truncate(35, ""), 
+            branch.id.to_s.truncate(30, ""), 
+            center.id.to_s.truncate(30, ""),
+            client.client_group_id.to_s.truncate(20, ""),
+            client.name.truncate(100, ""),
+            "".truncate(50, ""),
+            "".truncate(50, ""),
+            "".truncate(30, ""),
+            (client.date_of_birth ? client.date_of_birth.strftime("%d%m%Y") : "").truncate(8, ""),
+            ((client.date_joined and client.date_of_birth) ? (client.date_joined.year - client.date_of_birth.year).to_s : "").truncate(3, ""),
+            (client.date_joined ? client.date_joined.strftime("%d%m%Y") : "").truncate(8, ""),
+            (client.respond_to?(:gender) ? client.send(:gender) : gender[:female]).truncate(1, ""), # ideally it should be untagged
+            (client.spouse_name.empty? ? marital_status[:untagged] : marital_status[:married]),
+            client.spouse_name.truncate(100, ""),
+            (client.spouse_name.empty? ? key_person_relationship[:other] : marital_status[:husband]),
+            "".truncate(100, ""), #member 1
+            "".truncate(3, ""), #relationship with member 1
+            "".truncate(100, ""), #member 2
+            "".truncate(3, ""), #relationship with member 1
+            "".truncate(100, ""), #member 3
+            "".truncate(3, ""), #relationship with member 1
+            "".truncate(100, ""), #member 4
+            "".truncate(3, ""), #relationship with member 1
+            "".truncate(100, ""), #nominee name
+            "".truncate(3, ""), #nominee relationship
+            "".truncate(3, ""), #nominee age
+            "".truncate(20, ""), #voters id
+            "".truncate(40, ""), # UID
+            "".truncate(15, ""), #PAN
+            "".truncate(20, ""), #ration card
+            "".truncate(20, ""), #other id type description 1
+            client.reference.truncate(30, ""), #other id 1
+            "".truncate(20, ""), #other id type description 2
+            "".truncate(30, ""), #other id 2
+            "".truncate(20, ""), #other id type description 3
+            "".truncate(30, ""), #other id 3
+            phone[:untagged], #telephone number type 1
+            "".truncate(15, ""), #telephone number 1
+            phone[:untagged], #telephone number type 2
+            "".truncate(15, ""), #telephone number 2
+            client.poverty_status.to_s.truncate(20, ""),
+            ((client.other_productive_asset.nil? || client.other_productive_asset.empty?) ? asset_ownership_indicator[:no] : asset_ownership_indicator[:yes]),
+            client.number_of_family_members.to_s.truncate(2, ""), #number of dependents
+            client.bank_name.to_s.truncate(50, ""),
+            client.bank_branch.to_s.truncate(50, ""),
+            client.account_number.to_s.truncate(35, ""),
+            (client.occupation.nil? ? "" : client.occupation.name).truncate(50, ""),
+            client.total_income.to_s.truncate(9, ""),
+            "".truncate(9, ""), #expenditure
+            religion[client.religion],
+            client.caste.truncate(30, ""),
+            group_leader_indicator[:untagged],
+            (CenterLeader.first(:client_id => client.id).nil? ? center_leader_indicator[:no] : center_leader_indicator[:yes]),
+            "".truncate(30, ""), #dummy reserved for future use
+            "ADRCRD",  
+            client.address.truncate(200, ""), #permanent address
+            "".truncate(2, ""), #state code
+            "".truncate(10, ""), #pin code
+            client.address.truncate(200, ""), #present address
+            "".truncate(2, ""), #state code
+            "".truncate(10, ""), #pin code
+            "".truncate(30, ""), #dummy reserved for future use
+            "ACTCRD",
+            loan.id.to_s.truncate(35, ""),
+            loan.id.to_s.truncate(35, ""),
+            branch.id.to_s.truncate(30, ""),
+            client.center_id.to_s.truncate(30, ""),
+            loan.applied_by.name.truncate(30, ""),
+            "".truncate(8, ""),
+            loan_category[:jlg_individual].truncate(3, ""), #loan category
+            client.client_group_id.to_s.truncate(20, ""),
+            loan.cycle_number.to_s.truncate(30, ""),
+            (loan.occupation ? loan.occupation.name : "").truncate(20, ""),  #purpose
+            account_status[loan.get_status],
+            (loan.applied_on ? loan.applied_on.strftime("%d%m%Y") : "").truncate(8, ""),
+            (loan.approved_on ? loan.approved_on.strftime("%d%m%Y") : "").truncate(8, ""),
+            (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
+            ((loan.status == :repaid and loan_history.status == :repaid) ? loan_history.date.strftime("%d%m%Y") : "").truncate(8, ""), #loan closed
+            loan_history.date.strftime("%d%m%Y").truncate(8, ""), #loan closed
+            (loan.amount_applied_for ? loan.amount_applied_for.to_currency : "").truncate(9, ""),
+            (loan.amount_sanctioned ? loan.amount_sanctioned.to_currency : "").truncate(9, ""), #amount approved or sanctioned
+            loan.amount.to_currency.truncate(9, ""), #amount disbursed
+            loan.number_of_installments.to_s.truncate(3, ""), #number of installments
+            loan.installment_frequency.to_s.truncate(3, ""), #repayment frequency
+            (loan.payment_schedule[@date].nil? ? "" : loan.payment_schedule[@date][:total].to_currency).truncate(9, ""),   #installment amount / minimum amount due
+            loan_history.actual_outstanding_total.to_currency.truncate(9, ""),
+            loan_history.amount_in_default.to_currency.truncate(9, ""), #amount overdue
+            (loan_history.days_overdue > 999 ? 999 : loan_history.days_overdue).to_s.truncate(3, ""), #days past due
+            "".truncate(9, ""), #write off amount
+            (loan.written_off_on.nil? ? "" : loan.written_off_on.strftime("%d%m%Y")).truncate(8, ""), #date written off
+            "".truncate(20, ""), #write-off reason
+            attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.truncate(3, ""), #no of meetings held
+            attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.truncate(3, ""), #no of meetings missed
+            insurance_indicator[(not loan.insurance_policy.nil?)], #insurance indicator
+            "".truncate(3, ""), #type of insurance
+            (loan.insurance_policy.nil? ? "" : loan.insurance_policy.premium.to_currency).truncate(10, ""), #sum assured / coverage
+            meeting_day_of_the_week[center.meeting_day].to_s.truncate(3, ""), #meeting day of the week
+            center.meeting_time.truncate(5, ""), #meeting time of the day
+            "".truncate(30, "") #dummy reserved for future use
+           ]
+  end
+  
   # specifications as required by the common data format    
   def gender
     @gender ||= {

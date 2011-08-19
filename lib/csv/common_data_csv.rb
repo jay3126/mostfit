@@ -1,18 +1,14 @@
 module Csv
-  module CommonDataCSV
-
-    def get_csv(data)
-      folder = File.join(Merb.root, "doc", "csv", "reports")
-      FileUtils.mkdir_p(folder)
-      filename = File.join(folder, "#{self.name}.csv")
-      file = File.new(filename, "w")
-      CSV::Writer.generate(file) do |csv|
-        data.each do |datum|
-          csv << datum
-        end
+  
+  def get_csv(data, filename)
+    file = File.new(filename, "w")
+    CSV::Writer.generate(file) do |csv|
+      data.each do |datum|
+        csv << datum
       end
-      return file
     end
-
+    file.close
+    return file
   end
+  
 end
