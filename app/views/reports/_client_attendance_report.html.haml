@@ -51,7 +51,7 @@
                     %td
                       = client.reference
                     %td
-                      = client.name
+                      = link_to "#{client.name}", resource(branch, center, client)
                       - group_total[0]+=1
                     %td
                       = statuses[0]||0
