@@ -20,10 +20,14 @@ namespace :mostfit do
       data = report.generate()
       folder = File.join(Merb.root, "doc", "csv", "reports")      
       FileUtils.mkdir_p(folder)
-      filename = File.join(folder, "#{report.name}.csv")
-      file = report.get_csv(data, filename)
+      filename1 = File.join(folder, "#{report.name}-customer.csv")
+      filename2 = File.join(folder, "#{report.name}-address.csv")
+      filename3 = File.join(folder, "#{report.name}-accounts.csv")
+      file1 = report.get_csv(data["CNSCRD"], filename1)
+      file2 = report.get_csv(data["ADRCRD"], filename2)
+      file3 = report.get_csv(data["ACTCRD"], filename3)
       puts 
-      puts "The file is stored at #{folder}"
+      puts "The files are stored at #{folder}"
     end
   end
 end
