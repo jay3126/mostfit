@@ -65,7 +65,8 @@ module Highmark
     
     def headers
       @headers ||= { 
-        "CNSCRD" => ["Segment Identifier",
+        "CNSCRD" => ["Bank ID",
+                     "Segment Identifier",
                      "Member Identifier",
                      "Branch Identifier",
                      "Kendra/Centre Identifier",
@@ -119,18 +120,27 @@ module Highmark
                      "Member's Caste",
                      "Group Leader indicator",
                      "Center Leader indicator",
-                     "Dummy"],
-        "ADRCRD" => ["Segment Identifier",
+                     "Dummy",
+                     "Member Name 4",
+                     "Member Name 5",
+                     "Passport Number",
                      "Parent ID",
+                     "EXTRACTION FILE ID",
+                     "SEVERITY"],
+        "ADRCRD" => ["Bank ID",
+                     "Segment Identifier",
                      "Member's Permanent Address",
                      "State Code ( Permanent Address)",
                      "Pin Code ( Permanent Address)",
                      "Member's Current Address",
                      "State Code ( Current Address)",
                      "Pin Code ( Current Address)",
-                     "Dummy"],
-        "ACTCRD" => ["Segment Identifier",
+                     "Dummy"
                      "Parent ID",
+                     "EXTRACTION FILE ID",
+                     "SEVERITY"],
+        "ACTCRD" => ["Bank ID",
+                     "Segment Identifier",
                      "Unique Account Reference number",
                      "Account Number",
                      "Branch Identifier",
@@ -166,13 +176,26 @@ module Highmark
                      "Sum Assured/Coverage",
                      "Agreed meeting day of the week",
                      "Agreed Meeting time of the day",
-                     "Dummy"]
+                     "Dummy",
+                     "Old Member Code", #in case the member id  number has changed
+                     "Old Member Short Number", #NULL
+                     "Old Account Number", # in case the account number has changed
+                     "CIBIL Act Status", # has to be populated 
+                     "Asset Classification", #if the account is doubtful, or if the loan is not being paid regularly
+                     "Member Code", # NULL
+                     "Member Short Number", #NULL
+                     "Account Type", #NULL
+                     "Ownership Indicator", #NULL
+                     "Parent ID", 
+                     "EXTRACTION FILE ID", 
+                     "SEVERITY"]
       }
     end
     
     def row(loan, client, center, branch, loan_history, attendance_record)
       @row = {
-        "CNSCRD" => ["CNSCRD",
+        "CNSCRD" => [client.id.to_s.truncate(100, ""),
+                     "CNSCRD",
                      client.id.to_s.truncate(35, ""), 
                      branch.id.to_s.truncate(30, ""), 
                      center.id.to_s.truncate(30, ""),
@@ -226,9 +249,16 @@ module Highmark
                      client.caste.truncate(30, ""),
                      group_leader_indicator[:untagged],
                      (CenterLeader.first(:client_id => client.id).nil? ? center_leader_indicator[:no] : center_leader_indicator[:yes]),
-                     "".truncate(30, "") #dummy reserved for future use
+                     "".truncate(30, ""), #dummy reserved for future use
+                     "".truncate(26, ""), #member name 4
+                     "".truncate(26, ""), #member name 5
+                     "".truncate(20, ""), #passport number
+                     "".truncate(100, ""), #parent id
+                     "",
+                     ""
                     ],
-        "ADRCRD" => ["ADRCRD",  
+        "ADRCRD" => [client.id.to_s.truncate(100, ""),
+                     "ADRCRD",  
                      client.id.to_s.truncate(35, ""),
                      client.address.truncate(200, ""), #permanent address
                      "".truncate(2, ""), #state code
@@ -237,6 +267,9 @@ module Highmark
                      "".truncate(2, ""), #state code
                      "".truncate(10, ""), #pin code
                      "".truncate(30, "") #dummy reserved for future use
+                     client.id.to_s.truncate(100, ""), #parent id
+                     "",
+                     ""
                     ],
         "ACTCRD" => ["ACTCRD",
                      client.id.to_s.truncate(35, ""),
@@ -276,6 +309,18 @@ module Highmark
                      meeting_day_of_the_week[center.meeting_day].to_s.truncate(3, ""), #meeting day of the week
                      center.meeting_time.truncate(5, ""), #meeting time of the day
                      "".truncate(30, "") #dummy reserved for future use
+                     "",
+                     "",
+                     "",
+                     "",
+                     "",
+                     "",
+                     "",
+                     "",
+                     "",
+                     client.id.to_s.truncate(100, ""), #parent id
+                     "", # extraction field id
+                     ""  # severity
                     ]
       }
     end
