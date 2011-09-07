@@ -18,7 +18,7 @@ module Pdf
         pdf.start_new_page if idx > 0
         pdf.text "Center: #{center.name}, Manager: #{self.name}, signature: ______________________", :font_size => 12, :justification => :left
         pdf.text("Center leader: #{center.leader.client.name}, signature: ______________________", :font_size => 12, :justification => :left) if center.leader
-        pdf.text("Date: #{date}, Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
+        pdf.text("Date: #{date}, Meeting Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
         pdf.text("\n")
         table = PDF::SimpleTable.new
         table.data = []
@@ -50,11 +50,25 @@ module Pdf
               interest_due       = [(lh ? lh.interest_due : 0), 0].max
               total_due          = [(lh ? (fee+lh.principal_due+lh.interest_due): 0), 0].max
               number_of_installments = loan.number_of_installments_before(date)
-              
-              table.data.push({"name" => client.name, "loan id" => loan.id, "amount" => loan.amount.to_currency, 
-                                "outstanding" => actual_outstanding.to_currency, "status" => lh.status.to_s,                                
+
+              # if loan.occupation
+              #   table.data.push({"id" => client.id, "name" => client.name, "spouse name" => client.spouse_name,
+              #                     "loan id" => loan.id, "amount" => loan.amount.to_currency,
+              #                     "outstanding" => actual_outstanding.to_currency, "purpose" => loan.occupation.name.capitalize,
+              #                     "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
+              #                     "principal" => principal_due.to_currency, "interest" => interest_due.to_currency,
+              #                     "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,
+              #                     "welfare fund" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
+            #  else
+              table.data.push({"id" => client.id, "name" => client.name, "spouse" => client.spouse_name,
+                                "loan id" => loan.id, "amount" => loan.amount.to_currency,
+                                "outstanding" => actual_outstanding.to_currency,
                                 "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
-                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,"fee" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
+                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency,
+                                "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,
+                                "welfare fund" => fee.to_currency, "total due" =>  total_due.to_currency, "sign" => "" })
+             # end
+              
               group_amount       += loan.amount
               group_outstanding  += actual_outstanding
               group_installments += number_of_installments
@@ -64,12 +78,12 @@ module Pdf
               group_due          += total_due
             } # loans end
             if loan_row_count==0
-              table.data.push({"name" => client.name, "signature" => "", "status" => "nothing outstanding"})              
+              table.data.push({"name" => client.name, "sign" => ""})              
             end
           } #clients end
           table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
                             "principal" => group_principal.to_currency, "interest" => group_interest.to_currency,
-                            "fee" => group_fee.to_currency, "total due" => group_due.to_currency                            
+                            "welfare fund" => group_fee.to_currency, "total due" => group_due.to_currency
                           })
           tot_amount         += group_amount
           tot_outstanding    += group_outstanding
@@ -81,11 +95,11 @@ module Pdf
         } #groups end
         table.data.push({"amount" => tot_amount.to_currency, "outstanding" => tot_outstanding.to_currency,
                           "principal" => tot_principal.to_currency,
-                          "interest" => tot_interest.to_currency, "fee" => tot_fee.to_currency,
+                          "interest" => tot_interest.to_currency, "welfare fund" => tot_fee.to_currency,
                           "total due" => (tot_principal + tot_interest + tot_fee).to_currency
                         })
         
-        table.column_order  = ["name", "loan id" , "amount", "outstanding", "status", "disbursed", "installment", "principal", "interest", "fee", "total due", "days absent/total", "signature"]
+        table.column_order  = ["id", "name", "spouse", "loan id", "amount", "outstanding", "disbursed", "installment", "principal", "interest", "welfare fund", "total due", "days absent/total", "sign"]
         table.show_lines    = :all
         table.show_headings = true
         table.shade_rows    = :none
@@ -108,7 +122,7 @@ module Pdf
                               "loan product" => loan.loan_product.name, "first payment" => loan.scheduled_first_payment_date                              ,"spouse name" => loan.client.spouse_name 
                             })
           end
-          table.column_order  = ["name", "spouse name", "group", "amount", "loan product", "first payment", "signature"]
+          table.column_order  = ["name", "spouse name", "group", "amount", "loan product", "first payment", "sign"]
           table.show_lines    = :all
           table.shade_rows    = :none
           table.show_headings = true          
@@ -121,7 +135,40 @@ module Pdf
           pdf.text "Disbursements today"
           pdf.text("\n")
           table.render_on(pdf)
-        end        
+        end
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("\n")
+        table = PDF::SimpleTable.new
+        table.data = []
+        if center.leader
+          table.data.push({"Center leader signature" => "               ", "  " => "               ", "Center manager signature" => "               ",
+                            "  " => "                  ", "  " => "                      ", "Branch manager signature" => "               "})
+          table.column_order = ["Center leader signature", "  ", "Center manager signature", "  ", "  ", "Branch manager signature"]
+          table.show_lines    = :none
+          table.show_headings = true
+          table.shade_rows    = :none
+          table.shade_headings = false
+          table.orientation   = :center
+          table.position      = :center
+          table.title_font_size = 12
+          table.header_gap = 10
+          table.render_on(pdf)
+        else
+          table.data.push({"Center manager signature" => "                    ", "  " => "               ", "  " => "               ",
+                            "  " => "               ", "  " => "               ", "Branch manager signature" => "               "})
+          table.column_order = ["Center manager signature", " ", "  ", "  ", "  ", "Branch manager signature"]
+          table.show_lines    = :none
+          table.show_headings = true
+          table.shade_rows    = :none
+          table.shade_headings = false
+          table.orientation   = :center
+          table.position      = :center
+          table.title_font_size = 12
+          table.header_gap = 10
+          table.render_on(pdf)
+        end
       } #centers end
       pdf.save_as(filename)
       return pdf
