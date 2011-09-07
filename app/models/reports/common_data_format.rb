@@ -135,7 +135,7 @@ module Highmark
                      "Member's Current Address",
                      "State Code ( Current Address)",
                      "Pin Code ( Current Address)",
-                     "Dummy"
+                     "Dummy",
                      "Parent ID",
                      "EXTRACTION FILE ID",
                      "SEVERITY"],
@@ -265,7 +265,7 @@ module Highmark
                      client.address.truncate(200, ""), #present address
                      "".truncate(2, ""), #state code
                      "".truncate(10, ""), #pin code
-                     "".truncate(30, "") #dummy reserved for future use
+                     "".truncate(30, ""), #dummy reserved for future use
                      client.id.to_s.truncate(100, ""), #parent id
                      "", #extraction field id
                      "" #severity
@@ -307,7 +307,7 @@ module Highmark
                      (loan.insurance_policy.nil? ? "" : loan.insurance_policy.premium.to_currency).truncate(10, ""), #sum assured / coverage
                      meeting_day_of_the_week[center.meeting_day].to_s.truncate(3, ""), #meeting day of the week
                      center.meeting_time.truncate(5, ""), #meeting time of the day
-                     "".truncate(30, "") #dummy reserved for future use
+                     "".truncate(30, ""), #dummy reserved for future use
                      "", #old member code
                      "", #old member shrt number
                      "", #old account number
