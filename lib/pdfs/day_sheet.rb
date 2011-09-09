@@ -9,16 +9,18 @@ module Pdf
       centers = self.centers(:id => center_ids).sort_by{|x| x.name}
       pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
       pdf.select_font "Times-Roman"
-      pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 24, :justification => :center
-      pdf.text("\n")
       return nil if centers.empty?
       days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash 
       days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
-        pdf.text "Center: #{center.name}, Manager: #{self.name}, signature: ______________________", :font_size => 12, :justification => :left
-        pdf.text("Center leader: #{center.leader.client.name}, signature: ______________________", :font_size => 12, :justification => :left) if center.leader
-        pdf.text("Date: #{date}, Meeting Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
+        pdf.text "MORAL GRAMIN MICRO CREDIT", :font_size => 19, :justification => :center
+        pdf.text("\n")
+        pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 16, :justification => :center
+        pdf.text("\n")
+        pdf.text "Branch:  #{center.branch.name}, Center:   #{center.name},  Manager: #{self.name},  signature: ______________________", :font_size => 12, :justification => :left
+        pdf.text("Center leader:   #{center.leader.client.name},   signature: ______________________", :font_size => 12, :justification => :left) if center.leader
+        pdf.text("Date: #{date},   Meeting Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
         pdf.text("\n")
         table = PDF::SimpleTable.new
         table.data = []
@@ -66,7 +68,8 @@ module Pdf
                                 "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
                                 "principal" => principal_due.to_currency, "interest" => interest_due.to_currency,
                                 "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,
-                                "welfare fund" => fee.to_currency, "total due" =>  total_due.to_currency, "sign" => "" })
+                                "total due" =>  total_due.to_currency, "signature    " => "     " })
+                             #   "welfare fund" => fee.to_currency, "total due" =>  total_due.to_currency, "sign" => "" })
              # end
               
               group_amount       += loan.amount
@@ -78,12 +81,13 @@ module Pdf
               group_due          += total_due
             } # loans end
             if loan_row_count==0
-              table.data.push({"name" => client.name, "sign" => ""})              
+              table.data.push({"name" => client.name, "signature    " => "    "})
             end
           } #clients end
           table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
                             "principal" => group_principal.to_currency, "interest" => group_interest.to_currency,
-                            "welfare fund" => group_fee.to_currency, "total due" => group_due.to_currency
+                            "total due" => group_due.to_currency
+                        #    "welfare fund" => group_fee.to_currency, "total due" => group_due.to_currency
                           })
           tot_amount         += group_amount
           tot_outstanding    += group_outstanding
@@ -95,18 +99,19 @@ module Pdf
         } #groups end
         table.data.push({"amount" => tot_amount.to_currency, "outstanding" => tot_outstanding.to_currency,
                           "principal" => tot_principal.to_currency,
-                          "interest" => tot_interest.to_currency, "welfare fund" => tot_fee.to_currency,
+                          "interest" => tot_interest.to_currency,
+                          #  "interest" => tot_interest.to_currency, "welfare fund" => tot_fee.to_currency,
                           "total due" => (tot_principal + tot_interest + tot_fee).to_currency
                         })
         
-        table.column_order  = ["id", "name", "spouse", "loan id", "amount", "outstanding", "disbursed", "installment", "principal", "interest", "welfare fund", "total due", "days absent/total", "sign"]
+        table.column_order  = ["id", "name", "spouse", "loan id", "amount", "outstanding", "disbursed", "installment", "principal", "interest", "total due", "days absent/total", "signature    "]
         table.show_lines    = :all
         table.show_headings = true
         table.shade_rows    = :none
         table.shade_headings = true
         table.orientation   = :center
         table.position      = :center
-        table.title_font_size = 16
+        table.title_font_size = 14
         table.header_gap = 10
         table.render_on(pdf)
         
@@ -122,7 +127,7 @@ module Pdf
                               "loan product" => loan.loan_product.name, "first payment" => loan.scheduled_first_payment_date                              ,"spouse name" => loan.client.spouse_name 
                             })
           end
-          table.column_order  = ["name", "spouse name", "group", "amount", "loan product", "first payment", "sign"]
+          table.column_order  = ["name", "spouse name", "group", "amount", "loan product", "first payment", "signature    "]
           table.show_lines    = :all
           table.shade_rows    = :none
           table.show_headings = true          
@@ -136,8 +141,6 @@ module Pdf
           pdf.text("\n")
           table.render_on(pdf)
         end
-        pdf.text("\n")
-        pdf.text("\n")
         pdf.text("\n")
         pdf.text("\n")
         table = PDF::SimpleTable.new
@@ -169,6 +172,9 @@ module Pdf
           table.header_gap = 10
           table.render_on(pdf)
         end
+        pdf.text "_______________________________________________________________________________________________________", :justification => :center
+        pdf.text("\n")
+        pdf.text "Address : Royal Arcade 565-Ka-94/2, Sneh Nagar, Alambagh, Lucknow(U.P) - 226005", :font_size => 12, :justification => :center
       } #centers end
       pdf.save_as(filename)
       return pdf
