@@ -14,6 +14,7 @@ class InsurancePolicy
   property :nominee, String, :nullable => true
   property :status, Enum.send("[]", *POLICY_STATUSES), :nullable => true
   property :cover_for, Enum.send("[]", *COVER_FOR), :nullable => true, :default => 'self'
+  property :beneficiary_name, Text
 
   belongs_to :insurance_product
   belongs_to :client

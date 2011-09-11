@@ -15,7 +15,8 @@ module Merb
     def current_user_info
       staff_or_funder = ""
       staff_or_funder = "#{session.user.staff_member.name}" if session.user.staff_member 
-      staff_or_funder += " #{session.user.funder.name}" if session.user.funder
+      f = Funder.first(:user_id => session.user.id)
+      staff_or_funder += " #{f.name}" if f
       "#{staff_or_funder} logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) | #{link_to 'log out', url(:logout)}"
     end
 
@@ -538,8 +539,9 @@ module Merb
     end
 
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})
+      branch ||= 0
       collection = []
-      @acc = Account.all(:branch => branch)
+      @acc = Account.all(:branch_id => (branch.is_a?(Integer) ? branch : branch.id))
       @acc = @acc.all(:account_category => ["Cash", "Bank"]) if journal_type == JournalType.get(4)
       @acc.group_by{|a| a.account_type}.sort_by{|at, as| at.name}.each do |account_type, accounts|
         collection << ['', "#{account_type.name}"]
@@ -655,5 +657,14 @@ module Merb
       end
       Loan.all(hash)
     end
+
+    def repayment_style_select(name = "style")
+      all_repayment_style_choices = REPAYMENT_STYLES.map{|x| [x.to_s, x.to_s]}
+      default_repayment_style = Mfi.first.default_repayment_style ? Mfi.first.default_repayment_style : NORMAL_REPAYMENT_STYLE
+      default_repayment_style_choice = all_repayment_style_choices.select {|style| style[0] == default_repayment_style.to_s}
+      repayment_style_choices = Mfi.first.allow_choice_of_repayment_style ? default_repayment_style_choice + (all_repayment_style_choices.reject {|style| style[0] == default_repayment_style}) : default_repayment_style_choice
+      select :name => name, :collection => repayment_style_choices
+    end
+
   end
 end

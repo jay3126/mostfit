@@ -99,7 +99,7 @@
     %div.tab        
       %h1 Disbursal
       - if @loans_to_disburse.size > 0
-        = form_for(@loan, :action => url(:loan_actions, :action => 'disburse', :return => resource(@branch, @center)), :class => "_disable_button_") do
+        = form_for(@loan, :action => url(:loan_actions, :action => 'disburse', :return => (request.path + "?for_date=#{@date}&center_id=#{@center.id}#dishbursals")), :class => "_disable_button_") do
           = partial "loans/disburse", {:loans_to_disburse => @loans_to_disburse, :date => @date}
           = submit 'Disburse these loans', :name => "disburse_loans"
           or
@@ -140,7 +140,7 @@
               %td
                 = obj.id
               %td.text
-                = Loan.descendants.include?(obj.class) ? link_to(obj.client.name, resource(obj.client)) : link_to(obj.name, resource(obj))
+                = obj.is_a?(Loan) ? link_to(obj.client.name, url_for_loan(obj)) : link_to(obj.name, resource(obj))
               %td.text
                 = (link_to obj.description, url_for_loan(obj)) if obj.respond_to?("description")
               %td.text
@@ -164,7 +164,7 @@
               %td.text
                 = link_to f.client.name, resource(f.client)
               %td.text
-                = link_to f.loan.description, url_for_loan(f.loan)
+                = (link_to f.loan.description, url_for_loan(f.loan)) if f.loan
               %td.text
               %td.number
                 = f.amount
