@@ -1,0 +1,75 @@
+= partial :form
+%table.report.nojs
+  %tr.header
+    %th
+      NFL Id
+    %th
+      Client Id
+    %th
+      Client Name
+    %th
+      Date Of Birth of Client
+    %th
+      Age (till date)
+    %th
+      Center Name & Address
+    %th
+      Branch Name
+    %th
+      Loan Amount
+    %th
+      Loan Disbursal Date
+    %th
+      Sum Insured
+    %th
+      Tenure (Frequency)
+    %th
+      Loan Purpose
+    %th
+      Spouse Name
+    - @data.sort_by{|client, branches| client}.each do |client, branches|
+      %tr
+        %td
+          - if branches[:nfl_id]
+            = branches[:nfl_id]
+          - else
+            = "-"
+        %td
+          = link_to branches[:client_id], resource(Client.get(branches[:client_id]))
+        %td
+          = branches[:client_name]
+        %td
+          = branches[:client_dob]
+        %td
+          = branches[:client_age]
+          yrs.
+        %td
+          - if branches[:client_center_address] != ""
+            = branches[:client_center_name]
+            ,
+            = branches[:client_center_address]
+          - else
+            = branches[:client_center_name]
+        %td
+          = branches[:client_branch]
+        %td
+          = branches[:loan_amount]
+        %td
+          = branches[:loan_disbursal_date]
+        %td
+          = branches[:loan_insurance_policy_sum_insured]
+        %td
+          - if branches[:loan_number_of_installments] and branches[:loan_installment_frequency]
+            = branches[:loan_number_of_installments]
+            (
+            = branches[:loan_installment_frequency]
+            )
+          - else
+            = "-"
+        %td
+          = branches[:loan_purpose]
+        %td
+          - if branches[:client_spouse_name] != ""
+            = branches[:client_spouse_name]
+          - else
+            = "-"
