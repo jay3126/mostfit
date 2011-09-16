@@ -2,7 +2,6 @@ module DataEntry
   class Clients < DataEntry::Controller
     provides :html, :xml
     def new
-      debugger
       params[:return] = "/data_entry"
       @center  = Center.get(params[:client][:center_id]) if params[:client] and params[:client][:center_id] 
       @branch = @center.branch if @center

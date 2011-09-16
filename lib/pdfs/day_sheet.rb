@@ -86,7 +86,6 @@ module Pdf
                           "total due" => (tot_principal + tot_interest + tot_fee).to_currency
                         })
 
-        debugger
         table.column_order  = ["name", "loan id" , "amount", "outstanding", "installment amount" ,"installment", "total due", "collected amount", "signature"]
         table.show_lines    = :all
         table.show_headings = true

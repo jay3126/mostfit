@@ -66,7 +66,6 @@ class Loans < Application
   end
 
   def bulk_create
-    debugger
     @loans = statuses = []
     array_to_map = params[:loans] ? params[:loans].values : params[:client_ids]
     array_to_map.each do |attrs|
@@ -87,7 +86,6 @@ class Loans < Application
         t.rollback if statuses.include?(false)
       end
     end
-    debugger
     if not statuses.include?(false)
       if params[:return]
         redirect(params[:return], :message => {:notice => "'#{statuses.count}' loans were successfully created"})

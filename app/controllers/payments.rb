@@ -49,7 +49,6 @@ class Payments < Application
   end
 
   def create(payment)
-    debugger
     raise NotFound unless (@loan or @client)
     success = do_payment(payment)
     if success  # true if saved
