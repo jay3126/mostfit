@@ -813,37 +813,17 @@ class Loan
   end
 
   def scheduled_principal_for_installment(number)
-<<<<<<< HEAD
-    extend_loan
-    self.scheduled_principal_for_installment(number)
-||||||| merged common ancestors
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount.to_f / number_of_installments).round(2)
-=======
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
     extend_loan
     scheduled_principal_for_installment(number)
->>>>>>> takeover
   end
 
   def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-<<<<<<< HEAD
-    extend_loan
-    self.scheduled_interest_for_installment(number)
-||||||| merged common ancestors
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount * interest_rate / number_of_installments).round(2)
-=======
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
     extend_loan
     scheduled_interest_for_installment(number)
->>>>>>> takeover
   end
 
   # These info functions need not be overridden in derived classes.
@@ -1174,13 +1154,7 @@ class Loan
   end
 
   def set_loan_product_parameters
-<<<<<<< HEAD
     self.repayment_style = self.loan_product.repayment_style unless repayment_style
-||||||| merged common ancestors
-    repayment_style = self.loan_product.repayment_style unless repayment_style
-=======
-    self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
->>>>>>> takeover
   end
 
   def interest_calculation(balance)
