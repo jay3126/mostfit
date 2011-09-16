@@ -32,9 +32,7 @@ class MonthlyInsuranceReport < Report
     end
 
     #now iterating with each client and getting the values.
-    client_ids.each do |client|
-
-      cl = Client.get(client)
+    Client.all(:id => client_ids).each do |cl|
 
       data[cl.name]||={}
 
