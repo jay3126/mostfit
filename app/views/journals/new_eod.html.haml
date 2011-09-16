@@ -35,6 +35,7 @@
                       %td{:width => "80%"}
                         = ca.credit_account.name                  
                       %td
+                        - debugger
                         - amount, changable = ca.amount(@date)
                         - credit_total += amount
                         - if false

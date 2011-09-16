@@ -19,8 +19,7 @@ class Loan
   before :destroy, :verified_cannot_be_deleted
 
   after :create, :set_nfl_id
-
-
+  before :valid?,    :set_loan_product_parameters
   before :save, :set_bullet_installments
 
   def rs
@@ -211,12 +210,12 @@ class Loan
     first_payment = payments.select{|p| [:prinicpal, :interest].include?(p.type)}.sort_by{|p| p.received_on}[0]
     self.c_actual_first_payment_date = first_payment.received_on if first_payment
     st = self.get_status
-    self.c_last_status = st
+    self.c_last_status = STATUSES.index(st) + 1
     self.c_principal_received = payments.select{|p| p.type == :principal}.reduce(0){|s,p| s + p.amount}
     self.c_interest_received = payments.select{|p| p.type == :principal}.reduce(0){|s,p| s + p.amount}
     last_payment = payments.select{|p| [:prinicpal, :interest].include?(p.type)}.sort_by{|p| p.received_on}.reverse[0]
     self.c_last_payment_received_on = last_payment.received_on if last_payment
-    self.c_maturity_date = c_last_payment_received_on if (STATUSES.index(st) > 5 and last_payment)
+    self.c_maturity_date = (STATUSES.index(st) > 5 and last_payment) ? c_last_payment_received_on : nil
     self.c_last_payment_id = last_payment.id if last_payment
     true
   end
@@ -814,13 +813,37 @@ class Loan
   end
 
   def scheduled_principal_for_installment(number)
+<<<<<<< HEAD
     extend_loan
     self.scheduled_principal_for_installment(number)
+||||||| merged common ancestors
+    # number unused in this implentation, subclasses may decide differently
+    # therefor always supply number, so it works for all implementations
+    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
+    (amount.to_f / number_of_installments).round(2)
+=======
+    # number unused in this implentation, subclasses may decide differently
+    # therefor always supply number, so it works for all implementations
+    extend_loan
+    scheduled_principal_for_installment(number)
+>>>>>>> takeover
   end
 
   def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
+<<<<<<< HEAD
     extend_loan
     self.scheduled_interest_for_installment(number)
+||||||| merged common ancestors
+    # number unused in this implentation, subclasses may decide differently
+    # therefor always supply number, so it works for all implementations
+    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
+    (amount * interest_rate / number_of_installments).round(2)
+=======
+    # number unused in this implentation, subclasses may decide differently
+    # therefor always supply number, so it works for all implementations
+    extend_loan
+    scheduled_interest_for_installment(number)
+>>>>>>> takeover
   end
 
   # These info functions need not be overridden in derived classes.
@@ -1011,6 +1034,7 @@ class Loan
   # Moved this method here from instead of the LoanHistory model for purposes of speed. We sacrifice a bit of readability
   # for brute force iterations and caching => speed
   def update_history(forced=false)
+    extend_loan
     return true if Mfi.first.dirty_queue_enabled and DirtyLoan.add(self) and not forced
     return if @already_updated and not forced
     return if self.history_disabled and not forced# easy when doing mass db modifications (like with fixutes)
@@ -1031,6 +1055,8 @@ class Loan
     total_principal_due = total_interest_due = total_principal_paid = total_interest_paid = 0
     repayed=false
     dates.each_with_index do |date,i|
+      $debug = true if i == 53
+      debugger if $debug
       current   = date == Date.today ? true : (((dates[[i,0].max] < Date.today and dates[[dates.size - 1,i+1].min] > Date.today) or 
                    (i == dates.size - 1 and dates[i] < Date.today)))
       scheduled = get_scheduled(:all, date)
@@ -1148,7 +1174,13 @@ class Loan
   end
 
   def set_loan_product_parameters
+<<<<<<< HEAD
     self.repayment_style = self.loan_product.repayment_style unless repayment_style
+||||||| merged common ancestors
+    repayment_style = self.loan_product.repayment_style unless repayment_style
+=======
+    self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
+>>>>>>> takeover
   end
 
   def interest_calculation(balance)
@@ -1227,6 +1259,7 @@ class Loan
 
   # TODO these should logically be private.
   def get_from_cache(cache, column, date)
+    debugger if $debug
     date = Date.parse(date) if date.is_a? String
     return 0 if cache.blank?
     if cache.has_key?(date)
@@ -1236,9 +1269,9 @@ class Loan
       keys = cache.keys.sort
       if date < keys.min
         col = cache[keys.min].merge(:balance => amount, :total_balance => total_to_be_received)
-        rv = (column == :all ? col : col[column])
+        rv = (column == :all ? Marshal.load(Marshal.dump(col)) : Marshal.load(Marshal.dump(col[column])))
       elsif date >= keys.max
-        rv = (column == :all ? cache[keys.max] : cache[keys.max][column])
+        rv = (column == :all ? Marshal.load(Marshal.dump(cache[keys.max])) : Marshal.load(Marshal.dump(cache[keys.max][column])))
       else
         keys.each_with_index do |k,i|
           if keys[[i+1,keys.size - 1].min] > date
@@ -1505,6 +1538,7 @@ module Loaner
       _scheduled_disbursal_date = scheduled_disbursal_date
       _fp_date = scheduled_first_payment_date
       _original_amount = amount
+
       # recreate the original loan
       self.scheduled_first_payment_date = original_first_payment_date
       self.amount = original_amount
