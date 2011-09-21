@@ -1,0 +1,4 @@
+---
+maintainer:
+  adapter: sqlite3
+  database: slices/maintainer/maintainer.db
