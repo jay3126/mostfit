@@ -414,9 +414,9 @@ module Highmark
     
     def loan_category
       @loan_category ||= {
-        :jlg_group      => "TO1",
-        :jlg_individual => "TO2",
-        :individual     => "TO3"
+        :jlg_group      => "T01",
+        :jlg_individual => "T02",
+        :individual     => "T03"
       }
     end
     
