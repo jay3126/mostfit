@@ -14,13 +14,13 @@ module Pdf
       days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
-        pdf.text "MORAL GRAMIN MICRO CREDIT", :font_size => 19, :justification => :center
+        pdf.text "MORAL GRAMIN MICRO CREDIT", :font_size => 12, :justification => :center
         pdf.text("\n")
-        pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 16, :justification => :center
+        pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 11, :justification => :center
         pdf.text("\n")
-        pdf.text "Branch:  #{center.branch.name}, Center:   #{center.name},  Manager: #{self.name},  signature: ______________________", :font_size => 12, :justification => :left
-        pdf.text("Center leader:   #{center.leader.client.name},   signature: ______________________", :font_size => 12, :justification => :left) if center.leader
-        pdf.text("Date: #{date},   Meeting Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
+        pdf.text "Branch:  #{center.branch.name}, Center:   #{center.name},  Center Manager: #{self.name},  signature: ______________________", :font_size => 10, :justification => :left
+        pdf.text("Center leader:   #{center.leader.client.name},   signature: ______________________", :font_size => 10, :justification => :left) if center.leader
+        pdf.text("Date: #{date},   Meeting Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 10, :justification => :left)
         pdf.text("\n")
         table = PDF::SimpleTable.new
         table.data = []
@@ -111,7 +111,7 @@ module Pdf
         table.shade_headings = true
         table.orientation   = :center
         table.position      = :center
-        table.title_font_size = 14
+        table.title_font_size = 10
         table.header_gap = 10
         table.render_on(pdf)
         
@@ -134,7 +134,7 @@ module Pdf
           table.shade_headings = true
           table.orientation   = :center
           table.position      = :center
-          table.title_font_size = 16
+          table.title_font_size = 10
           table.header_gap = 10
           pdf.text("\n")
           pdf.text "Disbursements today"
@@ -155,7 +155,7 @@ module Pdf
           table.shade_headings = false
           table.orientation   = :center
           table.position      = :center
-          table.title_font_size = 12
+          table.title_font_size = 10
           table.header_gap = 10
           table.render_on(pdf)
         else
@@ -168,13 +168,13 @@ module Pdf
           table.shade_headings = false
           table.orientation   = :center
           table.position      = :center
-          table.title_font_size = 12
+          table.title_font_size = 10
           table.header_gap = 10
           table.render_on(pdf)
         end
         pdf.text "_______________________________________________________________________________________________________", :justification => :center
         pdf.text("\n")
-        pdf.text "Address : Royal Arcade 565-Ka-94/2, Sneh Nagar, Alambagh, Lucknow(U.P) - 226005", :font_size => 12, :justification => :center
+        pdf.text "Address : Royal Arcade 565-Ka-94/2, Sneh Nagar, Alambagh, Lucknow(U.P) - 226005", :font_size => 11, :justification => :center
       } #centers end
       pdf.save_as(filename)
       return pdf
