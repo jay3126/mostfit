@@ -39,7 +39,7 @@ class Users < Application
     params[:user][:password_changed_at] = Time.now
     @user = User.new(user)
 
-    if @user.save
+    if @user.save!
       redirect resource(:users), :message => {:notice => "Successfully created user '#{@user.login}'"}
     else
       message[:error] = "Could not create the user."
@@ -56,6 +56,7 @@ class Users < Application
     if @user.update_attributes(user)
       redirect resource(:users), :message => {:notice => "User '#{@user.login}' has been modified"}
     else
+      message[:error] = "User '#{@user.login}' could not be modified"
       display @user, :edit
     end
   end
