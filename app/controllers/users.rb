@@ -37,9 +37,10 @@ class Users < Application
     params[:user][:staff_member] = StaffMember.get(params[:user][:staff_member]) if params[:user][:staff_member]
     params[:user][:funder]       = Funder.get(params[:user][:funder]) if params[:user][:funder]
     params[:user][:password_changed_at] = Time.now
+    debugger
     @user = User.new(user)
 
-    if @user.save!
+    if @user.save
       redirect resource(:users), :message => {:notice => "Successfully created user '#{@user.login}'"}
     else
       message[:error] = "Could not create the user."
