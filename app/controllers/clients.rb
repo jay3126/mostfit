@@ -176,6 +176,7 @@ class Clients < Application
 
 end # Clients
 
+
 class IndividualClients < Clients
 end
 
