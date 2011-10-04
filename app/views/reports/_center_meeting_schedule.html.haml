@@ -1,5 +1,5 @@
 = partial :form
-- if @data
+- unless @data.empty?
   %table.report.nojs
     %thead
       %tr.header
@@ -24,10 +24,10 @@
           %td
             = center.loans.count
           %td
-            = center.meeting_day
+            = center.meeting_day.to_s.capitalize
           %td
             = center.meeting_time
 - else
   %h5
-    This branch has no centers.
+    This branch has no centers meeting on the selected weekday
     
