@@ -1,5 +1,7 @@
 class CenterMeetingSchedule < Report
-  attr_accessor :branch, :branch_id
+  attr_accessor :branch, :branch_id, :weekday
+
+  validates_with_method :branch_id, :branch_should_be_selected  
   
   def initialize(params, dates, user)
     @branch = Branch.get(@branch_id) 
@@ -16,8 +18,11 @@ class CenterMeetingSchedule < Report
   end
 
   def generate
+    weekday_hash = WEEKDAYS.map{|x| [(WEEKDAYS.index(x)+1), x]}.to_hash
+    query = {}
+    query = {:meeting_day => weekday_hash[@weekday]} if @weekday
     branch = Branch.get(@branch_id)
-    data = branch.centers
+    data = branch.centers(query)
     return data
   end
 
