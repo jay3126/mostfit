@@ -18,7 +18,7 @@ class CenterMeetingSchedule < Report
   end
 
   def generate
-    weekday_hash = WEEKDAYS.map{|x| [WEEKDAYS.index(x), x]}.to_hash
+    weekday_hash = WEEKDAYS.map{|x| [(WEEKDAYS.index(x)+1), x]}.to_hash
     query = {}
     query = {:meeting_day => weekday_hash[@weekday]} if @weekday
     branch = Branch.get(@branch_id)

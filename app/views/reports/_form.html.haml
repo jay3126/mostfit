@@ -1,5 +1,5 @@
 = error_messages_for @report
-- weekday_hash = WEEKDAYS.map{|x| [WEEKDAYS.index(x), x.to_s.capitalize]}.to_hash
+- weekday_hash = WEEKDAYS.map{|x| [(WEEKDAYS.index(x)+1), x.to_s.capitalize]}.to_hash
 - unless params[:layout] 
   - report = @report.class.to_s.snake_case
   - area_id = (params[report] and params[report][:area_id] and not params[report][:area_id].blank?) ? params[report][:area_id] : nil
@@ -165,7 +165,7 @@
           - if @report.respond_to?(:weekday)
             %td
               Weekday: 
-              = select(:weekday, :collection => WEEKDAYS.map{|x| [WEEKDAYS.index(x), x.to_s.capitalize]}, :include_blank => true, :id => "weekday_selector")
+              = select(:weekday, :collection => WEEKDAYS.map{|x| [(WEEKDAYS.index(x)+1), x.to_s.capitalize]}, :include_blank => true, :id => "weekday_selector")
           - if @report.respond_to?(:center_id)
             %td
               Center:          
