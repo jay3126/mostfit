@@ -6,7 +6,7 @@ class Reports < Application
     :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance], 
     :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
     :statistics   => [LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport], 
-    :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
+    :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis, CenterMeetingSchedule],
     :accounting   => [GeneralLedgerReport, TrialBalanceReport, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
