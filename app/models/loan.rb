@@ -19,6 +19,7 @@ class Loan
   before :destroy, :verified_cannot_be_deleted
 
   after :create, :set_nfl_id
+
   before :valid?,    :set_loan_product_parameters
   before :save, :set_bullet_installments
 
@@ -302,6 +303,10 @@ class Loan
 
 
   # MISC FUNCTIONS
+  def name
+    "Loan #{id} for client #{client.name}"
+  end
+
   def description
     "#{id}:Rs. #{amount} @ #{interest_rate} for client #{client.name}"
   end
