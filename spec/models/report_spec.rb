@@ -93,6 +93,8 @@ describe Report do
             client.created_by = @user
             client.client_type = ClientType.first||ClientType.create(:type => "standard")
             client.date_joined = @date - 1
+            client.gender = 'male'
+            client.type_of_id = 'voter_id'
             client.save
             client.errors.each {|e| puts e}
             client.should be_valid
@@ -168,6 +170,8 @@ describe Report do
     # add a dummy client and check
     c = Client.new(:center => Center.get(1), :name => "delete me", :reference => "dummy1", :date_joined => "2008-01-01", 
                    :client_type => ClientType.first, :created_by => User.first)
+    c.gender = 'male'
+    c.type_of_id = 'voter_id'
     unless c.save
       p c.errors
     end

@@ -650,7 +650,7 @@ module Merb
       if staff = session.user.staff_member
         branch_ids = [staff.branches, staff.areas.branches, staff.regions.areas.branches].flatten.map{|x| x.id}
         hash["client.center.branch_id"] = branch_ids unless branch_ids.empty?
-        center_ids = staff.centers.aggregate(:id)
+        center_ids = staff.centers.aggregate(:id) 
         hash["client.center_id"] = center_ids unless center_ids.empty?
       end
       Loan.all(hash)

@@ -1,0 +1,7 @@
+%h1
+  Village
+  = @village.name
+
+= link_to 'Edit',  url(:edit_village,  @village)
+|
+= link_to 'Back', url(:villages)

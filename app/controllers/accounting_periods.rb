@@ -36,7 +36,7 @@ class AccountingPeriods < Application
     if @accounting_period.save
       redirect resource(:accounts), :message => {:notice => "AccountingPeriod was successfully created"}
     else
-      message[:error] = "AccountingPeriod failed to be created"
+      message[:error] = "Accounting Period failed to be created"
       render :new
     end
   end

@@ -15,6 +15,8 @@ class LoanHistory
   # some properties for similarly named methods of a loan:
   property :scheduled_outstanding_total,     Float, :nullable => false, :index => true
   property :scheduled_outstanding_principal, Float, :nullable => false, :index => true
+  property :scheduled_principal_to_be_paid,  Float, :nullable => false, :index => true
+  property :scheduled_interest_to_be_paid,   Float, :nullable => false, :index => true
   property :actual_outstanding_total,        Float, :nullable => false, :index => true
   property :actual_outstanding_principal,    Float, :nullable => false, :index => true
   property :principal_due,                   Float, :nullable => false, :index => true
@@ -207,7 +209,7 @@ class LoanHistory
         COUNT(lh.loan_id) loan_count,
         #{selects}
       FROM #{subtable} as dt, loan_history lh, loans l
-      WHERE lh.loan_id=dt.loan_id AND lh.date=dt.date AND lh.status in (5,6) AND lh.loan_id=l.id AND l.deleted_at is NULL AND l.rejected_on is NULL
+      WHERE lh.loan_id=dt.loan_id AND lh.date=dt.date AND lh.status in (5,6) AND lh.loan_id=l.id AND l.deleted_at is NULL AND l.rejected_on is NULL 
       #{group_by_query};
     })
   end
@@ -770,7 +772,7 @@ class LoanHistory
     query = build_extra(query)    
     return "(SELECT max(lh.date) date, lh.loan_id loan_id
      FROM loan_history lh, loans l
-     WHERE lh.loan_id=l.id AND l.deleted_at is NULL AND lh.status IN (5,6,7,8,9) AND lh.date<='#{date.strftime('%Y-%m-%d')}' #{query}
+     WHERE lh.loan_id=l.id AND l.deleted_at is NULL AND lh.status IN (5,6,7,8,9,10) AND lh.date<='#{date.strftime('%Y-%m-%d')}' #{query}
      GROUP BY lh.loan_id
      )"
   end

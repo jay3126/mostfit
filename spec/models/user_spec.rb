@@ -119,11 +119,11 @@ describe User do
     @user.can_access?({:action => "reject", :controller => "loans"}).should be_true
     @user.can_access?({:action => "write_off", :controller => "loans"}).should be_true
     @user.can_access?({:action => "write_off_suggested", :controller => "loans"}).should be_true
+
     #loans create
     @user.can_access?({:action => "create", :controller => "loans", :branch_id => 1, :center_id => 1, :client_id => 1, :loan_type => :default_loan}, 
                       {:default_loan => {:loan_product_id => 1, :amount => 10000, :interest => 10, :applied_on => "03-03-2010", :scheduled_disbursement_date => "03-03-2010",
                           :scheduled_first_payment_date => "10-03-2010"}}).should be_true
-
     # admin stuff
     @user.can_access?({:action => "index", :controller => "admin"}).should be_true
     @user.can_access?({:action => "edit", :controller => "admin"}).should be_true
@@ -137,6 +137,7 @@ describe User do
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "region", :id => Region.first.id}).should be_true
 
+
     @user.can_access?({:action => "index", :controller => "areas"}).should be_true
     @user.can_access?({:action => "create", :controller => "areas"}).should be_true
     @user.can_access?({:action => "update", :controller => "areas"}).should be_true
@@ -149,6 +150,7 @@ describe User do
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "staff_member", :id => StaffMember.first.id}).should be_true
 
+
     @user.can_access?({:action => "index", :controller => "users"}).should be_true
     @user.can_access?({:action => "update", :controller => "users"}).should be_true
 
@@ -159,6 +161,7 @@ describe User do
     @user.can_access?({:action => "update", :controller => "funding_lines", :funder_id => 1}).should be_true
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "funding_line", :id => FundingLine.first.id}).should be_true
+
 
     @user.can_access?({:action => "index", :controller => "portfolios", :funder_id => 1}).should be_true
     @user.can_access?({:action => "update", :controller => "portfolios", :funder_id => 1}).should be_true
@@ -315,6 +318,7 @@ describe User do
     @user.can_access?({:action => "write_off", :controller => "loans"}).should be_true
     @user.can_access?({:action => "write_off_suggested", :controller => "loans"}).should be_false
 
+
     #loans create
     @user.can_access?({:action => "create", :controller => "loans", :branch_id => 1, :center_id => 1, :client_id => 1, :loan_type => :default_loan}, 
                       {:default_loan => {:loan_product_id => 1, :amount => 10000, :interest => 10, :applied_on => "03-03-2010", :scheduled_disbursement_date => "03-03-2010",
@@ -343,6 +347,7 @@ describe User do
     @user.can_access?({:action => "index", :controller => "staff_members"}).should be_true
     @user.can_access?({:action => "create", :controller => "staff_members"}).should be_true
     @user.can_access?({:action => "update", :controller => "staff_members"}).should be_true
+
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "staff_member", :id => StaffMember.first.id}).should be_true
 
@@ -354,6 +359,7 @@ describe User do
 
     @user.can_access?({:action => "index", :controller => "funding_lines", :funder_id => 1}).should be_true
     @user.can_access?({:action => "update", :controller => "funding_lines", :funder_id => 1}).should be_true
+
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "funding_line", :id => FundingLine.first.id}).should be_true
 
@@ -454,6 +460,7 @@ describe User do
     #branch access
     managed_branches.each{|branch|
       @user.can_access?({:action => "show", :id => branch.id, :controller => "branches"}).should be_true
+
       #info
       @user.can_access?({:action => "moreinfo", :controller => "info", :for => "branch", :id => branch.id}).should be_true
     }
@@ -463,6 +470,7 @@ describe User do
                           :creation_date => "27-11-2010", :area_id => 1}}).should be_false
     non_managed_branches.each{|branch|
       @user.can_access?({:action => "show", :id => branch.id, :controller => "branches"}).should be_false
+
       #info
       @user.can_access?({:action => "moreinfo", :controller => "info", :for => "branch", :id => branch.id}).should be_false
     }
@@ -540,6 +548,7 @@ describe User do
     non_managed_centers.clients.each{|loan|
       @user.can_access?({:action => "show", :id => loan.id, :controller => "loans"}).should be_false
     }
+
     @user.can_access?({:action => "approve", :controller => "loans"}).should be_true
     @user.can_access?({:action => "disburse", :controller => "loans"}).should be_true
     @user.can_access?({:action => "reject", :controller => "loans"}).should be_true
@@ -573,12 +582,14 @@ describe User do
     @user.can_access?({:action => "index", :controller => "areas"}).should be_false
     @user.can_access?({:action => "create", :controller => "areas"}).should be_false
     @user.can_access?({:action => "update", :controller => "areas"}).should be_false
+
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "area", :id => Area.first.id}).should be_false
 
     @user.can_access?({:action => "index", :controller => "staff_members"}).should be_true
     @user.can_access?({:action => "create", :controller => "staff_members"}).should be_true
     @user.can_access?({:action => "update", :controller => "staff_members"}).should be_true
+
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "staff_member", :id => @user.staff_member.id}).should be_true
     # TODO: Fix this
@@ -593,6 +604,7 @@ describe User do
 
     @user.can_access?({:action => "index", :controller => "funding_lines", :funder_id => 1}).should be_true
     @user.can_access?({:action => "update", :controller => "funding_lines", :funder_id => 1}).should be_true
+
     #info
     @user.can_access?({:action => "moreinfo", :controller => "info", :for => "funding_line", :id => FundingLine.first.id}).should be_false
 
@@ -738,6 +750,7 @@ describe User do
     #client access
     user.staff_member.branches.centers.clients.all.each{|client|
       user.can_access?({:action => "show", :id => client.id, :controller => "clients", :branch_id => client.center.branch_id, :center_id => client.center_id}).should be_true
+
       user.can_access?({:action => "index", :controller => "clients"}, {:branch_id => client.center.branch_id, :center_id => client.center_id}).should be_true
     }
     #client creation
@@ -762,6 +775,7 @@ describe User do
     user.can_access?({:action => "reject", :controller => "loans"}).should be_true
     user.can_access?({:action => "write_off", :controller => "loans"}).should be_false
     user.can_access?({:action => "write_off_suggested", :controller => "loans"}).should be_false
+
     #loans create
     user.can_access?({:action => "create", :controller => "loans"}, 
                       {:default_loan => {:loan_product_id => 1, :amount => 10000, :interest => 10, :applied_on => "03-03-2010", :scheduled_disbursement_date => "03-03-2010",
@@ -828,7 +842,6 @@ describe User do
     user.can_access?({:action => "update", :controller => "areas"}).should be_false
     #info
     user.can_access?({:action => "moreinfo", :controller => "info", :for => "area", :id => Area.first.id}).should be_false
-
     user.can_access?({:action => "index", :controller => "staff_members"}).should be_true
     user.can_access?({:action => "create", :controller => "staff_members"}, {:staff_member => {:name => "foo"}}).should be_false
     user.can_access?({:action => "update", :controller => "staff_members"}).should be_false
@@ -1087,7 +1100,6 @@ describe User do
     user.can_access?({:action => "update", :controller => "staff_members"}).should be_false
     #info
     user.can_access?({:action => "moreinfo", :controller => "info", :for => "staff_member", :id => StaffMember.first.id}).should be_false
-
     user.can_access?({:action => "index", :controller => "users"}).should be_false
     user.can_access?({:action => "update", :controller => "users"}).should be_false
 
@@ -1523,7 +1535,6 @@ describe User do
     user.can_access?({:action => "update", :controller => "regions"}).should be_false
     #info
     user.can_access?({:action => "moreinfo", :controller => "info", :for => "region", :id => Region.first.id}).should be_true
-
     user.can_access?({:action => "index", :controller => "areas"}).should be_true
     user.can_access?({:action => "create", :controller => "areas"}).should be_true
     user.can_access?({:action => "update", :controller => "areas"}).should be_true
@@ -1695,7 +1706,6 @@ describe User do
     user.can_access?({:action => "update", :controller => "areas"}).should be_false
     #info
     user.can_access?({:action => "moreinfo", :controller => "info", :for => "area", :id => Area.first.id}).should be_true
-
     user.can_access?({:action => "index", :controller => "staff_members"}).should be_true
     user.can_access?({:action => "create", :controller => "staff_members"}).should be_false
     user.can_access?({:action => "update", :controller => "staff_members"}).should be_false

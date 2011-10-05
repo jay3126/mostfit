@@ -1,0 +1,7 @@
+%h1 New village
+= error_messages_for @village
+= form_for(@village, :action => url(:villages) ) do
+  = partial :fields
+  = submit "Create village"
+
+= link_to 'Back', url(:villages)

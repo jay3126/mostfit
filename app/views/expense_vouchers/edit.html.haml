@@ -1,0 +1,15 @@
+%h1
+  ExpenseVouchers controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/expense_vouchers/edit.html.erb
+= error_messages_for @expense_voucher
+
+= form_for(@expense_voucher, :action => url(:expense_voucher, @expense_voucher)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:expense_voucher, @expense_voucher)
+|
+= link_to 'Back', url(:expense_vouchers)

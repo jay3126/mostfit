@@ -1,0 +1,39 @@
+%table
+  %tr
+    %td
+      Expense Head
+    %td
+      = select :name => "expense_voucher[expense_head_id]", :collection => ExpenseHead.all.map{ |x| [x.id, x.name] }, :prompt => "Choose Expense Head"
+  %tr
+    %td
+      Branch
+    %td
+      =select :branch_id, :collection => Branch.all.map{ |x| [x.id, x.name]}, :prompt => "Select Branch"
+  %tr
+    %td
+      Amount
+    %td 
+      = text_field :amount
+  %tr
+    %td
+      Issued to name
+    %td
+      = text_field :issued_to_name
+  %tr
+    %td
+      Notation
+    %td
+      = text_field :notation
+  %tr
+    %td
+      Bill number
+    %td
+      = text_field :bill_number
+  %tr
+    %td
+      Voucher date
+    %td
+      = date_select_for @expense_voucher, :issued_on, :nullable => false
+
+%p
+  = submit "Create"

@@ -4,7 +4,7 @@ class Journal
   include DateParser
   
   before :valid?, :parse_dates
- 
+  
   property :id,             Serial
   property :comment,        String
   property :transaction_id, String, :index => true  
@@ -145,7 +145,6 @@ class Journal
               }
     repository.adapter.query(sql)
   end
-  
 
   def self.xml_tally(hash={}, xml_file = nil)
     xml_file ||= '/tmp/voucher.xml'
@@ -194,4 +193,5 @@ class Journal
     } 
     f.close
   end 
+    
 end

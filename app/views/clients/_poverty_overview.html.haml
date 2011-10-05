@@ -16,88 +16,19 @@
       %br/
   %tr
     %td
-      Irrigated land:
-    %td
       %table{:width => '100%'}
       %tr
-        %th
-          %i (in acres)
-        %th
-          own
-        %th
-          leased
-        %th
-          shared
+        %td
+          Land for farming:
+        %td
+          Total
+        %td
+          Irrigated
       %tr
         %td
-          Fertile
+          Area (in acres)
         %td
-          = text_field(:irrigated_land_own_fertile, :size => 10)
+          = text_field(:total_land_farming, :size => 10)
         %td
-          = text_field(:irrigated_land_leased_fertile, :size => 10)
-        %td
-          = text_field(:irrigated_land_shared_fertile, :size => 10)
-      %tr
-        %td
-          Semifertile
-        %td
-          = text_field(:irrigated_land_own_semifertile, :size => 10)
-        %td
-          = text_field(:irrigated_land_leased_semifertile, :size => 10)
-        %td
-          = text_field(:irrigated_land_shared_semifertile, :size => 10)
-      %tr
-        %td
-          Wasteland
-        %td
-          = text_field(:irrigated_land_own_wasteland, :size => 10)
-        %td
-          = text_field(:irrigated_land_leased_wasteland, :size => 10)
-        %td
-          = text_field(:irrigated_land_shared_wasteland, :size => 10)
+          = text_field(:total_land_farming_irrigated, :size => 10)
       %br/
-  %tr
-    %td
-      Not irrigated land:
-    %td
-      %table{:width => '100%'}
-      %tr
-        %th
-          %i (in acres)
-        %th
-          own
-        %th
-          leased
-        %th
-          shared
-      %tr
-        %td
-          Fertile
-        %td
-          = text_field(:not_irrigated_land_own_fertile, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_leased_fertile, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_shared_fertile, :size => 10)
-      %tr
-        %td
-          Semifertile
-        %td
-          = text_field(:not_irrigated_land_own_semifertile, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_leased_semifertile, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_shared_semifertile, :size => 10)
-      %tr
-        %td
-          Wasteland
-        %td
-          = text_field(:not_irrigated_land_own_wasteland, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_leased_wasteland, :size => 10)
-        %td
-          = text_field(:not_irrigated_land_shared_wasteland, :size => 10)
-      %br/
-  %tr
-    %td{:colspan => '2'}
-      %hr

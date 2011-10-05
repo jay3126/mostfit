@@ -59,6 +59,7 @@ class RuleBooks < Application
       @rule_book.updated_by_user_id = session.user.id
       @rule_book.attributes = rule_book
       @rule_book.credit_accounts, @rule_book.debit_accounts = [], []
+
       credit_accounts.each{|ca|
         if car = @rule_book.credit_account_rules.find{|rule| rule.credit_account == ca[:account]}
           # found an existing credit accoutn rule. Update percentage value
@@ -156,14 +157,14 @@ class RuleBooks < Application
 private
   def get_credit_and_debit_accounts(rule_book)
     if rule_book[:credit_accounts]
-      credit_accounts = rule_book[:credit_accounts].reject{|k, ca| ca[:account_id].blank?}.map{|k, ca| 
+      credit_accounts = rule_book[:credit_accounts].reject{|k, ca| ca[:account_id].blank?}.sort_by{|x| x[0]}.map{|k, ca| 
         {:account => Account.get(ca[:account_id]), :percentage => ca[:percentage]}
       }.compact
       rule_book.delete(:credit_accounts)
     end
 
     if rule_book[:debit_accounts]
-      debit_accounts  = rule_book[:debit_accounts].reject{|k, da| da[:account_id].blank?}.map{|k, da| 
+      debit_accounts  = rule_book[:debit_accounts].reject{|k, da| da[:account_id].blank?}.sort_by{|x| x[0]}.map{|k, da| 
         {:account => Account.get(da[:account_id]), :percentage => da[:percentage]}
       }.compact
       rule_book.delete(:debit_accounts)

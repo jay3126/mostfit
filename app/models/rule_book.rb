@@ -69,7 +69,7 @@ class RuleBook
           credit_accounts[rule.id][car.credit_account.id] ||= 0
           credit_accounts[rule.id][car.credit_account.id] += (p.amount * (car.percentage)/100).round(2)
         }
-
+        
         rule.debit_account_rules.each{|dar|
           debit_accounts[rule.id] ||= {}
           debit_accounts[rule.id][dar.debit_account.id] ||= 0
@@ -99,7 +99,7 @@ class RuleBook
     else
       raise "NoRuleFoundError"
     end
-
+    
     credit_accounts, debit_accounts  = {}, {}
     rule.credit_account_rules.each{|car|
       credit_accounts[rule.id] ||= {}

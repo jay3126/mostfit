@@ -45,19 +45,42 @@
           = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
   %tr
     %td
+      Description of member:
+    %td
+      = text_field :client_description, :size => 60
+      %br/
+  %tr
+    %td
+      Gender:
+    %td
+      = select(:gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please select gender")
+      %br/
+  %tr
+    %td
+      Existing customer:
+    %td
+      = select(:existing_customer, :collection => [[:no, "No"], [:yes, "Yes"]])
+      %br/
+  %tr
+    %td
       Client Type
     %td
       = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
   %tr
     %td
-      Reference:
+      Reference Identification:
     %td
-      = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
+      = text_field :reference, :size => 40
       %br/
       %span.greytext
         references are unique, a way to check that this is the only record of a client
         %br/
         for this reason it is advisable to use a government ID as reference
+  %tr
+    %td 
+      Type of identification:
+    %td
+      = select(:type_of_id, :collection => [[:voter_id, "Voter ID"], [:driving_licence, "Driving Licence"], [:pan_card, "PAN Card"], [:gp_certificate, "Gram Panchayat Certificate"], [:ration_card, "Ration Card"], [:nrega_card, "NREGA Card"], [:phone_bill, "Phone bill"], [:electricity_bill, "Electricity bill"]] , :prompt => "Select ID card type")
   %tr
     %td
       Date of birth:
@@ -76,14 +99,54 @@
         = date_select_for @client, :grt_pass_date, :nullable => true, :max_date => Date.today
   %tr
     %td
+      Religion:
+    %td
+      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddhist, "Buddhist"], [:christian, "Christian"], [:other, "Other"]] , :prompt => "Select religion")
+  %tr
+    %td
+      Caste:
+    %td
+      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select caste")
+  %tr
+    %td
       Spouse name:
     %td
       = text_field :spouse_name, :size => 40
+  %tr
+    %td 
+      Spouse Date of Birth:
+    %td
+      = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %td
+      Father's name:
+    %td
+      = text_field :fathers_name, :size => 40
+      &nbsp;&nbsp;
+      Alive: &nbsp;
+      = select(:father_is_alive, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Is father alive?")
+    %td{ :colspan => '2' }
+      &nbsp;
   %tr
     %td
       Address:
     %td
       ~ text_area :address, :rows => 6, :cols => 38
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      Village: &nbsp;
+      = select :village_id, :collection => Village.all, :value_method => :id, :text_method => :name, :prompt => "---"
+    %td{ :colspan => '2' }
+      &nbsp;
+  %tr
+    %td
+      PIN Code:
+    %td
+      = text_field :address_pin, :size => 10
+      &nbsp;&nbsp;
+      Phone number: &nbsp;
+      = text_field :phone_number, :size => 20
+    %td{ :colspan => '2' }
+      &nbsp;
   %tr
     %td
       Occupation

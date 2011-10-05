@@ -1,11 +1,13 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :expense_vouchers
+  resources :expense_heads
   resources :api_accesses
   resources :monthly_targets
   resources :account_balances
   resources :bookmarks
   resources :branch_diaries
-  resources :stock_registers
+  resources :stock_registers  
   resources :asset_registers
   resources :locations, :id => %r(\d+)
   resources :insurance_products
@@ -31,6 +33,7 @@ Merb::Router.prepare do
   resources :audit_trails
   resources :insurance_policies
   resources :insurance_companies
+  resources :guarantors
   resources :occupations
   resources :loan_purposes
   resources :regions do
@@ -48,6 +51,7 @@ Merb::Router.prepare do
   resources :users, :id => %r(\d+)
   resources :staff_members, :id => %r(\d+) 
   resources :clients, :id => %r(\d+) do
+    resources :guarantors
     resources :insurance_policies
     resources :attendances
     resources :claims
@@ -59,6 +63,7 @@ Merb::Router.prepare do
   resources :loans, :id => %r(\d+), :member => {:prepay => [:get, :put]} 
   resources :centers, :id => %r(\d+)
   resources :payments
+  resources :villages
   resources :branches, :id => %r(\d+)  do    
     resources :journals
     resources :centers, :id => %r(\d+) do
@@ -117,6 +122,7 @@ Merb::Router.prepare do
   match('/branches/:id/today').to(:controller => 'branches', :action => 'today').name(:branch_today)
   match('/entrance(/:action)').to(:controller => 'entrance').name(:entrance)
   match('/branches/:branch_id/centers/:center_id/clients/:client_id/test').to( :controller => 'loans', :action => 'test')
+ 
   match('/branches/:branch_id/centers/:center_id/weeksheet').to( :controller => 'centers', :action => 'weeksheet').name(:weeksheet)
   match('/staff_members/:id/day_sheet').to(:controller => 'staff_members', :action => 'day_sheet').name(:day_sheet)
   match('/staff_members/:id/day_sheet.:format').to(:controller => 'staff_members', :action => 'day_sheet', :format => ":format").name(:day_sheet_with_format)

@@ -36,8 +36,11 @@ describe Payment do
 
     @client = Client.new(:name => 'Ms C.L. Ient', :reference => 'XW000-2009.01.05', :client_type => ClientType.create(:type => "standard"), :created_by => @user)
     @client.center  = @center
+    @client.gender = 'female'
+    @client.type_of_id = 'voter_id'
     @client.date_joined = Date.parse('2008-01-01')
     @client.save
+    @client.errors.each{|e| puts e}
     @client.should be_valid
     
     @loan_product = LoanProduct.new

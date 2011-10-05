@@ -1,0 +1,50 @@
+%table.form
+  - if @client.blank?       
+    %tr
+      %td
+        For Client
+      %td
+        = select_client_for @guarantor, :client_id
+  -else
+    %tr
+      %td
+        For Client
+      %td
+        = @client.name
+        %input{:id => "client_id", :value => "#{@client.id}", :type => "hidden"}
+    
+  %tr
+    %td
+      Name of Guarantor 
+    %td
+      =text_field :name
+  %tr
+    %td
+      Gender:
+    %td
+      = select(:gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select gender")
+  %tr
+    %td
+      Fathers Name
+    %td
+      = text_field :father_name   
+  %tr 
+    %td
+      Date of Birth
+    %td
+      = date_select_for @guarantor, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %td
+      Address
+    %td
+      ~ text_area :address, :rows => 6, :cols => 38
+  %tr  
+    %td
+      Relationship
+    %td
+      = select(:relationship_to_client, :collection => [[:spouse, "Spouse"], [:brother, "Brother"], [:brother_in_law, "Brother-in-law"], [:father, "Father"], [:father_in_law, "Father-in-law"], [:adult_son, "Adult son"], [:other, "Other"]] , :prompt => "Choose relationship")
+  %tr  
+    %td
+      Occupation 
+    %td
+      = select :guarantor_occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "Choose occupation"

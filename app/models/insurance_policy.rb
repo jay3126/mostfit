@@ -3,7 +3,7 @@ class InsurancePolicy
   include FeesContainer
 
   POLICY_STATUSES = [:active, :expired, :claim_pending, :claim_settled]
-  COVER_FOR       = [:self, :spouse, :both, :son, :daughter, :mother, :father]
+  COVER_FOR       = [:self, :spouse, :both, :son, :daughter, :mother, :father, :cattle]
   property :id, Serial
   property :application_number, String, :nullable => true
   property :policy_no, String, :nullable => true
@@ -30,14 +30,15 @@ class InsurancePolicy
   end
 
   def description
-    "#{insurance_product.name}: Rs.#{sum_insured}"
+    product_name = insurance_product ? insurance_product.name : nil
+    product_name ? "#{product_name}: Rs.#{sum_insured}" : "Rs.#{sum_insured}"
   end
 
-  # [:applied_on, :approved_on, :disbursal_date].each do |p|
-  #   define_method "loan_#{p}" do 
-  #     loan.send(p) if loan
-  #   end
-  # end
+  [:applied_on, :scheduled_disbursal_date].each do |p|
+    define_method "loan_#{p}" do 
+      loan.send(p) if loan
+    end
+  end
 
   private
   def set_status

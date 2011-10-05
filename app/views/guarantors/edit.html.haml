@@ -1,0 +1,9 @@
+- form_url   =  resource(@client,@guarantor, {:return => params[:return]})
+=error_messages_for @guarantor
+
+= form_for(@guarantor, :action => form_url, :class => "form" ) do
+  %h1 Edit a Guarantor
+  %fieldset
+    = partial "guarantors/fields"
+    = submit "Update"
+= link_to 'Back', resource(@client)

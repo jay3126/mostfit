@@ -1,0 +1,31 @@
+%h1 
+  List of Guarantors 
+  == for #{@client.name} (client ID: #{@client.id})
+%table 
+  %tr
+    %th 
+      Guarantor ID (displayed) 
+    %th 
+      Name 
+    %th
+      Date of Birth
+    %th 
+      Relation
+  %tr
+  - for guarantor in @guarantors    
+    %tr
+      %td
+        = "G-" + guarantor.id.to_s
+      %td
+        = guarantor.name
+      %td
+        = guarantor.date_of_birth
+      %td 
+        = guarantor.relationship_to_client
+     
+     
+
+
+= link_to 'New', resource(@client,:guarantors, :new)
+|
+= link_to 'Back', resource(@client)

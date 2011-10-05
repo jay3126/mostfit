@@ -4,6 +4,7 @@ class Posting
   before :create,  :unverify_account_balances
   ACTIONS = [
              'principal', 'interest', 'fees', 'disbursement', 'advance_principal',
+             'advance_interest', 'advance_principal_adjusted', 'advance_interest_adjusted',
              'advance_interest', 'advance_principal_adjusted', 'advance_interest_adjusted', 'journal'
             ]
 
@@ -38,6 +39,3 @@ class Posting
   end
 
 end
-
-
-  

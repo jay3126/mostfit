@@ -2,6 +2,60 @@
 %script{:type => "text/javascript", :src => "/javascripts/jquery.cookie.js"}
 %script{:type => "text/javascript", :src => "/javascripts/jquery.treeview.js"}
 =partial :form
+%table.report.nojs
+  %tr.header
+    %th
+      Account Type
+    %th
+      Account
+    %th
+      Opening Balance 
+    %th
+      Debit
+    %th
+      Credit
+    %th
+      Total Balance
+ 
+  - length = 3
+  - org_total = []
+  - debit_sum, credit_sum, opening_sum = 0 , 0 , 0
+  - @data.each do |account|
+    %tr
+      %td
+        = account.account_type.name
+      %td
+        = account.name
+      %td
+        - opening_balance = account.opening_balance
+        - opening_sum += opening_balance
+        = account.opening_balance_on_date
+        %br
+        = opening_balance.round  
+      %td
+        - debit = (account.postings.sum(:amount, :amount.lte => 0)||0) * -1
+        - debit_sum += debit
+        = debit.round(2)
+      %td
+        - credit = account.postings.sum(:amount, :amount.gte => 0)||0
+        - credit_sum += credit
+        = credit.round(2)
+      %td
+
+        = ((debit - credit).to_currency * -1) + opening_balance
+
+  %tr
+    %td
+    %td
+    %td
+      =opening_sum.round(2)
+    %td
+      =debit_sum.round(2)
+    %td
+      =credit_sum.round(2)
+    %td
+      =(opening_sum + (credit_sum - debit_sum)).round(2)
+
 %div#sidetreecontrol
   %a{:href => "?#"}
     Collapse All

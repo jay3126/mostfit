@@ -168,7 +168,6 @@ module DataEntry
     
 
     def staff_collection_sheet
-      
       @data = StaffMember.all(:active => true)
       render
     end

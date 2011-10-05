@@ -43,6 +43,7 @@
           = date_select 'for_date', @date
           = hidden_field :name => :center_id, :value => @center.id
           = submit 'Go!',  :style => 'margin: 0px; padding: 0px;'
+
   - @loans_to_approve = @clients.loans(:approved_on => nil, :rejected_on => nil)
   - @loans_to_utilize = @clients.loans(:loan_utilization_id => nil, :rejected_on => nil, :disbursal_date.not => nil)
   - date_with_holiday = [@date, @date.holidays_shifted_today].max

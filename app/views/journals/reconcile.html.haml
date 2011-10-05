@@ -70,22 +70,24 @@
         %td
           %span{:class => "#{(ls - as).abs >= 0.01 ? 'red' : 'green'}"}
             = (ls - as).to_currency
-      - rs  = @rules[:fees].group_by{|r| r.credit_accounts}
-      - rs.each do |credit_accounts, rules|        
-        - fid =  rules.map{|r| r.fee_id}
+      - rs_by_fee_id  = @rules[:fees].group_by{|r| r.fee_id}
+      - rs_by_fee_id.each do |fees_id,rules_for_this_fee|
+        - ls = 0
+        - as = 0
         %tr
           %td
             %b 
-              = Fee.all(:id => fid).aggregate(:name).join(", ")
-              %br
-              = "(#{rules.first.branch.name})" if @branch.count > 1
-          %td
-            = (ls = fid.map{|f| @fees[f]||0}.reduce(0){|s,x| s+=x}).to_currency
-          %td
+              = Fee.first(:id => fees_id).name
+          - ls = fees_id.to_a.map{|f| @fees[f]||0}.reduce(0){|s,x| s+=x}
+          - rs = {}
+          - rs = rules_for_this_fee.group_by{|r| r.credit_accounts}
+          - rs.each do |credit_accounts, rules|
             - account_ids = []
             - account_ids += credit_accounts.map{|ca| ca.id}.flatten
-            - as = (Posting.all("journal.date" => (@from_date..@to_date), :account_id => account_ids, :action => :fees, :fee_id => fid).aggregate(:amount.sum) || 0)
-            - # subtracting this figure below as above are debit entries
+            - as += (Posting.all("journal.date" => (@from_date..@to_date), :account_id => account_ids, :action => :fees, :fee_id => fees_id).aggregate(:amount.sum) || 0)
+          %td
+            = ls.to_currency
+          %td
             = as.to_currency
           %td
             %span{:class => "#{(ls - as).abs >= 0.01 ? 'red' : 'green'}"}

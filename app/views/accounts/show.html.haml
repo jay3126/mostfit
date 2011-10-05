@@ -34,14 +34,8 @@
 
 %div.tab_container
   %ul.tabs
-    %li#journal Journal
-    %li#book Ledger
     %li#accounting_periods End-of-period Balances
     
-  %div.tab
-    = partial "journals/list_account", :accounts => @account
-  %div.tab{:class => "_load_remote_"}
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :accounts, :action => :book, :account_id => @account.id, :date => (params[:date] || Date.today))}
   %div.tab{:class => "_load_remote_"}
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :account_balances, :action => :index, :account_id => @account.id, :date => (params[:date] || Date.today))}
 %br

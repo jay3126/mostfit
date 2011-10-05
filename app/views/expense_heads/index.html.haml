@@ -1,0 +1,18 @@
+%h1 List of Expense Heads
+%table
+  %tr
+    %th
+      Name
+    %th
+      Action
+  %tr
+  - for expense_head in @expense_heads
+    %tr
+      %td
+        = expense_head.name
+      %td
+        = link_to 'Edit', url(:edit_expense_head,  expense_head)
+
+= link_to 'New', url(:new_expense_head)
+|
+= link_to 'Back', url(:accounts)

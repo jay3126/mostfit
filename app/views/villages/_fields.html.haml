@@ -1,0 +1,16 @@
+%table.form
+  %tr
+    %th
+      Name
+      %td
+        = text_field :name
+  %tr
+    %th
+      Area 
+    %td
+      - if @area
+        = hidden_field :area_id, :value => @area.id
+        %b
+        = @area.name
+      - else
+        = select :area_id, :collection =>  Area.all.map{|r| [r.id, r.name]}, :prompt => "---", :selected => @village.area ? @village.area.id.to_s : nil

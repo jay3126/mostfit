@@ -23,64 +23,66 @@
       Occupation
     %th
       Member(M)/ Guarantor(G)
-  - @data.each do  |row|
-    %tr 
-      %td{:width => "10px"}
-        = row[:loan_id]
-      %td
-        = row[:client_id]
-      %td
-        = row[:amount]
-      %td
-        = row[:client_name]
-      %td
-        - if row[:client_gender] == 3
-          = "Male"
-        - elsif row[:client_gender] == 2
-          = "Female"
-        - else
-          = "-"
-      %td
-        - age = row[:c_date_of_birth] ? (Time.now.year - row[:c_date_of_birth].year) : ""
-        = age
-      %td
-        = row[:c_date_of_birth]
-      %td
-        = row[:disbursal_date]
-      %td
-        = row[:branch_name]
-      %td
-        - occupation = row[:c_occupation_id] ? Occupation.get(row[:c_occupation_id]).name : "-"
-        = occupation
-      %td
-        = "M"
-    %tr
-      %td{:width => "10px"}
-        = row[:loan_id]
-      %td
-        = "G-" + row[:guarantor_id].to_s
-      %td
-        = row[:amount]
-      %td
-        = row[:guarantor_name]
-      %td
-        - if row[:g_gender] == 3
-          = "Male"
-        - elsif row[:g_gender] == 2
-          = "Female"
-        - else
-          = "-"
-      %td
-        - age = row[:g_date_of_birth] ? (Time.now.year - row[:g_date_of_birth].year) : ""
-        = age
-      %td
-        = row[:g_date_of_birth]
-      %td
-        = row[:disbursal_date]
-      %td
-        = row[:branch_name]
-      %td
-        - occcupation = row[:g_occupation_id] ? (Occupation.get(row[:g_occupation_id]).name) : "-"
-        = occupation
-      %td
-        = "G"
+  - clients = @data[:clients]
+  - loans = @data[:loans]
+  - insurance_policies = @data[:insurance_policies]
+  - guarantors = @data[:guarantors]
+  - insurance_policies.each do |ip|
+    - begin
+      - c = clients[ip.client_id]
+      - l = loans[ip.loan_id]
+      %tr 
+        %td{:width => "10px"}
+          = ip.loan_id
+        %td
+          = c.id
+        %td
+          = l.amount if l
+        %td
+          = c.name
+        %td
+          = c.gender
+        %td
+          - age = ((@report.from_date - c.date_of_birth) / 365).floor if c.date_of_birth
+          = age
+        %td
+          = c.date_of_birth
+        %td
+          = l.disbursal_date if l
+        %td
+          = @report.branch.name
+        %td
+          = c.occupation.name if c.occupation
+        %td
+          = "M"
+      - ip.client.guarantors.each do |g|
+        %tr
+          %td{:width => "10px"}
+            = ip.loan_id
+          %td
+            = "G-" + g.id.to_s
+          %td
+            = l.amount if l
+          %td
+            = g.name
+          %td
+            = g.gender
+          %td
+            - age = ((@report.from_date - g.date_of_birth)/365).floor if g.date_of_birth
+            = age
+          %td
+            = g.date_of_birth
+          %td
+            = l.disbursal_date if l
+          %td
+            = @report.branch.name
+          %td
+            = g.guarantor_occupation.name if g.guarantor_occupation
+          %td
+            = "G"
+    - rescue
+      %tr
+        %td
+          = link_to ip.id, resource(ip)
+        %td{:colspan => 20, :class => "error"}
+          Something went wrong

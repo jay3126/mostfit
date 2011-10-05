@@ -187,6 +187,8 @@ describe Center do
     @client = Client.new(:name => name, :reference => ref, :date_joined => Date.today, :client_type => ClientType.create(:type => "standard"))
     @client.center     = @center
     @client.created_by = @user
+    @client.gender = 'male'
+    @client.type_of_id = 'voter_id'
     @client.save
     @client.errors.each {|e| p e}
     @client.should be_valid
@@ -201,6 +203,8 @@ describe Center do
                          :client_type => ClientType.first, :created_by => @user)
     client2.center  = @center
     client2.created_by = @user
+    client2.gender = 'male'
+    client2.type_of_id = 'voter_id'
     client2.save
     client2.should be_valid
 

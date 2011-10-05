@@ -1,0 +1,8 @@
+%h1 New expense voucher
+
+= error_messages_for @expense_voucher
+
+= form_for(@expense_voucher, :action => (@branch ? resource(@branch, :expense_vouchers) : resource(:expense_vouchers)) ) do
+  = partial :fields
+
+= link_to 'Back', (@branch ? resource(@branch) : url(:accounts))
