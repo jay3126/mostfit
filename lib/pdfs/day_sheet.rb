@@ -14,8 +14,7 @@ module Pdf
       days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
-        pdf.text "MORAL GRAMIN MICRO CREDIT", :font_size => 12, :justification => :center
-        pdf.text("\n")
+        pdf.image "#{Merb.root}/public/images/moral_logo_cds.png", :justification => :left
         pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 11, :justification => :center
         pdf.text("\n")
         pdf.text "Branch:  #{center.branch.name}, Center:   #{center.name},  Center Manager: #{self.name},  signature: ______________________", :font_size => 10, :justification => :left
