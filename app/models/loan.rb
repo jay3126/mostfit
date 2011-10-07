@@ -151,6 +151,7 @@ class Loan
   has n, :portfolio_loans
   has 1, :insurance_policy
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Loan"
+  has n, :accruals, :required => false
   #validations
 
   validates_present      :client, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
@@ -313,6 +314,21 @@ class Loan
 
   def short_tag
     "#{id}:Rs. #{amount} @ #{interest_rate}"
+  end
+
+  def effective_rate
+    self.interest_rate
+  end
+
+  #TODO
+  # We can accrue interest on any loan at any point in time since payment was last received
+  # For loans that are NPA, we can compute and accrue interest
+  def accrue_ad_hoc(on_date = Date.today)
+  end
+
+  #TODO
+  # We simply accrue the interest that is anticipated as per the repayment schedule
+  def accrue_per_schedule(on_date = Date.today)
   end
 
   def info(date = Date.today)
@@ -1212,6 +1228,29 @@ class Loan
     prin = total - int
     [int, prin]
   end
+
+  def correct_prepayments
+    prins = payments(:type => :principal).sort_by{|p| p.received_on}.reverse
+    ints = payments(:type => :interest).sort_by{|p| p.received_on}.reverse
+    total = 0
+    diff = amount - prins.map{|p| p.amount}.reduce(:+)
+    ints.each do |ix|
+      transfer = [ix.amount, diff - total].min
+      px = prins.find{|_p| _p.received_on == ix.received_on}
+      px.amount += transfer
+      ix.amount -= transfer
+      puts "transferred #{transfer}"
+      px.amount = px.amount.round(2)
+      ix.amount = ix.amount.round(2)
+      total += transfer
+      px.save!
+      ix.save!
+    end
+    puts total
+    self.update_history
+  end
+
+
 
   def reallocate(style, user)
     self.extend_loan
