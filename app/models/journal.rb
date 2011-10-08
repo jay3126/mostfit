@@ -12,7 +12,7 @@ class Journal
   property :created_at,     DateTime, :index => true  
   property :deleted_at,     ParanoidDateTime, :index => true  
   property :batch_id,       Integer, :nullable => true
-  property :uuid,           String, :nullable => false
+  property :uuid,           String, :nullable => true
   belongs_to :batch
   belongs_to :journal_type
   has n, :postings
