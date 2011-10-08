@@ -21,6 +21,7 @@ class Posting
   validates_with_method :journal_date_of_posting_is_after_account_opening_date
   
   def journal_date_of_posting_is_after_account_opening_date
+    return true if deleted_at
     return [false, "Account #{self.account.name} does not exists on this date"] if self.account.opening_balance_on_date > Journal.get(journal_id).date
     return true
   end
