@@ -18,7 +18,7 @@ EXPENSES = [SALARIES, RENT_AND_TAXES, ADMIN_EXPENSES, TRAVEL_EXPENSES]
 INCOME_HEAD_NOT_CHOSEN = 'Choose income or expense head'
 INCOME_HEADS = [INCOMES, EXPENSES].flatten
 
-INSTALLMENT_FREQUENCIES = [:daily, :weekly, :biweekly, :fortnightly, :monthly, :quadweekly]
+INSTALLMENT_FREQUENCIES = [:daily, :weekly, :biweekly, :monthly, :quadweekly]
 WEEKDAYS = [:monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
 MONTHS = ["None", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 STATUSES = [:applied_in_future, :pending_approval, :rejected, :approved, :disbursed, :outstanding, :repaid, :written_off, :claim_settlement, :preclosed]
