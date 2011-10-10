@@ -41,7 +41,7 @@
         %td.left-numeric.due
         %td.right-numeric.paid
       - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      - client_grouped.sort_by{|x| x.name}.each do |client| 
+      - client_grouped.sort_by{|x| x.id}.each do |client| 
         - loan_row_count = 0
         - loans.find_all{|x| x.client_id==client.id and (x.approved_on || x.disbursal_date)}.each do |loan|
           - lh = histories.find_all{|x| x.loan_id == loan.id}.sort_by{|x| x.created_at}[-1]

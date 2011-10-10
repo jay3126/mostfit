@@ -37,7 +37,7 @@ module Pdf
           table.data.push({"disbursed" => group ? group.name : "No group"})
           #absent days
           #Grouped clients
-          clients.sort_by{|x| x.name}.each{|client|
+          clients.sort_by{|x| x.id}.each{|client|
             # all the loans of a client
             loan_row_count=0
             loans.find_all{|l| l.client_id==client.id and l.disbursal_date}.each{|loan|
