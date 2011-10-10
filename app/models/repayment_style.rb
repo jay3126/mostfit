@@ -27,7 +27,6 @@ class RepaymentStyle
   end
 
   def return_schedule(type)
-    debugger
     raise ArgumentError ("type must be :principal or :interest") unless [:principal, :interest].include? type
     s = self.send("custom_#{type}_schedule")
     if s.index("?").nil? # only one amount

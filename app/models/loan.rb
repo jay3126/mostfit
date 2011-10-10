@@ -417,6 +417,8 @@ class Loan
       new_date =  date + number * 7
     when :biweekly
       new_date = date + number * 14
+    when :fortnightly
+      new_date = date + number * 14
     when :quadweekly
       new_date = date + number * 28
     when :monthly
@@ -438,7 +440,7 @@ class Loan
     end
     
     # take care of date changes in weekly schedules
-    if [:weekly, :biweekly, :quadweekly].include?(installment_frequency) and cl=self.client(:fields => [:id, :center_id]) and cen=cl.center and cen.meeting_day != :none and ensure_meeting_day
+    if [:weekly, :biweekly, :fortnightly, :quadweekly].include?(installment_frequency) and cl=self.client(:fields => [:id, :center_id]) and cen=cl.center and cen.meeting_day != :none and ensure_meeting_day
       unless (new_date.weekday == cen.meeting_day_for(new_date) or (cen.meeting_day_for(new_date) == :none))
         # got wrong val. recalculate
         next_date = cen.next_meeting_date_from(new_date)
@@ -905,6 +907,8 @@ class Loan
              then  ((date - scheduled_first_payment_date).to_f / 7).floor + 1
              when  :biweekly
              then  ((date - scheduled_first_payment_date).to_f / 14).floor + 1
+             when  :fortnightly
+             then  ((date - scheduled_first_payment_date).to_f / 14).floor + 1
              when  :quadweekly
              then  ((date - scheduled_first_payment_date).to_f / 28).floor + 1
              when  :monthly
@@ -1026,7 +1030,7 @@ class Loan
     end
         
     ensure_meeting_day = false
-    ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
+    ensure_meeting_day = [:weekly, :biweekly, :fortnightly].include?(installment_frequency)
     ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
     @_installment_dates = (0..(actual_number_of_installments-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) }    
   end
