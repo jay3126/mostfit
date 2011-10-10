@@ -31,7 +31,7 @@
     - clients.group_by{|x| x.client_group}.sort_by{|x| x[0] ? x[0].name : "none"}.each do |group, client_grouped|
       %tr.group{:style => 'font-weight: bold; text-align: center; background: #cfcfcf'}
         %td{:colspan => 6}
-          =group ? group.name : "none"
+          = group ? group.name : "none"
         %td.left-numeric.due
         %td.right-numeric.paid
         %td.left-numeric.due
@@ -44,7 +44,7 @@
       - client_grouped.sort_by{|x| x.name}.each do |client| 
         - loan_row_count = 0
         - loans.find_all{|x| x.client_id==client.id and (x.approved_on || x.disbursal_date)}.each do |loan|
-          - lh = histories.find_all{|x| x.loan_id==loan.id}.sort_by{|x| x.created_at}[-1]
+          - lh = histories.find_all{|x| x.loan_id == loan.id}.sort_by{|x| x.created_at}[-1]
           - next if not lh
           - next if lh and LOANS_NOT_PAYABLE.include?(lh.status) and not (lh.principal_paid>0 or lh.interest_paid>0)
           - next unless loan.respond_to?(:approved_on) and loan.approved_on <= @date
@@ -118,19 +118,19 @@
               - tot_total_paid += (ppaid + ipaid + fee_paid)
               - grp_total_paid += (ppaid + ipaid + fee_paid)
         - if loan_row_count == 0 and not params[:filter]
-          %tr{ :class => cycle('odd','even') }
-            %td
-              %b= link_to client.name, resource(branch, center, client)
-            %td{ :colspan => 5, :style => "text-align: center;" }
-              %i nothing outstanding
-            %td.left-numeric.due
-            %td.right-numeric.paid
-            %td.left-numeric.due
-            %td.right-numeric.paid
-            %td.left-numeric.due
-            %td.right-numeric.paid
-            %td.left-numeric.due
-            %td.right-numeric.paid
+          -# %tr{ :class => cycle('odd','even') }
+          -#   %td
+          -#     %b= link_to client.name, resource(branch, center, client)
+          -#   %td{ :colspan => 5, :style => "text-align: center;" }
+          -#     %i nothing outstanding
+          -#   %td.left-numeric.due
+          -#   %td.right-numeric.paid
+          -#   %td.left-numeric.due
+          -#   %td.right-numeric.paid
+          -#   %td.left-numeric.due
+          -#   %td.right-numeric.paid
+          -#   %td.left-numeric.due
+          -#   %td.right-numeric.paid
       %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }  
         %td{:colspan => 2}
         %td.numeric

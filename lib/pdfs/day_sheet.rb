@@ -81,7 +81,7 @@ module Pdf
               group_due          += total_due
             } # loans end
             if loan_row_count==0
-              table.data.push({"name" => client.name, "signature    " => "    "})
+              # table.data.push({"name" => client.name, "signature    " => "    "})
             end
           } #clients end
           table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
