@@ -52,7 +52,7 @@ namespace :mostfit do
       loans_count = loan_ids.count
       payments_count = payments.count
 
-      puts "Total payments to be deleted between #{begin_date} and #{end_date} is #{payments_count} of #{loans_count} loans."
+     # puts "Total payments to be deleted between #{begin_date} and #{end_date} is #{payments_count} of #{loans_count} loans."
       puts
       puts "Begining to delete the payments..."
       puts
