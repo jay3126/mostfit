@@ -265,10 +265,10 @@ module Highmark
                     ],
         "ADRCRD" => [client.id.to_s.truncate(100, ""),
                      "ADRCRD",  
-                     client.address.gsub("\n", " ").truncate(200, ""), #permanent address
+                     client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #permanent address
                      nil, #state code
                      nil, #pin code
-                     client.address.gsub("\n", " ").truncate(200, ""), #present address
+                     client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #present address
                      nil, #state code
                      nil, #pin code
                      nil, #dummy reserved for future use
