@@ -10,6 +10,7 @@ class ConsolidatedReport < Report
   column :balance_outstanding => [:principal, :interest,   :total             ]
   column :balance_overdue     => [:principal, :interest,   :total             ]
   column :advance_repayment   => [:collected, :adjusted,   :balance           ]
+  column :correction_amount   => [:preclosed, :repaid,     :written_off       ]
 
   validates_with_method :from_date, :date_should_not_be_in_future
 
@@ -42,7 +43,10 @@ class ConsolidatedReport < Report
     balances  = (LoanHistory.advance_balance(self.to_date, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
     old_balances = (LoanHistory.advance_balance(self.from_date-1, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
     defaults   = LoanHistory.defaulted_loan_info_by(grouper, @to_date, extra).group_by{|x| x.send(group_by_column)}.map{|cid, row| [cid, row[0]]}.to_hash
-    
+    preclosures= (LoanHistory.sum_foreclosure_grouped_by(grouper, self.from_date, self.to_date, extra)||{}).group_by{|x| x.send(group_by_column)}  
+    repayments = (LoanHistory.sum_repaid_grouped_by(grouper, self.from_date, self.to_date, extra)||{}).group_by{|x| x.send(group_by_column)}
+    write_offs = (LoanHistory.sum_written_off_grouped_by(grouper, self.from_date, self.to_date, extra)||{}).group_by{|x| x.send(group_by_column)}
+
     @center.each{|c| centers[c.id] = c} if self.branch_id
 
     if self.center_id
@@ -64,16 +68,19 @@ class ConsolidatedReport < Report
           if self.center_id
             data[b][c]||= {}
             c.client_groups.each{|g|
-              add_outstanding_to(data[b][c], g, histories, advances, balances, old_balances, defaults)
+              # add_outstanding_to(data[b][c], g, histories, advances, balances, old_balances, defaults)
+              add_outstanding_to_new(data[b][c], g, histories, advances, balances, old_balances, defaults, preclosures, repayments, write_offs)
             }
           else
-            add_outstanding_to(data[b], c, histories, advances, balances, old_balances, defaults)
+           # add_outstanding_to(data[b], c, histories, advances, balances, old_balances, defaults)
+            add_outstanding_to_new(data[b], c, histories, advances, balances, old_balances, defaults, preclosures, repayments, write_offs)
           end
         }
       else
         #0              1                 2                3              4              5     6                  7         8    9,10,11     12       
         #amount_applied,amount_sanctioned,amount_disbursed,outstanding(p),outstanding(i),total,principal_paidback,interest_,fee_,shortfalls, #defaults
-        add_outstanding_to(data, b, histories, advances, balances, old_balances, defaults)
+        # add_outstanding_to(data, b, histories, advances, balances, old_balances, defaults)
+        add_outstanding_to_new(data, b, histories, advances, balances, old_balances, defaults, preclosures, repayments, write_offs)
       end
     }
 
