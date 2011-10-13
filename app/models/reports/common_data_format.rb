@@ -23,54 +23,81 @@ module Highmark
     
     def generate
       @data = { "CNSCRD" => [], "ADRCRD" => [], "ACTCRD" => [] }
+      folder = File.join(Merb.root, "doc", "csv", "reports")      
+      FileUtils.mkdir_p(folder)
+
+      file_cnscrd = File.new(File.join(folder, "#{self.name}-customer.csv"), "w")
+      file_adrcrd = File.new(File.join(folder, "#{self.name}-address.csv"), "w")
+      file_actcrd = File.new(File.join(folder, "#{self.name}-accounts.csv"), "w")
+
       attendance_record = Center.all.map{|x| [x.id, Attendance.all(:center_id => x.id).aggregate(:client_id, :client_id.count).to_hash]}.to_hash
       absent_record = Center.all.map{|x| [x.id, Attendance.all(:center_id => x.id, :status => "absent").aggregate(:client_id, :client_id.count).to_hash]}.to_hash
-      @data["CNSCRD"] << headers["CNSCRD"]
-      @data["ADRCRD"] << headers["ADRCRD"]
-      @data["ACTCRD"] << headers["ACTCRD"]
+      append_to_file_as_csv([headers["CNSCRD"]], file_cnscrd)
+      append_to_file_as_csv([headers["ADRCRD"]], file_adrcrd)
+      append_to_file_as_csv([headers["ACTCRD"]], file_actcrd)
+      # @data["CNSCRD"] << headers["CNSCRD"]
+      # @data["ADRCRD"] << headers["ADRCRD"]
+      # @data["ACTCRD"] << headers["ACTCRD"]
       # @data << headers
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
-      all_loans = Loan.all.map{|x| x.id}.uniq
+      all_loans = Loan.all(:fields => [:id]).map{|x| x.id}.uniq
       cut_off_date = @date << 3 
-      # ineligible_written_off_loans = LoanHistory.all(:status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
-      # ineligible_preclosed_loans = LoanHistory.all(:status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
-      # ineligible_repaid_loans = LoanHistory.all(:status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+      # ineligible_written_off_loans = LoanHistory.all(:fields => [:loan_id], :status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+      # ineligible_preclosed_loans = LoanHistory.all(:fields => [:loan_id], :status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
+      # ineligible_repaid_loans = LoanHistory.all(:fields => [:loan_id], :status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
       eligible_loans = all_loans # - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
       
-      loans = Loan.all(:id => eligible_loans)
+      #loans = Loan.all(:id => eligible_loans)
       
       # if @branch_id
       #   loans = Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.lte => @date)
       # else
       #   loans = Loan.all("client.center.branch.id" => @branch.map{|b| b.id}, :applied_on.lte => @date)
       # end
-      loans.each do |l|
+      eligible_loans.each do |l_id|
+        l = Loan.get(l_id)
         client = l.client
         center = client.center
         branch = center.branch
         # lh     = LoanHistory.first(:loan_id => l.id, :date.lte => Date.today, :status => [:disbursed, :outstanding], :order => [:date.desc])
         lh     = LoanHistory.last(:loan_id => l.id, :date.lte => @date)
         
-        rows = row(l, client, center, branch, lh, attendance_record, absent_record) 
+        rows = row(l, client, center, branch, lh, attendance_record, absent_record)
+
+        #the following lines of code replace the blanks with nils
         rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
         rows["ADRCRD"].map!{|x| x = (x == "" ? nil : x)}
         rows["ACTCRD"].map!{|x| x = (x == "" ? nil : x)}
 
         unless @data["CNSCRD"].include?(rows["CNSCRD"])
           @data["CNSCRD"] << rows["CNSCRD"]
-          @data["ADRCRD"] << rows["ADRCRD"]
+          append_to_file_as_csv([rows["CNSCRD"]], file_cnscrd)
+          append_to_file_as_csv([rows["ADRCRD"]], file_adrcrd)
+          # @data["ADRCRD"] << rows["ADRCRD"]
         end
-        @data["ACTCRD"] << rows["ACTCRD"]
+        append_to_file_as_csv([rows["ACTCRD"]], file_actcrd)
+        # @data["ACTCRD"] << rows["ACTCRD"]
         # @data << row(l, client, center, branch, lh, attendance_record) 
       end
-
-      return @data
+      
+      file_adrcrd.close
+      file_actcrd.close
+      file_cnscrd.close
+      return true
     end
     
     private
-    
+
+    def append_to_file_as_csv(data, file)
+      CSV::Writer.generate(file, "|") do |csv|
+        data.each do |datum|
+            csv << datum
+        end
+      end
+    end
+      
     def headers
-      @headers ||= { 
+      _headers ||= { 
         "CNSCRD" => ["Bank ID",
                      "Segment Identifier",
                      "Member Identifier",
@@ -199,7 +226,7 @@ module Highmark
     end
     
     def row(loan, client, center, branch, loan_history, attendance_record, absent_record)
-      @row = {
+      _row = {
         "CNSCRD" => [client.id.to_s.truncate(100, ""),
                      "CNSCRD",
                      client.id.to_s.truncate(35, ""), 
@@ -332,7 +359,7 @@ module Highmark
     
     # specifications as required by the common data format    
     def gender
-      @gender ||= {
+      _gender ||= {
         :female   => "F", 
         :male     => "M", 
         :untagged => "U"
@@ -340,7 +367,7 @@ module Highmark
     end
     
     def marital_status
-      @marital_status ||= {
+      _marital_status ||= {
         :married   => "M01", 
         :separated => "M02", 
         :divorced  => "M03", 
@@ -351,7 +378,7 @@ module Highmark
     end
     
     def key_person_relationship
-      @key_person_relationship ||= {
+      _key_person_relationship ||= {
         :father          => "K01",
         :husband         => "K02",
         :mother          => "K03",
@@ -370,7 +397,7 @@ module Highmark
     end
     
     def phone
-      @phone ||= {
+      _phone ||= {
         :residence => "P01",
         :company   => "P02",
         :mobile    => "P03",
@@ -381,14 +408,14 @@ module Highmark
     end
     
     def asset_ownership_indicator
-      @asset_ownership_indicator ||= {
+      _asset_ownership_indicator ||= {
         :yes => "Y",
         :no  => "N"
       }
     end
     
     def religion
-      @religion ||= {
+      _religion ||= {
         'hindu'       => "R01",
         'muslim'      => "R02",
         'christian'   => "R03",
@@ -403,7 +430,7 @@ module Highmark
     
     
     def group_leader_indicator
-      @group_leader_indicator ||= {
+      _group_leader_indicator ||= {
         :yes      => "Y",
         :no       => "N",
         :untagged => "U"
@@ -411,7 +438,7 @@ module Highmark
     end
     
     def center_leader_indicator
-      @center_leader_indicator ||= {
+      _center_leader_indicator ||= {
         :yes      => "Y",
         :no       => "N",
         :untagged => "U"
@@ -419,7 +446,7 @@ module Highmark
     end
     
     def loan_category
-      @loan_category ||= {
+      _loan_category ||= {
         :jlg_group      => "T01",
         :jlg_individual => "T02",
         :individual     => "T03"
@@ -428,7 +455,7 @@ module Highmark
     
     # account status is nothing but loan status
     def account_status
-      @account_status ||= {
+      _account_status ||= {
         :applied_in_future => "S01", #loan submitted
         :pending_approval  => "S01", #loan submitted
         :approved          => "S02", #loan_approved_not_yet_disbursed
@@ -444,7 +471,7 @@ module Highmark
     end
     
     def repayment_frequency
-      @repayment_frequency ||= {
+      _repayment_frequency ||= {
         :weekly              => "F01",  
         :biweekly            => "F02",
         :monthly             => "F03",
@@ -459,7 +486,7 @@ module Highmark
     end
     
     def write_off_reason
-      @write_off_reason = { 
+      _write_off_reason = { 
         :first_payment_default             => "X01",
         :death                             => "X02",
         :willful_default_status            => "X03",
@@ -470,21 +497,21 @@ module Highmark
     end
     
     def days_past_due
-      @days_past_due ||= {
+      _days_past_due ||= {
         :zero_payments_past_due => "000",
         :no_payment_history_available_for_this_month => "XXX",
       }
     end
     
     def insurance_indicator
-      @insurance_indicator ||= {
+      _insurance_indicator ||= {
         true      => "Y",
         false     => "N"
       }
     end
     
     def type_of_insurance
-      @type_of_insurance ||= {
+      _type_of_insurance ||= {
         :life_insurance            => "L01", 
         :credit_insurance          => "L02",
         :health_medical_insurance  => "L03",
@@ -495,7 +522,7 @@ module Highmark
     end
     
     def meeting_day_of_the_week
-      @meeting_day_of_the_week ||= {
+      _meeting_day_of_the_week ||= {
         :monday     => "MON",
         :tuesday    => "TUE",
         :wednesday  => "WED",
@@ -507,7 +534,7 @@ module Highmark
     end
     
     def states
-      @states ||= {
+      _states ||= {
         :andhra_pradesh     => "AP",
         :arunachal_pradesh  => "AR",
         :assam              => "AS",
