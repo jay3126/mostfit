@@ -22,8 +22,8 @@ class TrialBalanceReport < Report
     data = {}
     hash = {"journal.date.gte" => @from_date, "journal.date.lte" => @to_date}
     @branch_id = @branch_id.to_i if @branch_id 
-    @debit_postings  = Posting.all(hash.merge({:amount.lt => 0})).aggregate(:account_id, :amount.sum).to_hash
-    @credit_postings = Posting.all(hash.merge({:amount.gt => 0})).aggregate(:account_id, :amount.sum).to_hash
+    @debit_postings  = Posting.all(hash.merge({:amount.lt => 0})).journals.postings.aggregate(:account_id, :amount.sum).to_hash
+    @credit_postings = Posting.all(hash.merge({:amount.gt => 0})).journals.postings.aggregate(:account_id, :amount.sum).to_hash
     
     Account.all(:order => [:account_type_id.asc], :parent_id => nil, :branch_id => @branch_id).group_by{|account| account.account_type}.each{|account_type, accounts|
       data[account_type] = recurse(accounts)    
