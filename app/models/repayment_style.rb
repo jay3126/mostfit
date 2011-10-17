@@ -27,7 +27,14 @@ class RepaymentStyle
   end
 
   def return_schedule(type)
+<<<<<<< HEAD
     raise ArgumentError ("type must be :principal or :interest") unless [:principal, :interest].include? type
+||||||| merged common ancestors
+    debugger
+    raise ArgumentError ("type must be :principal or :interest") unless [:principal, :interest].include? type
+=======
+    raise ArgumentError.new("type must be :principal or :interest") unless [:principal, :interest].include? type
+>>>>>>> new-layout
     s = self.send("custom_#{type}_schedule")
     if s.index("?").nil? # only one amount
       rv = s.split(",").map{|a| a.to_f}
