@@ -1186,6 +1186,8 @@ class Loan
         :funding_line_id                     => funding_line_id,
         :loan_product_id                     => loan_product_id,
         :days_overdue                        => days_overdue
+
+
       }
     end
 
