@@ -134,7 +134,7 @@ class Center
   def self.paying_today(user, date = Date.today)
     debugger
     center_ids = LoanHistory.all(:date => date||Date.today).aggregate(:center_id)
-    centers = center_ids.blank? ? [] : Center.all(:id => center_ids)
+    centers = center_ids.blank? ? Center.all(:id => 0) : Center.all(:id => center_ids)
     if user.staff_member
       staff = user.staff_member
       centers = (staff.branches.count > 0 ? ([staff.centers, staff.branches.centers].flatten.uniq & centers) : (staff.centers & centers))
