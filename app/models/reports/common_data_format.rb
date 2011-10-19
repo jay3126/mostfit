@@ -2,19 +2,19 @@ module Highmark
   
   class CommonDataFormat < Report
     
-    attr_accessor :date 
+    attr_accessor :from_date, :to_date 
     
     include Mostfit::Reporting
     include Csv
     
     def initialize(params, dates, user)
-      @date   = (dates and dates[:date]) ? dates[:date] : Date.today
-      @name   = "Report for #{@date}"
+      @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
+      @from_date = (dates and dates[:from_date]) ? dates[:from_date] : @to_date << 3
       get_parameters(params, user)
     end
     
     def name
-      "Common Data Format Report for #{Mfi.first.name} as on #{@date}"
+      "Common Data Format Report for #{Mfi.first.name} as on #{@to_date}"
     end
     
     def self.name
@@ -41,7 +41,8 @@ module Highmark
       # @data << headers
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Loan.all(:fields => [:id]).map{|x| x.id}.uniq
-      cut_off_date = @date << 3 
+      # cut_off_date = @from_date
+      # cut_off_date = @to_date << 3 
       # ineligible_written_off_loans = LoanHistory.all(:fields => [:loan_id], :status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
       # ineligible_preclosed_loans = LoanHistory.all(:fields => [:loan_id], :status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
       # ineligible_repaid_loans = LoanHistory.all(:fields => [:loan_id], :status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
@@ -59,9 +60,15 @@ module Highmark
         client = l.client
         center = client.center
         branch = center.branch
+        if l.status(@to_date) == :outstanding
+          lh = l.loan_history(:status => :outstanding, :date.lte => @to_date).last  # if the loan is outstanding then the last record of loan history is the latest state of the loan
+        else
+          lh = l.loan_history(:status => l.status(@to_date), :date.lte => @to_date).first # this is because after a loan is written off, preclosed or under claim settlement all the succeeding loan history records of that loan change to the same status. Hence we go for the first status and in case of repaid it is always the last
+        end
+        lh = l.loan_history(:date.lte => @to_date).last if lh.nil? # this is there because in some cases it has been observed that the l.status function returns :repaid but the last loan history record for that loan is that of :outstanding.
+        debugger if lh.nil?
         # lh     = LoanHistory.first(:loan_id => l.id, :date.lte => Date.today, :status => [:disbursed, :outstanding], :order => [:date.desc])
-        lh     = LoanHistory.last(:loan_id => l.id, :date.lte => @date)
-        
+           
         rows = row(l, client, center, branch, lh, attendance_record, absent_record)
 
         #the following lines of code replace the blanks with nils
@@ -234,39 +241,40 @@ module Highmark
                      center.id.to_s.truncate(30, ""),
                      client.client_group_id.to_s.truncate(20, ""),
                      client.name.truncate(100, ""),
-                     nil,
-                     nil,
-                     nil,
+                     nil, # member name 2
+                     nil, # member name 3
+                     nil, # alternate name of member
                      (client.date_of_birth ? client.date_of_birth.strftime("%d%m%Y").truncate(8,"") : nil),
                      ((client.date_joined and client.date_of_birth) ? (client.date_joined.year - client.date_of_birth.year).to_s.truncate(3, "") : nil),
                      (client.date_joined ? client.date_joined.strftime("%d%m%Y").truncate(8,"") : nil),
-                     (client.respond_to?(:gender) ? client.send(:gender) : gender[:female]).truncate(1, ""), # ideally it should be untagged
+                     (client.gender.empty? ? nil : gender[client.gender.to_sym]), #(client.respond_to?(:gender) ? gender[client.send(:gender).to_sym] : gender[:female]).truncate(1, ""), # ideally it should be untagged
                      (client.spouse_name.empty? ? marital_status[:untagged] : marital_status[:married]),
                      client.spouse_name.truncate(100, ""),
-                     (client.spouse_name.empty? ? key_person_relationship[:other] : marital_status[:husband]),
-                     nil, #member 1
-                     nil, #relationship with member 1
-                     nil, #member 2
-                     nil, #relationship with member 1
-                     nil, #member 3
-                     nil, #relationship with member 1
-                     nil, #member 4
-                     nil, #relationship with member 1
-                     nil, #nominee name
-                     nil, #nominee relationship
-                     nil, #nominee age
-                     nil, #voters id
+                     key_person_relationship(client, 'spouse'),
+                     #(client.gender == "female" ? key_person_relationship['husband'] : key_person_relationship['wife']),
+                     client.family_member_1_age, #member 1
+                     (key_person_relationship(client, client.family_member_1_relationship)), #relationship with member 1
+                     client.family_member_2_name, #member 2
+                     (key_person_relationship(client, client.family_member_2_relationship)), #relationship with member 2
+                     client.family_member_3_name, #member 3
+                     (key_person_relationship(client, client.family_member_3_relationship)), #relationship with member 3
+                     client.family_member_4_name, #member 4
+                     (key_person_relationship(client, client.family_member_4_relationship)), #relationship with member 4
+                     nil, # client.guarantor_name, #nominee name
+                     nil, # key_person_relationship[client.guarantor_relationship], #nominee relationship
+                     nil, # ((client.date_joined and client.guarantor_date_of_birth) ? (client.date_joined.year - client.guarantor_date_of_birth.year).to_s.truncate(3, "") : nil), #nominee age
+                     (client.type_of_id == "voter_id" ? client.reference.truncate(20, "") :  nil), #voters id
                      nil, # UID
-                     nil, #PAN
-                     nil, #ration card
+                     (client.type_of_id == "pan_card" ? client.reference.truncate(15, "") : nil), #PAN
+                     (client.type_of_id == "ration_card" ? client.reference.truncate(20, "") : nil), #ration card
                      client.type_of_id.to_s.truncate(20, ""), #other id type description 1
                      client.reference.truncate(30, ""), #other id 1
                      nil, #other id type description 2
                      nil, #other id 2
                      nil, #other id type description 3
                      nil, #other id 3
-                     nil, #telephone number type 1
-                     nil, #telephone number 1
+                     phone[:untagged], #telephone number type 1
+                     client.phone_number.truncate(15, ""), #telephone number 1
                      nil, #telephone number type 2
                      nil, #telephone number 2
                      client.poverty_status.to_s.truncate(20, ""),
@@ -277,7 +285,7 @@ module Highmark
                      client.account_number.to_s.truncate(35, ""),
                      (client.occupation.nil? ? nil : client.occupation.name.truncate(50, "")),
                      client.total_income.to_s.truncate(9, ""),
-                     nil, #expenditure
+                     client.total_expenses.to_s.truncate(9, ""), #expenditure
                      religion[client.religion],
                      client.caste.truncate(30, ""),
                      group_leader_indicator[:untagged],
@@ -294,10 +302,10 @@ module Highmark
                      "ADRCRD",  
                      client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #permanent address
                      nil, #state code
-                     nil, #pin code
+                     client.address_pin, #pin code
                      client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #present address
                      nil, #state code
-                     nil, #pin code
+                     client.address_pin, #pin code
                      nil, #dummy reserved for future use
                      client.id.to_s.truncate(100, ""), #parent id
                      nil, #extraction field id
@@ -328,9 +336,9 @@ module Highmark
                      repayment_frequency[loan.installment_frequency], #repayment frequency
                      ((loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1)).to_f.to_s.truncate(9, "")),   #installment amount / minimum amount due
                      loan_history.actual_outstanding_total.to_f.to_s.truncate(9, ""),
-                     loan_history.amount_in_default.to_f.to_s.truncate(9, ""), #amount overdue
+                     (((loan_history.scheduled_outstanding_total - loan_history.actual_outstanding_total) > 0) ? (loan_history.scheduled_outstanding_total - loan_history.actual_outstanding_total).to_f.round(2).to_s.truncate(9, "") : nil), #amount overdue
                      (loan_history.days_overdue > 999 ? 999 : loan_history.days_overdue).to_s.truncate(3, ""), #days past due
-                     nil, #write off amount
+                     (loan_history.status == :written_off ? actual_outstanding_principal.round(2).to_f.to_s : nil), #write off amount
                      (loan.written_off_on.nil? ? nil : loan.written_off_on.strftime("%d%m%Y").truncate(8, "")), #date written off
                      nil, #write-off reason
                      attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.truncate(3, ""), #no of meetings held
@@ -377,23 +385,29 @@ module Highmark
       }
     end
     
-    def key_person_relationship
+    def key_person_relationship(client, relationship)
       _key_person_relationship ||= {
-        :father          => "K01",
-        :husband         => "K02",
-        :mother          => "K03",
-        :son             => "K04",
-        :daughter        => "K05",
-        :wife            => "K06",
-        :brother         => "K07",
-        :mother_in_law   => "K08",
-        :father_in_law   => "K09",
-        :daughter_in_law => "K10",
-        :sister_in_law   => "K11",
-        :son_in_law      => "K12",
-        :brother_in_law  => "K13",
-        :other           => "K14"
+        'father'          => "K01",
+        'husband'         => "K02",
+        'mother'          => "K03",
+        'son'             => "K04",
+        'adult_son'       => "K04",
+        'daughter'        => "K05",
+        'wife'            => "K06",
+        'brother'         => "K07",
+        'mother_in_law'   => "K08",
+        'father_in_law'   => "K09",
+        'daughter_in_law' => "K10",
+        'sister_in_law'   => "K11",
+        'son_in_law'      => "K12",
+        'brother_in_law'  => "K13",
+        'other'           => "K14",
       }   
+      if relationship == 'spouse'
+        return (client.gender == "female" ? _key_person_relationship['husband'] : _key_person_relationship['wife'])
+      else
+        return _key_person_relationship[relationship]
+      end
     end
     
     def phone
@@ -402,8 +416,8 @@ module Highmark
         :company   => "P02",
         :mobile    => "P03",
         :permanent => "P04",
-        :other     => "P05",
-        :untagged  => "P06"
+        :other     => "P07",
+        :untagged  => "P08"
       }
     end
     
@@ -464,7 +478,7 @@ module Highmark
         :outstanding       => "S04", #current
         :delinquent        => "S05", #delinquent
         :written_off       => "S06", #written_off
-        :claim_settlement  => "S06", #written_off
+        :claim_settlement  => "S07", #account_closed for intellecash
         :repaid            => "S07", #account_closed
         :preclosed         => "S07"  #account_closed
       }
