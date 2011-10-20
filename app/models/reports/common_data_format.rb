@@ -252,7 +252,7 @@ module Highmark
                      client.spouse_name.truncate(100, ""),
                      key_person_relationship(client, 'spouse'),
                      #(client.gender == "female" ? key_person_relationship['husband'] : key_person_relationship['wife']),
-                     client.family_member_1_age, #member 1
+                     client.family_member_1_name, #member 1
                      (key_person_relationship(client, client.family_member_1_relationship)), #relationship with member 1
                      client.family_member_2_name, #member 2
                      (key_person_relationship(client, client.family_member_2_relationship)), #relationship with member 2
@@ -327,7 +327,7 @@ module Highmark
                      (loan.applied_on ? loan.applied_on.strftime("%d%m%Y").truncate(8, "") : nil),
                      (loan.approved_on ? loan.approved_on.strftime("%d%m%Y").truncate(8, "") : nil),
                      (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
-                     ((loan.status == :repaid and loan_history.status == :repaid) ? loan_history.date.strftime("%d%m%Y").truncate(8, "") : nil), #loan closed
+                     ( ( (loan.status == :repaid and loan_history.status == :repaid) || (loan.status == :preclosed and loan_history.status == :preclosed) || (loan.status == :claim_settlement and loan_history.status == :claim_settlement) ) ? loan_history.date.strftime("%d%m%Y").truncate(8, "") : nil), #loan closed
                      loan_history.date.strftime("%d%m%Y").truncate(8, ""), #loan closed
                      (loan.amount_applied_for ? loan.amount_applied_for.to_f.to_s.truncate(9, "") : nil),
                      (loan.amount_sanctioned ? loan.amount_sanctioned.to_f.to_s.truncate(9, "") : nil), #amount approved or sanctioned
@@ -336,7 +336,7 @@ module Highmark
                      repayment_frequency[loan.installment_frequency], #repayment frequency
                      ((loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1)).to_f.to_s.truncate(9, "")),   #installment amount / minimum amount due
                      loan_history.actual_outstanding_total.to_f.to_s.truncate(9, ""),
-                     (((loan_history.scheduled_outstanding_total - loan_history.actual_outstanding_total) > 0) ? (loan_history.scheduled_outstanding_total - loan_history.actual_outstanding_total).to_f.round(2).to_s.truncate(9, "") : nil), #amount overdue
+                     (((loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total) > 0) ? (loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total).to_f.round(2).to_s.truncate(9, "") : nil), #amount overdue
                      (loan_history.days_overdue > 999 ? 999 : loan_history.days_overdue).to_s.truncate(3, ""), #days past due
                      (loan_history.status == :written_off ? actual_outstanding_principal.round(2).to_f.to_s : nil), #write off amount
                      (loan.written_off_on.nil? ? nil : loan.written_off_on.strftime("%d%m%Y").truncate(8, "")), #date written off
