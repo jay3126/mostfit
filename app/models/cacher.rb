@@ -127,7 +127,6 @@ class BranchCache < Cacher
   def self.update(date = Date.today, branch_ids = nil, force = false)
     # updates the cache object for a branch
     # first create caches for the centers that do not have them
-    debugger
     t0 = Time.now; t = Time.now;
     branch_ids = Branch.all.aggregate(:id) unless branch_ids
     branch_centers = Branch.all(:id => branch_ids).centers(:creation_date.lte => date).aggregate(:id)
@@ -205,7 +204,6 @@ end
 class CenterCache < Cacher
   def self.update(hash = {})
     # creates a cache per center for branches and centers per the hash passed as argument
-    debugger
     date = hash.delete(:date) || Date.today
     hash = hash.select{|k,v| [:branch_id, :center_id].include?(k)}.to_hash
     centers_data = CenterCache.create(hash.merge(:date => date, :group_by => [:branch_id,:center_id])).deepen.values.sum
