@@ -2,28 +2,6 @@ class Accounts < Application
   # provides :xml, :yaml, :js
   before :get_context
 
-  # TODO the recursive functions need to be debugged and have to be used a display fully nested accounting selection box
-  # def hash_creation(account, hash_list)
-  #     if account.children
-  #       hash_list[account]||={}
-  #       account.children.each{|c|
-  #       hash_creation(c, hash_list[c])
-  #     }
-  #     else 
-  #       hash_list[account] = account.children
-  #     end
-  # end
-
-  # def list_creation(account, list)
-  #     if account.children
-  #       account.children.each{|c|
-  #       list_creation(c, list)
-  #     }
-  #     else 
-  #       list << account.children
-  #     end
-  # end
-
   def index
     if params[:branch_id] and not params[:branch_id].blank?
       @branch =  Branch.get(params[:branch_id])
@@ -33,7 +11,11 @@ class Accounts < Application
     end
     @accounts = Account.tree((params[:branch_id] and not params[:branch_id].blank?) ? params[:branch_id].to_i : nil )
     if params[:account_type_id] and (not params[:account_type_id].blank?)
-      @accounts = @accounts.delete(AccountType.get(params[:account_type_id])).to_hash
+      # bizarre result from to_hash compels me to take the scenic route - svs
+      at  = AccountType.get(params[:account_type_id])
+      na = {}
+      na[at] = @accounts[at]
+      @accounts = na
     end
     template = request.xhr? ? 'accounts/select' : 'accounts/index'
     display @accounts, template, :layout => layout?
@@ -146,7 +128,7 @@ class Accounts < Application
     @account = Account.get(params[:account_id])
     @from_date = (@accounting_period ? @accounting_period.begin_date : @account.account_earliest_date - 1)
     @to_date =  (@accounting_period ? @accounting_period.end_date : Date.today)
-    @posting_hash = Posting.all(:account => @account, "journal.date.lte" => @to_date, "journal.date.gte" => @from_date).paginate(:page => params[:page], :per_page => 20)
+    @posting_hash = Posting.all(:account => @account, "journal.date.lte" => @to_date, "journal.date.gte" => @from_date)
     partial :book, :layout => layout?
   end
 

@@ -1,7 +1,14 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+<<<<<<< HEAD
   resources :expense_vouchers
   resources :expense_heads
+=======
+
+  resources :holiday_calendars
+  resources :cachers, :id => %r(\d+)
+
+>>>>>>> takeover
   resources :api_accesses
   resources :monthly_targets
   resources :account_balances
@@ -135,6 +142,10 @@ Merb::Router.prepare do
   match('/documents/:action(/:id)').to(:controller => "documents").name(:documents_action_link)
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
   match('/rules/get').to(:controller => 'rules', :action => 'get') 
+
+  #cachers
+  match('/cachers/:action').to(:controller => 'cachers').name(:caches)
+
   #API Route
   match('/api/v1') do
     match('/browse.:format').to(:controller => 'browse', :action => 'index')
@@ -146,6 +157,10 @@ Merb::Router.prepare do
     match('/regions/:id.:format').to(:controller => 'regions', :action =>'show')
     match('/areas.:format').to(:controller => 'areas', :action =>'index')
     match('/areas/:id.:format').to(:controller => 'areas', :action =>'show')
+    match('/transaction_logs.:format').to(:controller => 'transaction_logs', :action =>'index')
+    match('/transaction_logs/:id.:format').to(:controller => 'transaction_logs', :action =>'show')
+    match('/model_event_logs.:format').to(:controller => 'model_event_logs', :action =>'index')
+    match('/model_event_logs/:id.:format').to(:controller => 'model_event_logs', :action =>'show')
     match('/branches') do
       match('.:format').to(:controller => 'branches', :action =>'index')
       match('/:id.:format').to(:controller => 'branches', :action =>'show')

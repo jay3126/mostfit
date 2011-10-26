@@ -42,7 +42,22 @@ class Account
   validates_is_unique :name, :scope => :branch
   validates_is_unique :gl_code, :scope => :branch
   validates_is_number :opening_balance
-  
+
+  # the following is forced upon us as a result of the current design where the account type is a master table
+  # Danger, Will Robinson! This will break if anyone edits the master table for account_types
+  ACCOUNT_TYPES = [:none, ASSETS, EXPENSES, INCOMES, LIABILITIES ]
+
+  def get_account_type
+    ACCOUNT_TYPES[self.account_type_id]
+  end
+
+  def get_default_balance_type
+    type = get_account_type
+    return DEBIT_BALANCE unless type
+    return DEBIT_BALANCE if type == :none
+    DEFAULT_TO_CREDIT_BALANCE.include?(type) ? CREDIT_BALANCE : DEBIT_BALANCE
+  end
+
   # check if it is a cash account
   def is_cash_account?
     @account_category ? @account_category.eql?('Cash') : false
@@ -52,10 +67,6 @@ class Account
   def is_bank_account?
     @account_category ? @account_category.eql?('Bank') : false
   end
-
-
-        
-      
 
   def opening_and_closing_balances_as_of(for_date = Date.today)
     return [nil, nil] if for_date > Date.today
@@ -113,7 +124,7 @@ class Account
     
     return nil if (datum_balance.nil? && balance_from_postings.nil?)
     datum_balance ||= 0.0; balance_from_postings ||= 0.0
-    return datum_balance + balance_from_postings
+    return datum_balance.to_f + balance_from_postings.to_f
   end
 
   def balance_as_of_now
@@ -172,7 +183,7 @@ class Account
     data = {}
     Account.all(:order => [:account_type_id.asc], :parent_id => nil).group_by{|account| account.account_type}.each{|account_type, accounts|
       accounts.each{|account| 
-        account.branch_edge = (account.branch_id == branch_id)
+        account.branch_edge = (account.branch_id == branch_id || account.branch_id == nil)
       }
       # recurse the tree: climb
       data[account_type] = climb(accounts, branch_id)
@@ -184,10 +195,53 @@ class Account
     data
   end
 
+  def self.put_tree(accounts)
+      rv = ""
+      if accounts
+        accounts.sort_by{|account_type, accounts| account_type.name}.each do |account_type, as|
+          if as
+            puts "------------------------------------ #{account_type.name}------------------------------"
+            as.each do |account|
+              rv += show_accounts(account, 0)
+            end
+          end
+        end
+      end
+      return rv
+  end
+
+  def self.show_accounts(accounts, depth)
+    if accounts.is_a?(Array)
+      return if accounts.length == 0
+      first_account, rest_accounts = accounts[0], accounts[1..-1]||[]
+      rv = ((first_account.is_a?(Account) ? output_li(first_account, depth) : show_accounts(first_account, depth)) + rest_accounts.map{|account|
+              if account.is_a?(Account)
+                output_li(account, depth)
+              elsif account.is_a?(Array) and account.length == 1 and account.first.is_a?(Account)
+                output_li(account.first, depth)
+              elsif account.is_a?(Array) and account.length > 0
+                show_accounts(account, depth + 1)
+              end
+            }.join)
+    else
+      rv = output_li(accounts, depth)
+    end
+    return rv
+  end
+
+  def self.output_li(account, depth)
+    # debugger if account.id == 32
+    puts "#{account.id} : #{account.name} : #{account.branch_id}"
+    prefix = (0..(depth*4)).map{|d| "-"}.join
+    return (account.branch_edge ? "#{prefix}#{account.id} : #{account.name}  Branch: #{account.branch.name if account.branch} Parent: #{account.parent_id} #{Account.get(account.parent_id).name if account.parent_id}\n" : "(#{account.branch_id} #{account.name})\n")
+  end
+
   private
   def self.climb(accounts, branch_id)
     # mark branch edges
-    accounts.each{|account| account.branch_edge = (account.branch_id == branch_id)}
+    accounts.each{|account| 
+      account.branch_edge = (account.branch_id == branch_id || account.branch_id == nil)
+    }
     #make tree
     accounts.map{|account|
       account.children.length>0 ? [account, climb(account.children, branch_id)] : [account]

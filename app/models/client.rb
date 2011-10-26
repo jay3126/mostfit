@@ -25,6 +25,7 @@ class Client
   property :father_is_alive, Enum.send('[]', *['', 'yes', 'no']), :default => '', :nullable => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true 
   property :date_of_birth,   Date,   :index => true, :lazy => true
+  property :spouse_date_of_birth, Date, :index => true, :lazy => true
   property :address,         Text, :lazy => true
   property :address_pin,     String, :length => 10, :lazy => true
   property :phone_number,    String, :length => 20, :lazy => true
@@ -243,6 +244,12 @@ class Client
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500
+
+  belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false
+  property   :parent_org_guid, String, :nullable => true
+  
+  belongs_to :domain, :parent_key => [:domain_guid], :child_key => [:parent_domain_guid], :required => false
+  property   :parent_domain_guid, String, :nullable => true
 
   has n, :loans
   has n, :payments

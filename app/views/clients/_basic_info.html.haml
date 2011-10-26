@@ -113,12 +113,12 @@
     %td
       = text_field :spouse_name, :size => 40
   %tr
-    %td 
-      Spouse Date of Birth:
+   %th
+     Spouse Date of Birth:
     %td
       = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
-    %td
+   %th
       Father's name:
     %td
       = text_field :fathers_name, :size => 40
@@ -128,10 +128,10 @@
     %td{ :colspan => '2' }
       &nbsp;
   %tr
+   %th
+     Address:
     %td
-      Address:
-    %td
-      ~ text_area :address, :rows => 6, :cols => 38
+      = text_area :address, :rows => 6, :cols => 38
       &nbsp;&nbsp;&nbsp;&nbsp;
       Village: &nbsp;
       = select :village_id, :collection => Village.all, :value_method => :id, :text_method => :name, :prompt => "---"

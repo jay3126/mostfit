@@ -22,6 +22,13 @@ class Branch
   has n, :accounts
   has n, :api_accesses
 
+  belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false
+  
+  property   :parent_org_guid, String, :nullable => true
+  
+  belongs_to :domain, :parent_key => [:domain_guid], :child_key => [:parent_domain_guid], :required => false
+  property   :parent_domain_guid, String, :nullable => true
+
   validates_is_unique   :code
   validates_length      :code, :min => 1, :max => 10
 
@@ -95,6 +102,14 @@ class Branch
     Branch.all(:id => branches)
   end
   
+  def holidays
+    # go up the chain and find the first calendar that applies.
+    hc = HolidayCalendar.all(:branch_id => id)
+    hc = HolidayCalendar.all(:area_id => area_id) if hc.blank?
+    hc = HolidayCalendar.all(:region_id => area.region_id) if hc.blank?
+    hc.holidays_fors.holidays
+  end
+
   private
   def manager_is_an_active_staff_member?
     return true if manager and manager.active
@@ -109,6 +124,7 @@ class Branch
     }
   end
   
+
   def <=> (other)
     @name <=> other.name
   end

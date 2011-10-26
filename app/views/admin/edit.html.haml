@@ -113,7 +113,7 @@
           %td
             Default repayment style
           %td
-            = select :default_repayment_style, :collection => [[NORMAL_REPAYMENT_STYLE,"fees=>int=>prin"], [PRORATA_REPAYMENT_STYLE,"pro rata"]]
+            = select :default_repayment_style, :collection => [[NORMAL_REPAYMENT_STYLE,"fees=>int=>prin"], [PRORATA_REPAYMENT_STYLE,"pro rata"], [:sequential, "sequential"]]
         %tr
           %td
             Allow choice of repayment style in weeksheets?
@@ -129,6 +129,16 @@
             Do accounting ?
           %td
             = check_box :accounting_enabled
+        %tr
+          %td
+            Allow Transaction Logging ?
+          %td
+            = check_box :transaction_logging_enabled
+        %tr
+          %td
+            Allow Event Model Logging ?
+          %td
+            = check_box :event_model_logging_enabled
         %tr
           %td
             Defer loan history re-generation ?

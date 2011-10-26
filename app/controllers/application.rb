@@ -77,6 +77,7 @@ class Application < Merb::Controller
   end
 
   def delete
+    debugger
     raise NotPrivileged unless session.user.admin?
     raise NotFound      unless params[:model] and params[:id]
     model    = Kernel.const_get(params[:model].camel_case.singularize)
@@ -101,7 +102,7 @@ class Application < Merb::Controller
       # if flag is still set to true delete the object
     if flag == true and obj.destroy
       # delete all the loan history
-      LoanHistory.all(:loan_id => obj.id).destroy if model  == Loan or model.superclass == Loan or model.superclass.superclass == Loan
+      LoanHistory.all(:loan_id => obj.id).destroy if obj.is_a?(Loan)
       Attendance.all(:client_id => obj.id).destroy if model == Client
       PortfolioLoan.all(:portfolio_id => obj.id).destroy if model == Portfolio
       Posting.all(:journal_id => obj.id).destroy if model == Journal
@@ -112,13 +113,15 @@ class Application < Merb::Controller
       end
       if model == Account
         redirect(params[:return], :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
+      elsif model == Journal
+        redirect("/accounts/#journal_entries", :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
       else
         return_url = params[:return].split("/")[0..-3].join("/")
         redirect(return_url, :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
       end
     else
       if model == ApplicableFee
-        obj.destroy #skip validations. they fail on the duplicate one
+        obj.destroy
         redirect(params[:return], :message => {:notice =>  "Deleted #{model} #{model.respond_to?(:name) ? model.name : ''} (id: #{id})"})
       end
 
