@@ -4,30 +4,9 @@ module Mostfit
 
     module Flat
 
-      def _pay_prorata(total, received_on, curr_bal = nil)
-        #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-        i = used = prin = int = 0.0
-        d = received_on
-        total = total.to_f
-        while used < total
-          prin += scheduled_principal_for_installment(installment_for_date(d)).round(2)
-          int  += scheduled_interest_for_installment(installment_for_date(d)).round(2)
-          used  = (prin + int)
-          d = shift_date_by_installments(d, 1)
-        end
-        interest  = total * int/(prin + int)
-        principal = total * prin/(prin + int)
-        [interest, principal]
-      end
-
-      def pay_normal
-        
-      end
-
       def actual_number_of_installments
         reducing_schedule.count
       end
-
 
       def reducing_schedule
         return @_reducing_schedule if @_reducing_schedule
@@ -81,30 +60,6 @@ module Mostfit
       def actual_number_of_installments
         reducing_schedule.count
       end
-
-      def _pay_prorata(total, received_on, curr_bal = nil)
-        i = used = prin = int = 0.0
-        d = received_on
-        total = total.to_f
-        pmnt = equated_payment
-        d = received_on
-        curr_bal ||= actual_outstanding_principal_on(d)
-        while (total - used) >= 0.01
-          i_pmt = interest_calculation(curr_bal)
-          int += i_pmt
-          p_pmt = pmnt - i_pmt
-          prin += p_pmt
-          curr_bal -= p_pmt
-          used  = (prin + int)
-          d = shift_date_by_installments(d, 1)
-        end
-        interest  = total * int/(prin + int)
-        principal = total * prin/(prin + int)
-        [interest, principal]
-      end
-
-        
-        
 
       def reducing_schedule
         return @_reducing_schedule if @_reducing_schedule
@@ -160,15 +115,6 @@ module Mostfit
         scheduled_interest_for_installment(1) * (1 - (scheduled_first_payment_date - date) / (scheduled_first_payment_date - disbursal_date||scheduled_disbursal_date))
       end
       
-      def _pay_prorata(total, received_on, cur_bal = 0)
-        #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-        int  = scheduled_interest_up_to(received_on)
-        int -= interest_received_up_to(received_on)
-        prin = total - int
-        [int, prin]
-      end
-
-  
       private
       def set_installments_to_1
         number_of_installments = 1
@@ -180,15 +126,7 @@ module Mostfit
       def self.display_name
         "Single shot principal with periodic interest (Bullet Loan With Periodic Interest)"
       end
-  
-      def _pay_prorata(total, received_on, curbal = 0)
-        #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-        int  = scheduled_interest_up_to(received_on)
-        int -= interest_received_up_to(received_on)
-        prin = total - int
-        [int, prin]
-      end
-
+ 
 
       def scheduled_interest_for_installment(number)
         raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
@@ -237,28 +175,6 @@ module Mostfit
     end
 
     module CustomPrincipalAndInterest
-      def _pay_prorata(total, received_on, curr_bal = nil)
-        #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-        i = used = prin = int = 0.0
-        d = received_on
-        total = total.to_f
-        prin_due = info(d)[:principal_due]
-        int_due  = info(d)[:interest_due]
-        if prin_due and int_due
-          prin = prin_due
-          int = int_due
-          used += (int + prin)
-        end
-        while used < total
-          prin += scheduled_principal_for_installment(installment_for_date(d)).round(2)
-          int  += scheduled_interest_for_installment(installment_for_date(d)).round(2)
-          used  = (prin + int)
-          d = shift_date_by_installments(d, 1)
-        end
-        interest  = total * int/(prin + int)
-        principal = total * prin/(prin + int)
-        [interest, principal]
-      end
 
       def scheduled_principal_for_installment(number)
         rs.principal_schedule(amount.to_i)[number - 1]
@@ -267,7 +183,7 @@ module Mostfit
       def scheduled_interest_for_installment(number)
         rs.interest_schedule(amount.to_i)[number - 1]
       end
-
+      
     end
       
 

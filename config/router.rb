@@ -1,14 +1,10 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
-<<<<<<< HEAD
   resources :expense_vouchers
   resources :expense_heads
-=======
-
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+)
 
->>>>>>> takeover
   resources :api_accesses
   resources :monthly_targets
   resources :account_balances

@@ -756,7 +756,7 @@ class Loan
     dd = disbursal_date || scheduled_disbursal_date
     fees_so_far = fs.has_key?(dd) ? fs[dd].values.inject(0){|a,b| a+b} : 0
 
-    @schedule[dd] = {:principal => 0, :interest => 0, :total_principal => 0, :total_interest => 0, :balance => balance, :total => 0, :fees => fees_so_far}
+    @schedule[dd] = {:principal => 0, :interest => 0, :total_principal => 0, :total_interest => 0, :balance => balance, :total => 0, :fees => fees_so_far, :installment_number => 0}
 
     repayed =  false
 
@@ -769,7 +769,8 @@ class Loan
       principal = scheduled_principal_for_installment(number)
       interest  = scheduled_interest_for_installment(number)
       next if repayed
-      repayed   = true if amount <= principal_received_up_to(date)
+      
+      # repayed   = true if amount <= principal_received_up_to(date)
       
       principal_so_far += principal
       interest_so_far  += interest
@@ -784,6 +785,7 @@ class Loan
         :total_interest             => (interest_so_far.round(2)),
         :total                      => (principal_so_far + interest_so_far).round(2),
         :balance                    => balance.round(2),
+        :installment_number         => number
       }
     end
     # we have to do the following to avoid the circular reference from total_to_be_received.
@@ -841,13 +843,11 @@ class Loan
     }.join("\n")
   end
   
-  # LOAN INFO FUNCTIONS - SCHEDULED
-
+ 
   def extend_loan
     unless @loan_extended
-      rp = self.repayment_style || self.loan_product.repayment_style
-      if rp
-        self.extend(Kernel.module_eval("Mostfit::PaymentStyles::#{rp.style.to_s}"))
+      if rs
+        self.extend(Kernel.module_eval("Mostfit::PaymentStyles::#{rs.style.to_s}"))
         @loan_extended = true
       else
         raise ArgumentError, "No repayment style specified"
@@ -855,29 +855,15 @@ class Loan
     end
   end
 
-  # these 2 methods define the pay back scheme
-  # These are ONE BASED
-  # typically reimplemented in subclasses
   def scheduled_principal_for_installment(number)
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
     extend_loan
     scheduled_principal_for_installment(number)
   end
 
-  def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
+  def scheduled_interest_for_installment(number) 
     extend_loan
     scheduled_interest_for_installment(number)
   end
-
-  # These info functions need not be overridden in derived classes.
-  # We attmept to achieve speed by caching values for the duration of a request through a payment_schedule function
-  # Later we write functions for
-  #    scheduled_[principal, interest, total]_to_be_received
-  #    scheduled_[principal, interest, total]_up_to(date)
-  #    scheduled_[principal, interest, total]_on(date)
 
   def total_principal_to_be_received; payment_schedule.map{|k,v| v[:principal]}.reduce(:+); end
   def total_interest_to_be_received; payment_schedule.map{|k,v| v[:interest]}.reduce(:+); end
@@ -1209,11 +1195,11 @@ class Loan
     args = args.merge(arg) if arg.is_a? Hash
     width = args[:width]; padding = args[:padding]; fields = args[:fields]
 
-    print_order = {:basic => {:titles => {:date => :date, :s_total => :scheduled_outstanding_total, :s_bal => :scheduled_outstanding_principal,
-          :a_total => :actual_outstanding_total, :a_bal => :actual_outstanding_principal,
+    print_order = {:basic => {:titles => {:date => :date, :s_bal => :scheduled_outstanding_principal, :a_bal => :actual_outstanding_principal,
           :p_paid => :principal_paid, :p_due => :principal_due, :i_paid => :interest_paid, :i_due => :interest_due,
+          :s_prin => :scheduled_principal_due, :s_int => :scheduled_interest_due,
           :tot_p_pd => :total_principal_paid, :tot_i_pd => :total_interest_paid, :tot_p_due => :total_principal_due, :tot_i_due => :total_interest_due},
-        :title_order => [:date, :s_total, :s_bal, :a_total, :a_bal, :p_paid, :p_due, :i_paid, :i_due, :tot_p_pd, :tot_p_due, :tot_i_pd, :tot_i_due]},
+        :title_order => [:date, :s_bal, :a_bal, :p_paid, :p_due, :i_paid, :i_due, :tot_p_pd, :s_prin, :s_int, :tot_p_due, :tot_i_pd, :tot_i_due]},
       :next => {:titles => {:date => :date, :tp_due => :total_principal_due, :tp_paid => :total_principal_paid, :ti_due => :total_interest_due,
           :ti_paid => :total_interest_paid, :adv_p => :advance_principal_paid, :adv_i => :advance_interest_paid, :def_p => :principal_in_default, 
           :def_i => :interest_in_default, :b => :branch_id, :c => :center_id, :k => :composite_key},
