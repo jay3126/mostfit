@@ -1,4 +1,7 @@
 # small monkey patch, real patch is submitted to extlib/merb/dm, hoping for inclusion soon
+
+
+
 class NilClass
   def to_currency
     "-"
@@ -7,6 +10,7 @@ class NilClass
   def to_account_balance
     "-"
   end
+
 end
 
 class Date
@@ -35,7 +39,7 @@ class Date
   end
 
   def inspect
-    "<Date: #{self.to_s}>"
+    "<Date: #{self.to_s} #{self.weekday}>"
   end
 
   def weekday
@@ -56,19 +60,24 @@ class Date
   end
 
   def holiday_bump(direction = nil)
-    hols = $holidays
-    new_date = self
-    return new_date unless hols
-    while hols.keys.include?(new_date)
-      direction ||= hols[new_date].shift_meeting
-      case direction
-        when :before
-          new_date -= 1 
-        when :after
-          new_date += 1
-      end
-    end
-    return new_date
+    # this is deprecated.
+    # we no longer bump holidays. for each holiday we replace the date with the new date
+    # and so we never have to call this function.
+    # to deprecte, simple return the original date
+    return self
+    # hols = $holidays
+    # new_date = self
+    # return new_date unless hols
+    # while hols.keys.include?(new_date)
+    #   direction ||= hols[new_date].shift_meeting
+    #   case direction
+    #     when :before
+    #       new_date -= 1 
+    #     when :after
+    #       new_date += 1
+    #   end
+    # end
+    # return new_date
   end  
   
   def holidays_shifted_today
@@ -150,6 +159,28 @@ module Misfit
 end
 
 class Hash
+
+  # a function to turn {[:a, :b, :c] => 123, [:a, :b, :d] => 456} into {:a => {:b => {:c => 123, :d => 456}}}
+  # very useful when bucketing and dealing with composite_key_sum group by from LoanHistory
+  def deepen
+    result = self.class.new
+
+    each do |key, value|
+      if key.is_a? Array and key.length > 1
+        if result[key[0]]
+          result[key[0]] += {key[1..-1] => value}.deepen
+        else 
+          result[key[0]] = {key[1..-1] => value}.deepen
+        end
+      else
+        result[key.is_a?(Array) ? key[0] : key] = value
+      end
+    end
+
+    result
+  end
+
+
   #Hash diffs are easy
   def diff(other)
     keys = self.keys
@@ -184,7 +215,9 @@ class Hash
     rhash = {}
     (keys + other.keys).uniq.each do |k|
       if has_key?(k) and other.has_key?(k)
-        rhash[k] = self[k] + other[k]
+        if self[k].respond_to?(:+) and other[k].respond_to?(:+)
+          rhash[k] = self[k] + other[k] rescue self[k]
+        end
       elsif other.has_key?(k)
         rhash[k] = other[k]
       elsif has_key?(k)
@@ -193,6 +226,8 @@ class Hash
     end
     rhash
   end
+
+
 
 end
 
@@ -230,6 +265,13 @@ class Float
   def round(n=0)
     (self * (10.0 ** n)).round_orig * (10.0 ** (-n))
   end
+  
+  def round_to_nearest(i = nil, style = :round)
+    return self if i.nil?
+    return self unless self.respond_to?(style)
+    (self / i).send(style) * i
+  end
+
 end
 
 class Array
@@ -243,6 +285,11 @@ class Array
        }]
     }.sort_by{|x| x[0]}
   end
+
+  def sum
+    self.reduce(:+)
+  end
+  
 end
 
 module ExcelFormula
@@ -272,5 +319,56 @@ module DmPagination
       @context.params.delete(:action) if @context.params[:action] == 'index'
       @context.url(@context.params.merge(params).reject{|k,v| k=="_message"})
     end
+  end
+end
+
+
+def get_bulk_insert_sql(table_name, data)
+  t = Time.now
+  keys = data.first.keys
+  sql = "INSERT INTO #{table_name}(#{keys.join(',')} )
+              VALUES "
+  values = []
+  data.each do |row|
+    value = keys.map do |k| 
+      v = row[k]
+      if v.class == Date
+        "'#{v.strftime('%Y-%m-%d')}'"
+      elsif v.class == DateTime
+        "'#{v.strftime('%Y-%m-%d %H:%M:%S')}'"
+      elsif row[k].class == String
+        "'#{v}'"
+      else
+        v
+      end
+    end
+    values << "(#{value.join(',')})
+              "
+  end
+  sql += values.join(",") + ";"
+  Merb.logger.info "sql statement crafted in #{Time.now - t}"
+  sql
+end
+
+class BigDecimal
+
+  def inspect
+    self.to_f
+  end
+
+  def round_to_nearest(i = nil, style = :round)
+    return self if i.nil?
+    return self unless self.respond_to?(style)
+    (self / i).send(style) * i
+  end
+
+end
+
+
+class Nothing
+  # instead of saying i.e. (Organization.get_organization(self.received_on).org_guid if Organization.get_organization(self.received_on) or "0000-0000" you can now say
+  # (Organization.get_organization(self.received_on) || Nothing).org_guid || "0000-0000"
+  def self.method_missing(method_name, *args)
+    nil
   end
 end

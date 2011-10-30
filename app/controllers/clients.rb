@@ -28,20 +28,32 @@ class Clients < Application
   end
 
   def new
-    only_provides :html
-    @client = Client.new
-    display @client
+    if Client.descendants.count == 1
+      only_provides :html
+      @client = Client.new
+      display @client
+    else
+      if params[:client_type]
+        @client = Kernel.const_get(params[:client_type].camel_case).new
+        display @client
+      else
+        render
+      end
+    end
   end
 
   def create(client)
-    @client = Client.new(client)
+    model_name = (params[:client_type])
+    model = Kernel.const_get(model_name)
+    client = params[:client].merge(params[model_name.snake_case])
+    @client = model.new(client)
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
     if @client.save
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display @client
       else
-        redirect(params[:return]||resource(@branch, @center, :clients), :message => {:notice => "Client '#{@client.name}' successfully created"})
+        redirect(params[:return]||resource(@branch, @center, :clients), :message => {:notice => "Client '#{@client.name}' (Id:#{@client.id}) successfully created"})
       end
     else
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
@@ -57,13 +69,14 @@ class Clients < Application
     @client = Client.get(id)
     raise NotFound unless @client
     disallow_updation_of_verified_clients
-    display @client
+    display @client, :template => "clients/edit"
   end
 
   def update(id, client)
     @client = Client.get(id)
     raise NotFound unless @client
     disallow_updation_of_verified_clients
+    client = params[:client].merge(params[@client.class.to_s.snake_case])
     @client.update_attributes(client)      
     if @client.errors.blank?
       if params[:tags]
@@ -87,9 +100,9 @@ class Clients < Application
         display @client
       else
         if @branch and @center
-          redirect(params[:return]||resource(@branch, @center, @client), :message => {:notice => "Client '#{@client.name}' has been edited"})
+          redirect(params[:return]||resource(@branch, @center, @client), :message => {:notice => "Client '#{@client.name}' (Id:#{@client.id}) has been edited"})
         else
-          redirect(resource(@client, :edit), :message => {:notice => "Client '#{@client.name}' has been edited"})
+          redirect(resource(@client, :edit), :message => {:notice => "Client '#{@client.name}' (Id:#{@client.id}) has been edited"})
         end
       end
     else
@@ -110,7 +123,7 @@ class Clients < Application
     raise NotFound unless @client
     disallow_updation_of_verified_clients
     if @client.destroy
-      redirect resource(@branch, @center, :clients), :message => {:notice => "Client '#{@client.name}' has been deleted"}
+      redirect resource(@branch, @center, :clients), :message => {:notice => "Client '#{@client.name}' (Id:#{@client.id}) has been deleted"}
     else
       raise InternalServerError
     end
@@ -162,3 +175,16 @@ class Clients < Application
   end
 
 end # Clients
+
+# This is how you massage params to fit the needs of various client types, by adding a before hook as below
+
+# class JlgClients < Clients
+
+#   before :do_params, :only => [:create, :update]
+
+#   def do_params
+#     params[:jlg_client][:member_details] = Marshal.dump(params[:jlg_client][:member_details])
+#     params[:jlg_client][:expenses] = Marshal.dump(params[:jlg_client][:expenses])
+#   end
+
+# end

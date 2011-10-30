@@ -6,8 +6,17 @@ class Browse < Application
   Line = Struct.new(:ip, :date_time, :method, :model, :url, :status, :response_time)
   
   def index
-    display @template
+    render
   end
+
+  def today
+    @date = params[:date] ? Date.parse(params[:date]) : Date.today
+    @caches = BranchCache.all(:date => @date)
+    @branch_data = @caches.map{|c| [c.model_id, c]}.to_hash
+    @branch_names = Branch.all.aggregate(:name, :id).to_hash
+    display [@branch_data, @branch_names], @template
+  end
+
 
   def branches
     redirect resource(:branches)
@@ -29,7 +38,7 @@ class Browse < Application
 
   def centers_paying_today
     @date = params[:date] ? Date.parse(params[:date]) : Date.today
-    hash  = {:date => @date}
+    hash  = {:date => @date, :status.not => [:rejected]}
     hash += {:branch_id => params[:branch_id]} if params[:branch_id] and not params[:branch_id].blank?
     center_ids = LoanHistory.all(hash).aggregate(:center_id)
     loans      = LoanHistory.all(hash).aggregate(:loan_id, :center_id).to_hash

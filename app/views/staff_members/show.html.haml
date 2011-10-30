@@ -8,7 +8,7 @@
   %li
     = link_to 'Centers Managed >>', url(:show_staff_member_centers, @staff_member.id), :class => "bold"
   %li
-    = link_to 'edit', resource(@staff_member, :edit)
+    = link_to 'edit', resource(@staff_member, :edit), :class => 'edit'
 %p
   = link_to '<< back', resource(:staff_members), :class => "button"
 
@@ -26,9 +26,9 @@
         %h2
           ="#{type.to_s.capitalize} managed"
         %ul
-          -@manages[type].each do |obj|
+          - @manages[type].each do |obj|
             %li
-              =link_to(obj.name, resource(obj))
+              = link_to(obj.name, resource(obj))
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@staff_member.id}?for=staff_member&type=created"}
   %div.tab

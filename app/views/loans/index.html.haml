@@ -12,8 +12,8 @@
       - elsif not @client.active
         %h3.blocked
           This client is not active anymore. 
-          -if @client.inactive_reason=='death_of_client' or @client.inactive_reason=='death_of_spouse'
-            =link_to('Click here for claim processing', resource(@client, :claims))
+          - if @client.inactive_reason=='death_of_client' or @client.inactive_reason=='death_of_spouse'
+            = link_to('Click here for claim processing', resource(@client, :claims))
       - else
         = link_to 'add a new loan', resource(@branch, @center, @client, :loans, :new), :class => "add"
 
@@ -33,6 +33,19 @@
           == (id: #{@client.id}, ref: #{@client.reference})
       %tr
         %td
+          Gender
+        %td
+          = @client.gender.capitalize if @client.gender
+      %tr
+        %td
+          Date Joined
+        %td
+          = @client.date_joined
+          (
+          = @client.date_joined.strftime('%A')
+          )
+      %tr.odd
+        %td
           Date of Birth
         %td
           - if @client.date_of_birth
@@ -44,10 +57,22 @@
         %td Spouse name
         %td
           = @client.spouse_name
+      %tr
+        %td Spouse Date of Birth
+        %td
+          - if @client.spouse_date_of_birth
+            = @client.spouse_date_of_birth
+            ( Age :
+            = Time.now.year - @client.spouse_date_of_birth.year
+            yrs.)
       %tr.odd
         %td Manager
         %td= link_to @center.manager.name, resource(@center.manager)
       %tr
+        %td Occupation
+        %td
+          = @client.occupation.name if @client.occupation
+      %tr.odd
         %td At center
         %td
           = link_to @client.center.name, resource(@client.center)
@@ -56,7 +81,7 @@
           %span.greytext
             center managed by:
             = link_to @center.branch.manager.name, resource(@center.manager)
-      %tr.odd
+      %tr
         %td
           Group
         %td
@@ -66,7 +91,7 @@
             Not associated with a group yet (
             =link_to('Edit', resource(@branch, @center, @client, :edit))
             to change)
-      %tr
+      %tr.odd
         %td
           Fees applicable
         %td

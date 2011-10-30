@@ -42,7 +42,22 @@ class Account
   validates_is_unique :name, :scope => :branch
   validates_is_unique :gl_code, :scope => :branch
   validates_is_number :opening_balance
-  
+
+  # the following is forced upon us as a result of the current design where the account type is a master table
+  # Danger, Will Robinson! This will break if anyone edits the master table for account_types
+  ACCOUNT_TYPES = [:none, ASSETS, EXPENSES, INCOMES, LIABILITIES ]
+
+  def get_account_type
+    ACCOUNT_TYPES[self.account_type_id]
+  end
+
+  def get_default_balance_type
+    type = get_account_type
+    return DEBIT_BALANCE unless type
+    return DEBIT_BALANCE if type == :none
+    DEFAULT_TO_CREDIT_BALANCE.include?(type) ? CREDIT_BALANCE : DEBIT_BALANCE
+  end
+
   # check if it is a cash account
   def is_cash_account?
     @account_category ? @account_category.eql?('Cash') : false
@@ -109,7 +124,7 @@ class Account
     
     return nil if (datum_balance.nil? && balance_from_postings.nil?)
     datum_balance ||= 0.0; balance_from_postings ||= 0.0
-    return datum_balance + balance_from_postings
+    return datum_balance.to_f + balance_from_postings.to_f
   end
 
   def balance_as_of_now

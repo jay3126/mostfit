@@ -7,7 +7,7 @@
   - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time) or (@loan.loan_history.last.total_principal_due == 0)
     .error
       History of this loan is not updated. Click
-      =link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
+      = link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
       to repair
   %h1
     Loan
@@ -29,55 +29,70 @@
       %td
         on
         = @loan.applied_on
+        (
+        = @loan.applied_on.strftime('%A')
+        )
         by
-        %b= link_to @loan.applied_by.name, resource(@loan.applied_by)
+        %b= link_to @loan.applied_by.name, resource(@loan.applied_by) if @loan.applied_by
     %tr
       %th.even{ :width => '30%', :rowspan => "2" } Sanction
       %td
-        -if @loan.approved_on
+        - if @loan.approved_on
           == <b>#{@loan.amount_sanctioned}</b> @
           %b= format("%.2f%", @loan.interest_rate*100)
-        -else
+        - else
           Not approved yet
     %tr
       %td
         - if @loan.approved_on
           on
           = @loan.approved_on
+          (
+          = @loan.approved_on.strftime('%A')
+          )
           by
-          %b= link_to @loan.approved_by.name, resource(@loan.approved_by)
+          %b= link_to @loan.approved_by.name, resource(@loan.approved_by) if @loan.approved_by
         - else
           %i approval is pending
 
     %tr
       %th.odd{ :width => '30%', :rowspan => "2" } Disbursal
       %td
-        -if @loan.disbursal_date
+        - if @loan.disbursal_date
           == <b>#{(@loan.amount).to_currency}</b> @
           %b= format("%.2f%", @loan.interest_rate*100)
-        -else
+        - else
           Not disbursed yet
     %tr
       %td
         - if @loan.disbursal_date
           on
           = @loan.disbursal_date
+          (
+          = @loan.disbursal_date.strftime('%A')
+          )
           by
-          %b= link_to @loan.disbursed_by.name, resource(@loan.disbursed_by)
+          %b= link_to @loan.disbursed_by.name, resource(@loan.disbursed_by) if @loan.disbursed_by
         - else
           to be disbursed on
           = @loan.scheduled_disbursal_date
+          (
+          = @loan.scheduled_disbursal_date.strftime('%A')
+          )
         - if @loan.class.to_s.match(/^TakeOver/)
           %br
           %i 
             original loan disbursed on
             = @loan.original_disbursal_date
+            (
+            = @loan.original_disbursal_date.strftime('%A')
+            )
     %tr
       %th.even Product
       %td
-        = @loan.loan_product.name
+        = link_to @loan.loan_product.name, resource(@loan.loan_product)
         %br
-        = @loan.discriminator.display_name
+        = @loan.loan_product.repayment_style.name if @loan.loan_product.repayment_style
     %tr
       %th.odd Installments
       %td
@@ -89,10 +104,16 @@
       %td
         - if @loan.payments(:type => [:principal, :interest]).empty?
           = @loan.scheduled_first_payment_date
+          (
+          = @loan.scheduled_first_payment_date.strftime('%A')
+          )
           %br/
           %span.greytext (scheduled, no payments yet)
         - else
           = actual_first_payment = @loan.payments(:type => [:principal, :interest]).min(:received_on)
+          (
+          = actual_first_payment.strftime('%A')
+          )
           %br/
           %span.greytext
             - if actual_first_payment == @loan.scheduled_first_payment_date
@@ -106,6 +127,9 @@
           %i 
             Original first payment date
             = @loan.original_first_payment_date
+            (
+            = @loan.original_first_payment_date.strftime('%A')
+            )
     %tr
       %th.odd
         Fees
@@ -114,6 +138,9 @@
           - @loan.applicable_fees.each do |f|
             %li
               = f.description
+              (
+              = f.applicable_on.strftime('%A')
+              )
               - fpaid = @loan.payments(:fee_id => f.fee_id).reduce(0){|s,p| s + p.amount}
               - if fpaid == f.amount
                 %span.green 
@@ -174,6 +201,7 @@
         - last_payment = @loan.payments.first(:order => [:received_on.desc])
         - last_payment_date = last_payment.received_on if last_payment
         - principal_so_far = interest_so_far = principal_received_so_far = interest_received_so_far = 0
+        - i = 0
         - @history.each_with_index do |lh, i|
           - principal_so_far += lh.principal_due
           - interest_so_far += lh.interest_due
@@ -188,12 +216,15 @@
                 %td{ :colspan => 6, :style => "text-align: center;" }
                   %span.greytext== today (#{Date.today})
           - first = false
-          - if lh.date <= Date.today
+          - if lh.date <= Date.today and lh.date >= (@loan.c_actual_first_payment_date || @loan.scheduled_first_payment_date)
             - default =  lh.actual_outstanding_total - lh.scheduled_outstanding_total
-            - default_class = default ? (default > 0 ? 'due' : (default < 0 ? 'overpaid' : 'paid')) : ""
+          - else
+            - default = 0
+          - default_class = default ? (default > 0 ? 'due' : (default < 0 ? 'overpaid' : 'paid')) : ""
+          
           %tr{ :class => cycle('odd','even') }
             %td{:class => default_class}
-              = [i - 1,0].max
+              = [i,0].max
             %td
               = lh.date
             %td
@@ -225,7 +256,12 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      = partial "payments/list", :pmts => @payments
+      - if @payments.blank?
+        %p
+          %i No repayments have been made so far.
+          = link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"
+      - else
+        = partial "payments/list", {:pmts => @payments, :context => :received}
     - if @loan.insurance_policy
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(@loan.insurance_policy)}
@@ -241,5 +277,6 @@
         %h3 No deleted payments
       - else
         = partial "payments/deleted_payments", {:pmts => deleted_payments, :context => :deleted}
+
 
   

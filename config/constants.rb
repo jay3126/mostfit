@@ -1,5 +1,6 @@
 DEFAULT_JOURNAL_TYPES = ['Payment','Receipt','Journal']
 
+ASSETS = 'Assets'
 CASH = 'Cash'; BANK_DEPOSITS = 'Bank Deposits'; SECURITIES = 'Securities'
 LAND = 'Land'; MACHINERY = 'Machinery'
 LOANS_MADE = 'Loans made'; BORROWINGS = 'Borrowings'; TAXES_PAYABLE = "Tax payable"; OTHER_LIABILITIES = "Other liabilities"
@@ -17,6 +18,11 @@ SALARIES = 'Salaries'; RENT_AND_TAXES = 'Rent, Rates, and Taxes'; ADMIN_EXPENSES
 EXPENSES = [SALARIES, RENT_AND_TAXES, ADMIN_EXPENSES, TRAVEL_EXPENSES]
 INCOME_HEAD_NOT_CHOSEN = 'Choose income or expense head'
 INCOME_HEADS = [INCOMES, EXPENSES].flatten
+
+DEBIT_BALANCE = "Dr."
+CREDIT_BALANCE = "Cr."
+DEFAULT_TO_DEBIT_BALANCE = [ASSETS, EXPENSES]
+DEFAULT_TO_CREDIT_BALANCE = [LIABILITIES, INCOMES]
 
 INSTALLMENT_FREQUENCIES = [:daily, :weekly, :biweekly, :monthly, :quadweekly]
 WEEKDAYS = [:monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
@@ -85,9 +91,10 @@ REPORT_ACCESS_HASH = {
   "LoanSizePerManagerReport" => ["mis_manager", "admin", "read_only"], 
   "ClientOccupationReport" => ["mis_manager", "admin", "read_only"]
 }
+PAYMENT_TYPES = [:principal, :interest, :fees]
 NORMAL_REPAYMENT_STYLE = :normal
 PRORATA_REPAYMENT_STYLE = :prorata
-REPAYMENT_STYLES = [NORMAL_REPAYMENT_STYLE, PRORATA_REPAYMENT_STYLE]
+REPAYMENT_STYLES = [NORMAL_REPAYMENT_STYLE, PRORATA_REPAYMENT_STYLE, :sequential]
 API_SUPPORT_FORMAT = ["xml"]
 LOAN_AGEING_BUCKETS = [0, 30, 60, 90, 180, 365, :older]
 LOSS_PROVISION_PERCENTAGES_BY_BUCKET = [0, 10, 25, 50, 75, 90, 100]
@@ -106,4 +113,16 @@ MEDIUM_DATE_PATTERN = "%b %d, %Y"
 LONG_DATE_PATTERN = "%B %d, %Y"
 FULL_DATE_PATTERN = "%A, %B %d, %Y"
 FORMAT_REG_EXP = /[- . \/]/
+
+# Bookmark Constants
+Types   = [:custom_reports, :system]
+Methods = [:get, :post, :put, :delete]
+
+# Audit
+AUDITABLES = ["Branch","Center","Client","ClientGroup","Loan","Payment","StaffMember"]
+
+# Targets
+TargetOf    = [:center_creation, :group_creation, :client_registration, :loan_disbursement_by_amount, :loan_disbursements_by_number]
+TargetType  = [:relative, :absolute]
+
 

@@ -1,5 +1,9 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+
+  resources :holiday_calendars
+  resources :cachers, :id => %r(\d+)
+
   resources :api_accesses
   resources :monthly_targets
   resources :account_balances
@@ -77,7 +81,7 @@ Merb::Router.prepare do
     resources :funding_lines
   end
   resources :center_meeting_days
-
+  resources :repayment_styles
   match('/dashboard/centers/:report_type/:branch_id').to(:controller => 'dashboard', :action => "centers", :branch_id => ":branch_id", :report_type => ":report_type").name(:dashboard_centers)
   match('/design').to(:controller => 'loan_products', :action => 'design').name(:design_loan_product)
   match('/centers/:id/groups(/:group_id).:format').to(:controller => 'centers', :action => 'groups')
@@ -129,6 +133,10 @@ Merb::Router.prepare do
   match('/documents/:action(/:id)').to(:controller => "documents").name(:documents_action_link)
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
   match('/rules/get').to(:controller => 'rules', :action => 'get') 
+
+  #cachers
+  match('/cachers/:action').to(:controller => 'cachers').name(:caches)
+
   #API Route
   match('/api/v1') do
     match('/browse.:format').to(:controller => 'browse', :action => 'index')

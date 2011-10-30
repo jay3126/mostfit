@@ -97,7 +97,7 @@ class StaffMembers < Application
     raise NotFound unless @staff_member
     @date = params[:date] ? parse_date(params[:date]): Date.today
     @date = @date.holiday_bump
-    center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
+    center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:approved]).map{|x| x.center_id}.uniq
     @centers   = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
     if params[:format] == "pdf"
       file = @staff_member.generate_disbursement_pdf(@date)
@@ -137,7 +137,7 @@ class StaffMembers < Application
   def create(staff_member)
     @staff_member = StaffMember.new(staff_member)
     if @staff_member.save
-      redirect resource(:staff_members), :message => {:notice => "StaffMember was successfully created"}
+      redirect resource(:staff_members), :message => {:notice => "StaffMember '#{@staff_member.name}' (Id:#{@staff_member.id}) was successfully created"}
     else
       message[:error] = "StaffMember failed to be created"
       render :new
