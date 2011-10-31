@@ -378,7 +378,7 @@ class Report
 
 
   def add_to_result(data, obj, column, value)
-    data[obj] ||= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    data[obj] ||= [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     data[obj][column] ||= 0
     data[obj][column] += value
   end
