@@ -197,6 +197,7 @@
             %th actual repayments
             %th difference
         %tbody
+        - ins = 1
         - first, passed = true, false  # these are for printing the "today" row
         - last_payment = @loan.payments.first(:order => [:received_on.desc])
         - last_payment_date = last_payment.received_on if last_payment
@@ -224,7 +225,11 @@
           
           %tr{ :class => cycle('odd','even') }
             %td{:class => default_class}
-              = [i,0].max
+              - if lh.date >= (@loan.c_actual_first_payment_date || @loan.scheduled_first_payment_date)
+                = ins
+                - ins += 1
+              - else
+                = 0
             %td
               = lh.date
             %td
