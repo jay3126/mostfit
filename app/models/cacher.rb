@@ -223,6 +223,7 @@ class CenterCache < Cacher
 
   def self.stalify(obj)
     # obj is either a Payment or a Loan
+    return # disabling for the moment as caches not being created properly
     t = Time.now
     cid = obj.c_center_id
     d = obj.is_a?(Payment) ? obj.received_on : obj.applied_on
