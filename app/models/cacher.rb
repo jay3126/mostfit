@@ -223,12 +223,13 @@ class CenterCache < Cacher
 
   def self.stalify(obj)
     # obj is either a Payment or a Loan
-    return # disabling for the moment as caches not being created properly
-    t = Time.now
-    cid = obj.c_center_id
-    d = obj.is_a?(Payment) ? obj.received_on : obj.applied_on
-    repository.adapter.execute("UPDATE cachers SET stale=1 WHERE center_id=#{cid} AND date >= '#{d.strftime('%Y-%m-%d')}' AND stale=0")
-    puts "STALIFIED CENTERS in #{(Time.now - t).round(2)} secs"
+    if false # disabling for the moment as caches not being created properly
+      t = Time.now
+      cid = obj.c_center_id
+      d = obj.is_a?(Payment) ? obj.received_on : obj.applied_on
+      repository.adapter.execute("UPDATE cachers SET stale=1 WHERE center_id=#{cid} AND date >= '#{d.strftime('%Y-%m-%d')}' AND stale=0")
+      puts "STALIFIED CENTERS in #{(Time.now - t).round(2)} secs"
+    end
   end
 
 end

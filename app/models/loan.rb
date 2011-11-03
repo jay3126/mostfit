@@ -200,7 +200,8 @@ class Loan
 
 
   def update_loan_cache(force = false)
-    update_non_history_attributes(force)
+    # temporarily doing this to save moral exceptions....
+    update_non_history_attributes(true)
     update_history_attributes
   end
   
@@ -1075,7 +1076,7 @@ class Loan
     Merb.logger.info "HISTORY EXEC TIME: #{(Time.now - t).round(4)} secs"
     @already_updated=true
     t = Time.now
-    #update_history_attributes
+    update_history_attributes
     #self.save!
     Merb.logger.info "LOAN CACHE UPDATE TIME: #{(Time.now - t).round(4)} secs"
   end
