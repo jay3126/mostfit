@@ -91,8 +91,8 @@ Merb::BootLoader.before_app_loads do
     :mailer_config => {
       :host   => 'smtp.gmail.com',
       :port   => '587',
-      :user   => '',
-      :pass   => '',
+      :user   => 'production@mostfit.org',
+      :pass   => 'm0stf1t123',
       :auth   => :plain,
       :tls    => true
     },
@@ -106,17 +106,6 @@ Merb::BootLoader.after_app_loads do
   # Activate SSL Support
   Net::SMTP.enable_tls(OpenSSL::SSL::VERIFY_NONE)
  
-  # Every application eventually evolves until it can send mail.
-  # Configure Merb Mailer
-  # Merb::Mailer.config = {
-  #   :host   => 'smtp.gmail.com',
-  #   :port   => '587',
-  #   :user   => 'sidleypatang@gmail.com',
-  #   :pass   => 's8s4a7m2',
-  #   :auth   => :plain,
-  #   :tls    => true
-  # }
-
   loan_types = Loan.descendants
 
   begin; $holidays = Holiday.all.map{|h| [h.date, h]}.to_hash; rescue; end
