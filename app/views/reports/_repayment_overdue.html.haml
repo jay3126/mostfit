@@ -4,6 +4,10 @@
     %th{:colspan => "2"}
       Client
     %th
+      Disbursal
+    %th
+      Scheduled 1st 
+    %th
       Installment
     %th
       Disbursed
@@ -18,6 +22,10 @@
       ID
     %th
       Name
+    %th
+      Date
+    %th
+      Payment Date
     %th
       Amount
     %th
@@ -45,9 +53,9 @@
     %th
       Total
   - center_id, branch_id = nil, nil
-  - length = 15
+  - length = 17
   - org_total = []
-  - summable_columns = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+  - summable_columns = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   - loan_products = LoanProduct.all.map{|lp| [lp.id, lp]}.to_hash
   - @data.sort_by{|branch, centers| branch.name}.each do |branch, centers|
     - branch_wise_client_count = 0   
@@ -74,8 +82,12 @@
                   - center_wise_client_count += 1
                   - branch_wise_client_count += 1
                   = client.name
+                - loan = Loan.get(row[0])
                 %td
-                  - loan = Loan.get(row[0])
+                  = loan.disbursal_date
+                %td
+                  = loan.scheduled_first_payment_date
+                %td
                   = loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1)
                 - row[1..-1].each_with_index do |d, idx|
                   %td
