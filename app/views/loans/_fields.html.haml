@@ -12,7 +12,7 @@
       %th
         Repayment Style
       %td
-        = select :repayment_style_id, :collection => RepaymentStyle.all, :value_method => :id, :text_method => :name
+        = select :repayment_style_id, :collection => RepaymentStyle.all.map{|r| [r.id.to_s, r.name]}, :selected => @loan.rs.id.to_s
   - if not take_over_loan
     %tr
       %th
