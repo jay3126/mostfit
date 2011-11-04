@@ -26,7 +26,7 @@ class RepaymentOverdue < Report
     # if a funder is selected
     funder_loan_ids = @funder.loan_ids if @funder
     hash[:id]       = funder_loan_ids if @funder
-    histories = LoanHistory.defaulted_loan_info_by(:loan, @date, hash, ["branch_id", "center_id", "client_id", "actual_outstanding_principal"])
+    histories = LoanHistory.defaulted_loan_info_by(:loan, @date, hash, ["branch_id", "center_id", "client_id", "actual_outstanding_principal", "actual_outstanding_total"])
 
     if histories and histories.length > 0
       client_ids = histories.map{|x| x.client_id}
@@ -53,8 +53,8 @@ class RepaymentOverdue < Report
           int   = payments[:interest][row.loan_id]||0
           fee   = payments[:fees][row.loan_id]||0
           total = prin + int + fee
-          data[b][c][clients[row.client_id]] << [row.loan_id, loans[row.loan_id], prin, int, fee, total,                                                 
-                                                 loans[row.loan_id] - prin,
+          data[b][c][clients[row.client_id]] << [row.loan_id, loans[row.loan_id], prin, int, fee, total,
+                                                 row.actual_outstanding_principal, (row.actual_outstanding_total - row.actual_outstanding_principal), row.actual_outstanding_total,
                                                  row.pdiff, row.tdiff-row.pdiff, 0]
         } if histories[c.id]
       }
@@ -74,9 +74,9 @@ class RepaymentOverdue < Report
       next unless center
       branch = branches[center.branch_id]
       if data[branch][center][client] and row = data[branch][center][client].find{|x| x[0] == loan_id}
-        row[9]+=amount
+        row[11]+=amount
       else
-        data[branch][center][client] = [[loan_id, loan.amount, 0, 0, 0, 0, loan.amount, 0, 0, amount]]
+        data[branch][center][client] = [[loan_id, loan.amount, 0, 0, 0, 0, loan.amount, 0, 0, 0, 0, amount]]
       end
     }
 
@@ -99,13 +99,12 @@ class RepaymentOverdue < Report
         next unless center
         branch = branches[center.branch_id]
         if data[branch][center][client] and row = data[branch][center][client].first
-          row[9]+=fee.amount
+          row[11]+=fee.amount
         else
-          data[branch][center][client] = [[0, 0, 0, 0, 0, 0, 0, 0, 0, fee.amount]]
+          data[branch][center][client] = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, fee.amount]]
         end
       }
     }
-
     return data
   end
 end
