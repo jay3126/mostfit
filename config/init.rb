@@ -1,4 +1,5 @@
 # Go to http://wiki.merbivore.com/pages/init-rb
+require 'lib/irb.rb'
 require 'yaml'
 require 'config/dependencies.rb'
 
@@ -46,9 +47,9 @@ Merb::BootLoader.before_app_loads do
   require 'lib/functions.rb'
   require 'lib/core_ext.rb'
   require 'lib/fees_container.rb'
+  require 'lib/datevector.rb'
   require 'gettext'
   require 'haml_gettext'
-
 
   #initialize i18n
   require 'i18n'
@@ -81,11 +82,41 @@ Merb::BootLoader.before_app_loads do
   end
   # load the extensions
   require 'lib/extensions.rb'
+
+  Merb::Plugins.config[:exceptions] = {
+    :email_addresses => [''],
+    :app_name        => "Mostfit",
+    :environments    => ['production'],
+    :email_from      => "",
+    :mailer_config => {
+      :host   => 'smtp.gmail.com',
+      :port   => '587',
+      :user   => '',
+      :pass   => '',
+      :auth   => :plain,
+      :tls    => true
+    },
+    :mailer_delivery_method => :net_smtp
+  }
+
 end
 
 Merb::BootLoader.after_app_loads do
   # This will get executed after your app's classes have been loaded.
-  # Load MFI account details to allow this app to sync phone numbers of staffmembers to mostfit box. If this file is not present then no such updates will happen
+  # Activate SSL Support
+  Net::SMTP.enable_tls(OpenSSL::SSL::VERIFY_NONE)
+ 
+  # Every application eventually evolves until it can send mail.
+  # Configure Merb Mailer
+  # Merb::Mailer.config = {
+  #   :host   => 'smtp.gmail.com',
+  #   :port   => '587',
+  #   :user   => 'sidleypatang@gmail.com',
+  #   :pass   => 's8s4a7m2',
+  #   :auth   => :plain,
+  #   :tls    => true
+  # }
+
   loan_types = Loan.descendants
 
   begin; $holidays = Holiday.all.map{|h| [h.date, h]}.to_hash; rescue; end
@@ -123,7 +154,6 @@ Merb::BootLoader.after_app_loads do
   Misfit::Extensions.hook
 
   Merb.add_mime_type(:pdf, :to_pdf, %w[application/pdf], "Content-Encoding" => "gzip")
-  LoanProduct.property(:loan_type, LoanProduct::Enum.send('[]', *Loan.descendants.map{|x| x.to_s}), :nullable => false, :index => true)
 
   begin
     if User.all.empty?

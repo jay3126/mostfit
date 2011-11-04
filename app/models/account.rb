@@ -105,11 +105,11 @@ class Account
 
     date_params = {"journal.date.lt" => for_date}
     date_params["journal.date.gte"] = datum if (datum && (datum < for_date))
-    balance_from_postings = postings(date_params).aggregate(:amount.sum)
+    balance_from_postings = postings(date_params).journals.postings(:account_id => self.id).aggregate(:amount.sum)
     
     return nil if (datum_balance.nil? && balance_from_postings.nil?)
     datum_balance ||= 0.0; balance_from_postings ||= 0.0
-    return datum_balance + balance_from_postings
+    return datum_balance.to_f + balance_from_postings.to_f
   end
 
   def balance_as_of_now

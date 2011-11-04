@@ -5,13 +5,13 @@ class TrialBalanceReport < Report
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.min_date
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name      = "Trial Balance"
-    @branch_id = params[:branch_id] if params and params.key?(:branch_id) and not params[:branch_id].blank?
+    @branch_id = (params and params.key?(:branch_id) and not params[:branch_id].blank?) ? params[:branch_id] : 0
   #  @page      = params[:page] ||0
     get_parameters(params, user)
   end
 
   def name
-    "Trial Balance for #{((@branch_id and not @branch_id.blank?) ? Branch.get(@branch_id).name : 'Head office')} from #{@from_date} to #{@to_date}"
+    "Trial Balance for #{((@branch_id > 0) ? Branch.get(@branch_id).name : 'Head office')} from #{@from_date} to #{@to_date}"
   end
 
   def self.name

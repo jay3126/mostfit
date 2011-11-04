@@ -5,27 +5,28 @@ class Payment
   include DataMapper::Resource
   before :valid?, :parse_dates
   before :valid?, :check_client
+  before :valid?, :add_center_and_branch
   # before :valid?, :add_loan_product_validations
   # after :valid?, :after_valid
   before :save, :put_fee
   attr_writer :total
   attr_accessor :override_create_observer  # just to be used in the form
 
-  PAYMENT_TYPES = [:principal, :interest, :fees]
-  
   property :id,                  Serial
   property :guid,                String, :default => lambda{ |obj, p| UUID.generate }
   property :amount,              Float, :nullable => false, :index => true
   property :type,                Enum.send('[]',*PAYMENT_TYPES), :index => true
   property :comment,             String, :length => 50
   property :received_on,         Date,    :nullable => false, :index => true
-  property :deleted_by_user_id,  Integer, :nullable => true, :index => true
-  property :created_at,          DateTime,:nullable => false, :default => Time.now, :index => true
+  property :deleted_by_user_id,  Integer, :nullable => true
+  property :created_at,          DateTime,:nullable => false, :index => true
   property :deleted_at,          ParanoidDateTime, :nullable => true, :index => true
   property :created_by_user_id,  Integer, :nullable => false, :index => true
   property :verified_by_user_id, Integer, :nullable => true, :index => true
   property :loan_id,             Integer, :nullable => true, :index => true
   property :client_id,           Integer, :nullable => true, :index => true
+  property :c_center_id,           Integer, :nullable => true, :index => true
+  property :c_branch_id,           Integer, :nullable => false, :index => true
   property :fee_id,              Integer, :nullable => true, :index => true
   property :desktop_id,          Integer
   property :origin,              String, :default => DEFAULT_ORIGIN
@@ -48,17 +49,23 @@ class Payment
   validates_with_method :loan_or_client_present?,  :method => :loan_or_client_present?
   validates_with_method :only_take_payments_on_disbursed_loans?, :if => Proc.new{|p| (p.type == :principal or p.type == :interest)}
   validates_with_method :created_by,  :method => :created_by_active_user?, :if => Proc.new{|p| p.deleted_at == nil}
-  validates_with_method :received_by, :method => :received_by_active_staff_member?
+  validates_with_method :received_by, :method => :received_by_active_staff_member?, :when => [:default, :reallocate]
   validates_with_method :deleted_by,  :method => :properly_deleted?
   validates_with_method :deleted_at,  :method => :properly_deleted?
   validates_with_method :not_approved, :method => :not_approved, :on => [:destroy]
   validates_with_method :received_on, :method => :not_received_in_the_future?, :unless => Proc.new{|t| Merb.env=="test"}
-  validates_with_method :received_on, :method => :not_received_in_past_upto?, :unless => Proc.new{|t| Merb.env=="test"}
+
   validates_with_method :received_on, :method => :not_received_before_loan_is_disbursed?, :if => Proc.new{|p| (p.type == :principal or p.type == :interest)}
   validates_with_method :principal,   :method => :is_positive?
   validates_with_method :verified_by_user_id, :method => :verified_cannot_be_deleted, :on => [:destroy]
   validates_with_method :verified_by_user_id, :method => :verified_cannot_be_deleted, :if => Proc.new{|p| p.deleted_at != nil and p.deleted_by!=nil}
+  # validates_with_method :is_last_payment?, :if => Proc.new{|p| p.deleted_at == nil and p.deleted_by == nil}
   
+  def add_center_and_branch
+    self.c_center_id = self.client.center.id
+    self.c_branch_id = self.client.center.branch.id
+  end
+
   def self.from_csv(row, headers, loans)
     if row[headers[:principal]]
       obj = new(:received_by => StaffMember.first(:name => row[headers[:received_by_staff]]), :loan => loans[row[headers[:loan_serial_number]]], 
@@ -226,6 +233,7 @@ class Payment
     [false, "Payments can only be created if an active user is supplied"]
   end
   def received_by_active_staff_member?
+    return true if self.send(:current_validation_context) == :reallocate
     return true if deleted_at
     return true if received_by and received_by.active
     [false, "Receiving staff member is currently not active"]
@@ -274,6 +282,12 @@ class Payment
     end
   end
 
+  def is_last_payment?
+    return true if type == :fees
+    return true unless loan.c_last_payment_received_on
+    return [false, "Payments cannot be received on a date before the last actual payment"] if received_on <= loan.c_last_payment_received_on
+    return true
+  end
 
   def put_fee
     if type==:fees and comment and not fee

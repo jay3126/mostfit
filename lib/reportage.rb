@@ -1,6 +1,25 @@
 # Reportage - the Mostfit Reporting Library
 
+class Array
+  # Find the smallest element in the array greater, than or equal to value.
+  # This assumes the array to be sorted
+  #
+  #   a = [10, 20, 30, 40, 50]
+  #   a.ceil(4)  #=> 10
+  #   a.ceil(10) #=> 10
+  #   a.ceil(12) #=> 20
+  #   a.ceil(60) #=> nil
+  def ceil(value)
+    each_cons(2) do |l, h|
+      return l if value == l
+      return h if value > l and value < h
+    end
+    return first if value < first
+  end
+end
+
 class BucketResult < Hash
+
 
   # The results from a Bucket#columns is stored as a BucketResult so that we can
   # print fancy tables and stuff
@@ -39,6 +58,16 @@ class Bucket < Hash
 
   def set_dates(dates = {})
     dates.each{|k,v| instance_variable_set("@#{k.to_s}",v)}
+  end
+
+  def group_by(group_by = nil, &blk)
+    result = self.class.new
+
+    each do |key, value|
+      result[key] = value.group_by(group_by, &blk)
+    end
+
+    result
   end
 
   def columns(cols)
@@ -142,6 +171,18 @@ end
 
 
 class LoanHistoryBucket < LoanBucket
+  
+  def composite_balances
+    return @_composite_balances if @_composite_balances
+    @_composite_balances = self.map{|bucket, ids| 
+      [bucket, LoanHistory.composite_key_sum(ids)]
+    }.to_hash
+  end
+
+  def latest_scheduled_outstanding_total
+    self.map{|bucket, ids| [bucket, composite_balances(ids)[:scheduled_outstanding_total].to_f]}.to_hash
+  end    
+  
 end
 
 
@@ -177,6 +218,7 @@ module DataMapper
       bucketed_results = LoanBucket.new
       if buckets
         buckets.map{|b| bucketed_results[b] = []}
+
         result.map do |k,v|
           bucket_found = false
           buckets.each_with_index do |b,i|

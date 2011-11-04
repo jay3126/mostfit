@@ -3,6 +3,7 @@ class Loan
   include FeesContainer
   include Identified
   include Pdf::LoanSchedule if PDF_WRITER
+  include ExcelFormula
 
   DAYS = [:none, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
 
@@ -14,13 +15,31 @@ class Loan
   before :save,    :update_loan_cache
   after  :create,  :update_cycle_number
   before :destroy, :verified_cannot_be_deleted
+  before :valid?,    :set_loan_product_parameters
+  before :save, :set_bullet_installments
+
+  def rs
+    self.repayment_style or self.loan_product.repayment_style
+  end
+
+  def set_bullet_installments
+    number_of_installments = 1 if rs.style == "BulletLoan"
+  end
+
 
   #  after  :destroy, :update_history
+
+  before :valid?, :set_amount
+  validates_with_method :original_properties_specified?, :when => Proc.new{|l| l.taken_over?}
+  validates_with_method :taken_over_properly?, :when => Proc.new{|l| l.taken_over?}
+
+
 
   attr_accessor :history_disabled  # set to true to disable history writing by this object
   attr_accessor :interest_percentage
   attr_accessor :already_updated
   attr_accessor :orig_attrs
+  attr_accessor :loan_extended          # set to true if you have mixed in the appropriate loan repayment functions
 
   property :id,                             Serial
   property :discriminator,                  Discriminator, :nullable => false, :index => true
@@ -81,6 +100,7 @@ class Loan
 
   property :staleness_frequency, Integer
 
+  property :c_client_group_id, Integer
   property :c_center_id, Integer
   property :c_branch_id, Integer
   property :c_scheduled_maturity_date, Date
@@ -93,8 +113,7 @@ class Loan
   property :c_last_payment_id, Integer
   property :c_stale?, Boolean
   
-#  property :taken_over_on,                     Date
-#  property :taken_over_on_installment_number,  Integer 
+  property :converted, Boolean
 
   # associations
   belongs_to :client
@@ -114,6 +133,7 @@ class Loan
   belongs_to :created_by,                :child_key => [:created_by_user_id],                 :model => 'User'
   belongs_to :loan_utilization
   belongs_to :verified_by,               :child_key => [:verified_by_user_id],                :model => 'User'
+  belongs_to :repayment_style
 
   belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false  
   property   :parent_org_guid, String, :nullable => true
@@ -127,6 +147,7 @@ class Loan
   has n, :portfolio_loans
   has 1, :insurance_policy
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Loan"
+  has n, :accruals, :required => false
   #validations
 
   validates_present      :client, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
@@ -179,24 +200,35 @@ class Loan
 
 
   def update_loan_cache(force = false)
+    update_non_history_attributes(force)
+    update_history_attributes
+  end
+  
+  def update_non_history_attributes(force)
+    self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
     @orig_attrs = self.original_attributes
     t = Time.now
     self.c_center_id = self.client.center.id if force
     self.c_branch_id = self.client.center.branch.id if force
+    self.c_client_group_id = (self.client.center.client_group_id if force) or 0
     self.c_scheduled_maturity_date = scheduled_maturity_date
+  end
+
+  def update_history_attributes
     # avoid SQL calls
     first_payment = payments.select{|p| [:prinicpal, :interest].include?(p.type)}.sort_by{|p| p.received_on}[0]
     self.c_actual_first_payment_date = first_payment.received_on if first_payment
     st = self.get_status
-    self.c_last_status = st
+    self.c_last_status = STATUSES.index(st) + 1
     self.c_principal_received = payments.select{|p| p.type == :principal}.reduce(0){|s,p| s + p.amount}
-    self.c_interest_received = payments.select{|p| p.type == :principal}.reduce(0){|s,p| s + p.amount}
+    self.c_interest_received = payments.select{|p| p.type == :interest}.reduce(0){|s,p| s + p.amount}
     last_payment = payments.select{|p| [:prinicpal, :interest].include?(p.type)}.sort_by{|p| p.received_on}.reverse[0]
-    self.c_last_payment_received_on = last_payment.received_on if last_payment
-    self.c_maturity_date = c_last_payment_received_on if (STATUSES.index(st) > 5 and last_payment)
+    self.c_last_payment_received_on = (last_payment.received_on if last_payment) || nil
+    self.c_maturity_date = (STATUSES.index(st) > 5 and last_payment) ? c_last_payment_received_on : nil
     self.c_last_payment_id = last_payment.id if last_payment
     true
   end
+
 
   def self.display_name
     "Loan"
@@ -240,8 +272,8 @@ class Loan
     {:min => :minimum, :max => :maximum}.each{|k, v|
       product_attr = product.send("#{k}_#{method}")
       if method==:interest_rate
-        product_attr = product_attr.to_f/100
-        loan_attr    = loan_attr.to_f
+        product_attr = product_attr.to_f/100.round(6)
+        loan_attr    = loan_attr.to_f.round(6)
       end
 
       if k==:min and loan_attr and product_attr and  loan_attr < product_attr
@@ -263,6 +295,10 @@ class Loan
 
 
   # MISC FUNCTIONS
+  def name
+    "Loan #{id} for client #{client.name}"
+  end
+
   def description
     "#{id}:Rs. #{amount} @ #{interest_rate} for client #{client.name}"
   end
@@ -271,18 +307,34 @@ class Loan
     "#{id}:Rs. #{amount} @ #{interest_rate}"
   end
 
+  def effective_rate
+    self.interest_rate
+  end
+
+  #TODO
+  # We can accrue interest on any loan at any point in time since payment was last received
+  # For loans that are NPA, we can compute and accrue interest
+  def accrue_ad_hoc(on_date = Date.today)
+  end
+
+  #TODO
+  # We simply accrue the interest that is anticipated as per the repayment schedule
+  def accrue_per_schedule(on_date = Date.today)
+  end
+
   def info(date = Date.today)
     LoanHistory.first(:loan_id => id, :date.lte => date, :order => [:date.desc], :limit => 1)
   end
 
-  def _show_cf(width = 10, padding = 4) #convenience function to see cashflow in console
-    ps = payment_schedule
+  def _show_cf(width = 10, padding = 4, actual = false, round = 4) #convenience function to see cashflow in console
+    ps = actual ? payments_hash : payment_schedule
     titles = [:date, :total_balance, :balance, :principal, :interest, :total_paid, :total_principal, :total_interest, :fees]
     puts titles.map{|t| t.to_s[0..width - 1].rjust(width - padding/2).ljust(width)}.join("|")
     ps.keys.sort.each do |d| 
       ps[d][:total_paid] = ps[d][:principal] + ps[d][:interest]
-      puts ([d.to_s] + titles[1..-1].map{|t| ps[d][t].round(4)}).map{|s| s.to_s.rjust(width - padding/2).ljust(width)}.join("|")
+      puts ([d.to_s] + titles[1..-1].map{|t| (ps[d][t] ? ps[d][t].round(round) : 0)}).map{|s| s.to_s.rjust(width - padding/2).ljust(width)}.join("|")
     end
+    false
   end
 
   def _show_ps
@@ -313,7 +365,7 @@ class Loan
   end
 
   def clear_cache
-    @payments_cache = @schedule = @history_array = @fee_schedule = @hols = @_installment_dates = nil
+    @payments_cache = @schedule = @history_array = @fee_schedule = @hols = @_installment_dates = @statuses = nil
   end
 
   # this method returns the last date the loan history makes sense
@@ -335,9 +387,9 @@ class Loan
     return nil  # i.e. when status is :applied or :rejected
   end
 
-  def repayment_style
-    :allow_both   # one of [:separated, :aggregated, :allow_both]
-  end
+#  def repayment_style
+#    :allow_both   # one of [:separated, :aggregated, :allow_both]
+#  end
 
   def interest_percentage  # code dup with the FundingLine
     return nil if interest_rate.blank?
@@ -359,7 +411,7 @@ class Loan
   # used by many other methods, it accepts a negative +number+
   # TODO: decide if we should make sure returned date is a payment date.
   def shift_date_by_installments(date, number, ensure_meeting_day = true)
-    return date.holiday_bump if number == 0
+    return date if number == 0
     case installment_frequency
     when :daily
       new_date =  date + number
@@ -397,7 +449,7 @@ class Loan
       end
       #new_date - new_date.cwday + Center.meeting_days.index(client.center.meeting_day)
     end
-    new_date.holiday_bump
+    new_date
   end
 
   def self.description
@@ -426,62 +478,34 @@ class Loan
 
   def repay(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default, desktop_id = nil, origin = nil)
     pmts = get_payments(input, user, received_on, received_by, defer_update, style, context, desktop_id, origin)
-    x = make_payments(pmts, context, defer_update)
-    x
+    make_payments(pmts, context, defer_update)
   end
 
-  def get_payments(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default, desktop_id = nil, origin = nil)
+  def get_payments(input, user, received_on, received_by, defer_update = false, style = NORMAL_REPAYMENT_STYLE, context = :default, desktop_id = nil, origin = nil) 
+
     # this is the way to repay loans, _not_ directly on the Payment model
     # this to allow validations on the Payment to be implemented in (subclasses of) the Loan
-    unless input.is_a? Array or input.is_a? Fixnum or input.is_a? Float or input.is_a?(Hash)
-      raise "the input argument of Loan#repay should be of class Fixnum or Array"
+
+    self.extend_loan
+
+    # only possible if we get a hash or a single number.
+    unless input.is_a? Fixnum or input.is_a? Float or input.is_a?(Hash)
+      raise "the input argument of Loan#repay should be of class Fixnum or Hash"
     end
     raise "cannot repay a loan that has not been saved" if new?
 
-    principal, interest, total, fees_paid = 0, 0, nil, 0
-    if input.is_a? Fixnum or input.is_a? Float  # in case only one amount is specified
-      # interest is paid first, the rest goes in as principal
-      # the payment is filed on received_on without knowing about the future
-      # it could happen that payment have been made after this payment
-      # here the validations on the Payment should
-      if style == NORMAL_REPAYMENT_STYLE
-        total        = input
-        total_fees_due_on_date = total_fees_payable_on(received_on)
-        fees_paid    = [total, total_fees_due_on_date].min
-        total        = input - fees_paid
-        interest_due = [(-interest_overpaid_on(received_on)), 0].max
-        interest     = [interest_due, total].min  # never more than total
-        principal    = total - interest
-      elsif style == PRORATA_REPAYMENT_STYLE #does not pay fees
-        interest, principal = pay_prorata(input, received_on)
-      end
-    elsif input.is_a? Array  # in case principal and interest are specified separately
-      principal, interest = input[0], input[1]
-    elsif input.is_a? Hash
-      fees_paid = input[:fees]
-      interest = input[:interest]
-      principal = input[:principal]
-    end
+    # if vals is a single number, then split it per the chosen style
+    # else vals is like {:fees => 123, :interest => 456, :principal => 789}
+    vals = input.is_a?(Hash) ? input : self.send("pay_#{style}",input, received_on) 
+                              
     
-    save_status = nil
     payments = []
-    if fees_paid > 0
-      fee_payment = Payment.new(:loan => self, :created_by => user,
+    [:fees, :interest, :principal].each do |type|
+      if ((vals[type] || 0) > 0)
+        payments.push(Payment.new(:loan => self, :created_by => user,
                                 :received_on => received_on, :received_by => received_by,
-                                :amount => fees_paid.round(2), :type => :fees, :desktop_id => desktop_id, :origin => origin)
-      payments.push(fee_payment)
-    end
-    if interest > 0
-      int_payment = Payment.new(:loan => self, :created_by => user,
-                                :received_on => received_on, :received_by => received_by,
-                                :amount => interest.round(2), :type => :interest, :desktop_id => desktop_id, :origin => origin)
-      payments.push(int_payment)
-    end
-    if principal > 0
-      prin_payment = Payment.new(:loan => self, :created_by => user,
-                                 :received_on => received_on, :received_by => received_by,
-                                 :amount => principal.round(2), :type => :principal, :desktop_id => desktop_id, :origin => origin)        
-      payments.push(prin_payment)
+                                :amount => vals[type] || 0, :type => type, :desktop_id => desktop_id, :origin => origin))
+      end
     end
     payments             
   end
@@ -490,12 +514,12 @@ class Loan
     return [false, nil, nil, nil] if payments.empty?
     Payment.transaction do |t|
       self.history_disabled=true
-      payments.each{|p| p.override_create_observer = true}    
+      n = DateTime.now
+      payments.each{|p| p.override_create_observer = true; p.created_at = n}    
       if payments.collect{|payment| payment.save(context)}.include?(false)
         t.rollback
-        return [false, payments.find{|p| p.type==:principal}, payments.find{|p| p.type==:interest}, payments.find{|p| p.type==:fees}]
+        return [false, payments.find{|p| p.type==:principal}, payments.find{|p| p.type==:interest}, payments.find_all{|p| p.type==:fees}]
       end
-      AccountPaymentObserver.single_voucher_entry(payments)
     end
     unless defer_update #i.e. bulk updating loans
       self.history_disabled=false
@@ -503,7 +527,6 @@ class Loan
       self.reload if payments.map{|p| p.received_on}.map{|d| installment_dates.include?(d)}.include?(false)
       update_history(true)  # update the history if we saved a payment
     end
-    update_loan_cache
     if payments.length > 0
       return [true, payments.find{|p| p.type==:principal}, payments.find{|p| p.type==:interest}, payments.find_all{|p| p.type==:fees}]
     else
@@ -512,18 +535,90 @@ class Loan
     # return the success boolean and the payment object itself for further processing
   end
 
+
+  def pay_prorata(total, received_on)
+    # calculates total interest and principal payable in this amount and divides the amount proportionally
+
+    int_to_pay = prin_to_pay = amt_to_pay = 0
+
+    # load relevant loan_history rows
+    loan_history.all( :order => [:date]).map do |lh|
+      next if amt_to_pay >= total or ((lh.interest_due + lh.principal_due) == 0)
+      # interest/prin due has the total interest/prin payable. 
+      # to get the proper ratio, we need the interest prin payable on that day only
+      int_due_today = (lh.interest_due - int_to_pay); prin_due_today =  (lh.principal_due - prin_to_pay);
+      amount_remaining = (total - amt_to_pay)
+      total_due_today =  + int_due_today + prin_due_today 
+      int_to_pay += [amount_remaining, total_due_today].min * int_due_today / total_due_today
+      prin_to_pay += [amount_remaining, total_due_today].min  * prin_due_today / total_due_today
+      amt_to_pay = (int_to_pay + prin_to_pay)
+    end
+    total = int_to_pay + prin_to_pay
+    int_to_pay = int_to_pay.round(2).round_to_nearest(rs.round_interest_to, rs.rounding_style)
+    prin_to_pay = total - int_to_pay
+    {:interest => int_to_pay, :principal => prin_to_pay}
+    
+  end
+
+  def pay_sequential(total, received_on)
+    # starts from the top and pays interest then principal then interest then principal and so on.
+    int_to_pay = prin_to_pay = amt_to_pay = 0
+    loan_history.all(:order => [:date]).map do |lh|
+      next if amt_to_pay >= total or ((lh.interest_due + lh.principal_due) == 0)
+      amount_remaining = (total - amt_to_pay)
+      int_due_today = (lh.interest_due - int_to_pay); prin_due_today =  (lh.principal_due - prin_to_pay);
+      int_to_pay_today = [int_due_today, amount_remaining].min;
+      amount_remaining -= int_to_pay_today
+      prin_to_pay_today = [prin_due_today, amount_remaining].min
+      amount_remaining -= prin_to_pay_today
+      int_to_pay += int_to_pay_today; prin_to_pay += prin_to_pay_today
+      amt_to_pay = int_to_pay + prin_to_pay
+    end
+    total = int_to_pay + prin_to_pay
+    int_to_pay = int_to_pay.round(2).round_to_nearest(rs.round_interest_to, rs.rounding_style)
+    prin_to_pay = total - int_to_pay
+    {:interest => int_to_pay, :principal => prin_to_pay}
+  end
+
+    
+  def pay_normal(total, received_on)
+    lh = info(received_on)
+    {:interest => lh.interest_due, :principal => total - lh.interest_due}
+  end
+
   # the way to delete payments from the db
   def delete_payment(payment, user)
     return false unless payment.loan.id == self.id
     payment.deleted_by = user
     if payment.destroy
       update_history
-      update_loan_cache
-      clear_cache
       return [true, payment]
     end
     [false, payment]
   end
+
+  def delete_payments(payments, user)
+    return false if payments.map{|p| p.loan.id != self.id}
+    payments.map{|p| p.deleted_by = user}
+    unless payments.map{|p| p.destroy}.include?(false)
+      return [true, payments]
+    else
+      return [false, payments]
+    end
+  end
+
+  def restore_payments(payments)
+    payments.each{|p| p.deleted_at = nil; p.deleted_by = nil;}
+    Payment.transaction do |t|
+      if payments.map{|p| p.save}.include?(false)
+        t.rollback
+        return [false, payments]
+      else
+        return [true, payments]
+      end
+    end
+  end
+
 
   def get_fee_payments(amount, date, received_by, created_by)
     fees = []
@@ -625,6 +720,10 @@ class Loan
   end
 
 
+  def taken_over?
+    taken_over_on || taken_over_on_installment_number
+  end
+
   def actual_number_of_installments
     # we need this beacuse in laons with rounding, you may end up with more/less installments than advertised!!
     # crazy MFI product managers!!!
@@ -635,13 +734,21 @@ class Loan
     # this is the fount of all knowledge regarding the scheduled payments for the loan. 
     # it feeds into every other calculation about the loan schedule such as get_scheduled, calculate_history, etc.
     # if this is wrong, everything about this loan is wrong.
+    if self.taken_over?
+      unless self.respond_to?(:taken_over_properly?)
+        extend Loaner::TakeoverLoan 
+      end
+    end
+    unless @loan_extended
+      extend_loan
+    end
+    actual_payment_schedule
+  end
+
+  def actual_payment_schedule
     return @schedule if @schedule
     @schedule = {}
     return @schedule unless amount.to_f > 0
-
-    #if self.respond_to?(:repayment_style) and self.repayment_style
-    #  extend Kernel.module_eval("Mostfit::RepaymentStyles:#{repayment_style.camel_case}")
-    #end
 
     principal_so_far = interest_so_far = fees_so_far = total = 0
     balance = amount
@@ -686,17 +793,19 @@ class Loan
   end
 
   
-  def payments_hash
+  def payments_hash(structs = nil)
     # this is the fount of knowledge for actual payments on the loan
-    return @payments_cache if @payments_cache
-    sql = %Q{
+    unless structs
+      return @payments_cache if @payments_cache
+      sql = %Q{
         SELECT SUM(amount * IF(type=1,1,0)) AS principal,
                SUM(amount * IF(type=2,1,0)) AS interest,
                received_on
         FROM payments
         WHERE (deleted_at IS NULL) AND (loan_id = #{self.id})
         GROUP BY received_on ORDER BY received_on}
-    structs = id ? repository.adapter.query(sql) : []
+      structs = id ? repository.adapter.query(sql) : []
+    end
     @payments_cache = {}
     total_balance = total_to_be_received
     @payments_cache[disbursal_date || scheduled_disbursal_date] = {
@@ -734,20 +843,33 @@ class Loan
   
   # LOAN INFO FUNCTIONS - SCHEDULED
 
+  def extend_loan
+    unless @loan_extended
+      rp = self.repayment_style || self.loan_product.repayment_style
+      if rp
+        self.extend(Kernel.module_eval("Mostfit::PaymentStyles::#{rp.style.to_s}"))
+        @loan_extended = true
+      else
+        raise ArgumentError, "No repayment style specified"
+      end
+    end
+  end
+
   # these 2 methods define the pay back scheme
   # These are ONE BASED
   # typically reimplemented in subclasses
   def scheduled_principal_for_installment(number)
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount.to_f / number_of_installments).round(2)
+    extend_loan
+    scheduled_principal_for_installment(number)
   end
+
   def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
     # number unused in this implentation, subclasses may decide differently
     # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 1 or number > actual_number_of_installments
-    (amount * interest_rate / number_of_installments).round(2)
+    extend_loan
+    scheduled_interest_for_installment(number)
   end
 
   # These info functions need not be overridden in derived classes.
@@ -858,6 +980,8 @@ class Loan
   def get_status(date = Date.today, total_received = nil) # we have this last parameter so we can speed up get_status
                                                           # considerably by passing total_received, i.e. from history_for
     #return @status if @status
+    @statuses ||= {}
+    return @statuses[date] if @statuses[date]
     date = Date.parse(date)      if date.is_a? String
 
     return :applied_in_future    if applied_on.holiday_bump > date  # non existant
@@ -882,6 +1006,7 @@ class Loan
     else
       @status =  :outstanding
     end
+    @statuses[date] = @status
   end
   
   # LOAN INFO FUNCTIONS - DATES
@@ -903,7 +1028,7 @@ class Loan
   def installment_dates
     return @_installment_dates if @_installment_dates
     if installment_frequency == :daily
-      # we have to br careful that when we do a holiday bump, we do not get stuck in an endless loop
+      # we have to be careful that when we do a holiday bump, we do not get stuck in an endless loop
       ld = scheduled_first_payment_date - 1
       @_installment_dates = []
       (1..number_of_installments).each do |i|
@@ -923,6 +1048,8 @@ class Loan
     ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
     ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
     @_installment_dates = (0..(actual_number_of_installments-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) }    
+    @_installment_dates = @_installment_dates.map{|d| self.holidays[d] ? self.holidays[d].new_date : d}
+    
   end
 
   #Increment/sync the loan cycle number. All the past loans which are disbursed are counted
@@ -935,60 +1062,102 @@ class Loan
     update_history(false)
   end
   
-  # Moved this method here from instead of the LoanHistory model for purposes of speed. We sacrifice a bit of readability
-  # for brute force iterations and caching => speed
   def update_history(forced=false)
+    t = Time.now
+    reload
+    Merb.logger.info "RELOAD: #{Time.now - t} secs"
+    extend_loan
     return true if Mfi.first.dirty_queue_enabled and DirtyLoan.add(self) and not forced
     return if @already_updated and not forced
     return if self.history_disabled and not forced# easy when doing mass db modifications (like with fixutes)
     clear_cache
     update_history_bulk_insert
+    Merb.logger.info "HISTORY EXEC TIME: #{(Time.now - t).round(4)} secs"
     @already_updated=true
+    t = Time.now
+    #update_history_attributes
+    #self.save!
+    Merb.logger.info "LOAN CACHE UPDATE TIME: #{(Time.now - t).round(4)} secs"
   end
+
+  def holidays
+    return @holidays if @holidays
+    @holidays = client.center.branch.holidays.map{|h| [h.date, h]}.to_hash
+  end
+
+
 
   def calculate_history
     return @history_array if @history_array
     # Crazy heisenbug is fixed by prefetching payments hash
-    payments_hash
     t = Time.now; @history_array = []
-    dates = ([applied_on, approved_on, scheduled_disbursal_date, disbursal_date, written_off_on, scheduled_first_payment_date].map{|d|
-               d.holiday_bump if d.is_a?(Date)
-             } + payment_dates + installment_dates).compact.uniq.sort
-    last_paid_date = nil
+    now = DateTime.now
+    payments_hash
+    
+    # get fee payments. this is probably better of moved to functions in the fees_container
+
+    fee_payments= Payment.all(:loan_id => id, :type => :fees).group_by{|p| p.received_on}.map do |k,v| 
+      amt = v.is_a?(Array) ? (v.reduce(0){|s,h| s + h.amount} || 0) : v.amount
+      [k,amt]
+    end.to_hash
+    ap_fees = fee_schedule.map{|k,v| [k,v.values.sum]}.to_hash
+
+    dates = (([applied_on, approved_on, scheduled_disbursal_date, disbursal_date, written_off_on, scheduled_first_payment_date] + installment_dates).map{|d|
+               (self.holidays[d] ? self.holidays[d].new_date : d)
+             } + payment_dates).compact.uniq.sort
+
     total_principal_due = total_interest_due = total_principal_paid = total_interest_paid = 0
-    repayed=false
+
+    # find the actual total principal and interest paid.
+    # this is helpful for adjusting interest and principal due on a particular date while taking into account future payments
+    last_payments_hash = payments_hash.sort.last; 
+    act_total_principal_paid = last_payments_hash[1][:total_principal]; act_total_interest_paid = last_payments_hash[1][:total_interest]
+    
     dates.each_with_index do |date,i|
-      current   = date == Date.today ? true : (((dates[[i,0].max] < Date.today and dates[[dates.size - 1,i+1].min] > Date.today) or 
-                   (i == dates.size - 1 and dates[i] < Date.today)))
-      scheduled = get_scheduled(:all, date)
-      actual    = get_actual(:all, date)
-      prin      = principal_received_on(date).round(2)
-      total_principal_paid += prin
-      int       = interest_received_on(date).round(2)
-      total_interest_paid += int
-      if (actual[:total_balance] - scheduled[:total_balance] > prin + int) and date >= scheduled_first_payment_date # there is a default
-        last_paid_date ||= dates[[i,dates.size-1].min];        days_overdue = [0,date - last_paid_date].max
-      else
-        last_paid_date = nil;        days_overdue = 0
-      end
-      next if repayed
-      principal_due  = actual[:balance].round(2) - scheduled[:balance].round(2)
-      interest_due   = actual[:total_balance].round(2) - scheduled[:total_balance].round(2) - (actual[:balance].round(2) - scheduled[:balance].round(2))
-      total_principal_due += scheduled[:principal].round(2)
-      total_interest_due += scheduled[:interest].round(2)
-      repayed = true if actual[:balance]<=0 and interest_due<=0
+      i_num                                  = installment_for_date(date)
+      scheduled                              = get_scheduled(:all, date)
+      actual                                 = get_actual(:all, date)
+      prin                                   = principal_received_on(date).round(2) 
+      int                                    = interest_received_on(date).round(2)
+      total_principal_paid                  += prin
+      total_interest_paid                   += int
+      st                                     = get_status(date)
+      scheduled_principal_due                = i_num > 0 ? scheduled[:principal] : 0
+      scheduled_interest_due                 = i_num > 0 ? scheduled[:interest] : 0
+      outstanding                            = [:disbursed, :outstanding].include?(st)
+      total_principal_due                   += scheduled[:principal].round(2)
+      total_interest_due                    += scheduled[:interest].round(2)
+      principal_due                          =  outstanding ? [total_principal_due - act_total_principal_paid,0].max : 0
+      interest_due                           = outstanding ? [total_interest_due - act_total_interest_paid,0].max : 0
+      advance_principal_paid                 = [0,total_principal_paid.round(2) - total_principal_due.round(2)].max
+      advance_interest_paid                  = [0,total_interest_paid.round(2) - total_interest_due.round(2)].max
+      total_fees_due                         = ap_fees.select{|dt,af| dt <= date}.to_hash.values.sum || 0
+      total_fees_paid                        = fee_payments.select{|dt,fp| dt <= date}.to_hash.values.sum || 0
+      fees_due_today                         = ap_fees[date] || 0
+      fees_paid_today                        = fee_payments[date] || 0
+
+      last_loan_history                      = @history_array.last || nil
+
+      principal_in_default                   = (date <= Date.today) ? [0,total_principal_paid.round(2) - total_principal_due.round(2)].min : 0
+      interest_in_default                    = (date <= Date.today) ? [0,total_interest_paid.round(2) - total_interest_due.round(2)].min : 0
+
+      days_overdue                           = ((principal_in_default > 0  or interest_in_default > 0) and last_loan_history) ? last_loan_history[:days_overdue] + (date - last_loan_history[:date]) : 0
 
       @history_array << {
-        :loan_id                             => id,
+        :loan_id                             => self.id,
         :date                                => date,
-        :status                              => STATUSES.index(get_status(date)) + 1,
+        :holiday_id                          => 0,
+        :last_status                         => last_loan_history ? last_loan_history[:status] : 1,
+        :status                              => STATUSES.index(st) + 1,
         :scheduled_outstanding_principal     => scheduled[:balance].round(2),
         :scheduled_outstanding_total         => scheduled[:total_balance].round(2),
-        :actual_outstanding_principal        => actual[:balance].round(2),
-        :actual_outstanding_total            => actual[:total_balance].round(2),
+        :actual_outstanding_principal        => outstanding ? actual[:balance].round(2) : 0,
+        :actual_outstanding_total            => outstanding ? actual[:total_balance].round(2) : 0,
         :amount_in_default                   => actual[:balance].round(2) - scheduled[:balance].round(2),
-        :days_overdue                        => days_overdue, 
-        :current                             => current,
+        :principal_in_default                => principal_in_default,
+        :interest_in_default                 => interest_in_default,
+        :scheduled_principal_due             => scheduled_principal_due,
+        :scheduled_interest_due              => scheduled_interest_due,
         :principal_due                       => principal_due.round(2), 
         :interest_due                        => interest_due.round(2),
         :principal_paid                      => prin.round(2),
@@ -997,24 +1166,68 @@ class Loan
         :total_interest_due                  => total_interest_due.round(2),
         :total_principal_paid                => total_principal_paid.round(2),
         :total_interest_paid                 => total_interest_paid.round(2),
-        
+        :advance_principal_paid              => advance_principal_paid,
+        :advance_interest_paid               => advance_interest_paid,
+        :total_advance_paid                  => advance_principal_paid + advance_interest_paid,
+        :advance_principal_paid_today        => (appt = @history_array.last ? [0,advance_principal_paid - (@history_array.last[:advance_principal_paid] || 0)].max : 0),
+        :advance_interest_paid_today         => (aipt = @history_array.last ? [0,advance_interest_paid - (@history_array.last[:advance_interest_paid] || 0)].max : 0),
+        :total_advance_paid_today            => appt + aipt,
+        :advance_principal_adjusted          => last_loan_history ? [0,last_loan_history[:advance_principal_paid] - advance_principal_paid].max : 0,
+        :advance_interest_adjusted           => last_loan_history ? [0,last_loan_history[:advance_interest_paid] - advance_interest_paid].max : 0,
+        :total_fees_due                      => total_fees_due,
+        :total_fees_paid                     => total_fees_paid,
+        :fees_due_today                      => fees_due_today,
+        :fees_paid_today                     => fees_paid_today,
+        :composite_key                       => "#{id}.#{(i/10000.0).to_s.split('.')[1]}".to_f,
+        :branch_id                           => c_branch_id,
+        :center_id                           => c_center_id,
+        :client_group_id                     => c_client_group_id || 0,
+        :created_at                          => now,
+        :funding_line_id                     => funding_line_id,
+        :loan_product_id                     => loan_product_id,
+        :days_overdue                        => days_overdue
+
+
       }
     end
+
+    if taken_over?
+      applied_on_date = self.applied_on.holiday_bump if self.applied_on
+      @history_array = @history_array.reject{|h| h[:date] < applied_on_date}      
+    end
+
     Merb.logger.info "History calculation took #{Time.now - t} seconds"
     @history_array
   end
 
-  def _show_his(width = 10, padding = 4)
-    titles = {:date => :date, :sched_total => :scheduled_outstanding_total, :sched_bal => :scheduled_outstanding_principal,
-      :act_total => :actual_outstanding_total, :act_bal => :actual_outstanding_principal,
-      :prin_paid => :principal_paid, :prin_due => :principal_due, :int_paid => :interest_paid, :int_due => :interest_due,
-       :tot_p_pd => :total_principal_paid, :tot_i_pd => :total_interest_paid, :tot_p_due => :total_principal_due, :tot_i_due => :total_interest_due}
-    title_order = [:date, :sched_total, :sched_bal, :act_total, :act_bal, :prin_paid, :prin_due, :int_paid, :int_due, :tot_p_pd, :tot_p_due]
-    hist = calculate_history.sort_by{|x| x[:date]}
-    puts title_order.map{|t| t.to_s.rjust(width - padding/2).ljust(width)}.join("|")
-    hist.each do |h|
-      puts (["#{h[:date]}"] + title_order[1..-1].map{|t| h[titles[t]].round(4)}.map{|v| v.to_s}.map{|s| s.rjust(width - padding/2).ljust(width)}).join("|")
+  def _show_his(arg = {})
+    # pretty prints the loan history
+    # get extended info by saying _show_his(:extended)
+    arg = {:fields => [:basic, :next]} if arg == :extended
+    args = {:width => 10, :padding => 4, :fields => [:basic]}
+    args = args.merge(arg) if arg.is_a? Hash
+    width = args[:width]; padding = args[:padding]; fields = args[:fields]
+
+    print_order = {:basic => {:titles => {:date => :date, :s_total => :scheduled_outstanding_total, :s_bal => :scheduled_outstanding_principal,
+          :a_total => :actual_outstanding_total, :a_bal => :actual_outstanding_principal,
+          :p_paid => :principal_paid, :p_due => :principal_due, :i_paid => :interest_paid, :i_due => :interest_due,
+          :tot_p_pd => :total_principal_paid, :tot_i_pd => :total_interest_paid, :tot_p_due => :total_principal_due, :tot_i_due => :total_interest_due},
+        :title_order => [:date, :s_total, :s_bal, :a_total, :a_bal, :p_paid, :p_due, :i_paid, :i_due, :tot_p_pd, :tot_p_due, :tot_i_pd, :tot_i_due]},
+      :next => {:titles => {:date => :date, :tp_due => :total_principal_due, :tp_paid => :total_principal_paid, :ti_due => :total_interest_due,
+          :ti_paid => :total_interest_paid, :adv_p => :advance_principal_paid, :adv_i => :advance_interest_paid, :def_p => :principal_in_default, 
+          :def_i => :interest_in_default, :b => :branch_id, :c => :center_id, :k => :composite_key},
+        :title_order => [:date, :tp_due, :tp_paid, :ti_due, :ti_paid, :adv_p, :adv_i, :def_p, :def_i, :b, :c, :k]}}
+    fields.each do |f|
+      hist = calculate_history.sort_by{|x| x[:date]}
+      title_order = print_order[f][:title_order]
+      titles = print_order[f][:titles]
+      puts title_order.map{|t| t.to_s.rjust(width - padding/2).ljust(width)}.join("|")
+      hist.each do |h|
+        puts (["#{h[:date]}"] + title_order[1..-1].map{|t| (h[titles[t]] || 0).round(2)}.map{|v| v.to_s}.map{|s| s.rjust(width - padding/2).ljust(width)}).join("|")
+      end
+
     end
+    puts "Call with _show_his(:extended) to see more fields" if fields == [:basic]
     false
   end
 
@@ -1022,25 +1235,8 @@ class Loan
     # this gets the history from calculate_history and does one single insert into the database
     t = Time.now
     Merb.logger.error! "could not destroy the history" unless self.loan_history.destroy!
-    d0 = Date.parse('2000-01-03')
-    sql = %Q{ INSERT INTO loan_history(loan_id, date, status, scheduled_outstanding_principal, scheduled_outstanding_total,
-                                       actual_outstanding_principal, actual_outstanding_total, current, amount_in_default, client_group_id, center_id, client_id, 
-                                       branch_id, days_overdue, week_id, principal_due, interest_due, principal_paid, interest_paid, 
-                                       total_principal_due, total_interest_due, total_principal_paid, total_interest_paid, 
-                                       created_at)
-              VALUES }
-    values = []
-    calculate_history.each do |history|
-      value = %Q{(#{id}, '#{history[:date].strftime('%Y-%m-%d')}', #{history[:status]}, #{history[:scheduled_outstanding_principal]},
-                          #{history[:scheduled_outstanding_total]}, #{history[:actual_outstanding_principal]},
-                          #{history[:actual_outstanding_total]},#{history[:current] ? 1 : 0}, #{history[:amount_in_default]}, #{client.client_group_id || "NULL"}, 
-                          #{client.center.id},#{client.id},#{client.center.branch.id}, #{history[:days_overdue]}, #{((history[:date] - d0) / 7).to_i + 1},
-                          #{history[:principal_due]},#{history[:interest_due]}, #{history[:principal_paid]},#{history[:interest_paid]}, 
-                          #{history[:total_principal_due]},#{history[:total_interest_due]}, #{history[:total_principal_paid]},#{history[:total_interest_paid]}, 
-                          '#{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}')}
-     values << value
-    end
-    sql += values.join(",") + ";"
+    sql = get_bulk_insert_sql("loan_history",calculate_history)
+    t = Time.now
     repository.adapter.execute(sql)
     Merb.logger.info "update_history_bulk_insert done in #{Time.now - t}"
     return true
@@ -1061,6 +1257,93 @@ class Loan
     end
   end
 
+  def set_amount
+    return unless taken_over?
+    # this sets the amount to be the outstanding amount unless it is already set
+    amount = payment_schedule[payment_schedule.keys.min][:balance]
+    amount_applied_for = amount
+  end
+
+  def set_loan_product_parameters
+    self.repayment_style = self.loan_product.repayment_style unless self.repayment_style
+  end
+
+  def interest_calculation(balance)
+    # need to have this is one place because a lot of functions need to know how interest is calculated given a balance
+    # this is bound to become more complex as we add all kinds of dates 
+    rs = self.repayment_style || self.loan_product.repayment_style
+    ((balance * interest_rate) / get_divider).round(2).round_to_nearest(rs.round_interest_to, rs.rounding_style)
+  end
+
+
+
+  def correct_prepayments
+    prins = payments(:type => :principal).sort_by{|p| p.received_on}.reverse
+    ints = payments(:type => :interest).sort_by{|p| p.received_on}.reverse
+    total = 0
+    diff = amount - prins.map{|p| p.amount}.reduce(:+)
+    ints.each do |ix|
+      transfer = [ix.amount, diff - total].min
+      px = prins.find{|_p| _p.received_on == ix.received_on}
+      px.amount += transfer
+      ix.amount -= transfer
+      puts "transferred #{transfer}"
+      px.amount = px.amount.round(2)
+      ix.amount = ix.amount.round(2)
+      total += transfer
+      px.save!
+      ix.save!
+    end
+    puts total
+    self.update_history
+  end
+
+
+  def reallocate(style, user, date_from = nil)
+    self.extend_loan
+    return false unless REPAYMENT_STYLES.include?(style)
+    if style == :correct_prepayments
+      status, _pmts = correct_prepayments
+      return status, _pmts
+    end
+    _ps  = self.payments(:type => [:principal, :interest])
+    ph = _ps.group_by{|p| p.received_on}.to_hash
+    _pmts = []
+    self.payments_hash([])
+    bal = amount
+    dates = date_from ? ph.keys.sort.select{|d| d >= date_from} : ph.keys.sort
+    dates.each_with_index do |date, i|
+      prins = ph[date].select{|p| p.type == :principal}
+      ints = ph[date].select{|p| p.type == :interest}
+      p_amt = prins.reduce(0){|s,p| s + p.amount} || 0
+      i_amt = ints.reduce(0){|s,p| s + p.amount} || 0
+      total_amt = p_amt + i_amt
+      ref_payment = (prins[0] ? prins[0] : ints[0])
+      user = ref_payment.created_by
+      received_by = ref_payment.received_by
+      pmts = get_payments(total_amt, user, date, received_by, true, style, :default, nil, nil)
+      _pp = pmts.find{|_p| _p.type == :principal}
+      bal -= _pp.amount if _pp
+      _pmts << pmts
+    end
+    _pmts = _pmts.flatten
+    Payment.transaction do |t|
+      _t = Time.now
+      ds = _ps.map{|p| p.deleted_by = user; p.deleted_at = _t; p.destroy}
+      statii =  _pmts.map do |p| 
+        p.created_at = _t
+        p.save(:reallocate)
+      end
+      if statii.include?(false) or ds.include?(false)
+        t.rollback
+        return false, _pmts
+      end
+    end
+    self.reload
+    update_history(true)
+    return true, _pmts
+  end
+
 
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include Misfit::LoanValidators
@@ -1074,25 +1357,6 @@ class Loan
     self.amount      ||= self.amount_applied_for
   end
 
-
-  # repayment styles
-  def pay_prorata(total, received_on)
-    #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-    i = used = prin = int = 0.0
-    d = received_on
-    total = total.to_f
-    while used < total
-      prin += scheduled_principal_for_installment(installment_for_date(d))
-      int  += scheduled_interest_for_installment(installment_for_date(d))
-      used  = (prin + int)
-      d = shift_date_by_installments(d, 1)
-    end
-    interest  = total * int/(prin + int)
-    principal = total * prin/(prin + int)
-    [interest, principal]
-  end
-
-  # TODO these should logically be private.
   def get_from_cache(cache, column, date)
     date = Date.parse(date) if date.is_a? String
     return 0 if cache.blank?
@@ -1103,9 +1367,9 @@ class Loan
       keys = cache.keys.sort
       if date < keys.min
         col = cache[keys.min].merge(:balance => amount, :total_balance => total_to_be_received)
-        rv = (column == :all ? col : col[column])
+        rv = (column == :all ? Marshal.load(Marshal.dump(col)) : Marshal.load(Marshal.dump(col[column])))
       elsif date >= keys.max
-        rv = (column == :all ? cache[keys.max] : cache[keys.max][column])
+        rv = (column == :all ? Marshal.load(Marshal.dump(cache[keys.max])) : Marshal.load(Marshal.dump(cache[keys.max][column])))
       else
         keys.each_with_index do |k,i|
           if keys[[i+1,keys.size - 1].min] > date
@@ -1138,6 +1402,7 @@ class Loan
     return true if h.blank?
     return [false, h.map{|f| f[0]}.join(", ") + " are holidays"]
   end
+
   def check_client_sincerity
     return [false, "Client is marked insincere and is not eligible for a loan"] if client and client.tags and client.tags.include?(:insincere)
     return true
@@ -1147,54 +1412,67 @@ class Loan
     return true if not amount.blank? and amount > 0
     [false, "Loan amount should be greater than zero"]
   end
+
   def interest_rate_greater_than_or_equal_to_zero?
     return true if interest_rate and interest_rate.to_f >= 0
     [false, "Interest rate should be greater than or equal to zero"]
   end
+
   def number_of_installments_greater_than_zero?
     return true if number_of_installments and number_of_installments.to_i > 0
     [false, "Number of installments should be greater than zero"]
   end
+
   def applied_before_appoved?
     return true if approved_on.blank? or (approved_on and applied_on and approved_on >= applied_on)
     [false, "Cannot be approved before it is applied for"]
   end
+
   def applied_before_rejected?
     return true if rejected_on.blank? or (rejected_on and applied_on and rejected_on >= applied_on)
     [false, "Cannot be rejected before it is applied for"]
   end
+
   def approved_before_disbursed?
     return true if disbursal_date.blank? or (disbursal_date and approved_on and disbursal_date >= approved_on)
     [false, "Cannot be disbursed before it is approved"]
   end
+
   def disbursed_before_validated?
     return true if validated_on.blank? or (disbursal_date and validated_on and disbursal_date <= validated_on)
     [false, "Cannot be validated before it is disbursed"]
   end
+
   def disbursed_before_written_off?
     return true if written_off_on.blank? or (disbursal_date and written_off_on and disbursal_date <= written_off_on)
     [false, "Cannot be written off before it is disbursed"]
   end
+
   def disbursed_before_suggested_written_off?
     return true if suggested_written_off_on.blank? or (disbursal_date and suggested_written_off_on and disbursal_date <= suggested_written_off_on)
     [false, "Cannot be suggested for write off before the loan is disbursed"]
   end
+
   def disbursed_before_write_off_rejected?
     return true if write_off_rejected_on.blank? or (disbursal_date and write_off_rejected_on and disbursal_date <= write_off_rejected_on)
     [false, "Cannot be rejected before the loan is disbursed"]
   end
+
   def rejected_before_suggested_write_off?
     return true if suggested_written_off_on.blank? or (write_off_rejected_on and suggested_written_off_on and write_off_rejected_on >= suggested_written_off_on)
     [false, "Cannot reject a loan for write off before it is suggested for write off."]
   end
+
   def applied_before_scheduled_to_be_disbursed?
     return true if scheduled_disbursal_date and applied_on and scheduled_disbursal_date >= applied_on
     [false, "Cannot be scheduled for disbusal before it is applied"]
   end
+
   def scheduled_disbursal_before_scheduled_first_payment?
     return true if scheduled_disbursal_date and scheduled_first_payment_date and scheduled_disbursal_date <= scheduled_first_payment_date
     [false, "The scheduled first payment date cannot precede the scheduled disbursal date"]
   end
+
   def properly_approved?
     return [false, "Funding Line must be set before approval"] unless funding_line
     return true if (approved_on and (approved_by or approved_by_staff_id)) or (approved_on.blank? and (approved_by.blank? or approved_by_staff_id.blank?))
@@ -1272,249 +1550,14 @@ class Loan
       1
     end    
   end
-
-  
 end
 
-class DefaultLoan < Loan
-  # This is the "Default" loan type. It is nothing better of worse than its parent.
-  # That explains the emptyness
-  def self.display_name
-    "Standard loan (Default Loan)"
-  end
-
-  def self.description
-    "This is the default loan in Mostfit. In this loan type interest is is paid flat over the installments, so all the installments are the same size. It allows both repayment in totals and repayment in principal-interest pairs. In case of paying in totals the interest due is payed before the principal due."
-  end
-  def fields_partial
-    ''  # this method is are used plug HTML into the show page of the loan and its payments (app/views/payments/index.html.haml)
-  end
-  def show_partial
-    ''  # this method is are used plug HTML into the show page of the loan and its payments (app/views/payments/index.html.haml)
-  end
-end
-
-class A50Loan < Loan
-  def self.display_name
-    "A50Loan - defunct"
-  end
-end
-
-class EquatedWeekly < Loan
-  # these 2 methods define the pay back scheme
-  # typically reimplemented in subclasses
-  include ExcelFormula
-  # property :purpose,  String
-
-  def self.display_name
-    "Reducing balance schedule (Equated Weekly)"
-  end
-
-  def equated_payment
-    pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-  end
-
-  def pay_prorata(total, received_on)
-    i = used = prin = int = 0.0
-    d = received_on
-    total = total.to_f
-    pmnt = equated_payment
-    d = received_on
-    curr_bal = actual_outstanding_principal_on(d)
-    while (total - used) >= 0.01
-      i_pmt = interest_rate/get_divider * curr_bal 
-      int += i_pmt
-      p_pmt = pmnt - i_pmt
-      prin += p_pmt
-      curr_bal -= p_pmt
-      used  = (prin + int)
-      d = shift_date_by_installments(d, 1)
-    end
-    interest  = total * int/(prin + int)
-    principal = total * prin/(prin + int)
-    [interest, principal]
-
-  end
-
-  def scheduled_principal_for_installment(number)
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
-    return reducing_schedule[number][:principal_payable]
-  end
-
-  def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 0 or number > number_of_installments
-    return reducing_schedule[number][:interest_payable]
-  end
-
-private
-  def reducing_schedule
-    return @reducing_schedule if @reducing_schedule
-    @reducing_schedule = {}    
-    balance = amount
-    payment            = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-    1.upto(number_of_installments){|installment|
-      @reducing_schedule[installment] = {}
-      @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider).round(2)
-      @reducing_schedule[installment][:principal_payable] = (payment - @reducing_schedule[installment][:interest_payable]).round(2)
-      balance = balance - @reducing_schedule[installment][:principal_payable]
-    }
-    return @reducing_schedule
-  end
-
-  def get_divider
-    case installment_frequency
-    when :weekly
-      52
-    when :biweekly
-      26
-    when :monthly
-      12
-    when :daily
-      365
-    end    
-  end
-end
-
-
-class BulletLoan < Loan
-  before :save, :set_installments_to_1
-  
-  def self.display_name
-    "Single shot repayment (Bullet Loan)"
-  end
-
-  def scheduled_interest_for_installment(number = 1)
-    amount * interest_rate
-  end
-  
-  def scheduled_principal_for_installment(number = 1)
-    amount
-  end
-
-  def scheduled_interest_up_to(date)
-    return scheduled_interest_for_installment(1) if date > scheduled_first_payment_date
-    scheduled_interest_for_installment(1) * (1 - (scheduled_first_payment_date - date) / (scheduled_first_payment_date - disbursal_date||scheduled_disbursal_date))
-  end
-
-  def pay_prorata(total, received_on)
-    #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-    int  = scheduled_interest_up_to(received_on)
-    int -= interest_received_up_to(received_on)
-    prin = total - int
-    [int, prin]
-  end
-
-  
-  private
-  def set_installments_to_1
-    number_of_installments = 1
-  end
-end
-
-class BulletLoanWithPeriodicInterest < BulletLoan
-  def self.display_name
-    "Single shot principal with periodic interest (Bullet Loan With Periodic Interest)"
-  end
-  
-  def scheduled_interest_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    (amount * interest_rate / number_of_installments).to_i
-  end
-
-  def scheduled_principal_for_installment(number)
-    return 0 if number < number_of_installments
-    return amount if number == number_of_installments
-  end
-  
-  def scheduled_interest_up_to(date);  get_scheduled(:total_interest,  date); end
-end
-
-class PararthRounded < Loan
-  def self.display_name
-    "Rounded schedule (Pararth Rounded)"
-  end
-
-  def scheduled_principal_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    rounding_schedule[number][:principal]
-  end
-
-  def scheduled_interest_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    rounding_schedule[number][:interest]
-  end
-
-  def rounding_schedule
-    return @_rounding_schedule if @_rounding_schedule
-    @_rounding_schedule = {}
-    return @_rounding_schedule unless amount.to_f > 0
-    _prin_per_installment = amount.to_f / number_of_installments
-    _total = amount * (1 + interest_rate) # cannot use total_to_be_received without blowing the universe up
-    _installment = _total / number_of_installments
-    rf = 0;
-    (1..number_of_installments).to_a.each do |i| 
-      prin = (_prin_per_installment + rf).send(loan_product.rounding_style)
-      rf = _prin_per_installment - prin + rf
-      int = (_installment - prin).send(loan_product.rounding_style)
-      @_rounding_schedule[i] =  {:principal => prin, :interest => int}
-    end
-    return @_rounding_schedule
-  end
-
-  def clear_cache
-    super
-    @_rounding_schedule = nil
-  end
-
-  # repayment styles
-  def pay_prorata(total, received_on)
-    #adds up the principal and interest amounts that can be paid with this amount and prorates the amount
-    i = used = prin = int = 0.0
-    d = received_on
-    total = total.to_f
-    while used < total
-      prin -= principal_overpaid_on(d).round(2)
-      int  -= interest_overpaid_on(d).round(2)
-      used  = (prin + int)
-      d = client.center.next_meeting_date_from(d)
-    end
-    interest  = total * int/(prin + int)
-    principal = total * prin/(prin + int)
-    pfloat    = principal - principal.to_i
-    ifloat    = interest  - interest.to_i
-    pfloat > ifloat ? [interest - ifloat, principal + ifloat] : [interest + pfloat, principal - pfloat]
-  end
-end
-
-
-# TAKEOVER LOANS!!
-# these loans are exisitng loans that are taken over by us. They work like this:
-# We create a descendant of each Loan sublass and suffix it with Takeover. i.e. BulletLoanTakeover
-# In our system, all payments are rebased from the installment we take it over from
-# We do this once, generically, for any repayment schedule, by calling super and  rejecting anything from the loan schedule that does not belong to us
-# Remember, the payments on the loan remain exactly the same as before for the customer.
-
-
-(Loan.descendants.to_a - [Loan]).each do |c|
-  k = Class.new(c)
-  Object.const_set "TakeOver#{c.to_s}", k # we have to name it first otherwise DataMapper craps out
-  Kernel.const_get("TakeOver#{c.to_s}").class_eval do
-    before :valid?, :set_amount
-    validates_with_method :original_properties_specified?
-    validates_with_method :taken_over_properly?
+module Loaner
+  module TakeoverLoan
     def self.display_name
       "Take over #{super}"
     end
 
-    def set_amount
-      # this sets the amount to be the outstanding amount unless it is already set
-      amount = payment_schedule[payment_schedule.keys.min][:balance]
-      amount_applied_for = amount
-    end
 
     def original_properties_specified?
       blanks = []
@@ -1536,14 +1579,14 @@ end
       end
     end  
 
-    def calculate_history
-      super
-      applied_on_date = self.applied_on.holiday_bump if self.applied_on
-      @history_array = @history_array.reject{|h| h[:date] < applied_on_date}      
-      return @history_array
-    end
+#    def calculate_history
+#      super
+#      applied_on_date = self.applied_on.holiday_bump if self.applied_on
+#      @history_array = @history_array.reject{|h| h[:date] < applied_on_date}      
+#      return @history_array
+#    end
     
-    def payment_schedule
+    def actual_payment_schedule
       return @schedule if @schedule
       raise ArgumentError "This takeover loan is missing takeover information"  unless (self.taken_over_on || self.taken_over_on_installment_number)
       # TODO this exception is raised because we need to respect the first payment date and subsequent dates have to be 
@@ -1607,6 +1650,7 @@ end
       _scheduled_disbursal_date = scheduled_disbursal_date
       _fp_date = scheduled_first_payment_date
       _original_amount = amount
+
       # recreate the original loan
       self.scheduled_first_payment_date = original_first_payment_date
       self.amount = original_amount
@@ -1621,214 +1665,6 @@ end
       self.amount = _original_amount
     end
 
-  end # Class.new
-end # each
+  end 
+end 
 
-# pararth rounded with last principal less/more than usual
-class RoundedAtLastInstallmentLoan < Loan
-  def self.display_name
-    "Rounded with last principal and interest adjusted"
-  end
-
-  def scheduled_principal_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    prin = (amount.to_f / number_of_installments)
-
-    if number == number_of_installments
-      ro_factor = prin - prin.send(loan_product.rounding_style)
-      (prin.send(loan_product.rounding_style) + (number_of_installments - 1) * ro_factor).send(loan_product.rounding_style)
-    else
-      prin.send(loan_product.rounding_style)
-    end
-  end
-
-  def scheduled_interest_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    total = (amount.to_f * (1 + interest_rate) / number_of_installments)
-
-    if number == number_of_installments
-      ro_factor = total - total.send(loan_product.rounding_style)
-      (total.send(loan_product.rounding_style) - scheduled_principal_for_installment(number) + (number_of_installments - 1) * ro_factor).send(loan_product.rounding_style)
-    else
-      total.send(loan_product.rounding_style) - scheduled_principal_for_installment(number)
-    end       
-  end
-end
-
-# pararth rounded with last ineterst less/more than usual
-class RoundedPrincipalAndInterestLoan < PararthRounded
-  def self.display_name
-    "Rounded with last interest adjusted"
-  end
-    
-  def scheduled_principal_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    rounding_schedule[number][:principal].send(loan_product.rounding_style)
-  end
-
-  def scheduled_interest_for_installment(number)
-    raise "number out of range, got #{number}" if number < 1 or number > number_of_installments
-    if number == number_of_installments
-      int_received_so_far = (1..(number-1)).map{|x| rounding_schedule[x][:interest]}.reduce(0){|s,x| s+=x}
-      (amount * interest_rate - int_received_so_far).send(loan_product.rounding_style)
-    else
-      rounding_schedule[number][:interest].send(loan_product.rounding_style)
-    end
-  end
-  
-end
-
-class EquatedWeeklyRoundedAdjustedLastPayment < EquatedWeekly
-  # This loan product uses the original interest amounts as per the PMT funtion and adjusts principal accordingly.
-  include ExcelFormula
-  # property :purpose,  String
-
-  def self.display_name
-    "Equated Payments - rounded, adjusted in last payment "
-  end
-
-  def scheduled_principal_for_installment(number)
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > actual_number_of_installments
-    return reducing_schedule[number][:principal_payable]
-  end
-
-  def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 0 or number > actual_number_of_installments
-    return reducing_schedule[number][:interest_payable]
-  end
-
-  def actual_number_of_installments
-    reducing_schedule.count
-  end
-
-  def installment_dates
-    insts = reducing_schedule.count
-    return @_installment_dates if @_installment_dates
-    if installment_frequency == :daily
-      # we have to br careful that when we do a holiday bump, we do not get stuck in an endless loop
-      ld = scheduled_first_payment_date - 1
-      @_installment_dates = []
-      (1..insts).each do |i|
-        ld += 1
-        if ld.cwday == weekly_off
-          ld +=1
-        end
-        if ld.holiday_bump.cwday == weekly_off # endless loop
-          ld.holiday_bump(:after)
-        end
-        @_installment_dates << ld
-      end
-      return @_installment_dates
-    end
-        
-    ensure_meeting_day = false
-    ensure_meeting_day = [:weekly, :biweekly].include?(installment_frequency)
-    ensure_meeting_day = true if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
-    @_installment_dates = (0..(insts-1)).to_a.map {|x| shift_date_by_installments(scheduled_first_payment_date, x, ensure_meeting_day) }    
-  end
-
-  def equated_payment
-    payment = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-    rnd = loan_product.rounding || 1
-    actual_payment = (payment / rnd).send(loan_product.rounding_style) * rnd
-  end
-
-private
-  def reducing_schedule
-    return @rounded_schedule if @rounded_schedule
-    @reducing_schedule = {}    
-    balance = amount
-    payment            = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-    1.upto(number_of_installments){|installment|
-      @reducing_schedule[installment] = {}
-      @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
-      if installment == number_of_installments or balance < (payment - @reducing_schedule[installment][:interest_payable])
-        @reducing_schedule[installment][:principal_payable] = balance
-      else
-        @reducing_schedule[installment][:principal_payable] = (payment - @reducing_schedule[installment][:interest_payable])
-      end
-      balance = balance - @reducing_schedule[installment][:principal_payable]
-    }
-    done = false
-    i = 1
-    @rounded_schedule = {}
-    balance = amount
-    actual_payment = equated_payment
-    while not done
-      @rounded_schedule[i] = {}
-      @rounded_schedule[i][:interest_payable] = (i <= @reducing_schedule.count ? @reducing_schedule[i][:interest_payable] : 0).round(2)
-      @rounded_schedule[i][:principal_payable] = [actual_payment - @rounded_schedule[i][:interest_payable], balance].min
-      balance -= @rounded_schedule[i][:principal_payable]
-      i += 1
-      done = true if balance == 0 
-    end
-    return @rounded_schedule
-  end
-
-end
-
-class EquatedWeeklyRoundedNewInterest < EquatedWeekly
-  # This loan product recalculates interest based on the new balances after rounding.
-  include ExcelFormula
-  # property :purpose,  String
-
-  def self.display_name
-    "Reducing balance schedule with new interest (Equated Weekly)"
-  end
-  
-  def scheduled_principal_for_installment(number)
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number} but max is #{number_of_installments}" if number < 0 or number > number_of_installments
-    return reducing_schedule[number][:principal_payable]
-  end
-
-  def scheduled_interest_for_installment(number)  # typically reimplemented in subclasses
-    # number unused in this implentation, subclasses may decide differently
-    # therefor always supply number, so it works for all implementations
-    raise "number out of range, got #{number}" if number < 0 or number > number_of_installments
-    return reducing_schedule[number][:interest_payable]
-  end
-
-  def equated_payment
-    payment            = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-    rnd = loan_product.rounding || 1
-    (payment / rnd).send(loan_product.rounding_style) * rnd
-  end    
-  
-private
-  def reducing_schedule
-    return @reducing_schedule if @reducing_schedule
-    @reducing_schedule = {}    
-    balance = amount
-    actual_payment = equated_payment
-    1.upto(number_of_installments){|installment|
-      @reducing_schedule[installment] = {}
-      @reducing_schedule[installment][:interest_payable]  = ((balance * interest_rate) / get_divider)
-      @reducing_schedule[installment][:principal_payable] = [(actual_payment - @reducing_schedule[installment][:interest_payable]), balance].min
-      balance = balance - @reducing_schedule[installment][:principal_payable]
-    }
-    return @reducing_schedule
-  end
-  
-  def get_divider
-    case installment_frequency
-    when :weekly
-      52
-    when :biweekly
-      26
-    when :fortnightly
-      26
-    when :monthly
-      12
-    when :daily
-      365
-    end    
-  end
-end
-
-# always add new loan types here i.e. at last

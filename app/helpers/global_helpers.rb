@@ -15,7 +15,8 @@ module Merb
     def current_user_info
       staff_or_funder = ""
       staff_or_funder = "#{session.user.staff_member.name}" if session.user.staff_member 
-      staff_or_funder += " #{session.user.funder.name}" if session.user.funder
+      f = Funder.first(:user_id => session.user.id)
+      staff_or_funder += " #{f.name}" if f
       "#{staff_or_funder} logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) | #{link_to 'log out', url(:logout)}"
     end
 
@@ -234,12 +235,12 @@ module Merb
         if part.to_i.to_s.length == part.length  # true when a number (id)
           o = instance_variable_get('@'+url.split('/')[-2].singular)  # get the object (@branch)
           s = (o.respond_to?(:name) ? link_to(o.name, url) : link_to('#'+o.id.to_s, url))
-          crums <<  "#{s}"  # merge the instance names (or numbers)
+          crums <<  "#{s} "  # merge the instance names (or numbers)
         else  # when not a number (id)
           crums << link_to(I18n.t("breadcrumb.#{part}", :default => part.gsub('_', ' ')), url) unless ['centers','clients'].include?(part) # add the resource name
         end
       end
-      '<ul class="breadcrumb"><li>' + ['<a href="/">Home</a>', crums].join('</li><li>') + '</li></ul>'  # fancy separator
+      ['<a href="/">Home  </a>', crums].join(' » ')   # fancy separator
     end
 
     def format_currency(i)
@@ -316,9 +317,10 @@ module Merb
     end
 
     def centers_paying_today_collection(date)
-      Center.paying_today(session.user, date).reduce({}) do |h, c|
-        key   = "Branch: #{c.branch.name}"
-        value = [c.id.to_s, c.name]
+      branches = Branch.all.aggregate(:id, :name).to_hash
+      Center.paying_today(session.user, date).aggregate(:id, :name, :branch_id).reduce({}) do |h, c|
+        key   = "Branch: #{branches[c[2]]}"
+        value = [c[0].to_s, c[1]]
         (h[key] ||= []) << value
         h
       end
@@ -538,8 +540,9 @@ module Merb
     end
 
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})
+      branch ||= 0
       collection = []
-      @acc = Account.all(:branch => branch)
+      @acc = Account.all(:branch_id => (branch.is_a?(Integer) ? branch : branch.id))
       @acc = @acc.all(:account_category => ["Cash", "Bank"]) if journal_type == JournalType.get(4)
       @acc.group_by{|a| a.account_type}.sort_by{|at, as| at.name}.each do |account_type, accounts|
         collection << ['', "#{account_type.name}"]
@@ -655,5 +658,14 @@ module Merb
       end
       Loan.all(hash)
     end
+
+    def repayment_style_select(name = "style")
+      all_repayment_style_choices = REPAYMENT_STYLES.map{|x| [x.to_s, x.to_s]}
+      default_repayment_style = Mfi.first.default_repayment_style ? Mfi.first.default_repayment_style : NORMAL_REPAYMENT_STYLE
+      default_repayment_style_choice = all_repayment_style_choices.select {|style| style[0] == default_repayment_style.to_s}
+      repayment_style_choices = Mfi.first.allow_choice_of_repayment_style ? default_repayment_style_choice + (all_repayment_style_choices.reject {|style| style[0] == default_repayment_style}) : default_repayment_style_choice
+      select :name => name, :collection => repayment_style_choices
+    end
+
   end
 end
