@@ -146,7 +146,7 @@
               %th status
               %th actions
           %tbody
-          - for loan in @loans
+          - @loans.sort_by{|l| l.id}.each do |loan|
             %tr{ :class => cycle('odd','') }
               %td &nbsp;
               %td
