@@ -42,8 +42,18 @@ class LoanHistory
   property :fees_due_today,                  Float, :nullable => false
   property :fees_paid_today,                 Float, :nullable => false
 
+
+
   property :status,                      Enum.send('[]', *STATUSES)
   property :last_status,                 Enum.send('[]', *STATUSES)
+
+  # add a column per status to track approvals, disbursals, etc.
+  STATUSES.each do |status|
+    property "#{status.to_s}_count".to_sym,  Integer, :nullable => false, :default => 0
+    property status,        Float,   :nullable => false, :default => 0
+  end
+  
+
   property :client_id,                   Integer, :index => true
   property :client_group_id,             Integer, :index => true
   property :center_id,                   Integer, :index => true
@@ -71,18 +81,20 @@ class LoanHistory
   
   validates_present :loan,:scheduled_outstanding_principal,:scheduled_outstanding_total,:actual_outstanding_principal,:actual_outstanding_total
 
-  def self.update_holidays(branch_ids, holiday, delete = false)
-    # get the loans which already have a loan history row for the new date
-    # we will have to do a manual update history for them.
-    if delete
-      repository.adapter.execute("update loan_history set date='#{holiday.date.strftime('%Y-%m-%d')}', holiday_id=NULL where holiday_id = #{holiday.id}")
-    else      
-      debugger
-      pls = LoanHistory.all(:branch_id => branch_ids, :date => holiday.new_date).aggregate(:loan_id)
-      s = pls.empty? ? "" : " AND loan_id NOT IN (#{pls.join','})"
-      repository.adapter.execute("update loan_history set date='#{holiday.new_date.strftime('%Y-%m-%d')}', holiday_id=#{holiday.id} where date='#{holiday.date.strftime('%Y-%m-%d')}' AND branch_id in (#{branch_ids.join(',')}) #{s}")
-      pls.each_with_index {|lid,i| l = Loan.get(lid); l.update_history_bulk_insert; puts("Updating #{i}/#{pls.count}")}
-    end
+  def total_paid
+    principal_paid + interest_paid + fees_paid_today
+  end
+
+  def actual_outstanding_interest
+    actual_outstanding_total - actual_outstanding_principal
+  end
+
+  def total_advance_paid
+    advance_principal_paid_today + advance_interest_paid_today
+  end
+
+  def total_default
+    (principal_in_default + interest_in_default).abs
   end
 
   @@selects = {Branch => "b.id", Center => "c.id", Client => "cl.id", Loan => "l.id", Area => "a.id", Region => "r.id", ClientGroup => "cg.id", Portfolio => "p.id"}
@@ -122,8 +134,7 @@ class LoanHistory
       return {:no_group => cols.zip(vals).to_hash}
     end
   end
-
-
+      
 
   def self.sum_cols
     # only some columns make sense to add while aggregating LoanHistory rows.
@@ -261,8 +272,8 @@ class LoanHistory
 
     repository.adapter.query(%Q{
       SELECT 
-        (-1 * SUM(lh.principal_due)) AS advance_principal,
-        (-1 * (SUM(lh.principal_due) + SUM(lh.interest_due))) AS advance_total,
+        (1 * SUM(lh.advance_principal_paid)) AS advance_principal,
+        (1 * (SUM(lh.total_advance_paid))) AS advance_total,
         #{selects}
       FROM loan_history lh, loans l
       WHERE lh.status in (6) AND l.id=lh.loan_id AND lh.date>='#{from_date.strftime('%Y-%m-%d')}' AND lh.date<='#{to_date.strftime('%Y-%m-%d')}'
