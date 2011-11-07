@@ -1,7 +1,7 @@
 class DailyTransactionSummary < Report
   attr_accessor :date, :branch, :branch_id
   
-  DataRow = Struct.new(:disbursement, :collection, :foreclosure, :var_adjustment, :claim_settlement, :write_off)
+  DataRow = Struct.new(:active_clients, :disbursement, :due_today, :collection, :balance_outstanding, :balance_overdue, :foreclosure, :var_adjustment, :claim_settlement, :write_off)
 
   def initialize(params, dates, user)
     @date = (dates and dates[:date]) ? dates[:date] : Date.today
@@ -21,9 +21,13 @@ class DailyTransactionSummary < Report
     branches, data = {}, {}
     extra = []
 
+    due_today = LoanHistory.all(:date => Date.today).aggregate(:branch_id, :scheduled_principal_due.sum, :scheduled_interest_due.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    histories = (LoanHistory.sum_outstanding_grouped_by(self.date, :branch, extra)||{}).group_by{|x| x.branch_id}
     advances  = (LoanHistory.sum_advance_payment(self.date, self.date, [:branch], extra)||{}).group_by{|x| x.branch_id}
     balances  = (LoanHistory.advance_balance(self.date, :branch, extra)||{}).group_by{|x| x.branch_id}
     old_balances = (LoanHistory.advance_balance(self.date-1, :branch, extra)||{}).group_by{|x| x.branch_id}
+    defaults   = LoanHistory.defaulted_loan_info_by(:branch, self.date, extra).group_by{|x| x.branch_id}
+    #.map{|cid, row| [cid, row[0]]}.to_hash
 
     disbursements = (LoanHistory.sum_disbursed_grouped_by(:branch, @date, @date)||{}).map{|x| [x.branch_id, x.loan_amount]}.to_hash
 
@@ -44,22 +48,29 @@ class DailyTransactionSummary < Report
                                                                                              :actual_outstanding_principal.sum, 
                                                                                              :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
 
+    
     #var_adjustments = old_balances - balances + advances
-    @branch.each{|b|
-      data[b]||= DataRow.new(0, {:principal => 0, :interest => 0, :fees => 0, :var => 0, :total => 0}, 
-                             {:principal => 0, :interest => 0, :total => 0}, {:principal => 0, :interest => 0, :total => 0}, 
-                             {:principal => 0, :interest => 0, :total => 0}, {:principal => 0, :interest => 0, :total => 0})
+    @branch.each do |b|
+      data[b]||= DataRow.new(0, 0, 0, {:principal => 0, :interest => 0, :fees => 0, :var => 0, :total => 0}, 
+                             {:principal => 0, :interest => 0, :total => 0}, 
+                             {:principal => 0, :interest => 0, :total => 0},
+                             {:principal => 0, :interest => 0, :total => 0}, 
+                             {:principal => 0, :interest => 0, :total => 0}, 
+                             {:principal => 0, :interest => 0, :total => 0}, 
+                             {:principal => 0, :interest => 0, :total => 0})
       
 #       advance  = advances[c.id][0]        if advances.key?(b.id)
 #       balance  = balances[c.id][0]        if balances.key?(b.id)
 #       old_balance = old_balances[c.id][0] if old_balances.key?(b.id)
-                
-      data[b][0] += disbursements[b.id] || 0
+      data[b][0] += b.clients(:active => true).count         
+      data[b][1] += disbursements[b.id] || 0
+      data[b][2] += due_today[b.id].sum if due_today[b.id]
+      
       # collection
-      data[b][1][:principal] += ((collections[:principal][b.id] || 0) - ( advances.key?(b.id) ? (advances[b.id][0][0] || 0) : 0 )) 
-      data[b][1][:interest]  += ((collections[:interest][b.id] || 0) - 
+      data[b][3][:principal] += ((collections[:principal][b.id] || 0) - ( advances.key?(b.id) ? (advances[b.id][0][0] || 0) : 0 )) 
+      data[b][3][:interest]  += ((collections[:interest][b.id] || 0) - 
                 (( advances.key?(b.id) ? (advances[b.id][0][1] || 0) : 0 ) - ( advances.key?(b.id) ? (advances[b.id][0][0] || 0) : 0 ))) 
-      data[b][1][:fees] += collections[:fees][b.id] || 0 
+      data[b][3][:fees] += collections[:fees][b.id] || 0 
                 
       branches[b.id] = b
       # client fee
@@ -71,48 +82,62 @@ class DailyTransactionSummary < Report
                                GROUP BY branch_id, center_id
                              }).each{|p|
       if b == branches[p.branch_id]
-        data[b][1][:fees] += p.amount.round(2)
+        data[b][3][:fees] += p.amount.round(2)
       end
       }
  
-      data[b][1][:total] += data[b][1][:principal] + data[b][1][:interest] + data[b][1][:fees]
+      data[b][3][:total] += data[b][3][:principal] + data[b][3][:interest] + data[b][3][:fees]
+
+      # balance outstanding
+      if histories.key?(b.id)
+        data[b][4][:principal] += histories[b.id][0].actual_outstanding_principal || 0 
+        data[b][4][:total]     += histories[b.id][0].actual_outstanding_total || 0
+        data[b][4][:interest]  += data[b][4][:total] - data[b][4][:principal]
+      end
+
+      # balance overdue
+      if defaults.key?(b.id)
+        data[b][5][:principal] += defaults[b.id][0].pdiff || 0 
+        data[b][5][:total]     += defaults[b.id][0].tdiff || 0
+        data[b][5][:interest]  += data[b][5][:total] - data[b][5][:principal]
+      end
 
       # foreclosure
       if foreclosures.key?(b.id)
-        data[b][2][:principal] += foreclosures[b.id][0] || 0
-        data[b][2][:interest]  += foreclosures[b.id][1] || 0
-        data[b][2][:total]     += ((foreclosures[b.id][1] || 0) + (foreclosures[b.id][0] || 0))
+        data[b][6][:principal] += foreclosures[b.id][0] || 0
+        data[b][6][:interest]  += foreclosures[b.id][1] || 0
+        data[b][6][:total]     += ((foreclosures[b.id][1] || 0) + (foreclosures[b.id][0] || 0))
       end
 
       # var adjusted
       if advances.key?(b.id)
-        data[b][1][:var] += advances[b.id][0][1] || 0  
-        data[b][1][:total] += (advances[b.id][0][1] || 0)    
+        data[b][3][:var] += advances[b.id][0][1] || 0  
+        data[b][3][:total] += (advances[b.id][0][1] || 0)    
         principal = ((advances[b.id][0][0] || 0) + 
                      (old_balances.key?(b.id) ? (old_balances[b.id][0][0] || 0) : 0) - 
                     (balances.key?(b.id) ? (balances[b.id][0][0] || 0) : 0 ))
         total = ((advances[b.id][0][1] || 0) + 
                  (old_balances.key?(b.id) ? (old_balances[b.id][0][1] || 0) : 0) - 
                 (balances.key?(b.id) ? (balances[b.id][0][1] || 0) : 0 ))
-        data[b][3][:principal] += principal
-        data[b][3][:interest]  += (total - principal)
-        data[b][3][:total] += total
+        data[b][7][:principal] += principal
+        data[b][7][:interest]  += (total - principal)
+        data[b][7][:total] += total
       end
 
       # claimed or death settlement
        if claimed.key?(b.id)
-        data[b][4][:principal] += claimed[b.id][0] || 0
-        data[b][4][:interest]  += ((claimed[b.id][1] || 0) - (claimed[b.id][0] || 0))
-        data[b][4][:total]     += claimed[b.id][1] || 0
+        data[b][8][:principal] += claimed[b.id][0] || 0
+        data[b][8][:interest]  += ((claimed[b.id][1] || 0) - (claimed[b.id][0] || 0))
+        data[b][8][:total]     += claimed[b.id][1] || 0
       end
       
       # written off
       if write_offs.key?(b.id)
-        data[b][5][:principal] += write_offs[b.id][0] || 0
-        data[b][5][:interest]  += ((write_offs[b.id][1] || 0) - (write_offs[b.id][0] || 0))
-        data[b][5][:total]     += write_offs[b.id][1] || 0
+        data[b][9][:principal] += write_offs[b.id][0] || 0
+        data[b][9][:interest]  += ((write_offs[b.id][1] || 0) - (write_offs[b.id][0] || 0))
+        data[b][9][:total]     += write_offs[b.id][1] || 0
       end
-    } 
+    end 
     return data
   end
 end

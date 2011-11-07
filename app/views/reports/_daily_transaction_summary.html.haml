@@ -4,9 +4,17 @@
     %th
       Branch
     %th{:colspan => "1"}
+      Active Clients
+    %th{:colspan => "1"}
       Disbursement
+    %th{:colspan => "1"}
+      Due Collection for today
     %th{:colspan => "5"}
       Cash Collection
+    %th{:colspan => "3"}
+      Balance Outstanding
+    %th{:colspan => "3"}
+      Balance Overdue
     %th{:colspan => "3"}
       Cash Foreclosure
     %th{:colspan => "3"}
@@ -16,7 +24,11 @@
     %th{:colspan => "3"}
       Write Offs
   %tr.header
+    %th    
     %th
+      Count
+    %th
+      Amount
     %th
       Amount
     %th
@@ -27,6 +39,18 @@
       Fee
     %th
       VAR
+    %th
+      Total
+    %th
+      Principal
+    %th
+      Interest
+    %th
+      Total
+    %th
+      Principal
+    %th
+      Interest
     %th
       Total
     %th
@@ -54,21 +78,29 @@
     %th
       Total
   - branch_id = nil
-  - length = 19
+  - length = 27
   - org_total = []
-  - branch_total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  -@data.sort_by{|branch, data| branch.name}.each do |branch, data|
-    -if data.length > 0
+  - branch_total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  - @data.sort_by{|branch, data| branch.name}.each do |branch, data|
+    - if data.length > 0
       %tr.branch
         %td
           %b 
             = branch.name
-        -data.each_with_index do |d, idx|
-          -if idx==0
+        - data.each_with_index do |d, idx|
+          - if idx == 0
+            %td
+              = d.to_i
+              - branch_total[0] += d
+          - elsif idx == 1
             %td
               = d.to_currency
-              - branch_total[0] += d
-          -elsif idx == 1
+              - branch_total[1] += d
+          - elsif idx == 2
+            %td
+              = d.to_currency
+              - branch_total[2] += d
+          - elsif idx == 3
             %td
               = d[:principal].to_currency
               - branch_total[1] += d[:principal]
@@ -84,7 +116,7 @@
             %td
               = d[:total].to_currency
               - branch_total[5] += d[:total]
-          -elsif idx == 2
+          - elsif idx == 4
             %td
               = d[:principal].to_currency
               - branch_total[6] += d[:principal]
@@ -94,7 +126,7 @@
             %td
               = d[:total].to_currency
               - branch_total[8] += d[:total]
-          -elsif idx == 3
+          - elsif idx == 5
             %td
               = d[:principal].to_currency
               - branch_total[9] += d[:principal]
@@ -104,7 +136,7 @@
             %td
               = d[:total].to_currency
               - branch_total[11] += d[:total]
-          -elsif idx == 4
+          - elsif idx == 6
             %td
               = d[:principal].to_currency
               - branch_total[12] += d[:principal]
@@ -114,7 +146,7 @@
             %td
               = d[:total].to_currency
               - branch_total[14] += d[:total]
-          -elsif idx == 5
+          - elsif idx == 7
             %td
               = d[:principal].to_currency
               - branch_total[15] += d[:principal]
@@ -124,6 +156,26 @@
             %td
               = d[:total].to_currency
               - branch_total[17] += d[:total]
+          - elsif idx == 8
+            %td
+              = d[:principal].to_currency
+              - branch_total[18] += d[:principal]
+            %td
+              = d[:interest].to_currency
+              - branch_total[19] += d[:interest]
+            %td
+              = d[:total].to_currency
+              - branch_total[20] += d[:total]
+          - elsif idx == 9
+            %td
+              = d[:principal].to_currency
+              - branch_total[21] += d[:principal]
+            %td
+              = d[:interest].to_currency
+              - branch_total[22] += d[:interest]
+            %td
+              = d[:total].to_currency
+              - branch_total[23] += d[:total]
     - org_total.push(branch_total) 
   %tr.org_total
     %td
@@ -131,4 +183,4 @@
     - branch_total.each do |ele|
       %td
         %b
-          =ele.to_currency
+          = ele.to_currency
