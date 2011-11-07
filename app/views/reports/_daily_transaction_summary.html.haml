@@ -103,79 +103,79 @@
           - elsif idx == 3
             %td
               = d[:principal].to_currency
-              - branch_total[1] += d[:principal]
+              - branch_total[3] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[2] += d[:interest]
+              - branch_total[4] += d[:interest]
             %td
               = d[:fees].to_currency
-              - branch_total[3] += d[:fees]
+              - branch_total[5] += d[:fees]
             %td
               = d[:var].to_currency
-              - branch_total[4] += d[:var]
+              - branch_total[6] += d[:var]
             %td
               = d[:total].to_currency
-              - branch_total[5] += d[:total]
+              - branch_total[7] += d[:total]
           - elsif idx == 4
             %td
               = d[:principal].to_currency
-              - branch_total[6] += d[:principal]
+              - branch_total[8] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[7] += d[:interest]
+              - branch_total[9] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[8] += d[:total]
+              - branch_total[10] += d[:total]
           - elsif idx == 5
             %td
               = d[:principal].to_currency
-              - branch_total[9] += d[:principal]
+              - branch_total[11] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[10] += d[:interest]
+              - branch_total[12] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[11] += d[:total]
+              - branch_total[13] += d[:total]
           - elsif idx == 6
             %td
               = d[:principal].to_currency
-              - branch_total[12] += d[:principal]
+              - branch_total[14] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[13] += d[:interest]
+              - branch_total[15] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[14] += d[:total]
+              - branch_total[16] += d[:total]
           - elsif idx == 7
             %td
               = d[:principal].to_currency
-              - branch_total[15] += d[:principal]
+              - branch_total[17] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[16] += d[:interest]
+              - branch_total[18] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[17] += d[:total]
+              - branch_total[19] += d[:total]
           - elsif idx == 8
             %td
               = d[:principal].to_currency
-              - branch_total[18] += d[:principal]
+              - branch_total[20] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[19] += d[:interest]
+              - branch_total[21] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[20] += d[:total]
+              - branch_total[22] += d[:total]
           - elsif idx == 9
             %td
               = d[:principal].to_currency
-              - branch_total[21] += d[:principal]
+              - branch_total[23] += d[:principal]
             %td
               = d[:interest].to_currency
-              - branch_total[22] += d[:interest]
+              - branch_total[24] += d[:interest]
             %td
               = d[:total].to_currency
-              - branch_total[23] += d[:total]
+              - branch_total[25] += d[:total]
     - org_total.push(branch_total) 
   %tr.org_total
     %td
