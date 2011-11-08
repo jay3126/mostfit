@@ -1,9 +1,11 @@
-- @journals = Journal.all("postings.account_id" => @account.id, :order => [:date.desc]).paginate(:page => params[:page], :per_page => 25)
+- @journals = Journal.all("postings.account_id" => @account.id, :order => [:created_at.desc]).paginate(:page => params[:page], :per_page => 25)
 = paginate @journals
 %table.narrow.form
   %tr
     %th
       id
+    %th
+      Recorded at
     %th
       Date
     %th 
@@ -14,10 +16,9 @@
       Account Credit
   - counter = 0
   - @journals.each do |journal|
-    - debugger
     - postings = Posting.all(:journal_id => journal.id).group_by{|x| x.amount>0 ? :credit : :debit}
-    - time_format = Mfi.first.date_format || "%d-%m-%Y"
-    - time_format += " %H:%M"
+    - date_format = Mfi.first.date_format || "%d-%m-%Y"
+    - time_format = date_format + " %H:%M"
     - counter += 1 
     - set_class = counter % 2 == 1 ? 'odd' : 'even'
     - rowspan_count = postings.size + 1
@@ -25,7 +26,9 @@
       %td{:rowspan => rowspan_count}
         = journal.id
       %td{:rowspan => rowspan_count}
-        = journal.date.strftime(time_format)
+        = journal.created_at.strftime(time_format)
+      %td{:rowspan => rowspan_count}
+        = journal.date.strftime(date_format)
       %td{:rowspan => rowspan_count} 
         = journal.comment
     - (postings[:debit] || []).each do |p|

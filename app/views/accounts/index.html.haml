@@ -13,8 +13,6 @@
       Accounting rules
     %li#new_voucher
       New voucher
-    %li#journal_entries
-      Journal entries
     %li#misc
       Miscellaneous
     %li#reconcile
@@ -50,8 +48,6 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:rule_books, :return => "/accounts")}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url({:controller => :journals, :action => :new, :return => url(:accounts)})}
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:journals)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:action => :duplicate)}
   %div.tab

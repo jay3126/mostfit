@@ -1,13 +1,54 @@
 %h1
-  Journal
-= link_to 'Delete',  "/application/delete/#{@journal.id}?model=journal&return=/journals/#{@journal.id}//", :class => 'delete'
+  = "Journal #{@journal.id}"
 
-%h3
-  = @journal.comment
+- journal = @journal
+- postings = journal.postings
 
-- @journal.postings.each do |p|
-  == #{p.account.name} => #{p.amount}<br>
-        
+%table.report.nojs
+  %tr
+    %th
+      id
+    %th
+      Recorded at
+    %th
+      Date
+    %th
+      Description
+    %th{:colspan => 2}
+      Account Debit
+    %th{:colspan => 2}
+      Account Credit
+  - counter = 0
+  - postings_grouped = postings.group_by{|x| x.amount>0 ? :credit : :debit}
+  - date_format = Mfi.first.date_format || "%d-%m-%Y"
+  - time_format = date_format + " %H:%M"
+  - counter += 1
+  - set_class = counter % 2 == 1 ? 'odd' : 'even'
+  - rowspan_count = postings.size + 1
+  %tr{:class => set_class}
+    %td{:rowspan => rowspan_count}
+      = journal.id
+    %td{:rowspan => rowspan_count}
+      = journal.created_at.strftime(time_format)
+    %td{:rowspan => rowspan_count}
+      = journal.date.strftime(date_format)
+    %td{:rowspan => rowspan_count}
+      = journal.comment
+  - (postings_grouped[:debit] || []).each do |p|
+    %tr{:class => set_class}
+      %td
+        = p.account.name if p.account
+      %td
+        = p.amount.to_account_balance
+      %td{:colspan => 2}
+  - (postings_grouped[:credit] || []).each do |p|
+
+    %tr{:class => set_class}
+      %td{:colspan => 2}
+      %td
+        = p.account.name if p.account
+      %td
+        = p.amount.to_account_balance
 
 |
 = link_to 'Back', url(:journals)
