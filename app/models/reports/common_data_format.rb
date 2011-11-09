@@ -35,26 +35,14 @@ module Highmark
       append_to_file_as_csv([headers["CNSCRD"]], file_cnscrd)
       append_to_file_as_csv([headers["ADRCRD"]], file_adrcrd)
       append_to_file_as_csv([headers["ACTCRD"]], file_actcrd)
-      # @data["CNSCRD"] << headers["CNSCRD"]
-      # @data["ADRCRD"] << headers["ADRCRD"]
-      # @data["ACTCRD"] << headers["ACTCRD"]
-      # @data << headers
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Loan.all(:fields => [:id]).map{|x| x.id}.uniq
-      # cut_off_date = @from_date
-      # cut_off_date = @to_date << 3 
-      # ineligible_written_off_loans = LoanHistory.all(:fields => [:loan_id], :status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
-      # ineligible_preclosed_loans = LoanHistory.all(:fields => [:loan_id], :status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
-      # ineligible_repaid_loans = LoanHistory.all(:fields => [:loan_id], :status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
-      eligible_loans = all_loans # - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
+      cut_off_date = @from_date
+      ineligible_written_off_loans = LoanHistory.all(:status => :written_off, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+      ineligible_preclosed_loans = LoanHistory.all(:status => :preclosed, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq 
+      ineligible_repaid_loans = LoanHistory.all(:status => :repaid, :date.lte => cut_off_date).map{|x| x.loan_id}.uniq
+      eligible_loans = all_loans - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
       
-      #loans = Loan.all(:id => eligible_loans)
-      
-      # if @branch_id
-      #   loans = Loan.all("client.center.id" => @center.map{|c| c.id}, :applied_on.lte => @date)
-      # else
-      #   loans = Loan.all("client.center.branch.id" => @branch.map{|b| b.id}, :applied_on.lte => @date)
-      # end
       eligible_loans.each do |l_id|
         l = Loan.get(l_id)
         client = l.client
@@ -67,8 +55,7 @@ module Highmark
         end
         lh = l.loan_history(:date.lte => @to_date).last if lh.nil? # this is there because in some cases it has been observed that the l.status function returns :repaid but the last loan history record for that loan is that of :outstanding.
         debugger if lh.nil?
-        # lh     = LoanHistory.first(:loan_id => l.id, :date.lte => Date.today, :status => [:disbursed, :outstanding], :order => [:date.desc])
-           
+                
         rows = row(l, client, center, branch, lh, attendance_record, absent_record)
 
         #the following lines of code replace the blanks with nils
@@ -80,11 +67,8 @@ module Highmark
           @data["CNSCRD"] << rows["CNSCRD"]
           append_to_file_as_csv([rows["CNSCRD"]], file_cnscrd)
           append_to_file_as_csv([rows["ADRCRD"]], file_adrcrd)
-          # @data["ADRCRD"] << rows["ADRCRD"]
         end
         append_to_file_as_csv([rows["ACTCRD"]], file_actcrd)
-        # @data["ACTCRD"] << rows["ACTCRD"]
-        # @data << row(l, client, center, branch, lh, attendance_record) 
       end
       
       file_adrcrd.close
@@ -303,9 +287,9 @@ module Highmark
                      client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #permanent address
                      nil, #state code
                      client.address_pin, #pin code
-                     client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #present address
+                     nil, #client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #present address
                      nil, #state code
-                     client.address_pin, #pin code
+                     nil, #client.address_pin, #pin code
                      nil, #dummy reserved for future use
                      client.id.to_s.truncate(100, ""), #parent id
                      nil, #extraction field id
@@ -329,23 +313,23 @@ module Highmark
                      (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
                      ( ( (loan.status == :repaid and loan_history.status == :repaid) || (loan.status == :preclosed and loan_history.status == :preclosed) || (loan.status == :claim_settlement and loan_history.status == :claim_settlement) ) ? loan_history.date.strftime("%d%m%Y").truncate(8, "") : nil), #loan closed
                      loan_history.date.strftime("%d%m%Y").truncate(8, ""), #loan closed
-                     (loan.amount_applied_for ? loan.amount_applied_for.to_f.to_s.truncate(9, "") : nil),
-                     (loan.amount_sanctioned ? loan.amount_sanctioned.to_f.to_s.truncate(9, "") : nil), #amount approved or sanctioned
-                     loan.amount.to_f.to_s.truncate(9, ""), #amount disbursed
+                     (loan.amount_applied_for ? loan.amount_applied_for.to_i.to_s.truncate(9, "") : nil),
+                     (loan.amount_sanctioned ? loan.amount_sanctioned.to_i.to_s.truncate(9, "") : nil), #amount approved or sanctioned
+                     loan.amount.to_i.to_s.truncate(9, ""), #amount disbursed
                      loan.number_of_installments.to_s.truncate(3, ""), #number of installments
                      repayment_frequency[loan.installment_frequency], #repayment frequency
-                     ((loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1)).to_f.to_s.truncate(9, "")),   #installment amount / minimum amount due
-                     loan_history.actual_outstanding_total.to_f.to_s.truncate(9, ""),
-                     (((loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total) > 0) ? (loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total).to_f.round(2).to_s.truncate(9, "") : nil), #amount overdue
+                     ((loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1)).to_i.to_s.truncate(9, "")),   #installment amount / minimum amount due
+                     loan_history.actual_outstanding_total.to_i.to_s.truncate(9, ""),
+                     (((loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total) > 0) ? (loan_history.actual_outstanding_total - loan_history.scheduled_outstanding_total).to_i.round(2).to_s.truncate(9, "") : 0), #amount overdue
                      (loan_history.days_overdue > 999 ? 999 : loan_history.days_overdue).to_s.truncate(3, ""), #days past due
-                     (loan_history.status == :written_off ? actual_outstanding_principal.round(2).to_f.to_s : nil), #write off amount
+                     (loan_history.status == :written_off ? actual_outstanding_principal.round(2).to_i.to_s : nil), #write off amount
                      (loan.written_off_on.nil? ? nil : loan.written_off_on.strftime("%d%m%Y").truncate(8, "")), #date written off
                      nil, #write-off reason
                      attendance_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id).count.to_s.truncate(3, ""), #no of meetings held
                      absent_record[center.id][client.id], #Attendance.all(:client_id => client.id, :center_id => center.id, :status => "absent").count.to_s.truncate(3, ""), #no of meetings missed
                      insurance_indicator[(not loan.insurance_policy.nil?)], #insurance indicator
                      nil, #type of insurance
-                     (loan.insurance_policy.nil? ? nil : loan.insurance_policy.premium.to_f.to_s.truncate(10, "")), #sum assured / coverage
+                     (loan.insurance_policy.nil? ? nil : loan.insurance_policy.premium.to_i.to_s.truncate(10, "")), #sum assured / coverage
                      meeting_day_of_the_week[center.meeting_day].to_s.truncate(3, ""), #meeting day of the week
                      center.meeting_time.truncate(5, ""), #meeting time of the day
                      nil, #dummy reserved for future use
