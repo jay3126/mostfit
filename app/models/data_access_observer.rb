@@ -85,7 +85,6 @@ class DataAccessObserver
   end
   
   before :destroy! do
-    true
   end
 
 end

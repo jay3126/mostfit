@@ -263,6 +263,13 @@ class Loan
               :funding_line_id => FundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id,
               :applied_by_staff_id => StaffMember.first(:name => row[headers[:applied_by_staff]]).id,
               :approved_by_staff_id => StaffMember.first(:name => row[headers[:approved_by_staff]]).id,
+<<<<<<< HEAD
+              :repayment_style_id => RepaymentStyle.first(:name => row[headers[:repayment_style]]).id,
+              :c_center_id => Center.first(:name => row[headers[:center]]).id,
+              :client => Client.first(:reference => row[headers[:client_reference]]))
+    obj.history_disabled=true
+    [obj.save!, obj]
+=======
               :reference => row[headers[:reference]], :client => Client.first(:reference => row[headers[:client_reference]]))
     obj.history_disabled=true
     saved = obj.save
@@ -279,6 +286,7 @@ class Loan
     end
     debugger unless saved
     [saved, obj]
+>>>>>>> new-layout
   end
 
   def is_valid_loan_product_amount; true; end #is_valid_loan_product(:amount); end
