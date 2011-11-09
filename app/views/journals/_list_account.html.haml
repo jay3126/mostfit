@@ -23,7 +23,8 @@
     - time_format = date_format + " %H:%M"
     - counter += 1 
     - set_class = counter % 2 == 1 ? 'odd' : 'even'
-    - rowspan_count = postings.size + 1
+    - postings_count = postings[:debit].size + postings[:credit].size
+    - rowspan_count = postings_count + 1
     %tr{:class => set_class}
       %td{:rowspan => rowspan_count}
         = journal.id
