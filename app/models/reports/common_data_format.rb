@@ -54,6 +54,7 @@ module Highmark
           lh = l.loan_history(:status => l.status(@to_date), :date.lte => @to_date).first # this is because after a loan is written off, preclosed or under claim settlement all the succeeding loan history records of that loan change to the same status. Hence we go for the first status and in case of repaid it is always the last
         end
         lh = l.loan_history(:date.lte => @to_date).last if lh.nil? # this is there because in some cases it has been observed that the l.status function returns :repaid but the last loan history record for that loan is that of :outstanding.
+        next if lh.nil?
         debugger if lh.nil?
                 
         rows = row(l, client, center, branch, lh, attendance_record, absent_record)
