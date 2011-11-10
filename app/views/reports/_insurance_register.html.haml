@@ -2,85 +2,51 @@
 %table.report.nojs
   %tr.header
     %th{:width => "10px"}
-      Loan Account No.
+      Branch Name
     %th
-      Unique Reference Number / Cust ID
+      Center Name
     %th
-      Loan Amount
+      Client Name
     %th
-      Full Name with Initials
-    %th
-      Gender
+      Client Id
     %th
       Age
     %th
-      Date of Birth
+      Spouse Name
     %th
-      Date of Disbursement
+      Spouse Age
     %th
-      Branch Name
+      Loan Id
     %th
-      Occupation
+      Loan Amount
     %th
-      Member(M)/ Guarantor(G)
+      Disbursal Date
+    %th
+      Nominee Name
+
   - @data.each do  |row|
     %tr 
       %td{:width => "10px"}
-        = row[:loan_id]
+        = row[:branch_name]
       %td
-        = row[:client_id]
-      %td
-        = row[:amount]
-      %td
+        = row[:center_name]
+      %th
         = row[:client_name]
       %td
-        - if row[:client_gender] == 3
-          = "Male"
-        - elsif row[:client_gender] == 2
-          = "Female"
-        - else
-          = "-"
+        = row[:client_id]
       %td
         - age = row[:c_date_of_birth] ? (Time.now.year - row[:c_date_of_birth].year) : ""
         = age
       %td
-        = row[:c_date_of_birth]
+        = row[:client_spouse_name]
       %td
-        = row[:disbursal_date]
+        - age1 = row[:spouse_date_of_birth] ? (Time.now.year - row[:spouse_date_of_birth].year) : ""
+        = age1
       %td
-        = row[:branch_name]
-      %td
-        - occupation = row[:c_occupation_id] ? Occupation.get(row[:c_occupation_id]).name : "-"
-        = occupation
-      %td
-        = "M"
-    %tr
-      %td{:width => "10px"}
         = row[:loan_id]
-      %td
-        = "G-" + row[:guarantor_id].to_s
       %td
         = row[:amount]
       %td
-        = row[:guarantor_name]
-      %td
-        - if row[:g_gender] == 3
-          = "Male"
-        - elsif row[:g_gender] == 2
-          = "Female"
-        - else
-          = "-"
-      %td
-        - age = row[:g_date_of_birth] ? (Time.now.year - row[:g_date_of_birth].year) : ""
-        = age
-      %td
-        = row[:g_date_of_birth]
-      %td
         = row[:disbursal_date]
       %td
-        = row[:branch_name]
-      %td
-        - occcupation = row[:g_occupation_id] ? (Occupation.get(row[:g_occupation_id]).name) : "-"
-        = occupation
-      %td
-        = "G"
+        = row[:nominee_name]
