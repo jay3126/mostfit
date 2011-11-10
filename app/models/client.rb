@@ -135,6 +135,14 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
+  validates_with_method :is_there_space_in_the_client_group?
+
+  def is_there_space_in_the_client_group?
+    unless self.client_group.nil?
+      return [false, "The number of clients in this group exceeds the maximum number of members permissible"] if self.client_group.clients.count >= self.client_group.number_of_members
+    end
+    return true
+  end
 
   def update_loan_cache
     loans.each{|l| l.update_loan_cache(true); l.save}
