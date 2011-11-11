@@ -59,7 +59,7 @@ Merb::BootLoader.before_app_loads do
   I18n::Backend::Simple.send(:include, I18n::Backend::PO)
   I18n.load_path << "#{Merb.root}/config/locales/hi.po"
   I18n.load_path << "#{Merb.root}/config/locales/en.po"
-
+  I18n.load_path << "#{Merb.root}/config/locales/es.po"
   begin
     require "pdf/writer"
     require "pdf/simpletable"

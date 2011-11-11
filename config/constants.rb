@@ -99,7 +99,7 @@ API_SUPPORT_FORMAT = ["xml"]
 LOAN_AGEING_BUCKETS = [0, 30, 60, 90, 180, 365, :older]
 LOSS_PROVISION_PERCENTAGES_BY_BUCKET = [0, 10, 25, 50, 75, 90, 100]
 DEFAULT_LOCALE = 'en'
-LOCALES = [["en","English"],["hi","Hindi"]]
+LOCALES = [["en","English"],["hi","Hindi"],["es","Spanish"]]
 DEFAULT_ORIGIN = "server"
 #Date format initializers
 #PREFERED_DATE_PATTERNS = ["%d-%m-%y", "%m-%d-%y", "%y-%m-%d", "%y-%d-%m", "%d-%m-%Y", "%m-%d-%Y", "%Y-%m-%d", "%Y-%d-%m"]
