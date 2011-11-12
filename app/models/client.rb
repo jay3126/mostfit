@@ -485,3 +485,6 @@ class Client
    end
 
  end
+
+class MicroEnterpriseLoanClient < Client
+end
