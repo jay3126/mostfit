@@ -86,7 +86,6 @@ class Center
     # then cycle through this hash and get the appropriate dates
     dates = []
     dvs.keys.sort.each_with_index{|date,i|
-      debugger
       d1 = [date,from].max
       d1 -= 1 if [dvs[date].what].flatten.include?(d1.weekday)
       d2 = dvs.keys.sort[i+1] || (to.class == Date ? to - 1: (to - dates.count - 1))
@@ -176,7 +175,6 @@ class Center
   end
 
   def self.paying_today(user, date = Date.today)
-    debugger
     center_ids = LoanHistory.all(:date => date||Date.today).aggregate(:center_id)
     centers = center_ids.blank? ? [] : Center.all(:id => center_ids)
     if user.staff_member

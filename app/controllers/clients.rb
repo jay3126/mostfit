@@ -176,6 +176,18 @@ class Clients < Application
 
 end # Clients
 
+class MicroEnterpriseLoanClients < Clients
+
+  before :do_params, :only => [:create, :update]
+
+  def do_params
+    params[:micro_enterprise_loan_client][:member_details] = Marshal.dump(params[:micro_enterprise_loan_client][:member_details])
+    params[:micro_enterprise_loan_client][:expenses] = Marshal.dump(params[:micro_enterprise_loan_client][:expenses])
+  end
+
+end
+
+
 # This is how you massage params to fit the needs of various client types, by adding a before hook as below
 
 # class JlgClients < Clients
