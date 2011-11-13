@@ -11,7 +11,7 @@
         For center:
       %td
         = select :center_id, :collection => Center.all(:branch => @client.center.branch), :value_method => :id, :text_method => :name, :selected => @client.center.id.to_s
-  -else
+  - else
     %tr
       %th 
         For center
@@ -113,12 +113,12 @@
     %td
       = text_field :spouse_name, :size => 40
   %tr
-   %th
-     Spouse Date of Birth:
+    %th
+      Spouse Date of Birth:
     %td
       = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
-   %th
+    %th
       Father's name:
     %td
       = text_field :fathers_name, :size => 40
@@ -128,8 +128,8 @@
     %td{ :colspan => '2' }
       &nbsp;
   %tr
-   %th
-     Address:
+    %th
+      Address:
     %td
       = text_area :address, :rows => 6, :cols => 38
       &nbsp;&nbsp;&nbsp;&nbsp;
