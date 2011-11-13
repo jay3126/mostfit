@@ -82,12 +82,8 @@ class DateVector
         while (to.class == Date ? d <= to : i <= to)
           [@every].flatten.each do |e|
             [@what].flatten.each do |w|
-<<<<<<< HEAD
               d = d.first_day_of_month.next_(w,e.to_i)
               debugger if d.nil?
-=======
-              d = d.first_day_of_month.next_(w,e)
->>>>>>> 928ea221c30e23cf6842f7a5347ee7caf51fbf65
               rv << d if d >= from and (to.class == Date ? d  <= to : i <= to)
             end
           end
@@ -97,10 +93,6 @@ class DateVector
         
       end
     end
-<<<<<<< HEAD
-    debugger
-=======
->>>>>>> 928ea221c30e23cf6842f7a5347ee7caf51fbf65
     @dates = rv.select{|d| d >= from and (to.class == Date ? d <= to : true)}
   end
 end
