@@ -29,7 +29,7 @@ class Reports < Application
 
     if @report
       display @report
-    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport
+    elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport and not klass==CommonDataFormat
       #Generating report
       @report   = klass.new(params[class_key], dates, session.user)
       if not params[:submit]
@@ -50,12 +50,52 @@ class Reports < Application
         end
       end
   
+    elsif klass==CommonDataFormat
+      @data = []
+      @report   = klass.new(params[class_key], dates, session.user)
+      @folder = File.join(Merb.root, "doc", "csv", "reports")
+      FileUtils.mkdir_p(@folder)
+      # filename = File.join(@folder, "#{@report.name} for #{@date}.csv")
+      filename = params[:filename]
+      @files = Dir.entries(@folder).select{|f| f.match(/Common.Data.Format.*csv$/)} if File.exists?(@folder)
+      # if not params[:filename]
+      #   display @data
+      # else
+      #   file = File.read(filename)
+        
+      #   send_data(file.to_s, :filename => filename, :type => "csv")
+      # end
+      if not params[:submit] and params[:filename]
+        render :form
+        display @data
+      elsif not params[:filename].empty?
+        file = File.read(filename)
+        send_data(file.to_s, :filename => filename, :type => "csv")
+      else
+        if @report.valid?
+          case @report.method(:generate).arity
+          when 0
+            @data = @report.generate
+          when 1
+            @data = @report.generate(params)
+          end
+          file = @report.get_csv(@data, filename)
+          send_data(file.to_s)
+          display @data
+        else
+          params.delete(:submit)
+          message[:error] = "Report cannot be generated"
+          render :form
+        end
+      end
+      
     elsif id.nil?
       @reports = klass.all(:order => [:start_date.desc])
       if klass==DuplicateClientsReport and (DuplicateClientsReport.count==0 or (Date.today - DuplicateClientsReport.all.aggregate(:created_at).max).to_i>6)
         DuplicateClientsReport.new.generate
       end
       display @reports
+         
     elsif id and params[:format] == "pdf"
       send_data(@report.get_pdf.generate, :filename => 'report.pdf')
     end
@@ -103,7 +143,7 @@ class Reports < Application
       raise InternalServerError
     end
   end
-
+  
   private
   def get_dates(class_key)
     dates = {}

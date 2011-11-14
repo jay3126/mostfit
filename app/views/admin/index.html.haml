@@ -77,6 +77,8 @@
     %h2 Data
     %ul.icon_links
       %li
+        = link_to_with_rights 'Highmark Data Submission', url(:controller => 'admin', :action => "credit_bureau"), :class => 'download icon'
+      %li
         = link_to_with_rights 'Upload data', resource(:uploads), :class => 'upload icon'
       %li
         = link_to_with_rights 'Download data', url(:controller => 'admin', :action => "download"), :class => 'download icon'
