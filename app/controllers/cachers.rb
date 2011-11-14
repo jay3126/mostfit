@@ -20,7 +20,7 @@ class Cachers < Application
     if @from_date and @to_date
       (@from_date..@to_date).each{|date| BranchCache.update(date)}
     else
-      BranchCache.update(@date)
+      BranchCache.update(@date || Date.today)
     end
     redirect request.referer
   end
@@ -43,7 +43,7 @@ class Cachers < Application
         cachers.reduce(:consolidate)
       end
     end
-    display @cachers, :template => 'cachers/index'
+    display @cachers, :template => 'cachers/index', :layout => :printer
   end
 
   def split
@@ -109,6 +109,7 @@ class Cachers < Application
     else 
       @level = (not params[:center_id].blank?) ? :loans : ((not params[:branch_id].blank?) ? :centers : :branches)
     end
+
   end
 
 end

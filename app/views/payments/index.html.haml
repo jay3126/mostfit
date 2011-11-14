@@ -207,8 +207,8 @@
           - interest_so_far += lh.interest_due
           - principal_received_so_far += lh.principal_paid
           - interest_received_so_far += lh.interest_paid
-          - scheduled_principal = lh.principal_due
-          - scheduled_interest =  lh.interest_due
+          - scheduled_principal = lh.scheduled_principal_due
+          - scheduled_interest =  lh.scheduled_interest_due
           - if lh.date > Date.today and not passed
             - passed = true
             - if not first
