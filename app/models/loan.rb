@@ -870,10 +870,6 @@ class Loan
   def extend_loan
     unless @loan_extended
       if rs
-<<<<<<< HEAD
-        debugger
-=======
->>>>>>> takeover
         self.extend(Kernel.module_eval("Mostfit::PaymentStyles::#{rs.style.to_s}"))
         @loan_extended = true
       else
@@ -1041,14 +1037,10 @@ class Loan
   # the installment dates
   def installment_dates
     return @_installment_dates if @_installment_dates
-<<<<<<< HEAD
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
-      
       @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, scheduled_first_payment_date))).uniq
       return @_installment_dates
     end
-=======
->>>>>>> takeover
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
       @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, scheduled_first_payment_date))).uniq
       return @_installment_dates
