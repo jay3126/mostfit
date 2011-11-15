@@ -91,6 +91,9 @@ class Cacher
     self.all(:stale => true)
   end
 
+  def noop
+    0
+  end
 
   def self.get_missing_centers
     debugger
