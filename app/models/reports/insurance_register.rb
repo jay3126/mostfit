@@ -19,7 +19,6 @@ class InsuranceRegister < Report
   end
 
   def generate
-    debugger
     insurance_policies = InsurancePolicy.all(:date_from => @from_date..@to_date, 'client.center.branch_id' => @branch_id)
     clients = insurance_policies.clients.map{|c| [c.id, c]}.to_hash
     loans = insurance_policies.loans.map{|l| [l.id, l]}.to_hash

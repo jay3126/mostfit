@@ -121,7 +121,6 @@ module Mostfit
           # debugger if $debug
           [date, row.merge(:balance => row[:balance] + (row[:installment_number] >= 26 ? @premium : 0))]
         }.to_hash
-        debugger
         return @adjusted_schedule
       end
     end  # Dairy Loan
