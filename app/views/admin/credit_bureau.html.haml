@@ -1,0 +1,17 @@
+%h1 Highmark Data Submission
+
+%h2 Common Data Format Files
+- if @files
+  - if @files.empty?
+    %h3 
+      == No reports exist as yet.
+  - else
+    %table
+      - @files.each do |f|
+        %tr
+          %td
+            = link_to f, url(:controller => :admin, :action => 'send_report', :filename => (File.join(@folder, f)))
+      %br
+- else
+  %h3 
+    == No reports exist as yet 

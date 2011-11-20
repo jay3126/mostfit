@@ -74,7 +74,6 @@ class Center
   def get_meeting_dates(to = Date.new(2100,12,31),from = creation_date)
     # to can be a date or a number
     # first find the date_Vectors for all center_meeting_days as a hash {:valid_from => DateVector}
-    debugger
     select = to.class == Date ? {:valid_from.lte => to} : {}
     dvs = center_meeting_days.all(select).map{|cmd| [cmd.valid_from, cmd.date_vector]}.to_hash
 
@@ -93,7 +92,6 @@ class Center
       _ds = _ds[0..(to - dates.count - 1)] if to.class == Fixnum
       dates.concat(_ds)
     }
-    debugger
     dates.sort
   end
 
@@ -134,7 +132,6 @@ class Center
 
   
   def meeting_day_for(date)
-    debugger
     @meeting_days ||= self.center_meeting_days(:order => [:valid_from])
     if @meeting_days.length==0
       meeting_day

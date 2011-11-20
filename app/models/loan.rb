@@ -811,7 +811,6 @@ class Loan
       }
     end
     # we have to do the following to avoid the circular reference from total_to_be_received.
-    debugger
     total = @schedule[@schedule.keys.max][:total]
     @schedule.each { |k,v| v[:total_balance] = (total - v[:total]).round(2)}
     @schedule

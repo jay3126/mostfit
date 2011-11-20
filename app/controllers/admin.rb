@@ -46,6 +46,17 @@ class Admin < Application
     DirtyLoan.clear(params[:id])
     render "done", :layout => false
   end
+  
+  def credit_bureau
+    @folder = File.join(Merb.root, "doc", "csv", "reports")
+    FileUtils.mkdir_p(@folder)
+    @files = Dir.entries(@folder).select{|f| f.match(/Common.Data.Format.*csv$/)} if File.exists?(@folder)
+    render
+  end
+
+  def send_report(filename)
+    send_data(File.read(filename), :filename => filename, :type => "csv")
+  end
 
   def clear_loans
     DirtyLoan.send(:class_variable_set,"@@poke_thread",true)
