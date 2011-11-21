@@ -84,7 +84,7 @@ Merb::BootLoader.before_app_loads do
   require 'lib/extensions.rb'
 
   Merb::Plugins.config[:exceptions] = {
-    :email_addresses => ['svs@intellecap.net'],
+    :email_addresses => ['svs@intellecap.net', 'janmejay.rai@intellecap.net'],
     :app_name        => "Mostfit",
     :environments    => ['production'],
     :email_from      => "production@mostfit.org",
