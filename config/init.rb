@@ -52,8 +52,8 @@ Merb::BootLoader.before_app_loads do
   require 'haml_gettext'
   
   #csv generation
-  require 'csv'
-  require 'lib/csv/common_data_csv.rb'
+  # require 'csv'
+  # require 'lib/csv/common_data_csv.rb'
 
   #initialize i18n
   require 'i18n'
