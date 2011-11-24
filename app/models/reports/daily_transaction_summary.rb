@@ -1,5 +1,5 @@
 class DailyTransactionSummary < Report
-  attr_accessor :date, :branch, :branch_id
+  attr_accessor :date, :branch_id
   
   DataRow = Struct.new(:active_clients, :disbursement, :due_today, :collection, :balance_outstanding, :balance_overdue, :foreclosure, :var_adjustment, :claim_settlement, :write_off)
 
@@ -18,126 +18,146 @@ class DailyTransactionSummary < Report
   end
   
   def generate
-    branches, data = {}, {}
+    objects, data = {}, {}
     extra = []
 
-    due_today = LoanHistory.all(:date => Date.today).aggregate(:branch_id, :scheduled_principal_due.sum, :scheduled_interest_due.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
-    histories = (LoanHistory.sum_outstanding_grouped_by(self.date, :branch, extra)||{}).group_by{|x| x.branch_id}
-    advances  = (LoanHistory.sum_advance_payment(self.date, self.date, [:branch], extra)||{}).group_by{|x| x.branch_id}
-    balances  = (LoanHistory.advance_balance(self.date, :branch, extra)||{}).group_by{|x| x.branch_id}
-    old_balances = (LoanHistory.advance_balance(self.date-1, :branch, extra)||{}).group_by{|x| x.branch_id}
-    defaults   = LoanHistory.defaulted_loan_info_by(:branch, self.date, extra).group_by{|x| x.branch_id}
+    if @branch_id.nil?
+      grouper = :branch
+      @grouper_objects = Branch.all.sort
+    else
+      grouper = :center
+      @grouper_objects = Center.all(:branch_id => @branch_id).sort
+    end
+
+    grouper_id = (grouper.to_s + '_id')
+
+    due_today = LoanHistory.all(:date => @date).aggregate(grouper_id.to_sym, :principal_due.sum, :interest_due.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    histories = (LoanHistory.sum_outstanding_grouped_by(self.date, grouper, extra)||{}).group_by{|x| x.send(grouper_id)}
+    advances  = (LoanHistory.sum_advance_payment(self.date, self.date, grouper, extra)||{}).group_by{|x| x.send(grouper_id)}
+    balances  = (LoanHistory.advance_balance(self.date, grouper, extra)||{}).group_by{|x| x.send(grouper_id)}
+    old_balances = (LoanHistory.advance_balance(self.date-1, grouper, extra)||{}).group_by{|x| x.send(grouper_id)}
+
+    defaults   = LoanHistory.defaulted_loan_info_by(grouper, self.date, extra).group_by{|x| x.send(grouper_id)}
     #.map{|cid, row| [cid, row[0]]}.to_hash
 
-    disbursements = (LoanHistory.sum_disbursed_grouped_by(:branch, @date, @date)||{}).map{|x| [x.branch_id, x.loan_amount]}.to_hash
-
     collections   = {:principal => {}, :interest => {}, :fees => {}}
-    LoanHistory.sum_repayment_grouped_by(:branch, @date, @date).each{|type, branches|
-      collections[type] = branches.map{|b| [b.branch_id, b.amount]}.to_hash
+    LoanHistory.sum_repayment_grouped_by(grouper, @date, @date).each{|type, objects|
+      collections[type] = objects.map{|go| [go.send(grouper_id), go.amount]}.to_hash
     }
+   
+    #foreclosures as calculated because there is a doubt that Loan History is getting created properly. for instance prepayment is not recoreded as a preclosure
+    foreclosures  = LoanHistory.all(:status => :repaid,  :date => @date, :scheduled_outstanding_principal.gt => 0).aggregate(grouper_id.to_sym, :principal_paid.sum, :interest_paid.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
     
-    foreclosures  = LoanHistory.all(:status => :repaid,  :date => @date,
-                                    :scheduled_outstanding_principal.gt => 0).aggregate(:branch_id, 
-                                                                                        :principal_paid.sum, 
-                                                                                        :interest_paid.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
-    write_offs    = LoanHistory.all(:status => :written_off,  :date => @date).aggregate(:branch_id, 
-                                                                                        :actual_outstanding_principal.sum, 
-                                                                                        :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    # preclosures calculated if the Loan History get created properly. A pre-payment has to be recorded as a preclosure.
+    # NOTE: until we are sure about the that Loan History is recording preclosures correctly we will have to use the above foreclosures code.
+    preclosures_composite_keys = LoanHistory.all(:status => :preclosed, :last_status => :outstanding, :date => @date).aggregate(:composite_key)
+    unless preclosures_composite_keys.empty?
+      pck = preclosures_composite_keys.map{|x| x-0.0001}
+      preclosures    = LoanHistory.all(:composite_key => pck).aggregate(grouper_id.to_sym, 
+                                                                       :actual_outstanding_principal.sum, 
+                                                                       :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    end
 
-    claimed       = LoanHistory.all(:status => :claim_settlement,  :date => @date).aggregate(:branch_id, 
-                                                                                             :actual_outstanding_principal.sum, 
-                                                                                             :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    # calculation of written off outstanding. Once the Loan gets written off the correspondinxg LoanHistory entry with the written_off status shows loan_outstanding as zero
+    write_offs_composite_keys = LoanHistory.all(:status => :written_off, :last_status => :outstanding, :date => @date).aggregate(:composite_key)
+    unless write_offs_composite_keys.empty?
+      wock = write_offs_composite_keys.map{|x| x-0.0001}
+      write_offs    = LoanHistory.all(:composite_key => wock).aggregate(grouper_id.to_sym, 
+                                                                        :actual_outstanding_principal.sum, 
+                                                                        :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    end
 
-    
+    # calculation of claim-settlement outstanding. This is again similar to the written-off process
+    claimed_composite_keys = LoanHistory.all(:status => :claim_settlement, :last_status => :outstanding, :date => @date).aggregate(:composite_key)
+    unless claimed_composite_keys.empty?
+      cck = claimed_composite_keys.map{|x| x-0.0001}
+      claimed       = LoanHistory.all(:composite_key => cck).aggregate(grouper_id.to_sym, 
+                                                                       :actual_outstanding_principal.sum, 
+                                                                       :actual_outstanding_total.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
+    end
+    collections = {}
     #var_adjustments = old_balances - balances + advances
-    @branch.each do |b|
-      data[b]||= DataRow.new(0, 0, 0, {:principal => 0, :interest => 0, :fees => 0, :var => 0, :total => 0}, 
+    @grouper_objects.each{|go|
+      clients = go.clients.aggregate(:id)
+      collections[go.id] = {:principal => 0, :interest => 0, :fees => 0}
+      unless clients.empty?
+        payment_principal = Payment.all(:client_id => clients, :received_on => @date, :type => :principal).aggregate(:amount.sum)
+        payment_interest = Payment.all(:client_id => clients, :received_on => @date, :type => :interest).aggregate(:amount.sum)
+        payment_fees = Payment.all(:client_id => clients, :received_on => @date, :type => :fees).aggregate(:amount.sum)
+        collections[go.id] = {:principal => payment_principal, :interest => payment_interest, :fees => payment_fees} 
+      end
+     
+      data[go]||= DataRow.new(0, 0, 0, {:principal => 0, :interest => 0, :fees => 0, :var => 0, :total => 0}, 
                              {:principal => 0, :interest => 0, :total => 0}, 
                              {:principal => 0, :interest => 0, :total => 0},
                              {:principal => 0, :interest => 0, :total => 0}, 
                              {:principal => 0, :interest => 0, :total => 0}, 
                              {:principal => 0, :interest => 0, :total => 0}, 
                              {:principal => 0, :interest => 0, :total => 0})
-      
-#       advance  = advances[c.id][0]        if advances.key?(b.id)
-#       balance  = balances[c.id][0]        if balances.key?(b.id)
-#       old_balance = old_balances[c.id][0] if old_balances.key?(b.id)
-      data[b][0] += b.clients(:active => true).count         
-      data[b][1] += disbursements[b.id] || 0
-      data[b][2] += due_today[b.id].sum if due_today[b.id]
-      
-      # collection
-      data[b][3][:principal] += ((collections[:principal][b.id] || 0) - ( advances.key?(b.id) ? (advances[b.id][0][0] || 0) : 0 )) 
-      data[b][3][:interest]  += ((collections[:interest][b.id] || 0) - 
-                (( advances.key?(b.id) ? (advances[b.id][0][1] || 0) : 0 ) - ( advances.key?(b.id) ? (advances[b.id][0][0] || 0) : 0 ))) 
-      data[b][3][:fees] += collections[:fees][b.id] || 0 
-                
-      branches[b.id] = b
-      # client fee
-      repository.adapter.query(%Q{
-                               SELECT c.id center_id, c.branch_id branch_id, SUM(p.amount) amount
-                               FROM  payments p, clients cl, centers c
-                               WHERE p.received_on = '#{date.strftime('%Y-%m-%d')}' AND p.loan_id is NULL AND p.type=3
-                               AND   p.deleted_at is NULL AND p.client_id=cl.id AND cl.center_id=c.id AND cl.deleted_at is NULL AND c.id in (#{@center.map{|c| c.id}.join(', ')})
-                               GROUP BY branch_id, center_id
-                             }).each{|p|
-      if b == branches[p.branch_id]
-        data[b][3][:fees] += p.amount.round(2)
-      end
-      }
  
-      data[b][3][:total] += data[b][3][:principal] + data[b][3][:interest] + data[b][3][:fees]
+      data[go][0] += go.clients(:active => true).count         
+      data[go][1] += 0
+      data[go][1] += (Loan.all(:client_id => clients, :disbursal_date => @date).aggregate(:amount).first || 0) unless clients.empty?
+      data[go][2] = due_today[go.id].sum if due_today[go.id]
+  
+      # collection
+      data[go][3][:principal] += ((collections[go.id][:principal] || 0) - ( advances.key?(go.id) ? (advances[go.id][0][0] || 0) : 0 )) 
+      data[go][3][:interest]  += ((collections[go.id][:interest] || 0) - 
+                (( advances.key?(go.id) ? (advances[go.id][0][1] || 0) : 0 ) - ( advances.key?(go.id) ? (advances[go.id][0][0] || 0) : 0 )))
+      data[go][3][:fees] += collections[go.id][:fees] || 0 
+      data[go][3][:total] += data[go][3][:principal] + data[go][3][:interest] + data[go][3][:fees]
 
       # balance outstanding
-      if histories.key?(b.id)
-        data[b][4][:principal] += histories[b.id][0].actual_outstanding_principal || 0 
-        data[b][4][:total]     += histories[b.id][0].actual_outstanding_total || 0
-        data[b][4][:interest]  += data[b][4][:total] - data[b][4][:principal]
+      if histories.key?(go.id)
+        data[go][4][:principal] += histories[go.id][0].actual_outstanding_principal || 0 
+        data[go][4][:total]     += histories[go.id][0].actual_outstanding_total || 0
+        data[go][4][:interest]  += data[go][4][:total] - data[go][4][:principal]
       end
 
       # balance overdue
-      if defaults.key?(b.id)
-        data[b][5][:principal] += defaults[b.id][0].pdiff || 0 
-        data[b][5][:total]     += defaults[b.id][0].tdiff || 0
-        data[b][5][:interest]  += data[b][5][:total] - data[b][5][:principal]
+      if defaults.key?(go.id)
+        data[go][5][:principal] += defaults[go.id][0].pdiff || 0 
+        data[go][5][:total]     += defaults[go.id][0].tdiff || 0
+        data[go][5][:interest]  += data[go][5][:total] - data[go][5][:principal]
       end
 
       # foreclosure
-      if foreclosures.key?(b.id)
-        data[b][6][:principal] += foreclosures[b.id][0] || 0
-        data[b][6][:interest]  += foreclosures[b.id][1] || 0
-        data[b][6][:total]     += ((foreclosures[b.id][1] || 0) + (foreclosures[b.id][0] || 0))
+      if foreclosures.key?(go.id)
+        data[go][6][:principal] += foreclosures[go.id][0] || 0
+        data[go][6][:interest]  += foreclosures[go.id][1] || 0
+        data[go][6][:total]     += ((foreclosures[go.id][1] || 0) + (foreclosures[go.id][0] || 0))
       end
 
       # var adjusted
-      if advances.key?(b.id)
-        data[b][3][:var] += advances[b.id][0][1] || 0  
-        data[b][3][:total] += (advances[b.id][0][1] || 0)    
-        principal = ((advances[b.id][0][0] || 0) + 
-                     (old_balances.key?(b.id) ? (old_balances[b.id][0][0] || 0) : 0) - 
-                    (balances.key?(b.id) ? (balances[b.id][0][0] || 0) : 0 ))
-        total = ((advances[b.id][0][1] || 0) + 
-                 (old_balances.key?(b.id) ? (old_balances[b.id][0][1] || 0) : 0) - 
-                (balances.key?(b.id) ? (balances[b.id][0][1] || 0) : 0 ))
-        data[b][7][:principal] += principal
-        data[b][7][:interest]  += (total - principal)
-        data[b][7][:total] += total
+      if advances.key?(go.id)
+        data[go][3][:var] += advances[go.id][0][1] || 0  
+        data[go][3][:total] += (advances[go.id][0][1] || 0)    
+        principal = ((advances[go.id][0][0] || 0) + 
+                     (old_balances.key?(go.id) ? (old_balances[go.id][0][0] || 0) : 0) - 
+                    (balances.key?(go.id) ? (balances[go.id][0][0] || 0) : 0 ))
+        total = ((advances[go.id][0][1] || 0) + 
+                 (old_balances.key?(go.id) ? (old_balances[go.id][0][1] || 0) : 0) - 
+                (balances.key?(go.id) ? (balances[go.id][0][1] || 0) : 0 ))
+        data[go][7][:principal] += principal
+        data[go][7][:interest]  += (total - principal)
+        data[go][7][:total] += total
       end
 
       # claimed or death settlement
-       if claimed.key?(b.id)
-        data[b][8][:principal] += claimed[b.id][0] || 0
-        data[b][8][:interest]  += ((claimed[b.id][1] || 0) - (claimed[b.id][0] || 0))
-        data[b][8][:total]     += claimed[b.id][1] || 0
+       if claimed && claimed.key?(go.id)
+        data[go][8][:principal] += claimed[go.id][0] || 0
+        data[go][8][:interest]  += ((claimed[go.id][1] || 0) - (claimed[go.id][0] || 0))
+        data[go][8][:total]     += claimed[go.id][1] || 0
       end
       
       # written off
-      if write_offs.key?(b.id)
-        data[b][9][:principal] += write_offs[b.id][0] || 0
-        data[b][9][:interest]  += ((write_offs[b.id][1] || 0) - (write_offs[b.id][0] || 0))
-        data[b][9][:total]     += write_offs[b.id][1] || 0
+      if write_offs && write_offs.key?(go.id)
+        data[go][9][:principal] += write_offs[go.id][0] || 0
+        data[go][9][:interest]  += ((write_offs[go.id][1] || 0) - (write_offs[go.id][0] || 0))
+        data[go][9][:total]     += write_offs[go.id][1] || 0
       end
-    end 
+    }
+
     return data
   end
 end
