@@ -50,7 +50,8 @@ class CenterMeetingDay
 
   def meeting_day_string
     return meeting_day.to_s if meeting_day and meeting_day != :none
-    "every #{every} #{what.join(',')} of every #{of_every} #{period}"
+    return "every #{every} #{what.join(',')} of every #{of_every} #{period}" unless [every,what,of_every,period].include?(nil)
+    return meeting_day.to_s
   end
 
   def to_s
