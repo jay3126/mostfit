@@ -601,13 +601,11 @@ class Loan
     
   def pay_normal(total, received_on)
     lh = info(received_on)
-    debugger if $debug
     {:interest => lh.interest_due, :principal => total - lh.interest_due}
   end
 
   def pay_reallocate_normal(total, received_on)
     # we need a separate one while reallocating due to the fact the interest_due becomes 0 after being paid and so we cannot use the one above while reallocating
-    debugger if $debug
     lh = info(received_on)
     {:interest => lh.interest_due + lh.interest_paid, :principal => total - (lh.interest_due + lh.interest_paid)}
   end
@@ -1154,7 +1152,6 @@ class Loan
     act_total_principal_paid = last_payments_hash[1][:total_principal]; act_total_interest_paid = last_payments_hash[1][:total_interest]
     last_status = 1; last_row = nil;
     dates.each_with_index do |date,i|
-      debugger if date == Date.new(2011,11,23)
       i_num                                  = installment_for_date(date)
       scheduled                              = get_scheduled(:all, date)
       actual                                 = get_actual(:all, date)
@@ -1391,7 +1388,6 @@ class Loan
         p.amount != (p.type == :principal ? _info[:scheduled_principal_due] : _info[:scheduled_interest_due])
       end
     end
-    debugger
     ph = _ps.group_by{|p| p.received_on}.to_hash
     _pmts = []
     self.payments_hash([])
@@ -1410,15 +1406,14 @@ class Loan
       [date, {:total => total_amt, :user => user, :date => date, :received_by => received_by}]
     end.to_hash
     statii = []
+    debugger
     _t = DateTime.now
-    debugger if $debug
     # then delete all payments and recalculate a virgin loan_history
     ds = _ps.map{|p| p.deleted_by = user; p.deleted_at = _t; p.destroy}
     reload
     update_history
     clear_cache
     # then make the payments again
-    $debug = true
     pmt_details.keys.sort.each do |date|
       debugger
       details = pmt_details[date]

@@ -16,24 +16,33 @@ namespace :mostfit do
   namespace :conversion do
     desc "convert intellecash db to takeover-intellecash"
     task :reallocate_all_loans do
-      t = DateTime.now
-      already_done = File.read('log/reallocated.log').split("\n")
+      _now = Time.now
+      already_done = File.read('log/reallocated.log').split("\n") rescue []
       log = File.open('log/reallocated.log','w')
       last_id = already_done[-1].to_i rescue 0
-      puts "Last id = #{last_id}. Continuing from #{last_id + 1}. Press any key to continue"
-      gets
+      puts "Last id = #{last_id}. Continuing from #{last_id + 1}."
       lids = Loan.all(:id.gt => last_id).aggregate(:id)
+      debugger
       loan_count = lids.count
+      loans_done = 1
       puts "doing #{loan_count} loans"
       lids.each_with_index do |lid,i|
-        break if file.exists?("tmp/abort_rake.txt")
+        if File.exists?("tmp/graceful_exit_rake.txt")
+          puts "exiting under grace"
+          break 
+        end
         puts "\ndoing loan id #{lid} (#{i}/#{loan_count}"
         l = Loan.get(lid)
-        next if loan.status != :outstanding
+        if l.status != :outstanding
+          log.write("#{lid}\n")
+          next
+        end
         l.reallocate(:normal, l.payments.last.created_by)
         log.write("#{lid}\n")
-        elapsed = DateTime.now - t
-        print "#{elapsed}.round(2). ETA #{(loan_count - i) * (elapsed/(i+1))/60} mins"
+        debugger
+        elapsed = (Time.now - _now).to_i
+        print "#{elapsed} secs. ETA #{(loan_count - i) * (elapsed/(loans_done))/60} mins"
+        loans_done += 1
       end
     end
   end
