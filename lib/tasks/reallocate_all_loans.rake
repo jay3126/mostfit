@@ -32,7 +32,7 @@ namespace :mostfit do
         l.reallocate(:normal, l.payments.last.created_by)
         log.write("#{lid}\n")
         elapsed = DateTime.now - t
-        print "#{elapsed}.round(2). ETA #{(loan_count - i) * (elapsed/i)/60} mins"
+        print "#{elapsed}.round(2). ETA #{(loan_count - i) * (elapsed/(i+1))/60} mins"
       end
     end
   end
