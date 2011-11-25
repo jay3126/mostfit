@@ -37,6 +37,10 @@ namespace :mostfit do
           log.write("#{lid}\n")
           next
         end
+        next unless l.histories.map do |h| 
+          diff = (h.interest_paid - h.scheduled_interest due).abs
+          diff > 0 and diff < 1
+        end.include?(true) 
         l.reallocate(:normal, l.payments.last.created_by)
         log.write("#{lid}\n")
         debugger
