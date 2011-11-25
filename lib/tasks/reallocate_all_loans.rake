@@ -20,12 +20,15 @@ namespace :mostfit do
       log = File.open('log/reallocated.log','w')
       already_done = File.read('log/reallocated.log').split("\n")
       last_id = already_done[-1].to_i rescue 0
+      puts "Last id = #{last_id}. Continuing from #{last_id + 1}. Press any key to continue"
+      gets
       lids = Loan.all(:id.gt => last_id).aggregate(:id)
       loan_count = lids.count
       puts "doing #{loan_count} loans"
       lids.each_with_index do |lid,i|
         puts "\ndoing loan id #{lid} (#{i}/#{loan_count}"
         l = Loan.get(lid)
+        next if loan.status != :outstanding
         l.reallocate(:normal, l.payments.last.created_by)
         log.write("#{lid}\n")
         elapsed = DateTime.now - t
