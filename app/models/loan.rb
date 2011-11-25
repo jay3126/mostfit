@@ -1425,6 +1425,7 @@ class Loan
       pmts = repay(details[:total], details[:user], date, details[:received_by], false, style, :reallocate, nil, nil)
       clear_cache
       statii.push(pmts[0])
+      print "."
     end
     self.reload
     update_history(true)
