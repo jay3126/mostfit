@@ -17,8 +17,8 @@ namespace :mostfit do
     desc "convert intellecash db to takeover-intellecash"
     task :reallocate_all_loans do
       t = DateTime.now
-      log = File.open('log/reallocated.log','w')
       already_done = File.read('log/reallocated.log').split("\n")
+      log = File.open('log/reallocated.log','w')
       last_id = already_done[-1].to_i rescue 0
       puts "Last id = #{last_id}. Continuing from #{last_id + 1}. Press any key to continue"
       gets
@@ -26,6 +26,7 @@ namespace :mostfit do
       loan_count = lids.count
       puts "doing #{loan_count} loans"
       lids.each_with_index do |lid,i|
+        break if file.exists?("tmp/abort_rake.txt")
         puts "\ndoing loan id #{lid} (#{i}/#{loan_count}"
         l = Loan.get(lid)
         next if loan.status != :outstanding
