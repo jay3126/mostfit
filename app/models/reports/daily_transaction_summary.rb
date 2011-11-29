@@ -122,10 +122,10 @@ class DailyTransactionSummary < Report
       end
 
       # foreclosure
-      if foreclosures.key?(go.id)
-        data[go][6][:principal] += foreclosures[go.id][0] || 0
-        data[go][6][:interest]  += foreclosures[go.id][1] || 0
-        data[go][6][:total]     += ((foreclosures[go.id][1] || 0) + (foreclosures[go.id][0] || 0))
+      if preclosures && preclosures.key?(go.id)
+        data[go][6][:principal] += preclosures[go.id][0] || 0
+        data[go][6][:interest]  += ((preclosures[go.id][1] || 0) - (preclosures[go.id][0] || 0))
+        data[go][6][:total]     += preclosures[go.id][1] || 0
       end
 
       # var adjusted
