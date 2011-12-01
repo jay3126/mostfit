@@ -106,8 +106,9 @@
         %tr
           %th
             Mark as preclosed
+            Preclose?
           %td
             = check_box :name => "writeoff", :checked => "checked"
             .greytext
-              Otherwise loan is marked as repaid
+              If you want to close the loan before its intended/scheduled tenure it is recommended to preclose the loan.<br> <br> If the repaid amount is less than the outstanding amount it is recommended to write off the loan.<br> To write off the loan, please scroll down the screen
       = submit 'Make Prepayment'

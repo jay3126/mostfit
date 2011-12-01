@@ -17,7 +17,6 @@ namespace :mostfit do
     desc "convert intellecash db to takeover-intellecash"
     task :convert_icash do
       puts "upgrading"
-      repository.adapter.execute('drop table loan_history');
       Rake::Task['db:autoupgrade'].invoke
       # add repayment styles to loan products
       LoanProduct.all(:id => [1,2,3,4]).each{|lp| lp.repayment_style = RepaymentStyle.get(3); lp.save}
@@ -33,8 +32,8 @@ namespace :mostfit do
       puts "done with normal stuff"
       # run the standard conversion script
       repository.adapter.execute('update loans set discriminator="Loan"')
-      repository.adapter.execute('alter table loan_history drop column scheduled_principal_to_be_paid')
-      repository.adapter.execute('alter table loan_history drop column scheduled_interest_to_be_paid')
+      repository.adapter.execute('alter table loan_history drop column scheduled_principal_to_be_paid') rescue nil
+      repository.adapter.execute('alter table loan_history drop column scheduled_interest_to_be_paid') rescue nil
       Rake::Task['mostfit:conversion:to_new_layout'].invoke
     end
   end

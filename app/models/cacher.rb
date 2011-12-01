@@ -44,6 +44,7 @@ class Cacher
   property :total_fees_paid,                 Float, :nullable => false
   property :fees_due_today,                  Float, :nullable => false
   property :fees_paid_today,                 Float, :nullable => false
+  property :principal_at_risk,               Float, :nullable => false
 
   # we need to track also the changes in status
   # i.e. from approved to disbursed, etc.
@@ -52,8 +53,6 @@ class Cacher
     property "#{status.to_s}_count".to_sym,  Integer, :nullable => false, :default => 0
     property "#{status.to_s}".to_sym,        Float,   :nullable => false, :default => 0
   end
-
-  property :additional_fields,               Text. :lazy => true
 
   property :created_at,                      DateTime
   property :updated_at,                      DateTime
@@ -64,7 +63,7 @@ class Cacher
   COLS =   [:scheduled_outstanding_principal, :scheduled_outstanding_total, :actual_outstanding_principal, :actual_outstanding_total,
             :total_interest_due, :total_interest_paid, :total_principal_due, :total_principal_paid,
             :principal_in_default, :interest_in_default, :total_fees_due, :total_fees_paid, :total_advance_paid, :advance_principal_paid, :advance_interest_paid,
-           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding]
+           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk]
   FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
                :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
                :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
@@ -80,8 +79,21 @@ class Cacher
     (actual_outstanding_total - actual_outstanding_principal).round(2)
   end
 
-  def total_advance_paid
+  def total_advance_paid_today
     advance_principal_paid_today + advance_interest_paid_today
+  end
+
+  def total_advance_paid
+    advance_principal_paid + advance_interest_paid
+  end
+
+  def total_advance_os
+    advance_principal_outstanding + advance_interest_outstanding
+  end
+
+
+  def total_advance_adjusted
+    advance_principal_adjusted + advance_interest_adjusted
   end
 
   def total_default
@@ -152,7 +164,7 @@ class BranchCache < Cacher
     # first create caches for the centers that do not have them
     t0 = Time.now; t = Time.now;
     branch_ids = Branch.all.aggregate(:id) unless branch_ids
-    branch_centers = Branch.all(:id => branch_ids).centers(:creation_date.lte => date).aggregate(:id)
+    branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
 
     # unless we are forcing an update, only work with the missing and stale centers
     unless force
@@ -167,13 +179,22 @@ class BranchCache < Cacher
     end
 
     return true if cids.blank? #nothing to do
-
     # update all the centers for today
-    return false unless (CenterCache.update(:center_id => cids, :date => date))
+    chunks = cids.count/3000
+    begin
+      _t = Time.now
+      cids.chunk(3000).each_with_index do |_cids,i|
+        (CenterCache.update(:center_id => _cids, :date => date))
+        puts "UPDATED #{i}/#{chunks} CACHES in #{(Time.now - _t).round} secs"
+      end
+    rescue
+      return false
+    end
     puts "UPDATED CENTER CACHES in #{(Time.now - t).round} secs"
     t = Time.now
     # then add up all the cached centers by branch
-    branch_data_hash = CenterCache.all(:model_name => "Center", :branch_id => branch_ids, :date => date).group_by{|x| x.branch_id}.to_hash
+    relevant_branch_ids = Center.all(:id => cids).aggregate(:branch_id)
+    branch_data_hash = CenterCache.all(:model_name => "Center", :branch_id => relevant_branch_ids, :date => date).group_by{|x| x.branch_id}.to_hash
     puts "READ CENTER CACHES in #{(Time.now - t).round} secs"
     t = Time.now
 
@@ -274,9 +295,9 @@ class CenterCache < Cacher
     # this makes it very difficult to find missing center caches so we must have a row for all centers, even if it is full of zeros
     
     # now hook in all the other functions that do not correspond to properties on loan history such as waiting borrowers, delayed disbursls etc.
-    extras = EXTRA_FIELDS.each do |hook|
-      [hook, self.send(hook)]
-    end
+    # extras = EXTRA_FIELDS.each do |hook|
+    #  [hook, self.send(hook)]
+    # end
     universe = Center.all(:id => hash[:center_id]).aggregate(:branch_id, :id) # array of [[:branch_id, :center_id]...] for all branches and centers
     universe.map do |k| 
       _p = pmts[k] || ng_pmts

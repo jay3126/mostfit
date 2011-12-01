@@ -48,12 +48,6 @@ class DataAccessObserver
 
   def self.check_session(obj)
     return true
-    return true unless Merb.environment == "production"
-    return true if Mfi.first.system_state == :migration
-    return true if File.writable?("config.ru") and not @_user
-    @_user = User.authenticate(ENV['MOSTFIT_USER'], ENV['MOSTFIT_PASSWORD'])    unless @_user
-    privileged = @_user and @_user.is_manager_of?(obj)
-    raise NotPrivileged unless privileged
   end
 
 

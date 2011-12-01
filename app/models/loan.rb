@@ -254,7 +254,8 @@ class Loan
     
     obj = new(:loan_product => LoanProduct.first(:name => row[headers[:product]]), :amount => row[headers[:amount]],
               :interest_rate => interest_rate,
-              :installment_frequency => row[headers[:installment_frequency]].downcase, :number_of_installments => row[headers[:number_of_installments]],
+              :installment_frequency => row[headers[:installment_frequency]].downcase, 
+              :number_of_installments => row[headers[:number_of_installments]],
               :scheduled_disbursal_date => Date.parse(row[headers[:scheduled_disbursal_date]]),
               :scheduled_first_payment_date => Date.parse(row[headers[:scheduled_first_payment_date]]),
               :applied_on => Date.parse(row[headers[:applied_on]]), :approved_on => Date.parse(row[headers[:approved_on]]),
@@ -263,9 +264,11 @@ class Loan
               :funding_line_id => FundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id,
               :applied_by_staff_id => StaffMember.first(:name => row[headers[:applied_by_staff]]).id,
               :approved_by_staff_id => StaffMember.first(:name => row[headers[:approved_by_staff]]).id,
+              :repayment_style_id => RepaymentStyle.first(:name => row[headers[:repayment_style]]).id,
+              :c_center_id => Center.first(:name => row[headers[:center]]).id,
               :reference => row[headers[:reference]], :client => Client.first(:reference => row[headers[:client_reference]]))
     obj.history_disabled=true
-    saved = obj.save
+    saved = obj.save!
     if saved
       c = Checker.first_or_new(:model_name => "Loan", :reference => obj.reference)
       c.check_field = row[headers[:check_field]]
@@ -1048,8 +1051,8 @@ class Loan
         # we need to verify if this works correctly when we get loans that are not weekly
         start_date = scheduled_first_payment_date
       end
-      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, start_date))).uniq
-      return @_installment_dates
+      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, start_date))).uniq rescue nil
+      return @_installment_dates if @_installment_dates # incase the center meeting days crap out due to badly defined meeting days
     end
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
       @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, scheduled_first_payment_date))).uniq
@@ -1167,6 +1170,7 @@ class Loan
       total_interest_due                    += outstanding ? scheduled[:interest].round(2) : 0
       principal_due                          = outstanding ? [total_principal_due - act_total_principal_paid,0].max : 0
       interest_due                           = outstanding ? [total_interest_due - act_total_interest_paid,0].max : 0
+      actual_outstanding_principal           = outstanding ? actual[:balance].round(2) : 0
 
       advance_principal_outstanding          = [0,total_principal_paid.round(2) - total_principal_due.round(2)].max
       advance_interest_outstanding           = [0,total_interest_paid.round(2) - total_interest_due.round(2)].max
@@ -1204,11 +1208,12 @@ class Loan
         :status                              => STATUSES.index(st) + 1,
         :scheduled_outstanding_principal     => scheduled[:balance].round(2),
         :scheduled_outstanding_total         => scheduled[:total_balance].round(2),
-        :actual_outstanding_principal        => outstanding ? actual[:balance].round(2) : 0,
+        :actual_outstanding_principal        => actual_outstanding_principal,
         :actual_outstanding_total            => outstanding ? actual[:total_balance].round(2) : 0,
         :amount_in_default                   => actual[:balance].round(2) - scheduled[:balance].round(2),
         :principal_in_default                => principal_in_default,
         :interest_in_default                 => interest_in_default,
+        :principal_at_risk                   => principal_in_default > 0 ? actual_outstanding_principal : 0,
         :scheduled_principal_due             => scheduled_principal_due,
         :scheduled_interest_due              => scheduled_interest_due,
         :principal_due                       => principal_due.round(2), 
@@ -1415,7 +1420,6 @@ class Loan
     clear_cache
     # then make the payments again
     pmt_details.keys.sort.each do |date|
-      debugger
       details = pmt_details[date]
       pmts = repay(details[:total], details[:user], date, details[:received_by], false, style, :reallocate, nil, nil)
       clear_cache
