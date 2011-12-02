@@ -1,0 +1,34 @@
+= partial :form
+%table.report.nojs
+  %tr.header
+    %th{:width => "10px"}
+      Loan
+    %th
+      Client
+    %th
+      Maturity Date
+    %th
+      Number of Absences
+    %th
+      Installments
+    %th
+      Eligible?
+  - @data.each do |d|
+    - loan = d[:loan]
+    - eligible = ((d[:number_of_installments] == 46 ? d[:attendance] >= 44 : d[:attendance] >= 48) and (d[:absents] <= 2))
+    - next unless eligible
+    %tr
+      %td
+        = link_to loan.description, url_for_loan(loan)
+      %td
+        = link_to d[:client].name, resource(d[:client])
+      %td
+        = d[:mat_date]
+      %td
+        = d[:absents]
+        == ( / #{d[:attendance]})
+      %td
+        == #{d[:attendance]} / #{d[:number_of_installments]}
+      %td{:style  => eligible ? "color: green" : "color:red"}
+        = eligible
+  
