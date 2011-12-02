@@ -559,7 +559,6 @@ class Loan
 
   def pay_prorata(total, received_on)
     # calculates total interest and principal payable in this amount and divides the amount proportionally
-
     int_to_pay = prin_to_pay = amt_to_pay = 0
 
     # load relevant loan_history rows
@@ -1150,7 +1149,6 @@ class Loan
     act_total_principal_paid = last_payments_hash[1][:total_principal]; act_total_interest_paid = last_payments_hash[1][:total_interest]
     last_status = 1; last_row = nil;
     dates.each_with_index do |date,i|
-      debugger if date == Date.new(2011,11,1)
       i_num                                  = installment_for_date(date)
       scheduled                              = get_scheduled(:all, date)
       actual                                 = get_actual(:all, date)
@@ -1162,7 +1160,7 @@ class Loan
       scheduled_principal_due                = i_num > 0 ? scheduled[:principal] : 0
       scheduled_interest_due                 = i_num > 0 ? scheduled[:interest] : 0
       outstanding                            = [:disbursed, :outstanding].include?(st) 
-      outstanding                            = date == scheduled_maturity_date ? [:disbursed, :outstanding].include?(STATUSES[last_row[:status]-1]) : outstanding
+      outstanding                            = (st == :repaid) ? [:disbursed, :outstanding].include?(STATUSES[last_row[:status]-1]) : outstanding
       total_principal_due                   += outstanding ? scheduled[:principal].round(2) : 0
       total_interest_due                    += outstanding ? scheduled[:interest].round(2) : 0
       principal_due                          = outstanding ? [total_principal_due - act_total_principal_paid,0].max : 0
@@ -1385,13 +1383,6 @@ class Loan
       return status, _pmts
     end
     _ps  = self.payments(:type => [:principal, :interest])
-    if only_schedule_mismatches
-      # i.e. we are only interested in correcting the principal interest split to match with the "schedule" and not actually reallocating the loan payments to a different style
-      _ps = _ps.select do |p|
-        _info = info(p.received_on)
-        p.amount != (p.type == :principal ? _info[:scheduled_principal_due] : _info[:scheduled_interest_due])
-      end
-    end
     ph = _ps.group_by{|p| p.received_on}.to_hash
     _pmts = []
     self.payments_hash([])
@@ -1420,6 +1411,7 @@ class Loan
     # then make the payments again
     pmt_details.keys.sort.each do |date|
       details = pmt_details[date]
+      reload
       pmts = repay(details[:total], details[:user], date, details[:received_by], false, style, :reallocate, nil, nil)
       clear_cache
       statii.push(pmts[0])
