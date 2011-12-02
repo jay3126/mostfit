@@ -79,10 +79,6 @@ class DataAccessObserver
   end
   
   before :destroy! do
-<<<<<<< HEAD
-   # raise NotPrivileged
-=======
->>>>>>> takeover
   end
 
 end
