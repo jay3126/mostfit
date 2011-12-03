@@ -24,7 +24,7 @@ class LoyaltyBonus < Report
     conds = {:status => [:preclosed, :repaid], :date => @from_date..@to_date, :last_status => [:outstanding]}.merge!(@branch_id ? {:branch_id => @branch_id} : {})
     _i = LoanHistory.all(conds).aggregate(:loan_id, :date)
     #then get [client, number_of_installments, attendance]
-    @date = _i.to_hash.map do |lid, mat_date| 
+    @data = _i.to_hash.map do |lid, mat_date| 
       l = Loan.get(lid)
       {:loan                               =>l, 
         :client                            => l.client, 
