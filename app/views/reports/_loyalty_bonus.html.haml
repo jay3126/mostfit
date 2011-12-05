@@ -1,3 +1,4 @@
+- debugger
 = partial :form
 %table.report.nojs
   %tr.header
@@ -21,7 +22,7 @@
       %td
         = link_to loan.description, url_for_loan(loan)
       %td
-        = link_to d[:client].name, resource(d[:client])
+        = link_to d[:client_name], url(:clients, d[:client_id])
       %td
         = d[:mat_date]
       %td
