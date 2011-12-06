@@ -30,6 +30,7 @@ class Branch
   property   :parent_domain_guid, String, :nullable => true
 
   validates_is_unique   :code
+  validates_is_unique   :name
   validates_length      :code, :min => 1, :max => 10
 
   validates_length      :name, :min => 3
@@ -38,7 +39,7 @@ class Branch
 
   def self.from_csv(row, headers)
     obj = new(:code => row[headers[:code]], :name => row[headers[:name]], :address => row[headers[:address]], 
-              :manager => StaffMember.first(:name => row[headers[:manager]]))
+              :manager => StaffMember.first(:name => row[headers[:manager]]), :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end
 

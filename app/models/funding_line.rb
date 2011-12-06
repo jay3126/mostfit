@@ -15,6 +15,7 @@ class FundingLine
   property :last_payment_date,   Date
   property :closed_on,           Date
   property :closing_comment,     Text
+  property :reference,           String, :unique => true
 
   belongs_to :funder
   has n, :loans
@@ -25,10 +26,12 @@ class FundingLine
   validates_present :amount, :interest_rate, :disbursal_date, :first_payment_date, :last_payment_date, :funder
 
   def self.from_csv(row, headers)
+    debugger
     funder = Funder.create(:name => row[headers[:funder_name]])
     obj = new(:funder_id => funder.id, :amount => row[headers[:amount]], :interest_rate => row[headers[:interest]],
               :disbursal_date => Date.parse(row[headers[:disbursal_date]]), :first_payment_date => Date.parse(row[headers[:first_payment_date]]),
-              :last_payment_date => Date.parse(row[headers[:last_payment_date]]))
+              :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :reference => row[headers[:reference]],
+              :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end
 
