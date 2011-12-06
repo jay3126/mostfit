@@ -48,13 +48,8 @@ class DailyTransactionSummary < Report
     # preclosures calculated if the Loan History get created properly. A pre-payment has to be recorded as a preclosure.
     # NOTE: until we are sure about the that Loan History is recording preclosures correctly we will have to use the above foreclosures code.
     preclosures    = LoanHistory.all(:status => :preclosed, :last_status => :outstanding, :date => @date).aggregate(grouper_id.to_sym, 
-<<<<<<< HEAD
-                                                                       :principal_paid.sum, 
-                                                                       :interest_paid.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
-=======
                                                                       :principal_paid.sum, 
                                                                       :interest_paid.sum).map{|x| [x[0], [x[1], x[2]]]}.to_hash
->>>>>>> 06692f7a7f850eb05c0aa6ae469c89c3e80f8abf
 
     # calculation of written off outstanding. Once the Loan gets written off the correspondinxg LoanHistory entry with the written_off status shows loan_outstanding as zero
     write_offs_composite_keys = LoanHistory.all(:status => :written_off, :last_status => :outstanding, :date => @date).aggregate(:composite_key)
