@@ -76,11 +76,11 @@
         %td
           Group
         %td
-          -if @client.client_group
-            =@client.client_group.name
-          -else
+          - if @client.client_group
+            = @client.client_group.name
+          - else
             Not associated with a group yet (
-            =link_to('Edit', resource(@branch, @center, @client, :edit))
+            = link_to('Edit', resource(@branch, @center, @client, :edit))
             to change)
       %tr.odd
         %td
@@ -128,6 +128,7 @@
           %thead
             %tr
               %th
+              %th Loan Cycle
               %th id
               %th amount
               %th interest
@@ -140,6 +141,8 @@
           - for loan in @loans
             %tr{ :class => cycle('odd','') }
               %td &nbsp;
+              %td
+                = loan.cycle_number
               %td
                 = link_to loan.id, url(:quick_link, "loans", loan.id)
               %td
@@ -194,7 +197,7 @@
       
           %tfoot
             %tr
-              %td{ :colspan => 9 }
+              %td{ :colspan => 11 }
     %div.tab  
       = partial 'comments/index', :object => @client
       %p
