@@ -14,6 +14,21 @@ class Client
   after  :save,   :update_loan_cache
   
   property :id,              Serial
+
+  # basic properties custom only to suryoday
+  property :first_name,      String, :nullable => false
+  property :last_name,       String, :nullable => true
+  property :relative_name,   String, :nullable => false
+  property :relative_relationship,   Enum.send('[]', *CLIENT_RELATIONSHIPS)
+  property :nominee_name,    String
+  property :nominee_relationship, Enum.send('[]', *CLIENT_RELATIONSHIPS)
+  property :id_number,       String
+  property :id_type,         Enum.send('[]', *ID_TYPES)
+  property :telephone_number, String
+  property :telephone_type,  Enum.send('[]', *TELEPHONE_TYPES)
+  property :state,           String
+  property :pincode,         Integer
+
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
