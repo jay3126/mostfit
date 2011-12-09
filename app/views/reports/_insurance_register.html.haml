@@ -2,51 +2,43 @@
 %table.report.nojs
   %tr.header
     %th{:width => "10px"}
-      Branch Name
-    %th
-      Center Name
-    %th
       Client Name
     %th
-      Client Id
-    %th
-      Age
+      Client Age
     %th
       Spouse Name
     %th
       Spouse Age
     %th
-      Loan Id
+      Center Name
     %th
-      Loan Amount
+      Branch Name
     %th
       Disbursal Date
     %th
-      Nominee Name
+      Disbursal Amount
 
-  - @data.each do  |row|
-    %tr 
-      %td{:width => "10px"}
-        = row[:branch_name]
-      %td
-        = row[:center_name]
-      %th
-        = row[:client_name]
-      %td
-        = row[:client_id]
-      %td
-        - age = row[:c_date_of_birth] ? (Time.now.year - row[:c_date_of_birth].year) : ""
-        = age
-      %td
-        = row[:client_spouse_name]
-      %td
-        - age1 = row[:spouse_date_of_birth] ? (Time.now.year - row[:spouse_date_of_birth].year) : ""
-        = age1
-      %td
-        = row[:loan_id]
-      %td
-        = row[:amount]
-      %td
-        = row[:disbursal_date]
-      %td
-        = row[:nominee_name]
+  - @data.each do  |client_id, hash|
+    - debugger
+    - client = hash[:client]
+    - loans = hash[:loans]
+    - loans.each do |loan|
+      %tr 
+        %td{:width => "10px"}
+          = link_to client.name, resource(client)
+        %td
+          = ((Date.today - client.date_of_birth).to_i/365) rescue nil
+          years
+        %td
+          = client.spouse_name
+        %td
+          == #{((Date.today - client.spouse_date_of_birth).to_i/365).to_i rescue nil}
+          years
+        %td
+          = client.center.name
+        %td
+          = client.center.branch.name
+        %td
+          = loan.disbursal_date
+        %td
+          = loan.amount
