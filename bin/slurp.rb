@@ -9,13 +9,14 @@ require 'yaml'
 dump_path = ARGV[0]
 
 # db_name is on the local machine
-config  = YAML.load_file(File.join( 'config', 'database.yml'))
-db_name = config['production']['database'] rescue nil
+config  = YAML.load_file(File.join('config', 'database.yml'))
+db_name = ARGV[1]
+
+db_name ||= config['production']['database'] rescue nil
 
 username = config['production']['username']
 password = config['production']['password']
 
-db_name   ||= ARGV[1]
 
 # scp, and uncompress the database dump
 sql_filename = File.basename(dump_path,".bz2")
