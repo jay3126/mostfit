@@ -46,7 +46,10 @@ class Center
   validates_with_method :creation_date_ok
 
   def self.from_csv(row, headers)
-    debugger
+    keys = [:center_name, :code, :center_meeting_time_in_24h_format, :meeting_day, :branch, :manager, :creation_date]
+    misssing_keys = keys - headers.keys
+    raise ArgumentError.new("missing key #{missing_keys.join(',')}") unless missing_keys.blank?
+
     hour, minute = row[headers[:center_meeting_time_in_24h_format]].split(":")[0..1]
     branch       = Branch.first(:name => row[headers[:branch]].strip)
     staff_member = StaffMember.first(:name => row[headers[:manager]])
@@ -55,7 +58,6 @@ class Center
       :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
       :creation_date => creation_date, :upload_id => row[headers[:upload_id]]}
     # do we need a special monthly center meeting day?
-    debugger
     monthly_meeting_date = row[headers[:meeting_day]].to_i
     if monthly_meeting_date > 0
       cmd = CenterMeetingDay.new(:every => monthly_meeting_date.to_s, :what => "day", :of_every => 1, :period => :month, :valid_from => creation_date)

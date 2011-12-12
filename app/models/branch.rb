@@ -38,8 +38,13 @@ class Branch
   validates_with_method :manager, :method => :manager_is_an_active_staff_member?
 
   def self.from_csv(row, headers)
+    keys = [:name, :code, :address, :manager, :creation_date]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+
     obj = new(:code => row[headers[:code]], :name => row[headers[:name]], :address => row[headers[:address]], 
-              :manager => StaffMember.first(:name => row[headers[:manager]]), :upload_id => row[headers[:upload_id]])
+              :manager => StaffMember.first(:name => row[headers[:manager]]), :upload_id => row[headers[:upload_id]],
+              :creation_date => Date.parse(row[headers[:creation_date]]))
     [obj.save, obj]
   end
 
