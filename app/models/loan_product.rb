@@ -60,13 +60,19 @@ class LoanProduct
   def self.from_csv(row, headers)
     min_interest = row[headers[:min_interest_rate]].to_f < 1 ? row[headers[:min_interest_rate]].to_f*100 : row[headers[:min_interest_rate]]
     max_interest = row[headers[:max_interest_rate]].to_f < 1 ? row[headers[:max_interest_rate]].to_f*100 : row[headers[:max_interest_rate]]
+    keys = [:name, :min_amount, :max_amount, :min_interest_rate, :max_interest_rate, :min_number_of_installments, :max_number_of_installments,
+            :installment_frequency, :valid_from, :valid_upto, :repayment_style]
+    missing_keys = keys - headers.keys
+    debugger
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+    debugger
     obj = new(:name => row[headers[:name]], :min_amount => row[headers[:min_amount]], :max_amount => row[headers[:max_amount]], 
               :min_interest_rate => min_interest, :max_interest_rate => max_interest, 
               :min_number_of_installments => row[headers[:min_number_of_installments]], 
               :max_number_of_installments => row[headers[:max_number_of_installments]], 
               :installment_frequency => row[headers[:installment_frequency]].downcase.to_sym,
               :valid_from => Date.parse(row[headers[:valid_from]]), :valid_upto => Date.parse(row[headers[:valid_upto]]),
-              :loan_type_string => row[headers[:loan_type]],
+              :loan_type_string => "Loan",
               :repayment_style => RepaymentStyle.first(:name => row[headers[:repayment_style]]), :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end

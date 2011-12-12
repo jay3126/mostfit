@@ -1,5 +1,6 @@
 %h1 Upload
 .menu-strip{:class => "width:100%"}
+  = link_to 'Continue', url(:continue_upload, @upload), :class => "greenButton"
   = link_to 'Reset and Delete all Data', url(:reset_upload, @upload, :delete => 1), :class => "cancelButton"
   = link_to 'Reupload', url(:edit_upload, @upload), :class => "cancelButton"
   = link_to 'Extract', url(:extract_upload, @upload), :class => "cancelButton"
@@ -53,7 +54,7 @@
 - Upload::MODELS.each do |model|
   - fn = File.join("uploads", @upload.directory, "#{model}.csv")
   - if File.exists?(fn)
-    - file_wcs[model] = `wc -l #{fn} | awk -F" " '{print $1}'`
+    - file_wcs[model] = `wc -l #{fn} | awk -F" " '{print $1}'`.to_i - 1
 - file_error_wcs = {}
 - Upload::MODELS.each do |model|
   - fn = File.join("uploads", @upload.directory, "#{model}_errors.csv")

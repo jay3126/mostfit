@@ -117,7 +117,10 @@ class Uploads < Application
     raise NotFound unless @upload
     if params[:file] and params[:file][:filename] and params[:file][:tempfile]
       @upload.move(params[:file][:tempfile].path)
-      redirect resource(@upload), :message => {:notice => "File has been replaced. Click continue to extract"}
+      Merb.run_later {
+        @upload.process_excel_to_csv
+      }
+      redirect resource(@upload), :message => {:notice => "File has been replaced and is extracting. Reload page to see progress."}
     else
       render
     end
