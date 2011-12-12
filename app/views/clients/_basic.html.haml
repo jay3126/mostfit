@@ -1,0 +1,58 @@
+%table.tall.shaded
+  %tr
+    %th First Name
+    %td
+      = text_field :first_name
+  %tr
+    %th Last Name
+    %td
+      = text_field :last_name
+  %tr
+    %th Name of Relative
+    %td
+      = text_field :relative_name
+  %tr 
+    %th Relationship
+    %td
+      = select :relative_relationship, :collection => CLIENT_RELATIONSHIPS, :prompt => "Select"
+  %tr 
+    %th Nominee Name
+    %td
+      = text_field :nominee_name
+  %tr 
+    %th Nominee Relationship
+    %td
+      = select :nominee_relationship, :collection => CLIENT_RELATIONSHIPS, :prompt => "Select"
+  %tr 
+    %th Date of Birth
+    %td 
+      = date_select_for @client, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr 
+    %th Type of ID
+    %td
+      = select :id_type , :collection => ID_TYPES, :prompt => "Select"
+  %tr 
+    %th ID number
+    %td
+      = text_field :id_number
+  %tr 
+    %th Telephone Number
+    %td
+      = text_field :telephone_number
+  %tr 
+    %th Telephone Type
+    %td
+      = select :telephone_type, :collection => TELEPHONE_TYPES, :prompt => "Select"
+  %tr 
+    %th Address
+    %td
+      ~ text_area :address, :rows => 8, :cols => 38
+  %tr 
+    %th State
+    %td
+      = text_field :state
+      -#= select :state, :collection => Client::STATE, :prompt => "Select"
+  %tr 
+    %th Pincode
+    %td
+      = text_field :pincode 
