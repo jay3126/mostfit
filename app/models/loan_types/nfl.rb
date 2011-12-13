@@ -56,8 +56,8 @@ module Mostfit
 
       def equated_payment
         payment = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-        rnd = loan_product.rounding || 1
-        actual_payment = (payment / rnd).send(loan_product.rounding_style) * rnd
+        rnd = rs.round_total_to
+        actual_payment = (payment / rnd).send(rs.rounding_style) * rnd
       end
 
       def pay_prorata(total, received_on, curr_bal = nil)
@@ -103,6 +103,7 @@ module Mostfit
         @rounded_schedule = {}
         balance = amount
         actual_payment = equated_payment
+        debugger
         while not done
           @rounded_schedule[i] = {}
           @rounded_schedule[i][:interest_payable] = (i <= @reducing_schedule.count ? @reducing_schedule[i][:interest_payable] : 0).round(2)
