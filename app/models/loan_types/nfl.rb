@@ -56,8 +56,9 @@ module Mostfit
 
       def equated_payment
         payment = pmt(interest_rate/get_divider, number_of_installments, amount, 0, 0)
-        rnd = rs.round_total_to
-        actual_payment = (payment / rnd).send(rs.rounding_style) * rnd
+        #rnd = rs.round_total_to
+        #actual_payment = (payment / rnd).send(rs.rounding_style) * rnd
+        actual_payment = payment.round_to_nearest(rs.round_total_to, rs.rounding_style)
       end
 
       def pay_prorata(total, received_on, curr_bal = nil)
