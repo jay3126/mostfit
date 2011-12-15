@@ -47,7 +47,7 @@ class Center
 
   def self.from_csv(row, headers)
     keys = [:center_name, :code, :center_meeting_time_in_24h_format, :meeting_day, :branch, :manager, :creation_date]
-    misssing_keys = keys - headers.keys
+    missing_keys = keys - headers.keys
     raise ArgumentError.new("missing key #{missing_keys.join(',')}") unless missing_keys.blank?
 
     hour, minute = row[headers[:center_meeting_time_in_24h_format]].split(":")[0..1]

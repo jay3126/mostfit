@@ -16,9 +16,9 @@ class Client
   property :id,              Serial
 
   # basic properties custom only to suryoday
-  property :first_name,      String, :nullable => false
+  property :first_name,      String, :nullable => true
   property :last_name,       String, :nullable => true
-  property :relative_name,   String, :nullable => false
+  property :relative_name,   String, :nullable => true
   property :relative_relationship,   Enum.send('[]', *CLIENT_RELATIONSHIPS)
   property :nominee_name,    String
   property :nominee_relationship, Enum.send('[]', *CLIENT_RELATIONSHIPS)
