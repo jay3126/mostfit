@@ -128,6 +128,11 @@ module Misfit
         @model = route[:controller].singularize.to_sym
         @action = route[:action]
 
+        # special case for NFL of payments not being editable, deletable unless admin
+        if @model == :payment
+          return false if [:edit, :update, :delete].include?(@action)
+        end
+
         # reports access control rules
         if route[:controller] == "reports" and route[:action] == "show" and route[:report_type] and Mfi.first.report_access_rules.key?(route[:report_type])
           return Mfi.first.report_access_rules[route[:report_type]].include?(user_role.to_s)
