@@ -280,7 +280,7 @@ class Loan
       :client                             => Client.first(:reference => row[headers[:client_reference]])}
     obj = new(hash)
     obj.history_disabled=true
-    saved = obj.save!
+    saved = obj.save
     if saved
       debugger
       c = Checker.first_or_new(:model_name => "Loan", :reference => obj.reference)

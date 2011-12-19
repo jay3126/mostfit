@@ -15,7 +15,7 @@ class Center
 
   property :id,                   Serial
   property :name,                 String, :length => 100, :nullable => false, :index => true
-  property :code,                 String, :length => 12, :nullable => true, :index => true
+  property :code,                 String, :length => 52, :nullable => true, :index => true
   property :address,              Text,   :lazy => true
   property :contact_number,       String, :length => 40, :lazy => true
   property :landmark,             String, :length => 100, :lazy => true  
@@ -34,7 +34,7 @@ class Center
   has n, :weeksheets
   
   validates_is_unique   :code, :scope => :branch_id
-  validates_length      :code, :min => 1, :max => 12
+  validates_length      :code, :min => 1, :max => 52
 
   validates_length      :name, :min => 3
   validates_is_unique   :name
