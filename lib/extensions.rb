@@ -130,7 +130,7 @@ module Misfit
 
         # special case for NFL of payments not being editable, deletable unless admin
         if @model == :payment
-          return false if [:edit, :update, :delete].include?(@action)
+          return false if [:edit, :update, :delete].include?(@action.to_sym)
         end
 
         # reports access control rules
