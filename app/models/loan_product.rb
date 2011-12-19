@@ -63,9 +63,7 @@ class LoanProduct
     keys = [:name, :min_amount, :max_amount, :min_interest_rate, :max_interest_rate, :min_number_of_installments, :max_number_of_installments,
             :installment_frequency, :valid_from, :valid_upto, :repayment_style]
     missing_keys = keys - headers.keys
-    debugger
     raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
-    debugger
     obj = new(:name => row[headers[:name]], :min_amount => row[headers[:min_amount]], :max_amount => row[headers[:max_amount]], 
               :min_interest_rate => min_interest, :max_interest_rate => max_interest, 
               :min_number_of_installments => row[headers[:min_number_of_installments]], 

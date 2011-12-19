@@ -52,7 +52,11 @@ class StaffMember
                       :password => row[headers[:password]], :password_confirmation => row[headers[:password]])    
       user.save
     end
-    
+
+    keys = [:name, :gender]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
     obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,

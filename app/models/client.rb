@@ -16,9 +16,9 @@ class Client
   property :id,              Serial
 
   # basic properties custom only to suryoday
-  property :first_name,      String, :nullable => false
+  property :first_name,      String, :nullable => true
   property :last_name,       String, :nullable => true
-  property :relative_name,   String, :nullable => false
+  property :relative_name,   String, :nullable => true
   property :relative_relationship,   Enum.send('[]', *CLIENT_RELATIONSHIPS)
   property :nominee_name,    String
   property :nominee_relationship, Enum.send('[]', *CLIENT_RELATIONSHIPS)
@@ -176,10 +176,8 @@ class Client
     end
     client_type     = ClientType.first||ClientType.create(:type => "Standard")
     grt_date        = row[headers[:grt_date]] ? Date.parse(row[headers[:grt_date]]) : nil
-    debugger
     keys = [:reference, :name, :spouse_name, :date_of_birth, :address, :date_joined, :center, :grt_date, :created_by_staff, :group]
     missing_keys = keys - headers.keys
-    debugger
     raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
     hash = {:reference => row[headers[:reference]], :name => row[headers[:name]], :spouse_name => row[headers[:spouse_name]],
       :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]], 
