@@ -1,20 +1,29 @@
-%a.expand_collapsed{:style => "color: green"}
-  Change parameters
-.collapsed
-  %form{:action => (@portfolio.new? ? resource(@funder, :portfolios, :new) : resource(@funder, @portfolio, :edit)), :method => :get, :style => "width: 50%"}
-    %table
-      %tr
-        %th
-          Branch
-        %td
-          = select :branch_id, :collection => Branch.all.map{|b| [b.id, b.name]}, :prompt => "Select branch"
-        %th
-          Add as on
-        %td
-          = date_select :added_on, params[:added_on]||Date.today
-        %th
-          Disbursed after
-        %td
-          = date_select :disbursed_after, params[:disbursed_after]||Date.min_date
-        %td
-          = submit "change"
+-if @counter==1
+  %tr
+    %th
+      %b Model
+    %th
+      %b Property
+    %th
+      %b operator
+    %th
+      %b values
+    %th
+      %b more
+%tr{:id => "formdiv_#{@counter}"}
+  %td
+    -if @model and @model.class==Class
+      = @model.name
+      %input{:type => "hidden", :name => "model[#{@counter}]", :id => "model_#{@counter}", :value => @model.name.snake_case}
+    -elsif @model
+      =select :name => "model[#{@counter}]", :id => "model_#{@counter}", :collection => @model.map{|x| [x, x.camelcase]}, :prompt => "choose model"
+    -else
+      = select :name => "model[#{@counter}]", :id => "model_#{@counter}", :collection => model_names, :prompt => "choose model"
+  %td
+    = select :name => "property[#{@counter}]", :id => "property_#{@counter}", :collection => (@model and @properties ? @properties.map{|x| [x,x]} : []), :prompt => "choose property"
+  %td
+    = select :name => "operator[#{@counter}]", :id => "operator_#{@counter}", :collection => [], :prompt => "choose operator"
+  %td
+    %span{:id => "span_#{@counter}"}
+  %td
+    = select :name => "more[#{@counter}]", :id => "more_#{@counter}", :class => "more", :collection => ["and", "or", "not", "chain"], :prompt => "Add more conditions"

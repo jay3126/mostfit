@@ -1,16 +1,19 @@
 %h1
-  Portfolios controller, index action
-%p
-  Edit this file in
-  %tt
-    app/views/portfolios/index.html.erb
-%table
-  %tr
+  Portfolios
+.menu-strip
+  = link_to 'New', url(:new_portfolio), :class => 'add'
+%table.narrow.shaded
+  %thead
+    %tr
+      %th
+        Name
+      %th
+        creation date
+      
   - for portfolio in @portfolios
     %tr
       %td
-        = link_to 'Show', url(:portfolio, portfolio)
+        = link_to portfolio.name, url(:portfolio, portfolio)
       %td
-        = link_to 'Edit', url(:edit_portfolio,  portfolio)
+        = portfolio.created_at
 
-= link_to 'New', url(:new_portfolio)

@@ -6,26 +6,18 @@ class Portfolio
 
   before :destroy, :verified_cannot_be_deleted
   before :valid?,  :parse_dates
-  after  :save,    :process_portfolio_details
-  after  :save,    :update_portfolio_value
   
   property :id, Serial
   property :name, String, :index => true, :nullable => false, :length => 3..20
-  property :funder_id, Integer, :index => true, :nullable => false
   property :start_value, Float, :nullable => true
-  property :outstanding_value, Float, :nullable => true
-  property :principal_repaid, Float, :nullable => true
-  property :interest_repaid, Float, :nullable => true
-  property :fees_repaid, Float, :nullable => true
-  property :last_payment_date, Date, :nullable => true
-  property :outstanding_calculated_on, DateTime, :nullable => true
   property :verified_by_user_id,            Integer, :nullable => true, :index => true
   property :created_by_user_id,  Integer, :nullable => false, :index => true
+
+  property :is_securitised, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
 
   property :created_at, DateTime, :default => Time.now
   property :updated_at, DateTime, :default => Time.now
 
-  belongs_to :funder
   has n, :portfolio_loans
   has n, :loans, :through => :portfolio_loans
   belongs_to :created_by,  :child_key => [:created_by_user_id],   :model => 'User'

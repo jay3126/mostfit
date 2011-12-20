@@ -1,0 +1,29 @@
+%h1 Mostfit advanced search tool
+= error_messages_for @portfolio
+=form_for(@portfolio,:id => "reporting_form",  :action => resource(:portfolios)) do
+  %table.tall.shaded
+    %tr
+      %th
+        Name of Portfolio
+      %td
+        = text_field :name
+    %tr
+      %th
+        Securitised portfolio?
+      %td
+        = check_box :is_securitised
+        .greytext
+          Loans in securitised portfolios can only exist in one such portfolio.
+          %br
+          Check this box if you want to guarantee that loans in this portfolio are uniquely only in this portfolio.
+    %tr
+      %th
+        Loans added as of
+      %td
+        = date_select :added_on
+
+    %tr
+      %td{:colspan => 2}
+        %table
+          =partial :form
+        = submit 'create portfolio'

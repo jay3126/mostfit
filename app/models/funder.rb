@@ -8,7 +8,7 @@ class Funder
   belongs_to :user, :nullable => true
 
   has n, :funding_lines
-  has n, :portfolios  
+
 
   def self.catalog
     result = {}
