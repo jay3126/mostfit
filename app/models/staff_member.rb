@@ -9,6 +9,7 @@ class StaffMember
   property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
   property :active,  Boolean, :default => true, :nullable => false  
   property :user_id,  Integer,  :nullable => true  
+  property :gender, Enum[:male, :female]
   # no designations, they are derived from the relations it has
 
   has n, :branches,          :child_key => [:manager_staff_id]

@@ -1,0 +1,34 @@
+%h1 XML file
+- keys = ["OWN_MFI_INDECATOR","TOTAL_RESPONSES","NO_OF_DEFAULT_ACCOUNTS","NO_OF_CLOSED_ACCOUNTS","NO_OF_OTHER_MFIS","STATUS", "NO_OF_ACTIVE_ACCOUNTS"]
+%table.narrow.shaded
+  %thead
+    %tr
+      %th
+        XML Client Name
+      - keys.each do |title|
+        %th
+          = title
+      %th
+        Closest Match
+      %th
+        Action
+        
+  - @data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"].each do |ol|
+    - name = ol["REQUEST"]["NAME"] 
+    - dob = ol["REQUEST"]["DOB"]
+    %tr{:class => cycle('odd','even')}
+      %td
+        = name
+        = dob
+      - keys.each do |title|
+        %td
+          = ol["HEADER"]["SUMMARY"][title]
+      %td
+        - matches = Client.all(:name.like => "%#{name}%", :date_of_birth => Date.parse(dob))
+        - matches.each do |c|
+          = link_to c.name, resource(c) 
+      %td
+        = check_box :name => "confirm"
+    
+      
+  
