@@ -1,0 +1,85 @@
+= partial :form
+- count = 0
+%table.report.nojs
+  %tr.header
+    %th
+      Branch Id
+    %th
+      Branch Name
+    %th
+      Center Id
+    %th
+      Center Name
+    %th
+      Client Id
+    %th
+      Client Name
+    %th
+      Loan Id
+    %th
+      Insurance Policy Id
+    %th
+      Application No.
+    %th
+      Policy No.
+    %th
+      Sum Insured
+    %th
+      Insurance Start Date
+    %th
+      Insurance End Date
+    %th
+      Premium
+    %th
+      Cover For
+    - @data.sort_by{|client, branches| client}.each do |client, branches|
+      - count += 1
+      %tr
+        %td
+          = branches[:branch_id]
+        %td
+          = branches[:branch_name]
+        %td
+          = branches[:center_id]
+        %td
+          = branches[:center_name]
+        %td
+          = branches[:client_id]
+        %td
+          = branches[:client_name]
+        %td
+          = branches[:loan_id]
+        %td
+          = branches[:insurance_id]
+        %td
+          = branches[:application_number]
+        %td
+          = branches[:policy_number]
+        %td
+          = branches[:sum_insured]
+        %td
+          = branches[:insurance_start_date]
+        %td
+          = branches[:insurance_end_date]
+        %td
+          = branches[:premium]
+        %td
+          = branches[:cover_for]
+  %tr.footer
+    %th
+      Total
+    %td
+    %td
+    %td
+    %td
+    %td
+      = count
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
