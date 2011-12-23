@@ -1,7 +1,7 @@
 module Merb
   module PortfoliosHelper
     def model_names
-      [Region, Area, Branch, Center, ClientGroup, Client, Funder, FundingLine].map{|d| 
+      [Region, Area, Branch, Center, ClientGroup, Client, Funder, FundingLine, Loan].map{|d| 
         [d.to_s.snake_case.to_sym, d.to_s]
       }.sort_by{|x| x[1]} 
     end

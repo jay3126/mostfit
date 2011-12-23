@@ -61,14 +61,6 @@ class Cacher
   property :stale,                           Boolean, :default => false
 
 
-  COLS =   [:scheduled_outstanding_principal, :scheduled_outstanding_total, :actual_outstanding_principal, :actual_outstanding_total, :actual_outstanding_interest,
-            :total_interest_due, :total_interest_paid, :total_principal_due, :total_principal_paid,
-            :principal_in_default, :interest_in_default, :total_fees_due, :total_fees_paid, :total_advance_paid, :advance_principal_paid, :advance_interest_paid,
-           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk, :outstanding_count, :outstanding]
-  FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
-               :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
-               :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
-               :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
 
 
   # some convenience functions
@@ -557,3 +549,32 @@ end
 class LoanProductCache < Cache
 end
 
+class PortfolioCache < Cacher
+  # this class handles caching for arbitrary collections of loans
+  # it is simpler because we do not provide "drill-down" functionality on these arbitrary collections....for now.
+
+  # also, it can cover a date range and not just one date.
+  # this enables us to, instead of maintaining a cache for each day and then aggregating the cashflows for a given date range, to maintain directly a cache for a given date range
+  # i.e. we avoid massive problems to do with stalification of caches and correct "point-in-time" snapshots (described below).
+
+
+ property :end_date, Date, :nullable => true
+  
+  def self.update(portfolio,date = Date.today)
+    t = Time.now
+    d1 = d2 = date
+    loan_ids = portfolio.portfolio_loans(:added_on.lte => d2).aggregate(:loan_id) # loans added before the end of this period only are to be counted
+    unless loan_ids.blank?
+      hash = {:loan_id => loan_ids}
+      balances = LoanHistory.latest_sum(hash,d2, [], COLS)
+      pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], FLOW_COLS)    
+      pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => portfolio.id, :date => d1, :end_date => d2})
+      pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
+      pc.save
+      puts "Done in #{Time.now - t} secs"
+      pc
+    end
+  end
+
+  # params is {:start_date => Date, :end_date => Date, :periodicity => one of "week","month"}
+end

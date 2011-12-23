@@ -13,7 +13,6 @@
         %th ID
         %th Name
         %th Funding lines
-        %th Portfolios
         %th
     %tbody
     - for funder in @funders
@@ -25,8 +24,6 @@
           %b= link_to funder.name, resource(funder)
         %td
           %b= funder.funding_lines.size
-        %td
-          %b= funder.portfolios.size
         %td
           = link_to_with_rights 'edit', resource(funder, :edit)
           &nbsp;|&nbsp

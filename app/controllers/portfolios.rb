@@ -98,6 +98,16 @@ class Portfolios < Application
     end
   end
 
+  def cashflow(id)
+    # returns the cashflow for a given potfolio between specified dates
+    # returns raw json
+    debugger
+    @portfolio = Portfolio.get(id)
+    raise NotFound unless @portfolio
+    @portfolio.cashflow(params)
+  end
+    
+
   # def loans
   #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new
   #   @loans     = @portfolio.eligible_loans(params[:center_id])

@@ -26,124 +26,60 @@ class Portfolio
   belongs_to :verified_by, :child_key => [:verified_by_user_id], :model => 'User'
   validates_with_method :verified_by_user_id, :method => :verified_cannot_be_deleted, :when => [:destroy]
 
-  def loans(hash={})
-    hash[:id] = portfolio_loans(:active => true).map{|x| x.id}
-    Loan.all(hash)
-  end
   
-  def portfolio_loans(hash={})
-    hash[:portfolio_id] = self.id
-    hash[:active] = true
-    PortfolioLoan.all(hash)
-  end
-  
-  def eligible_loans
-    centers_hash = {}
-    row = Struct.new(:loan_count, :actual_outstanding_principal)
-
-    Center.all(:fields => [:id, :name]).each{|c| centers_hash[c.id] = c}
+  def take_cashflow_snapshot(every, what) # no other way to name the args.
+    # @params 
+    # i.e. 15, :month            => 15th of every month
+    # i.e. 2, :friday            => every 2nd friday
     
-    hash = self.new? ? {} : {:portfolio_id.not => id}
-    hash[:active] = true
-    pids = (PortfolioLoan.all(hash).map{|x| x.loan_id})
-    
-    hash         = {:current => true, :loan_id => PortfolioLoan.all(:portfolio_id => self.id).map{|pl| pl.loan_id}, :status => [:repaid, :written_off, :claim_settlement]}
-    hash[:branch_id] = self.branch_id  if self.branch_id and self.branch_id.to_i > 0
-    repaid_loans = LoanHistory.all(hash)
-    
-    query = []    
-    query << "l.id not in (#{pids.join(', ')})" if pids.length > 0
-    query << "l.disbursal_date>='#{self.disbursed_after.strftime('%Y-%m-%d')}'" if self.disbursed_after and self.disbursed_after.is_a?(Date)
-    query << "lh.branch_id = #{self.branch_id}" if self.branch_id and self.branch_id.to_i > 0
-
-    date = self.added_on || Date.today
-
-    data = LoanHistory.sum_outstanding_grouped_by(date, [:center, :branch], query).group_by{|x| x.branch_id}.map{|bid, centers| 
-      [Branch.get(bid), centers.group_by{|x| x.center_id}.map{|cid, rows| [centers_hash[cid], rows.first]}.to_hash]
-    }.to_hash
-
-    repaid_loans.each{|lh|
-      data[lh.branch][lh.center] ||= row.new(0, 0)
-      data[lh.branch][lh.center].loan_count += 1
-      data[lh.branch][lh.center].actual_outstanding_principal += lh.actual_outstanding_principal
-    }
-    data
-  end
-
-  def process_portfolio_details
-    if centers and centers.length>0
-      outstanding_statuses = [:outstanding, :disbursed]
-      loan_values = {}
-      accounted_for = []
-
-      existing_loans = self.portfolio_loans.map{|l| l.loan_id}
-      self.loans.each{|l| l.history_disabled = true}
-
-      centers = Center.all(:id => self.centers.reject{|cid, status| status != "on"}.keys)
-      inactive_loans = PortfolioLoan.all(:portfolio_id => self.id, :active => false, :fields => [:id, :loan_id]).map{|x| x.loan_id}
-      self.added_on  = Date.parse(self.added_on) if self.added_on.is_a?(String)
-
-      LoanHistory.loans_outstanding_for(centers, self.added_on).each{|loan|
-        if existing_loans.include?(loan.loan_id)
-          accounted_for << loan.loan_id
-        elsif inactive_loans.include?(loan.loan_id)
-          accounted_for << loan.loan_id
-          pl = PortfolioLoan.first(:portfolio_id => self.id, :loan_id => loan.loan_id)
-          pl.active = true
-          pl.save
-        else
-          PortfolioLoan.create!(:loan_id => loan.loan_id, :original_value => loan.amount, :added_on => self.added_on, :portfolio => self,
-                                :starting_value => loan.actual_outstanding_principal, :current_value => loan.actual_outstanding_principal)
-        end
-      }
-
-      # deactivate all the loans which are not accounted for
-      Loan.all(:id => (existing_loans - accounted_for), "client.center_id" => displayed_centers).each{|lid|
-        if pl = PortfolioLoan.first(:loan_id => lid, :portfolio_id => self.id)
-          pl.update(:active => false)
-        end
-      } if (existing_loans - accounted_for).length > 0
-
-      total_start_value = portfolio_loans.aggregate(:starting_value.sum) || 0
-      repository.adapter.execute("UPDATE portfolios SET start_value=#{total_start_value}, outstanding_calculated_on=NOW() WHERE id=#{self.id}")
-      return true
-    end
-  end
-  
-  def update_portfolio_value
-    loan_values = {}
-    last_payment_created_at = Payment.all("loan.portfolio_loans.portfolio_id" => self.id).max(:created_at)
-    return unless last_payment_created_at
-    return if last_payment_created_at.new_offset <=  (self.updated_at + self.updated_at.offset).new_offset
-    
-    # force reloading to read associations correctly
-    self.reload
-    loan_ids = []
-
-    if PortfolioLoan.all(:portfolio_id => self.id, :active => true).count > 0
-      LoanHistory.loans_outstanding_for(Loan.all(:id => self.portfolio_loans.map{|x| x.loan_id}, :fields => [:id])).each{|loan|
-        loan_values[loan.loan_id] = loan
-      }
-      self.portfolio_loans(:active => true).each{|l|
-        if loan_values.key?(l.loan_id)
-          l.current_value = loan_values[l.loan_id].actual_outstanding_principal
-        else
-          l.current_value = 0
-        end
-        l.save!
-        loan_ids << l.loan_id
-      }
+    if what == :month  # day of month
+       what = :day;    of_every = 1;          period = :month
+    else               # day of week
+      every = 1;       of_every = every;      period = :week
     end
 
-    if loan_ids.length > 0
-      outstanding_value = portfolio_loans(:active => true).aggregate(:current_value.sum) || 0
-      last_payment_date       = Payment.all("loan.portfolio_loans.portfolio_id" => self.id).max(:received_on)
-      repository.adapter.execute(%Q{
-                                     UPDATE portfolios SET outstanding_value=#{outstanding_value}, outstanding_calculated_on=NOW(), last_payment_date='#{last_payment_date.strftime('%Y-%m-%d')}', updated_at=NOW()
-                                     WHERE id=#{self.id}
-                                 })
+    # having portfolio cashflow caches for different periods presents a unique problem. Each of the caches may have been generated at different times
+    # and so be out of sync with each other. i.e. one months cache created a time t0 and for another at time t1. So, when we display monthly cashflows
+    # the cashflow will not be consistent
+    # therefore, portfolio caches for a particular portfolio must always be generated in a "snapshot" fashion. is this slow? fuck yeah!
+    # do we have an option? fucked if I can see one....
+    
+    # also, we cannot allow the user to choose the start and end dates. we have to delete all caches that conform to this periodicity
+    t = Time.now
+
+    start_date = LoanHistory.all(:loan_id => loans.aggregate(:id)).aggregate(:date.min) # last loan history date for these loans
+    end_date = LoanHistory.all(:loan_id => loans.aggregate(:id)).aggregate(:date.max) # last loan history date for these loans
+
+    dates = ([start_date] + DateVector.new(every, what, 1, period, start_date, end_date).get_dates + [end_date]).uniq
+    # voila, a datevector reflecting the dates of the cashflow
+    # obviously at some point the datevector is going to have to support holiday calendars and business day adjustments, but all that can come later.
+
+
+    # you know how we always wanted a function called "map_with_index"? well, if all you want to do is access the next/previous element, the below
+    # is an example of how to do that elegantly
+    
+    # here we go over the various dates and create portfolios for each of them
+    d1 = dates[0]
+    portfolios = dates[1..-1].map do |d2|
+      loan_ids = portfolio_loans(:added_on.lte => d2).aggregate(:loan_id) # loans added before the end of this period only are to be counted
+      unless loan_ids.blank?
+        hash = {:loan_id => loan_ids}
+        balances = LoanHistory.latest_sum(hash,d2, [], COLS)
+        pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], FLOW_COLS)    
+        pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => id, :date => d1, :end_date => d2})
+        pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
+        pc.save
+        puts "Done in #{Time.now - t} secs"
+        pc
+      else
+        nil
+      end
+      d1 = d2 + 1 # i.e. round 1 is 1 - 31 jan, then 1 feb - 28 feb....so we have to bump d2 by 1
     end
+
   end
+    
+
 
   def verified_cannot_be_deleted
     return true unless verified_by_user_id
