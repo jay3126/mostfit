@@ -18,20 +18,18 @@ class Client
   # basic properties custom only to suryoday
   property :first_name,      String, :nullable => true
   property :last_name,       String, :nullable => true
-  property :relative_name,   String, :nullable => true
-  property :relative_relationship,   Enum.send('[]', *CLIENT_RELATIONSHIPS)
   property :nominee_name,    String
-  property :nominee_relationship, Enum.send('[]', *CLIENT_RELATIONSHIPS)
-  property :id_number,       String
-  property :id_type,         Enum.send('[]', *ID_TYPES)
-  property :telephone_number, String
-  property :telephone_type,  Enum.send('[]', *TELEPHONE_TYPES)
-  property :state,           String
-  property :pincode,         Integer
+  property :nominee_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
+  property :id_number,       String, :nullable => true
+  property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
+  property :telephone_number, String, :nullable => true
+  property :telephone_type,  Enum.send('[]', *([nil] + TELEPHONE_TYPES)), :nullable => true
+  property :state,           String, :nullable => true
+  property :pincode,         Integer, :nullable => true
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
+  property :gender,     Enum.send('[]', *[nil, 'female', 'male']), :nullable => true, :lazy => true
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
@@ -122,7 +120,7 @@ class Client
   belongs_to :center
   belongs_to :client_group
   belongs_to :occupation, :nullable => true
-  belongs_to :client_type
+  # belongs_to :client_type
   belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'

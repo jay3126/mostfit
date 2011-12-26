@@ -161,6 +161,30 @@ class Clients < Application
     render
   end
   
+  def bulk_entry
+    if request.method == :get
+      render
+    else
+      debugger
+      @center = Center.get(params[:center_id])
+      @clients = params[:clients].each do |k,v| 
+        if v.values.join.length > 0
+          c = Client.new(v.merge({:center_id => params[:center_id], 
+                                   :created_by_staff_member_id => @center.manager, 
+                                   :created_by_user_id => session.user.id}))
+          params[:clients].delete(k) if c.save
+        else
+          params[:clients].delete(k)
+        end
+      end
+      if params[:clients].keys.length > 0
+        render
+      else
+        redirect "/data_entry", :message => {:notice => "all clients succesfully added"}
+      end
+    end
+  end
+  
 
   private
   def get_context
