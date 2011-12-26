@@ -2,7 +2,7 @@ class Cacher
   # like LoanHistory but for anything that has loans
   include DataMapper::Resource
 
-   property :id,                              Serial
+  property :id,                              Serial
   property :type,                            Discriminator
   property :date,                            Date, :nullable => false, :index => true
   property :model_name,                      String, :nullable => false, :index => true
@@ -64,11 +64,11 @@ class Cacher
   COLS =   [:scheduled_outstanding_principal, :scheduled_outstanding_total, :actual_outstanding_principal, :actual_outstanding_total, :actual_outstanding_interest,
             :total_interest_due, :total_interest_paid, :total_principal_due, :total_principal_paid,
             :principal_in_default, :interest_in_default, :total_fees_due, :total_fees_paid, :total_advance_paid, :advance_principal_paid, :advance_interest_paid,
-           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk]
+           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk, :outstanding_count, :outstanding]
   FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
                :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
                :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
-               :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym]}.flatten
+               :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
 
 
   # some convenience functions
@@ -76,6 +76,9 @@ class Cacher
     principal_paid + interest_paid + fees_paid_today
   end
 
+  def total_due
+    principal_due + interest_due + fees_due_today
+  end
 
   def total_advance_paid_today
     advance_principal_paid_today + advance_interest_paid_today
@@ -97,6 +100,19 @@ class Cacher
   def total_default
     (principal_in_default + interest_in_default).abs
   end
+
+  def principal_defaulted_today
+    [scheduled_principal_due - principal_paid,0].max
+  end
+
+  def interest_defaulted_today
+    [scheduled_interest_due - interest_paid,0].max
+  end
+  
+  def total_defaulted_today
+    principal_defaulted_today + interest_defaulted_today
+  end
+
 
   def icash_interest_in_default
     [0,interest_in_default + total_advance_outstanding].min
