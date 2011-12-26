@@ -39,15 +39,16 @@ class LoyaltyBonus < Report
     keys.each_with_index do |k,i| 
       debugger
       model = Kernel.const_get(k.to_s.camel_case) # i.e. Branch
-      instance_variable_set("@#{k}_names", model.all(:id => required_fields.map{|x| x[i+1]}).aggregate(:id, :name))
+      instance_variable_set("@#{k}_names", model.all(:id => required_fields.map{|x| x[i+1]}).aggregate(:id, :name).to_hash)
       # i.e. @branch = Branch.all(:id => required_fields.map{|x| x[1]})
     end
     required_field_hash = required_fields.map{|x| [x[0], x[1..-1]]}.to_hash
     @data = required_field_hash.map do |lid, data_array| #data_array = [:branch_id, :center_id, :client_group_id, :client_id, :date] 
+      bname = @branch_names[data_array[0]] rescue nil
       mat_date = data_array[-1]
       l = Loan.get(lid)
       {:loan                                    =>l, 
-        :branch_name                            => @branch_names[data_array[0]][1], # ugh!
+        :branch_name                            => bname,
         :branch_id                              => data_array[0],
         :client_name                            => @client_names[data_array[3]], # inelegant!
         :client_id                              => data_array[3],
