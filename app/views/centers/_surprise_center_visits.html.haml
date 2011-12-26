@@ -1,0 +1,23 @@
+%h1
+  Surprise Center Visits
+
+%table.narrow.form
+  %thead
+    %th Date
+    %th Conducted by
+    %th Action
+  %tbody
+    - @center.surprise_center_visits.each do |surprise_center_visit|
+      %tr
+        %td  
+          = surprise_center_visit.done_on
+        %td
+          - sm = StaffMember.get(surprise_center_visit.conducted_by_id)
+          = sm.name if sm
+        %td
+          = link_to 'Show', url(:surprise_center_visit, surprise_center_visit)
+          |
+          = link_to 'Edit', url(:edit_surprise_center_visit,  surprise_center_visit)
+
+%p.menu-strip
+  = link_to 'Create new surprise center visit', url(:controller => :surprise_center_visits, :center_id => @center.id, :action => :new), :class => "add"

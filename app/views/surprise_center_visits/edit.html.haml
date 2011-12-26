@@ -1,0 +1,12 @@
+%h1
+  Edit Surprise Center Visits
+= error_messages_for @surprise_center_visit
+
+= form_for(@surprise_center_visit, :action => url(:surprise_center_visit, @surprise_center_visit)) do
+  = partial :fields
+  = hidden_field :center_id, :value => @surprise_center_visit.center_id 
+  = submit "Update"
+
+= link_to 'Show', url(:surprise_center_visit, @surprise_center_visit)
+|
+= link_to 'Back', resource(@surprise_center_visit.center)
