@@ -1,0 +1,74 @@
+%h1
+  SurpriseCenterVisits 
+
+%table.form
+  %tr
+    %th
+      Done on
+    %td
+      = @surprise_center_visit.done_on  
+  %tr
+    %th
+      Question 1
+    %td
+      = @surprise_center_visit.question_1
+  %tr
+    %th
+      Question 2
+    %td
+      = @surprise_center_visit.question_2
+  %tr
+    %th
+      Question 3
+    %td
+      = @surprise_center_visit.question_3
+  %tr
+    %th
+      Question 4
+    %td
+      = @surprise_center_visit.question_4
+  %tr
+    %th
+      Question 5
+    %td
+      = @surprise_center_visit.question_5
+  %tr
+    %th
+      Question 6
+    %td
+      = @surprise_center_visit.question_6
+  %tr
+    %th
+      Question 7
+    %td
+      = @surprise_center_visit.question_7
+  %tr
+    %th
+      Question 8
+    %td
+      = @surprise_center_visit.question_8
+  %tr
+    %th
+      Question 9
+    %td
+      = @surprise_center_visit.question_9
+  %tr
+    %th
+      Question 10
+    %td
+      = @surprise_center_visit.question_10
+  %tr
+    %th
+      Conducted By
+    %td
+      - s = StaffMember.get(@surprise_center_visit.conducted_by_id)
+      = s.name if s
+  %tr
+    %th
+      Conducted at
+    %td
+      = @surprise_center_visit.center.name
+
+= link_to 'Edit',  url(:edit_surprise_center_visit)
+|
+= link_to 'Back', resource(@surprise_center_visit.center)
