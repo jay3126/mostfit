@@ -1,5 +1,5 @@
 class Clients < Application
-  before :get_context, :exclude => ['redirect_to_show']
+  before :get_context, :exclude => ['redirect_to_show', 'bulk_entry']
   provides :xml, :yaml, :js
 
   def index
@@ -63,11 +63,6 @@ class Clients < Application
       end
     end
   end
-
-  def bulk_create
-    render
-  end
-
 
   def edit(id)
     only_provides :html
@@ -170,9 +165,9 @@ class Clients < Application
     if request.method == :get
       render
     else
-      debugger
       @center = Center.get(params[:center_id])
       @clients = params[:clients].each do |k,v| 
+        debugger
         if v.values.join.length > 0
           c = Client.new(v.merge({:center_id => params[:center_id], 
                                    :created_by_staff_member_id => @center.manager, 
@@ -185,7 +180,7 @@ class Clients < Application
       if params[:clients].keys.length > 0
         render
       else
-        redirect "/data_entry", :message => {:notice => "all clients succesfully added"}
+        redirect resource(@center), :message => {:notice => "all clients succesfully added"}
       end
     end
   end
