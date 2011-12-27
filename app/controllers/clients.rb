@@ -1,5 +1,5 @@
 class Clients < Application
-  before :get_context, :exclude => ['redirect_to_show']
+  before :get_context, :exclude => ['redirect_to_show', 'bulk_entry']
   provides :xml, :yaml, :js
 
   def index
@@ -159,6 +159,30 @@ class Clients < Application
   def inactive_client_count
     @data = Client.all(:active => false, :inactive_reason => 'death_of_client') + Client.all(:active => false, :inactive_reason => 'death_of_spouse')
     render
+  end
+  
+  def bulk_entry
+    if request.method == :get
+      render
+    else
+      @center = Center.get(params[:center_id])
+      @clients = params[:clients].each do |k,v| 
+        debugger
+        if v.values.join.length > 0
+          c = Client.new(v.merge({:center_id => params[:center_id], 
+                                   :created_by_staff_member_id => @center.manager, 
+                                   :created_by_user_id => session.user.id}))
+          params[:clients].delete(k) if c.save
+        else
+          params[:clients].delete(k)
+        end
+      end
+      if params[:clients].keys.length > 0
+        render
+      else
+        redirect resource(@center), :message => {:notice => "all clients succesfully added"}
+      end
+    end
   end
   
 
