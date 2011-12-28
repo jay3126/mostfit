@@ -110,6 +110,11 @@ Merb::Router.prepare do
   match('/reports/:report_type(/:id)').to(:controller => 'reports', :action => 'show').name(:show_report)
   resources :reports
   match('/data_entry(/:action)').to(:namespace => 'data_entry', :controller => 'index').name(:data_entry)
+
+  namespace :credit_bureaus do 
+    match('/:name/:action').to(:controller => :name)
+  end
+
   namespace :data_entry, :name_prefix => 'enter' do  # for url(:enter_payment) and the likes
     match('/clients(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
     match('/loans/approve_by_center/:id').to(:controller => 'loans', :action => 'approve').name(:approval_by_center)

@@ -4,6 +4,7 @@ class Loan
   include Identified
   include Pdf::LoanSchedule if PDF_WRITER
   include ExcelFormula
+  include Highmark::Loan
 
   DAYS = [:none, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
 

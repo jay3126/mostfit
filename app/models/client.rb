@@ -3,6 +3,7 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
   include FeesContainer
+  include Highmark::Client
 
   FLAGS = [:insincere]
 
@@ -98,6 +99,9 @@ class Client
   property :not_irrigated_land_shared_wasteland, Integer, :lazy => true
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
   property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
+  property :highmark_done, Boolean, :nullable => true
+
+
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500

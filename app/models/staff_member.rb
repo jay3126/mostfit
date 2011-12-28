@@ -12,6 +12,7 @@ class StaffMember
   property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :male
   property :active,  Boolean, :default => true, :nullable => false  
   property :user_id,  Integer,  :nullable => true  
+  property :gender, Enum[:male, :female]
   # no designations, they are derived from the relations it has
 
   has n, :branches,          :child_key => [:manager_staff_id]
