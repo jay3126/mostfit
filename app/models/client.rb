@@ -19,7 +19,7 @@ class Client
   property :existing_customer,	Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :client_description, String, :length => 100, :nullable => true, :index => false
-  property :gender,	Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
+  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :fathers_name,     String, :length => 100, :lazy => true
   property :father_is_alive, Enum.send('[]', *['', 'yes', 'no']), :default => '', :nullable => true, :lazy => true
