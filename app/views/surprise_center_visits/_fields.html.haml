@@ -1,0 +1,61 @@
+%table.form
+  %tr
+    %th
+      Done on
+    %td
+      = date_select_for(@surprise_center_visit, :done_on)  
+  %tr
+    %th
+      Question 1
+    %td
+      = check_box :question_1, :checked => false
+  %tr
+    %th
+      Question 2
+    %td
+      = check_box :question_2, :checked => false
+  %tr
+    %th
+      Question 3
+    %td
+      = check_box :question_3, :checked => false
+  %tr
+    %th
+      Question 4
+    %td
+      = check_box :question_4, :checked => false
+  %tr
+    %th
+      Question 5
+    %td
+      = check_box :question_5, :checked => false
+  %tr
+    %th
+      Question 6
+    %td
+      = check_box :question_6, :checked => false
+  %tr
+    %th
+      Question 7
+    %td
+      = check_box :question_7, :checked => false
+  %tr
+    %th
+      Question 8
+    %td
+      = check_box :question_8, :checked => false
+  %tr
+    %th
+      Question 9
+    %td
+      = check_box :question_9, :checked => false
+  %tr
+    %th
+      Question 10
+    %td
+      = check_box :question_10, :checked => false
+  %tr
+    %th
+      Conducted By
+    %td
+      = select :conducted_by_id, :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"

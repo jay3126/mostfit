@@ -15,7 +15,7 @@ class Center
 
   property :id,                   Serial
   property :name,                 String, :length => 100, :nullable => false, :index => true
-  property :code,                 String, :length => 12, :nullable => true, :index => true
+  property :code,                 String, :length => 52, :nullable => true, :index => true
   property :address,              Text,   :lazy => true
   property :contact_number,       String, :length => 40, :lazy => true
   property :landmark,             String, :length => 100, :lazy => true  
@@ -32,9 +32,10 @@ class Center
   has n, :loan_history
   has n, :center_meeting_days
   has n, :weeksheets
+  has n, :surprise_center_visits
   
   validates_is_unique   :code, :scope => :branch_id
-  validates_length      :code, :min => 1, :max => 12
+  validates_length      :code, :min => 1, :max => 52
 
   validates_length      :name, :min => 3
   validates_is_unique   :name
@@ -46,15 +47,27 @@ class Center
   validates_with_method :creation_date_ok
 
   def self.from_csv(row, headers)
-    hour, minute = row[headers[:center_meeting_time_in_24h_format]].split(":")
+    keys = [:center_name, :code, :center_meeting_time_in_24h_format, :meeting_day, :branch, :manager, :creation_date]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing key #{missing_keys.join(',')}") unless missing_keys.blank?
+
+    hour, minute = row[headers[:center_meeting_time_in_24h_format]].split(":")[0..1]
     branch       = Branch.first(:name => row[headers[:branch]].strip)
     staff_member = StaffMember.first(:name => row[headers[:manager]])
-
     creation_date = ((headers[:creation_date] and row[headers[:creation_date]]) ? row[headers[:creation_date]] : Date.today)
-    obj = new(:name => row[headers[:center_name]], :meeting_day => row[headers[:meeting_day]].downcase.to_s.to_sym, :code => row[headers[:code]],
-              :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
-              :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
-    [obj.save, obj]
+    hash = {:name => row[headers[:center_name]],  :code => row[headers[:code]],
+      :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
+      :creation_date => creation_date, :upload_id => row[headers[:upload_id]]}
+    # do we need a special monthly center meeting day?
+    monthly_meeting_date = row[headers[:meeting_day]].to_i
+    if monthly_meeting_date > 0
+      cmd = CenterMeetingDay.new(:every => monthly_meeting_date.to_s, :what => "day", :of_every => 1, :period => :month, :valid_from => creation_date)
+      center = new(hash)
+      center.center_meeting_days << cmd
+    else
+      center = new(hash.merge(:meeting_day => row[headers[:meeting_day]].downcase.to_s.to_sym))
+    end
+    [center.save, center]
   end
 
   def self.search(q, per_page=10)
@@ -136,8 +149,8 @@ class Center
     @meeting_days ||= self.center_meeting_days(:order => [:valid_from])
     if @meeting_days.length==0
       meeting_day
-    elsif date_row = @meeting_days.find{|md| md.valid_from <= date and md.valid_upto >= date} 
-      (date_row.meeting_wday)
+    elsif date_row = @meeting_days.find{|md| md.valid_from <= date and md.last_date >= date} 
+      (date_row.meeting_day == :none and (not date_row.what.blank?)) ? date_row.what[0].to_sym : date_row.meeting_day
     elsif @meeting_days[0].valid_from > date
       (@meeting_days[0].meeting_wday)
     else

@@ -7,6 +7,9 @@ class StaffMember
   property :name,    String, :length => 100, :nullable => false
   property :mobile_number,  String, :length => 12,  :nullable => true
   property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
+  property :address, Text, :lazy => true
+  property :father_name,  String, :length => 100, :nullable => true
+  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :male
   property :active,  Boolean, :default => true, :nullable => false  
   property :user_id,  Integer,  :nullable => true  
   property :gender, Enum[:male, :female]
@@ -29,6 +32,7 @@ class StaffMember
   has n, :payments, :child_key  => [:received_by_staff_id]
   has n, :monthly_targets
   has n, :weeksheets
+  has n, :staff_member_attendances
 
   belongs_to :user
 
@@ -50,7 +54,11 @@ class StaffMember
                       :password => row[headers[:password]], :password_confirmation => row[headers[:password]])    
       user.save
     end
-    
+
+    keys = [:name, :gender]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
     obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,

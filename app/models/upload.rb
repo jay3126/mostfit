@@ -154,6 +154,7 @@ class Upload
     # therefore, we run the roo task from a separate ruby file with no gems loaded
     self.update(:state => :extracting)
     s =  `ruby lib/tasks/excel.rb #{directory} #{filename}`
+    log_file unless @log
     @log.info s
     if s
       self.update(:state => :extracted)

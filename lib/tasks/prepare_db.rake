@@ -125,6 +125,12 @@ namespace :mostfit do
                              modify preclosed                   decimal(15,2) not null,
                              modify preclosed_count             integer not null;
          })
+      # deal with uploads
+      [:staff_members, :repayment_styles, :loan_products, :funding_lines, :branches, :centers, :client_groups, :clients, :loans].each do |table|
+        repository.adapter.execute("alter table #{table} modify column upload_id integer null")
+      end
+      repository.adapter.execute("alter table clients modify column client_type_id integer null")
+      
     end
 
     # the following three tasks make it easy to create a massive database from a small one.

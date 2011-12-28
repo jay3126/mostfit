@@ -97,7 +97,6 @@ namespace :mostfit do
       t1 = Time.now
       secs = (t1 - t0).round
       Merb.logger.info! "Finished mock:history rake task in #{secs} secs for #{Loan.all.size} loans with #{Payment.all.size} payments, at #{t1}"
-     # log.close
     end
 
   end

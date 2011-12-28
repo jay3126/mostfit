@@ -160,6 +160,13 @@ class Centers < Application
     redirect resource(@center.branch, @center)
   end
 
+  def surprise_center_visits
+    @center = Center.get(params[:id])
+    raise NotFound unless @center 
+    @surprise_center_visits = @center.surprise_center_visits
+    partial "centers/surprise_center_visits"
+  end
+
   def groups
     only_provides :json
     if params[:group_id]

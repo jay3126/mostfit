@@ -33,6 +33,11 @@
           == (id: #{@client.id}, ref: #{@client.reference})
       %tr
         %td
+          Gender
+        %td
+          = @client.gender.capitalize if @client.gender
+      %tr
+        %td
           Date Joined
         %td
           = @client.date_joined

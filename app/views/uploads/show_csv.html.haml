@@ -1,0 +1,12 @@
+%table.narrow
+  %thead
+    %tr
+      - @csv_file[0].each do |item|
+        %th
+          = item
+  - @csv_file[1..-1].each_with_index do |row,i|
+    %tr{:class => cycle('odd','even')}
+      - row.each do |item|
+        %td
+          = item
+  

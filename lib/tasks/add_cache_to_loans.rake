@@ -21,6 +21,11 @@ namespace :mostfit do
           UPDATE loans 
           SET c_center_id = (SELECT cn.id from centers cn, clients cs
              WHERE loans.client_id = cs.id AND cs.center_id = cn.id)})
+      puts "marking client_groups"
+      repository.adapter.execute(%Q{
+          UPDATE loans 
+          SET c_client_group_id = (SELECT cg.id from client_groups cg, clients cs
+             WHERE loans.client_id = cs.id AND cs.client_group_id = cg.id )})
       puts "marking branches..."
       repository.adapter.execute(%Q{
           UPDATE loans 

@@ -636,7 +636,7 @@ class LoanHistory
 
     repository.adapter.query(%Q{
       SELECT 
-        SUM(l.amount) AS loan_amount,
+        SUM(lh.total_principal_paid) AS loan_amount,
         COUNT(DISTINCT(lh.loan_id)) loan_count,
         #{selects}
       FROM loan_history lh, loans l
@@ -655,16 +655,11 @@ class LoanHistory
     repository.adapter.query(%Q{
       SELECT
         SUM(lh.actual_outstanding_principal) AS loan_amount,
-        COUNT(lh.loan_id) loan_count,
+        COUNT(DISTINCT(lh.loan_id)) loan_count,
         #{selects}
-      FROM (SELECT max(lh.date) date, lh.loan_id loan_id
-            FROM loan_history lh, loans l
-            WHERE lh.loan_id=l.id AND l.deleted_at is NULL AND lh.status IN (7) AND lh.date<='#{to_date.strftime('%Y-%m-%d')}'
-                  AND lh.scheduled_outstanding_total > 0 AND lh.scheduled_outstanding_principal > 0 #{extra}
-            GROUP BY lh.loan_id
-            ) dt, loan_history lh, loans l
-      WHERE lh.loan_id=dt.loan_id AND lh.date = dt.date AND lh.date <= '#{to_date.strftime('%Y-%m-%d')}' AND lh.date >= '#{from_date.strftime('%Y-%m-%d')}'
-            AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
+      FROM loan_history lh, loans l
+      WHERE lh.status in (10) AND lh.loan_id=l.id AND l.deleted_at is NULL AND l.rejected_on is NULL  
+           AND lh.date <= '#{to_date.strftime('%Y-%m-%d')}' AND lh.date >= '#{from_date.strftime('%Y-%m-%d')}' #{extra}
       #{group_by_query};
     })    
   end
@@ -678,15 +673,11 @@ class LoanHistory
     repository.adapter.query(%Q{
       SELECT
         SUM(lh.actual_outstanding_principal) AS loan_amount,
-        COUNT(lh.loan_id) loan_count,
+        COUNT(DISTINCT(lh.loan_id)) loan_count,
         #{selects}
-      FROM (SELECT max(lh.date) date, lh.loan_id loan_id
-            FROM loan_history lh, loans l
-            WHERE lh.loan_id=l.id AND l.deleted_at is NULL AND lh.status IN (8) AND lh.date<='#{to_date.strftime('%Y-%m-%d')}' #{query}
-            GROUP BY lh.loan_id
-            ) dt, loan_history lh, loans l
-      WHERE lh.loan_id=dt.loan_id AND lh.date = dt.date AND lh.date <= '#{to_date.strftime('%Y-%m-%d')}' AND lh.date >= '#{from_date.strftime('%Y-%m-%d')}'
-            AND lh.loan_id=l.id AND l.deleted_at is NULL #{extra}
+      FROM loan_history lh, loans l
+      WHERE lh.status in (8) AND lh.loan_id=l.id AND l.deleted_at is NULL AND l.rejected_on is NULL  
+           AND lh.date <= '#{to_date.strftime('%Y-%m-%d')}' AND lh.date >= '#{from_date.strftime('%Y-%m-%d')}' #{extra}
       #{group_by_query};
     })    
   end

@@ -11,6 +11,8 @@
       %th
         Shift Meeting
       %th
+        New Date
+      %th
         Actions
   - for holiday in @holidays
     %tr{:class => cycle('odd','even')}
@@ -20,6 +22,8 @@
         = holiday.date.display
       %td
         = holiday.shift_meeting
+      %td
+        = holiday.new_date.display if holiday.new_date
       %td
         = link_to 'Show', url(:holiday, holiday)
         |

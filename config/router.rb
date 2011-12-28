@@ -1,5 +1,7 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :surprise_center_visits
+  resources :staff_member_attendances
   resources :report_formats
   resources :checkers
 
@@ -52,7 +54,9 @@ Merb::Router.prepare do
   resources :ledger_entries
   resources :loan_products
   resources :users, :id => %r(\d+)
-  resources :staff_members, :id => %r(\d+) 
+  resources :staff_members, :id => %r(\d+) do
+    resources :staff_member_attendances
+  end
   resources :clients, :id => %r(\d+) do
     resources :insurance_policies
     resources :attendances

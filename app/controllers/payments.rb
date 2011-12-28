@@ -141,6 +141,7 @@ class Payments < Application
       @payment.created_by = session.user
       @payment.created_at = Time.now
       @payment.received_on = date
+      @payment.created_at = Time.now
       success = @payment.save
     end
     # reloading loan as payments can be stale here

@@ -1,0 +1,33 @@
+= partial :form
+- unless @data.empty?
+  %table.report.nojs
+    %thead
+      %tr.header
+        %th Center ID
+        %th Center Name
+        %th Manager
+        %th Total Clients
+        %th Total Loans
+        %th Meeting Day
+        %th Meeting Time
+    %tbody
+      - @data.each do |center|
+        %tr
+          %td
+            = center.id
+          %td
+            = center.name
+          %td
+            = center.manager.name
+          %td
+            = center.clients.count
+          %td
+            = center.loans.count
+          %td
+            = center.meeting_day.to_s.capitalize
+          %td
+            = center.meeting_time
+- else
+  %h5
+    This branch has no centers meeting on the selected weekday
+    

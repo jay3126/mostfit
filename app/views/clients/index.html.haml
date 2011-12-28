@@ -70,6 +70,8 @@
         Data Entry
       %li#history
         History
+      %li#visit      
+        Center Visits
       %li#miscellaneous
         Miscellaneous
       - if Mfi.first.map_enabled
@@ -98,6 +100,8 @@
       %div#bulk_form
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :id => @center.id, :action => :surprise_center_visits)}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :id => @center.id, :action => :misc)}
     - if Mfi.first.map_enabled

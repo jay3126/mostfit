@@ -59,12 +59,34 @@ class Uploads < Application
     # reloads a single model
     @upload = Upload.get(id)
     raise NotFound unless @upload
-    Kernel.const_get(params[:model].to_s.singularize.camel_case).all(:upload_id => @upload.id).destroy!
+    if params[:erase]
+      Kernel.const_get(params[:model].to_s.singularize.camel_case).all(:upload_id => @upload.id).destroy!
+      if params[:model] == "loans"
+        Checker.all(:upload_id => id).destroy!
+      end
+    end
     Merb.run_later {
       @upload.reload(params[:model])
     }
     redirect resource(@upload)
   end    
+
+  def extract(id)
+    @upload = Upload.get(id)
+    raise NotFound unless @upload
+    Merb.run_later {
+      @upload.process_excel_to_csv
+    }
+    redirect resource(@upload), :message => {:notice => "Started extracting. Reload to see progress"}
+  end
+
+
+  def stop(id)
+    @upload = Upload.get(id)
+    raise NotFound unless @upload
+    @upload.update(:state => :stopped)
+    redirect resource(@upload), :message => {:notice => "Started extracting. Reload to see progress"}
+  end
 
 
 
@@ -90,21 +112,27 @@ class Uploads < Application
 
   def update(id, upload)
     @upload = Upload.get(id)
-    FileUtils.rm(File.join("uploads",@upload.directory,@upload.filename))
+    FileUtils.rm(File.join("uploads",@upload.directory,@upload.filename)) rescue nil
     @upload.reset # does not delete data. only removes the files
     raise NotFound unless @upload
     if params[:file] and params[:file][:filename] and params[:file][:tempfile]
       @upload.move(params[:file][:tempfile].path)
-      redirect resource(@upload), :message => {:notice => "File has been replaced. Click continue to extract"}
+      Merb.run_later {
+        @upload.process_excel_to_csv
+      }
+      redirect resource(@upload), :message => {:notice => "File has been replaced and is extracting. Reload page to see progress."}
     else
       render
     end
   end
 
+
   def show_csv(id)
     @upload = Upload.get(id)
     raise NotFound unless @upload
-    "<pre>" + File.read(File.join(Merb.root, "uploads",@upload.directory, params[:filename])) + "</pre>"
+    raise NotAcceptable unless params[:filename].match(/csv$/)
+    @csv_file = FasterCSV.read(File.join(Merb.root, "uploads",@upload.directory, params[:filename]))
+    display @csv_file
   end
 
     

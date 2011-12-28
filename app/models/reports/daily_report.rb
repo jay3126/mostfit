@@ -10,6 +10,7 @@ class DailyReport < Report
   column :balance_outstanding => [:principal, :interest,   :total             ]
   column :balance_overdue     => [:principal, :interest,   :total             ]
   column :advance_repayment   => [:collected, :adjusted,   :balance           ]
+  column :correction_amount   => [:preclosed, :repaid,     :written_off       ]
 
   def initialize(params, dates, user)
     @date   =  dates[:date]||Date.today    

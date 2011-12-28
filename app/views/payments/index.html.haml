@@ -225,7 +225,7 @@
           
           %tr{ :class => cycle('odd','even') }
             %td{:class => default_class}
-              = [i - 2,0].max
+              = [i,0].max
             %td
               = lh.date
             %td
@@ -257,10 +257,10 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      %h2== Repayments #{link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
       - if @payments.blank?
         %p
           %i No repayments have been made so far.
+          = link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"
       - else
         = partial "payments/list", {:pmts => @payments, :context => :received}
     - if @loan.insurance_policy

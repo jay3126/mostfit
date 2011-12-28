@@ -1,0 +1,10 @@
+%h1 
+  = I18n.t "surprise_center_visits.fields.title", :default => "New Surprise Center Visits"
+= error_messages_for @surprise_center_visit
+
+= form_for(@surprise_center_visit, :action => url(:surprise_center_visits) ) do
+  = partial :fields
+  = hidden_field :center_id, :value => params[:center_id].to_i  
+  = submit "Create"
+
+= link_to 'Back', url(:surprise_center_visits)

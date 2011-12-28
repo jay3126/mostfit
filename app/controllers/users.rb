@@ -56,6 +56,7 @@ class Users < Application
     if @user.update_attributes(user)
       redirect resource(:users), :message => {:notice => "User '#{@user.login}' has been modified"}
     else
+      message[:error] = "User '#{@user.login}' could not be modified"
       display @user, :edit
     end
   end

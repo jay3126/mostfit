@@ -27,6 +27,9 @@ class FundingLine
 
   def self.from_csv(row, headers)
     funder = Funder.create(:name => row[headers[:funder_name]])
+    keys = [:funder_name, :amount, :interest, :disbursal_date, :first_payment_date, :last_payment_date, :reference]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
     obj = new(:funder_id => funder.id, :amount => row[headers[:amount]], :interest_rate => row[headers[:interest]],
               :disbursal_date => Date.parse(row[headers[:disbursal_date]]), :first_payment_date => Date.parse(row[headers[:first_payment_date]]),
               :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :reference => row[headers[:reference]],
