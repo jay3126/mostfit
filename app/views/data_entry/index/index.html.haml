@@ -73,6 +73,8 @@
       
         - if thing == :client
           %br
+          = link_to "Bulk add clients", url(:controller => :clients, :action => :bulk_entry), :class => 'add_small'
+          %br
           - cl = Client.all(:active => false).aggregate(:id.count)
           = link_to_with_rights("Inactive Clients", url(:controller => :clients, :action => :inactive_client_count), :class => 'edit_small')
           %span.number-hint
@@ -80,4 +82,3 @@
         - if thing == :center
           %br
           = link_to_with_rights("Loan Utilization", url(:enter_loans,:action => 'make_loan_utilization'), :class => 'edit_small')
-          
