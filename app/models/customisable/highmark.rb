@@ -36,6 +36,7 @@ module Highmark
 
     def parse_response
       # this checks the response against the accepted limits and marks the status appropriately
+      debugger
       unless response_text.blank?
         r = JSON::parse(response_text)
         if true # TODO make this check the various parameters from the response and mark status appropriately
@@ -44,7 +45,7 @@ module Highmark
           self.status = :rejected
         end
       else
-        self.status = :success
+
       end
     end
 

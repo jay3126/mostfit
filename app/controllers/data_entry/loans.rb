@@ -104,11 +104,7 @@ module DataEntry
         display([@center, @clients], "data_entry/loans/bulk_form")
         
       elsif params[:loan] 
-        @loan_product = LoanProduct.get(params[:loan][:loan_product_id])
-        message[:error] = ""
-        message[:error] += "Please select at least one client." unless @selected_clients
-        message[:error] += "Please select a loan product." unless @loan_product
-        if @selected_clients and @loan_product
+        if @selected_clients
           # ok, we have enough to start making the loans
           @loans = []
           debugger
