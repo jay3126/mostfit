@@ -1,0 +1,8 @@
+%h1 
+  == Highmark Response for Loan id #{link_to(@loan.id, resource(@loan))}
+
+%h3
+  status:
+  = @response.status
+%pre
+  = ap JSON::parse(@response.response_text || "{}"), :html => true

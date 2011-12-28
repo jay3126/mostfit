@@ -176,7 +176,7 @@ class Client
     else
       client_group  = nil
     end
-    client_type     = ClientType.first||ClientType.create(:type => "Standard")
+    # client_type     = ClientType.first||ClientType.create(:type => "Standard")
     grt_date        = row[headers[:grt_date]] ? Date.parse(row[headers[:grt_date]]) : nil
     keys = [:reference, :name, :spouse_name, :date_of_birth, :address, :date_joined, :center, :grt_date, :created_by_staff, :group]
     missing_keys = keys - headers.keys
@@ -185,7 +185,7 @@ class Client
       :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]], 
       :date_joined => row[headers[:date_joined]], :center => center, :grt_pass_date => grt_date, :created_by => User.first,
       :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :client_group => client_group, :client_type => client_type, :upload_id => row[headers[:upload_id]]}
+      :client_group => client_group, :upload_id => row[headers[:upload_id]]}
     obj             = new(hash)
     [obj.save!, obj]
   end

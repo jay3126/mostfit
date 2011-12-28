@@ -22,6 +22,8 @@
       %th
         Selected
       %th
+        credit bureau
+      %th
         Approved By
   - staff_members_allowed = staff_members_collection
   -@loans_to_approve.each do |loan|
@@ -50,6 +52,9 @@
         = loan.status.to_s.camelcase(' ')
       %td
         = check_box :name => "loans[#{loan.id}][approved?]"
+      - hr = Highmark::HighmarkResponse.first(:loan_id => loan.id)
+      %td
+        = hr ? (link_to "HR", url(:controller => :highmarks, :action => :response, :id => hr.id), :class => hr.status) : "!!"
       %td.text
         = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
   %tfoot

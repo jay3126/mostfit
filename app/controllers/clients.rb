@@ -163,6 +163,7 @@ class Clients < Application
   
   def bulk_entry
     if request.method == :get
+      @errors = {}
       render
     else
       @center = Center.get(params[:center_id])

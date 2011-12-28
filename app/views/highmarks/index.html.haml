@@ -21,7 +21,9 @@
   %input{:type => "submit", :value => "Upload"}  
 
 %h3 uploaded files
-- @files.each do |file|
-  - fname = file.split("/")[-1].chomp
-  = fname
-  = link_to "parse", url(:controller => :highmarks, :action => :parse, :filename => fname)
+%ul
+  - @files.each do |file|
+    - fname = file.split("/")[-1].chomp
+    %li
+      = fname
+      = link_to "parse", url(:controller => :highmarks, :action => :parse, :filename => fname)

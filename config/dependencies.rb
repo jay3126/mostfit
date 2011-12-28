@@ -54,3 +54,4 @@ dependency "do_sqlite3", do_gems_version
 
 dependency "tlsmail"
 dependency "crack"
+dependency "awesome_print"

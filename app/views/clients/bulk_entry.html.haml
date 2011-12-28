@@ -31,9 +31,9 @@
         %th
           spouse d.o.b
       
-  
+    - debugger
     - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
-      - if @errors[i]
+      - if (@errors or Nothing)[i] 
         %tr
           %td{:colspan => 10}
             .error

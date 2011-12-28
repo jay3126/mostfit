@@ -1,34 +1,53 @@
 %h1 XML file
-- keys = ["OWN_MFI_INDECATOR","TOTAL_RESPONSES","NO_OF_DEFAULT_ACCOUNTS","NO_OF_CLOSED_ACCOUNTS","NO_OF_OTHER_MFIS","STATUS", "NO_OF_ACTIVE_ACCOUNTS"]
-%table.narrow.shaded
-  %thead
-    %tr
-      %th
-        XML Client Name
-      - keys.each do |title|
+.nb
+  The following responses have been received from Highmark concerning the loan applications below.
+  %br
+  %b.green
+    You may directly approve the loans from this screen. 
+    If you override the highmark response, a comment is mandatory
+= form(:action => url(:controller => "highmarks", :action => "parse")) do
+  .menu-strip{:style => "width: 100%"}
+    %b approved by
+    = select :name => :approved_by, :collection => staff_members_collection
+    %b on
+    = date_select :approved_on
+    = hidden_field :name => :filename, :value => params[:filename]
+    = submit 'Mark response and Approve selected loans'
+  - keys = {"our client?" => "OWN_MFI_INDECATOR","responses" => "TOTAL_RESPONSES","defaulted a/cs" => "NO_OF_DEFAULT_ACCOUNTS","closed a/cs" => "NO_OF_CLOSED_ACCOUNTS","other mfis" => "NO_OF_OTHER_MFIS","status" => "STATUS", "active a/cs" => "NO_OF_ACTIVE_ACCOUNTS"}
+  %table.narrow.shaded
+    %thead
+      %tr
         %th
-          = title
-      %th
-        Closest Match
-      %th
-        Action
-        
-  - @data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"].each do |ol|
-    - name = ol["REQUEST"]["NAME"] 
-    - dob = ol["REQUEST"]["DOB"]
-    %tr{:class => cycle('odd','even')}
-      %td
-        = name
-        = dob
-      - keys.each do |title|
+          Client Name
+        - keys.each do |name, title|
+          %th
+            = name
+        %th
+          HR
+        %th
+          Approve Loan
+          
+    - @data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"].each do |ol|
+      - name = ol["REQUEST"]["NAME"] 
+      - dob = ol["REQUEST"]["DOB"]
+      - reference = ol["REQUEST"]["REFERENCE"]
+      - loan = Loan.get(ol["REQUEST"]["LOAN_ID"])
+      - hr = Highmark::HighmarkResponse.first(:loan_id => loan.id)
+      %tr{:class => cycle('odd','even')}
         %td
-          = ol["HEADER"]["SUMMARY"][title]
-      %td
-        - matches = Client.all(:name.like => "%#{name}%", :date_of_birth => Date.parse(dob))
-        - matches.each do |c|
-          = link_to c.name, resource(c) 
-      %td
-        = check_box :name => "confirm"
+          - client = Client.first(:reference => reference)
+          - if client
+            = (link_to client.name, resource(client)) 
+          - else
+            = name
+        - keys.each do |name,title|
+          %td
+            = ol["HEADER"]["SUMMARY"][title]
+        %td
+          = link_to('R', url(:controller => "highmarks",:action => :response, :id => hr.id)) if hr
+        %td
+          - if client
+            = hidden_field :name => "clients[#{client.id}]"
+            = check_box :name => "confirm"
+        
     
-      
-  
