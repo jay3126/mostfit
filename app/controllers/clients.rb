@@ -166,19 +166,27 @@ class Clients < Application
       render
     else
       @center = Center.get(params[:center_id])
-      @clients = params[:clients].each do |k,v| 
-        debugger
-        if v.values.join.length > 0
-          c = Client.new(v.merge({:center_id => params[:center_id], 
-                                   :created_by_staff_member_id => @center.manager, 
-                                   :created_by_user_id => session.user.id}))
-          params[:clients].delete(k) if c.save
-        else
-          params[:clients].delete(k)
+      @errors = {}
+      @errors[:center] = "Please choose a center" unless @center
+      if @errors.blank?
+        @clients = params[:clients].each do |k,v| 
+          if v.values.join.length > 0 # if it isn't one of the blank rows
+            # create the client
+            c = Client.new(v.merge({:center_id => params[:center_id], 
+                                     :created_by_staff_member_id => @center.manager, 
+                                     :created_by_user_id => session.user.id}))
+            if c.save
+              params[:clients].delete(k) 
+            else
+              @errors[k] = c.errors # keep a copy of the errors in a global variable
+            end
+          else
+            params[:clients].delete(k) # this worked. delete this params so you can report errors on all the params that remain
+          end
         end
       end
-      if params[:clients].keys.length > 0
-        render
+      if params[:clients].keys.length > 0 # there are some errors
+        render # errors will be shown
       else
         redirect resource(@center), :message => {:notice => "all clients succesfully added"}
       end

@@ -380,7 +380,7 @@ class BigDecimal
 end
 
 
-class Nothing
+class Nothing < NilClass
   # instead of saying i.e. (Organization.get_organization(self.received_on).org_guid if Organization.get_organization(self.received_on) or "0000-0000" you can now say
   # (Organization.get_organization(self.received_on) || Nothing).org_guid || "0000-0000"
   def self.method_missing(method_name, *args)

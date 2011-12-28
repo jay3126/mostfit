@@ -75,6 +75,10 @@ class LoanProduct
     [obj.save, obj]
   end
 
+  def valid
+    self.all(:valid_from.lte => Date.today, :valid_upto.gte => Date.today)
+  end
+
   def payment_validations
     (payment_validation_methods or "").split(",").map{|m| m.to_sym}
   end
