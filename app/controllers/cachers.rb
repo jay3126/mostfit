@@ -118,6 +118,7 @@ class Cachers < Application
 
 
   def get_cachers
+    debugger
     q = {}
     q[:branch_id] = params[:branch_id] unless params[:branch_id].blank? 
     unless params[:branch_id].blank?
@@ -133,7 +134,7 @@ class Cachers < Application
         q[:center_id] ||= 0 unless q[:center_id.not]
         q[:model_id] = params[:model_id] if params[:model_id]
       else
-        q[:model_name] = ["Branch","Center"] 
+        q[:model_name] = params[:branch_id] ? "Center" : "Branch"
       end
     end
     q[:date] = @date if @date
