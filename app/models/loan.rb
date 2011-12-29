@@ -86,7 +86,7 @@ class Loan
   property :created_by_user_id,                Integer, :nullable => true, :index => true
   property :cheque_number,                     String,  :length => 20, :nullable => true, :index => true
   property :cycle_number,                      Integer, :default => 1, :nullable => false, :index => true
-  property :loan_pool_id,                      Integer, :nullable => true, :index => true
+  # property :loan_pool_id,                      Integer, :nullable => true, :index => true
 
   #these amount and disbursal dates are required for TakeOver loan types. 
   property :original_amount,                    Integer
