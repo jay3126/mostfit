@@ -1,10 +1,16 @@
+- @staff = session.user.staff_member
 %table.tall.shaded
   - if @center.blank? 
     %tr
       %th
+        For branch:
+      %td
+        = select :name => :branch_id, :collection => get_accessible_branches(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :id => "branch_selector"
+    %tr
+      %th
         For center:
       %td
-        = select_center_for @client, :center
+        = select(:center_id , :collection => get_accessible_centers(params[:branch_id], @staff), :include_blank => true, :id => "center_selector")
   - elsif not @client.new? 
     %tr
       %th

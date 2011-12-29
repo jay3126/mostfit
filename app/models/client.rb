@@ -16,17 +16,17 @@ class Client
   
   property :id,              Serial
 
-  # basic properties custom only to suryoday
-  property :first_name,      String, :nullable => true
-  property :last_name,       String, :nullable => true
-  property :nominee_name,    String
-  property :nominee_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
-  property :id_number,       String, :nullable => true
-  property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
-  property :telephone_number, String, :nullable => true
-  property :telephone_type,  Enum.send('[]', *([nil] + TELEPHONE_TYPES)), :nullable => true
-  property :state,           String, :nullable => true
-  property :pincode,         Integer, :nullable => true
+  # # basic properties custom only to suryoday
+  # property :first_name,      String, :nullable => true
+  # property :last_name,       String, :nullable => true
+  # property :nominee_name,    String
+  # property :nominee_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
+  # property :id_number,       String, :nullable => true
+  # property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
+  # property :telephone_number, String, :nullable => true
+  # property :telephone_type,  Enum.send('[]', *([nil] + TELEPHONE_TYPES)), :nullable => true
+  # property :state,           String, :nullable => true
+  # property :pincode,         Integer, :nullable => true
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true

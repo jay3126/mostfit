@@ -35,7 +35,7 @@
         %td
           Gender
         %td
-          = @client.gender.capitalize if @client.gender
+          = @client.gender.to_s.capitalize if @client.gender
       %tr
         %td
           Date Joined
