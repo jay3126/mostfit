@@ -1,5 +1,3 @@
-- if not params[:layout]
-  = link_to("Printer friendly version", resource(@funder, @portfolio, {:layout => 'printer'}), {:style => "float: right;", :target => "_BLANK"})
 %h1
   Portfolio: 
   = @portfolio.name
@@ -13,114 +11,91 @@
     %td
       - if @portfolio.portfolio_loans.count > 0
         %b= @portfolio.loans.count
-      -else
+      - else
         0  
-  %tr.odd
-    %td Starting value
-    %td
-      = @portfolio.start_value
-  %tr
-    %td Present value
-    %td
-      = @portfolio.outstanding_value
-  %tr.odd
-    %td Last payment
-    %td
-      = @portfolio.last_payment_date
   %tr
     %td
       Created on
     %td
       = @portfolio.created_at.strftime(Mfi.first.date_format)
-
-%table.report
-  %tr.header
-    %th
-      Client ID
-    %th
-      Client name
-    %th
-      Loan ID
-    %th
-      Loan purpose
-    %th
-      Amount
-    %th
-      Disbursed on
-    %th
-      Added to portfolio
-    %th
-      Starting balance
-    %th
-      Current balance
-    %th
-      Payments
-  - length = 10
-  - org_total = []
-  - @portfolio.portfolio_loans.select{|pf| pf.loan}.group_by{|pf| pf.loan.client.center}.sort_by{|center, pf| center.name}.each do |center, portfolio_loans|
-    %tr.branch#loan
-      %td{:colspan => length}
-        %b
-          Branch:
-          = center.branch.name
-          ,
-          Center:
-          = center.name
-    - center_total = [0, 0, 0, 0, 0]
-    - portfolio_loans.each do |pf|
-      %tr.loan
-        %td        
-          = link_to(pf.loan.client.reference, "/clients/#{pf.loan.client_id}", {:target => "BLANK", :class => "link"})
-        %td
-          = pf.loan.client.name
-        %td
-          = link_to(pf.loan_id, "/loans/#{pf.loan_id}", {:target => "BLANK", :class => "link"})
-          - center_total[0]+= 1
-        %td
-          = pf.loan.occupation.name if pf.loan.occupation
-        %td
-          = pf.loan.amount
-          - center_total[1]+= pf.loan.amount
-        %td
-          = pf.loan.disbursal_date
-        %td
-          = pf.added_on
-        %td
-          = pf.starting_value
-          - center_total[2]+= pf.starting_value
-        %td
-          = pf.current_value
-          - center_total[3]+= pf.current_value
-        %td
-          = pf.starting_value - pf.current_value
-          - center_total[4]+= pf.starting_value - pf.current_value
-    %tr.branch_total
-      - center_total.each_with_index do |ele, idx|
-        - if idx == 2
+%div.tab_container
+  %ul.tabs
+    %li#cashflows
+      Cashflows
+    %li#reports
+      Reports
+  %div.tab
+    .menu-strip.clearfix{:style => "width: 100%"}
+      = form(:action => url(:cashflow_portfolio, :id => @portfolio.id), :style => "float: left") do
+        See cashflow 
+        %b weekly 
+        every 
+        = select :name => :weekday, :collection => WEEKDAYS.map(&:to_s), :prompt => "on"
+        = submit 'go!'
+      %h3{:style => "float:left; font-size: 2.1em;"}
+        or  
+      = form(:action => url(:cashflow_portfolio, :id => @portfolio.id), :style => "float: left") do
+        &nbsp;
+        monthly
+        on every 
+        = text_field :name => "day_of_month", :style => "width: 3em"
+        th day
+        = submit 'go!'
+    - keys = [:actual_outstanding_principal, :principal_paid, :interest_paid, :scheduled_outstanding_principal]
+    %table
+      %thead
+        %tr
+          %th
+            Date
+          %th
+            Outstanding Balance
+          %th
+            Principal Collected
+          %th.right-numeric
+            Interest Collected
+          %th
+            Scheduled Balance
+          %th
+            Scheduled Principal
+          %th
+            Scheduled Interest
+    
+      - last_principal = nil
+      - PortfolioCache.all(:model_id => @portfolio.id, :order => [:date]).each do |c|
+        - next if keys.map{|x| c.send(x)}.sum == 0
+        %tr{:class => cycle("odd","even")}
           %td
+            = c.end_date
+          - keys.each do |k|
+            %td{:class => (k == :interest_paid ? "right-numeric" : "numeric")}
+              = c.send(k).to_currency
           %td
-        %td
-          %b= ele.to_currency
-        - if idx == 0
+            - if last_principal
+              = (last_principal - c.scheduled_outstanding_principal).to_currency
+            - else
+              = c.scheduled_principal_due.to_currency
+            - last_principal = c.scheduled_outstanding_principal
           %td
+            = c.scheduled_interest_due.to_currency
+  %div.tab
+    %h1 Reports
+    = select :name => 'report_format', :collection => ReportFormat.all,:text_method => :name, :value_method => :id, :selected => (params[:report_format] || 1).to_s, :prompt => 'Select a report format', :onchange => "javascript: document.location = '#{url(:controller => :portfolios, :action => :show, :id => 4)}?report_format=' + (this.options[this.selectedIndex].value) + '#reports'"
+    - keys =  (params[:report_format] ? ReportFormat.get(params[:report_format]).keys : ReportFormat.get(1).keys)
+    - debugger
+    - h = PortfolioCache.first(:date => Date.today, :end_date => Date.today)
+    %table.diags
+      %thead
+        %tr
+          %th date
+          - keys.each do |k|
+            %th
+              = k.to_s.gsub("_"," ")
+        %tr{:class => cycle('odd','even')}
           %td
-          %td
-    - org_total << center_total
-  %tr.org_total
-    - org_total.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}.each_with_index do |ele, idx|
-      - if idx == 2
-        %td
-        %td
-      - if idx == 0
-        %td.center
-          %b= ele.to_currency
-        %td
-        %td
-        %td
-      - else
-        %td        
-          %b= ele.to_currency
-- if not params[:layout] or params[:layout] != "printer"
-  = link_to 'edit', resource(@funder, @portfolio, :edit), :class => "edit"
-  |
-  = link_to 'Back', url(@funder)
+            = Date.today.strftime("%Y%m%d")
+          - keys.each do |k|
+            %td
+              = h.send(k) rescue nil
+            
+      
+    

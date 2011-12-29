@@ -10,7 +10,6 @@ class Funders < Application
     @funder ||= Funder.get(id)
     raise NotFound unless @funder
     @funding_lines = @funder.funding_lines
-    @portfolios    = @funder.portfolios
     display [@funder, @funding_lines]
   end
 

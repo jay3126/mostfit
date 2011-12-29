@@ -18,10 +18,6 @@
     %td Last disbursement
     %td
       = @funder.funding_lines.max(:disbursal_date)
-  %tr
-    %td Portfolios
-    %td      
-      %b= @funder.portfolios.size
 
 %p= link_to 'edit this funders details', resource(@funder, :edit), :class => "edit"
 
@@ -29,9 +25,5 @@
   %ul.tabs
     %li#funding_lines
       Funding lines
-    %li#portfolios
-      Portfolios
   %div.tab
     = partial "funding_lines/list"
-  %div.tab  
-    = partial "portfolios/list"

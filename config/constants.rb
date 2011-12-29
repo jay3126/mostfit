@@ -129,5 +129,15 @@ TargetType  = [:relative, :absolute]
 CLIENT_RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
 
 ID_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
-
 TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
+
+# column types for cachers and related models
+COLS =   [:scheduled_outstanding_principal, :scheduled_outstanding_total, :actual_outstanding_principal, :actual_outstanding_total, :actual_outstanding_interest,
+          :total_interest_due, :total_interest_paid, :total_principal_due, :total_principal_paid,
+          :principal_in_default, :interest_in_default, :total_fees_due, :total_fees_paid, :total_advance_paid, :advance_principal_paid, :advance_interest_paid,
+          :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk, :outstanding_count, :outstanding]
+FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
+             :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
+             :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
+             :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
+

@@ -84,6 +84,9 @@ Merb::Router.prepare do
       end
     end
   end
+  resources :portfolios, :id => %r(\d+), :member => {:cashflow => [:get]}
+
+  resources :funding_lines
   resources :funders do    
     resources :portfolios
     resources :funding_lines
@@ -94,6 +97,8 @@ Merb::Router.prepare do
   resources :uploads, :member => {:continue => [:get], :reset => [:get], :show_csv => [:get], :reload => [:get], :extract => [:get], :stop => [:get]} do
     resources :checkers, :collection => {:recheck => [:get]}
   end
+
+
 
   match('/dashboard/centers/:report_type/:branch_id').to(:controller => 'dashboard', :action => "centers", :branch_id => ":branch_id", :report_type => ":report_type").name(:dashboard_centers)
   match('/design').to(:controller => 'loan_products', :action => 'design').name(:design_loan_product)
