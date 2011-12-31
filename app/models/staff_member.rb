@@ -31,6 +31,7 @@ class StaffMember
   has n, :payments, :child_key  => [:received_by_staff_id]
   has n, :monthly_targets
   has n, :weeksheets
+  has n, :staff_member_attendances
 
   belongs_to :user
 

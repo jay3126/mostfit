@@ -16,7 +16,7 @@ class Client
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true
+  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
@@ -94,7 +94,7 @@ class Client
   
   belongs_to :domain, :parent_key => [:domain_guid], :child_key => [:parent_domain_guid], :required => false
   property   :parent_domain_guid, String, :nullable => true
-
+  property   :client_type_id,     Integer, :default => 1
   has n, :loans
   has n, :payments
   has n, :insurance_policies
@@ -171,7 +171,6 @@ class Client
     grt_date        = row[headers[:grt_date]] ? Date.parse(row[headers[:grt_date]]) : nil
     keys = [:reference, :name, :spouse_name, :date_of_birth, :address, :date_joined, :center, :grt_date, :created_by_staff, :group]
     missing_keys = keys - headers.keys
-    debugger
     raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
     hash = {:reference => row[headers[:reference]], :name => row[headers[:name]], :spouse_name => row[headers[:spouse_name]],
       :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]], 
