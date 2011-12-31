@@ -264,7 +264,7 @@
               = role.to_s.camelcase(' ')
         - Reports::Types.sort_by{|rt, rs| rt.to_s}.each do |report_type, reports|
           %tr.branch
-            %td{:colspan => User.roles.length + 1}
+            %td{:colspan => User.roles.length + 2}
               %b
                 = report_type.to_s.camelcase(' ')
           - reports.each do |report|

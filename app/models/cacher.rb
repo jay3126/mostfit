@@ -328,6 +328,7 @@ class CenterCache < Cacher
       extra = balances[k] ? {} : {:center_id => k[1], :branch_id => k[0]} # for ng rows, we need to insert center_id and branch_id
       [k, _p.merge(_b).merge(extra)]
     end.to_hash
+
   end
 
 
