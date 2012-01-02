@@ -125,7 +125,7 @@ AUDITABLES = ["Branch","Center","Client","ClientGroup","Loan","Payment","StaffMe
 TargetOf    = [:center_creation, :group_creation, :client_registration, :loan_disbursement_by_amount, :loan_disbursements_by_number]
 TargetType  = [:relative, :absolute]
 
-<<<<<<< HEAD
+
 # Basic Enumerations for suryodaya specific client info
 CLIENT_RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
 

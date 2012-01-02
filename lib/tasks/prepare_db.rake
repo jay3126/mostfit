@@ -80,14 +80,14 @@ namespace :mostfit do
          })
 
       # drop and recreate the cachers table if required
-      unless (repository.adapter.query("select id from loan_history limit 1") rescue false)
-        dates = Cacher.all.aggregate(:date)
-        repository.adapter.execute("drop table cachers");
-        Rake::Task['db:autoupgrade'].invoke
-        dates.each do |date|
-          BranchCache.update(date)
-        end
-      end
+      # unless (repository.adapter.query("select id from loan_history limit 1") rescue false)
+      #   dates = Cacher.all.aggregate(:date)
+      #   repository.adapter.execute("drop table cachers");
+      #   Rake::Task['db:autoupgrade'].invoke
+      #   dates.each do |date|
+      #     BranchCache.update(date)
+      #   end
+      # end
       
       repository.adapter.execute(%Q{
          alter table cachers modify actual_outstanding_total decimal(15,2) not null, 
