@@ -234,8 +234,6 @@
           on&nbsp;&nbsp;
           = date_select_for @loan, :written_off_on
           &nbsp;&nbsp;by&nbsp;&nbsp;
-          - center = @client.center
-          - branch = center.branch
           = select_staff_member_for @loan, :written_off_by, :id => "written_off_by"
       %tr
         %th
