@@ -483,7 +483,6 @@ class Loans < Application
       else
         success, @p, @i, @f = @loan.make_payments(pmts)
       end
-            
       if success
         if params[:writeoff]
           @loan.preclosed_on = @date

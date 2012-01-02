@@ -1017,7 +1017,7 @@ class Loan
 
   def get_status(date = Date.today, total_received = nil) # we have this last parameter so we can speed up get_status
                                                           # considerably by passing total_received, i.e. from history_for
-    #return @status if @status
+     #return @status if @status
     @statuses ||= {}
     return @statuses[date] if @statuses[date]
     date = Date.parse(date)      if date.is_a? String
@@ -1037,7 +1037,7 @@ class Loan
     return :disbursed            if (date == disbursal_date.holiday_bump) and total_received < total_to_be_received
     if total_received >= total_to_be_received
       @status =  :repaid
-    elsif (amount - principal_received) <= EPSILON and scheduled_interest_up_to(date)<=interest_received_up_to(Date.today)
+    elsif (amount - principal_received) <= EPSILON and (scheduled_interest_up_to(date)-interest_received_up_to(Date.today) <= EPSILON)
       @status =  :repaid
     elsif amount<=principal_received
       @status =  :repaid
