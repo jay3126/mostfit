@@ -197,7 +197,7 @@ end
 class BranchCache < Cacher
 
   def self.recreate(date = Date.today, branch_ids = nil)
-    self.update(:date => date, :branch_ids => branch_ids, :force => true)
+    self.update(date, branch_ids, true)
   end
 
   def self.update(date = Date.today, branch_ids = nil, force = false)
