@@ -33,7 +33,6 @@ class Portfolios < Application
   end
 
   def create(portfolio)
-    debugger
     # if the final Loan chain is not provided in params, we have to add some stuff to params
     max                               = params[:model].keys.map(&:to_i).max
     unless params[:model][max.to_s]   == "loan"
@@ -51,13 +50,21 @@ class Portfolios < Application
     @added_on = Date.parse(params[:added_on])
     if @portfolio.save
       @securitised_loans =  @portfolio.is_securitised ? Portfolio.all(:is_securitised => true).portfolio_loans.aggregate(:loan_id) : []
-      @objects.each do |o|
-        next if @securitised_loans.include?(o.id)
-        pl = PortfolioLoan.new(:loan => o, :portfolio => @portfolio, :added_on => @added_on)
-        pl.save
-      end
-      redirect resource(:portfolios), :message => {:notice => 'Portfolio was succesfully created'}
+      # some portfilios can be really big, so we go the bulk route
+      # of course, does not write in the audit trail....
+      # TODO write this in the audit trail
+      interesting_loan_ids = (@objects.aggregate(:id) - @securitised_loans)
+      pls = interesting_loan_ids.map do |loan_id|
+        {:loan_id => loan_id, :portfolio_id => @portfolio.id, :added_on => @added_on}
+      end.compact
+      debugger
+      sql = get_bulk_insert_sql("portfolio_loans", pls)
+      if (repository.adapter.execute(sql) rescue nil)
+        redirect resource(:portfolios), :message => {:notice => 'Portfolio was succesfully created'}
       else
+        render :advanced
+      end
+    else
       render :advanced
     end
   end
