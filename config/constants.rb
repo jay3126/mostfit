@@ -125,6 +125,7 @@ AUDITABLES = ["Branch","Center","Client","ClientGroup","Loan","Payment","StaffMe
 TargetOf    = [:center_creation, :group_creation, :client_registration, :loan_disbursement_by_amount, :loan_disbursements_by_number]
 TargetType  = [:relative, :absolute]
 
+
 # Basic Enumerations for suryodaya specific client info
 CLIENT_RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
 
@@ -140,4 +141,6 @@ FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
              :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
              :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
              :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
+
+
 
