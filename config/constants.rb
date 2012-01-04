@@ -128,7 +128,7 @@ TargetType  = [:relative, :absolute]
 
 # Basic Enumerations for suryodaya specific client info
 CLIENT_RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
-
+EWS_LIST = ['small_marginal_farmers', 'sc_st', 'cottage_industry', 'not_applicable']
 ID_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
 TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
 
