@@ -59,7 +59,6 @@ class Cacher
 
   property :stale,                           Boolean, :default => false
 
-
   COLS =   [:scheduled_outstanding_principal, :scheduled_outstanding_total, :actual_outstanding_principal, :actual_outstanding_total, :actual_outstanding_interest,
           :total_interest_due, :total_interest_paid, :total_principal_due, :total_principal_paid,
           :principal_in_default, :interest_in_default, :total_fees_due, :total_fees_paid, :total_advance_paid, :advance_principal_paid, :advance_interest_paid,
@@ -71,7 +70,6 @@ class Cacher
              :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
   CALCULATED_COLS = [:principal_defaulted_today, :interest_defaulted_today, :total_defaulted_today]
   
-
   # some convenience functions
   def total_paid
     principal_paid + interest_paid + fees_paid_today
@@ -205,7 +203,7 @@ end
 class BranchCache < Cacher
 
   def self.recreate(date = Date.today, branch_ids = nil)
-    self.update(:date => date, :branch_ids => branch_ids, :force => true)
+    self.update(date, branch_ids, true)
   end
 
   def self.update(date = Date.today, branch_ids = nil, force = false)

@@ -46,9 +46,9 @@ class Portfolio
     
     # also, we cannot allow the user to choose the start and end dates. we have to delete all caches that conform to this periodicity
     t = Time.now
-
-    start_date = LoanHistory.all(:loan_id => loans.aggregate(:id)).aggregate(:date.min) # last loan history date for these loans
-    end_date = LoanHistory.all(:loan_id => loans.aggregate(:id)).aggregate(:date.max) # last loan history date for these loans
+    loan_ids = loans.aggregate(:id)
+    start_date = LoanHistory.all(:loan_id => loan_ids).aggregate(:date.min) # first loan history date for these loans
+    end_date = LoanHistory.all(:loan_id => loan_ids).aggregate(:date.max) # last loan history date for these loans
 
     dates = ([start_date] + DateVector.new(every, what, 1, period, start_date, end_date).get_dates + [end_date]).uniq
     # voila, a datevector reflecting the dates of the cashflow
@@ -64,17 +64,18 @@ class Portfolio
       loan_ids = portfolio_loans(:added_on.lte => d2).aggregate(:loan_id) # loans added before the end of this period only are to be counted
       unless loan_ids.blank?
         hash = {:loan_id => loan_ids}
-        balances = LoanHistory.latest_sum(hash,d2, [], COLS)
-        pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], FLOW_COLS)    
-        pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => id, :date => d1, :end_date => d2})
+        balances = LoanHistory.latest_sum(hash,d2, [], Cacher::COLS)
+        pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], Cacher::FLOW_COLS)    
+        pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => id, :date => d1, :end_date => d2, :branch_id => 0, :center_id => 0})
         pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
+        debugger
         pc.save
         puts "Done in #{Time.now - t} secs"
         pc
       else
         nil
       end
-      d1 = d2 + 1 # i.e. round 1 is 1 - 31 jan, then 1 feb - 28 feb....so we have to bump d2 by 1
+      d1 = d2 + 1 # i.e. round one is 1 - 31 jan, then 1 feb - 28 feb....so we have to bump d2 by 1
     end
 
   end
