@@ -24,6 +24,9 @@
       Cashflows
     %li#reports
       Reports
+    %li#info
+      Info
+
   %div.tab
     .menu-strip.clearfix{:style => "width: 100%"}
       = form(:action => url(:cashflow_portfolio, :id => @portfolio.id), :style => "float: left") do
@@ -96,6 +99,23 @@
           - keys.each do |k|
             %td
               = h.send(k) rescue nil
+  %div.tab
+    .clearfix
+      %h1 Info
+      .big-number
+        .number
+          = @portfolio.loans.count
+        .text
+          loans in 
+          %br
+          portfolio
+      .big-number
+        .number
+          = Loan.all(:loan_pool_id => @portfolio.id).count
+        .text
+          in securitised
+          %br
+          portfolio
             
       
     

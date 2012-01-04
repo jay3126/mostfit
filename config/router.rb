@@ -1,6 +1,7 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   resources :loan_pools
+  resources :loan_pools
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
@@ -84,7 +85,7 @@ Merb::Router.prepare do
       end
     end
   end
-  resources :portfolios, :id => %r(\d+), :member => {:cashflow => [:get]}
+  resources :portfolios, :id => %r(\d+), :member => {:cashflow => [:get], :securitise => [:get]}
 
   resources :funding_lines
   resources :funders do    

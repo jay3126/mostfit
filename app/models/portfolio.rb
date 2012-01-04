@@ -15,6 +15,8 @@ class Portfolio
 
   property :is_securitised, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
 
+  property :params, Yaml, :length => 2000 
+
   property :created_at, DateTime, :default => Time.now
   property :updated_at, DateTime, :default => Time.now
 

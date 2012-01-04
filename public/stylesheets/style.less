@@ -1876,3 +1876,34 @@ tr.closed {
 td.date {
   word-wrap: none;
 }
+
+
+.big-number {
+  @stats-bg: #dfdfdf;
+  @stats-bg-text: #999;
+  @stats-bg-shadow: @stats-bg * 1.2;
+
+  float:left;
+  padding: 10px;
+  .number {
+    font-size: 3em;
+    border-radius: 7px;
+    padding: 5px;
+    float:left;
+    height: 1.2em;
+    line-height: 1.2em;
+    vertical-align: middle;
+    display: table-cell;
+    background: @stats-bg;
+    text-shadow: 1px 1px @stats-bg-shadow;
+    color: @stats-bg-text;
+    box-shadow: 1px 1px @stats-bg-shadow;
+  }
+  .text {
+    font-family: Georgia;
+    float: left;
+    font-size: 1.2em;
+    padding: 5px;
+  }
+}
+    
