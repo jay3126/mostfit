@@ -1,7 +1,6 @@
 class Highmarks < Application
 
   def index
-    debugger
     folder =     File.join(Merb.root, "docs","highmark","responses")
     @files = Dir.glob(File.join(folder, "*xml"))
     render
@@ -35,7 +34,6 @@ class Highmarks < Application
     # this deals with an XML upload.
     # since the XML upload changes the data in the system, it would be very useful to track all these changes
     # and keep a copy of the XML file as well
-    debugger
     if params[:file][:tempfile]
       folder =     File.join(Merb.root, "docs","highmark","responses")
       filename = "highmark-response-#{DateTime.now.strftime('%Y-%m-%d-%H-%M-%s')}.xml"
@@ -46,20 +44,20 @@ class Highmarks < Application
   end
 
   def parse
-    debugger
     folder =     File.join(Merb.root, "docs","highmark","responses")
     @data = Crack::XML.parse(File.read(File.join(folder, params[:filename])))
     if request.method == :get
       display @data
     else
       message = {:error => "", :notice => ""}
-      @data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"].each do |ol|
+      reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
+      reports.each do |ol|
+        #ol = olp[1]
         reference = ol["REQUEST"]["REFERENCE"]
         loan_id = ol["REQUEST"]["LOAN_ID"]
         loan = Loan.get(loan_id)
         r = Highmark::HighmarkResponse.first(:loan_id => loan_id, :status => :pending)
         next unless r
-        debugger
         r.response_text = ol.to_json
         r.status = :success
         r.save

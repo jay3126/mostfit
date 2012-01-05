@@ -36,16 +36,23 @@ module Highmark
 
     def parse_response
       # this checks the response against the accepted limits and marks the status appropriately
-      debugger
       unless response_text.blank?
         r = JSON::parse(response_text)
-        if true # TODO make this check the various parameters from the response and mark status appropriately
-          self.status = :accepted
+        check = nil
+        no_of_active_accounts = r["HEADER"]["SUMMARY"]["NO_OF_ACTIVE_ACCOUNTS"].to_i
+        no_of_mfis = r["HEADER"]["SUMMARY"]["NO_OF_OTHER_MFIS"].to_i
+        responses = [r["RESPONSES"]["RESPONSE"]].flatten
+        sum = 0
+        responses.each{|x| sum += x["LOAN_DETAILS"]["CURRENT_BAL"].to_f}
+        existing_loans_amount = 0
+        responses.each{|x| existing_loans_amount += x["LOAN_DETAILS"]["DISBURSED_AMT"].to_f}
+        if (no_of_active_accounts >= 2) or ((loan.amount + existing_loans_amount) >= 50000)
+          self.status = :rejected          
         else
-          self.status = :rejected
+          self.status = :accepted
         end
       else
-
+        
       end
     end
 
@@ -75,7 +82,6 @@ module Highmark
 
         def create_highmark_response
           hr = HighmarkResponse.new(:loan_id => self.id, :created_by => self.applied_by, :status => :pending, :client_id => self.client.id)
-          debugger
           hr.save
         end
         
