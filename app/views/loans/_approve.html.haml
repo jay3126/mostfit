@@ -27,6 +27,8 @@
         credit bureau
       %th
         Approved By
+      -# %th
+      -#   Comment
   - staff_members_allowed = staff_members_collection
   -@loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
@@ -57,13 +59,22 @@
         = loan.client.center.meeting_day.to_s.camelcase
       %td.text
         = loan.status.to_s.camelcase(' ')
-      %td
-        = check_box :name => "loans[#{loan.id}][approved?]"
       - hr = Highmark::HighmarkResponse.first(:loan_id => loan.id)
+      %td
+        - if hr
+          - if hr.status == :rejected
+            = check_box :name => "loans[#{loan.id}][approved?]", :onclick => "javascript:$('#approval_comment_#{loan.id}').toggle();"
+          - else
+            = check_box :name => "loans[#{loan.id}][approved?]"
+        - else
+          = check_box :name => "loans[#{loan.id}][approved?]"
+        = text_field :name => "loans[#{loan.id}][approval_comment]", :style => "display:none;", :id => "approval_comment_#{loan.id}", :placeholder => "APPROVAL REASON"  
       %td
         = hr ? (link_to "HR", url(:controller => :highmarks, :action => :response, :id => hr.id), :class => hr.status) : "!!"
       %td.text
         = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
+      -# %td.text
+      -#   = text_field :name => "loans[#{loan.id}][approval_comment]", :style => "display:none;", :id => "approval_comment_#{loan.id}" 
   %tfoot
     %tr
       %td{:colspan => 11}

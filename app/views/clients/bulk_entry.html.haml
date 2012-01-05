@@ -27,9 +27,13 @@
         %th
           date joined
         %th
-          spouse name
+          guarantor name
         %th
-          spouse d.o.b
+          guarantor d.o.b
+        %th
+          guarantor relationship
+        %th
+          ews classification
       
     - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
       - if (@errors or Nothing)[i] 
@@ -49,9 +53,13 @@
         %th
           = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined"
         %th
-          = text_field :name => "clients[#{i}][spouse_name]", :value => (params[:clients] and params[:clients][i.to_s][:spouse_name])
+          = text_field :name => "clients[#{i}][guarantor_name]", :value => (params[:clients] and params[:clients][i.to_s][:guarantor_name])
         %th
-          = date_select "clients[#{i}][spouse_date_of_birth]",(params[:clients] and params[:clients][i.to_s][:spouse_date_of_birth]) , :id => "client_#{i}_spouse_dob"
-  = submit 'add clients'
+          = date_select "clients[#{i}][guarantor_dob]",(params[:clients] and params[:clients][i.to_s][:spouse_date_of_birth]) , :id => "client_#{i}_guarantor_dob"
+        %th
+          = select :name => "clients[#{i}][guarantor_relationship]", :value => ((params[:clients]) and params[:clients][i.to_s][:guarantor_relationship]), :collection => CLIENT_RELATIONSHIPS, :prompt => "select guarantor relationship"
+        %th
+          = select :name => "clients[#{i}][ews]", :value => ((params[:clients]) and params[:clients][i.to_s][:ews]), :collection => EWS_LIST.map{|x| [x, x.camelcase(' ')]}, :prompt => "select ews"
+  = submit 'add clients' 
       
 

@@ -6,6 +6,7 @@ class Client
   include Highmark::Client
 
   FLAGS = [:insincere]
+  # PSL_LIST = [:micro_credit, :direct_agriculture, :smsme]
 
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
@@ -19,14 +20,24 @@ class Client
   # # basic properties custom only to suryoday
   # property :first_name,      String, :nullable => true
   # property :last_name,       String, :nullable => true
-  # property :nominee_name,    String
-  # property :nominee_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
+  property :guarantor_name,  String
+  property :guarantor_dob,   Date, :index => true, :lazy => true
+  property :guarantor_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
   # property :id_number,       String, :nullable => true
   # property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
-  # property :telephone_number, String, :nullable => true
+  property :telephone_number, String, :nullable => true
   # property :telephone_type,  Enum.send('[]', *([nil] + TELEPHONE_TYPES)), :nullable => true
   # property :state,           String, :nullable => true
-  # property :pincode,         Integer, :nullable => true
+  property :pincode,         Integer
+  property :income,          Integer 
+  property :family_income,   Integer
+  property :seating,         Integer
+  property :earning_members, Integer
+  property :cb_approval_number, String
+  property :ration_card_number, String
+  # property :psl,             Enum.send('[]', *PSL_LIST)
+  # property :psl_subcategory  String
+  property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
@@ -45,7 +56,7 @@ class Client
   property :deleted_at,      ParanoidDateTime
   property :updated_at,      DateTime
   property :deceased_on,     Date, :lazy => true
-#  property :client_type,     Enum["standard", "takeover"] #, :default => "standard"
+  # property :client_type,     Enum["standard", "takeover"], :default => "standard"
   property :created_by_user_id,  Integer, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
   property :verified_by_user_id, Integer, :nullable => true, :index => true
@@ -124,7 +135,7 @@ class Client
   belongs_to :center
   belongs_to :client_group
   belongs_to :occupation, :nullable => true
-  # belongs_to :client_type
+  belongs_to :client_type
   belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'

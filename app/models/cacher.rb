@@ -8,7 +8,6 @@ class Cacher
   property :model_id,                        Integer, :nullable => false, :index => true, :unique => [:model_name, :date], :key => true
   property :branch_id,                       Integer, :index => true, :key => true
   property :center_id,                       Integer, :index => true, :key => true
-
   property :funding_line_id,                 Integer, :index => true
   property :scheduled_outstanding_total,     Float, :nullable => false
   property :scheduled_outstanding_principal, Float, :nullable => false
@@ -185,7 +184,15 @@ class Cacher
 #    raise ArgumentError "cannot add cachers of different classes" unless self.class == other.class
     date = (self.date > other.date ? self.date : other.date)
     me = self.attributes; other = other.attributes;
-    attrs = me + other; attrs[:date] = date; attrs[:id] = -1; attrs[:model_name] = self.model_name;
+    attrs = me + other; attrs[:date] = date; attrs[:model_name] = "Sum";
+
+    # add the calculated fields
+    #calc_flow_fields = FLOW_COLS - attrs.keys
+    #calc_flow_fields.each{|cff| attrs[cff] = self.send(cff) + other.send(cff)}
+    #calc_col_fields = COLS - attrs
+    #calc_col_fields.each{|c| attrs[c] = self.send(c) + other.send(c)}
+
+    
     attrs[:model_id] = nil; attrs[:branch_id] = nil; attrs[:center_id] = nil;
     attrs[:stale] = me[:stale] || other[:stale]
     Cacher.new(attrs)
@@ -399,7 +406,6 @@ class Cache < Cacher
 
 
   def self.update(hash = {})
-    debugger
     # is our cache based off fields in the loan history table?
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
@@ -441,7 +447,6 @@ class Cache < Cacher
     _fls = fls.map{|fl| fl.delete(loan_history_field); fl}
     sql = get_bulk_insert_sql("cachers", _fls)
     # destroy the relevant funding_line caches in the database
-    debugger
     ids = fl_data.map{|center_id, models|
       models.map{|fl_id, data|
         [center_id, fl_id]
@@ -453,7 +458,6 @@ class Cache < Cacher
 
     # now do the branch aggregates for each funding line cache
     Kernel.const_get(base_model_name).all.each do |fl|
-      debugger
       relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
       branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
 
@@ -472,7 +476,7 @@ class Cache < Cacher
       # when you add clients directly to the branch, do also update the code here
 
       branch_data.map do |bid, c|
-        debugger
+        
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         if bc.new?
@@ -488,7 +492,7 @@ class Cache < Cacher
 
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
-    debugger
+    
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today

@@ -57,7 +57,7 @@
     %th
       Client Type
     %td
-      -# = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
+      = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
   %tr
     %th
       Gender
@@ -73,6 +73,11 @@
         references are unique, a way to check that this is the only record of a client
         %br/
         for this reason it is advisable to use a government ID as reference
+  %tr
+    %th
+      Ration Card:
+    %td
+      = text_field :ration_card_number
   %tr
     %th
       Date of birth:
@@ -101,9 +106,39 @@
       = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %th
+      Guarantor name:
+    %td
+      = text_field :guarantor_name, :size => 40
+  %tr
+    %th
+      Guarantor Date of Birth:
+    %td
+      = date_select_for @client, :guarantor_dob, :max_date => Date.today
+  %tr
+    %th
+      Guarantor relationship:
+    %td
+      = select :guarantor_relationship, :collection => CLIENT_RELATIONSHIPS, :prompt => "---"
+  %tr
+    %th
+      No of Family Numbers:
+    %td
+      = text_field :number_of_family_members
+  %tr
+    %th
       Address:
     %td
       ~ text_area :address, :rows => 6, :cols => 38
+  %tr
+    %th
+      Pincode:
+    %td
+      = text_field :pincode
+  %tr
+    %th
+      Economic Weaker Section Classification
+    %td
+      = select :ews, :collection => EWS_LIST.map{|x| [x, x.camelcase(' ')]}, :prompt => "---"
   %tr
     %th
       Occupation

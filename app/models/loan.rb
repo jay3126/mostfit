@@ -123,7 +123,7 @@ class Loan
   property :converted,                           Boolean
 
   property :reference,                           String, :unique => true # to be used during migrations
-  
+  property :approval_comment,                    Text
 
   # associations
   belongs_to :client
