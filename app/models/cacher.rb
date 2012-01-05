@@ -606,18 +606,21 @@ class PortfolioCache < Cacher
  property :end_date, Date, :nullable => true
   
   def self.update(portfolio,date = Date.today)
+    # this function DOES NOT do cashflows. It only does a single days snapshot, like the methods above.
+    # to get protfolio cashfows, please see Portfolio#take_cashflow_snapshot
     t = Time.now
     d1 = d2 = date
     loan_ids = portfolio.portfolio_loans(:added_on.lte => d2).aggregate(:loan_id) # loans added before the end of this period only are to be counted
     unless loan_ids.blank?
       hash = {:loan_id => loan_ids}
       balances = LoanHistory.latest_sum(hash,d2, [], COLS)
-      pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], FLOW_COLS)    
-      pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => portfolio.id, :date => d1, :end_date => d2})
+      pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => date)).aggregate(:composite_key), [], FLOW_COLS)    
+      pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => portfolio.id, :date => d1})
       pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
-      pc.save
+      pc.center_id = pc.branch_id = 0
       puts "Done in #{Time.now - t} secs"
-      pc
+      debugger
+      return pc.save
     end
   end
 
