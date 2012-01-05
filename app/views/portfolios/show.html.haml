@@ -24,25 +24,12 @@
       Cashflows
     %li#reports
       Reports
+    %li#info
+      Info
+
   %div.tab
-    .menu-strip.clearfix{:style => "width: 100%"}
-      = form(:action => url(:controller => :portfolios, :action => :cashflow, :id => @portfolio.id), :style => "float: left") do
-        See cashflow 
-        %b weekly 
-        every 
-        = select :name => :weekday, :collection => WEEKDAYS.map(&:to_s), :prompt => "on"
-        = submit 'go!'
-      %h3{:style => "float:left; font-size: 2.1em;"}
-        or  
-      = form(:action => url(:cashflow_portfolio, :id => @portfolio.id), :style => "float: left") do
-        &nbsp;
-        monthly
-        on every 
-        = text_field :name => "day_of_month", :style => "width: 3em"
-        th day
-        = submit 'go!'
     - keys = [:actual_outstanding_principal, :principal_paid, :interest_paid, :scheduled_outstanding_principal]
-    %table
+    %table.shaded{:style => "margin: 20px"}
       %thead
         %tr
           %th
@@ -92,6 +79,23 @@
           - keys.each do |k|
             %td
               = h.send(k) rescue nil
+  %div.tab
+    .clearfix
+      %h1 Info
+      .big-number
+        .number
+          = @portfolio.loans.count
+        .text
+          loans in 
+          %br
+          portfolio
+      .big-number
+        .number
+          = Loan.all(:loan_pool_id => @portfolio.id).count
+        .text
+          in securitised
+          %br
+          portfolio
             
       
     

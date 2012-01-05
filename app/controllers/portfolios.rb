@@ -47,6 +47,7 @@ class Portfolios < Application
     @objects = @search.process
     @portfolio = Portfolio.new(portfolio)
     @portfolio.created_by_user_id = session.user.id
+    @portfolio.params = params
     @added_on = Date.parse(params[:added_on])
     if @portfolio.save
       @securitised_loans =  @portfolio.is_securitised ? Portfolio.all(:is_securitised => true).portfolio_loans.aggregate(:loan_id) : []
@@ -84,15 +85,15 @@ class Portfolios < Application
 
 
   def update(id, portfolio)
+    # new loans keep getting added all the time to the database and many of them will match the search criteria
+    # so, we give the option to add such loans to the portfolio
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
-    @portfolio.attributes = portfolio
-    if @portfolio.save_self
-       redirect resource(@funder)
-    else
-      @data = @portfolio.eligible_loans
-      display @portfolio, :edit
-    end
+    # use the original parameters to conduct another search
+    @search  = Search.new(@portfolio.params)
+    @objects = @search.process
+    @added_on = Date.parse(params[:added_on])
+    
   end
 
   def destroy(id)
@@ -114,6 +115,27 @@ class Portfolios < Application
     @portfolio.cashflow(params)
   end
     
+  def securitise(id)
+    # this updates all the loans in portfolio and sets their loan_pool_id to the portfolio id
+    # securitised portfolios can now get their own high class reporting like everyone else ;-)
+    # the problem is with the audit trail, we need to do everything by hand
+    # because portfolios can be HUUUGGGE and going loan by loan is not really an option
+    @portfolio = Portfolio.get(id)
+    loan_ids = @portfolio.loans.aggregate(:id, :loan_pool_id)
+    t0 = DateTime.now
+    Portfolio.transaction do |t|
+      audit_trails = loan_ids.map{|x| 
+        {:auditable_id => x[0], :auditable_type => "Loan", :action => :update,
+          :changes => {:loan_pool_id => [x[1],id]}.to_yaml, :created_at => t0,
+          :type => :log, :user_id => session.user.id}
+      }
+      repository.adapter.execute("update loans set loan_pool_id = #{id} where loan_id in (#{loan_ids.join(',')})")
+      sql = get_bulk_insert_sql("audit_trail", audit_trails)
+      repository.adapter.execute(sql)
+    end
+  end
+
+
 
   # def loans
   #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new

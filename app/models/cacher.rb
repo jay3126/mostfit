@@ -74,7 +74,7 @@ class Cacher
                :principal_due_today, :interest_due_today, :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, 
                :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
   CALCULATED_COLS = [:principal_defaulted_today, :interest_defaulted_today, :total_defaulted_today]
-  
+
   # some convenience functions
   def total_paid
     principal_paid + interest_paid + fees_paid_today
@@ -211,25 +211,35 @@ class BranchCache < Cacher
     self.update(date, branch_ids, true)
   end
 
-  def self.update(date = Date.today, branch_ids = nil, force = false)
-    # cache updates must be pristine, so rollback on failure.
-    BranchCache.transaction do |t|
-      # updates the cache object for a branch
-      # first create caches for the centers that do not have them
-      t0 = Time.now; t = Time.now;
-      branch_ids = Branch.all.aggregate(:id) unless branch_ids
-      branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
+  def self.update(hash = {})
+    hash = {:date => Date.today, :branch_ids => nil, :force => false}.merge(hash)
+    date = hash[:date]; branch_ids = hash[:branch_ids]; force = hash[:force]
+    # updates the cache object for a branch
+    # first create caches for the centers that do not have them
+    t0 = Time.now; t = Time.now;
+    branch_ids = Branch.all.aggregate(:id) unless branch_ids
+    branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
 
-      # unless we are forcing an update, only work with the missing and stale centers
-      unless force
-        ccs = CenterCache.all(:model_name => "Center", :branch_id => branch_ids, :date => date, :center_id.gt => 0)
-        cached_centers = ccs.aggregate(:center_id)
-        stale_centers = ccs.stale.aggregate(:center_id)
-        cids = (branch_centers - cached_centers) + stale_centers
-        puts "#{cached_centers.count} cached centers; #{branch_centers.count} total centers; #{stale_centers.count} stale; #{cids.count} to update"
-      else
-        cids = branch_centers
-        puts " #{cids.count} to update"
+    # unless we are forcing an update, only work with the missing and stale centers
+    unless force
+      ccs = CenterCache.all(:model_name => "Center", :branch_id => branch_ids, :date => date, :center_id.gt => 0)
+      cached_centers = ccs.aggregate(:center_id)
+      stale_centers = ccs.stale.aggregate(:center_id)
+      cids = (branch_centers - cached_centers) + stale_centers
+      puts "#{cached_centers.count} cached centers; #{branch_centers.count} total centers; #{stale_centers.count} stale; #{cids.count} to update"
+    else
+      cids = branch_centers
+      puts " #{cids.count} to update"
+    end
+
+    return true if cids.blank? #nothing to do
+    # update all the centers for today
+    chunks = cids.count/3000
+    begin
+      _t = Time.now
+      cids.chunk(3000).each_with_index do |_cids,i|
+        (CenterCache.update(:center_id => _cids, :date => date))
+        puts "UPDATED #{i}/#{chunks} CACHES in #{(Time.now - _t).round} secs"
       end
 
       return true if cids.blank? #nothing to do
