@@ -26,7 +26,7 @@
       Reports
   %div.tab
     .menu-strip.clearfix{:style => "width: 100%"}
-      = form(:action => url(:cashflow_portfolio, :id => @portfolio.id), :style => "float: left") do
+      = form(:action => url(:controller => :portfolios, :action => :cashflow, :id => @portfolio.id), :style => "float: left") do
         See cashflow 
         %b weekly 
         every 
@@ -61,7 +61,7 @@
             Scheduled Interest
     
       - last_principal = nil
-      - PortfolioCache.all(:model_id => @portfolio.id, :order => [:date]).each do |c|
+      - PortfolioCache.all(:model_name => "PortfolioCashflow", :model_id => @portfolio.id, :order => [:date]).each do |c|
         - next if keys.map{|x| c.send(x)}.sum == 0
         %tr{:class => cycle("odd","even")}
           %td
@@ -70,19 +70,14 @@
             %td{:class => (k == :interest_paid ? "right-numeric" : "numeric")}
               = c.send(k).to_currency
           %td
-            - if last_principal
-              = (last_principal - c.scheduled_outstanding_principal).to_currency
-            - else
-              = c.scheduled_principal_due.to_currency
-            - last_principal = c.scheduled_outstanding_principal
+            = c.principal_due_today.to_currency
           %td
-            = c.scheduled_interest_due.to_currency
+            = c.interest_due_today.to_currency
   %div.tab
     %h1 Reports
     = select :name => 'report_format', :collection => ReportFormat.all,:text_method => :name, :value_method => :id, :selected => (params[:report_format] || 1).to_s, :prompt => 'Select a report format', :onchange => "javascript: document.location = '#{url(:controller => :portfolios, :action => :show, :id => 4)}?report_format=' + (this.options[this.selectedIndex].value) + '#reports'"
     - keys =  (params[:report_format] ? ReportFormat.get(params[:report_format]).keys : ReportFormat.get(1).keys)
     - debugger
-    - h = PortfolioCache.first(:date => Date.today, :end_date => Date.today)
     %table.diags
       %thead
         %tr
@@ -90,9 +85,10 @@
           - keys.each do |k|
             %th
               = k.to_s.gsub("_"," ")
+      - PortfolioCache.all(:model_id => @portfolio.id, :model_name => "Portfolio").each do |h|
         %tr{:class => cycle('odd','even')}
           %td
-            = Date.today.strftime("%Y%m%d")
+            = h.date
           - keys.each do |k|
             %td
               = h.send(k) rescue nil
