@@ -5,7 +5,7 @@ class Cacher
   property :type,                            Discriminator, :key => true
   property :date,                            Date, :nullable => false, :index => true, :key => true
   property :model_name,                      String, :nullable => false, :index => true, :key => true
-  property :model_id,                        Integer, :nullable => false, :index => true, :unique => [:model_name, :date], :key => true
+  property :model_id,                        Integer, :nullable => false, :index => true, :key => true
   property :branch_id,                       Integer, :index => true, :key => true
   property :center_id,                       Integer, :index => true, :key => true
 
@@ -458,53 +458,54 @@ class Cache < Cacher
       return false 
     end
     _fls = fls.map{|fl| fl.delete(loan_history_field); fl}
-    sql = get_bulk_insert_sql("cachers", _fls)
-    # destroy the relevant funding_line caches in the database
-    debugger
-    ids = fl_data.map{|center_id, models|
-      models.map{|fl_id, data|
-        [center_id, fl_id]
+    Cache.transaction do |t|
+      # destroy the relevant funding_line caches in the database
+      ids = fl_data.map{|center_id, models|
+        models.map{|fl_id, data|
+          [center_id, fl_id]
+        }
       }
-    }
-    ids = ids.flatten(1).map{|x| "(#{x.join(',')})"}.join(",")
-    raise unless repository.adapter.execute("delete from cachers where model_name = '#{base_model_name}' and (center_id, model_id) in (#{ids})")
-    repository.adapter.execute(sql)
+      debugger
+      ids = ids.flatten(1).map{|x| "(#{x.join(',')})"}.join(",")
+      raise unless repository.adapter.execute("delete from cachers where model_name = '#{base_model_name}' and (center_id, model_id) in (#{ids})")
+      _fls.chunk(3000).each do |f|
+        sql = get_bulk_insert_sql("cachers", f)
+        repository.adapter.execute(sql)
+      end
+      debugger
 
     # now do the branch aggregates for each funding line cache
-    Kernel.const_get(base_model_name).all.each do |fl|
-      debugger
-      relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
-      branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
-
-      # we now have {:branch => [{...center data...}, {...center data...}]}, ...
-      # we have to convert this to {:branch => { sum of centers data }, ...}
-
-      branch_data = branch_data_hash.map do |bid,ccs|
-        sum_centers = ccs.map do |c|
-          center_sum_attrs = c.attributes.select{|k,v| v.is_a? Numeric}.to_hash
-        end
-        [bid, sum_centers.reduce({}){|s,h| s+h}]
-      end.to_hash
-
-      # TODO then add the loans that do not belong to any center
-      # this does not exist right now so there is no code here.
-      # when you add clients directly to the branch, do also update the code here
-
-      branch_data.map do |bid, c|
+      mname = base_model_name
+      base_model_name = "Portfolio" if base_model_name == "LoanPool"
+      Kernel.const_get(base_model_name).all.each do |fl|
         debugger
-        bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
-        attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
-        if bc.new?
-          bc.attributes = attrs.merge(:id => nil, :updated_at => DateTime.now)
+        relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
+        branch_data_hash = self.all(:model_name => mname, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
+        # we now have {:branch => [{...center data...}, {...center data...}]}, ...
+        # we have to convert this to {:branch => { sum of centers data }, ...}
+
+        branch_data = branch_data_hash.map do |bid,ccs|
+          sum_centers = ccs.map do |c|
+            center_sum_attrs = c.attributes.select{|k,v| v.is_a? Numeric}.to_hash
+          end
+          [bid, sum_centers.reduce({}){|s,h| s+h}]
+        end.to_hash
+        
+        # TODO then add the loans that do not belong to any center
+        # this does not exist right now so there is no code here.
+        # when you add clients directly to the branch, do also update the code here
+        
+        branch_data.map do |bid, c|
+          bc = self.first_or_new({:model_name => mname, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
+          attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => mname)
+          bc.attributes = attrs
+          debugger
           bc.save
-        else
-          bc.update(attrs.merge(:id => bc.id))
         end
       end
     end
   end
-
-
+    
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
     debugger
@@ -594,6 +595,8 @@ end
 class LoanProductCache < Cache
 end
 
+class LoanPoolCache < Cache; end
+
 class PortfolioCache < Cacher
   # this class handles caching for arbitrary collections of loans
   # it is simpler because we do not provide "drill-down" functionality on these arbitrary collections....for now.
@@ -619,7 +622,6 @@ class PortfolioCache < Cacher
       pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
       pc.center_id = pc.branch_id = 0
       puts "Done in #{Time.now - t} secs"
-      debugger
       return pc.save
     end
   end

@@ -22,21 +22,17 @@ class Cachers < Application
   end
   
   def generate
+    debugger
     @model = params[:by] ? Kernel.const_get(params[:by].camel_case + "Cache") : BranchCache
-    if @from_date and @to_date
-      (@from_date..@to_date).each{|date| @model.update(:date => date)}
+    if (@model == BranchCache and Branch.all.count == 0)
+      redirect url(:browse, :action => 'index'), :message => {:error => "No data found to generate report"} 
     else
-      @model.update(:date => (@date || Date.today))
-      if Branch.count > 0
-        if @from_date and @to_date
-          (@from_date..@to_date).each{|date| BranchCache.update(date)}
-        else
-          BranchCache.update(@date || Date.today)
-        end
-        redirect request.referer
+      if @from_date and @to_date
+        (@from_date..@to_date).each{|date| @model.update(:date => date)}
       else
-        redirect url(:browse, :action => 'index'), :message => {:error => "No data found to generate report"}
+        @model.update(:date => @date)
       end
+      redirect request.referer
     end
   end
 
@@ -64,7 +60,6 @@ class Cachers < Application
         # when we are aggregating "by" something else we need to consolidate cachers that span across dates and 
         # add cachers for the same date
         if params[:by]
-          $debug = true if group_by_id == 2
           cachers_for_date = cachers.group_by{|c| c.date}.to_hash.map{|d, cs| [d,cs.reduce(:+)]}.to_hash
           r = cachers_for_date.values.reduce(:consolidate)
           r.model_id = group_by_id

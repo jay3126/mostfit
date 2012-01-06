@@ -25,7 +25,7 @@
     %li#reports
       Reports
     %li#info
-      Info
+      Misc
 
   %div.tab
     - keys = [:actual_outstanding_principal, :principal_paid, :interest_paid, :scheduled_outstanding_principal]
@@ -80,22 +80,26 @@
             %td
               = h.send(k) rescue nil
   %div.tab
-    .clearfix
-      %h1 Info
-      .big-number
-        .number
-          = @portfolio.loans.count
-        .text
-          loans in 
-          %br
-          portfolio
-      .big-number
-        .number
-          = Loan.all(:loan_pool_id => @portfolio.id).count
-        .text
-          in securitised
-          %br
-          portfolio
+    .box
+      %fieldset
+        %legend Statistics
+        %div
+          .big-number
+            .number
+              = @portfolio.loans.count
+            .text
+              loans in 
+              %br
+              portfolio
+          .big-number
+            .number
+              = Loan.all(:loan_pool_id => @portfolio.id).count
+            .text
+              in securitised
+              %br
+              portfolio
+        = link_to 'Securitize!', url(:securitise_portfolio, :id => @portfolio.id)
+      
             
       
     

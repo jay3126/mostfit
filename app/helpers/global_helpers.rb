@@ -345,6 +345,7 @@ module Merb
       arr.map{|change|
         next unless change
         change.map{|k, v|
+          debugger
           if relations.key?(k)
             str = "<tr><td>#{relations[k].first.to_s.humanize}</td><td>"
             str += (if action==:update and v.class==Array
@@ -372,7 +373,7 @@ module Merb
                       "#{v}"
                     end)||""
           else
-            str="<tr><td>#{k.humanize}</td><td>"
+            str="<tr><td>#{k.humanize rescue k.to_s}</td><td>"
             str+=if action==:update and v.class==Array
                    if model.properties.find{|x| x.name == k}.type.respond_to?(:flag_map)
                      "changed from #{model.properties.find{|x| x.name == k}.type.flag_map[v.first]}</td><td>to #{v.last}"                     

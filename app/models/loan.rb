@@ -1284,6 +1284,7 @@ class Loan
         :center_id                           => c_center_id,
         :client_group_id                     => c_client_group_id || 0,
         :client_id                           => client_id,
+        :loan_pool_id                        => loan_pool_id || 0,
         :created_at                          => now,
         :funding_line_id                     => funding_line_id,
         :loan_product_id                     => loan_product_id,

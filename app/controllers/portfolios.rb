@@ -50,7 +50,7 @@ class Portfolios < Application
     @portfolio.params = params
     @added_on = Date.parse(params[:added_on])
     if @portfolio.save
-      @securitised_loans =  @portfolio.is_securitised ? Portfolio.all(:is_securitised => true).portfolio_loans.aggregate(:loan_id) : []
+      @securitised_loans =  @portfolio.is_securitisable ? Portfolio.all(:is_securitisable => true).portfolio_loans.aggregate(:loan_id) : []
       # some portfilios can be really big, so we go the bulk route
       # of course, does not write in the audit trail....
       # TODO write this in the audit trail
@@ -120,18 +120,25 @@ class Portfolios < Application
     # securitised portfolios can now get their own high class reporting like everyone else ;-)
     # the problem is with the audit trail, we need to do everything by hand
     # because portfolios can be HUUUGGGE and going loan by loan is not really an option
+    debugger
     @portfolio = Portfolio.get(id)
-    loan_ids = @portfolio.loans.aggregate(:id, :loan_pool_id)
+    raise NotFound unless @portfolio
+    redirect request.referer, :message => {:notice => "This portfolio not securitisable"} unless  @portfolio.is_securitisable
+    redirect request.referer, :message => {:notice => "This portfolio is already securitised"} if @portfolio.is_securitised
+    loan_ids = @portfolio.loans.aggregate(:id)
     t0 = DateTime.now
     Portfolio.transaction do |t|
       audit_trails = loan_ids.map{|x| 
-        {:auditable_id => x[0], :auditable_type => "Loan", :action => :update,
-          :changes => {:loan_pool_id => [x[1],id]}.to_yaml, :created_at => t0,
-          :type => :log, :user_id => session.user.id}
+        {:auditable_id => x, :auditable_type => "Loan", :action => 2,
+          :changes => {:loan_pool_id => [0,id]}.to_yaml, :created_at => t0,
+          :type => 1, :user_id => session.user.id}
       }
-      repository.adapter.execute("update loans set loan_pool_id = #{id} where loan_id in (#{loan_ids.join(',')})")
+      repository.adapter.execute("update loans set loan_pool_id = #{id} where id in (#{loan_ids.join(',')})")
       sql = get_bulk_insert_sql("audit_trail", audit_trails)
       repository.adapter.execute(sql)
+      @portfolio.is_securitised = true
+      @portfolio.save
+      redirect request.referer, :message => {:success => "Loans have been marked as securitsed"}
     end
   end
 

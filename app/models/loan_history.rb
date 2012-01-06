@@ -75,7 +75,7 @@ class LoanHistory
   property :funding_line_id,             Integer, :index => true
   property :funder_id,                   Integer, :index => true
   property :loan_product_id,             Integer, :index => true
-
+  property :loan_pool_id,                Integer, :nullable => true, :index => true
   property :composite_key, Float, :index => true
 
 
