@@ -29,6 +29,7 @@ class LoyaltyBonus < Report
     # but first the non refactored version
 
     # first get [:loan_id, :date] for all loan_history where status is repaid abd last status is outstanding
+    debugger
     conds = {:status => [:preclosed, :repaid], :date => @from_date..@to_date, :last_status => [:outstanding]}.merge!(@branch_id ? {:branch_id => @branch_id} : {})
 
     keys = [:branch, :center, :client_group, :client]
@@ -57,7 +58,8 @@ class LoyaltyBonus < Report
         :number_of_installments                 => l.number_of_installments, 
         :absents                                => l.client.attendances(:date => l.disbursal_date..mat_date, :status => "absent").count, 
         :attendance                             => l.client.attendances(:date => l.disbursal_date..mat_date).count, 
-        :mat_date                               => mat_date}
+        :mat_date                               => mat_date,
+        :paid                                   => l.client.loyalty_bonus_paid}
     end
   end
   

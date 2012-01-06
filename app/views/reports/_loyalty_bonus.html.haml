@@ -7,6 +7,10 @@
     %th
       Client
     %th
+      Center
+    %th
+      Branch
+    %th
       Maturity Date
     %th
       Number of Absences
@@ -14,6 +18,8 @@
       Installments
     %th
       Eligible?
+    %th
+      Paid
   - @data.each do |d|
     - loan = d[:loan]
     - eligible = ((d[:number_of_installments] == 46 ? d[:attendance] >= 44 : d[:attendance] >= 48) and (d[:absents] <= 2))
@@ -22,7 +28,11 @@
       %td
         = link_to loan.description, url_for_loan(loan)
       %td
-        = link_to d[:client_name], url(:clients, d[:client_id])
+        = link_to d[:client_name], url(:client, d[:client_id])
+      %td
+        = link_to d[:center_name], url(:center, d[:center_id])
+      %td
+        = d[:branch_name]
       %td
         = d[:mat_date]
       %td
@@ -32,4 +42,6 @@
         == #{d[:attendance]} / #{d[:number_of_installments]}
       %td{:style  => eligible ? "color: green" : "color:red"}
         = eligible
+      %td
+        = d[:paid] || "Not paid"
   
