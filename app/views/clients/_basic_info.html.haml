@@ -11,7 +11,7 @@
         For center:
       %td
         = select :center_id, :collection => Center.all(:branch => @client.center.branch), :value_method => :id, :text_method => :name, :selected => @client.center.id.to_s
-  -else
+  - else
     %tr
       %td 
         For center
@@ -71,6 +71,11 @@
       Client Type
     %td
       = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
+  %tr
+    %td
+      Gender
+    %td
+      = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please choose a gender"
   %tr
     %td
       Reference Identification:
