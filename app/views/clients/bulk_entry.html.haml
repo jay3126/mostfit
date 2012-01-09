@@ -12,28 +12,23 @@
         and center
       %td
         = select :name => 'center_id', :id => 'center_selector', :collection => Center.all(:branch_id => params[:branch_id]), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center', :selected => params[:center_id]
-        %span.red
-          = @errors[:center]
+        - if @errors[:center]
+          %span.red
+            = @errors[:center]
 
   %table
     %thead
       %tr
         %th
-          name
+          Name
         %th
-          reference
+          Reference
         %th
-          d.o.b.
+          D.O.B.
         %th
-          date joined
+          Date joined
         %th
-          guarantor name
-        %th
-          guarantor d.o.b
-        %th
-          guarantor relationship
-        %th
-          ews classification
+          Address
       
     - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
       - if (@errors or Nothing)[i] 
@@ -49,17 +44,9 @@
         %th
           = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference])
         %th
-          = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob"
+          = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000
         %th
-          = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined"
+          = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today
         %th
-          = text_field :name => "clients[#{i}][guarantor_name]", :value => (params[:clients] and params[:clients][i.to_s][:guarantor_name])
-        %th
-          = date_select "clients[#{i}][guarantor_dob]",(params[:clients] and params[:clients][i.to_s][:spouse_date_of_birth]) , :id => "client_#{i}_guarantor_dob"
-        %th
-          = select :name => "clients[#{i}][guarantor_relationship]", :value => ((params[:clients]) and params[:clients][i.to_s][:guarantor_relationship]), :collection => CLIENT_RELATIONSHIPS, :prompt => "select guarantor relationship"
-        %th
-          = select :name => "clients[#{i}][ews]", :value => ((params[:clients]) and params[:clients][i.to_s][:ews]), :collection => EWS_LIST.map{|x| [x, x.camelcase(' ')]}, :prompt => "select ews"
+          = text_field :name => "clients[#{i}][address]", :value => (params[:clients] and params[:clients][i.to_s][:address])
   = submit 'add clients' 
-      
-
