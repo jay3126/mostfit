@@ -9,7 +9,7 @@ class StaffMember
   property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
   property :address, Text, :lazy => true
   property :father_name,  String, :length => 100, :nullable => true
-  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :male
+  property :gender,     Enum.send('[]', *[nil, :female, :male]), :nullable => true, :lazy => true, :default => :male
   property :active,  Boolean, :default => true, :nullable => false  
   property :user_id,  Integer,  :nullable => true  
   property :gender, Enum[:male, :female]
@@ -61,6 +61,7 @@ class StaffMember
 
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
+    debugger
     obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,
               :gender => row[headers[:gender]],
               :mobile_number => mobile, :active => true, :upload_id => row[headers[:upload_id]])

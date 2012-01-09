@@ -277,12 +277,13 @@ class Loan
       :funding_line_id                    => FundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id,
       :applied_by_staff_id                => StaffMember.first(:name => row[headers[:applied_by_staff]]).id,
       :approved_by_staff_id               => StaffMember.first(:name => row[headers[:approved_by_staff]]).id,
-      :repayment_style_id                 => RepaymentStyle.first(:name => row[headers[:repayment_style]]).id,
+      :repayment_style_id                 => (RepaymentStyle.first(:name => row[headers[:repayment_style]]) or Nothing).id,
       :c_center_id                        => Center.first(:name => row[headers[:center]]).id,
       :reference                          => row[headers[:reference]],
       :client                             => Client.first(:reference => row[headers[:client_reference]])}
     obj = new(hash)
     obj.history_disabled=true
+    debugger
     saved = obj.save
     if saved
       c = Checker.first_or_new(:model_name => "Loan", :reference => obj.reference)
