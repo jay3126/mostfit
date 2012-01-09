@@ -30,7 +30,7 @@
       -# %th
       -#   Comment
   - staff_members_allowed = staff_members_collection
-  -@loans_to_approve.each do |loan|
+  - @loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
     %tr{:class => cycle('odd','')}
       %td.number
@@ -44,8 +44,12 @@
       %td.text
         = link_to client.center.name, url(:quick_link, "centers", client.center.id)
       %td.text
-        - min_date = (loan.applied_on > Date.min_transaction_date ? loan.applied_on : Date.min_transaction_date)
-        = date_select("loans[#{loan.id}][approved_on]", min_date, :id => "loans_#{loan.id}_approved_on", :min_date => min_date, :max_date => Date.max_transaction_date)
+        - if Mfi.first.allow_approval_date_selection
+          - min_date = (loan.applied_on > Date.min_transaction_date ? loan.applied_on : Date.min_transaction_date)
+          = date_select("loans[#{loan.id}][approved_on]", min_date, :id => "loans_#{loan.id}_approved_on", :min_date => min_date, :max_date => Date.max_transaction_date)
+        - else
+          = Date.today
+          = hidden_field(:name => "loans[#{loan.id}][approved_on]", :value => Date.today)
       %td.text
         - min_date = (loan.scheduled_disbursal_date > Date.min_transaction_date ? loan.scheduled_disbursal_date : Date.min_transaction_date)
         = date_select("loans[#{loan.id}][scheduled_disbursal_date]", min_date, :id => "loans_#{loan.id}_scheduled_disbursal_date", :min_date => min_date, :max_date => Date.max_transaction_date)
@@ -77,7 +81,7 @@
       -#   = text_field :name => "loans[#{loan.id}][approval_comment]", :style => "display:none;", :id => "approval_comment_#{loan.id}" 
   %tfoot
     %tr
-      %td{:colspan => 11}
+      %td{:colspan => 13}
   
 = paginate @loans_to_approve if @loans_to_approve.respond_to?(:page)
  

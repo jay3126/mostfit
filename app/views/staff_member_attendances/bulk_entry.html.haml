@@ -4,7 +4,7 @@
     = form_for(@staff_member_attendance, :controller => :staff_member_attendances, :action => "bulk_entry") do
       = select :sma_branch_id, :collection => Branch.all.map{ |x| [x.id, x.name]}, :prompt => "Select Branch", :class => 'chosen'
       &nbsp;&nbsp;
-      = date_select_for @staff_member_attendance, :date
+      = date_select_for @staff_member_attendance, :date, :max_date => Date.today
       &nbsp;&nbsp;
       = submit 'Next...'
 - else

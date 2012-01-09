@@ -37,7 +37,7 @@ class Client
   property :ration_card_number, String
   # property :psl,             Enum.send('[]', *PSL_LIST)
   # property :psl_subcategory  String
-  property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true
+  property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true, :default => 'not_applicable'
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
