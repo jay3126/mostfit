@@ -15,6 +15,8 @@ class Portfolio
 
   property :is_securitised, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
 
+  property :params, Yaml, :length => 2000 
+
   property :created_at, DateTime, :default => Time.now
   property :updated_at, DateTime, :default => Time.now
 
@@ -66,7 +68,7 @@ class Portfolio
         hash = {:loan_id => loan_ids}
         balances = LoanHistory.latest_sum(hash,d2, [], Cacher::COLS)
         pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], Cacher::FLOW_COLS)    
-        pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => id, :date => d1, :end_date => d2, :branch_id => 0, :center_id => 0})
+        pc = PortfolioCache.first_or_new({:model_name => "PortfolioCashflow", :model_id => id, :date => d1, :end_date => d2, :branch_id => 0, :center_id => 0})
         pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
         debugger
         pc.save

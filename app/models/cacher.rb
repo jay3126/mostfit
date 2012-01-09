@@ -16,8 +16,12 @@ class Cacher
   property :actual_outstanding_interest,     Float, :nullable => false
   property :scheduled_principal_due,         Float, :nullable => false
   property :scheduled_interest_due,          Float, :nullable => false
+
   property :principal_due,                   Float, :nullable => false
   property :interest_due,                    Float, :nullable => false
+  property :principal_due_today,             Float, :nullable => false # this is the principal and interest 
+  property :interest_due_today,              Float, :nullable => false  #that has become payable today
+
   property :principal_paid,                  Float, :nullable => false
   property :interest_paid,                   Float, :nullable => false
   property :total_principal_due,             Float, :nullable => false
@@ -65,11 +69,12 @@ class Cacher
           :advance_principal_adjusted, :advance_interest_adjusted, :advance_principal_outstanding, :advance_interest_outstanding, :total_advance_outstanding, :principal_at_risk, 
           :outstanding_count, :outstanding]
   FLOW_COLS = [:principal_due, :principal_paid, :interest_due, :interest_paid,
-             :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
-             :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
-             :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
+               :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted,
+               :advance_principal_paid, :advance_interest_paid, :advance_principal_paid_today, :advance_interest_paid_today, :fees_due_today, :fees_paid_today,
+               :principal_due_today, :interest_due_today, :total_advance_paid_today, :advance_principal_adjusted_today, :advance_interest_adjusted_today, 
+               :total_advance_adjusted_today] + STATUSES.map{|s| [s, "#{s}_count".to_sym] unless s == :outstanding}.compact.flatten
   CALCULATED_COLS = [:principal_defaulted_today, :interest_defaulted_today, :total_defaulted_today]
-  
+
   # some convenience functions
   def total_paid
     principal_paid + interest_paid + fees_paid_today
@@ -203,28 +208,38 @@ end
 class BranchCache < Cacher
 
   def self.recreate(date = Date.today, branch_ids = nil)
-    self.update(date, branch_ids, true)
+    self.update(:date => date, :branch_ids => branch_ids, :force => true)
   end
 
-  def self.update(date = Date.today, branch_ids = nil, force = false)
-    # cache updates must be pristine, so rollback on failure.
-    BranchCache.transaction do |t|
-      # updates the cache object for a branch
-      # first create caches for the centers that do not have them
-      t0 = Time.now; t = Time.now;
-      branch_ids = Branch.all.aggregate(:id) unless branch_ids
-      branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
+  def self.update(hash = {})
+    hash = {:date => Date.today, :branch_ids => nil, :force => false}.merge(hash)
+    date = hash[:date]; branch_ids = hash[:branch_ids]; force = hash[:force]
+    # updates the cache object for a branch
+    # first create caches for the centers that do not have them
+    t0 = Time.now; t = Time.now;
+    branch_ids = Branch.all.aggregate(:id) unless branch_ids
+    branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
 
-      # unless we are forcing an update, only work with the missing and stale centers
-      unless force
-        ccs = CenterCache.all(:model_name => "Center", :branch_id => branch_ids, :date => date, :center_id.gt => 0)
-        cached_centers = ccs.aggregate(:center_id)
-        stale_centers = ccs.stale.aggregate(:center_id)
-        cids = (branch_centers - cached_centers) + stale_centers
-        puts "#{cached_centers.count} cached centers; #{branch_centers.count} total centers; #{stale_centers.count} stale; #{cids.count} to update"
-      else
-        cids = branch_centers
-        puts " #{cids.count} to update"
+    # unless we are forcing an update, only work with the missing and stale centers
+    unless force
+      ccs = CenterCache.all(:model_name => "Center", :branch_id => branch_ids, :date => date, :center_id.gt => 0)
+      cached_centers = ccs.aggregate(:center_id)
+      stale_centers = ccs.stale.aggregate(:center_id)
+      cids = (branch_centers - cached_centers) + stale_centers
+      puts "#{cached_centers.count} cached centers; #{branch_centers.count} total centers; #{stale_centers.count} stale; #{cids.count} to update"
+    else
+      cids = branch_centers
+      puts " #{cids.count} to update"
+    end
+
+    return true if cids.blank? #nothing to do
+    # update all the centers for today
+    chunks = cids.count/3000
+    begin
+      _t = Time.now
+      cids.chunk(3000).each_with_index do |_cids,i|
+        (CenterCache.update(:center_id => _cids, :date => date))
+        puts "UPDATED #{i}/#{chunks} CACHES in #{(Time.now - _t).round} secs"
       end
 
       return true if cids.blank? #nothing to do
@@ -586,18 +601,21 @@ class PortfolioCache < Cacher
  property :end_date, Date, :nullable => true
   
   def self.update(portfolio,date = Date.today)
+    # this function DOES NOT do cashflows. It only does a single days snapshot, like the methods above.
+    # to get protfolio cashfows, please see Portfolio#take_cashflow_snapshot
     t = Time.now
     d1 = d2 = date
     loan_ids = portfolio.portfolio_loans(:added_on.lte => d2).aggregate(:loan_id) # loans added before the end of this period only are to be counted
     unless loan_ids.blank?
       hash = {:loan_id => loan_ids}
       balances = LoanHistory.latest_sum(hash,d2, [], COLS)
-      pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => ((d1 + 1)..d2))).aggregate(:composite_key), [], FLOW_COLS)    
-      pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => portfolio.id, :date => d1, :end_date => d2})
+      pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => date)).aggregate(:composite_key), [], FLOW_COLS)    
+      pc = PortfolioCache.first_or_new({:model_name => "Portfolio", :model_id => portfolio.id, :date => d1})
       pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
-      pc.save
+      pc.center_id = pc.branch_id = 0
       puts "Done in #{Time.now - t} secs"
-      pc
+      debugger
+      return pc.save
     end
   end
 

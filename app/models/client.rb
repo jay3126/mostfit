@@ -176,7 +176,7 @@ class Client
         center   = Center.get(center_attr)
       end
     end
-    raise ArgumentError("No center with code/id #{center_attr}") unless center
+    raise ArgumentError.new("No center with code/id #{center_attr}") unless center
     branch         = center.branch
     #creating group either on group ccode(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
