@@ -29,9 +29,9 @@ class Cachers < Application
       @model.update(:date => (@date || Date.today))
       if Branch.count > 0
         if @from_date and @to_date
-          (@from_date..@to_date).each{|date| BranchCache.update(date)}
+          (@from_date..@to_date).each{|date| BranchCache.update(:date => date)}
         else
-          BranchCache.update(@date || Date.today)
+          BranchCache.update(:date => (@date || Date.today))
         end
         redirect request.referer
       else
@@ -134,7 +134,7 @@ class Cachers < Application
         q[:center_id] ||= 0 unless q[:center_id.not]
         q[:model_id] = params[:model_id] if params[:model_id]
       else
-        q[:model_name] = params[:branch_id] ? "Center" : "Branch"
+        q[:model_name] = (params[:branch_id] and params[:branch_id].blank?) ? "Branch" : "Center"
       end
     end
     q[:date] = @date if @date
