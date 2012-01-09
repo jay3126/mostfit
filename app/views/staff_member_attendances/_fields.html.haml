@@ -3,7 +3,7 @@
     %td
       Date
     %td
-      = date_select_for @staff_member_attendance, :date
+      = date_select_for @staff_member_attendance, :date, :max_date => Date.today
     %td
       Status
     %td
