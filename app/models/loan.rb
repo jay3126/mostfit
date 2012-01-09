@@ -1017,7 +1017,7 @@ class Loan
 
   def get_status(date = Date.today, total_received = nil) # we have this last parameter so we can speed up get_status
                                                           # considerably by passing total_received, i.e. from history_for
-    #return @status if @status
+     #return @status if @status
     @statuses ||= {}
     return @statuses[date] if @statuses[date]
     date = Date.parse(date)      if date.is_a? String
@@ -1037,7 +1037,7 @@ class Loan
     return :disbursed            if (date == disbursal_date.holiday_bump) and total_received < total_to_be_received
     if total_received >= total_to_be_received
       @status =  :repaid
-    elsif (amount - principal_received) <= EPSILON and scheduled_interest_up_to(date)<=interest_received_up_to(Date.today)
+    elsif (amount - principal_received) <= EPSILON and (scheduled_interest_up_to(date)-interest_received_up_to(Date.today) <= EPSILON)
       @status =  :repaid
     elsif amount<=principal_received
       @status =  :repaid
@@ -1193,6 +1193,8 @@ class Loan
       total_interest_due                    += outstanding_at_start ? scheduled[:interest].round(2) : 0
       principal_due                          = outstanding_at_start ? [total_principal_due - act_total_principal_paid,0].max : 0
       interest_due                           = outstanding_at_start ? [total_interest_due - act_total_interest_paid,0].max : 0
+      principal_due_today                    = [principal_due - ((last_row or Nothing)[:principal_due] || 0), 0].max
+      interest_due_today                     = [interest_due  - ((last_row or Nothing)[:interest_due]  || 0), 0].max
 
       actual_outstanding_principal           = outstanding ? actual[:balance].round(2) : 0
       actual_outstanding_total               = outstanding ? actual[:total_balance].round(2) : 0
@@ -1249,6 +1251,8 @@ class Loan
         :scheduled_interest_due              => scheduled_interest_due,
         :principal_due                       => principal_due.round(2), 
         :interest_due                        => interest_due.round(2),
+        :principal_due_today                 => principal_due_today.round(2),
+        :interest_due_today                  => interest_due_today.round(2),
         :principal_paid                      => prin.round(2),
         :interest_paid                       => int.round(2),
         :total_principal_due                 => total_principal_due.round(2),
