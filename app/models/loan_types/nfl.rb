@@ -104,7 +104,6 @@ module Mostfit
         @rounded_schedule = {}
         balance = amount
         actual_payment = equated_payment
-        debugger
         while not done
           @rounded_schedule[i] = {}
           @rounded_schedule[i][:interest_payable] = (i <= @reducing_schedule.count ? @reducing_schedule[i][:interest_payable] : 0).round(2)

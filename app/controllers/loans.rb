@@ -144,7 +144,7 @@ class Loans < Application
 
     # if an attached insurance policy then create or update insurance policy
     if attrs[:insurance_policy]
-      @insurance_policy = @loan.insurance_policy || Insurance.new
+      @insurance_policy = @loan.insurance_policy || InsurancePolicy.new
       @insurance_policy.client = @loan.client
       @insurance_policy.attributes = attrs.delete(:insurance_policy)
     end
@@ -152,7 +152,9 @@ class Loans < Application
     @loan_product = @loan.loan_product
     @loan.insurance_policy = @insurance_policy if @loan_product.linked_to_insurance and @insurance_policy   
 
-    if @loan.save or @loan.errors.length==0
+    if (@loan.valid? or @loan.errors.length==0) and (@loan.insurance_policy.nil? ? true : @loan.insurance_policy.valid?)
+      @loan.insurance_policy.save unless @loan.insurance_policy.nil?
+      @loan.save
       if params[:return]
         redirect(params[:return], :message => {:notice => "Loan '#{@loan.id}' has been edited"})
       else
