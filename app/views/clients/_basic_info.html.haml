@@ -113,7 +113,7 @@
     %th
       Guarantor Date of Birth:
     %td
-      = date_select_for @client, :guarantor_dob, :max_date => Date.today
+      = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %th
       Guarantor relationship:
