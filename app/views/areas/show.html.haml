@@ -41,17 +41,17 @@
 
 %div.tab_container
   %ul.tabs
-    %li#branches
-      Branches
+    %li#districts
+      Districts
     %li#info
       Info
     - if Mfi.first.map_enabled
       %li#map
         Map
   %div.tab
-    %h2 Branches in this area
-    - if @area.branches.blank?
-      %h2 No branches
+    %h2 Districts in this area
+    - if @area.districts.blank?
+      %h2 No districts
     - else
     %table.narrow.form{:width => "100%"}
       %thead
@@ -60,12 +60,16 @@
             id
           %th
             name
-      - @area.branches.each do |b|
+          %th
+            branches
+      - @area.districts.each do |district|
         %tr{:class => cycle('odd','even')}
           %td
-            = b.id
+            = link_to district.id, resource(district)
           %td
-            = link_to b.name, resource(b)
+            = district.name
+          %td
+            = district.branches.count
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@area.id}?for=area"}
   - if Mfi.first.map_enabled        

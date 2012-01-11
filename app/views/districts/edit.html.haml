@@ -1,0 +1,33 @@
+%h1
+  District
+  = @district.name
+= error_messages_for @district
+
+= form_for(@district, :action => url(:district, @district)) do
+  = partial :fields
+  = submit "Update #{@district.name.capitalize}"
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Show', url(:districts), :class => "grey_button"
+  &nbsp;&nbsp;&nbsp;
+  |
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Back', url(:district, @district), :class => "grey_button"
+
+-# %h1
+-#   Districts controller, edit action
+-# %p
+-#   Edit this file in
+-#   %tt
+-#     app/views/districts/edit.html.erb
+-# = error_messages_for @district
+
+-# = form_for(@district, :action => url(:district, @district)) do
+-#   %p
+-#     = submit "Update"
+
+-# = link_to 'Show', url(:district, @district)
+-# |
+-# = link_to 'Back', url(:districts)

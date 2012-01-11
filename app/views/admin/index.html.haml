@@ -1,5 +1,32 @@
 - if session.user.can_access?({:controller => "admin", :action => "index"})
   %h1 Administration
+  %div.clearfix
+    .admin-box
+      %h2 Manage organization profile and calendar
+      %ul.icon_links
+        %li
+          = link_to_with_rights 'Profile and system-wide policies', url(:controller => "admin", :action => "edit"), :class => 'admin icon'
+        %li
+          = link_to_with_rights 'Holidays', url(:controller => 'holidays', :action => "index"), :class => 'icon holiday'
+        %li
+          = link_to_with_rights 'Holiday Calendars', url(:controller => 'holiday_calendars', :action => "index"), :class => 'icon holiday'
+    .admin-box
+      %h2 Manage geographical locations
+      %ul.icon_links
+        %li
+          = link_to_with_rights 'Regions', resource(:regions), :class => 'org icon'
+        %li
+          = link_to_with_rights 'Areas', resource(:areas), :class => 'org icon'
+        %li
+          = link_to_with_rights 'Districts', resource(:districts), :class => 'org icon'
+    .admin-box
+      %h2 Manage staff, users, and roles
+      %ul.icon_links
+        %li
+          = link_to_with_rights 'Staff Members', resource(:staff_members), :class => 'staff icon'
+        %li
+          = link_to_with_rights 'Users and roles', resource(:users), :class => 'user icon'
+
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links

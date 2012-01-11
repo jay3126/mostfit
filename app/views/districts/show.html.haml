@@ -1,0 +1,70 @@
+%h1== District : <i>#{@district.name}</i>
+%p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
+  = link_to 'edit this district details', url(:edit_district, @district), :class => 'edit grey_button'
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  = link_to 'back', resource(:districts), :class => 'grey_button'
+
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.odd
+    %th.odd
+      Name
+    %td
+      = @district.name
+      ( id:
+      = @district.id
+      )
+  %tr.even
+    %th.even
+      Area
+    %td
+      = link_to @district.area.name, resource(@district.area), :target => "_blank"
+  %tr.odd
+    %th.odd
+      Manager
+    %td
+      = link_to @district.manager.name, resource(@district.manager), :target => "_blank"
+  %tr.even
+    %th.even
+      Address
+    %td
+      = @district.address
+  %tr.odd
+    %th.odd
+      Contact number
+    %td
+      = @district.contact_number
+  %tr.even
+    %th.even
+      Landmark
+    %td
+      = @district.landmark
+
+%div.tab_container
+  %ul.tabs
+    %li#branches
+      Branches
+    - if Mfi.first.map_enabled
+      %li#map
+        Map
+  %div.tab
+    %h2 Branches in this district
+    - if @district.branches.blank?
+      %h2 No branches
+    - else
+    %table.narrow.form{:width => "100%"}
+      %thead
+        %tr
+          %th
+            id
+          %th
+            name
+      - @district.branches.each do |b|
+        %tr{:class => cycle('odd','even')}
+          %td
+            = b.id
+          %td
+            = link_to b.name, resource(b)
+  - if Mfi.first.map_enabled        
+    %div.tab
+      = js_include_tag :map
+      = partial "locations/map", {:obj => @district}

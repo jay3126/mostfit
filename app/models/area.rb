@@ -9,6 +9,7 @@ class Area
   property :creation_date,        Date,   :length => 100, :lazy => true, :default => Date.today
 
   has n, :branches
+  has n, :districts
   belongs_to :region
   belongs_to :manager, :model => StaffMember
 

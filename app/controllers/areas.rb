@@ -69,6 +69,14 @@ class Areas < Application
     end
   end
 
+  def districts
+    if params[:id]
+      area = Area.get(params[:id])
+      next unless area
+      return("<option value=''>Select district</option>"+area.districts(:order => [:name]).map{|dr| "<option value=#{dr.id}>#{dr.name}</option>"}.join)
+    end
+  end
+
   private
   def get_region
     @region = params[:region_id] ? Region.get(params[:region_id]) : nil

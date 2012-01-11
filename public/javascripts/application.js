@@ -595,6 +595,18 @@ function confirm_for(things) {
     }
 }
 
+function fillDistricts(){
+    $("#area_selector").change(function(){
+				     $.ajax({
+						type: "GET",
+						url: "/areas/districts/"+$("#area_selector").val(),
+						success: function(data){
+						    $("#district_selector").html(data);
+						}
+					    });
+				 });
+}
+
 function fillCenters(){
     $("#branch_selector").change(function(){
 				     $.ajax({
@@ -756,6 +768,7 @@ $(document).ready(function(){
 		      fillFundingLines();
 		      fillCashAccounts();
 		      fillBankAccounts();
+                      fillDistricts();
 		    $('.chosen').chosen();
 		    $('input#submit').addClass("greenButton");
 		    $('button.add').addClass("greenButton");

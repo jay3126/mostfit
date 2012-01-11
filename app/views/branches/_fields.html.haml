@@ -46,7 +46,13 @@
     %td
       Area
     %td
-      = select :area_id, :collection => Area.all.map{|a| [a.id.to_s, a.name]}, :prompt => "---", :class => 'chosen'
-      %span.greytext Pick the aread to which this branch belongs to
+      = select :area_id, :collection => Area.all.map{|a| [a.id.to_s, a.name]}, :prompt => "Select Area", :class => 'chosen', :id => 'area_selector'
+      %span.greytext Pick the area to which this branch belongs to
+  %tr
+    %td
+      District
+    %td
+      = select :district_id, :collection => District.all.map{|a| [a.id.to_s, a.name]}, :prompt => "Select District", :class => 'chosen', :id => 'district_selector'
+      %span.greytext Pick the district to which this branch belongs to
   %tr
     %td
