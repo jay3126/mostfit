@@ -131,4 +131,5 @@ CLIENT_RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife"
 EWS_LIST = ['small_marginal_farmers', 'sc_st', 'cottage_industry', 'not_applicable']
 ID_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
 TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
+APPROVAL_REASONS = {'bad_data' => 'data regarding this client is incorrect', 'stale_data' => 'data regarding this client is stale', 'other' => 'other reasons'}
 

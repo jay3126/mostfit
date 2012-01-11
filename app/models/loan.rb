@@ -124,6 +124,7 @@ class Loan
 
   property :reference,                           String, :unique => true # to be used during migrations
   property :approval_comment,                    Text
+  property :approval_reason,                     Enum.send('[]', *([nil] + APPROVAL_REASONS.keys))
 
   # associations
   belongs_to :client
