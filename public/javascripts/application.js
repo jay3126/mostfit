@@ -602,6 +602,7 @@ function fillDistricts(){
 						url: "/areas/districts/"+$("#area_selector").val(),
 						success: function(data){
 						    $("#district_selector").html(data);
+						    $("#district_selector").trigger("liszt:updated");
 						}
 					    });
 				 });
