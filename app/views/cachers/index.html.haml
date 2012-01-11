@@ -79,11 +79,16 @@
     = select :name => 'report_format', :collection => ReportFormat.all,:text_method => :name, :value_method => :id, :selected => (params[:report_format] || 1).to_s, :prompt => 'Select a report format', :class => 'chosen'
     = submit 'apply filter'
     
-  %b by
-  - root_url_hash = query_params.dup
-  - root_url_hash.delete(:by); root_url_hash.delete(:branch_id); root_url_hash.delete(:center_id); root_url_hash.delete(:model_id)
-  = link_to 'funding_line', url(:consolidate_cachers, root_url_hash.merge(:by => "funding_line"))
-  = link_to 'loan_product', url(:consolidate_cachers, root_url_hash.merge(:by => "loan_product"))
+  %table
+    %tr
+      %td
+        %h5 by
+      - root_url_hash = query_params.dup
+      - root_url_hash.delete(:by); root_url_hash.delete(:branch_id); root_url_hash.delete(:center_id); root_url_hash.delete(:model_id)
+      %td
+        = link_to 'funding_line', url(:consolidate_cachers, root_url_hash.merge(:by => "funding_line")), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
+      %td
+        = link_to 'loan_product', url(:consolidate_cachers, root_url_hash.merge(:by => "loan_product")), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
 
   - if @cachers.count == 0
     %h3 
