@@ -26,15 +26,15 @@
     #bookmark_form_container
     #header
       %h1.logo
-        -if mfi = Mfi.first
+        - if mfi = Mfi.first
           %span{:style => "color: #{mfi.color||'green'};"}
-            -if mfi.logo_name and not mfi.logo_name.blank?
+            - if mfi.logo_name and not mfi.logo_name.blank?
               = image_tag("logos/#{mfi.logo_name}", :height => 50)
-            -if mfi.name
+            - if mfi.name
               = mfi.name
-            -else
+            - else
               MOSTFIT
-        -else
+        - else
           MOSTFIT
       #green-header
         #navigation
@@ -72,7 +72,7 @@
             - message.each do |key, value|
               .flash{ :class => key.to_s }
                 %p= value.gsub("\n", "<br/>")
-        - if params[:action]=="edit" and session.user.admin?
+        - if params[:action]=="edit" and session.user.admin? and (params[:controller] != "users")
           %p{:style => "float: right; border: 1px solid orange; padding: 4px;"}
             = link_to("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
         = catch_content :for_layout

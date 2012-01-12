@@ -6,10 +6,13 @@
 
   = form_for(@user, :action => url(:users)) do
     = partial 'fields'
-    %p
-      = submit "create"
-
-  = link_to 'Back', url(:users)
+    %table
+      %td
+        = submit "create"
+      %td
+        %h5 Or
+      %td
+        = link_to 'Back', url(:users), :class => "grey_button"
 
   %p
     %br/

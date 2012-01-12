@@ -9,8 +9,10 @@
   = form_for @user, { :action => resource(@user), :method => 'DELETE' } do
     %p
       = submit "Yes, delete user '#{@user.login}'..."
-
-  = link_to 'Back', url(:users)
+      &nbsp;&nbsp;&nbsp;
+      %b Or
+      &nbsp;&nbsp;&nbsp;
+      = link_to 'Back', url(:users), :class => "grey_button"
 
   %p
     %br/

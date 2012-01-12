@@ -11,6 +11,7 @@
   
   %hr
   %h2 Change password
+  %h5 Use this section if you only want to change your password
   = form_for(@user, :action => url(:action => :admin_change_password, :user_id => @user.id)) do
     %table
       %tr
@@ -25,10 +26,13 @@
           = password_field :password_confirmation
           %br/
           %span.greytext (password fields must be filled to complete user profile)
-    %p
-      = submit "Save changes"
-      
-  = link_to 'Back', url(:users)
+    %table
+      %td
+        = submit "Save new password"
+      %td
+        %h5 Or
+      %td      
+        = link_to 'Back', url(:users), :class => "grey_button"
 
   %p
     %br/
