@@ -111,6 +111,16 @@
             = check_box :allow_choice_of_repayment_style
         %tr
           %td
+            Default Funding line
+          %td
+            = select :funding_line_id, :collection => FundingLine.all.map{|x| [x.id, x.name]}, :prompt => 'select funding line', :class => 'chosen'
+        %tr
+          %td
+            Allow choice of funding line in bulk loan creation?
+          %td
+            = check_box :allow_choice_of_funding_line
+        %tr
+          %td
             Allow GRT date on new client form
           %td
             = check_box :allow_grt_date_on_form
