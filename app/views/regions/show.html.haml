@@ -67,7 +67,9 @@
             %th
               = I18n.t 'region.show.areas.table.name', :default => "name"
             %th
-              = I18n.t 'region.show.areas.table.branches', :default => "branches" 
+              = I18n.t 'region.show.areas.table.districts', :default => "districts" 
+            %th
+              = I18n.t 'region.show.areas.table.branches', :default => "branches"
             %th
               = I18n.t 'region.show.areas.table.action', :default => "action"
         - @region.areas.each do |a|
@@ -77,7 +79,9 @@
             %td
               = link_to a.name, resource(a)
             %td
-              = link_to a.branches.count, resource(a)
+              = link_to a.districts.count, resource(a)
+            %td
+              = link_to a.branches.count, resource(a) 
             %td
               = link_to I18n.t('region.index.edit', :default => "Edit"), resource(a, :edit)
   %div.tab

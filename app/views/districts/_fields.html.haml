@@ -1,0 +1,44 @@
+%table.form
+  %tr
+    %th
+      Name
+      %td
+        = text_field :name
+  %tr
+    - if Area.count==0 and session.user.role==:admin
+      %div.error
+        You do not have any area data yet. Create them
+        = link_to("here", resource(:areas, :new), :target => "_blank")
+    %th
+      Area
+    %td
+      - if @area
+        = hidden_field :area_id, :value => @area.id
+        %b
+        = @area.name
+      - else
+        = select :area_id, :collection =>  Area.all.map{|r| [r.id, r.name]}, :prompt => "---", :selected => @district.area ? @district.area.id.to_s : nil, :class => "chosen"
+  %tr
+    - if StaffMember.count==0 and session.user.role==:admin
+      %div.error
+        You do not have any staff members data yet. Create them
+        = link_to("here", resource(:staff_members, :new), :target => "_blank")
+    %th
+      Manager
+    %td
+      = select :manager_id, :collection =>  StaffMember.all.sort_by{|s| s.name}.map{|r| [r.id, r.name]}, :prompt => "---", :selected => @district.manager ? @district.manager.id.to_s : nil, :class => "chosen"
+  %tr
+    %th
+      Address:
+    %td
+      ~ text_area :address, :rows => 6, :cols => 38
+  %tr
+    %th
+      Contact phone number:
+    %td
+      = text_field :contact_number, :size => 15
+  %tr
+    %th
+      Landmark:
+    %td
+      = text_field :landmark, :size => 25

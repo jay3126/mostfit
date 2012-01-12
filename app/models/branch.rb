@@ -14,9 +14,11 @@ class Branch
   property :created_at,     DateTime
   property :creation_date,  Date, :default => Date.today
   property :area_id,        Integer, :nullable => true
+  property :district_id,    Integer, :nullable => true
 
   belongs_to :manager,      :child_key => [:manager_staff_id], :model => 'StaffMember'
   belongs_to :area,         :nullable => true
+  belongs_to :district,     :nullable => true
   has n, :centers
   has n, :audit_trails, :auditable_type => "Branch", :child_key => ["auditable_id"]
   has n, :accounts

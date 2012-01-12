@@ -1,0 +1,30 @@
+%h1
+  Districts 
+
+- if @districts.count == 0
+  .flash
+    .notice
+      No districts
+  = link_to 'Add New District', url(:new_district), :class => 'add gre_button'
+- else
+  %table.narrow
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Name
+        %th.actions
+          Actions
+    %tr
+      - for district in @districts
+        %tr
+          %td
+            = district.id
+          %td
+            = link_to district.name, resource(district)
+          %td
+            = link_to 'Show', url(:district, district)
+            |
+            = link_to 'Edit', url(:edit_district, district)
+    = link_to 'Add new District', url(:new_district), :class => 'add grey_button'
