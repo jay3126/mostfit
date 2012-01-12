@@ -56,7 +56,12 @@
       %b applied_by
       = select :name => "loan[applied_by_staff_id]", :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
       %b funding line
-      = select :name => "loan[funding_line_id]", :collection => FundingLine.all, :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a funding line', :selected => params[:loan][:funding_line_id]
+      - if Mfi.first.allow_choice_of_funding_line
+        = select :name => "loan[funding_line_id]", :collection => FundingLine.all, :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a funding line', :selected => params[:loan][:funding_line_id]
+      - else
+        - funding_line = FundingLine.get(Mfi.first.funding_line_id)
+        = funding_line.name
+        = hidden_field :name => "loan[funding_line_id]", :value => funding_line.id
     %h2 Choose clients
 
     %table.report.nojs
