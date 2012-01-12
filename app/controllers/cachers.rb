@@ -134,7 +134,8 @@ class Cachers < Application
         q[:center_id] ||= 0 unless q[:center_id.not]
         q[:model_id] = params[:model_id] if params[:model_id]
       else
-        q[:model_name] = (params[:branch_id] and params[:branch_id].blank?) ? "Branch" : "Center"
+        q[:model_name] = (params[:branch_id] and (not params[:branch_id].blank?)) ? "Center" : "Branch"
+        q[:center_id] = 0 if q[:model_name] == "Branch"
       end
     end
     q[:date] = @date if @date
