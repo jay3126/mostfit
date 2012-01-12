@@ -298,12 +298,6 @@ end
 
 class CenterCache < Cacher
 
-<<<<<<< HEAD
-=======
-  # these have to be hooks, for obvious reasons, but for now we make do with some hardcoded magic!
-
-s  EXTRA_FIELDS = [:delayed_disbursals]
->>>>>>> takeover
   def self.update(hash = {})
     # creates a cache per center for branches and centers per the hash passed as argument
     date = hash.delete(:date) || Date.today
@@ -360,10 +354,7 @@ s  EXTRA_FIELDS = [:delayed_disbursals]
     # workaround for the situation where no rows get returned for centers without loans.
     # this makes it very difficult to find missing center caches so we must have a row for all centers, even if it is full of zeros
     
-    # now hook in all the other functions that do not correspond to properties on loan history such as waiting borrowers, delayed disbursls etc.
-    # extras = EXTRA_FIELDS.each do |hook|
-    #  [hook, self.send(hook)]
-    # end
+    
     universe = Center.all(:id => hash[:center_id]).aggregate(:branch_id, :id) # array of [[:branch_id, :center_id]...] for all branches and centers
     universe.map do |k| 
       _p = pmts[k] || ng_pmts
