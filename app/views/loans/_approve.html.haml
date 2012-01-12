@@ -67,7 +67,7 @@
       %td
         - if hr
           - if hr.status == :rejected
-            = check_box :name => "loans[#{loan.id}][approved?]", :onclick => "javascript:$('#approval_comment_#{loan.id}').toggle();"
+            = check_box :name => "loans[#{loan.id}][approved?]", :onclick => "javascript:$('#approval_reason_#{loan.id}').toggle();"
           - else
             = check_box :name => "loans[#{loan.id}][approved?]"
         - else

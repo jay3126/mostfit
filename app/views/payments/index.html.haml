@@ -166,6 +166,10 @@
         - st = @loan.status
         %h2{:class => st}
           = st.to_s.gsub('_', ' ')
+          - if @loan.approval_reason
+            inspite of highmark disapproval
+            %span.greytext
+              = "(reason: #{@loan.approval_reason})"
         - if @status == :written_off
           by
           %b= link_to @loan.written_off_by.name, resource(@loan.written_off_by)
