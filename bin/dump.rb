@@ -19,7 +19,7 @@ dump_name = "#{File.basename(mostfit_dir)}-dump-#{d.strftime('%F-%H:%M')}.sql"
 dump_path = File.join(mostfit_dir, dump_name)
 
 # dump, and compress
-fail "Failed to dump" unless system("mysqldump -p#{password} -u root #{db_name} > #{dump_path}")
+fail "Failed to dump" unless system("mysqldump -p#{password} -u root #{db_name} --ignore-table=#{db_name}.cachers --ignore-table=#{db_name}.attendances > #{dump_path}")
 puts "Compressing ..."
 fail "Failed to compress. Do you have bzip2 installed?" unless system("bzip2 #{dump_path}")
 
