@@ -1,0 +1,25 @@
+%h1 Priority Sector Lists 
+= error_messages_for(@priority_sector_list)
+
+= form_for(@priority_sector_list, :action => url(:priority_sector_lists) ) do
+  = partial :fields
+  %br
+  = submit 'Create this Priority Sector List'
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Cancel', url(params[:return]), :class => "grey_button"
+
+
+-# %p 
+-#   Edit this file in 
+-#   %tt app/views/priority_sector_lists/new.html.erb
+
+-# = error_messages_for @priority_sector_list
+
+-# = form_for(@priority_sector_list, :action => url(:priority_sector_lists) ) do
+-#   %p
+-#     = submit "Create"
+
+-# = link_to 'Back', url(:priority_sector_lists)

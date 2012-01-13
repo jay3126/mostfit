@@ -1,5 +1,7 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :psl_sub_categories
+  resources :priority_sector_lists
   resources :districts
   resources :staff_member_attendances
   resources :report_formats

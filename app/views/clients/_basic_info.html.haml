@@ -144,6 +144,16 @@
       Occupation
     %td
       = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"
+  %tr
+    %th
+      Priority Sector List (PSL)
+    %td
+      = select :priority_sector_list_id, :collection => PrioritySectorList.all, :value_method => :id, :text_method => :name, :prompt => "---", :id => 'psl_selector'
+  %tr
+    %th
+      PSL Sub-category
+    %td
+      = select :psl_sub_category_id, :collection => nil, :value_method => :id, :text_method => :name, :prompt => "---", :id => 'psl_sub_category_selector'
   - if not @client.new?
     %tr
       %th

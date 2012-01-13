@@ -1,0 +1,31 @@
+%h1
+  PslSubCategories controller, edit action
+  = @psl_sub_category.name
+= error_messages_for @psl_sub_category
+
+= form_for(@psl_sub_category, :action => url(:psl_sub_category, @psl_sub_category)) do
+  = partial :fields
+  = submit "Update #{@psl_sub_category.name.capitalize}"
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Show', url(:psl_sub_categoryies), :class => "grey_button"
+  &nbsp;&nbsp;&nbsp;
+  |
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Back', url(:psl_sub_category, @psl_sub_category), :class => "grey_button"
+  
+-#   %p
+-#   Edit this file in
+-#   %tt
+-#     app/views/psl_sub_categories/edit.html.erb
+-# = error_messages_for @psl_sub_category
+
+-# = form_for(@psl_sub_category, :action => url(:psl_sub_category, @psl_sub_category)) do
+-#   %p
+-#     = submit "Update"
+
+-# = link_to 'Show', url(:psl_sub_category, @psl_sub_category)
+-# |
+-# = link_to 'Back', url(:psl_sub_categories)
