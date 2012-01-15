@@ -382,7 +382,12 @@ class Array
       # and additionally, not possible to ask DM to just craft an SQL statement and give it to us (i think)
       hash.map do |col, v|
         val = format_for_sql(v)
-        operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
+        if col.to_s.match('.') 
+          col = col.to_s.split(".")[0]
+          operator = {Array => "NOT IN", Range => "NOT BETWEEN"}[v.class] || "<>"
+        else
+          operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
+        end
         "#{col} #{operator} #{val}" 
       end.join(" AND ")
     end

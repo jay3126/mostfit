@@ -5,7 +5,7 @@ class Cacher
   property :type,                            Discriminator, :key => true
   property :date,                            Date, :nullable => false, :index => true, :key => true
   property :model_name,                      String, :nullable => false, :index => true, :key => true
-  property :model_id,                        Integer, :nullable => false, :index => true, :unique => [:model_name, :date], :key => true
+  property :model_id,                        Integer, :nullable => false, :index => true, :key => true
   property :branch_id,                       Integer, :index => true, :key => true
   property :center_id,                       Integer, :index => true, :key => true
   property :scheduled_outstanding_total,     Float, :nullable => false
@@ -394,9 +394,16 @@ class Cache < Cacher
       # and others that belong to other fuding lines.
       # therefore, the incremental update must necessarily be per loan_ids.
       # we have to find the loan ids in the stale funding line
-      fl_caches = self.all(:center_id.not => 0, :date => date)
-      stale_caches = fl_caches.stale.aggregate(:model_id, :center_id)
-      missing_caches = LoanHistory.all(:date.gte => date).aggregate(loan_history_field, :center_id) - fl_caches.aggregate(:model_id, :center_id)
+      
+      #fl_caches = self.all(:center_id.not => 0, :date => date)
+      #stale_caches = fl_caches.stale.aggregate(:model_id, :center_id)
+      # optimised for speed
+      h = {:'center_id.not' => 0, :date => date, :type => self.to_s}
+      debugger
+      fl_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h)} GROUP BY model_id, center_id").map(&:to_a)
+      stale_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h.merge(:stale => true))} GROUP BY model_id, center_id").map(&:to_a)
+      required_caches = q("SELECT #{loan_history_field}, center_id FROM loan_history WHERE date > #{format_for_sql(date)} GROUP BY #{loan_history_field}, center_id").map(&:to_a)
+      missing_caches = required_caches - fl_caches
       caches_to_do = stale_caches + missing_caches
       unless caches_to_do.blank?
         ids = caches_to_do.map{|x| "(#{x.join(',')})"}
@@ -432,6 +439,7 @@ class Cache < Cacher
     repository.adapter.execute(sql)
 
     # now do the branch aggregates for each funding line cache
+    $debug = true
     Kernel.const_get(base_model_name).all.each do |fl|
       relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
       branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
@@ -454,12 +462,9 @@ class Cache < Cacher
         
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
-        if bc.new?
-          bc.attributes = attrs.merge(:id => nil, :updated_at => DateTime.now)
-          bc.save
-        else
-          bc.update(attrs.merge(:id => bc.id))
-        end
+        bc.attributes = attrs.merge(:updated_at => DateTime.now)
+        debugger if $debug
+        bc.save
       end
     end
   end
