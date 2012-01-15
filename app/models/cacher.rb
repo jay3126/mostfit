@@ -190,8 +190,13 @@ class BranchCache < Cacher
       return true if cids.blank? #nothing to do
       # update all the centers for today
       begin
-        _t = Time.now
-        (CenterCache.update(:center_id => cids, :date => date))
+        chunk_size = 6000
+        chunks = cids.count/chunk_size
+        cids.chunk(chunk_size).each_with_index do |_cids, i|
+          _t = Time.now
+          (CenterCache.update(:center_id => _cids, :date => date))
+          puts "did chunk #{i} in #{Time.now - _t} secs"
+        end
       rescue Exception => e
         puts "#{e}\n#{e.backtrace}"
         return false

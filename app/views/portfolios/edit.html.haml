@@ -1,12 +1,19 @@
 %h1
-  ==Edit #{@portfolio.name}
+  ==Edit portfolio: #{@portfolio.name}
 = error_messages_for @portfolio
-= partial :form
 
-= form_for(@portfolio, :action => resource(@funder, @portfolio) ) do
-  = hidden_field :added_on, :value => @portfolio.added_on||Date.today
-  = partial :fields
+= form_for(@portfolio, :action => resource(@portfolio), :class => "shaded" ) do
+  %h2 Add loans
+  as of 
+  = date_select :added_on, (@portfolio.added_on||Date.today)
+  %table
+    = partial :form
   %p
-    = submit "Save portfolio"
+    = submit "Add Loans"
+
+= form_for(@portfolio, :action => resource(@portfolio), :class => "shaded") do
+  %h2 Remove loans
+  = text_area :name => :delete_ids, :cols => 80, :rows => 5
+  = submit 'Remove above loan ids'
 
 = link_to 'Back', url(@funder)

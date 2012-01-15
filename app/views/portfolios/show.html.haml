@@ -1,6 +1,14 @@
+:javascript
+  $(document).ready(function() {
+    $('#select_loans').change(function() {
+      $('.portfolio_loan').attr('checked', $(this).attr('checked'))
+    });
+  });
 %h1
   Portfolio: 
   = @portfolio.name
+.menu-strip
+  = link_to 'Edit', resource(@portfolio, :edit), :class => 'greenButton'
 %table.narrow.form{ :style => "width: 40%;" }
   %tr.odd
     %td Name
@@ -24,6 +32,7 @@
       Cashflows
     %li#reports
       Reports
+    %li#loans Loans
     %li#info
       Info
 
@@ -46,7 +55,6 @@
             Scheduled Principal
           %th
             Scheduled Interest
-    
       - last_principal = nil
       - PortfolioCache.all(:model_name => "PortfolioCashflow", :model_id => @portfolio.id, :order => [:date]).each do |c|
         - next if keys.map{|x| c.send(x)}.sum == 0
@@ -79,6 +87,31 @@
           - keys.each do |k|
             %td
               = h.send(k) rescue nil
+  %div.tab
+    %h1 List of loans
+    = paginate(@portfolio_loans)
+    = form_for(@portfolio, :action => resource(@portfolio)) do
+      = hidden_field :name
+      = submit 'Remove selected loans'
+      %table.narrow.shaded
+        %thead
+          %tr
+            %th
+              Select
+              %br
+              = check_box :id => "select_loans"
+            %th
+              Loan
+            %th
+              Added on
+        - @portfolio_loans.each do |pl|  
+          %tr{:class => cycle('odd','even')}
+            %td
+              = check_box :name => "loan[#{pl.id}]", :class => "portfolio_loan"
+            %td
+              = link_to "#{pl.loan.description} for #{pl.loan.client.name}", url_for_loan(pl.loan)
+            %td
+              = pl.added_on
   %div.tab
     .clearfix
       %h1 Info
