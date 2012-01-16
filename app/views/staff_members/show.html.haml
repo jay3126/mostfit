@@ -15,34 +15,28 @@
       )
   %tr.even
     %th.even
-      Father Name
+      Gender
     %td
-      = @staff_member.father_name
+      = (@staff_member.gender ? @staff_member.gender.capitalize : NIL)
   %tr.odd
     %th.odd
-      Gender
     %td
       = (@staff_member.gender ? @staff_member.gender.to_s.capitalize : NIL)
   %tr.even
     %th.even
-      Address
-    %td
-      = @staff_member.address
-  %tr.odd
-    %th.odd
       Mobile Number
     %td
       = @staff_member.mobile_number
-  %tr.even
-    %th.even
+  %tr.odd
+    %th.odd
       Joining Date
     %td
       = @staff_member.creation_date
       (
       = @staff_member.creation_date.strftime('%A')
       )
-  %tr.odd
-    %th.odd
+  %tr.even
+    %th.even
       Status
     %td
       %span{:class => @staff_member.active? ? '' : 'red'}
