@@ -61,7 +61,6 @@ class StaffMember
 
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
-    debugger
     obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,
               :gender => row[headers[:gender]],
               :mobile_number => mobile, :active => true, :upload_id => row[headers[:upload_id]])

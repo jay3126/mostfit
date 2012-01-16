@@ -113,13 +113,11 @@ class Cachers < Application
     {:date => nil, :from_date => Date.today - 7, :to_date => Date.today}.each do |date, default|
       instance_variable_set("@#{date.to_s}", (params[date] ?  Date.parse(params[date]) : nil))
     end
-    debugger
     @date = (@to_date or Date.today) unless @date
   end
 
 
   def get_cachers
-    debugger
     q = {}
     q[:branch_id] = params[:branch_id] unless params[:branch_id].blank? 
     unless params[:branch_id].blank?
