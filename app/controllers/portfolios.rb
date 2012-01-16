@@ -166,6 +166,7 @@ class Portfolios < Application
 
 
 
+
     # def loans
     #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new
     #   @loans     = @portfolio.eligible_loans(params[:center_id])
