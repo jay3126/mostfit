@@ -1,0 +1,11 @@
+%h1 Priority Sector List Sub Categories 
+= error_messages_for(@psl_sub_category)
+= form_for(@psl_sub_category, :action => url(:psl_sub_categories) ) do
+  = partial :fields
+  %br
+  = submit 'Create this PSL sub category'
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Cancel', url(params[:return]), :class => "grey_button"

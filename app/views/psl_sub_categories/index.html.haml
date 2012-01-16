@@ -1,0 +1,27 @@
+%h1
+  = I18n.t "psl_sub_category.index.title", :default => "Psl_sub_categorys"
+= link_to I18n.t("psl_sub_category.index.add_an_psl_sub_category", :default => "Add an psl_sub_category"), url(:new_psl_sub_category), :class => 'add'
+%table.narrow
+  %thead
+    %tr
+      %th
+        = I18n.t "psl_sub_category.index.id", :default => "Id"
+      %th
+        = I18n.t "psl_sub_category.index.psl_sub_category", :default => "Psl_sub_category"
+      %th
+        = I18n.t "psl_sub_category.index.priority_sector_list", :default => "Priority Sector List"
+      %th
+        = I18n.t "psl_sub_category.index.actions", :default => "Actions"
+
+  - for psl_sub_category in @psl_sub_categories
+    %tr{:class => cycle('odd', '')}
+      %td
+        = psl_sub_category.id
+      %td
+        = psl_sub_category.name
+      %td
+        = psl_sub_category.priority_sector_list.name
+      %td
+        = link_to I18n.t("psl_sub_category.index.show", :default => "Show"), url(:psl_sub_category, psl_sub_category)
+        |
+        = link_to I18n.t("psl_sub_category.index.edit", :default => "Edit"), url(:edit_psl_sub_category,  psl_sub_category)

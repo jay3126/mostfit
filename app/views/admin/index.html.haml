@@ -30,6 +30,10 @@
       %li
         = link_to_with_rights 'Occupations', resource(:occupations), :class => 'edit'
       %li
+        = link_to_with_rights 'Priority Sector Lists', resource(:priority_sector_lists), :class => 'edit'
+      %li
+        = link_to_with_rights 'PSL Sub-categories', resource(:psl_sub_categories), :class => 'edit'
+      %li
         = link_to_with_rights 'Loan Utilizations', resource(:loan_utilizations), :class => 'icon accept'
       %li
         = link_to_with_rights 'Document Types', resource(:document_types), :class => 'icon documents'
@@ -80,9 +84,9 @@
     %h2 Credit Bureaus
     %ul.icon_links
       %li
-        = link_to "Highmark", url(:controller => :highmarks, :action => :index)
+        = link_to "Highmark", url(:controller => :highmarks, :action => :index), :class => 'icon audit'
       %li
-        Equifax
+        = link_to "Equifax", url("javascript:;"), :class => 'icon audit' 
   .admin-box
     %h2 Data
     %ul.icon_links

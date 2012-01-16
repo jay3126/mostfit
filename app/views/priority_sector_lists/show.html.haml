@@ -1,0 +1,22 @@
+%h1
+  = I18n.t "priority_sector_list.show.title", :default => "Priority Sector List"
+%table.loan
+  %tr.odd
+    %td
+      = I18n.t"priority_sector_list.show.id", :default => "Id"   
+    %td
+      = @priority_sector_list.id
+  %tr
+    %td
+      = I18n.t"priority_sector_list.show.name", :default => "Name"   
+    %td
+      = @priority_sector_list.name
+  %tr.odd
+    %td
+      = I18n.t"priority_sector_list.show.code", :default => "Code"   
+    %td
+      = @priority_sector_list.code.blank? ? '-' : @priority_sector_list.code
+= link_to I18n.t("priority_sector_list.show.edit", :default => "Edit"),  url(:edit_priority_sector_list,  @priority_sector_list)
+|
+= link_to I18n.t("priority_sector_list.show.back", :default => "Back"), url(:priority_sector_lists)
+

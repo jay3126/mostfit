@@ -1,0 +1,31 @@
+%h1
+  Priority Sector List 
+  = @priority_sector_list.name
+= error_messages_for @priority_sector_list
+
+= form_for(@priority_sector_list, :action => url(:priority_sector_list, @priority_sector_list)) do
+  = partial :fields
+  = submit "Update #{@priority_sector_list.name.capitalize}"
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Show', url(:priority_sector_lists), :class => "grey_button"
+  &nbsp;&nbsp;&nbsp;
+  |
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Back', url(:priority_sector_list, @priority_sector_list), :class => "grey_button"
+
+-#   %p
+-#   Edit this file in
+-#   %tt
+-#     app/views/priority_sector_lists/edit.html.erb
+-# = error_messages_for @priority_sector_list
+
+-# = form_for(@priority_sector_list, :action => url(:priority_sector_list, @priority_sector_list)) do
+-#   %p
+-#     = submit "Update"
+
+-# = link_to 'Show', url(:priority_sector_list, @priority_sector_list)
+-# |
+-# = link_to 'Back', url(:priority_sector_lists)

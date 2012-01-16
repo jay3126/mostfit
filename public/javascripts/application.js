@@ -574,6 +574,19 @@ function confirm_for(things) {
     }
 }
 
+function fillPslSubCategories(){
+    $("#psl_selector").change(function(){
+				     $.ajax({
+						type: "GET",
+						url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
+						success: function(data){
+						    $("#psl_sub_category_selector").html(data);
+						    $("#psl_sub_category_selector").trigger("liszt:updated");
+						}
+					    });
+				 });
+}
+
 function fillDistricts(){
     $("#area_selector").change(function(){
 				     $.ajax({
@@ -749,6 +762,7 @@ $(document).ready(function(){
 		      fillCashAccounts();
 		      fillBankAccounts();
                       fillDistricts();
+                      fillPslSubCategories();
 		    $('.chosen').chosen();
 		    $('input#submit').addClass("greenButton");
 		    $('button.add').addClass("greenButton");

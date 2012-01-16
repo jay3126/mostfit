@@ -1,0 +1,11 @@
+%table
+  %tr
+    %th
+      = I18n.t "psl_subcategory.fields.name", :default => "Name"
+    %td
+      = text_field :name
+  %tr
+    %th
+      = I18n.t "psl_subcategory.fields.priority_sector_list_id", :default => "Priority Sector List"
+    %td
+      = select :priority_sector_list_id, :collection => PrioritySectorList.all.map{|x| [x.id, x.name]}, :prompt => "Choose Priority Sector List", :class => :chosen

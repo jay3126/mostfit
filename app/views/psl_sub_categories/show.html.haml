@@ -1,0 +1,23 @@
+%h1
+  = I18n.t "psl_sub_category.show.title", :default => "PSL  Sub Category"
+%table.loan
+  %tr.odd
+    %th
+      = I18n.t"psl_sub_category.show.id", :default => "Id"   
+    %td
+      = @psl_sub_category.id
+  %tr
+    %th
+      = I18n.t"psl_sub_category.show.name", :default => "Name"   
+    %td
+      = @psl_sub_category.name
+  %tr.odd
+    %th
+      = I18n.t"psl_sub_category.show.priority_sector_list", :default => "Priority Sector List"   
+    %td
+      = @psl_sub_category.priority_sector_list.name
+      
+= link_to I18n.t("psl_sub_category.show.edit", :default => "Edit"),  url(:edit_psl_sub_category,  @psl_sub_category)
+|
+= link_to I18n.t("psl_sub_category.show.back", :default => "Back"), url(:psl_sub_categories)
+

@@ -22,7 +22,7 @@ class Client
   # property :last_name,       String, :nullable => true
   property :guarantor_name,  String
   property :guarantor_dob,   Date, :index => true, :lazy => true
-  property :guarantor_relationship, Enum.send('[]', *([nil] + CLIENT_RELATIONSHIPS)), :nullable => true
+  property :guarantor_relationship, Enum.send('[]', *(CLIENT_RELATIONSHIPS)), :default => 'Other'
   # property :id_number,       String, :nullable => true
   # property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
   property :telephone_number, String, :nullable => true
@@ -111,7 +111,8 @@ class Client
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
   property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
   property :highmark_done, Boolean, :nullable => true
-
+  property :priority_sector_list_id, Integer, :nullable => true
+  property :psl_sub_category_id, Integer, :nullable => true
 
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
@@ -134,7 +135,9 @@ class Client
 
   belongs_to :center
   belongs_to :client_group
-  belongs_to :occupation, :nullable => true
+  belongs_to :occupation,           :nullable => true
+  belongs_to :priority_sector_list, :nullable => true
+  belongs_to :psl_sub_category,     :nullable => true
   belongs_to :client_type
   belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'

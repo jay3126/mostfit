@@ -1,0 +1,29 @@
+%h1
+  = I18n.t "priority_sector_list.index.title", :default => "Priority Sector Lists"
+= link_to I18n.t("priority_sector_list.index.add_an_priority_sector_list", :default => "Add a priority sector list"), url(:new_priority_sector_list), :class => 'add'
+%table.narrow
+  %thead
+    %tr
+      %th
+        = I18n.t "priority_sector_list.index.id", :default => "Id"
+      %th
+        = I18n.t "priority_sector_list.index.priority_sector_list", :default => "Priority Sector List"
+      %th
+        = I18n.t "priority_sector_list.index.priority_sector_list", :default => "Priority Sector List"
+      %th
+        = I18n.t "priority_sector_list.index.code", :default => "Code"
+      %th
+        = I18n.t "priority_sector_list.index.actions", :default => "Actions"
+
+  - for priority_sector_list in @priority_sector_lists
+    %tr{:class => cycle('odd', '')}
+      %td
+        = priority_sector_list.id
+      %td
+        = priority_sector_list.name
+      %td
+        = priority_sector_list.code
+      %td
+        = link_to I18n.t("priority_sector_list.index.show", :default => "Show"), url(:priority_sector_list, priority_sector_list)
+        |
+        = link_to I18n.t("priority_sector_list.index.edit", :default => "Edit"), url(:edit_priority_sector_list,  priority_sector_list)
