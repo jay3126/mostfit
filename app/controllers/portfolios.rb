@@ -143,7 +143,6 @@ class Portfolios < Application
     # securitised portfolios can now get their own high class reporting like everyone else ;-)
     # the problem is with the audit trail, we need to do everything by hand
     # because portfolios can be HUUUGGGE and going loan by loan is not really an option
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     redirect request.referer, :message => {:notice => "This portfolio not securitisable"} unless  @portfolio.is_securitisable
@@ -163,7 +162,7 @@ class Portfolios < Application
       @portfolio.save
       redirect request.referer, :message => {:success => "Loans have been marked as securitsed"}
     end
-
+  end
 
 
     # def loans
