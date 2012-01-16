@@ -1,8 +1,12 @@
 class Highmarks < Application
 
   def index
-    folder =     File.join(Merb.root, "docs","highmark","responses")
+    folder = File.join(Merb.root, "docs","highmark","responses")
+    FileUtils.mkdir_p folder
     @files = Dir.glob(File.join(folder, "*xml"))
+    parsed_folder = File.join(Merb.root, "docs","highmark","responses_done")
+    FileUtils.mkdir_p parsed_folder
+    @parsed_files = Dir.glob(File.join(parsed_folder, "*xml"))
     render
   end
 
@@ -44,23 +48,36 @@ class Highmarks < Application
   end
 
   def parse
-    folder =     File.join(Merb.root, "docs","highmark","responses")
-    @data = Crack::XML.parse(File.read(File.join(folder, params[:filename])))
+    folder = File.join(Merb.root, "docs","highmark","responses")
+    final_destination = File.join(Merb.root, "docs","highmark","responses_done")
+    filename_src = File.join(folder, params[:filename]) 
+    filename_dest = File.join(final_destination, params[:filename])
+    @data = Crack::XML.parse(File.read(filename_src))
     if request.method == :get
       display @data
     else
       message = {:error => "", :notice => ""}
       reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
-      reports.each do |ol|
-        #ol = olp[1]
-        reference = ol["REQUEST"]["REFERENCE"]
-        loan_id = ol["REQUEST"]["LOAN_ID"]
-        loan = Loan.get(loan_id)
-        r = Highmark::HighmarkResponse.first(:loan_id => loan_id, :status => :pending)
-        next unless r
-        r.response_text = ol.to_json
-        r.status = :success
-        r.save
+      Highmark::HighmarkResponse.transaction do |t|
+        results = reports.map do |ol|
+          reference = ol["REQUEST"]["REFERENCE"]
+          loan_id = ol["REQUEST"]["LOAN_ID"]
+          loan = Loan.get(loan_id)
+          r = Highmark::HighmarkResponse.first(:loan_id => loan_id, :status => :pending)
+          next unless r
+          r.response_text = ol.to_json
+          r.status = :success
+          r.save
+        end
+      
+        if results.include?(false)
+          t.rollback 
+          redirect "/highmarks", :message => {:error => "Something went wrong"}
+        else
+          FileUtils.mv(filename_src, filename_dest)
+          redirect "/highmarks", :message => {:success => "The response has been succesfully recorded"}
+        end
+
       end
     end
   end

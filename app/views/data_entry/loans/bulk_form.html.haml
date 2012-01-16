@@ -47,12 +47,12 @@
       %span.greytext Loan Products listed above are valid loan products for today which are not linked to any insurance
       %br
       %b application date
-      = date_select "loan[applied_on]", (params[:loan] or Nothing)[:applied_on], :id =>"applied_on"
-      %b scheduled disbursal date
-      = date_select "loan[scheduled_disbursal_date]", (params[:loan] or Nothing)[:scheduled_disbursal_date], :id =>"scheduled_disbursal_date"
-      %b scheduled first payment date
-      = date_select "loan[scheduled_first_payment_date]", (params[:loan] or Nothing)[:scheduled_first_payment_date], :id =>"scheduled_first_payment_date"
-      %br
+      = date_select("loan[applied_on]", Date.today, :id =>"applied_on")
+      -# %b scheduled disbursal date
+      -# = date_select "loan[scheduled_disbursal_date]", (params[:loan] or Nothing)[:scheduled_disbursal_date], :id =>"scheduled_disbursal_date"
+      -# %b scheduled first payment date
+      -# = date_select "loan[scheduled_first_payment_date]", (params[:loan] or Nothing)[:scheduled_first_payment_date], :id =>"scheduled_first_payment_date"
+      -# %br
       %b applied_by
       = select :name => "loan[applied_by_staff_id]", :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
       %b funding line

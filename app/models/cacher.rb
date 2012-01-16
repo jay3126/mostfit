@@ -216,7 +216,6 @@ class BranchCache < Cacher
 
       # we now have {:branch => [{...center data...}, {...center data...}]}, ...
       # we have to convert this to {:branch => { sum of centers data }, ...}
-      debugger
       numeric_attributes = branch_data_hash.first[1][0].attributes.select{|k,v| k if v.is_a? Numeric}.to_hash.keys
       branch_data = branch_data_hash.map do |bid,ccs|
         sum_centers = ccs.map do |c|
@@ -291,7 +290,6 @@ class CenterCache < Cacher
     hash[:center_id] = hash[:center_id] - centers_to_not_update
     return true if hash[:center_id].blank? and centers_to_not_update.blank?
     centers_data = hash[:center_id].blank? ? {} : CenterCache.create(hash.merge(:date => date, :group_by => [:branch_id,:center_id]))
-    debugger
     centers_data += centers_data_wo
     return false if centers_data == nil
     now = DateTime.now
@@ -399,7 +397,6 @@ class Cache < Cacher
       #stale_caches = fl_caches.stale.aggregate(:model_id, :center_id)
       # optimised for speed
       h = {:'center_id.not' => 0, :date => date, :type => self.to_s}
-      debugger
       fl_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h)} GROUP BY model_id, center_id").map(&:to_a)
       stale_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h.merge(:stale => true))} GROUP BY model_id, center_id").map(&:to_a)
       required_caches = q("SELECT #{loan_history_field}, center_id FROM loan_history WHERE date > #{format_for_sql(date)} GROUP BY #{loan_history_field}, center_id").map(&:to_a)
@@ -414,7 +411,6 @@ class Cache < Cacher
     end
     
     fl_data = self.create(hash.merge(:date => date, :group_by => [:branch_id, :center_id, loan_history_field]))
-    debugger
     fl_data = fl_data.deepen.values.sum
     return false if fl_data == nil
     now = DateTime.now
@@ -472,7 +468,6 @@ class Cache < Cacher
     
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
-    debugger
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today
@@ -482,7 +477,6 @@ class Cache < Cacher
     balances = LoanHistory.latest_sum(hash,date, group_by, cols)
     pmts = LoanHistory.composite_key_sum(LoanHistory.get_composite_keys(hash.merge(:date => date)), group_by, flow_cols)
     # if there are no loan history rows that match today, then pmts is just a single hash, else it is a hash of hashes
-    debugger
     # set up some default hashes to use in case we get dodgy results back.
     ng_pmts = flow_cols.map{|c| [c,0]}.to_hash         # ng = no good. we return this if we get dodgy data
     ng_bals = cols.map{|c| [c,0]}.to_hash              # ng = no good. we return this if we get dodgy data

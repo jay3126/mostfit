@@ -55,8 +55,8 @@ class Loan
   property :weekly_off,                     Integer, :nullable => true # cwday pls
   property :client_id,                      Integer, :nullable => false, :index => true
 
-  property :scheduled_disbursal_date,       Date, :nullable => false, :auto_validation => false, :index => true
-  property :scheduled_first_payment_date,   Date, :nullable => false, :auto_validation => false, :index => true
+  property :scheduled_disbursal_date,       Date, :nullable => true, :auto_validation => false, :index => true
+  property :scheduled_first_payment_date,   Date, :nullable => true, :auto_validation => false, :index => true
   property :applied_on,                     Date, :nullable => false, :auto_validation => false, :index => true, :default => Date.today
   property :approved_on,                    Date, :auto_validation => false, :index => true
   property :rejected_on,                    Date, :auto_validation => false, :index => true
@@ -162,7 +162,7 @@ class Loan
   has n, :accruals
   #validations
 
-  validates_present      :client, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by, :applied_on
+  validates_present      :client, :applied_by, :applied_on
 
   validates_with_method  :amount,                       :method => :amount_greater_than_zero?
   validates_with_method  :interest_rate,                :method => :interest_rate_greater_than_or_equal_to_zero?
@@ -180,8 +180,8 @@ class Loan
   validates_with_method  :write_off_rejected_on,        :method => :rejected_before_suggested_write_off?
   validates_with_method  :disbursal_date,               :method => :disbursed_before_validated?
   validates_with_method  :validated_on,                 :method => :disbursed_before_validated?
-  validates_with_method  :approved_on,                  :method => :applied_before_scheduled_to_be_disbursed?
-  validates_with_method  :scheduled_disbursal_date,     :method => :applied_before_scheduled_to_be_disbursed?
+  validates_with_method  :approved_on,                  :method => :applied_before_scheduled_to_be_disbursed?, :if => Proc.new{|l| l.scheduled_disbursal_date}
+  validates_with_method  :scheduled_disbursal_date,     :method => :applied_before_scheduled_to_be_disbursed?, :if => Proc.new{|l| l.scheduled_disbursal_date}
   validates_with_method  :approved_on,                  :method => :properly_approved?
   validates_with_method  :approved_by,                  :method => :properly_approved?
   validates_with_method  :rejected_on,                  :method => :properly_rejected?
@@ -196,8 +196,8 @@ class Loan
   validates_with_method  :disbursed_by,                 :method => :properly_disbursed?
   validates_with_method  :validated_on,                 :method => :properly_validated?
   validates_with_method  :validated_by,                 :method => :properly_validated?
-  validates_with_method  :scheduled_first_payment_date, :method => :scheduled_disbursal_before_scheduled_first_payment?
-  validates_with_method  :scheduled_disbursal_date,     :method => :scheduled_disbursal_before_scheduled_first_payment?
+  validates_with_method  :scheduled_first_payment_date, :method => :scheduled_disbursal_before_scheduled_first_payment?, :if => Proc.new{|l| l.scheduled_disbursal_date and l.scheduled_first_payment_date}
+  validates_with_method  :scheduled_disbursal_date,     :method => :scheduled_disbursal_before_scheduled_first_payment?, :if => Proc.new{|l| l.scheduled_disbursal_date and l.scheduled_first_payment_date}
   validates_with_method  :cheque_number,                :method => :check_validity_of_cheque_number
   validates_with_method  :client_active,                :method => :is_client_active
   validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
@@ -284,7 +284,6 @@ class Loan
       :client                             => Client.first(:reference => row[headers[:client_reference]])}
     obj = new(hash)
     obj.history_disabled=true
-    debugger
     saved = obj.save
     if saved
       c = Checker.first_or_new(:model_name => "Loan", :reference => obj.reference)
@@ -956,6 +955,7 @@ class Loan
   # the number of payment dates before 'date' (if date is a payment 'date' it is counted in)
   # used to calculate the outstanding value, and in the views
   def number_of_installments_before(date)
+    return 0 unless self.scheduled_first_payment_date
     return 0 if date < scheduled_first_payment_date
     result = case installment_frequency
              when  :daily
@@ -983,8 +983,8 @@ class Loan
   # the following methods basically count the payments (PAYMENT-RECEIVED perspective)
   # the last method makes the actual (optimized) db call and is cached
 
-  def principal_received_up_to(date); get_actual(:total_principal, date); end
-  def interest_received_up_to(date); get_actual(:total_interest, date); end
+  def principal_received_up_to(date); get_actual(:total_principal, date) rescue 0; end
+  def interest_received_up_to(date); get_actual(:total_interest, date) rescue 0; end
   def total_received_up_to(date); get_actual(:total,date); end
 
   def principal_received_on(date); get_actual(:principal, date); end
@@ -1069,6 +1069,7 @@ class Loan
   end
   # the installment dates
   def installment_dates
+    return [] unless self.scheduled_first_payment_date
     return @_installment_dates if @_installment_dates
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
       # DIRTY HACK! We cannot have two installment dates in the same week. So, we have to start counting with the first installment date and then go on to Sunday
@@ -1118,6 +1119,7 @@ class Loan
   end
   
   def update_history(forced=false)
+    return unless self.scheduled_disbursal_date and self.scheduled_first_payment_date
     t = Time.now
     reload
     Merb.logger.info "RELOAD: #{Time.now - t} secs"
@@ -1147,6 +1149,7 @@ class Loan
   end
 
   def calculate_history
+    return {} unless self.scheduled_first_payment_date and self.scheduled_disbursal_date
     return @history_array if @history_array
     # Crazy heisenbug is fixed by prefetching payments hash
     t = Time.now; @history_array = []
@@ -1337,6 +1340,7 @@ class Loan
   end
 
   def update_history_bulk_insert
+    return unless self.scheduled_disbursal_date and self.scheduled_first_payment_date
     # this gets the history from calculate_history and does one single insert into the database
     t = Time.now
     Merb.logger.error! "could not destroy the history" unless self.loan_history.destroy!

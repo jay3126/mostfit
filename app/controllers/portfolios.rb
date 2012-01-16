@@ -61,7 +61,6 @@ class Portfolios < Application
         pls = interesting_loan_ids.map do |loan_id|
           {:loan_id => loan_id, :portfolio_id => @portfolio.id, :added_on => @added_on}
         end.compact
-        debugger
         sql = get_bulk_insert_sql("portfolio_loans", pls)
         if repository.adapter.execute(sql)
           redirect resource(:portfolios), :message => {:notice => "Portfolio was succesfully created. #{dropped_loans.count} conflicting loans ignored"}
@@ -84,7 +83,6 @@ class Portfolios < Application
 
 
   def update(id, portfolio)
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     if params[:submit].downcase == "remove selected loans"
@@ -135,7 +133,6 @@ class Portfolios < Application
   def cashflow(id)
     # returns the cashflow for a given potfolio between specified dates
     # returns raw json
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     @portfolio.cashflow(params)

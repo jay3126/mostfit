@@ -3,6 +3,7 @@
   $('#toggle_approve').change(function() {
     $('.approve').attr('checked',$(this).attr('checked'))});  
   });
+
 %table.report.nojs    
   %thead
     %tr{:style => "font-size: 0.85em;"}
@@ -18,10 +19,10 @@
         Center
       %th
         Approval Date
-      %th
-        Scheduled Disbursal Date
-      %th
-        Scheduled 1st Payment Date
+      -# %th
+      -#   Scheduled Disbursal Date
+      -# %th
+      -#   Scheduled 1st Payment Date
       %th
         Center Meeting Day
       %th
@@ -33,8 +34,6 @@
         credit bureau
       %th
         Approved By
-      -# %th
-      -#   Comment
   - staff_members_allowed = staff_members_collection
   - @loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
@@ -56,15 +55,15 @@
         - else
           = Date.today
           = hidden_field(:name => "loans[#{loan.id}][approved_on]", :value => Date.today)
-      %td.text
-        - min_date = (loan.scheduled_disbursal_date > Date.min_transaction_date ? loan.scheduled_disbursal_date : Date.min_transaction_date)
-        = date_select("loans[#{loan.id}][scheduled_disbursal_date]", min_date, :id => "loans_#{loan.id}_scheduled_disbursal_date", :min_date => min_date, :max_date => Date.max_transaction_date)
-        = loan.scheduled_first_payment_date.strftime('%A')
+      -# %td.text
+      -#   - min_date = (loan.scheduled_disbursal_date > Date.min_transaction_date ? loan.scheduled_disbursal_date : Date.min_transaction_date)
+      -#   = date_select("loans[#{loan.id}][scheduled_disbursal_date]", min_date, :id => "loans_#{loan.id}_scheduled_disbursal_date", :min_date => min_date, :max_date => Date.max_transaction_date)
+      -#   = loan.scheduled_first_payment_date.strftime('%A')
 
-      %td.text
-        - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date)
-        = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, :id => "loans_#{loan.id}_scheduled_first_payment_date", :min_date => min_date, :max_date => Date.max_transaction_date)
-        = loan.scheduled_first_payment_date.strftime('%A')
+      -# %td.text
+      -#   - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date)
+      -#   = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, :id => "loans_#{loan.id}_scheduled_first_payment_date", :min_date => min_date, :max_date => Date.max_transaction_date)
+      -#   = loan.scheduled_first_payment_date.strftime('%A')
       %td.text
         = loan.client.center.meeting_day.to_s.camelcase
       %td.text
@@ -83,8 +82,6 @@
         = hr ? (link_to "HR", url(:controller => :highmarks, :action => :response, :id => hr.id), :class => hr.status) : "!!"
       %td.text
         = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
-      -# %td.text
-      -#   = text_field :name => "loans[#{loan.id}][approval_comment]", :style => "display:none;", :id => "approval_comment_#{loan.id}" 
   %tfoot
     %tr
       %td{:colspan => 13}

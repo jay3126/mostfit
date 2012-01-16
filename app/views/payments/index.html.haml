@@ -4,7 +4,7 @@
       = ofc2(550, 400, 'http://' + (request.env['HTTP_HOST'] or 'example.org') + url(:graph_data, :action => 'loan', :id => @loan.id, :scope_unit => 'months', :scope_size => 3) )
   
   = error_messages_for @payment
-  - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time)
+  - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time) and @loan.scheduled_first_payment_date
     .error
       History of this loan is not updated. Click
       = link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
@@ -70,7 +70,7 @@
           on
           = @loan.disbursal_date
           (
-          = @loan.disbursal_date.strftime('%A')
+          = @loan.disbursal_date.strftime('%A') if @loan.disbursal_date
           )
           by
           %b= link_to @loan.disbursed_by.name, resource(@loan.disbursed_by) if @loan.disbursed_by
@@ -78,7 +78,7 @@
           to be disbursed on
           = @loan.scheduled_disbursal_date
           (
-          = @loan.scheduled_disbursal_date.strftime('%A')
+          = @loan.scheduled_disbursal_date.strftime('%A') if @loan.scheduled_disbursal_date 
           )
         - if @loan.class.to_s.match(/^TakeOver/)
           %br
@@ -86,7 +86,7 @@
             original loan disbursed on
             = @loan.original_disbursal_date
             (
-            = @loan.original_disbursal_date.strftime('%A')
+            = @loan.original_disbursal_date.strftime('%A') if @loan.original_disbursal_date
             )
     %tr
       %th.even Product
@@ -106,14 +106,14 @@
         - if @loan.payments(:type => [:principal, :interest]).empty?
           = @loan.scheduled_first_payment_date
           (
-          = @loan.scheduled_first_payment_date.strftime('%A')
+          = (@loan.scheduled_first_payment_date or Nothing).strftime('%A')
           )
           %br/
           %span.greytext (scheduled, no payments yet)
         - else
           = actual_first_payment = @loan.payments(:type => [:principal, :interest]).min(:received_on)
           (
-          = actual_first_payment.strftime('%A')
+          = actual_first_payment.strftime('%A') if actual_first_payment
           )
           %br/
           %span.greytext
@@ -129,7 +129,7 @@
             Original first payment date
             = @loan.original_first_payment_date
             (
-            = @loan.original_first_payment_date.strftime('%A')
+            = @loan.original_first_payment_date.strftime('%A') if @loan.original_first_payment_date
             )
     %tr
       %th.odd
@@ -140,7 +140,7 @@
             %li
               = f.description
               (
-              = f.applicable_on.strftime('%A')
+              = f.applicable_on.strftime('%A') if f.applicable_on
               )
               - fpaid = @loan.payments(:fee_id => f.fee_id).reduce(0){|s,p| s + p.amount}
               - if fpaid == f.amount
