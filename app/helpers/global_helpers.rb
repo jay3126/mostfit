@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 module Merb
   module GlobalHelpers
     CRUD_ACTIONS = ["list", "index", "show", "edit", "new"]
@@ -345,7 +346,6 @@ module Merb
       arr.map{|change|
         next unless change
         change.map{|k, v|
-          debugger
           if relations.key?(k)
             str = "<tr><td>#{relations[k].first.to_s.humanize}</td><td>"
             str += (if action==:update and v.class==Array
