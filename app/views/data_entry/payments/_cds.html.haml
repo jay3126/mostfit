@@ -87,10 +87,10 @@
                 = a.round(2)
                 - tot_total += a
               %td.paid
-                - if a > 0.01
-                  = text_field :name => "paid[loan][#{loan.id}]", :value => [a,0].max.round(2), :cols => "5", :style => "width:50px;" 
-                - else
-                  = lh.principal_paid + lh.interest_paid
+                -# - if a > 0.01
+                = text_field :name => "paid[loan][#{loan.id}]", :value => [a,0].max.round(2), :cols => "5", :style => "width:50px;" 
+                -# - else
+                -#   = lh.principal_paid + lh.interest_paid
               %td 
                 = select :name => "payment_style[#{loan.id}]", :collection => repayment_style_choices
               %td
