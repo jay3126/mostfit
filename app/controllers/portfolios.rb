@@ -152,16 +152,6 @@ class Portfolios < Application
     t0 = DateTime.now
     Portfolio.transaction do |t|
       audit_trails = loan_ids.map{|x| 
-<<<<<<< HEAD
-        {:auditable_id => x[0], :auditable_type => "Loan", :action => :update,
-          :changes => {:loan_pool_id => [x[1],id]}.to_yaml, :created_at => t0,
-          :type => :log, :user_id => session.user.id}
-        }
-        repository.adapter.execute("update loans set loan_pool_id = #{id} where loan_id in (#{loan_ids.join(',')})")
-        sql = get_bulk_insert_sql("audit_trail", audit_trails)
-        repository.adapter.execute(sql)
-      end
-=======
         {:auditable_id => x, :auditable_type => "Loan", :action => 2,
           :changes => {:loan_pool_id => [0,id]}.to_yaml, :created_at => t0,
           :type => 1, :user_id => session.user.id}
@@ -172,7 +162,6 @@ class Portfolios < Application
       @portfolio.is_securitised = true
       @portfolio.save
       redirect request.referer, :message => {:success => "Loans have been marked as securitsed"}
->>>>>>> portfolio
     end
 
 

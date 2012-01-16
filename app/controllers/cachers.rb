@@ -22,21 +22,20 @@ class Cachers < Application
   end
   
   def generate
-    debugger
     @model = params[:by] ? Kernel.const_get(params[:by].camel_case + "Cache") : BranchCache
     if (@model == BranchCache and Branch.all.count == 0)
       redirect url(:browse, :action => 'index'), :message => {:error => "No data found to generate report"} 
     else
-      @model.update(:date => (@date || Date.today))
+      @model.update(@date || Date.today)
       if Branch.count > 0
         if @from_date and @to_date
-          (@from_date..@to_date).each{|date| BranchCache.update(:date => date)}
+          (@from_date..@to_date).each{|date| BranchCache.update(date)}
         else
           BranchCache.update(:date => (@date || Date.today))
         end
         redirect request.referer
       else
-        @model.update(:date => @date)
+        @model.update(@date)
       end
       redirect request.referer
     end
