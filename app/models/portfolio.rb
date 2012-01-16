@@ -68,7 +68,6 @@ class Portfolio
       pmts = LoanHistory.composite_key_sum(LoanHistory.get_composite_keys(hash.merge(:date => ((d1 + 1)..d2))), [], Cacher::FLOW_COLS)    
       pc = PortfolioCache.first_or_new({:model_name => "PortfolioCashflow", :model_id => id, :date => d1, :end_date => d2, :branch_id => 0, :center_id => 0})
       pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
-      debugger
       pc.save
       puts "Done in #{Time.now - t} secs"
       pc
