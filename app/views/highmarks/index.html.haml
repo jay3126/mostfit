@@ -20,10 +20,33 @@
   %input{:name => "file", :size => "80", :type => "file"}
   %input{:type => "submit", :value => "Upload"}  
 
-%h3 uploaded files
-%ul
-  - @files.each do |file|
-    - fname = file.split("/")[-1].chomp
-    %li
-      = fname
-      = link_to "parse", url(:controller => :highmarks, :action => :parse, :filename => fname)
+%table
+  %tr
+    %td
+      %table.tall.shaded
+        %thead
+          %th{:colspan => 2}
+            uploaded files
+        %tbody    
+          - @files.each do |file|
+            - fname = file.split("/")[-1].chomp
+            %tr
+              %td
+                = fname
+                %br
+                  = link_to "view", url(:controller => :highmarks, :action => :parse, :filename => fname, :method => :post), :class => "grey_button", :style => "padding-top:0px; padding-bottom:0px; margin: 0px; float:right; color:gray;"
+              %td
+                = form(:action => url(:controller => :highmarks, :action => :parse, :method => :post)) do
+                  = hidden_field :name => :filename, :value => fname
+                  = submit "Parse"
+    %td
+      %table.tall.shaded
+        %thead
+          %th
+            parsed files
+        %tbody
+          - @parsed_files.each do |file|
+            - fname = file.split("/")[-1].chomp
+            %tr
+              %td
+                = fname
