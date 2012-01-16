@@ -5,7 +5,7 @@
 = form_for(@portfolio, :action => resource(@portfolio), :class => "shaded" ) do
   %h2 Add loans
   as of 
-  = date_select :added_on, (@portfolio.added_on||Date.today)
+  = date_select :added_on, (Date.today)
   %table
     = partial :form
   %p

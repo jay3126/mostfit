@@ -86,7 +86,7 @@ Merb::Router.prepare do
       end
     end
   end
-  resources :portfolios, :id => %r(\d+), :member => {:cashflow => [:get], :securitise => [:get]}
+  resources :portfolios, :id => %r(\d+), :member => {:cashflow => [:get], :securitise => [:get], :encumber => [:put]}
   resources :surprise_center_visits
   resources :funding_lines
   resources :funders do    

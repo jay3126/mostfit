@@ -9,7 +9,8 @@
   = @portfolio.name
 .menu-strip
   = link_to 'Edit', resource(@portfolio, :edit), :class => 'greenButton'
-  = link_to 'Securitise', resource(@portfolio, :securitise), :class => @portfolio.is_securitised? ? 'grey_button'  : 'greenButton', :disabled => true
+  - if @portfolio.is_securitisable and not @portfolio.is_securitised
+    = link_to 'Securitise', resource(@portfolio, :securitise), :class => @portfolio.is_securitised? ? 'grey_button'  : 'greenButton', :disabled => true
 %table.narrow.form{ :style => "width: 40%;" }
   %tr.odd
     %td Name
@@ -124,8 +125,15 @@
           portfolio
       .big-number
         .number
+          - debugger
           = Loan.all(:loan_pool_id => @portfolio.id).count
         .text
           in securitised
           %br
           portfolio
+      
+      = form_for(@portfolio, :action => resource(@portfolio, :encumber)) do
+        %h1 Encumberance
+        = select :name => :funding_line_id, :collection => FundingLine.all, :text_method => :name, :value_method => :id, :prompt => "please select a funding line"
+        = hidden_field :id
+        = submit 'mark!'

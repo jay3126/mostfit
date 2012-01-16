@@ -378,12 +378,12 @@ class Cache < Cacher
   # all references to funding line in comments is purely for illustration and not meant literally
 
 
-  def self.update(hash = {})
+  def self.update(date = Date.today,hash = {})
+    debugger
     # is our cache based off fields in the loan history table?
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     # creates a cache per funding line for branches and funding lines per the hash passed as argument
-    date = hash.delete(:date) || Date.today
     force = hash.delete(:force) || false
     hash = hash.select{|k,v| [:branch_id, :center_id, loan_history_field].include?(k)}.to_hash
 
@@ -399,7 +399,7 @@ class Cache < Cacher
       h = {:'center_id.not' => 0, :date => date, :type => self.to_s}
       fl_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h)} GROUP BY model_id, center_id").map(&:to_a)
       stale_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h.merge(:stale => true))} GROUP BY model_id, center_id").map(&:to_a)
-      required_caches = q("SELECT #{loan_history_field}, center_id FROM loan_history WHERE date > #{format_for_sql(date)} GROUP BY #{loan_history_field}, center_id").map(&:to_a)
+      required_caches = q("SELECT #{loan_history_field}, center_id FROM loan_history WHERE date > #{format_for_sql(date)} AND #{loan_history_field} IS NOT NULL GROUP BY #{loan_history_field}, center_id").map(&:to_a)
       missing_caches = required_caches - fl_caches
       caches_to_do = stale_caches + missing_caches
       unless caches_to_do.blank?
@@ -437,10 +437,11 @@ class Cache < Cacher
     repository.adapter.execute(sql)
 
     # now do the branch aggregates for each funding line cache
-    $debug = true
     Kernel.const_get(base_model_name).all.each do |fl|
+      debugger
       relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
-      branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
+      model_id = base_model_name == "LoanPool" ? Portfolio.first(:name => fl.name).id : fl.id
+      branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => model_id).group_by{|x| x.branch_id}.to_hash
 
       # we now have {:branch => [{...center data...}, {...center data...}]}, ...
       # we have to convert this to {:branch => { sum of centers data }, ...}
@@ -461,6 +462,7 @@ class Cache < Cacher
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         bc.attributes = attrs.merge(:updated_at => DateTime.now)
+        debugger
         bc.save
       end
     end
@@ -468,6 +470,7 @@ class Cache < Cacher
     
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
+    debugger
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today

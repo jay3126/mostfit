@@ -10,10 +10,12 @@
         = params[:report_name]
       - else
         = klass.camelcase
-    .menu-strip
-      %form{:action => "/searches/edit", :method => :post, :style => "margin-bottom: 0px;"}
+    .menu-strip.clearfix
+      %form{:action => "/searches/edit", :method => :post, :style => "margin-bottom: 0px; float:left;"}
         %input{:type => "hidden", :name => "parameters", :value => YAML::dump(params)}
         = submit "edit this report"
+    #bulk_edit
+      - debugger
     -# = paginate_objects(@objects, params)
     %table.report.nojs
       %thead

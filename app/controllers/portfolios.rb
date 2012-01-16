@@ -73,6 +73,27 @@ class Portfolios < Application
     end
   end 
 
+  def encumber(id)
+    @portfolio = Portfolio.get(id)
+    raise NotFound unless @portfolio
+    funding_line_id = params[:funding_line_id].to_i
+    raise NotFound unless FundingLine.get(funding_line_id)
+    loan_ids = @portfolio.loans.aggregate(:id)
+    t0 = DateTime.now
+    Portfolio.transaction do |t|
+      audit_trails = loan_ids.map{|x| 
+        {:auditable_id => x, :auditable_type => "Loan", :action => 2,
+          :changes => {:encumbered_to_funding_line_id => [0,funding_line_id]}.to_yaml, :created_at => t0,
+          :type => 1, :user_id => session.user.id}
+      }
+      repository.adapter.execute("update loans set encumbered_to_funding_line_id = #{id} where id in (#{loan_ids.join(',')})")
+      sql = get_bulk_insert_sql("audit_trail", audit_trails)
+      repository.adapter.execute(sql)
+      redirect resource(@portfolio), :message => {:success => "marked encumberances"}
+    end
+  end
+
+
   def edit(id)
     only_provides :html
     @portfolio = Portfolio.get(id)
@@ -143,29 +164,13 @@ class Portfolios < Application
     # securitised portfolios can now get their own high class reporting like everyone else ;-)
     # the problem is with the audit trail, we need to do everything by hand
     # because portfolios can be HUUUGGGE and going loan by loan is not really an option
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     redirect request.referer, :message => {:notice => "This portfolio not securitisable"} unless  @portfolio.is_securitisable
     redirect request.referer, :message => {:notice => "This portfolio is already securitised"} if @portfolio.is_securitised
-    loan_ids = @portfolio.loans.aggregate(:id)
-    t0 = DateTime.now
-    Portfolio.transaction do |t|
-      audit_trails = loan_ids.map{|x| 
-        {:auditable_id => x, :auditable_type => "Loan", :action => 2,
-          :changes => {:loan_pool_id => [0,id]}.to_yaml, :created_at => t0,
-          :type => 1, :user_id => session.user.id}
-      }
-      repository.adapter.execute("update loans set loan_pool_id = #{id} where id in (#{loan_ids.join(',')})")
-      sql = get_bulk_insert_sql("audit_trail", audit_trails)
-      repository.adapter.execute(sql)
-      @portfolio.is_securitised = true
-      @portfolio.save
-      redirect request.referer, :message => {:success => "Loans have been marked as securitsed"}
-    end
-
-
-
+    msg =  @portfolio.securitise(session.user) ? {:success => "Loans have been marked as securitsed"} : {:error => "something went wrong"}
+    redirect resource(@portfolio)
+  end
 
     # def loans
     #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new

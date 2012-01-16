@@ -18,7 +18,7 @@ module DataEntry
 
       redirect url(:data_entry)
     end
-    
+
   end
 
 end

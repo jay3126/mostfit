@@ -126,9 +126,13 @@ class Loan
   property :approval_comment,                    Text
   property :approval_reason,                     Enum.send('[]', *([nil] + APPROVAL_REASONS.keys))
 
+
+  property :encumbered_to_funding_line_id,     Integer, :nullable => true
+
   # associations
   belongs_to :client
   belongs_to :funding_line,              :nullable => true
+  belongs_to :encumberance,              :child_key => [:encumbered_to_funding_line_id], :nullable => true, :model => 'FundingLine'
   belongs_to :loan_product
   belongs_to :loan_purpose,              :nullable  => true
   belongs_to :occupation,                :nullable => true
@@ -137,7 +141,7 @@ class Loan
   belongs_to :rejected_by,               :child_key => [:rejected_by_staff_id],               :model => 'StaffMember'
   belongs_to :disbursed_by,              :child_key => [:disbursed_by_staff_id],              :model => 'StaffMember'
   belongs_to :written_off_by,            :child_key => [:written_off_by_staff_id],            :model => 'StaffMember'
-  belongs_to :preclosed_by,              :child_key => [:preclosed_by_staff_id],            :model => 'StaffMember'
+  belongs_to :preclosed_by,              :child_key => [:preclosed_by_staff_id],              :model => 'StaffMember'
   belongs_to :suggested_written_off_by,  :child_key => [:suggested_written_off_by_staff_id],  :model => 'StaffMember'
   belongs_to :write_off_rejected_by,     :child_key => [:write_off_rejected_by_staff_id],     :model => 'StaffMember' 
   belongs_to :validated_by,              :child_key => [:validated_by_staff_id],              :model => 'StaffMember'

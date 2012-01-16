@@ -19,6 +19,11 @@ class DirtyLoan
     @@poke_thread = true
   end
 
+  def self.bulk_add(loan_ids)
+    repository.adapter.execute(get_bulk_insert_sql("dirty_loans", loan_ids.map{|pl| {:loan_id => pl, :created_at => now}}))
+    self.send(:class_variable_set,"@@poke_thread", true)
+  end
+
   def self.clear(id=nil)
     hash = id ? {:id => id} : {}
     DirtyLoan.pending(hash).aggregate(:id).each{|_dl|
