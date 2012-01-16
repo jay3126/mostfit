@@ -413,7 +413,9 @@ class Cache < Cacher
       end
     end
     
-    fl_data = self.create(hash.merge(:date => date, :group_by => [:branch_id, :center_id, loan_history_field])).deepen.values.sum
+    fl_data = self.create(hash.merge(:date => date, :group_by => [:branch_id, :center_id, loan_history_field]))
+    debugger
+    fl_data = fl_data.deepen.values.sum
     return false if fl_data == nil
     now = DateTime.now
     fl_data.delete(:no_group)
@@ -472,7 +474,7 @@ class Cache < Cacher
 
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
-    
+    debugger
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today
@@ -480,16 +482,17 @@ class Cache < Cacher
     cols = hash.delete(:cols) || COLS
     flow_cols = FLOW_COLS
     balances = LoanHistory.latest_sum(hash,date, group_by, cols)
-    pmts = LoanHistory.composite_key_sum(LoanHistory.all(hash.merge(:date => date)).aggregate(:composite_key), group_by, flow_cols)
+    pmts = LoanHistory.composite_key_sum(LoanHistory.get_composite_keys(hash.merge(:date => date)), group_by, flow_cols)
     # if there are no loan history rows that match today, then pmts is just a single hash, else it is a hash of hashes
-
-``    # set up some default hashes to use in case we get dodgy results back.
-    ng_pmts = flow_cols.map{|c| [c,0]}.to_hash # ng = no good. we return this if we get dodgy data
-    ng_bals = cols.map{|c| [c,0]}.to_hash # ng = no good. we return this if we get dodgy data
+    debugger
+    # set up some default hashes to use in case we get dodgy results back.
+    ng_pmts = flow_cols.map{|c| [c,0]}.to_hash         # ng = no good. we return this if we get dodgy data
+    ng_bals = cols.map{|c| [c,0]}.to_hash              # ng = no good. we return this if we get dodgy data
     # workaround for the situation where no rows get returned for centers without loans.
     # this makes it very difficult to find missing center caches so we must have a row for all centers, even if it is full of zeros
-    # find all relevant centers
 
+
+    # find all relevant centers
     # if we are doing only a subset of centers / funding lines, we do it using loan_ids.
     # so if we have some loan_ids, then we just use these
     if hash[:loan_id]

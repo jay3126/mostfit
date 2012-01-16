@@ -13,7 +13,17 @@
 
 = form_for(@portfolio, :action => resource(@portfolio), :class => "shaded") do
   %h2 Remove loans
+  = hidden_field :id, :value => @portfolio.id
   = text_area :name => :delete_ids, :cols => 80, :rows => 5
+  = submit 'Remove above loan ids'
+
+= form_for(@portfolio, :action => resource(@portfolio), :class => "shaded") do
+  %h2 Add loans
+  = hidden_field :id, :value => @portfolio.id
+  = text_area :name => :add_ids, :cols => 80, :rows => 5
+  %br
+  %b as on
+  = date_select :added_on, Date.today
   = submit 'Remove above loan ids'
 
 = link_to 'Back', url(@funder)

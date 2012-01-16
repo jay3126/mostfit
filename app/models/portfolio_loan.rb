@@ -11,4 +11,7 @@ class PortfolioLoan
   belongs_to :portfolio
   belongs_to :loan
 
+  validates_with_method :not_in_conflicting_portfolios, :if => Proc.new{|pl| pl.portfolio.is_securitisable}
+
+
 end

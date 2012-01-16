@@ -2,8 +2,6 @@ class Portfolio
   include DataMapper::Resource
   include DateParser
 
-  attr_accessor :centers, :added_on, :branch_id, :disbursed_after, :displayed_centers
-
   before :destroy, :verified_cannot_be_deleted
   before :valid?,  :parse_dates
   
@@ -14,8 +12,8 @@ class Portfolio
   property :created_by_user_id,  Integer, :nullable => false, :index => true
 
   property :is_securitised, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
-
   property :params, Yaml, :length => 2000 
+
 
   property :created_at, DateTime, :default => Time.now
   property :updated_at, DateTime, :default => Time.now

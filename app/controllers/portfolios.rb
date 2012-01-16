@@ -85,14 +85,33 @@ class Portfolios < Application
 
   def update(id, portfolio)
     debugger
+    @portfolio = Portfolio.get(id)
+    raise NotFound unless @portfolio
     if params[:submit].downcase == "remove selected loans"
-      PortfolioLoan.all(:id => params[:loan].keys.map(&:to_i)).destroy
+      PortfolioLoan.all(:id => params[:loan].keys.map(&:to_i)).destroy # these are ids for the portfolio_loan, not the loan
       redirect request.referer, :message => {:success => "Loans removed from portfolio"}
+    elsif params[:delete_ids] # got some delete ids in a text box
+      ids = params[:delete_ids].split(",").map(&:to_i)
+      if @portfolio.portfolio_loans(:loan_id => ids).destroy
+        redirect resource(@portfolio), :message => {:success => "Succesfully removed #{ids.count} loans"}
+      else
+        raise
+      end
+    elsif params[:add_ids] # got some delete ids in a text box
+      @added_on = Date.parse(params[:added_on])
+      ids = params[:add_ids].split(",").map(&:to_i)
+      pls = ids.map do |loan_id|
+        {:loan_id => loan_id, :portfolio_id => @portfolio.id, :added_on => @added_on}
+      end.compact
+      sql = get_bulk_insert_sql("portfolio_loans", pls)
+      if repository.adapter.execute(sql)
+        redirect resource(@portfolio), :message => {:notice => "#{ids.count} loans added to portfolio"}
+      else
+        redirect resource(@portfolio, :edit), :message => {:error => "Ooops! Something went wrong"}
+      end
     else
       # new loans keep getting added all the time to the database and many of them will match the search criteria
       # so, we give the option to add such loans to the portfolio
-      @portfolio = Portfolio.get(id)
-      raise NotFound unless @portfolio
       # use the original parameters to conduct another search
       @search  = Search.new(@portfolio.params)
       @objects = @search.process

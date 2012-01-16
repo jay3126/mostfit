@@ -9,6 +9,7 @@
   = @portfolio.name
 .menu-strip
   = link_to 'Edit', resource(@portfolio, :edit), :class => 'greenButton'
+  = link_to 'Securitise', resource(@portfolio, :securitise), :class => @portfolio.is_securitised? ? 'grey_button'  : 'greenButton', :disabled => true
 %table.narrow.form{ :style => "width: 40%;" }
   %tr.odd
     %td Name

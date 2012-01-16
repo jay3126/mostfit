@@ -382,7 +382,7 @@ class Array
       # and additionally, not possible to ask DM to just craft an SQL statement and give it to us (i think)
       hash.map do |col, v|
         val = format_for_sql(v)
-        if col.to_s.match('.') 
+        if col.to_s.index('.not') 
           col = col.to_s.split(".")[0]
           operator = {Array => "NOT IN", Range => "NOT BETWEEN"}[v.class] || "<>"
         else
