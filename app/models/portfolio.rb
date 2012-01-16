@@ -11,7 +11,8 @@ class Portfolio
   property :verified_by_user_id,            Integer, :nullable => true, :index => true
   property :created_by_user_id,  Integer, :nullable => false, :index => true
 
-  property :is_securitised, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
+  property :is_securitisable, Boolean # if true, then loans in this portfolio may not already be in any other portfolio
+  property :is_securitised,   Boolean
   property :params, Yaml, :length => 2000 
 
 

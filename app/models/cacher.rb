@@ -128,12 +128,12 @@ class Cacher
     
     # for the FLOW_COLS, take the sum of the attributes in the two cachers
     my_attrs = self.attributes; other_attrs = other.attributes;
-    FLOW_COLS.map{|col| attrs[col] = my_attrs[col] + other_attrs[col]}    
+    FLOW_COLS.each{|col| attrs[col] = my_attrs[col] + other_attrs[col]}    
 
     me = self.attributes; other = other.attributes;
 
     attrs[:stale] = me[:stale] || other[:stale]
-    Cacher.new(my_attrs)
+    Cacher.new(attrs)
   end
 
   def + (other)
@@ -465,13 +465,11 @@ class Cache < Cacher
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         bc.attributes = attrs.merge(:updated_at => DateTime.now)
-        debugger if $debug
         bc.save
       end
     end
   end
-
-
+    
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
     debugger
@@ -562,6 +560,8 @@ end
 class LoanProductCache < Cache
 end
 
+class LoanPoolCache < Cache; end
+
 class PortfolioCache < Cacher
   # this class handles caching for arbitrary collections of loans
   # it is simpler because we do not provide "drill-down" functionality on these arbitrary collections....for now.
@@ -587,7 +587,6 @@ class PortfolioCache < Cacher
       pc.attributes = (pmts[:no_group] || pmts[[]]).merge(balances[:no_group]) # if there is only one loan, there is no :no_group key in the return value. smell a bug in loan_history?
       pc.center_id = pc.branch_id = 0
       puts "Done in #{Time.now - t} secs"
-      debugger
       return pc.save
     end
   end

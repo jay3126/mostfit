@@ -58,8 +58,8 @@
         = link_to 'last month', url(:consolidate_cachers, query_params.merge(:from_date => (Date.today << 1) - Date.today.day + 1, :to_date => Date.today - Date.today.day)), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
       &nbsp;&nbsp;
       %td
-        = link_to 'month to date', url(:consolidate_cachers, query_params.merge(:from_date => Date.today - Date.today.day + 1, :to_date => Date.today )), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
-      &nbsp;
+        -# = link_to 'month to date', url(:consolidate_cachers, query_params.merge(:from_date => Date.today - Date.today.day + 1, :to_date => Date.today )), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
+      &n-bsp;
       %td
         ]
       %td
