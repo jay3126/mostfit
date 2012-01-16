@@ -50,7 +50,6 @@ class Portfolios < Application
     @portfolio.created_by_user_id = session.user.id
     @portfolio.params = params
     @added_on = Date.parse(params[:added_on])
-<<<<<<< HEAD
     Portfolio.transaction do |t|
       if @portfolio.save
         @securitised_loans =  @portfolio.is_securitised ? Portfolio.all(:is_securitised => true).portfolio_loans.aggregate(:loan_id) : []
@@ -101,12 +100,15 @@ class Portfolios < Application
     elsif params[:add_ids] # got some delete ids in a text box
       @added_on = Date.parse(params[:added_on])
       ids = params[:add_ids].split(",").map(&:to_i)
+      @securitised_loans =  @portfolio.is_securitised ? Portfolio.all(:is_securitised => true).portfolio_loans.aggregate(:loan_id) : []
+      interesting_loan_ids = (ids - @securitised_loans)
+      dropped_loans = ids - interesting_loan_ids
       pls = ids.map do |loan_id|
         {:loan_id => loan_id, :portfolio_id => @portfolio.id, :added_on => @added_on}
       end.compact
       sql = get_bulk_insert_sql("portfolio_loans", pls)
       if repository.adapter.execute(sql)
-        redirect resource(@portfolio), :message => {:notice => "#{ids.count} loans added to portfolio"}
+        redirect resource(@portfolio), :message => {:notice => "#{ids.count} loans added to portfolio. #{dropped_loans.count} conflicting loans ignored"}
       else
         redirect resource(@portfolio, :edit), :message => {:error => "Ooops! Something went wrong"}
       end
