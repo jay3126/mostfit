@@ -8,7 +8,6 @@ class StaffMember
   property :mobile_number,  String, :length => 12,  :nullable => true
   property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
   property :address, Text, :lazy => true
-
   property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :male
   property :active,  Boolean, :default => true, :nullable => false  
   property :user_id,  Integer,  :nullable => true  
