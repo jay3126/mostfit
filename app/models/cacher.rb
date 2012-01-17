@@ -16,6 +16,8 @@ class Cacher
   property :scheduled_principal_due,         Float, :nullable => false
   property :scheduled_interest_due,          Float, :nullable => false
   
+
+
   property :principal_due,                   Float, :nullable => false
   property :interest_due,                    Float, :nullable => false
   property :principal_due_today,             Float, :nullable => false # this is the principal and interest 
@@ -189,16 +191,16 @@ class BranchCache < Cacher
 
       return true if cids.blank? #nothing to do
       # update all the centers for today
+      chunks = (cids.count/CHUNK_SIZE.to_f).ceil
       begin
-        chunk_size = 6000
-        chunks = cids.count/chunk_size
-        cids.chunk(chunk_size).each_with_index do |_cids, i|
-          _t = Time.now
+        _t = Time.now
+        cids.chunk(CHUNK_SIZE).each_with_index do |_cids, i|
+          puts "DOING chunk #{i+1} of #{chunks}...."
           (CenterCache.update(:center_id => _cids, :date => date))
-          puts "did chunk #{i} in #{Time.now - _t} secs"
+          print "#{(Time.now - _t).round(2)} secs"
         end
       rescue Exception => e
-        puts "#{e}\n#{e.backtrace}"
+        puts "#{e}\n#{e.backtrace[0..400]}"
         return false
       end
       puts "UPDATED CENTER CACHES in #{(Time.now - t).round} secs"
@@ -216,6 +218,7 @@ class BranchCache < Cacher
 
       # we now have {:branch => [{...center data...}, {...center data...}]}, ...
       # we have to convert this to {:branch => { sum of centers data }, ...}
+      debugger
       numeric_attributes = branch_data_hash.first[1][0].attributes.select{|k,v| k if v.is_a? Numeric}.to_hash.keys
       branch_data = branch_data_hash.map do |bid,ccs|
         sum_centers = ccs.map do |c|
@@ -290,6 +293,10 @@ class CenterCache < Cacher
     hash[:center_id] = hash[:center_id] - centers_to_not_update
     return true if hash[:center_id].blank? and centers_to_not_update.blank?
     centers_data = hash[:center_id].blank? ? {} : CenterCache.create(hash.merge(:date => date, :group_by => [:branch_id,:center_id]))
+<<<<<<< HEAD
+=======
+    debugger
+>>>>>>> takeover
     centers_data += centers_data_wo
     return false if centers_data == nil
     now = DateTime.now

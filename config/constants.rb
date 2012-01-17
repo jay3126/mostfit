@@ -133,3 +133,9 @@ ID_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Lic
 TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
 APPROVAL_REASONS = {'bad_data' => 'data regarding this client is incorrect', 'stale_data' => 'data regarding this client is stale', 'other' => 'other reasons'}
 
+
+# Caches
+# in order to avoid overrunning the SQL max packet size, we split the cacher update into chunks
+# 2500 should be good for the standard SQL max_packet_size of 16MB
+CHUNK_SIZE = 2500 
+
