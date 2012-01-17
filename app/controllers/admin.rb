@@ -83,6 +83,10 @@ class Admin < Application
     @stale_loan_histories = latest.select{|loan_id, updated_at| @last_histories[loan_id] ? @last_histories[loan_id] < updated_at : true}.to_hash
     render
   end
+
+  def eom
+    redirect request.referer, :message => {:success => "End of Month batch processing task will be run tonight"}
+  end
   
   def insurance
     @insurance_companies = InsuranceCompany.all

@@ -39,6 +39,11 @@
       Misc
 
   %div.tab
+    = form(:action => url(:controller => :portfolios, :action => :cashflow, :id => @portfolio.id), :method => "GET", :style => "margin: 10px;", :class => "shaded") do
+      %b every
+      = text_field :name => "every", :value => params[:every] || 1, :style => "width:2em"
+      = select :name => "what", :collection => [["week", "week"], ["fortnight","fortnight"], ["month","months"]], :prompt => "please choose a periodicity", :selected => params[:what]
+      = submit 'Show cashflows'
     - keys = [:actual_outstanding_principal, :principal_paid, :interest_paid, :scheduled_outstanding_principal]
     %table.shaded{:style => "margin: 20px"}
       %thead
@@ -58,7 +63,7 @@
           %th
             Scheduled Interest
       - last_principal = nil
-      - PortfolioCache.all(:model_name => "PortfolioCashflow", :model_id => @portfolio.id, :order => [:date]).each do |c|
+      - @cashflow.each do |c|
         - next if keys.map{|x| c.send(x)}.sum == 0
         %tr{:class => cycle("odd","even")}
           %td

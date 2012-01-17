@@ -11,9 +11,14 @@ class Portfolios < Application
   end
 
   def show(id)
+    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     @portfolio_loans = @portfolio.portfolio_loans(:order => [:loan_id]).paginate(:per_page => 50, :page => params[:page] || 1)
+    every = (params[:every] or Nothing).to_i || 1
+    what = (params[:what] or Nothing).to_sym || :month
+    what = :sunday if what == :week
+    @cashflow = @portfolio.cashflow(every, what)
     display @portfolio
   end
 
@@ -154,9 +159,15 @@ class Portfolios < Application
   def cashflow(id)
     # returns the cashflow for a given potfolio between specified dates
     # returns raw json
+    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
-    @portfolio.cashflow(params)
+    every = params[:every].to_i
+    every = every * 2 if params[:what] == "fortnight"
+    every = 1 if params[:what] == "month"
+    what = params[:what] == "month" ? params[:what].to_sym : :sunday
+    @cashflow = @portfolio.cashflow(every,what)
+    redirect resource(@portfolio, :every => params[:every], :what => params[:what])
   end
 
   def securitise(id)

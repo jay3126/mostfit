@@ -3,9 +3,13 @@
 = error_messages_for @portfolio
 
 = form_for(@portfolio, :action => resource(@portfolio), :class => "shaded" ) do
-  %h2 Add loans
+  %h1 Add loans
   as of 
   = date_select :added_on, (Date.today)
+  = hidden_field :id, :value => @portfolio.id
+  %h3 Add using ids
+  = text_area :name => :add_ids, :cols => 80, :row => 13, :style => "height: 40px"
+  %h3 OR
   %table
     = partial :form
   %p
@@ -15,15 +19,5 @@
   %h2 Remove loans
   = hidden_field :id, :value => @portfolio.id
   = text_area :name => :delete_ids, :cols => 80, :rows => 5
-  = submit 'Remove above loan ids'
+  = submit 'Remove loans'
 
-= form_for(@portfolio, :action => resource(@portfolio), :class => "shaded") do
-  %h2 Add loans
-  = hidden_field :id, :value => @portfolio.id
-  = text_area :name => :add_ids, :cols => 80, :rows => 5
-  %br
-  %b as on
-  = date_select :added_on, Date.today
-  = submit 'Remove above loan ids'
-
-= link_to 'Back', url(@funder)
