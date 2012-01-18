@@ -15,6 +15,20 @@
       )
   %tr.even
     %th.even
+      Designation
+    %td
+      = @staff_member.staff_designation if @staff_member.staff_designation
+  %tr.odd
+    %th.odd
+      Date of Birth
+    %td
+      - if @staff_member.staff_date_of_birth
+        = @staff_member.staff_date_of_birth 
+        (
+        = @staff_member.staff_date_of_birth.strftime('%A')
+        )
+  %tr.even
+    %th.even
       Father Name
     %td
       = @staff_member.father_name

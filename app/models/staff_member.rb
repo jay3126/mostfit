@@ -14,6 +14,9 @@ class StaffMember
   property :user_id,  Integer,  :nullable => true  
   # no designations, they are derived from the relations it has
 
+  property :staff_designation, String, :length => 30, :nullable => true
+  property :staff_date_of_birth, Date, :nullable => true
+
   has n, :branches,          :child_key => [:manager_staff_id]
   has n, :branch_diaries,    :child_key => [:manager_staff_id]
   has n, :stock_registers,   :child_key => [:manager_staff_id]

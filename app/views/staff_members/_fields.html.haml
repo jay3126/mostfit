@@ -8,7 +8,17 @@
       %span.greytext the screen name of the staff member
   %tr
     %td
-      Father's Name:
+      Designation:
+    %td
+      = text_field :staff_designation, :size => 40
+  %tr
+    %td
+      Date of Birth:
+    %td
+      = date_select_for @staff_member, :staff_date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %td
+      Father Name:
     %td
       = text_field :father_name, :size => 40
   %tr
@@ -32,7 +42,7 @@
     %td
       Joining date:
     %td
-      = date_select_for @staff_member, :creation_date
+      = date_select_for @staff_member, :creation_date, :max_date => Date.today
       &nbsp;&nbsp;
       %span.greytext date this staff member joined active duty
   %tr
