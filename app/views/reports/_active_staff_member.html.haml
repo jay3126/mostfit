@@ -1,0 +1,62 @@
+= partial :form
+- count = 0
+- unless @data.empty?
+  %table.report.nojs
+    %thead
+      %tr
+        %th
+          Staff Name
+        %th
+          Father Name
+        %th
+          Branch Name
+        %th
+          Joining Date
+        %th
+          Designation
+        %th
+          Employee Id.
+        %th
+          Date of Birth
+        %th
+          Contact Number
+        %th
+          Address
+    %tbody
+      - @data.each do |staff|
+        %tr
+          %td
+            = link_to staff.name, resource(staff)
+            - count += 1
+          %td
+            = staff.father_name
+          %td
+            = (staff.centers.branch[0] ? staff.centers.branch[0].name : NIL)
+          %td
+            = staff.creation_date
+          %td
+            = staff.staff_designation
+          %td
+            = staff.employee_id
+          %td
+            = staff.staff_date_of_birth
+          %td
+            = staff.mobile_number
+          %td
+            = staff.address
+    %tfoot
+      %tr
+        %td
+          Total
+        %td
+          = count
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+- else
+  %h5
+    No data to display
