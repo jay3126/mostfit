@@ -16,6 +16,7 @@ class StaffMember
 
   property :staff_designation, String, :length => 30, :nullable => true
   property :staff_date_of_birth, Date, :nullable => true
+  property :employee_id, String, :length => 20, :nullable => true
 
   has n, :branches,          :child_key => [:manager_staff_id]
   has n, :branch_diaries,    :child_key => [:manager_staff_id]
