@@ -21,7 +21,6 @@ class InsuranceRegister < Report
     hash = {:disbursal_date => @from_date..@to_date}.merge(@branch_id ? {:c_branch_id => @branch_id} : {})
     loans = Loan.all(hash)
     clients = Client.all(:id => loans.aggregate(:client_id)).map{|c| [c.id, {:client => c, :loans => []}]}.to_hash
-    debugger
     loans.each{|l| clients[l.client_id][:loans].push(l)}
     return clients
   end
