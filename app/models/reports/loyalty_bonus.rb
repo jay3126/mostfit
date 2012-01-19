@@ -33,8 +33,13 @@ class LoyaltyBonus < Report
     conds = {:status => [:preclosed, :repaid], :date => @from_date..@to_date, :last_status => [:outstanding]}.merge!(@branch_id ? {:branch_id => @branch_id} : {})
 
     keys = [:branch, :center, :client_group, :client]
-    debugger
     required_fields = LoanHistory.all(conds).aggregate(*([:loan_id] + keys.map{|k| "#{k.to_s}_id".to_sym} + [:date]))
+
+    # filer for date condition per http://issues.mostfit.in/issues/show/1533
+    selected_loan_ids = required_fields.map{|f| f[0]}
+    eligible_loan_ids = Loan.all(:id => selected_loan_ids, :disbursal_date => Date.new(2010,12,1)..Date.new(2011,5,15)).aggregate(:id)
+    required_fields = required_fields.select{|x| eligible_loan_ids.include?(x[0])}
+
     return {} if required_fields.blank?
     # Get the names of everything that is in the array
     keys.each_with_index do |k,i| 
