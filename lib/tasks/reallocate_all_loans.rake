@@ -22,7 +22,6 @@ namespace :mostfit do
       last_id = already_done[-1].to_i rescue 0
       puts "Last id = #{last_id}. Continuing from #{last_id + 1}."
       lids = Loan.all(:id.gt => last_id).aggregate(:id)
-      debugger
       loan_count = lids.count
       loans_done = 1
       puts "doing #{loan_count} loans"
@@ -43,7 +42,6 @@ namespace :mostfit do
         end.include?(true) 
         l.reallocate(:normal, l.payments.last.created_by)
         log.write("#{lid}\n")
-        debugger
         elapsed = (Time.now - _now).to_i
         print "#{elapsed} secs. ETA #{(loan_count - i) * (elapsed/(loans_done))/60} mins"
         loans_done += 1

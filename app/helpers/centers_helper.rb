@@ -1,7 +1,6 @@
 module Merb
   module CentersHelper
     def display_field_form(model, field, obj)
-      debugger
       val = obj.send(field)
       if relationship = model.relationships[field]
         name = "#{model.to_s.downcase}[#{obj.id}][#{field}]"
