@@ -398,8 +398,8 @@ class Cache < Cacher
       #fl_caches = self.all(:center_id.not => 0, :date => date)
       #stale_caches = fl_caches.stale.aggregate(:model_id, :center_id)
       # optimised for speed
-      h = {:'center_id.not' => 0, :date => date, :type => self.to_s}
-      fl_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h)} GROUP BY model_id, center_id").map(&:to_a)
+      h = {:date => date, :type => self.to_s}
+      fl_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h)} AND center_id <> 0 GROUP BY model_id, center_id").map(&:to_a)
       stale_caches = q("SELECT model_id, center_id FROM cachers WHERE #{get_where_from_hash(h.merge(:stale => true))} GROUP BY model_id, center_id").map(&:to_a)
       required_caches = q("SELECT #{loan_history_field}, center_id FROM loan_history WHERE date > #{format_for_sql(date)} AND #{loan_history_field} IS NOT NULL GROUP BY #{loan_history_field}, center_id").map(&:to_a)
       missing_caches = required_caches - fl_caches
