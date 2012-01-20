@@ -1422,7 +1422,6 @@ class Loan
       [date, {:total => total_amt, :user => user, :date => date, :received_by => received_by}]
     end.to_hash
     statii = []
-    debugger
     _t = DateTime.now
     # then delete all payments and recalculate a virgin loan_history
     ds = _ps.map{|p| p.deleted_by = user; p.deleted_at = _t; p.save!}

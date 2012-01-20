@@ -29,7 +29,6 @@ class LoyaltyBonus < Report
     # but first the non refactored version
 
     # first get [:loan_id, :date] for all loan_history where status is repaid abd last status is outstanding
-    debugger
     conds = {:status => [:preclosed, :repaid], :date => @from_date..@to_date, :last_status => [:outstanding]}.merge!(@branch_id ? {:branch_id => @branch_id} : {})
 
     keys = [:branch, :center, :client_group, :client]
@@ -43,7 +42,6 @@ class LoyaltyBonus < Report
     return {} if required_fields.blank?
     # Get the names of everything that is in the array
     keys.each_with_index do |k,i| 
-      debugger
       model = Kernel.const_get(k.to_s.camel_case) # i.e. Branch
       instance_variable_set("@#{k}_names", model.all(:id => required_fields.map{|x| x[i+1]}).aggregate(:id, :name).to_hash)
       # i.e. @branch = Branch.all(:id => required_fields.map{|x| x[1]})
