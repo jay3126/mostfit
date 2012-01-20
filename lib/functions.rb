@@ -287,11 +287,11 @@ class Array
        }]
     }.sort_by{|x| x[0]}
   end
-  
+
   def sum
     self.reduce(:+)
   end
-  
+
   def chunk len
     a = []
     each_with_index do |x,i|
@@ -300,7 +300,6 @@ class Array
     end
     a
   end
-  
 end
 
 
@@ -311,7 +310,6 @@ module ExcelFormula
     (vPow * present_value - future_value)/(vPow - 1) * actual_interest_rate
   end
 end
-
 
 module FinancialFunctions
   def npv(cashflows, discount_rate)
