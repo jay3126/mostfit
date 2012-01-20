@@ -67,7 +67,6 @@
         = loan.client.center.meeting_day.to_s.camelcase
       %td.text
         = loan.status.to_s.camelcase(' ')
-      - hr = Highmark::HighmarkResponse.first(:loan_id => loan.id)
       %td
         - if hr
           - if hr.status == :rejected

@@ -287,11 +287,19 @@ class Array
        }]
     }.sort_by{|x| x[0]}
   end
+<<<<<<< HEAD
   
   def sum
     self.reduce(:+)
   end
   
+=======
+
+  def sum
+    self.reduce(:+)
+  end
+
+>>>>>>> takeover
   def chunk len
     a = []
     each_with_index do |x,i|
@@ -300,7 +308,10 @@ class Array
     end
     a
   end
+<<<<<<< HEAD
   
+=======
+>>>>>>> takeover
 end
 
 
@@ -362,8 +373,8 @@ def get_bulk_insert_sql(table_name, data, add = {}, drop = [])
   sql
 end
 
-    # fast formatting. required for large bulk insert statements  
-    # v is the value, c is the class
+# fast formatting. required for large bulk insert statements  
+# v is the value, c is the class
 def format_for_sql(v, c = nil) 
   c ||= v.class
   return "'#{v}'" if c == String
@@ -391,7 +402,6 @@ end
 def q(sql)
   repository.adapter.query(sql)
 end
-
 
 class BigDecimal
   def inspect
