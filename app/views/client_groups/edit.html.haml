@@ -52,7 +52,7 @@
         %td
           =client.name
         %td
-          =client.grt_pass_date ? client.grt_pass_date : " - "
+          = client.grt_pass_date || " - "
         - min_date = client.date_joined if min_date > client.date_joined
     %tr
       %td{:colspan => 4}

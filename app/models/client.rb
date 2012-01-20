@@ -114,6 +114,13 @@ class Client
   property :priority_sector_list_id, Integer, :nullable => true
   property :psl_sub_category_id, Integer, :nullable => true
 
+
+  # suryoday specific fields
+  # CPV means contact point verification and is the date of the CPV.
+  property :cpv1, Date
+  property :cpv2, Date
+
+
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500

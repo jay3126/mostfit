@@ -179,24 +179,37 @@ class Portfolios < Application
     raise NotFound unless @portfolio
     redirect request.referer, :message => {:notice => "This portfolio not securitisable"} unless  @portfolio.is_securitisable
     redirect request.referer, :message => {:notice => "This portfolio is already securitised"} if @portfolio.is_securitised
-    msg =  @portfolio.securitise(session.user) ? {:success => "Loans have been marked as securitsed"} : {:error => "something went wrong"}
-    redirect resource(@portfolio)
+    loan_ids = @portfolio.loans.aggregate(:id)
+    t0 = DateTime.now
+    Portfolio.transaction do |t|
+      audit_trails = loan_ids.map{|x| 
+        {:auditable_id => x, :auditable_type => "Loan", :action => 2,
+          :changes => {:loan_pool_id => [0,id]}.to_yaml, :created_at => t0,
+          :type => 1, :user_id => session.user.id}
+      }
+      repository.adapter.execute("update loans set loan_pool_id = #{id} where id in (#{loan_ids.join(',')})")
+      sql = get_bulk_insert_sql("audit_trail", audit_trails)
+      repository.adapter.execute(sql)
+      @portfolio.is_securitised = true
+      @portfolio.save
+      redirect request.referer, :message => {:success => "Loans have been marked as securitsed"}
+    end
   end
-
-    # def loans
-    #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new
-    #   @loans     = @portfolio.eligible_loans(params[:center_id])
-    #   render :layout => layout?
-    # end
-
-    private
-    def get_context
-      if params[:funder_id] and not params[:funder_id].blank?
-        @funder = Funder.get(params[:funder_id])
-        raise NotFound unless @funder
-      end
+  
+  # def loans
+  #   @portfolio = params[:id] ? Portfolio.get(params[:id]) : Portfolio.new
+  #   @loans     = @portfolio.eligible_loans(params[:center_id])
+  #   render :layout => layout?
+  # end
+  
+  private
+  def get_context
+    if params[:funder_id] and not params[:funder_id].blank?
+      @funder = Funder.get(params[:funder_id])
+      raise NotFound unless @funder
     end
-    def disallow_updation_of_verified_portfolios
-      raise NotChangeable if @portfolio.verified_by_user_id
-    end
-  end # Portfolios
+  end
+  def disallow_updation_of_verified_portfolios
+    raise NotChangeable if @portfolio.verified_by_user_id
+  end
+end # Portfolios

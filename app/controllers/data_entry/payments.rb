@@ -80,25 +80,50 @@ module DataEntry
     end
 
     def by_staff_member
-      @date = params[:for_date] ? Date.parse(params[:for_date]) : Date.today
-      staff_id = params[:staff_member_id] || params[:received_by]
-      if staff_id
-        @staff_member = StaffMember.get(staff_id.to_i)
-        raise NotFound unless @staff_member
-      end
-      if request.method == :post
-        if params[:paid] or params[:disbursed]
-          bulk_payments_and_disbursals
-          mark_attendance
+      if params[:staff_member_id].nil?
+        render
+      else
+        @date = params[:for_date] ? Date.parse(params[:for_date]) : Date.today
+        staff_id = params[:staff_member_id] || params[:received_by]
+
+        if staff_id
+          @staff_member = StaffMember.get(staff_id.to_i)
+          raise NotFound unless @staff_member
         end
-        if @success and @errors.blank?
-          redirect url(:enter_payments, :action => 'by_staff_member'), :message => {:notice => "All payments made succesfully"}
+
+        center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).aggregate(:center_id)
+        @centers = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
+
+        unless @staff_member.nil?
+          @loan_ids = @staff_member.loans.map{|l| l.id}
+          @loans = Loan.all(:id => @loan_ids, :rejected_on => nil)
+          @client_ids = @loans.map{|l| l.client_id}
+          @clients = Client.all(:id => @client_ids, :fields => [:id, :name, :center_id, :client_group_id])
+          @disbursed_loans = @loans.all(:disbursal_date.not => nil)
+          @undisbursed_loans = @loans.all(:disbursal_date => nil, :approved_on.not => nil)
+          @loans_to_approve = @loans.all(:approved_on  => nil)
+          @loans_to_utilize = @disbursed_loans.all(:loan_utilization_id => nil)
+          date_with_holiday = [@date, @date.holidays_shifted_today].max
+          @loans_to_disburse = @undisbursed_loans.all(:scheduled_disbursal_date.lte => date_with_holiday)
+          @fee_paying_loans   = @loans.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
+          @fee_paying_clients = @clients.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
+          @fee_paying_things = @fee_paying_clients + @fee_paying_loans
+        end
+
+        if request.method == :post
+          if params[:paid] or params[:disbursed]
+            bulk_payments_and_disbursals
+            mark_attendance
+          end
+          if @success and @errors.blank?
+            redirect url(:enter_payments, :action => 'by_staff_member'), :message => {:notice => "All payments made succesfully"}
+          else
+            render
+          end
         else
+          #redirect url(:enter_payments, :action => 'by_staff_member', :staff_member_id => @staff_member.id, :for_date => @date)
           render
         end
-      else
-        #redirect url(:enter_payments, :action => 'by_staff_member', :staff_member_id => @staff_member.id, :for_date => @date)
-        render
       end
     end
 

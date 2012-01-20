@@ -287,19 +287,7 @@ class Array
        }]
     }.sort_by{|x| x[0]}
   end
-<<<<<<< HEAD
-  
-  def sum
-    self.reduce(:+)
-  end
-  
-=======
 
-  def sum
-    self.reduce(:+)
-  end
-
->>>>>>> takeover
   def chunk len
     a = []
     each_with_index do |x,i|
@@ -308,10 +296,11 @@ class Array
     end
     a
   end
-<<<<<<< HEAD
-  
-=======
->>>>>>> takeover
+
+  def sum
+    self.reduce(:+)
+  end
+
 end
 
 

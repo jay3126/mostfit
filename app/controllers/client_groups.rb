@@ -92,6 +92,7 @@ class ClientGroups < Application
   private
   def get_context
     if params[:id]
+      debugger
       @client_group = ClientGroup.get(params[:id])
       raise NotFound unless @client_group
       @branch = @client_group.center.branch

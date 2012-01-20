@@ -37,7 +37,7 @@ module DataEntry
       @branch  = @center.branch
       @errors = []
       clients.each{|client_id|
-        if client = Client.get(client_id) and not client.update_attributes(:grt_pass_date => grt_date)
+        if client = Client.get(client_id) and not client.update_attributes(:grt_pass_date => grt_date) and not client.errors.blank?
           @errors << client
         end
       }
