@@ -35,7 +35,6 @@ namespace :mostfit do
               puts "pos = #{pos}. making #{lh_rows.count} payments" if lh_rows.count > 0
               lh_rows.each do |lh|
               # make the payments
-                debugger
                 bid = l.client.center.branch.id
                 cid = l.client.center.id
                 p = Payment.new(:type => :principal, :amount => lh.scheduled_principal_due, :received_on => lh.date,

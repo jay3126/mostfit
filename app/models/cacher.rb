@@ -16,6 +16,8 @@ class Cacher
   property :scheduled_principal_due,         Float, :nullable => false
   property :scheduled_interest_due,          Float, :nullable => false
   
+
+
   property :principal_due,                   Float, :nullable => false
   property :interest_due,                    Float, :nullable => false
   property :principal_due_today,             Float, :nullable => false # this is the principal and interest 
@@ -189,16 +191,16 @@ class BranchCache < Cacher
 
       return true if cids.blank? #nothing to do
       # update all the centers for today
+      chunks = (cids.count/CHUNK_SIZE.to_f).ceil
       begin
-        chunk_size = 6000
-        chunks = cids.count/chunk_size
-        cids.chunk(chunk_size).each_with_index do |_cids, i|
-          _t = Time.now
+        _t = Time.now
+        cids.chunk(CHUNK_SIZE).each_with_index do |_cids, i|
+          puts "DOING chunk #{i+1} of #{chunks}...."
           (CenterCache.update(:center_id => _cids, :date => date))
-          puts "did chunk #{i} in #{Time.now - _t} secs"
+          print "#{(Time.now - _t).round(2)} secs"
         end
       rescue Exception => e
-        puts "#{e}\n#{e.backtrace}"
+        puts "#{e}\n#{e.backtrace[0..400]}"
         return false
       end
       puts "UPDATED CENTER CACHES in #{(Time.now - t).round} secs"
