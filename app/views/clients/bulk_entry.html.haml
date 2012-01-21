@@ -1,5 +1,6 @@
 %h1 Bulk Entry of Clients
 
+- no_of_fields = 4
 = form :action => url(:controller => :clients, :action => :bulk_entry, :method => :post) do
   %table.tall.shaded
     %tr
@@ -16,37 +17,114 @@
           %span.red
             = @errors[:center]
 
-  %table
-    %thead
+  - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
+    - if (@errors or Nothing)[i] 
       %tr
-        %th
-          Name
-        %th
-          Reference
-        %th
-          D.O.B.
-        %th
-          Date joined
-        %th
-          Address
+        %td{:colspan => 10}
+          .error
+            - @errors.map do |k,v|
+              - v.keys.each do |key|
+                == #{key} : #{v[key]}
+                
+  %table.shaded
+    %tr
+      %th
+        Name
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_field :name => "clients[#{i}][name]", :value => (params[:clients] and params[:clients][i.to_s][:name]), :tabindex => 1*i
+    %tr
+      %th
+        Ration Card
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_field :name => "clients[#{i}][ration_card_number]", :value => (params[:clients] and params[:clients][i.to_s][:ration_card_number]), :tabindex => 1*i
+    %tr
+      %th
+        Reference
+      - (1..no_of_fields).each do |i| 
+        %td
+          = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference]), :tabindex => 1*i
+    %tr
+      %th
+        Reference type
+      - (1..no_of_fields).each do |i|
+        %td
+          = select :name => "clients[#{i}][type_of_id]", :value => (params[:clients] and params[:clients][i.to_s][:type_of_id]), :collection => ID_TYPES, :tabindex => 1*i
+    %tr
+      %th
+        D.O.B.
+      - (1..no_of_fields).each do |i|
+        %td
+          = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000, :tabindex => 1*i
+    %tr
+      %th
+        Date joined
+      - (1..no_of_fields).each do |i|
+        %td
+          = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today, :tabindex => 1*i
+    %tr
+      %th
+        Kin name
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_area :name => "clients[#{i}][next_to_kin]", :value => (params[:clients] and params[:clients][i.to_s][:next_to_kin]), :tabindex => 1*i
+    %tr
+      %th
+        Kin relationship
+      - (1..no_of_fields).each do |i|
+        %td
+          = select :name => "clients[#{i}][next_to_kin_relationship]", :value => (params[:clients] and params[:clients][i.to_s][:next_to_kin_relationship]), :collection => ["Husband", "Father"], :tabindex => 1*i
+    %tr
+      %th
+        Address
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_area :name => "clients[#{i}][address]", :value => (params[:clients] and params[:clients][i.to_s][:address]), :tabindex => 1*i
+    %tr
+      %th
+        State
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_area :name => "clients[#{i}][state]", :value => (params[:clients] and params[:clients][i.to_s][:state]), :tabindex => 1*i
+    %tr
+      %th
+        Pincode
+      - (1..no_of_fields).each do |i|
+        %td
+          = text_area :name => "clients[#{i}][pincode]", :value => (params[:clients] and params[:clients][i.to_s][:pincode]), :tabindex => 1*i
+  = submit 'add clients'             
+  -# %table
+  -#   %thead
+  -#     %tr
+  -#       %th
+  -#         Name
+  -#       %th
+  -#         Reference
+  -#       %th
+  -#         D.O.B.
+  -#       %th
+  -#         Date joined
+  -#       %th
+  -#         Address
       
-    - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
-      - if (@errors or Nothing)[i] 
-        %tr
-          %td{:colspan => 10}
-            .error
-              - @errors.map do |k,v|
-                - v.keys.each do |key|
-                  == #{key} : #{v[key]}
-      %tr
-        %th
-          = text_field :name => "clients[#{i}][name]", :value => (params[:clients] and params[:clients][i.to_s][:name])
-        %th
-          = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference])
-        %th
-          = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000
-        %th
-          = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today
-        %th
-          = text_field :name => "clients[#{i}][address]", :value => (params[:clients] and params[:clients][i.to_s][:address])
-  = submit 'add clients' 
+  -#   - ((params[:clients] or Nothing).keys || (1..5)).each do |i|
+  -#     - if (@errors or Nothing)[i] 
+  -#       %tr
+  -#         %td{:colspan => 10}
+  -#           .error
+  -#             - @errors.map do |k,v|
+  -#               - v.keys.each do |key|
+  -#                 == #{key} : #{v[key]}
+  -#     %tr
+  -#       %th
+  -#         = text_field :name => "clients[#{i}][name]", :value => (params[:clients] and params[:clients][i.to_s][:name])
+  -#       %th
+  -#         = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference])
+  -#       %th
+  -#         = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000
+  -#       %th
+  -#         = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today
+  -#       %th
+  -#         = text_field :name => "clients[#{i}][address]", :value => (params[:clients] and params[:clients][i.to_s][:address])
+  -# = submit 'add clients' 

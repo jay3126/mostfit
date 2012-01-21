@@ -297,6 +297,7 @@ class Array
     a
   end
 
+
   def sum
     self.reduce(:+)
   end
@@ -311,7 +312,6 @@ module ExcelFormula
     (vPow * present_value - future_value)/(vPow - 1) * actual_interest_rate
   end
 end
-
 
 module FinancialFunctions
   def npv(cashflows, discount_rate)
@@ -382,11 +382,15 @@ def get_where_from_hash(hash)
   # and additionally, not possible to ask DM to just craft an SQL statement and give it to us (i think)
   hash.map do |col, v|
     val = format_for_sql(v)
-    operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
+    if col.to_s.index('.not') 
+      col = col.to_s.split(".")[0]
+      operator = {Array => "NOT IN", Range => "NOT BETWEEN"}[v.class] || "<>"
+    else
+      operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
+    end
     "#{col} #{operator} #{val}" 
   end.join(" AND ")
 end
-
 
 def q(sql)
   repository.adapter.query(sql)

@@ -167,6 +167,14 @@ class Centers < Application
     partial "centers/surprise_center_visits"
   end
 
+  def client_groups
+    if params[:id]
+      center = Center.get(params[:id])
+      next unless center
+      return("<option value=''>Select client group</option>"+center.client_groups(:order => [:name]).map{|br| "<option value=#{br.id}>#{br.name}</option>"}.join)
+    end 
+  end
+
   def groups
     only_provides :json
     if params[:group_id]

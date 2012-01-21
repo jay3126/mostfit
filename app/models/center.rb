@@ -316,7 +316,6 @@ class Center
   end
 
   def get_meeting_date(date, direction)
-    debugger
     number = 1
     if direction == :next
       nwday = (date + number).wday
