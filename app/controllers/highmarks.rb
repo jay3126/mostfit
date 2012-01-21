@@ -19,15 +19,15 @@ class Highmarks < Application
   end
 
   def pipe_delimited_file
-    # find all the clients
-    clients = Client.all(:id => Highmark::HighmarkResponse.all(:status => :pending).aggregate(:client_id))
+    # find all the loans
+    loans = Loan.all(:id => Highmark::HighmarkResponse.all(:status => :pending).aggregate(:loan_id))
     file = FasterCSV.generate({:col_sep => "|"}) do |csv| 
-      clients.each do |client|
-        csv << client.row_to_delimited_file
+      loans.each do |loan|
+        csv << loan.row_to_delimited_file
       end
     end
 
-    send_data(file, :filename => "clients.csv", :type => "csv")
+    send_data(file, :filename => "highmark_request.csv", :type => "csv")
   end
 
   # def download_pipe_delimited_file
