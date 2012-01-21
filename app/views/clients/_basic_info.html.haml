@@ -28,14 +28,17 @@
     %th
       Group name
     %td
-      %select{:id => "client_group_id", :name => "client[client_group_id]"}
-        %option{:value => ""}
-          Select the group for this person
-        - if @center
-          = @center.client_groups.collect{|g| "<option #{'selected=\"selected\"' if g.id==@client.client_group_id} value='#{g.id}'>#{g.name}</option>"}.join
-      %a{:href => "#", :id => "new_client_group_link", :style => "#{@center ? 'display:block' : 'display: none;'}"}
-        Add new group
-      %div#new_client_group_form
+      - if @center
+        %select{:id => "client_group_id", :name => "client[client_group_id]"}
+          %option{:value => ""}
+            Select the group for this person
+          - if @center
+            = @center.client_groups.collect{|g| "<option #{'selected=\"selected\"' if g.id==@client.client_group_id} value='#{g.id}'>#{g.name}</option>"}.join
+        %a{:href => "#", :id => "new_client_group_link", :style => "#{@center ? 'display:block' : 'display: none;'}"}
+          Add new group
+        %div#new_client_group_form
+      - else
+        = select :client_group_id, :collection => nil, :value_method => :id, :text_method => :name, :id => "client_group_selector"
   %tr
     %th
       Name:
@@ -62,7 +65,7 @@
     %th
       Gender
     %td
-      = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please choose a gender"
+      = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select"
   %tr
     %th
       Reference:
@@ -73,6 +76,11 @@
         references are unique, a way to check that this is the only record of a client
         %br/
         for this reason it is advisable to use a government ID as reference
+  %tr
+    %th
+      Reference type:
+    %td
+      = select :type_of_id, :collection => ID_TYPES, :prompt => "Select"
   %tr
     %th
       Ration Card:
@@ -118,7 +126,7 @@
     %th
       Guarantor relationship:
     %td
-      = select :guarantor_relationship, :collection => CLIENT_RELATIONSHIPS, :prompt => "---"
+      = select :guarantor_relationship, :collection => CLIENT_RELATIONSHIPS, :prompt => "Select"
   %tr
     %th
       No of Family Numbers:
@@ -131,29 +139,74 @@
       ~ text_area :address, :rows => 6, :cols => 38
   %tr
     %th
+      State:
+    %td
+      = text_field :state
+  %tr
+    %th
       Pincode:
     %td
       = text_field :pincode
   %tr
     %th
+      Telephone number:
+    %td
+      = text_field :telephone_number
+  %tr 
+    %th
+      Telephone Type
+    %td
+      = select :telephone_type, :collection => TELEPHONE_TYPES, :prompt => "Select"
+  %tr
+    %th
       Economic Weaker Section Classification
     %td
-      = select :ews, :collection => EWS_LIST.map{|x| [x, x.camelcase(' ')]}, :prompt => "---"
+      = select :ews, :collection => EWS_LIST.map{|x| [x, x.camelcase(' ')]}, :prompt => "Select"
+  %tr
+    %th
+      Income
+    %td
+      = text_field :income
+  %tr
+    %th
+      Family Income
+    %td
+      = text_field :family_income
+  %tr
+    %th
+      Earning Members
+    %td
+      = text_field :earning_members
+  %tr
+    %th
+      Credit Bureau Approval Number
+    %td
+      = text_field :cb_approval_number
   %tr
     %th
       Occupation
     %td
-      = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"
+      = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "Select"
   %tr
     %th
       Priority Sector List (PSL)
     %td
-      = select :priority_sector_list_id, :collection => PrioritySectorList.all, :value_method => :id, :text_method => :name, :prompt => "---", :id => 'psl_selector'
+      = select :priority_sector_list_id, :collection => PrioritySectorList.all, :value_method => :id, :text_method => :name, :prompt => "Select", :id => 'psl_selector'
   %tr
     %th
       PSL Sub-category
     %td
-      = select :psl_sub_category_id, :collection => nil, :value_method => :id, :text_method => :name, :prompt => "---", :id => 'psl_sub_category_selector'
+      = select :psl_sub_category_id, :collection => nil, :value_method => :id, :text_method => :name, :prompt => "Select", :id => 'psl_sub_category_selector'
+  %tr
+    %th
+      Caste:
+    %td
+      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select")
+  %tr
+    %th
+      Religion:
+    %td
+      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddha, "Buddha"], [:christian, "Christian"]] , :prompt => "Select")
   - if not @client.new?
     %tr
       %th

@@ -6,7 +6,6 @@ class Client
   include Highmark::Client
 
   FLAGS = [:insincere]
-  # PSL_LIST = [:micro_credit, :direct_agriculture, :smsme]
 
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
@@ -20,14 +19,14 @@ class Client
   # # basic properties custom only to suryoday
   # property :first_name,      String, :nullable => true
   # property :last_name,       String, :nullable => true
+  property :next_to_kin,     String
+  property :next_to_kin_relationship, Enum.send('[]', *["Husband", "Father"]), :default => "Husband"
   property :guarantor_name,  String
   property :guarantor_dob,   Date, :index => true, :lazy => true
   property :guarantor_relationship, Enum.send('[]', *(CLIENT_RELATIONSHIPS)), :default => 'Other'
-  # property :id_number,       String, :nullable => true
-  # property :id_type,         Enum.send('[]', *([nil] + ID_TYPES)), :nullable => true
   property :telephone_number, String, :nullable => true
-  # property :telephone_type,  Enum.send('[]', *([nil] + TELEPHONE_TYPES)), :nullable => true
-  # property :state,           String, :nullable => true
+  property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Other"
+  property :state,           String, :nullable => true
   property :pincode,         Integer
   property :income,          Integer 
   property :family_income,   Integer
@@ -35,11 +34,10 @@ class Client
   property :earning_members, Integer
   property :cb_approval_number, String
   property :ration_card_number, String
-  # property :psl,             Enum.send('[]', *PSL_LIST)
-  # property :psl_subcategory  String
   property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true, :default => 'not_applicable'
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :type_of_id, Enum.send('[]', *(ID_TYPES)), :nullable => false, :lazy => true, :default => "Others"
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true

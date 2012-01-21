@@ -612,6 +612,18 @@ function fillCenters(){
 				 });
 }
 
+function fillClientGroups(){
+    $("#center_selector").change(function(){
+				     $.ajax({
+						type: "GET",
+						url: "/centers/client_groups/"+$("#center_selector").val(),
+						success: function(data){
+						    $("#client_group_selector").html(data);
+						}
+					    });
+				 });
+}
+
 function fillComboBranches(){
     $("#area_selector").change(function(){
 	$.ajax({
@@ -762,6 +774,7 @@ $(document).ready(function(){
 		      fillCashAccounts();
 		      fillBankAccounts();
                       fillDistricts();
+                      fillClientGroups();
                       fillPslSubCategories();
 		    $('.chosen').chosen();
 		    $('input#submit').addClass("greenButton");
