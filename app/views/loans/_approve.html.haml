@@ -55,20 +55,12 @@
         - else
           = Date.today
           = hidden_field(:name => "loans[#{loan.id}][approved_on]", :value => Date.today)
-      -# %td.text
-      -#   - min_date = (loan.scheduled_disbursal_date > Date.min_transaction_date ? loan.scheduled_disbursal_date : Date.min_transaction_date)
-      -#   = date_select("loans[#{loan.id}][scheduled_disbursal_date]", min_date, :id => "loans_#{loan.id}_scheduled_disbursal_date", :min_date => min_date, :max_date => Date.max_transaction_date)
-      -#   = loan.scheduled_first_payment_date.strftime('%A')
-
-      -# %td.text
-      -#   - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date)
-      -#   = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, :id => "loans_#{loan.id}_scheduled_first_payment_date", :min_date => min_date, :max_date => Date.max_transaction_date)
-      -#   = loan.scheduled_first_payment_date.strftime('%A')
       %td.text
         = loan.client.center.meeting_day.to_s.camelcase
       %td.text
         = loan.status.to_s.camelcase(' ')
       %td
+        - hr = loan.highmark_responses.first
         - if hr
           - if hr.status == :rejected
             = check_box :name => "loans[#{loan.id}][approved?]", :onclick => "javascript:$('#approval_reason_#{loan.id}').toggle();", :class => "approve"

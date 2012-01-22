@@ -2,6 +2,12 @@
   Approve loans
   %h2
     The following loans have not been approved yet
+
+= form :method => :get, :action => url(:loan_actions, :action => :approve) do
+  = select :name => 'branch_id', :id => "branch_selector", :collection => Branch.all, :text_method => :name, :value_method => :id, :selected => params[:branch_id].to_s, :prompt => 'Select a branch', :class => 'chosen'
+  = select :name => 'center_id', :id => 'center_selector', :collection => Center.all(:branch_id => params[:branch_id]), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center', :class => 'chosen', :style => "width: 400px"
+  = submit 'Refresh!'
+
 - if not @errors.blank?
   .error
     %ul

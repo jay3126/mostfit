@@ -199,13 +199,13 @@ class Loans < Application
       # disburse loans
       disbursal_loans = params[:loans].select{|k,v| v[:disbursed?] == "on"}.to_hash
       disbursal_loans.keys.each do |id|        
-        loan = Loan.get(id.to_i)
+        loan                                   = Loan.get(id.to_i)
         next unless loan_ids.include?(loan.id)
-        loan.disbursal_date = params[:loans][id][:disbursal_date]
-        loan.cheque_number  = params[:loans][id][:cheque_number] and params[:loans][id][:cheque_number].to_i>0 ? params[:loans][id][:cheque_number] : nil
-        loan.scheduled_first_payment_date = params[:loans][id][:scheduled_first_payment_date] if params[:loans][id][:scheduled_first_payment_date]
-        loan.amount         = params[:loans][id][:amount]
-        loan.disbursed_by   = StaffMember.get(params[:loans][id][:disbursed_by_staff_id])
+        loan.disbursal_date                    = params[:loans][id][:disbursal_date]
+        loan.cheque_number                     = params[:loans][id][:cheque_number] and params[:loans][id][:cheque_number].to_i>0 ? params[:loans][id][:cheque_number] : nil
+        loan.scheduled_first_payment_date      = params[:loans][id][:scheduled_first_payment_date] if params[:loans][id][:scheduled_first_payment_date]
+        loan.amount                            = params[:loans][id][:amount]
+        loan.disbursed_by                      = StaffMember.get(params[:loans][id][:disbursed_by_staff_id])
         @errors << loan.errors if not loan.save
       end
       rurl = (params[:return]||url(:data_entry))
@@ -219,8 +219,11 @@ class Loans < Application
 
   def approve
     if request.method == :get
-      if params[:center_id]
-        @loans_to_approve = @loan.all("client.center" => Center.get(params[:center_id]))
+      debugger
+      if (not params[:center_id].blank?)
+        @loans_to_approve = get_loans("client.center" => Center.get(params[:center_id]),:approved_on => nil, :rejected_on => nil)
+      elsif (not params[:branch_id].blank?)
+        @loans_to_approve = get_loans("client.center.branch_id" => params[:branch_id],:approved_on => nil, :rejected_on => nil)
       else
         @loans_to_approve = get_loans({:approved_on => nil, :rejected_on => nil})
       end
