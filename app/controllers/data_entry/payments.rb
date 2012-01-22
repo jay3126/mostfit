@@ -78,50 +78,54 @@ module DataEntry
         end
       end
     end
-
+    
     def by_staff_member
-      if params[:staff_member_id].nil?
-        render
-      else
-        @date = params[:for_date] ? Date.parse(params[:for_date]) : Date.today
-        staff_id = params[:staff_member_id] || params[:received_by]
-
-        if staff_id
-          @staff_member = StaffMember.get(staff_id.to_i)
-          raise NotFound unless @staff_member
-        end
-
-        center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).aggregate(:center_id)
-        @centers = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
-
-        unless @staff_member.nil?
-          @loan_ids = @staff_member.loans.map{|l| l.id}
-          @loans = Loan.all(:id => @loan_ids, :rejected_on => nil)
-          @client_ids = @loans.map{|l| l.client_id}
-          @clients = Client.all(:id => @client_ids, :fields => [:id, :name, :center_id, :client_group_id])
-          @disbursed_loans = @loans.all(:disbursal_date.not => nil)
-          @undisbursed_loans = @loans.all(:disbursal_date => nil, :approved_on.not => nil)
-          @loans_to_approve = @loans.all(:approved_on  => nil)
-          @loans_to_utilize = @disbursed_loans.all(:loan_utilization_id => nil)
-          date_with_holiday = [@date, @date.holidays_shifted_today].max
-          @loans_to_disburse = @undisbursed_loans.all(:scheduled_disbursal_date.lte => date_with_holiday)
-          @fee_paying_loans   = @loans.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
-          @fee_paying_clients = @clients.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
-          @fee_paying_things = @fee_paying_clients + @fee_paying_loans
-        end
-
-        if request.method == :post
-          if params[:paid] or params[:disbursed]
-            bulk_payments_and_disbursals
-            mark_attendance
-          end
-          if @success and @errors.blank?
-            redirect url(:enter_payments, :action => 'by_staff_member'), :message => {:notice => "All payments made succesfully"}
-          else
-            render
-          end
+      debugger
+      @date = params[:for_date] ? Date.parse(params[:for_date]) : Date.today
+      if request.method == :get
+        if params[:staff_member_id].blank?
+          @loan_history = LoanHistory.latest_by_status(:date => @date, :status => :outstanding)
+          @centers = Center.all(:id => @loan_history.aggregate(:center_id))
+          @staff_members = @centers.managers.aggregate(:id, :name)
         else
-          #redirect url(:enter_payments, :action => 'by_staff_member', :staff_member_id => @staff_member.id, :for_date => @date)
+          staff_id = params[:staff_member_id] || params[:received_by]
+          if staff_id
+            @staff_member = StaffMember.get(staff_id.to_i)
+            raise NotFound unless @staff_member
+          end
+          
+          unless @staff_member.nil?
+            # select clients and centers
+            @centers                         = Center.all(:manager => @staff_member)
+            @clients                         = @centers.clients
+            redirect url(:controller => 'data_entry/payments', :action => :by_staff_member), :message => {:notice => "This StaffMember does not have any clients"} if @clients.blank?
+            @atts                            = @clients.attendances(:date => @date).aggregate(:client_id, :status).to_hash
+            @client_groups                   = ClientGroup.all(:center_id => @centers.aggregate(:id)).aggregate(:id, :name).to_hash
+            @grouped_clients                 = @clients.all(:fields => [:center_id, :client_group_id, :name, :id]).group_by{|c| [c.center_id, c.client_group_id]}.deepen
+            
+            # select loans
+            @loan_histories                  = LoanHistory.latest_by_status(:center_id => @centers.aggregate(:id), :date => @date, :status => :outstanding)
+            @loans                           = @loan_histories.loans
+            @disbursed_loans                 = @clients.loans.all(:disbursal_date.not => nil)
+            @undisbursed_loans               = @clients.loans.all(:disbursal_date => nil, :approved_on.not => nil)
+            @loans_to_approve                = @clients.loans.all(:approved_on  => nil)
+            @loans_to_utilize                = @disbursed_loans.all(:loan_utilization_id => nil)
+            date_with_holiday                = [@date, @date.holidays_shifted_today].max
+            @loans_to_disburse               = @undisbursed_loans.all(:scheduled_disbursal_date.lte => date_with_holiday)
+            @fee_paying_loans                = @loan_histories.all(:fees_due_today.gt => 0).aggregate(:loan_id, :fees_due_today).to_hash
+            # @fee_paying_clients              = @clients.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
+            # @fee_paying_things               = @fee_paying_loans
+          end
+        end
+        render
+      elsif request.method == :post
+        if params[:paid] or params[:disbursed]
+          bulk_payments_and_disbursals(true)
+          mark_attendance
+        end
+        if @success and @errors.blank?
+          redirect url(:enter_payments, :action => 'by_staff_member'), :message => {:notice => "All payments made succesfully"}
+        else
           render
         end
       end
@@ -213,7 +217,7 @@ module DataEntry
     private
     include DateParser
     # this function is called by by_center and by_staff_member
-    def bulk_payments_and_disbursals
+    def bulk_payments_and_disbursals(defer_updation = false)
       @center = Center.get(params[:center_id]) || Center.first(:name => params[:center_id]) 
       @branch = @center.branch unless @center.nil?
       @clients = @center.clients(:fields => [:id, :name, :center_id, :client_group_id]) unless @center.nil?
@@ -246,9 +250,11 @@ module DataEntry
               @loan.preclosed_on = @date; @loan.preclosed_by = @staff; 
               @loan.save
             end
-            @loan.history_disabled = false
-            @loan.already_updated  = false
-            @loan.update_history(true)
+            unless defer_updation
+              @loan.history_disabled = false
+              @loan.already_updated  = false
+              @loan.update_history(true)
+            end
           else
           end
         end
