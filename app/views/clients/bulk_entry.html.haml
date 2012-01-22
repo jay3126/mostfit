@@ -1,6 +1,6 @@
 %h1 Bulk Entry of Clients
 
-- no_of_fields = 4
+- no_of_fields = params[:clients] ? params[:clients].keys.count : 4
 = form :action => url(:controller => :clients, :action => :bulk_entry, :method => :post) do
   %table.tall.shaded
     %tr
@@ -26,12 +26,13 @@
               - v.keys.each do |key|
                 == #{key} : #{v[key]}
                 
-  %table.shaded
+  %table.tall.shaded
     %tr
       %th
         Name
       - (1..no_of_fields).each do |i|
         %td
+          - debugger
           = text_field :name => "clients[#{i}][name]", :value => (params[:clients] and params[:clients][i.to_s][:name]), :tabindex => 1*i
     %tr
       %th

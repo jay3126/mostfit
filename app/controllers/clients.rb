@@ -171,7 +171,7 @@ class Clients < Application
       @errors[:center] = "Please choose a center" unless @center
       if @errors.blank?
         @clients = params[:clients].each do |k,v| 
-          if v.values.join.length > 0 # if it isn't one of the blank rows
+          if v.except(:type_of_id, :next_to_kin_relationship).values.join.length > 0 # if it isn't one of the blank rows
             # create the client
             c = Client.new(v.merge({:center_id => params[:center_id], 
                                      :created_by_staff_member_id => @center.manager, 
