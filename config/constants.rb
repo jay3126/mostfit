@@ -123,6 +123,44 @@ ID_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Lic
 TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
 APPROVAL_REASONS = {'bad_data' => 'data regarding this client is incorrect', 'stale_data' => 'data regarding this client is stale', 'other' => 'other reasons'}
 
+STATES = [
+          "andhra_pradesh"     , 
+          "arunachal_pradesh"  , 
+          "assam"              , 
+          "bihar"              , 
+          "chattisgarh"        , 
+          "goa"                , 
+          "gujarat"            , 
+          "haryana"            , 
+          "himachal_pradesh"   , 
+          "jammu_kashmir"      , 
+          "jharkhand"          , 
+          "karnataka"          , 
+          "kerala"             , 
+          "madhya_pradesh"     , 
+          "maharashtra"        , 
+          "manipur"            , 
+          "meghalaya"          , 
+          "mizoram"            , 
+          "nagaland"           , 
+          "orissa"             , 
+          "punjab"             , 
+          "rajasthan"          , 
+          "sikkim"             , 
+          "tamil_nadu"         , 
+          "tripura"            , 
+          "uttarakhand"        , 
+          "uttar_pradesh"      , 
+          "west_bengal"        , 
+          "andaman_nicobar"    , 
+          "chandigarh"         , 
+          "dadra_nagar_haveli" , 
+          "daman_diu"          , 
+          "delhi"              , 
+          "lakshadweep"        , 
+          "pondicherry"                  
+         ]
+
 # Caches
 # in order to avoid overrunning the SQL max packet size, we split the cacher update into chunks
 # 2500 should be good for the standard SQL max_packet_size of 16MB

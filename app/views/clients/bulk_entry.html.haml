@@ -87,7 +87,7 @@
         State
       - (1..no_of_fields).each do |i|
         %td
-          = text_area :name => "clients[#{i}][state]", :value => (params[:clients] and params[:clients][i.to_s][:state]), :tabindex => 1*i
+          = select :name => "clients[#{i}][state]", :collection => STATES, :selected => (params[:clients] and params[:clients][i.to_s][:state]).to_s, :tabindex => 1*i, :class => "chosen", :prompt => "Select"
     %tr
       %th
         Pincode

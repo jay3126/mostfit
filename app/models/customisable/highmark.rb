@@ -116,6 +116,51 @@ module Highmark
             "Pan"                => "ID07"
           }
         end
+
+        # def states(string)
+        #   return "GJ" if string =~ /[Gg][Uu]j.*/
+        # end
+
+        def states
+          @states ||= {
+            :andhra_pradesh     => "AP",
+            :arunachal_pradesh  => "AR",
+            :assam              => "AS",
+            :bihar              => "BR",
+            :chattisgarh        => "CG",
+            :goa                => "GA",
+            :gujarat            => "GJ",
+            :haryana            => "HR",
+            :himachal_pradesh   => "HP",
+            :jammu_kashmir      => "JK",
+            :jharkhand          => "JH",
+            :karnataka          => "KA",
+            :kerala             => "KL",
+            :madhya_pradesh     => "MP",
+            :maharashtra        => "MH",
+            :manipur            => "MN",
+            :meghalaya          => "ML",
+            :mizoram            => "MZ",
+            :nagaland           => "NL",
+            :orissa             => "OR",
+            :punjab             => "PB",
+            :rajasthan          => "RJ",
+            :sikkim             => "SK",
+            :tamil_nadu         => "TN",
+            :tripura            => "TR",
+            :uttarakhand        => "UK",
+            :uttar_pradesh      => "UP",
+            :west_bengal        => "WB",
+            :andaman_nicobar    => "AN",
+            :chandigarh         => "CH",
+            :dadra_nagar_haveli => "DN",
+            :daman_diu          => "DD",
+            :delhi              => "DL",
+            :lakshadweep        => "LD",
+            :pondicherry        => "PY"
+          }
+        end
+
         # creates a row for a loan as per highmarks pipe delimited format 
         def row_to_delimited_file(datetime = DateTime.now)
           client = self.client
@@ -156,18 +201,18 @@ module Highmark
                   client.id,                                                               # member id
                   client.center.id,                                                        # kendra id
                   self.amount_applied_for || self.amount,                                  # applied for amount / current balance
-                  nil,                                                                     # key person name
-                  nil,                                                                     # key person relationship
+                  client.next_to_kin,                                                      # key person name
+                  client.next_to_kin_relationship.nil? ? nil : key_person_relationship[client.next_to_kin_relationship.to_s.downcase.to_sym], # key person relationship
                   nil,                                                                     # nominee name
                   nil,                                                                     # nominee relationship
-                  client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
-                  client.telephone_number,                                                 # applicant telephone number number 1
+                  nil, #client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
+                  nil, #client.telephone_number,                                           # applicant telephone number number 1
                   nil,                                                                     # applicant telephone number type 2
                   nil,                                                                     # applicant telephone number number 2
                   "D01",                                                                   # applicant address type 1
                   client.address,                                                          # applicant address 1
-                  nil,                                                                     # applicant address 1 city
-                  client.state,                                                            # applicant address 1 state
+                  client.center.branch.name,                                               # applicant address 1 city
+                  states[(client.state or Nothing).to_sym],                                # applicant address 1 state
                   client.pincode,                                                          # applicant address 1 pincode
                   nil,                                                                     # applicant address type 2
                   nil,                                                                     # applicant address 2

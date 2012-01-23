@@ -146,12 +146,12 @@
     %th
       Address:
     %td
-      ~ text_area :address, :rows => 6, :cols => 38
+      = text_area :address, :rows => 6, :cols => 38
   %tr
     %th
       State:
     %td
-      = text_field :state
+      = select :state, :collection => STATES, :prompt => "Select"
   %tr
     %th
       Pincode:
