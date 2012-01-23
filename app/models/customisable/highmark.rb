@@ -122,9 +122,9 @@ module Highmark
           return [
                   "CRDRQINQR",                                                             # segment identifier
                   "JOIN",                                                                  # credit request type
-                  "",                                                                      # credit report transaction id
+                  nil,                                                                     # credit report transaction id
                   "ACCT-ORIG",                                                             # credit inquiry purpose type
-                  "",                                                                      # credit inquiry purpose type description
+                  nil,                                                                     # credit inquiry purpose type description
                   "PRE-DISB",                                                              # credit inquiry stage
                   datetime.strftime("%d-%m-%Y %H:%M:%S"),                                  # credit report transaction date time 
                   client.name,                                                             # applicant name 1
@@ -143,24 +143,24 @@ module Highmark
                   nil,                                                                     # member relationship name 3
                   nil,                                                                     # member relationship type 4
                   nil,                                                                     # member relationship name 4
-                  client.date_of_birth.strftime("%d%m%Y"),                                 # applicant date of birth
+                  client.date_of_birth.strftime("%d-%m-%Y"),                               # applicant date of birth
                   Date.today.year - client.date_of_birth.year,                             # applicant age
-                  Date.today.strftime("%d%m%Y"),                                           # applicant age as of
-                  id_type[client.type_of_id],                                                       # applicant id type 1
+                  Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
+                  id_type[client.type_of_id],                                              # applicant id type 1
                   client.reference,                                                        # applicant id 1
                   "ID05",                                                                  # applicant id type 2
                   client.ration_card_number,                                               # applicant id 2
-                  self.applied_on,                                                         # account opening date
+                  self.applied_on.strftime("%d-%m-%Y"),                                    # account opening date
                   self.id,                                                                 # account id / number
-                  client.center.branch.name,                                                      # branch id
+                  client.center.branch.id,                                                 # branch id
                   client.id,                                                               # member id
-                  client.center.name,                                               # kendra id
-                  self.amount_applied_for,                                                 # applied for amount / current balance
+                  client.center.id,                                                        # kendra id
+                  self.amount_applied_for || self.amount,                                  # applied for amount / current balance
                   nil,                                                                     # key person name
                   nil,                                                                     # key person relationship
                   nil,                                                                     # nominee name
                   nil,                                                                     # nominee relationship
-                  client.telephone_type,                                                   # applicant telephone number type 1
+                  client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
                   client.telephone_number,                                                 # applicant telephone number number 1
                   nil,                                                                     # applicant telephone number type 2
                   nil,                                                                     # applicant telephone number number 2
@@ -173,7 +173,7 @@ module Highmark
                   nil,                                                                     # applicant address 2
                   nil,                                                                     # applicant address 2 city
                   nil,                                                                     # applicant address 2 state
-                  nil                                                                     # applicant address 2 pincode
+                  nil                                                                      # applicant address 2 pincode
                  ]
         end
 
