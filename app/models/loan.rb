@@ -793,7 +793,7 @@ class Loan
 
   def actual_payment_schedule
     return @schedule if @schedule
-    @schedule = {}
+    @Schedule = {}
     return @schedule unless amount.to_f > 0
 
     principal_so_far = interest_so_far = fees_so_far = total = 0
@@ -833,7 +833,7 @@ class Loan
       }
     end
     # we have to do the following to avoid the circular reference from total_to_be_received.
-    total = @schedule[@schedule.keys.max][:total]
+    total = @schedule[@schedule.keys.compact.max][:total]
     @schedule.each { |k,v| v[:total_balance] = (total - v[:total]).round(2)}
     @schedule
   end
