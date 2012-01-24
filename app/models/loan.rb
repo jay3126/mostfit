@@ -1063,6 +1063,7 @@ class Loan
     shift_date_by_installments(scheduled_first_payment_date, number-1)
   end
   def scheduled_maturity_date
+    return nil unless scheduled_disbursal_date and scheduled_first_payment_date
     payment_schedule.keys.compact.max
   end
   def scheduled_repaid_on
