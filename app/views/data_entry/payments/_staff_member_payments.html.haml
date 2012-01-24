@@ -1,4 +1,18 @@
+:javascript
+  $(document).ready(function() {
+    $('.paid').change(function() {
+      center_id = $(this).attr('id').split("_")[0];
+      cTotal = 0;
+      $('.paid_' + center_id).each(function(){cTotal += parseFloat(this.value)});
+      $('#tot_paid_' + center_id).html(cTotal);
+      gTotal = 0;
+      $('.paid').each(function(){gTotal += parseFloat(this.value)});
+      $('#tt_paid').html(gTotal);
+    });
+  });
+    
 - if @centers.count>0
+  - tt_prin, tt_int, tt_fees, tt_paid = 0,0,0,0 # the grand total row
   Payment collected on
   = date_select "for_date", @date
   by
@@ -20,7 +34,7 @@
           %th attendance
           
       %tbody{:style => "text-align:left;display:none;", :id => "t_#{center.id}"}
-        - tot_amount, tot_outstanding, tot_installments, tot_principal, tot_interest, tot_fees, tot_total = 0, 0, 0, 0, 0, 0, 0
+        - tot_amount, tot_outstanding, tot_installments, tot_principal, tot_interest, tot_fees, tot_total, tot_paid = 0, 0, 0, 0, 0, 0, 0
         - clients_by_center = center.clients.group_by{|c| c.client_group_id}.each do |group_id, clients|
           %tr.group{:style => 'font-weight: bold; text-align: center; background: grey'}
             %td{:colspan => 12}
@@ -55,14 +69,11 @@
                   = f.round(2).to_currency
                   - tot_fees += f.round(2)
                 %td.number
-                  - a = p + i + f
-                  = a.round(2)
+                  - a = (p + i + f).round(2)
+                  = a.to_currency
                   - tot_total += a
-                %td.paid
-                  -# - if a > 0.01
-                  = text_field :name => "paid[loan][#{loan.id}]", :value => [a,0].max.round(2), :cols => "5", :style => "width:50px;" 
-                  -# - else
-                  -#   = lh.principal_paid + lh.interest_paid
+                %td.number
+                  = text_field :name => "paid[loan][#{loan.id}]", :value => [a,0].max.round(2), :cols => "5", :style => "width:50px;", :class => "paid_#{center.id} paid", :id => "#{center.id}_#{loan.id}" 
                 %td 
                   = repayment_style_select "payment_style[#{loan.id}]"
                 %td
@@ -82,14 +93,49 @@
           %td
           %td.numeric
             %b= tot_principal.to_currency
+            - tt_prin += tot_principal
           %td.numeric
             %b= tot_interest.to_currency
+            - tt_int += tot_interest
           %td
             %b= tot_fees.to_currency
+            - tt_fees += tot_fees
           %td
             %b= tot_total.to_currency
+          %td{:id => "tot_paid_#{center.id} center_paid"}
+            %b= tot_total.to_currency
+            - tt_paid += tot_total
           %td
           %td
-          %td
+  %h1 Grand Total
+  %table.report.nojs
+    %thead
+      %tr{:style => "font-size: 0.85em;"}
+        %th client
+        %th loan
+        %th principal due
+        %th interest due
+        %th fees_due
+        %th total due
+        %th paid
+        %th repay type
+        %th attendance
+    %tr
+      %td
+      %td
+      %td.numeric
+        %b= tt_prin
+      %td.numeric
+        %b= tt_int
+      %td.numeric
+        %b= tt_fees
+      %td.numeric
+        %b= tt_paid
+      %td.numeric#tt_paid
+        %b= tt_paid
+      %td
+      %td
+
+    
 - else
   %i This staff member has no collections today

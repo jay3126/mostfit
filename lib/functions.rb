@@ -382,9 +382,19 @@ def get_where_from_hash(hash)
   # and additionally, not possible to ask DM to just craft an SQL statement and give it to us (i think)
   hash.map do |col, v|
     val = format_for_sql(v)
-    if col.to_s.index('.not') 
+    if col.class == DataMapper::Query::Operator
+      fn = col.operator.to_s
+      col = col.target.to_s
+    else
+      fn = col.to_s.split(".")[1]
       col = col.to_s.split(".")[0]
+    end
+    if fn == "not"
       operator = {Array => "NOT IN", Range => "NOT BETWEEN"}[v.class] || "<>"
+    elsif fn == "gt"
+      operator = ">"
+    elsif fn == "gte"
+      operator = ">="
     else
       operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
     end

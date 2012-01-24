@@ -80,7 +80,6 @@ module DataEntry
     end
     
     def by_staff_member
-      debugger
       @date = params[:for_date] ? Date.parse(params[:for_date]) : Date.today
       if request.method == :get
         if params[:staff_member_id].blank?
@@ -97,22 +96,23 @@ module DataEntry
           unless @staff_member.nil?
             # select clients and centers
             @centers                         = Center.all(:manager => @staff_member)
-            @clients                         = @centers.clients
+            
+            # select loans
+            @loan_histories                  = LoanHistory.latest_by_status(:center_id => @centers.aggregate(:id), :date => @date, :status => :outstanding, :principal_due.gt => 0)
+            @loans                           = @loan_histories.loans
+            @clients                         = @loans.clients
+            @centers                         = @clients.centers
             redirect url(:controller => 'data_entry/payments', :action => :by_staff_member), :message => {:notice => "This StaffMember does not have any clients"} if @clients.blank?
             @atts                            = @clients.attendances(:date => @date).aggregate(:client_id, :status).to_hash
             @client_groups                   = ClientGroup.all(:center_id => @centers.aggregate(:id)).aggregate(:id, :name).to_hash
             @grouped_clients                 = @clients.all(:fields => [:center_id, :client_group_id, :name, :id]).group_by{|c| [c.center_id, c.client_group_id]}.deepen
-            
-            # select loans
-            @loan_histories                  = LoanHistory.latest_by_status(:center_id => @centers.aggregate(:id), :date => @date, :status => :outstanding)
-            @loans                           = @loan_histories.loans
+
             @disbursed_loans                 = @clients.loans.all(:disbursal_date.not => nil)
-            @undisbursed_loans               = @clients.loans.all(:disbursal_date => nil, :approved_on.not => nil)
-            @loans_to_approve                = @clients.loans.all(:approved_on  => nil)
-            @loans_to_utilize                = @disbursed_loans.all(:loan_utilization_id => nil)
-            date_with_holiday                = [@date, @date.holidays_shifted_today].max
-            @loans_to_disburse               = @undisbursed_loans.all(:scheduled_disbursal_date.lte => date_with_holiday)
-            @fee_paying_loans                = @loan_histories.all(:fees_due_today.gt => 0).aggregate(:loan_id, :fees_due_today).to_hash
+            # @undisbursed_loans               = @clients.loans.all(:disbursal_date => nil, :approved_on.not => nil)
+            # @loans_to_approve                = @clients.loans.all(:approved_on  => nil)
+            # @loans_to_utilize                = @disbursed_loans.all(:loan_utilization_id => nil)
+            # @loans_to_disburse               = @undisbursed_loans.all(:scheduled_disbursal_date.lte => date_with_holiday)
+            # @fee_paying_loans                = @loan_histories.all(:fees_due_today.gt => 0).aggregate(:loan_id, :fees_due_today).to_hash
             # @fee_paying_clients              = @clients.collect{|x| {x => x.fees_payable_on(@date)}}.inject({}){|s,x| s+=x}
             # @fee_paying_things               = @fee_paying_loans
           end
