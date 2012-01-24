@@ -49,7 +49,7 @@
           on time
       %td
         - if late > 0
-          - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date)
+          - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date) rescue Date.min_transaction_date
           = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, {:min_date => min_date, :id =>  "loans_#{loan.id}_first_payment"}) 
         - else
           = loan.scheduled_first_payment_date
