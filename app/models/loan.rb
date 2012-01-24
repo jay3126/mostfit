@@ -793,7 +793,7 @@ class Loan
 
   def actual_payment_schedule
     return @schedule if @schedule
-    @Schedule = {}
+    @schedule = {}
     return @schedule unless amount.to_f > 0
 
     principal_so_far = interest_so_far = fees_so_far = total = 0
