@@ -1063,7 +1063,7 @@ class Loan
     shift_date_by_installments(scheduled_first_payment_date, number-1)
   end
   def scheduled_maturity_date
-    payment_schedule.keys.max
+    payment_schedule.keys.compact.max
   end
   def scheduled_repaid_on
     # first payment is on "scheduled_first_payment_date", so number_of_installments-1 periods later
