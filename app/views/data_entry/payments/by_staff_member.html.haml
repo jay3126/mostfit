@@ -49,7 +49,6 @@
       %h1 Repayments
       = form_for(@payment, :action => url(:enter_payments, :action => 'by_staff_member', :class => "_disable_button_")) do
         = hidden_field :name => 'staff_member_id', :value => @staff_member.id
-        = hidden_field :name => :for_date, :value => @date.srtftime('%Y-%m-%d')
         = partial :staff_member_payments
         = submit 'Make Repayments'
 - else

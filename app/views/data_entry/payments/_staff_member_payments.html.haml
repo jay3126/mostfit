@@ -1,6 +1,6 @@
 - if @centers.count>0
   Payment collected on
-  = date_select "received_on", @date
+  = date_select "for_date", @date
   by
   = select :name => "payment[received_by]", :collection => staff_members_collection, :selected => @staff_member.id.to_s, :id => 'payments_received_by', :class => "chosen"
   - @centers.each do |center|
