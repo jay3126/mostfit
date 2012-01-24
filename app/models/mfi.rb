@@ -61,7 +61,7 @@ class Mfi
 
   property :main_text, Text, :nullable => true, :lazy => true
   
-  property :allow_choice_of_funding_line, Boolean, :default => false, :index => true
+  property :set_default_funding_line, Boolean, :default => false, :index => true
   has 1, :funding_line, :child_key => [:funding_line_id]
   property :funding_line_id, Integer, :nullable => true
 
