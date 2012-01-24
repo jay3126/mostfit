@@ -60,10 +60,11 @@ class Highmarks < Application
       reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
       Highmark::HighmarkResponse.transaction do |t|
         results = reports.map do |ol|
-          reference = ol["REQUEST"]["REFERENCE"]
-          loan_id = ol["REQUEST"]["LOAN_ID"]
-          loan = Loan.get(loan_id)
-          r = Highmark::HighmarkResponse.first(:loan_id => loan_id, :status => :pending)
+          # since we do not get a loan id in the response, we will assume that the last loan for the particular client
+          # is the loan we are referring to
+          client_id = ol["REQUEST"]["MBR_ID"]
+          loan = Client.get(client_id).loans.last
+          r = Highmark::HighmarkResponse.first(:client_id => client_id, :loan_id => loan.id, :status => :pending)
           next unless r
           r.response_text = ol.to_json
           r.status = :success

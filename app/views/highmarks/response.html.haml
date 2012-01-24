@@ -25,7 +25,7 @@
                   %i
                     = r[key][k][ki]
   - else
-    - responses = [r[key]["RESPONSE"]].flatten
+    - responses = [r[key]["RESPONSE"]].flatten rescue []
     - responses.each do |response|
       %table.tall.shaded
         - response.keys.each do |ke|

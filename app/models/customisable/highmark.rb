@@ -41,7 +41,7 @@ module Highmark
         check = nil
         no_of_active_accounts = r["HEADER"]["SUMMARY"]["NO_OF_ACTIVE_ACCOUNTS"].to_i
         no_of_mfis = r["HEADER"]["SUMMARY"]["NO_OF_OTHER_MFIS"].to_i
-        responses = [r["RESPONSES"]["RESPONSE"]].flatten
+        responses = [r["RESPONSES"]["RESPONSE"]].flatten rescue []
         sum = 0
         responses.each{|x| sum += x["LOAN_DETAILS"]["CURRENT_BAL"].to_f}
         existing_loans_amount = 0
