@@ -39,7 +39,7 @@
         %td
           = l.amount if l
         %td
-          = c.name
+          = link_to c.name, resource(c)
         %td
           = c.gender
         %td
@@ -50,7 +50,7 @@
         %td
           = l.disbursal_date if l
         %td
-          = @report.branch.name
+          = (Branch.get(params[:insurance_register][:branch_id]) or Nothing).name
         %td
           = c.occupation.name if c.occupation
         %td
@@ -75,7 +75,7 @@
           %td
             = l.disbursal_date if l
           %td
-            = @report.branch.name
+            = (Branch.get(params[:insurance_register][:branch_id]) or Nothing).name
           %td
             = g.guarantor_occupation.name if g.guarantor_occupation
           %td
