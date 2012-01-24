@@ -114,6 +114,11 @@ class Client
 
 
   # suryoday specific fields
+  # CGT on the client is probably a good idea
+  property :cgt1, Date
+  property :cgt2, Date
+  property :cgt3, Date
+
   # CPV means contact point verification and is the date of the CPV.
   property :cpv1, Date
   property :cpv2, Date

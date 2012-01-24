@@ -37,7 +37,7 @@ LOANS_NOT_PAYABLE = [nil, :repaid, :pending, :written_off, :claim_settlement, :p
 DUMP_FOLDER      = "db/daily"
 MASS_ENTRY_FIELDS = {
   :client => [:spouse_name, :account_number, :type_of_account, :bank_name, :bank_branch, :join_holder, :number_of_family_members, 
-              :caste, :religion, :occupation, :client_type, :cpv1, :cpv2, :grt_pass_date], 
+              :caste, :religion, :occupation, :client_type, :cgt1, :cgt2, :cgt3, :cpv1, :cpv2, :grt_pass_date], 
   :loan => [:scheduled_disbursal_date, :scheduled_first_payment_date, :loan_utilization, :purpose, :funding_line]
 }
 CLEANER_INTERVAL = 120
