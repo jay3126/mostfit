@@ -1,3 +1,11 @@
+:javascript
+  $(document).ready(function(){
+    if ($('[name="mfi[set_default_funding_line]"]:checked').val() !== "1"){
+      $(default_funding_line_selection).hide();
+    }
+    $(mfi_set_default_funding_line).click(function(event){$(default_funding_line_selection).toggle();});
+  });
+
 = js_include_tag "jquery.colorPicker.js"
 = js_include_tag "tiny_mce/tiny_mce.js"
 = js_include_tag "mce_editor.js"
@@ -111,14 +119,14 @@
             = check_box :allow_choice_of_repayment_style
         %tr
           %td
+            Set a default funding line in bulk loan creation?
+          %td
+            = check_box :set_default_funding_line
+        %tr#default_funding_line_selection
+          %td
             Default Funding line
           %td
-            = select :funding_line_id, :collection => FundingLine.all.map{|x| [x.id, x.name]}, :prompt => 'select funding line', :class => 'chosen'
-        %tr
-          %td
-            Allow choice of funding line in bulk loan creation?
-          %td
-            = check_box :allow_choice_of_funding_line
+            = select :funding_line_id, :collection => FundingLine.all.map{|x| [x.id, x.name]}, :prompt => 'select funding line'
         %tr
           %td
             Allow GRT date on new client form
