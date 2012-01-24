@@ -25,8 +25,8 @@ class Client
   property :guarantor_dob,   Date, :index => true, :lazy => true
   property :guarantor_relationship, Enum.send('[]', *(CLIENT_RELATIONSHIPS)), :default => 'Other'
   property :telephone_number, String, :nullable => true
-  property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Other"
-  property :state,           String, :nullable => true
+  property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Untagged"
+  property :state,           Enum.send('[]', *(STATES)) 
   property :pincode,         Integer
   property :income,          Integer 
   property :family_income,   Integer

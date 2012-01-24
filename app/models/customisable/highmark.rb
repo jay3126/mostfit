@@ -116,15 +116,60 @@ module Highmark
             "Pan"                => "ID07"
           }
         end
+
+        # def states(string)
+        #   return "GJ" if string =~ /[Gg][Uu]j.*/
+        # end
+
+        def states
+          @states ||= {
+            :andhra_pradesh     => "AP",
+            :arunachal_pradesh  => "AR",
+            :assam              => "AS",
+            :bihar              => "BR",
+            :chattisgarh        => "CG",
+            :goa                => "GA",
+            :gujarat            => "GJ",
+            :haryana            => "HR",
+            :himachal_pradesh   => "HP",
+            :jammu_kashmir      => "JK",
+            :jharkhand          => "JH",
+            :karnataka          => "KA",
+            :kerala             => "KL",
+            :madhya_pradesh     => "MP",
+            :maharashtra        => "MH",
+            :manipur            => "MN",
+            :meghalaya          => "ML",
+            :mizoram            => "MZ",
+            :nagaland           => "NL",
+            :orissa             => "OR",
+            :punjab             => "PB",
+            :rajasthan          => "RJ",
+            :sikkim             => "SK",
+            :tamil_nadu         => "TN",
+            :tripura            => "TR",
+            :uttarakhand        => "UK",
+            :uttar_pradesh      => "UP",
+            :west_bengal        => "WB",
+            :andaman_nicobar    => "AN",
+            :chandigarh         => "CH",
+            :dadra_nagar_haveli => "DN",
+            :daman_diu          => "DD",
+            :delhi              => "DL",
+            :lakshadweep        => "LD",
+            :pondicherry        => "PY"
+          }
+        end
+
         # creates a row for a loan as per highmarks pipe delimited format 
         def row_to_delimited_file(datetime = DateTime.now)
           client = self.client
           return [
                   "CRDRQINQR",                                                             # segment identifier
                   "JOIN",                                                                  # credit request type
-                  "",                                                                      # credit report transaction id
+                  nil,                                                                     # credit report transaction id
                   "ACCT-ORIG",                                                             # credit inquiry purpose type
-                  "",                                                                      # credit inquiry purpose type description
+                  nil,                                                                     # credit inquiry purpose type description
                   "PRE-DISB",                                                              # credit inquiry stage
                   datetime.strftime("%d-%m-%Y %H:%M:%S"),                                  # credit report transaction date time 
                   client.name,                                                             # applicant name 1
@@ -143,37 +188,37 @@ module Highmark
                   nil,                                                                     # member relationship name 3
                   nil,                                                                     # member relationship type 4
                   nil,                                                                     # member relationship name 4
-                  client.date_of_birth.strftime("%d%m%Y"),                                 # applicant date of birth
+                  client.date_of_birth.strftime("%d-%m-%Y"),                               # applicant date of birth
                   Date.today.year - client.date_of_birth.year,                             # applicant age
-                  Date.today.strftime("%d%m%Y"),                                           # applicant age as of
-                  id_type[client.type_of_id],                                                       # applicant id type 1
+                  Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
+                  id_type[client.type_of_id],                                              # applicant id type 1
                   client.reference,                                                        # applicant id 1
                   "ID05",                                                                  # applicant id type 2
                   client.ration_card_number,                                               # applicant id 2
-                  self.applied_on,                                                         # account opening date
+                  self.applied_on.strftime("%d-%m-%Y"),                                    # account opening date
                   self.id,                                                                 # account id / number
-                  client.center.branch.name,                                                      # branch id
+                  client.center.branch.id,                                                 # branch id
                   client.id,                                                               # member id
-                  client.center.name,                                               # kendra id
-                  self.amount_applied_for,                                                 # applied for amount / current balance
-                  nil,                                                                     # key person name
-                  nil,                                                                     # key person relationship
+                  client.center.id,                                                        # kendra id
+                  self.amount_applied_for || self.amount,                                  # applied for amount / current balance
+                  client.next_to_kin,                                                      # key person name
+                  client.next_to_kin_relationship.nil? ? nil : key_person_relationship[client.next_to_kin_relationship.to_s.downcase.to_sym], # key person relationship
                   nil,                                                                     # nominee name
                   nil,                                                                     # nominee relationship
-                  client.telephone_type,                                                   # applicant telephone number type 1
-                  client.telephone_number,                                                 # applicant telephone number number 1
+                  nil, #client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
+                  nil, #client.telephone_number,                                           # applicant telephone number number 1
                   nil,                                                                     # applicant telephone number type 2
                   nil,                                                                     # applicant telephone number number 2
                   "D01",                                                                   # applicant address type 1
                   client.address,                                                          # applicant address 1
-                  nil,                                                                     # applicant address 1 city
-                  client.state,                                                            # applicant address 1 state
+                  client.center.branch.name,                                               # applicant address 1 city
+                  states[(client.state or Nothing).to_sym],                                # applicant address 1 state
                   client.pincode,                                                          # applicant address 1 pincode
                   nil,                                                                     # applicant address type 2
                   nil,                                                                     # applicant address 2
                   nil,                                                                     # applicant address 2 city
                   nil,                                                                     # applicant address 2 state
-                  nil                                                                     # applicant address 2 pincode
+                  nil                                                                      # applicant address 2 pincode
                  ]
         end
 
