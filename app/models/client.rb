@@ -145,7 +145,6 @@ class Client
 
 
   def move_to_center(center, as_of_date)
-    debugger
     center = center.class == Center ? center : Center.get(center_id)
     pcs = self.past_centers || {}
     pcs[as_of_date - 1] = self.center.id
