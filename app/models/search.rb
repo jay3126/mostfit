@@ -33,7 +33,6 @@ class Search
 
   private
   def chain_queries
-    debugger
     #No chaining
     return {models.uniq.first.to_s.snake_case.to_sym => models.first.all(queries.values.first).aggregate(:id)} if models.uniq.length==1
 

@@ -32,7 +32,6 @@
         Name
       - (1..no_of_fields).each do |i|
         %td
-          - debugger
           = text_field :name => "clients[#{i}][name]", :value => (params[:clients] and params[:clients][i.to_s][:name]), :tabindex => 1*i
     %tr
       %th

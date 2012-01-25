@@ -130,7 +130,6 @@
           portfolio
       .big-number
         .number
-          - debugger
           = Loan.all(:loan_pool_id => @portfolio.id).count
         .text
           in securitised

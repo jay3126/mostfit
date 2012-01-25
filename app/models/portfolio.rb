@@ -73,7 +73,6 @@ class Portfolio
   end
 
   def securitise(user)
-    debugger
     loan_ids = self.loans.aggregate(:id)
     _id = self.id
     t0 = DateTime.now
@@ -97,7 +96,6 @@ class Portfolio
   end
 
   def cashflow(every, what)
-    debugger
     cf = PortfolioCache.all(:model_id => self.id, :model_name => "PortfolioCashflow_#{every}_#{what}", :order => [:date])
     if cf.empty?
       self.take_cashflow_snapshot(every, what)
@@ -113,7 +111,6 @@ class Portfolio
 
   private 
   def cashflow_dates(every, what)
-    debugger
     # return a list of dates relevant for a particular periodicity, start and end date for a cashflow
     if what == :month  # day of month
       what = :day;    of_every = 1;          period = :month

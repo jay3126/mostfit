@@ -11,7 +11,6 @@ class Portfolios < Application
   end
 
   def show(id)
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     @portfolio_loans = @portfolio.portfolio_loans(:order => [:loan_id]).paginate(:per_page => 50, :page => params[:page] || 1)
@@ -159,7 +158,6 @@ class Portfolios < Application
   def cashflow(id)
     # returns the cashflow for a given potfolio between specified dates
     # returns raw json
-    debugger
     @portfolio = Portfolio.get(id)
     raise NotFound unless @portfolio
     every = params[:every].to_i

@@ -15,7 +15,6 @@
         %input{:type => "hidden", :name => "parameters", :value => YAML::dump(params)}
         = submit "edit this report"
     #bulk_edit
-      - debugger
     -# = paginate_objects(@objects, params)
     %table.report.nojs
       %thead

@@ -5,7 +5,6 @@ class Clients < Application
   def index
 #    @clients = @center.clients
 #    display @clients
-    debugger
     @all_clients   = LoanHistory.all(:center_id => @center.id).clients
     @moved_clients = @all_clients - @clients
     @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @clients.loans
@@ -120,7 +119,6 @@ class Clients < Application
   end
 
   def move_to_center(id)
-    debugger
     @client = Client.get(id)
     raise NotFound unless @client
     @center = @client.center
@@ -193,7 +191,6 @@ class Clients < Application
       @clients = @center.clients
       render
     else
-      debugger
       @center = Center.get(params[:center_id])
       raise NotFound unless @center
       @date = Date.parse(params[:date]) rescue nil
@@ -201,7 +198,6 @@ class Clients < Application
       if @date and @new_center
         Client.transaction do |t|
           @center.clients.each do |c|
-            debugger
             c.move_to_center(@new_center, @date)
           end
         end

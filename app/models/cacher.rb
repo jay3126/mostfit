@@ -381,7 +381,6 @@ class Cache < Cacher
 
 
   def self.update(date = Date.today,hash = {})
-    debugger
     # is our cache based off fields in the loan history table?
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
@@ -440,7 +439,6 @@ class Cache < Cacher
 
     # now do the branch aggregates for each funding line cache
     Kernel.const_get(base_model_name).all.each do |fl|
-      debugger
       relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
       model_id = base_model_name == "LoanPool" ? Portfolio.first(:name => fl.name).id : fl.id
       branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => model_id).group_by{|x| x.branch_id}.to_hash
@@ -464,7 +462,6 @@ class Cache < Cacher
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         bc.attributes = attrs.merge(:updated_at => DateTime.now)
-        debugger
         bc.save
       end
     end
@@ -472,7 +469,6 @@ class Cache < Cacher
     
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
-    debugger
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today

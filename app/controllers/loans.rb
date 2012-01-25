@@ -219,7 +219,6 @@ class Loans < Application
 
   def approve
     if request.method == :get
-      debugger
       if (not params[:center_id].blank?)
         @loans_to_approve = get_loans("client.center" => Center.get(params[:center_id]),:approved_on => nil, :rejected_on => nil)
       elsif (not params[:branch_id].blank?)

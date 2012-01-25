@@ -22,7 +22,6 @@ class Cachers < Application
   end
   
   def generate
-    debugger
     @model = params[:by] ? Kernel.const_get(params[:by].camel_case + "Cache") : BranchCache
     if Branch.all.count == 0
       redirect url(:browse, :action => 'index'), :message => {:error => "No data found to generate report"} 
