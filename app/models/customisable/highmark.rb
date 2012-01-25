@@ -193,8 +193,8 @@ module Highmark
                   Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
                   id_type[client.type_of_id],                                              # applicant id type 1
                   client.reference,                                                        # applicant id 1
-                  "ID05",                                                                  # applicant id type 2
-                  client.ration_card_number,                                               # applicant id 2
+                  client.ration_card_number.blank? ? nil : "ID05",                         # applicant id type 2
+                  client.ration_card_number.blank? ? nil : client.ration_card_number,      # applicant id 2
                   self.applied_on.strftime("%d-%m-%Y"),                                    # account opening date
                   self.id,                                                                 # account id / number
                   client.center.branch.id,                                                 # branch id
