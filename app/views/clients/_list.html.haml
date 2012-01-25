@@ -24,7 +24,7 @@
         %th
     %tbody
     - group=-1
-    - @clients.sort_by{|x| [x.client_group.id, x.id]}.each do |client|
+    - @all_clients.sort_by{|x| [x.client_group.id, x.id]}.each do |client|
       - if group!=client.client_group_id
         - group = client.client_group_id 
         %tr.group
@@ -46,12 +46,13 @@
             %i{:style => "background-color : #{client.active ? '#fff' : '#fdd'}; padding: 3px;" }
               inactive 
         %td
-          %b= link_to client.name, resource(@branch, @center, client)
+          %b= link_to client.name, resource(@branch, @center, client), :class => @moved_clients.include?(client) ? "moved" : ""
         %td
           %ul.inline
             - client.loans.each do |l|
               %li
-                = link_to l.short_tag, url_for_loan(l), :class => ((l.info or Nothing)[:status] or l.get_status)
+                - moved = @moved_loans.include?(l)
+                = link_to l.short_tag, url_for_loan(l), :class => (moved ? 'moved' : (l.info or Nothing)[:status] or l.get_status)
         %td
           = link_to 'edit', resource(@branch, @center, client, :edit)
           &nbsp;|&nbsp;

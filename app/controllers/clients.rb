@@ -5,6 +5,11 @@ class Clients < Application
   def index
 #    @clients = @center.clients
 #    display @clients
+    debugger
+    @all_clients   = LoanHistory.all(:center_id => @center.id).clients
+    @moved_clients = @all_clients - @clients
+    @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @clients.loans
+
     if request.xhr?
       @clients = @center.clients
       @loans   = @clients.loans

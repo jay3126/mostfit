@@ -1,0 +1,14 @@
+%h1 
+  == bulk move clients from #{@center.name}
+
+= form(:action => url(:controller => :clients, :action => :bulk_move), :method => :post) do
+  = select :name => :new_center_id, :collection => @center.branch.centers - [@center], :text_method => :name, :value_method => :id, :prompt => "Please select a center", :class => "chosen"
+  = hidden_field :center_id, :value => params[:center_id]
+  = date_select "date", Date.today
+  = submit 'move clients', :class => 'greenButton'
+
+  %ul
+    - @clients.each do |c|
+      %li
+        = check_box :name => "clients[#{c.id}]", :checked => "checked"
+        = c.name

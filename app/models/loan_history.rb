@@ -166,10 +166,10 @@ class LoanHistory
     # we cannot simply say LoanHistory.latest(:status => :outstanding, @date)
     # because this will simply return the last row when the loan was outstanding even if the loan has been
     # repaid before @date. Hence we need to take a circuituous route where we first select the latest row and then filter for outstanding loans
-    selection = options.except(:status, :date)
+    selection = options.except(:status)
     date = options[:date] || Date.today
     status = options[:status]
-    cks = LoanHistory.latest_keys(selection, date)
+    cks = LoanHistory.get_composite_keys(selection)
     LoanHistory.all(:composite_key => cks, :status => :outstanding)
   end
     

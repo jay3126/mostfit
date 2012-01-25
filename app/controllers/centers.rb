@@ -23,6 +23,10 @@ class Centers < Application
     raise NotFound unless @center
     @branch  =  @center.branch if not @branch
     @clients =  grouped_clients
+    @all_clients   = LoanHistory.all(:center_id => @center.id).clients
+    @moved_clients = @all_clients - @clients
+    @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @center.clients.loans
+
     if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
       display [@center, @clients, @date]
     else
