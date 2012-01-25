@@ -23,7 +23,6 @@ class Centers < Application
     raise NotFound unless @center
     @branch  =  @center.branch if not @branch
     @clients =  grouped_clients
-    debugger
     @all_clients   = (LoanHistory.all(:center_id => @center.id).clients + @clients).uniq
     @moved_clients = @all_clients - @clients
     @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @center.clients.loans
@@ -230,7 +229,6 @@ class Centers < Application
   end
   
   def grouped_clients
-    debugger
     clients = {}
     (@clients ? @clients.all(:center => @center) : @center.clients).each{|c|      
       group_name = c.client_group ? c.client_group.name : "No group"

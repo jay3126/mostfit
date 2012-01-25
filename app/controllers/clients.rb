@@ -3,12 +3,12 @@ class Clients < Application
   provides :xml, :yaml, :js
 
   def index
-#    @clients = @center.clients
+    @clients = @center.clients
 #    display @clients
-    @all_clients   = LoanHistory.all(:center_id => @center.id).clients
+    @all_clients   = (LoanHistory.all(:center_id => @center.id).clients + @clients).uniq
     @moved_clients = @all_clients - @clients
-    @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @clients.loans
-
+    @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @center.clients.loans
+  
     if request.xhr?
       @clients = @center.clients
       @loans   = @clients.loans
