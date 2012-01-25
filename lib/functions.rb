@@ -380,6 +380,7 @@ def get_where_from_hash(hash)
   # naive function to make a WHERE clause from a Hash.
   # isn't there a library somewhere that does this? DM is too slow running aggregates
   # and additionally, not possible to ask DM to just craft an SQL statement and give it to us (i think)
+  return " 1 " if hash.blank?
   hash.map do |col, v|
     val = format_for_sql(v)
     if col.class == DataMapper::Query::Operator
