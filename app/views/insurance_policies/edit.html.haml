@@ -6,7 +6,12 @@
 = form_for(@insurance_policy, :action => url(:insurance_policy, @insurance_policy)) do
   = partial :fields
   = submit "Update"
-
-= link_to 'Show', url(:insurance_policy, @insurance_policy)
-|
-= link_to 'Back', url(:insurance_policies)
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to 'Show', url(:insurance_policy, @insurance_policy), :class => "grey_button"
+  &nbsp;&nbsp;
+  |
+  &nbsp;&nbsp;
+  = link_to 'Back', url(:insurance_policies), :class => "grey_button"

@@ -2,6 +2,8 @@
   Insurance Policies
   == for #{@client.name}
 
+= link_to 'New', resource(@client, :insurance_policies, :new), :class => 'add grey_button'
+
 %table.narrow
   %thead
     %tr
@@ -41,8 +43,6 @@
         = link_to 'Show', resource(@client, insurance_policy)
         |
         = link_to 'Edit', resource(@client, insurance_policy, :edit)
-
-= link_to 'New', resource(@client, :insurance_policies, :new), :class => 'add'
 
 %h1
   %br

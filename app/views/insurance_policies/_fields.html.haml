@@ -10,7 +10,7 @@
         = hidden_field :insurance_product_id, :value => @insurance_policy.insurance_product.id
       - else
         = select :insurance_product_id, :collection => InsuranceProduct.all, :prompt => "---", :value_method => :id, :text_method => :name
-        = link_to 'Add a product', resource(:insurance_products, :new, {:return => (@client ? resource(@client, :insurance_policies, :new) : nil)}), :class => "_remote_"
+        = link_to 'Add a product', resource(:insurance_products, :new, {:return => (@client ? resource(@client, :insurance_policies, :new) : nil)}), :class => "_remote_ grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px; padding-top: 1px; padding-bottom: 1px;"
   %tr
     %td
       Policy Number

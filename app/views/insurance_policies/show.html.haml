@@ -1,6 +1,11 @@
 %h1
   InsurancePolicy #
   = @insurance_policy.policy_no
+  of client
+  = @insurance_policy.client.name
+  (id:
+  = @insurance_policy.client_id
+  )
 
 %h2
   = @insurance_policy.description
@@ -36,5 +41,4 @@
       = @insurance_policy.status
   %tr
     %td
-    %td
-      = link_to 'Edit',  resource(@client, @insurance_policy,  :edit)
+      = link_to 'Edit', resource(@client, @insurance_policy, :edit), :class => "grey_button"
