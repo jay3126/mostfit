@@ -29,7 +29,7 @@
   - loans = @data[:loans]
   - insurance_policies = @data[:insurance_policies]
   - guarantors = @data[:guarantors]
-  - insurance_policies.sort_by{|x| x.loan_id}.each do |ip|
+  - insurance_policies.each do |ip|
     - count += 1
     - begin
       - c = clients[ip.client_id]
