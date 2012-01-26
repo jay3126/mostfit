@@ -1,4 +1,6 @@
 = partial :form
+- count = 0
+- total_amount = 0
 %table.report.nojs
   %tr.header
     %th{:width => "10px"}
@@ -27,13 +29,15 @@
   - loans = @data[:loans]
   - insurance_policies = @data[:insurance_policies]
   - guarantors = @data[:guarantors]
-  - insurance_policies.each do |ip|
+  - insurance_policies.sort_by{|x| x.loan_id}.each do |ip|
+    - count += 1
     - begin
       - c = clients[ip.client_id]
       - l = loans[ip.loan_id]
+      - total_amount += l.amount
       %tr 
         %td{:width => "10px"}
-          = ip.loan_id
+          = link_to ip.loan_id, resource(l)
         %td
           = c.id
         %td
@@ -41,16 +45,18 @@
         %td
           = link_to c.name, resource(c)
         %td
-          = c.gender
+          = (c.gender ? c.gender.capitalize : NIL)
         %td
           - age = ((@report.from_date - c.date_of_birth) / 365).floor if c.date_of_birth
           = age
+          yrs.
         %td
           = c.date_of_birth
         %td
           = l.disbursal_date if l
         %td
-          = (Branch.get(params[:insurance_register][:branch_id]) or Nothing).name
+          - branch = Branch.get(params[:insurance_register][:branch_id])
+          = (link_to branch.name, resource(branch)) if branch
         %td
           = c.occupation.name if c.occupation
         %td
@@ -58,31 +64,49 @@
       - ip.client.guarantors.each do |g|
         %tr
           %td{:width => "10px"}
-            = ip.loan_id
+            = link_to ip.loan_id, resource(l)
           %td
             = "G-" + g.id.to_s
           %td
             = l.amount if l
           %td
-            = g.name
+            = link_to g.name, resource(c)
           %td
-            = g.gender
+            = (g.gender ? g.gender.capitalize : NIL)
           %td
             - age = ((@report.from_date - g.date_of_birth)/365).floor if g.date_of_birth
             = age
+            yrs.
           %td
             = g.date_of_birth
           %td
             = l.disbursal_date if l
           %td
-            = (Branch.get(params[:insurance_register][:branch_id]) or Nothing).name
+            - branch = Branch.get(params[:insurance_register][:branch_id])
+            = (link_to branch.name, resource(branch)) if branch
           %td
             = g.guarantor_occupation.name if g.guarantor_occupation
           %td
             = "G"
+ 
     - rescue
       %tr
         %td
           = link_to ip.id, resource(ip)
         %td{:colspan => 20, :class => "error"}
           Something went wrong
+  %tr
+    %th
+      Total
+    %td
+      = count
+    %td
+      = (total_amount or Nothing).to_currency
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
