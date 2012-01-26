@@ -98,8 +98,7 @@ module DataEntry
             @centers                         = Center.all(:manager => @staff_member)
             
             # select loans
-            debugger
-            @loan_histories                  = LoanHistory.latest_by_status(:center_id => @centers.aggregate(:id), :date => @date, :status => :outstanding, :principal_due.gt => 0)
+            @loan_histories                  = LoanHistory.all(:center_id => @centers.aggregate(:id), :date => @date, :status => :outstanding, :principal_due.gt => 0)
             @loans                           = @loan_histories.loans
             @clients                         = @loans.clients
             @centers                         = @clients.centers
