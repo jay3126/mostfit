@@ -92,13 +92,13 @@
       %td{:colspan => 2}
         %div.error
           You do not have any funder created yet. Create them                 
-          =link_to("here", resource(:funders, :new))
+          = link_to("here", resource(:funders, :new))
   - elsif FundingLine.count==0 and session.user.role==:admin
     %tr
       %td{:colspan => 2}
         %div.error
           You do not have any funding line created yet. Create them                 
-          =link_to("here", resource(:funders))
+          = link_to("here", resource(:funders))
   %tr
     %th
       Application:
@@ -264,4 +264,7 @@
     %td
       = submit submit_text, :class => "grey_button"
       &nbsp;&nbsp;
-      = link_to 'cancel', cancel_link
+      %b
+        Or
+      &nbsp;&nbsp;
+      = link_to 'cancel', cancel_link, :class => "grey_button"
