@@ -19,15 +19,15 @@ class Client
   property :existing_customer,	Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :client_description, String, :length => 100, :nullable => true, :index => false
-  property :gender,	Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
+  property :gender,	Enum.send('[]', *['', 'female', 'male']), :nullable => false, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :fathers_name,     String, :length => 100, :lazy => true
   property :father_is_alive, Enum.send('[]', *['', 'yes', 'no']), :default => '', :nullable => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true 
-  property :date_of_birth,   Date,   :index => true, :lazy => true
+  property :date_of_birth,   Date, :nullable => false, :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
-  property :address,         Text, :lazy => true
-  property :address_pin,     String, :length => 10, :lazy => true
+  property :address,         Text, :nullable => false, :lazy => true
+  property :address_pin,     String, :nullable => false, :length => 6, :lazy => true
   property :phone_number,    String, :length => 20, :lazy => true
   property :active,          Boolean, :default => true, :nullable => false, :index => true
   property :inactive_reason, Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :index => true, :default => ''
@@ -260,10 +260,11 @@ class Client
   has n, :guarantors
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
+  validates_length :address_pin, :max => 6
 
   belongs_to :center
   belongs_to :client_group
-  belongs_to :occupation, :nullable => true
+  belongs_to :occupation, :nullable => false
   belongs_to :village, :nullable => true
   belongs_to :guarantor_occupation, :nullable => true, :child_key => [:guarantor_occupation_id], :model => 'Occupation'
   belongs_to :client_type
