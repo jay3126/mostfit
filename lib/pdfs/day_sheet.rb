@@ -54,7 +54,9 @@ module Pdf
               table.data.push({"name" => client.name, "loan id" => loan.id, "amount" => loan.amount.to_currency, 
                                 "outstanding" => actual_outstanding.to_currency, "status" => lh.status.to_s,                                
                                 "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
-                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,"fee" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
+                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, 
+                                "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,
+                                "fee" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
               group_amount       += loan.amount
               group_outstanding  += actual_outstanding
               group_installments += number_of_installments
@@ -64,7 +66,7 @@ module Pdf
               group_due          += total_due
             } # loans end
             if loan_row_count==0
-              table.data.push({"name" => client.name, "signature" => "", "status" => "nothing outstanding"})              
+              #able.data.push({"name" => client.name, "signature" => "", "status" => "nothing outstanding"})
             end
           } #clients end
           table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
