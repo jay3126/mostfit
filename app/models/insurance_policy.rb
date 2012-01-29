@@ -13,7 +13,7 @@ class InsurancePolicy
   property :date_to, Date, :nullable => false
   property :nominee, String, :nullable => true
   property :status, Enum.send("[]", *POLICY_STATUSES), :nullable => true
-  property :cover_for, Enum.send("[]", *COVER_FOR), :nullable => true, :default => 'self'
+  property :cover_for, Enum.send("[]", *COVER_FOR), :nullable => false, :default => 'both'
   property :beneficiary_name, Text
 
   belongs_to :insurance_product

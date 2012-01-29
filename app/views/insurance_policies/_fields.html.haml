@@ -51,7 +51,7 @@
     %td
       Cover for
     %td
-      = select(:cover_for, :collection => InsurancePolicy::COVER_FOR.map{|x| [x, x]})
+      = select(:cover_for, :collection => InsurancePolicy::COVER_FOR.map{|x| [x, x]}, :prompt => "Select the cover for insurance policy")
   %tr
     %td
       Beneficiary Name
