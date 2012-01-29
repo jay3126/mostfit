@@ -155,7 +155,7 @@
     %td
       Occupation
     %td
-      = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"
+      = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "Please select Occupation"
   - if not @client.new?
     %tr
       %td

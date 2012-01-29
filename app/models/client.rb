@@ -260,7 +260,7 @@ class Client
   has n, :guarantors
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
-  validates_length :address_pin, :max => 6
+  validates_length :address_pin, :min => 6, :max => 6
 
   belongs_to :center
   belongs_to :client_group
