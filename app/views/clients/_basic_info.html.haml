@@ -68,6 +68,11 @@
       = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select"
   %tr
     %th
+      Marital Status
+    %td
+      = select :marital_status, :collection =>[[:single,"Single"],[:married,"Married"],[:divorce,"Divorce"],[:widowed, "Widowed"]], :prompt => "Select"
+  %tr
+    %th
       Reference:
     %td
       = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
