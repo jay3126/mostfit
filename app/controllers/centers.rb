@@ -71,7 +71,7 @@ class Centers < Application
           @errors[id] = obj.errors.values.join(",") unless obj.errors.blank?
         end
       }
-      saved = @errors.blank? ? true : @errors.count < 
+      saved = @errors.blank? ? true : @errors.count 
       if @errors.blank?
         return("<div class='notice'>Saved successfully</div>")
       else
