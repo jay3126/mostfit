@@ -117,4 +117,4 @@ TargetType  = [:relative, :absolute]
 # Caches
 # in order to avoid overrunning the SQL max packet size, we split the cacher update into chunks
 # 2500 should be good for the standard SQL max_packet_size of 16MB
-CHUNK_SIZE = 2500 
+CHUNK_SIZE = 2500
