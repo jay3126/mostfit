@@ -70,7 +70,7 @@
     %th
       Marital Status
     %td
-      = select :marital_status, :collection =>[[:single,"Single"],[:married,"Married"],[:divorce,"Divorce"],[:widowed, "Widowed"]], :prompt => "Select"
+      =  select :marital_status, :collection => MARITAL_STATUS, :prompt => "Select"
   %tr
     %th
       Reference:

@@ -161,6 +161,9 @@ STATES = [
           "pondicherry"                  
          ]
 
+# MARITAL_STATUS For client page
+MARITAL_STATUS= ["single", "married", "divorce", "widowed"]
+
 # Caches
 # in order to avoid overrunning the SQL max packet size, we split the cacher update into chunks
 # 2500 should be good for the standard SQL max_packet_size of 16MB

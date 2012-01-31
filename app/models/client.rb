@@ -40,7 +40,7 @@ class Client
   property :type_of_id, Enum.send('[]', *(ID_TYPES)), :nullable => false, :lazy => true, :default => "Others"
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :female
-  property :marital_status, Enum.send('[]', *[:single, :married, :divorce, :widowed]), :nullable => true, :default => :married  
+  property :marital_status, Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
