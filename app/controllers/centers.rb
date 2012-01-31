@@ -61,26 +61,21 @@ class Centers < Application
                end
       raise NotAllowed unless column
       saved = []
+      @errors = {}
       params[params["model"].snake_case].each{|id, attr|
         if id and not id.blank? and attr.length>0
-          attr.each{|col, val|
-            next if val.blank?
-            val = val.to_i if /^\d+$/.match(val)
-            obj = model.get(id)     
-            next if obj.send(column) == val
-            obj.history_disabled=true if model==Loan
-            obj.send("#{column}=", val)
-            saved << obj.save_self
-          }
+          obj = model.get(id)     
+          next unless obj
+          obj.history_disabled=true if model==Loan
+          obj.update(attr)
+          @errors[id] = obj.errors.values.join(",") unless obj.errors.blank?
         end
       }
-      saved = saved.uniq
-      if saved == [true]
+      saved = @errors.blank? ? true : @errors.count < 
+      if @errors.blank?
         return("<div class='notice'>Saved successfully</div>")
-      elsif saved.include?(true) and saved.include?(false)
-        return("<div class='notice'>Saved with some errors</div>")
       else
-        return("<div class='error'>Sorry! Not able to save</div>")
+        return("<div class='notice'>Saved with #{@errors.count} errors</div>")
       end
     end
   end

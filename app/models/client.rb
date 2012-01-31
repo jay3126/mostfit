@@ -9,6 +9,7 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
+  before :valid?, :store_old_loyalty_bonus_date
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
   after  :save,   :update_loan_cache
@@ -295,6 +296,7 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
+  validates_with_method :loyalty_bonus_paid, :method => :cannot_change_loyalty_bonus_date
 
   def update_loan_cache
     loans.each{|l| l.update_loan_cache(true); l.save}
@@ -396,6 +398,18 @@ class Client
   end
 
   private
+  def store_old_loyalty_bonus_date
+    @old_loyalty_bonus_date = self.loyalty_bonus_paid
+  end
+  
+   def cannot_change_loyalty_bonus_date
+     debugger
+     return true if @old_loyalty_bonus_date == nil
+     return true unless self.attribute_dirty?(:loyalty_bonus_paid)
+     return [false, "loyalty bonus date can only be set once"]
+   end
+
+
   def convert_blank_to_nil
     self.attributes.each{|k, v|
       if v.is_a?(String) and v.empty? and self.class.send(k).type==Integer
@@ -490,6 +504,7 @@ class Client
      return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
      return true
    end
+
 
  end
 
