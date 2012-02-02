@@ -1,0 +1,12 @@
+.error
+  %b
+    == Saved with #{@errors.count} errors
+  %ul
+    - @errors.each do |id, errors|
+      %li
+        %b
+        == id #{id}
+        = ":"
+        = errors
+    
+    

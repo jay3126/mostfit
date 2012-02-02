@@ -9,7 +9,6 @@ class Client
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
-  before :valid?, :store_old_loyalty_bonus_date
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
   after  :save,   :update_loan_cache
@@ -397,13 +396,21 @@ class Client
     end
   end
 
-  private
-  def store_old_loyalty_bonus_date
+  # the following two functions have to do with a limitation of this version of datamapper.
+  # because we cannot arbitrarily write before hooks for any member function, I have wrapped the setting/getting of loayalty_bonus_date
+  # in these functions. It allows me to store @old_loyalty_bonus_date at an appropriate time.
+  def loyalty_bonus_date=(date)
     @old_loyalty_bonus_date = self.loyalty_bonus_paid
+    self.loyalty_bonus_paid = date
   end
+
+  def loyalty_bonus_date
+    loyalty_bonus_paid
+  end
+
+  private
   
    def cannot_change_loyalty_bonus_date
-     debugger
      return true if @old_loyalty_bonus_date == nil
      return true unless self.attribute_dirty?(:loyalty_bonus_paid)
      return [false, "loyalty bonus date can only be set once"]

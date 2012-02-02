@@ -188,51 +188,52 @@ function dateFromAge(ageYear, ageMonth, ageDay){
     return birthDate;
 }
 function attachFormRemote(){
-    $("form._remote_").live('submit', function(f){
-				form=$(f.currentTarget);
-				$(form).find("input[type='submit']").attr("disabled", true);
-				$(form).after("<img id='spinner' src='/images/spinner.gif' />");
-				$(".floatingBox").remove();
-				$.ajax({
-					   type: form.attr("method"),
-					   url: form.attr("action"),
-					   data: form.serialize(),
-					   success: function(data, status, xmlObj){
-					       if(data.redirect){
-						   window.location.href = data.redirect;
-					       }else if(form.find("input[name='_target_']").length>0){
-						   id=form.find("input[name='_target_']").attr("value");
-						   if($("#"+id).length>0){
-						       $("#" + id).html(data);
-						   }
-						   else if($("#append_"+id).length>0){
-						       $(data).appendTo($("#append_"+id));
-						   }
-					       }else if(form.find("table").length>0){
-						   form.find("table").html(data);
-					       }else if(form.find("div").length>0){
-						   form.find("div").html(data);
-					       }
-					       if($(".floatingBox").length>0)
-						   addFloater($(form), $($(".floatingBox")[0]));
-					       $(form).find("input[type='submit']").attr("disabled", "");
-					       $("#spinner").remove();
-					   },
-					   error: function(xhr, text, errorThrown){
-					       if(xhr.status=="302"){
-						   window.location.href = text;
-					       }else{
-						   $("div.error").remove();
-						   txt = "<div class='error'>"+xhr.responseText+"</div>";
-						   form.before(txt);
-						   $(form).find("input[type='submit']").attr("disabled", "");
-					       }
-					       $("#spinner").remove();
-					   }
-				       });
-				return(false);
+  $("form._remote_").live('submit', function(f){
+			    form=$(f.currentTarget);
+			    $(form).find("input[type='submit']").attr("disabled", true);
+			    $(form).after("<img id='spinner' src='/images/spinner.gif' />");
+			    $(".floatingBox").remove();
+			    $.ajax({
+			      type: form.attr("method"),
+			      url: form.attr("action"),
+			      data: form.serialize(),
+			      success: function(data, status, xmlObj){
+				if(data.redirect){
+				  window.location.href = data.redirect;
+				}else if(form.find("input[name='_target_']").length>0){
+				  id=form.find("input[name='_target_']").attr("value");
+				  if($("#"+id).length>0){
+				    $("#" + id).html(data);
+				  }
+				  else if($("#append_"+id).length>0){
+				    $(data).appendTo($("#append_"+id));
+				  }
+				}else if(form.find("table").length>0){
+				  form.find("table").html(data);
+				}else if(form.find("div").length>0){
+				  form.find("div").html(data);
+				}
+				if($(".floatingBox").length>0)
+				  addFloater($(form), $($(".floatingBox")[0]));
+				$(form).find("input[type='submit']").attr("disabled", "");
+				$("#spinner").remove();
+			      },
+			      error: function(xhr, text, errorThrown){
+				if(xhr.status=="302"){
+				  window.location.href = text;
+				}else{
+				  $("div.error").remove();
+				  txt = "<div class='error'>"+xhr.responseText+"</div>";
+				  form.before(txt);
+				  $(form).find("input[type='submit']").attr("disabled", "");
+				}
+				$("#spinner").remove();
+			      }
 			    });
+			    return(false);
+  });
 }
+
 function create_remotes(){
     $("a._remote_").live('click', function(){
 			     href=$(this).attr("href");

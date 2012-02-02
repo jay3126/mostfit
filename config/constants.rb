@@ -36,7 +36,7 @@ CLAIM_DOCUMENTS = [:death_certificate, :center_declaration_form, :kyc_document]
 LOANS_NOT_PAYABLE = [nil, :repaid, :pending, :written_off, :claim_settlement, :preclosed]
 DUMP_FOLDER      = "db/daily"
 MASS_ENTRY_FIELDS = {
-  :client => [:spouse_name, :caste, :loyalty_bonus_paid, :religion, :occupation, :client_type], 
+  :client => [:spouse_name, :caste, :loyalty_bonus_date, :religion, :occupation, :client_type], 
   :loan => [:loan_utilization, :purpose, :funding_line]
 }
 CLEANER_INTERVAL = 120

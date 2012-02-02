@@ -58,6 +58,8 @@ class Centers < Application
                  property.name
                elsif model.relationships[@field]
                  model.relationships[@field].child_key.first.name
+               else
+                 @field
                end
       raise NotAllowed unless column
       saved = []
@@ -75,7 +77,7 @@ class Centers < Application
       if @errors.blank?
         return("<div class='notice'>Saved successfully</div>")
       else
-        return("<div class='notice'>Saved with #{@errors.count} errors</div>")
+        render :bulk_save_errors, :layout => false
       end
     end
   end
