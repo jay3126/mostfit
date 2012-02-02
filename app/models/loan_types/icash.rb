@@ -117,8 +117,6 @@ module Mostfit
         # add the insurance premium to the balance for dates of the 26th installment onwards 
         @premium ||= (insurance_policy or Nothing).premium || 0
         @adjusted_schedule = @schedule.map{|date, row|
-          # $debug = true if row[:installment_number] >= 26 if $debug.nil?
-          # debugger if $debug
           [date, row.merge(:balance => row[:balance] + (row[:installment_number] >= 26 ? @premium : 0))]
         }.to_hash
         return @adjusted_schedule

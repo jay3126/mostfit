@@ -37,13 +37,15 @@ describe Client do
     @loan_product.installment_frequency = :weekly
     @loan_product.min_number_of_installments = 1
     @loan_product.max_number_of_installments = 125
-    @loan_product.loan_type = "DefaultLoan"
     @loan_product.valid_from = Date.parse('2000-01-01')
     @loan_product.valid_upto = Date.parse('2012-01-01')
+    @loan_product.repayment_style = RepaymentStyle.create(:name => "rp1", :style => "Flat")
     @loan_product.save
     @loan_product.errors.each {|e| puts e}
     @loan_product.should be_valid
     @client_type = ClientType.create(:type => "standard")
+    
+    @occupation = Occupation.create(:name => "programmer")
   end
 
   before(:each) do
@@ -53,6 +55,10 @@ describe Client do
     @client.center  = @center
     @client.gender = 'male'
     @client.type_of_id = 'voter_id'
+    @client.date_of_birth = Date.new(1975,3,12)
+    @client.address = "abcdef"
+    @client.address_pin = "123456"
+    @client.occupation = @occupation
     @client.save
     @client.errors.each{|e| puts e}
     @client.should be_valid
@@ -103,6 +109,7 @@ describe Client do
     @loan.approved_by = @manager
     @loan.loan_product = @loan_product
     @loan.save
+    @loan.occupation = @occupation
     @loan.errors.each {|e| p e}
     @loan.should be_valid
 
@@ -120,6 +127,7 @@ describe Client do
     loan2.client       = @client
     loan2.funding_line = @funding_line
     loan2.loan_product = @loan_product
+    loan2.occupation   = @occupation
     loan2.save
     loan2.errors.each {|e| puts e}
     loan2.should be_valid
@@ -140,6 +148,14 @@ describe Client do
 
   it "should deal with death of a client" do
     @client.deceased_on = Date.today
+  end
+
+  it "should not allow updation of loyalty bonus date" do
+    @client.loyalty_bonus_date.should == nil
+    @client.loyalty_bonus_date = Date.today
+    @client.should be_valid
+    @client.loyalty_bonus_date = Date.today + 1
+    @client.should_not be_valid
   end
 
 end
