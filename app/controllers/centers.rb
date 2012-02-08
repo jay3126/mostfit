@@ -89,6 +89,33 @@ class Centers < Application
     end
   end
 
+
+
+  def bulk_move
+    if request.method == :get
+      @errors = {}
+      @branch = Branch.get(params[:branch_id])
+      raise NotFound unless @branch
+      @centers = @branch.centers
+      render
+    else
+      debugger
+      @branch = Branch.get(params[:branch_id])
+      raise NotFound unless @branch
+      @date = Date.parse(params[:date]) rescue nil
+      @new_branch = Branch.get(params[:new_branch_id])
+      if @date and @new_branch
+        Center.transaction do |t|
+          Center.all(:id => params[:centers].keys.map(&:to_i)).each do |c|
+            c.move_to_branch(@new_branch, @date)
+          end
+        end
+      end
+      redirect resource(@new_branch), :message => {:success => "All centers moved succesfully and loans updated"}
+    end
+  end
+  
+
   def new
     only_provides :html
     @center = Center.new

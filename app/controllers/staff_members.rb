@@ -19,6 +19,32 @@ class StaffMembers < Application
     display @staff_members
   end
 
+  def bulk_move_centers(id)
+    if request.method == :get
+      @errors = {}
+      @staff_member = StaffMember.get(id)
+      raise NotFound unless @staff_member
+      @centers = @staff_member.centers
+      render
+    else
+      @staff_member = StaffMember.get(id)
+      raise NotFound unless @staff_member
+      @date = Date.parse(params[:date]) rescue nil
+      @new_staff_member = StaffMember.get(params[:new_staff_member])
+      if @date and @new_center
+        Center.transaction do |t|
+          Center.all(:id => params[:centers].keys.map(&:to_i)).each do |c|
+            c.manager = @new_staff_member
+            c.save!
+          end
+        end
+      end
+      redirect resource(@new_staff_member), :message => {:success => "Centers moved successfully"}
+    end
+  end
+
+
+
   #serves info tab for staff member
   def moreinfo(id)
     @render_form = true

@@ -24,7 +24,10 @@ class Center
   property :meeting_time_minutes, Integer, :length => 2, :index => true
   property :meeting_calendar,     Text # this is a comma separated list of dates and takes precedence over everything else.
   property :created_at,           DateTime, :nullable => false, :default => Time.now, :index => true
+  property :deleted_at,           ParanoidDateTime
   property :creation_date,        Date
+  property :branch_history,       Text # fucking YAML doesn't work for some reason
+
   belongs_to :branch
   belongs_to :manager, :child_key => [:manager_staff_id], :model => 'StaffMember'
 
@@ -46,6 +49,39 @@ class Center
   validates_with_method :meeting_time_minutes, :method => :minutes_valid?
 
   # validates_with_method :creation_date_ok
+  # Public: setter for all the centers this client has belonged to
+  # 
+  # hash: a Hash of {:Date => {:center_id}...}
+  def past_branches=(hash)
+      self.branch_history = hash.to_json
+  end
+
+
+  def past_branches
+    return @pcs if @pcs
+    @pcs = self.branch_history ? JSON::parse(self.branch_history).map{|k,v| [Date.parse(k),v]}.to_hash : {}
+  end
+
+
+  def move_to_branch(branch, as_of_date)
+    branch = branch.class == Branch ? branch : Branch.get(branch)
+    pcs = self.past_branches || {}
+    pcs[as_of_date - 1] = self.branch.id
+    self.branch = branch
+    self.past_branches = pcs
+    self.save!
+    self.loans.each{|l| l.update_history}
+    return true
+  end
+
+  def branch_for_date(date)
+    return branch_id if past_branches.blank?
+    return branch_id if self.past_branches.keys.max < date
+    self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
+  end
+
+
+
 
   def self.from_csv(row, headers)
     keys = [:center_name, :code, :center_meeting_time_in_24h_format, :meeting_day, :branch, :manager, :creation_date]

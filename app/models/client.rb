@@ -127,26 +127,31 @@ class Client
 
   property :center_history, Text # marshal.dump of past centers in format{date_upto => center_id}
 
+  # Public: setter for all the centers this client has belonged to
+  # 
+  # hash: a Hash of {:Date => {:center_id}...}
   def past_centers=(hash)
       self.center_history = hash.to_json
   end
 
+  # Public: getter for all the centers this client has belonged to
   def past_centers
     return @pcs if @pcs
     @pcs = self.center_history ? JSON::parse(self.center_history).map{|k,v| [Date.parse(k),v]}.to_hash : {}
   end
 
-
-  def past_branches
-    # later this must support movement of centers between branches as as well
-    return @pbs if @pbs
-    bs = Center.all(:id => past_centers.values).aggregate(:id, :branch_id).to_hash
-    @pbs = past_centers.map{|k,v| [k, bs[v]]}.to_hash
-  end
+  # Public: all the centers that are fit to be known
+  # preload these to prevent making repeated calls to the database each time
+  #
+  # called with no arguments
+  def relevant_centers
+    return @rcs if @rcs
+    @rcs = Center.all(:id => past_centers.values + [center_id]).map{|c| [c.id, c]}.to_hash
+  end    
 
 
   def move_to_center(center, as_of_date)
-    center = center.class == Center ? center : Center.get(center_id)
+    center = center.class == Center ? center : Center.get(center)
     pcs = self.past_centers || {}
     pcs[as_of_date - 1] = self.center.id
     self.center = center
@@ -164,8 +169,8 @@ class Client
   end
 
   def branch_for_date(date)
-    return center.branch_id if past_centers.blank? or self.past_centers.keys.max < date
-    self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
+    # this will slow things down, but no need to optimise prematurely
+    relevant_centers[center_for_date(date)].branch_for_date(date)
   end
 
   validates_length :number_of_family_members, :max => 20

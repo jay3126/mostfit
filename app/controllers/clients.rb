@@ -197,12 +197,12 @@ class Clients < Application
       @new_center = Center.get(params[:new_center_id])
       if @date and @new_center
         Client.transaction do |t|
-          @center.clients.each do |c|
+          Client.all(:id => params[:clients].keys.map(&:to_i)).each do |c|
             c.move_to_center(@new_center, @date)
           end
         end
       end
-      redirect resource(@new_center)
+      redirect resource(@new_center), :message => {:success => "Clients moved successfully"}
     end
   end
 

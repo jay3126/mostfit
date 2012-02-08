@@ -1,0 +1,24 @@
+:javascript
+  $(document).ready(function() {
+    $('#toggle_check').click(function(){
+      checkboxes = $('input[type="checkbox"]');
+      new_status = !checkboxes.attr('checked');
+      checkboxes.attr('checked', new_status)
+    });
+  });
+%h1 
+  == bulk move centers from #{@branch.name}
+
+= form(:action => url(:controller => :centers, :action => :bulk_move), :method => :post) do
+  = select :name => :new_branch_id, :collection => Branch.all - [@branch], :text_method => :name, :value_method => :id, :prompt => "Please select a branch", :class => "chosen"
+  = hidden_field :branch_id, :value => params[:branch_id]
+  = date_select "date", Date.today
+  = submit 'move center', :class => 'greenButton'
+  %br
+  %a#toggle_check{:href=>"#"} check/uncheck all
+
+  %ul
+    - @centers.each do |c|
+      %li
+        = check_box :name => "centers[#{c.id}]"
+        = c.name
