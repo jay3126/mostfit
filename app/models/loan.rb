@@ -1061,11 +1061,11 @@ class Loan
         # we need to verify if this works correctly when we get loans that are not weekly
         start_date = scheduled_first_payment_date
       end
-      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, start_date))).uniq rescue nil
+      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, start_date))).uniq.map{|d| self.holidays[d] ? self.holidays[d].new_date : d}    rescue nil
       return @_installment_dates if @_installment_dates # incase the center meeting days crap out due to badly defined meeting days
     end
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
-      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, scheduled_first_payment_date))).uniq
+      @_installment_dates =  ([scheduled_first_payment_date].concat(client.center.get_meeting_dates(number_of_installments, scheduled_first_payment_date))).uniq.map{|d| self.holidays[d] ? self.holidays[d].new_date : d} 
       return @_installment_dates
     end
     if installment_frequency == :daily
