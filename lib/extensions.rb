@@ -111,7 +111,8 @@ module Misfit
         return rights_from_access_rules
       end
       
-      def _can_access?(route, params = nil)       
+      def _can_access?(route, params = nil)     
+        # boy, we really do need a new ACL!!
         user_role = self.role
         return true  if user_role == :admin
         return false if route[:controller] == "journals" and route[:action] == "edit"
@@ -157,6 +158,8 @@ module Misfit
         
         if role == :data_entry 
           return ["new", "edit", "create", "update", "bulk_entry"].include?(@action) if ["clients", "loans", "client_groups", "centers", "data_entry/centers"].include?(@controller)
+          return ["centers"].include?(@action) if ["branches"].include?(@controller) # this is so data entry can get a list of centers on bulk add clients page.
+          
           return (@action == "disbursement_sheet" or @action == "day_sheet") if @controller == "staff_members"
         end
         
