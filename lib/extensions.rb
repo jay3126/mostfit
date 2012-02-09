@@ -144,6 +144,7 @@ module Misfit
           return(is_funder? and allow_read_only)
         end
         
+        
         @staff ||= self.staff_member
         return true if @action == "redirect_to_show"
         if @controller=="documents" and CUD_Actions.include?(@action)
@@ -155,7 +156,7 @@ module Misfit
         end
         
         if role == :data_entry 
-          return ["new", "edit", "create", "update"].include?(@action) if ["clients", "loans", "client_groups"].include?(@controller)
+          return ["new", "edit", "create", "update", "bulk_entry"].include?(@action) if ["clients", "loans", "client_groups", "centers", "data_entry/centers"].include?(@controller)
           return (@action == "disbursement_sheet" or @action == "day_sheet") if @controller == "staff_members"
         end
         
