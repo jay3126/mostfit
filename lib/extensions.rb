@@ -155,7 +155,7 @@ module Misfit
         end
         
         if role == :data_entry 
-          return ["new", "edit", "create", "update"].include?(@action) if ["clients", "loans", "client_groups", "centers"].include?(@controller)
+          return ["new", "edit", "create", "update"].include?(@action) if ["clients", "loans", "client_groups", "centers", "data_entry/centers"].include?(@controller)
           return (@action == "disbursement_sheet" or @action == "day_sheet") if @controller == "staff_members"
         end
         
