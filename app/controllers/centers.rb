@@ -132,6 +132,7 @@ class Centers < Application
       @center.branch = @branch  # set direct context
     end
     if @center.save
+      debugger
       @center_meeting_day.center_id = @center.id
       @center_meeting_day.save
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
