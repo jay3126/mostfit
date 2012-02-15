@@ -331,4 +331,13 @@ class Center
     }
   end
 
+  # The meeting time of day is a number in minutes from midnight
+  # In the event that a meeting time in hours or meeting time in minutes are not defined, 
+  # they are currently considered as zero for the purpose of this calculation
+  def meeting_time_of_day
+    hours_to_minutes = @meeting_time_hours ? (@meeting_time_hours * 60) : 0
+    time_of_day = hours_to_minutes + (@meeting_time_minutes || 0)
+    time_of_day
+  end
+
 end

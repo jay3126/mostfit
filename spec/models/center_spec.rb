@@ -209,4 +209,28 @@ describe Center do
     @center.clients.size.should eql(2)
   end
 
+  it "should return a valid center meeting time of day in minutes when a center meeting hour is not assigned" do
+    @center.meeting_time_hours = nil
+    @center.meeting_time_minutes = 23
+    @center.meeting_time_of_day.should == 23
+  end
+
+  it "should return a valid center meeting time of day in minutes when a center meeting minute is not assigned" do
+    @center.meeting_time_hours = 4
+    @center.meeting_time_minutes = nil
+    @center.meeting_time_of_day.should == (4 * 60)
+  end
+
+  it "should return a valid center meeting time of day in minutes when a center meeting hour and center meeting minute are both not assigned" do
+    @center.meeting_time_hours = nil
+    @center.meeting_time_minutes = nil
+    @center.meeting_time_of_day.should == 0
+  end
+
+  it "should return a valid center meeting time of day in minutes when a center meeting hour and minutes are both assigned" do
+    @center.meeting_time_hours = 4
+    @center.meeting_time_minutes = 23
+    @center.meeting_time_of_day.should == ((4 * 60) + 23)
+  end
+
 end
