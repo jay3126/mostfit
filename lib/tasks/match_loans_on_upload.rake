@@ -68,7 +68,7 @@ USAGE_TEXT
           results_row[:number_of_loans_read] = number_of_loans_read
 
           loan_and_payments = {}
-          total_pos_difference = 0;
+          total_pos_difference = 0; zero_payments_difference = 0; some_payments_difference = 0;
           loans_payments_error_count = 0; loans_not_found_count = 0; matched_loan_count = 0; mismatched_loan_count = 0
           header_row = ['Loan ID', 'Expected POS', 'Current POS', 'Payment to change', 'Interest receipts']
           loan_and_pos.each { |loan_reference, expected_pos|
@@ -85,17 +85,17 @@ USAGE_TEXT
             interest_receipts = Payment.all(:loan => loan, :type => :interest).aggregate(:amount.sum)
 
             unless (expected_pos and loan_amount and total_principal_receipts and interest_receipts)
-              errors << "#{loan_reference}, #{expected_pos}, #{loan_amount}, #{total_principal_receipts}, #{interest_receipts}"
+              loan_info = [loan.id, expected_pos, loan_amount, (total_principal_receipts || 0) , (interest_receipts || 0)]
+              errors << loan_info
               loans_payments_error_count += 1
-              loan_amount_difference = loan_amount || expected_pos
-              total_pos_difference += loan_amount_difference
+              zero_payments_difference += loan_amount
             else
               current_pos = loan_amount - total_principal_receipts
               pos_difference = expected_pos - current_pos
               pos_difference_normal = 0
               if (pos_difference.abs > TOLERABLE_DIFFERENCE)
                 pos_difference_normal =  pos_difference.round(ROUND_TO_DECIMAL_PLACES) 
-                total_pos_difference += pos_difference_normal
+                some_payments_difference += pos_difference_normal
                 mismatched_loan_count += 1
               end
               matched_loan_count += 1 if pos_difference_normal == 0
@@ -105,9 +105,12 @@ USAGE_TEXT
               loan_and_payments[loan.id] = [loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]
             end
           }
+          total_pos_difference = some_payments_difference + zero_payments_difference
           results_row[:loans_not_found_count] = loans_not_found_count
           results_row[:loans_payments_error_count] = loans_payments_error_count
           results_row[:total_pos_difference] = total_pos_difference
+          results_row[:zero_payments_difference] = zero_payments_difference
+          results_row[:some_payments_difference] = some_payments_difference
           results_row[:mismatched_loan_count] = mismatched_loan_count
           results_row[:matched_loan_count] = matched_loan_count
 
