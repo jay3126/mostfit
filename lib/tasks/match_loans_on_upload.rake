@@ -13,12 +13,14 @@ Merb.start_environment(:environment => ENV['MERB_ENV'] || 'development')
 namespace :mostfit do
   namespace :migration do
     desc "given a list of loans and principal outstanding, calculates the expected and current pos and corrections needed to payments"
-    task :match_loans_on_upload, :directory do |t, args|
+    task :match_loans_on_upload, :directory, :include_matched do |t, args|
       require 'fastercsv'
 
       USAGE = <<USAGE_TEXT
-[bin/]rake mostfit:migration:match_loans_on_upload[<'directory'>]
+[bin/]rake mostfit:migration:match_loans_on_upload[<'directory'>, 'yes/no']
 Convert loans tab in the upload file to .csv and copy it into 'directory'
+When anything other than 'no' is specified as the second argument, the task will ignore loans where the POS matches the expected POS.
+If the second argument is not specified, we assume that all loans must be reported 
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'LAN No'
@@ -29,6 +31,10 @@ USAGE_TEXT
       MAX_LOAN_POS_TO_READ = 20000
 
       begin
+        ignore_matching_loans_str = args[:include_matched]
+        ignore_matching_loans = false
+        ignore_matching_loans = true if (ignore_matching_loans_str and (ignore_matching_loans_str != 'no'))
+
         dir_name_str = args[:directory]
         raise ArgumentError, USAGE unless (dir_name_str and !(dir_name_str.empty?))
         
@@ -98,11 +104,15 @@ USAGE_TEXT
                 some_payments_difference += pos_difference_normal
                 mismatched_loan_count += 1
               end
+
               matched_loan_count += 1 if pos_difference_normal == 0
 
-              current_pos = current_pos.round(ROUND_TO_DECIMAL_PLACES)
-              interest_receipts = interest_receipts.round(ROUND_TO_DECIMAL_PLACES)
-              loan_and_payments[loan.id] = [loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]
+              unless (ignore_matching_loans and (pos_difference_normal == 0))
+                current_pos = current_pos.round(ROUND_TO_DECIMAL_PLACES)
+                interest_receipts = interest_receipts.round(ROUND_TO_DECIMAL_PLACES)
+                loan_and_payments[loan.id] = [loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]                
+              end
+
             end
           }
           total_pos_difference = some_payments_difference + zero_payments_difference
