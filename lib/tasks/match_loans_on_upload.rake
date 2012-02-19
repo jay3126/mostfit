@@ -17,8 +17,8 @@ namespace :mostfit do
       require 'fastercsv'
 
       USAGE = <<USAGE_TEXT
-      [bin/]rake mostfit:migration:display_receipts_for_loans[<'directory'>]
-      Convert loans tab in the upload file to .csv
+[bin/]rake mostfit:migration:match_loans_on_upload[<'directory'>]
+Convert loans tab in the upload file to .csv and copy it into 'directory'
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'LAN No'
@@ -60,7 +60,7 @@ USAGE_TEXT
               if pos > MAX_LOAN_POS_TO_READ
                 errors << row
               else
-                loan_and_pos[loan_reference] = pos if pos
+                loan_and_pos[loan_reference] = pos
               end
             end
           end
@@ -140,7 +140,8 @@ USAGE_TEXT
         end
         ap results
       rescue => ex
-        puts "An error occurred: #{ex.backtrace}"
+        puts "An error occurred: #{ex.message}"
+        puts USAGE
       end
     end
   end
