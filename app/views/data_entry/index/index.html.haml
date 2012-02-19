@@ -36,8 +36,6 @@
           = link_to_with_rights("Collection sheet<br/>", url(:enter_payments,:action => 'staff_collection_sheet'), :class => 'edit_small')
           = link_to "Daily Report", url(:show_report, 'DailyReport', {:daily_report => {:date => Date.today, :branch_id => session[:branch_id], :center_id => session[:center_id]}, :submit => "Go"}), :class => 'edit_small'
           %br
-          = link_to "Transaction Ledger", url(:show_report, 'TransactionLedger', {:transaction_ledger => {:from_date => Date.today, :branch_id => session[:branch_id], :center_id => session[:center_id]}, :submit => "GO"}), :class => 'edit_small'
-          %br
         - else
           = link_to_with_rights "Add new #{thing.to_s}", url("enter_#{plural}".to_sym, :action => 'new'), :class => 'add_small'
           %br
