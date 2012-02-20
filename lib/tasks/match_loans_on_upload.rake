@@ -76,7 +76,7 @@ USAGE_TEXT
           loan_and_payments = {}
           total_pos_difference = 0; zero_payments_difference = 0; some_payments_difference = 0;
           loans_payments_error_count = 0; loans_not_found_count = 0; matched_loan_count = 0; mismatched_loan_count = 0
-          header_row = ['Loan ID', 'Expected POS', 'Current POS', 'Payment to change', 'Interest receipts']
+          header_row = ['LAN No' 'Loan ID', 'Expected POS', 'Current POS', 'Payment to change', 'Interest receipts']
           loan_and_pos.each { |loan_reference, expected_pos|
             loan = Loan.first(:reference => loan_reference)
             
@@ -91,7 +91,7 @@ USAGE_TEXT
             interest_receipts = Payment.all(:loan => loan, :type => :interest).aggregate(:amount.sum)
 
             unless (expected_pos and loan_amount and total_principal_receipts and interest_receipts)
-              loan_info = [loan.id, expected_pos, loan_amount, (total_principal_receipts || 0) , (interest_receipts || 0)]
+              loan_info = [loan_reference, loan.id, expected_pos, loan_amount, (total_principal_receipts || 0) , (interest_receipts || 0)]
               errors << loan_info
               loans_payments_error_count += 1
               zero_payments_difference += loan_amount
@@ -110,7 +110,7 @@ USAGE_TEXT
               unless (ignore_matching_loans and (pos_difference_normal == 0))
                 current_pos = current_pos.round(ROUND_TO_DECIMAL_PLACES)
                 interest_receipts = interest_receipts.round(ROUND_TO_DECIMAL_PLACES)
-                loan_and_payments[loan.id] = [loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]                
+                loan_and_payments[loan.id] = [loan_reference, loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]                
               end
 
             end
