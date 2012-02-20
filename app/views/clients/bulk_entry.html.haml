@@ -56,13 +56,15 @@
         D.O.B.
       - (1..no_of_fields).each do |i|
         %td
-          = date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000, :tabindex => 1*i
+          = text_field :name => "clients[#{i}][date_of_birth]", :value => (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :tabindex => 1*i
+          /= date_select "clients[#{i}][date_of_birth]", (params[:clients] and params[:clients][i.to_s][:date_of_birth]), :id => "client_#{i}_dob", :min_date => Date.today-36500, :max_date => Date.today-1000, :tabindex => 1*i
     %tr
       %th
         Date joined
       - (1..no_of_fields).each do |i|
         %td
-          = date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today, :tabindex => 1*i
+          = text_field :name => "clients[#{i}][date_joined]", :value => (params[:clients] and params[:clients][i.to_s][:date_joined]), :tabindex => 1*i
+          /= date_select "clients[#{i}][date_joined]", (params[:clients] and params[:clients][i.to_s][:date_joined]), :id => "client_#{i}_date_joined", :max_date => Date.today, :tabindex => 1*i
     %tr
       %th
         Kin name
