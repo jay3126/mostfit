@@ -85,6 +85,7 @@ class Loan
   property :created_by_user_id,                Integer, :nullable => true, :index => true
   property :cheque_number,                     String,  :length => 20, :nullable => true, :index => true
   property :cycle_number,                      Integer, :default => 1, :nullable => false, :index => true
+  property :loan_pool_id,                      Integer, :nullable => true, :index => true
 
   #these amount and disbursal dates are required for TakeOver loan types. 
   property :original_amount,                    Integer
@@ -142,6 +143,8 @@ class Loan
   belongs_to :loan_utilization
   belongs_to :verified_by,               :child_key => [:verified_by_user_id],                :model => 'User'
   belongs_to :repayment_style
+
+  # belongs_to :loan_pool
 
   belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :nullable => true  
   property   :parent_org_guid, String, :nullable => true
@@ -473,17 +476,21 @@ class Loan
     else
       raise ArgumentError.new("Strange period you got..")
     end
+
+    # the below code is commented out because with the introduction of the center meeting day schedule at the start of Loan#installment_dates
+    # there is no more the need to do this.
+    # if we find that there are no problems associated with installment dates in the coming few weeks from Feb 8 2012, remove this comment and the lines below
     
-    # take care of date changes in weekly schedules
-    if [:weekly, :biweekly, :quadweekly].include?(installment_frequency) and cl=self.client(:fields => [:id, :center_id]) and cen=cl.center and cen.meeting_day != :none and ensure_meeting_day
-      unless (new_date.weekday == cen.meeting_day_for(new_date) or (cen.meeting_day_for(new_date) == :none))
-        # got wrong val. recalculate
-        next_date = cen.next_meeting_date_from(new_date)
-        prev_date = cen.previous_meeting_date_from(new_date)
-        new_date  = (next_date.cweek == new_date.cweek ? next_date : prev_date)
-      end
-      #new_date - new_date.cwday + Center.meeting_days.index(client.center.meeting_day)
-    end
+    # # take care of date changes in weekly schedules
+    # if [:weekly, :biweekly, :quadweekly].include?(installment_frequency) and cl=self.client(:fields => [:id, :center_id]) and cen=cl.center and cen.meeting_day != :none and ensure_meeting_day
+    #   unless (new_date.weekday == cen.meeting_day_for(new_date) or (cen.meeting_day_for(new_date) == :none))
+    #     # got wrong val. recalculate
+    #     next_date = cen.next_meeting_date_from(new_date)
+    #     prev_date = cen.previous_meeting_date_from(new_date)
+    #     new_date  = (next_date.cweek == new_date.cweek ? next_date : prev_date)
+    #   end
+    #   #new_date - new_date.cwday + Center.meeting_days.index(client.center.meeting_day)
+    # end
     new_date
   end
 
@@ -572,10 +579,8 @@ class Loan
   def pay_prorata(total, received_on)
     # calculates total interest and principal payable in this amount and divides the amount proportionally
     int_to_pay = prin_to_pay = amt_to_pay = 0
-    $debug = true
     # load relevant loan_history rows
     loan_history.all( :order => [:date]).map do |lh|
-      debugger if $debug
       next if amt_to_pay >= total or ((lh.interest_due + lh.principal_due) == 0)
       # interest/prin due has the total interest/prin payable. 
       # to get the proper ratio, we need the interest prin payable on that day only
@@ -784,6 +789,17 @@ class Loan
     actual_payment_schedule
   end
 
+  # Public returns the installment dates between the scheduled_first_payment_date and the disbursal_date
+  def extra_dates
+      # extra_dates = self.client.center.get_meeting_dates(scheduled_first_payment_date - 1, d1 + 1) 
+      eds = []; d = scheduled_first_payment_date
+      while d >= (disbursal_date || scheduled_disbursal_date)
+        d = shift_date_by_installments(d, -1, false)
+        eds << d if d >= (disbursal_date || scheduled_disbursal_date)
+      end
+    eds
+  end
+
   def actual_payment_schedule
     return @schedule if @schedule
     @schedule = {}
@@ -807,11 +823,8 @@ class Loan
     if self.loan_product.loan_validations.include?(:collect_stub_period_interest)
       # find installment dates for this loan/center between the disbursal date and the scheduled first payment date
       d1 = disbursal_date || scheduled_disbursal_date
-      debugger
-      extra_dates = self.client.center.get_meeting_dates(scheduled_first_payment_date - 1, d1 + 1) 
       interest_so_far = 0
       extra_dates.each do |d2|
-        debugger
         interest = interest_calculation(balance, d1, d2)
         @schedule[d2] = {
           :principal                  => 0,
@@ -1091,9 +1104,9 @@ class Loan
     if self.loan_product.loan_validations and self.loan_product.loan_validations.include?(:scheduled_dates_must_be_center_meeting_days)
       # DIRTY HACK! We cannot have two installment dates in the same week. So, we have to start counting with the first installment date and then go on to Sunday
       # so that the next date is gauranteed to be in the next week.
-      if installment_frequency == :weekly
+      if [:weekly, :biweekly].include?(installment_frequency)
         d = scheduled_first_payment_date
-        start_date = d - d.cwday + 7
+        start_date = d - d.cwday + (installment_frequency == :weekly ? 7 : 14)
       else
         # we need to verify if this works correctly when we get loans that are not weekly
         start_date = scheduled_first_payment_date
@@ -1399,6 +1412,7 @@ class Loan
   def interest_calculation(balance, d1 = nil, d2 = nil)
     # need to have this is one place because a lot of functions need to know how interest is calculated given a balance
     # this is bound to become more complex as we add all kinds of dates 
+    return 0 if d2 and d1 and d2 == d1
     rs = self.repayment_style || self.loan_product.repayment_style
     if d1 and d2
       ((balance * interest_rate) / (365/(d2-d1))).round(2).round_to_nearest(rs.round_interest_to, rs.rounding_style)

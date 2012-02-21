@@ -22,6 +22,7 @@ class Center
   property :meeting_day,          Enum.send('[]', *DAYS), :nullable => false, :default => :none, :index => true
   property :meeting_time_hours,   Integer, :length => 2, :index => true
   property :meeting_time_minutes, Integer, :length => 2, :index => true
+  property :meeting_calendar,     Text # this is a comma separated list of dates and takes precedence over everything else.
   property :created_at,           DateTime, :nullable => false, :default => Time.now, :index => true
   property :creation_date,        Date
   belongs_to :branch
@@ -75,6 +76,14 @@ class Center
   def get_meeting_dates(to = Date.new(2100,12,31),from = creation_date)
     # to can be a date or a number
     # first find the date_Vectors for all center_meeting_days as a hash {:valid_from => DateVector}
+    unless self.meeting_calendar.blank?
+      ds = self.meeting_calendar.split(/[\s,]/).reject(&:blank?).map{|d| Date.parse(d) rescue nil}.compact.select{|d| d >= from}.sort
+      if to
+        ds = ds.select{|d| d <= to} if to.is_a? Date
+        ds = ds[0..to - 1] if to.is_a? Numeric
+      end
+      return ds
+    end
     select = to.class == Date ? {:valid_from.lte => to} : {}
     dvs = center_meeting_days.all(select).map{|cmd| [cmd.valid_from, cmd.date_vector]}.to_hash
 
@@ -137,7 +146,7 @@ class Center
     @meeting_days ||= self.center_meeting_days(:order => [:valid_from])
     if @meeting_days.length==0
       meeting_day
-    elsif date_row = @meeting_days.find{|md| md.valid_from <= date and md.valid_upto >= date} 
+    elsif date_row = @meeting_days.find{|md| md.valid_from <= date and (md.valid_upto == nil or md.valid_upto >= date)} 
       (date_row.meeting_wday)
     elsif @meeting_days[0].valid_from > date
       (@meeting_days[0].meeting_wday)
@@ -295,7 +304,6 @@ class Center
   end
 
   def get_meeting_date(date, direction)
-    debugger
     number = 1
     if direction == :next
       nwday = (date + number).wday
@@ -321,6 +329,15 @@ class Center
         self.send("#{k}=", nil)
       end
     }
+  end
+
+  # The meeting time of day is a number in minutes from midnight
+  # In the event that a meeting time in hours or meeting time in minutes are not defined, 
+  # they are currently considered as zero for the purpose of this calculation
+  def meeting_time_of_day
+    hours_to_minutes = @meeting_time_hours ? (@meeting_time_hours * 60) : 0
+    time_of_day = hours_to_minutes + (@meeting_time_minutes || 0)
+    time_of_day
   end
 
 end
