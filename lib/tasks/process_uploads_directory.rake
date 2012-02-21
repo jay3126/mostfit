@@ -17,15 +17,16 @@ namespace :mostfit do
     desc "read all excel files in a directory and process them"
     task :process_upload_directory do
       file_list = Dir.glob(File.join(Merb.root,"uploads","*xls"))
-      puts "found #{file_list}.count files"
+      file_count = file_list.count
+      puts "found #{file_count} files"
       uploads = []
       file_list.each do |f|
         puts "copying #{f}"
         u = Upload.make(:file => {:filename => f.split("/")[-1], :tempfile => File.new(f,"r")}, :user => User.first)
         uploads.push u
       end
-      uploads.each do |u|
-        # u.cont
+      Upload.all.each do |u|
+        u.cont
       end
     end
   end
