@@ -214,18 +214,18 @@
     %table.form
       %tr
         %th
-          For Date
+          At branch
         %td
-          = date_select 'for_date', (@date || Date.today), {:id => 'for_date'}
+          = select :name => 'branch_id', :id => "paying_branch_selector", :collection => Branch.all, :text_method => :name, :value_method => :id, :selected => params[:branch_id].to_s, :prompt => 'Select a branch'
           = hidden_field :name => 'return', :value => url(:data_entry)
       %tr
         %th
-          In branch
+          On Date
         %td
-          = select :name => 'branch_id', :id => "paying_branch_selector", :collection => Branch.all, :text_method => :name, :value_method => :id, :selected => params[:branch_id].to_s, :prompt => 'Select a branch'
+          = date_select 'for_date', (@date || Date.today), {:id => 'for_date'}
       %tr
         %th
-          Centers repaying today
+          Centers repaying
         %td
           = select :name => 'center_id', :id => 'paying_center_selector', :collection => Center.all(:branch_id => params[:branch_id]), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center'
       %tr
