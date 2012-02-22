@@ -216,7 +216,7 @@
         %th
           At branch
         %td
-          = select :name => 'branch_id', :id => "paying_branch_selector", :collection => Branch.all, :text_method => :name, :value_method => :id, :selected => params[:branch_id].to_s, :prompt => 'Select a branch'
+          = select :name => 'branch_id', :id => "paying_branch_selector", :collection => get_accessible_branches, :text_method => :name, :value_method => :id, :selected => params[:branch_id].to_s, :prompt => 'Select a branch'
           = hidden_field :name => 'return', :value => url(:data_entry)
       %tr
         %th
