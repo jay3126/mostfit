@@ -6,20 +6,20 @@
       = text_field :login
       %br/
       %span.greytext (only letters and numbers are allowed)
-  - unless @user.role
+  - unless @user.role and @user.saved?
     %tr
       %td
         Select role
       %td
-        = select :role, :collection => User.roles, :class => 'chosen'
+        = select :role, :collection => User.roles, :prompt => 'Select Role', :class => 'chosen', :id => 'user_role'
   - else
     %tr
       %td
         Role
       %td
         = @user.role_to_s
-  - unless @user.staff_member
-    %tr.staff_member
+  - unless @user.staff_member and @user.saved?
+    %tr.staff_member#is_staff_member
       %td
         Is a staff member?
       %td
@@ -30,11 +30,11 @@
         Staff member
       %td
         = @user.staff_member.name
-  %tr.funder
+  %tr.funder#is_funder
     %td
       Is a funder
     %td
-      = select :funder, :collection => [["","---"]] + Funder.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.funder ? @user.funder.id.to_s : ""), :class => 'chosen'
+      = select :funder, :collection => [["","---"]] + Funder.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.funder ? @user.funder.id.to_s : ""), :class => "chosen"
   %tr
     %td
       Preferred Locale
