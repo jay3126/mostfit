@@ -268,6 +268,10 @@ end
 
 class CenterCache < Cacher
 
+  # these have to be hooks, for obvious reasons, but for now we make do with some hardcoded magic!
+
+  EXTRA_FIELDS = [:delayed_disbursals]
+
   def self.update(hash = {})
     # creates a cache per center for branches and centers per the hash passed as argument
     t = Time.now

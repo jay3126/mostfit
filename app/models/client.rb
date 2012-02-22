@@ -66,7 +66,7 @@ class Client
   property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
   property :bank_branch,         String, :length => 20, :nullable => true, :lazy => true
   property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
-#  property :client_type,    Enum[:default], :default => :default
+  #  property :client_type,    Enum[:default], :default => :default
   property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
   property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
   property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
@@ -125,13 +125,15 @@ class Client
   property :cpv2, Date
 
 
-  property :center_history, Text # marshal.dump of past centers in format{date_upto => center_id}
-
   # Public: setter for all the centers this client has belonged to
   # 
   # hash: a Hash of {:Date => {:center_id}...}
+
+  property :center_history, Text # marshal.dump of past centers in format{date_upto => center_id}
+
+
   def past_centers=(hash)
-      self.center_history = hash.to_json
+    self.center_history = hash.to_json
   end
 
   # Public: getter for all the centers this client has belonged to
@@ -149,9 +151,16 @@ class Client
     @rcs = Center.all(:id => past_centers.values + [center_id]).map{|c| [c.id, c]}.to_hash
   end    
 
+  def past_branches
+    # later this must support movement of centers between branches as as well
+    return @pbs if @pbs
+    bs = Center.all(:id => past_centers.values).aggregate(:id, :branch_id).to_hash
+    @pbs = past_centers.map{|k,v| [k, bs[v]]}.to_hash
+  end
+
 
   def move_to_center(center, as_of_date)
-    center = center.class == Center ? center : Center.get(center)
+    center = center.class == Center ? center : Center.get(center_id)
     pcs = self.past_centers || {}
     pcs[as_of_date - 1] = self.center.id
     self.center = center
@@ -169,8 +178,8 @@ class Client
   end
 
   def branch_for_date(date)
-    # this will slow things down, but no need to optimise prematurely
-    relevant_centers[center_for_date(date)].branch_for_date(date)
+    return center.branch_id if past_centers.blank? or self.past_centers.keys.max < date
+    self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
   end
 
   validates_length :number_of_family_members, :max => 20
@@ -203,19 +212,19 @@ class Client
   belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'
 
   has_attached_file :picture,
-    :styles => {:medium => "300x300>", :thumb => "60x60#"},
-    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :default_url => "/images/no_photo.jpg"
+  :styles => {:medium => "300x300>", :thumb => "60x60#"},
+  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :default_url => "/images/no_photo.jpg"
 
   has_attached_file :application_form,
-    :styles => {:medium => "300x300>", :thumb => "60x60#"},
-    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
+  :styles => {:medium => "300x300>", :thumb => "60x60#"},
+  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
 
   has_attached_file :fingerprint,
-    :url => "/uploads/:class/:id/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
+  :url => "/uploads/:class/:id/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
   validates_present   :center
@@ -358,7 +367,7 @@ class Client
   end
 
   def self.death_cases(obj, from_date, to_date)
-     d2 = to_date.strftime('%Y-%m-%d')
+    d2 = to_date.strftime('%Y-%m-%d')
     if obj.class == Branch 
       from  = "branches b, centers c, clients cl, claims cm"
       where = %Q{
@@ -386,18 +395,18 @@ class Client
                            })
   end
   
-   def self.pending_death_cases(obj,from_date, to_date) 
-     if obj.class == Branch
-       repository.adapter.query(%Q{
+  def self.pending_death_cases(obj,from_date, to_date) 
+    if obj.class == Branch
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
                                 FROM branches b, centers c, clients cl, claims cm
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.center_id = c.id AND c.branch_id = b.id 
                                 AND b.id = #{obj.id} AND cl.id NOT IN (SELECT client_id FROM claims)     
                                })
-       
-     elsif obj.class == Center      
-       repository.adapter.query(%Q{
+      
+    elsif obj.class == Center      
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
                                 FROM centers c, clients cl, claims cm 
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
@@ -405,20 +414,20 @@ class Client
                                 NOT IN (SELECT client_id FROM claims )   
                               })
 
-     elsif obj.class == StaffMember
-       repository.adapter.query(%Q{
+    elsif obj.class == StaffMember
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
                                 FROM clients cl, claims cm, staff_members sm 
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id} AND cl.id
                                 NOT IN (SELECT client_id FROM claims )
                                 })
-     end
-   end
-   
-   def cannot_have_inactive_reason_if_active
-     return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
-     return true
-   end
+    end
+  end
+  
+  def cannot_have_inactive_reason_if_active
+    return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
+    return true
+  end
 
- end
+end

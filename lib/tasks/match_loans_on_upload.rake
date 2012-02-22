@@ -110,7 +110,7 @@ USAGE_TEXT
               unless (ignore_matching_loans and (pos_difference_normal == 0))
                 current_pos = current_pos.round(ROUND_TO_DECIMAL_PLACES)
                 interest_receipts = interest_receipts.round(ROUND_TO_DECIMAL_PLACES)
-                loan_and_payments[loan.id] = [loan_reference, loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]                
+                loan_and_payments[loan.id] = [loan_reference, loan.id, expected_pos, current_pos, pos_difference_normal, interest_receipts]
               end
 
             end

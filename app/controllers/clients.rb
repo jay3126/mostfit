@@ -197,7 +197,7 @@ class Clients < Application
       @new_center = Center.get(params[:new_center_id])
       if @date and @new_center
         Client.transaction do |t|
-          Client.all(:id => params[:clients].keys.map(&:to_i)).each do |c|
+          @center.clients.each do |c|
             c.move_to_center(@new_center, @date)
           end
         end
