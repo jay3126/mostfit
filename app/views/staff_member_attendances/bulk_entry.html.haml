@@ -34,7 +34,12 @@
       - if @failures
         - staff_members = StaffMember.all(:id => @failures.map{|a| a.staff_member_id})
       - else
-        - staff_members = (branch.centers.managers(:order => [:name], :active => true)) + [branch.manager]
+        - branch_manager = branch.manager
+        - center_managers = branch.centers.managers(:order => [:name], :active => true)
+        - if center_managers.include?(branch_manager)
+          - staff_members = center_managers
+        - else
+          - staff_members = branch_manager + center_managers
       - staff_members.each do |staff|
         %tr
           %td
