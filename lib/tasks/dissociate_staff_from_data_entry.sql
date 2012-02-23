@@ -1,0 +1,1 @@
+UPDATE staff_members, users SET staff_members.user_id = NULL WHERE users.role = 1 AND staff_members.user_id = users.id;
