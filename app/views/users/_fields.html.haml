@@ -3,10 +3,13 @@
     %td
       Login name:
     %td
-      = text_field :login
-      %br/
-      %span.greytext (only letters and numbers are allowed)
-  - unless @user.role
+      - if @user.new?
+        = text_field :login
+        %br/
+        %span.greytext (only letters and numbers are allowed)
+      - else
+        = @user.name
+  - unless @user.role and @user.saved?
     %tr
       %td
         Select role
