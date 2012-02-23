@@ -23,7 +23,7 @@
       %td
         Is a staff member?
       %td
-        = select :staff_member, :collection => [["","---"]] + StaffMember.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.staff_member ? @user.staff_member.id.to_s : ""), :class => "chosen"
+        = select :staff_member, :collection => [["","Select Staff Member"]] + StaffMember.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.staff_member ? @user.staff_member.id.to_s : ""), :class => "chosen"
   - else
     %tr
       %td
@@ -32,9 +32,9 @@
         = @user.staff_member.name
   %tr.funder#is_funder
     %td
-      Is a funder
+      Is a funder?
     %td
-      = select :funder, :collection => [["","---"]] + Funder.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.funder ? @user.funder.id.to_s : ""), :class => "chosen"
+      = select :funder, :collection => [["","Select Funder"]] + Funder.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :selected => (@user.funder ? @user.funder.id.to_s : ""), :class => "chosen"
   %tr
     %td
       Preferred Locale
