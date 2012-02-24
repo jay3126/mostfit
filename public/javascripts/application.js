@@ -10,7 +10,7 @@ function addFloater(link, form){
 	if((window.document.height > form.offset().top + form.height()) && !$(".floatingBox").hasClass("shiftUp")){
 	    var top = link.offset().top + link.height();
 	}else{
-	    var top = link.offset().top - form.height();
+	    var top = link.offset().top;
 	}
 	$(form).offset({top: top, left: left});
     }
