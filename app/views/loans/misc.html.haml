@@ -26,9 +26,7 @@
 
 - if [:admin, :mis_manager].include?(session.user.role)
   .box
-    %fieldset
-      %legend Levy Penalty/Fee
-      = partial "applicable_fees/form", :layout => false
+    = partial "applicable_fees/form", :layout => false
 
   .box
     %fieldset
