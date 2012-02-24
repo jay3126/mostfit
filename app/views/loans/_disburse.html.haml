@@ -67,6 +67,6 @@
         = select :name => "loans[#{loan.id}][disbursed_by_staff_id]", :collection => staff_members, :selected => loan.client.center.manager.id.to_s
   %tfoot
     %tr
-      %td{:colspan => 10}
+      %td{:colspan => 11}
 
 = paginate loans_to_disburse if loans_to_disburse.respond_to?(:page)

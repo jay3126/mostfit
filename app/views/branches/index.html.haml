@@ -11,6 +11,8 @@
     %thead
       %tr
         %th
+        %th{:style => "width: 5%"}
+          = "Sl."
         %th ID
         %th Name
         %th Manager
@@ -18,9 +20,13 @@
         %th Centers
         %th Edit | Delete
     %tbody
+    - row_number = 0;
     - for branch in @branches
+      - row_number = row_number + 1
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
+        %td
+          = row_number
         %td
           = branch.id
         %td
@@ -39,5 +45,5 @@
 
     %tfoot
       %tr
-        %td{ :colspan => 7 }
+        %td{ :colspan => 8 }
   = paginate @branches
