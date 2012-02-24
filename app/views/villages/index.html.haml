@@ -1,5 +1,8 @@
 %h1
   Villages
+  %br
+  %br
+    = link_to 'Add New', url(:new_village), :class => "grey_button add"
 
 - if @villages.count == 0
   .flash
@@ -24,5 +27,3 @@
             = village.name
           %td
             = link_to 'Edit', url(:edit_village,  village)
-
-= link_to 'New', url(:new_village)

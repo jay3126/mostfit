@@ -29,6 +29,8 @@
         = link_to_with_rights('Browse Aggregate Data', url(:cachers, :date => Date.today.strftime('%Y-%m-%d')))
       %li
         = link_to_with_rights 'Verify data', resource(:verifications)
+      %li
+        = link_to_with_rights 'Add Villages', resource(:villages)
 
 %div.right_pane
   %div.result

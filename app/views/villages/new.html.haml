@@ -3,5 +3,8 @@
 = form_for(@village, :action => url(:villages) ) do
   = partial :fields
   = submit "Create village"
-
-= link_to 'Back', url(:villages)
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to 'Back', url(:villages), :class => "grey_button"
