@@ -8,7 +8,9 @@
   %thead
     %tr
       %th
-        id
+        Sl.
+      %th
+        Id
       %th
         Client Name
       %th
@@ -28,8 +30,12 @@
         Cheque number
       %th
         Disbursed By
+  - row_number = 0
   - loans_to_disburse.each do |loan|
     %tr
+      %td.number
+        - row_number = row_number + 1
+        = row_number
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
       %td.text
