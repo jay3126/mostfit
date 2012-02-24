@@ -117,7 +117,9 @@ module DataEntry
             if r.include?(false)
               t.rollback 
             else
-              redirect resource(@center), :message => {:notice => "all loans added succesfully"}
+              loan_ids = @loans.map{|x| x.id}
+              return_to = session.user.role == :data_entry ? url(:data_entry) : resource(@center)
+              redirect return_to, :message => {:notice => "Successfully added loans with ids #{loan_ids.to_json}"}
             end
           end
         end
