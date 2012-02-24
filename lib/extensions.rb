@@ -171,6 +171,7 @@ module Misfit
             return true if @controller == "regions" and @staff.regions.length > 0
             return true if @controller == "branches" and @action == "index"
             return(@staff.areas.length>0 or @staff.regions.length > 0) if @controller == "areas"
+            return true if @controller == "clients"  and @action == "bulk_entry"
           else
             return(@staff.areas.length>0 or @staff.regions.length>0 or role == :mis_manager) if @controller == "staff_members"
             if @controller == "loans"
