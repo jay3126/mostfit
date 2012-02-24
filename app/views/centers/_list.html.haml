@@ -14,6 +14,7 @@
 - else
   %table.narrow.floating_header
     %tr.header
+      %th{:style => "width: 5%"} Sl.
       %th{:style => "width: 5%"} ID
       %th Name
       %th Manager
@@ -23,8 +24,12 @@
     %tbody
     - clients_count = Client.all(:center => @centers).aggregate(:center_id, :id.count).to_hash
     - today = Date.today.weekday
+    - row_number = 0
     - @centers.sort_by{|c| c.id}.each do |center|
       %tr{:class => cycle('odd','')}
+        %td{:style => 'text-align:center'}
+          - row_number = row_number + 1
+          = row_number
         %td
           = center.id
         %td.text
@@ -44,4 +49,4 @@
 
     %tfoot
       %tr
-        %td{ :colspan => 7 }
+        %td{ :colspan => 8 }

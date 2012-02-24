@@ -8,6 +8,8 @@
   %thead
     %tr{:style => "font-size: 0.85em;"}
       %th
+        Sl.
+      %th
         Loan id
       %th
         Client Name
@@ -35,9 +37,13 @@
       %th
         Approved By
   - staff_members_allowed = staff_members_collection
+  - row_number = 0
   - @loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
     %tr{:class => cycle('odd','')}
+      %td.number
+        - row_number = row_number + 1
+        = row_number
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
       %td.text
