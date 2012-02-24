@@ -36,6 +36,20 @@ class User
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
+
+  validates_with_method :role, :method => :appropriate_roles_mapping?
+
+  def appropriate_roles_mapping?
+    if self.funder
+      return true if self.role == :funder
+      return [false, "Cannot assign a funder to user with role #{self.role}"]
+    elsif self.staff_member
+      return true if self.role == :staff_member
+      return [false, "Cannot assign a staff_member to user with role #{self.role}"]
+    else
+      return true
+    end
+  end
   
   def set_staff_member
     if self.staff_member
