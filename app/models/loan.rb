@@ -85,6 +85,7 @@ class Loan
   property :created_by_user_id,                Integer, :nullable => true, :index => true
   property :cheque_number,                     String,  :length => 20, :nullable => true, :index => true
   property :cycle_number,                      Integer, :default => 1, :nullable => false, :index => true
+  property :loan_pool_id,                      Integer, :nullable => true, :index => true
 
   #these amount and disbursal dates are required for TakeOver loan types. 
   property :original_amount,                    Integer
@@ -142,6 +143,8 @@ class Loan
   belongs_to :loan_utilization
   belongs_to :verified_by,               :child_key => [:verified_by_user_id],                :model => 'User'
   belongs_to :repayment_style
+
+  # belongs_to :loan_pool
 
   belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :nullable => true  
   property   :parent_org_guid, String, :nullable => true
@@ -569,7 +572,6 @@ class Loan
   def pay_prorata(total, received_on)
     # calculates total interest and principal payable in this amount and divides the amount proportionally
     int_to_pay = prin_to_pay = amt_to_pay = 0
-    $debug = true
     # load relevant loan_history rows
     loan_history.all( :order => [:date]).map do |lh|
       next if amt_to_pay >= total or ((lh.interest_due + lh.principal_due) == 0)
@@ -1152,7 +1154,6 @@ class Loan
     # initialize
     total_principal_due = total_interest_due = total_principal_paid = total_interest_paid = advance_principal_paid = advance_interest_paid = 0
 
-
     # find the actual total principal and interest paid.
     # this is helpful for adjusting interest and principal due on a particular date while taking into account future payments
     last_payments_hash = payments_hash.sort.last; 
@@ -1266,8 +1267,8 @@ class Loan
         :fees_due_today                      => fees_due_today,
         :fees_paid_today                     => fees_paid_today,
         :composite_key                       => "#{id}.#{(i/10000.0).to_s.split('.')[1]}".to_f,
-        :branch_id                           => c_branch_id,
-        :center_id                           => c_center_id,
+        :branch_id                           => client.branch_for_date(date),
+        :center_id                           => client.center_for_date(date),
         :client_group_id                     => c_client_group_id || 0,
         :client_id                           => client_id,
         :created_at                          => now,

@@ -64,6 +64,10 @@
     %table.report.nojs
       %tr.header
         %th
+          Select All
+          %br
+            = check_box :id => "toggle_choose_loan"
+        %th
           ID
         %th
           Reference
@@ -73,15 +77,15 @@
           Loan Product
         %th
           Loan Purpose
-        %th
-          Choose
-          = check_box :id => "toggle_choose_loan"
+       
       - @clients.group_by{|client| client.client_group}.each do |client_group, clients|
         %tr.branch
           %td{:colspan => 15}
             %b= client_group ? client_group.name : "None"
           - clients.each do |client|
             %tr
+              %td
+                = check_box :name => "clients[#{client.id}][chosen]", :value => client.id, :checked => (@selected_clients and @selected_clients.include?(client.id.to_s)), :id => "client_#{client.id}", :class => "choose_loan"
               %td
                 = link_to client.id, resource(client)
               %td
