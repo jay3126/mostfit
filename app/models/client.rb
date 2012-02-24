@@ -230,6 +230,7 @@ class Client
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
+  validates_is_unique :ration_card_number
   validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
