@@ -274,10 +274,7 @@
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
       - deleted_payments = Payment.with_deleted{ Payment.all(:loan_id => @loan.id, :deleted_at.not => nil) }
-      - if @payments.blank?
+      - if deleted_payments.blank?
         %h3 No deleted payments
       - else
         = partial "payments/deleted_payments", {:pmts => deleted_payments, :context => :deleted}
-
-
-  
