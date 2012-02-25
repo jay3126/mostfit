@@ -64,7 +64,7 @@
             - if d.deleted == 'No'
               = "-"
             - else
-              = User.get(payment.deleted_by_user_id).login
+              = User.get(d.deleted_by_user_id).login
 
 %h3 
   = "Recorded later"  
@@ -117,4 +117,4 @@
             - if d.deleted == 'No'
               = "-"
             - else
-              = User.get(payment.deleted_by_user_id).login
+              = User.get(d.deleted_by_user_id).login
