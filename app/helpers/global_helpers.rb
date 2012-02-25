@@ -425,7 +425,7 @@ module Merb
     # Otherwise it returns branches in order by name fashion
     def get_accessible_branches(staff=nil)
       if staff or staff=session.user.staff_member
-        [staff.centers.branches, staff.branches, staff.areas.branches, staff.regions.areas.branches].flatten
+        [staff.centers.branches, staff.branches, staff.areas.branches, staff.regions.areas.branches].flatten.uniq
       else
         Branch.all(:order => [:name])
       end
