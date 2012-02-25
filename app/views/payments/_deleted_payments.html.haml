@@ -10,6 +10,7 @@
       %th created at
       - if context == :deleted
         %th deleted at
+        %th deleted by user
       %th
   %tbody
   - @client = @payments.first.client unless @client
@@ -21,7 +22,7 @@
     - clss = cycle('odd','even')
     - if gpmts[d].count > 1
       %tr{:class => clss, :style => "border-top: 2px grey solid"}
-        %td{:colspan => "9", :style => "padding-left: 2%"}
+        %td{:colspan => "10", :style => "padding-left: 2%"}
           %span{:style => "font-size: 118%; color: #5C8F11;letter-spacing: 0.02em;"}
             == #{gpmts[d].count} payments deleted on #{d.to_s}
           %a{:href => "#", :onclick => "javascript:$('.tr#{dh}').hide(); return false"} hide all
@@ -54,6 +55,8 @@
           = payment.created_at
         %td
           = payment.deleted_at
+        %td
+          = User.get(payment.deleted_by_user_id).login
         %td
           - if payment.loan_id 
             restore
