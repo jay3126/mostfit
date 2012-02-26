@@ -34,9 +34,12 @@
     %td
       Premium
     %td
-      - if @loan_product.insurance_product
+      - if @loan_product.insurance_product and @loan_product.insurance_product.fees
         = @loan_product.insurance_product.fees[0].amount
         = hidden_field :premium, :value => @loan_product.insurance_product.fees[0].amount
+      - elsif @loan_product.insurance_product and not @loan_product.insurance_product.fees
+        = text_field :premium
+        %span.greytext No premium fees is attached to this insurance product. Please enter the same here.
       - else
         = text_field :premium
   %tr
