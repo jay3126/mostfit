@@ -1,3 +1,7 @@
+:javascript
+  document.getElementById('total_pi_due').innerHTML=(parseFloat($('#outstanding_principal').val()) + parseFloat($('#interest_due').val()))
+  document.getElementById('total_due').innerHTML=(parseFloat($('#outstanding_principal').val()) + parseFloat($('#interest_due').val()))
+
 %div.box#repayment_form
   - unless params[:date]
     .help{:style => "width: 75%"}
@@ -9,13 +13,15 @@
       = submit "Submit"
   - else
     - @date = Date.parse(params[:date])
-    - os_prin = @loan.actual_outstanding_principal_on(@date)
-    - os_int = @loan.actual_outstanding_interest_on(@date)
+    - os_prin = (@loan.actual_outstanding_principal_on(@date))
+    - os_int = (@loan.actual_outstanding_interest_on(@date))
     - info = @loan.info(@date)
     - missed_int = info.total_interest_due - info.total_interest_paid
     - accrued_int = @date > info.date ? info.actual_outstanding_principal * @loan.interest_rate * ((@date - info.date) - 1) / 365 : 0
     - allow_override_principal = false
     - allow_override_interest = true
+    - total_due = 0
+    - total_pi_due = 0
     %h2
       Loan id
       = @loan.id
@@ -33,6 +39,8 @@
             Outstanding Principal
           %td
             = os_prin
+            - outstanding_principal = os_prin
+            = hidden_field :name => "outstanding_principal", :value => outstanding_principal, :id => "outstanding_principal"
           %td
             - if allow_override_principal
               = text_field :name => :principal, :value => os_prin.round(2)
@@ -53,23 +61,27 @@
             %br
             %b
               Total Interest Due
-              = (missed_int + accrued_int).to_currency
+              - total_interest_due = (missed_int + accrued_int)
+              = total_interest_due.to_currency
             %br
             Remaining Interest
             = os_int.to_currency
           %td
+            - interest_due = (missed_int + accrued_int).round(2)
             - if allow_override_interest
-              = text_field :name => :interest, :value => (missed_int + accrued_int).to_currency
+              = text_field :name => :interest, :value => total_interest_due.to_currency
+              = hidden_field :name => "interest_calculation", :value => interest_due, :id => "interest_due"
             - else
-              = (missed_int + accrued_int).to_currency
-              = hidden_field :name => :interest, :value => (missed_int + accrued_int).to_currency
+              = total_interest_due.to_currency
+              = hidden_field :name => :interest, :value => total_interest_due.to_currency
+              = hidden_field :name => "interest_calculation", :value => interest_due, :id => "interest_due"
         %tr.total
           %th
             Total P and I due
           %td
-          %td
-            - total = (missed_int + accrued_int + os_prin)
-            = total.to_currency
+          %td#total_pi_due
+            /- total_pi_due = (missed_int + accrued_int + os_prin)
+            /= (total_pi_due).to_currency
         %tr
           %th
             Penalty
@@ -79,15 +91,15 @@
           %td
             - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
               - fee_amt = f.amount_for(@loan, @date)
-              - total += fee_amt
+              - total_due = total_pi_due + fee_amt
               = fee_amt
-              = hidden_field :name => "fees[#{f.id}]", :value => fee_amt
+              = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
         %tr.total
           %th
             Total Due
           %td
-          %td
-            = (total).to_currency
+          %td#total_due
+            /= (total_due).to_currency
         %tr
           %th
             Received By
@@ -100,5 +112,4 @@
             = check_box :name => "writeoff"
             .greytext
               If you want to close the loan before its intended/scheduled tenure it is recommended to preclose the loan.<br> <br> If the repaid amount is less than the outstanding amount it is recommended to write off the loan.<br> To write off the loan, please scroll down the screen
-      = submit 'Make Prepayment'
-
+      = submit 'Make Prepayment', :class => "grey_button"
