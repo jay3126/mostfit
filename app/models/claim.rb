@@ -53,8 +53,10 @@ class Claim
   end
 
   def client_marked_inactive
-    if client and client.active
-      return [false, "This client is active. A claim cannot be raised against an active client"]
+    if self.new?
+      if client and client.active
+        return [false, "This client is active. A new claim cannot be created against an active client"]
+      end
     end
     return true
   end

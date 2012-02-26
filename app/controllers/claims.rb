@@ -4,7 +4,12 @@ class Claims < Application
 
   def index
     @claims = Claim.all(:client => @client)
-    display @claims
+    #if this request is from a jQuery tab, like the one used in Client screen,
+    if request.xhr?
+      partial "claims/index"
+    else
+      render
+    end
   end
 
   def show(id)
