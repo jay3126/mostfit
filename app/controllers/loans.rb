@@ -220,9 +220,13 @@ class Loans < Application
   def approve
     if request.method == :get
       if (not params[:center_id].blank?)
-        @loans_to_approve = get_loans("client.center" => Center.get(params[:center_id]),:approved_on => nil, :rejected_on => nil)
+        center = Center.get(params[:center_id].to_i)
+        client_ids = center.clients.aggregate(:id)
+        @loans_to_approve = get_loans(:client_id => client_ids, :approved_on => nil, :rejected_on => nil)
       elsif (not params[:branch_id].blank?)
-        @loans_to_approve = get_loans("client.center.branch_id" => params[:branch_id],:approved_on => nil, :rejected_on => nil)
+        branch = Branch.get(params[:branch_id].to_i)
+        client_ids = branch.centers.clients.aggregate(:id)
+        @loans_to_approve = get_loans(:client_id => client_ids, :approved_on => nil, :rejected_on => nil)
       else
         @loans_to_approve = get_loans({:approved_on => nil, :rejected_on => nil})
       end
