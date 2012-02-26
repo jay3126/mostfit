@@ -1,0 +1,29 @@
+-# This partial is used in case of AJAX request, for example in the Clients page.
+%h2== Claims for #{@client.name} #{link_to 'New Claim', resource(@client, :claims, :new), :class => "add"}
+
+- unless @claims.empty?
+  %table.narrow.form{:width => '100%'} 
+    %thead
+      %tr
+        %td
+          = "Claim ID"
+        %td
+          = "Claim Amount"
+        %td
+          = "Submission date"
+        %td
+          = "&nbsp;" 
+    %tbody 
+      - for claim in @claims
+        %tr
+          %td
+            = claim.claim_id
+          %td
+            = claim.amount_of_claim
+          %td
+            = claim.claim_submission_date
+          %td
+            = link_to 'Update', resource(@client, claim, :edit)
+- else
+  %h3
+    = "No claims found"

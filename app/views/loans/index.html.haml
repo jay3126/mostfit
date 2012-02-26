@@ -13,7 +13,8 @@
         %h3.blocked
           This client is not active anymore. 
           - if @client.inactive_reason=='death_of_client' or @client.inactive_reason=='death_of_spouse'
-            = link_to('Click here for claim processing', resource(@client, :claims))
+            -#= link_to('Click here for claim processing', resource(@client, :claims))
+            = "To process claims, please go to the Claims tab"
       - else
         = link_to 'add a new loan', resource(@branch, @center, @client, :loans, :new), :class => "add grey_button"
 
@@ -113,6 +114,7 @@
       %li#payments Repayments
       %li#attendance Attendance
       %li#misc Miscellaneous
+      %li#claims Claims
     %div.tab
       %h2== Loans for client <i>#{@client.name}</i>
       
@@ -231,7 +233,5 @@
         .box
           - @applicable_fee = ApplicableFee.new(:applicable_type => 'Client', :applicable_id => @client.id)
           = partial "applicable_fees/form", :layout => false, :object => @client
-
-
-
-  
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :action => :index, :value => resource(@client, :claims)}
