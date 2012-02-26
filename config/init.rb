@@ -84,7 +84,7 @@ Merb::BootLoader.before_app_loads do
   require 'lib/extensions.rb'
 
   Merb::Plugins.config[:exceptions] = {
-    :email_addresses => ['svs@intellecap.net', 'janmejay.rai@intellecap.net','krishnan.mani@intellecap.net'],
+    :email_addresses => ['support@mostfit.org'],
     :app_name        => "SAHAYOG",
     :environments    => ['production'],
     :email_from      => "production@mostfit.org",
@@ -103,6 +103,9 @@ end
 
 Merb::BootLoader.after_app_loads do
   # This will get executed after your app's classes have been loaded.
+
+  # Activate SSL Support
+  Net::SMTP.enable_tls(OpenSSL::SSL::VERIFY_NONE)
  
   loan_types = Loan.descendants
 
