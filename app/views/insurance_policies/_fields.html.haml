@@ -6,7 +6,7 @@
       Insurance Product
     %td
       - if defined? :product_fixed? and @insurance_policy.insurance_product
-        = @insurance_policy.insurance_product.name
+        = link_to @insurance_policy.insurance_product.name, resource(@insurance_policy.insurance_product)
         = hidden_field :insurance_product_id, :value => @insurance_policy.insurance_product.id
       - else
         = select :insurance_product_id, :collection => InsuranceProduct.all, :prompt => "---", :value_method => :id, :text_method => :name
@@ -25,12 +25,20 @@
     %td
       Sum Insured
     %td
-      = text_field :sum_insured
+      - if @loan_product and (@loan_product.min_amount == @loan_product.max_amount)
+        = @loan_product.min_amount
+        = hidden_field :sum_insured, :value => @loan_product.min_amount
+      - else
+        = text_field :sum_insured
   %tr
     %td
       Premium
     %td
-      = text_field :premium
+      - if @loan_product.insurance_product
+        = @loan_product.insurance_product.fees[0].amount
+        = hidden_field :premium, :value => @loan_product.insurance_product.fees[0].amount
+      - else
+        = text_field :premium
   %tr
     %td
       Date from
