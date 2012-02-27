@@ -28,7 +28,10 @@
         %td
           = center.id
         %td.text
-          %b= link_to center.name, resource(@branch, center )
+          - if center.center_category.nil? or center.center_category.empty?
+            %b= link_to {center.name} , resource(@branch, center )
+          - else
+            %b= link_to "#{center.name} (#{center.center_category})", resource(@branch, center )
         %td.text
           = link_to center.manager.name, resource(center.manager)
         %td

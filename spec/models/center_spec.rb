@@ -20,6 +20,7 @@ describe Center do
   end
 
   before(:each) do
+    debugger
     Center.all.destroy!
     @center = Center.new(:name => "Munnar hill center")
     @center.manager = @manager
@@ -30,7 +31,22 @@ describe Center do
     @center.save
     @center.should be_valid
   end
- 
+  
+  it "can have a category which is urban" do
+     @center.center_category = "urban"
+     @center.should be_valid
+  end
+  
+  it "can have a category which is rural" do
+      @center.center_category = "rural"
+      @center.should be_valid
+  end
+  
+  it "can have a blank category" do
+      @center.center_category = ""
+      @center.should be_valid
+  end
+
   it "should not be valid without a manager" do
     @center.manager = nil
     @center.should_not be_valid
