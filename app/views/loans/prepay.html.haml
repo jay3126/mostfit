@@ -20,6 +20,7 @@
     - accrued_int = @date > info.date ? info.actual_outstanding_principal * @loan.interest_rate * ((@date - info.date) - 1) / 365 : 0
     - allow_override_principal = false
     - allow_override_interest = true
+    - allow_override_penalty = true
     - total_due = 0
     - total_pi_due = 0
     %h2
@@ -92,8 +93,12 @@
             - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
               - fee_amt = f.amount_for(@loan, @date)
               - total_due = total_pi_due + fee_amt
-              = fee_amt
-              = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
+              - if allow_override_penalty
+                = text_field :name => "fees[#{f.id}]", :value => fee_amt
+                = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
+              - else
+                = fee_amt
+                = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
         %tr.total
           %th
             Total Due
