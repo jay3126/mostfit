@@ -458,45 +458,48 @@ class Loans < Application
       display @loan, :layout => layout?
     else
       staff = StaffMember.get(params[:received_by])
-      raise ArgumentError.new("No staff member selected") unless staff
-      raise ArgumentError.new("No applicable fee for penalty") if (params[:fee].blank? and (not params[:penalty_amount].blank?))
-      @date = Date.parse(params[:date])
+      if staff.nil?
+        redirect url_for_loan(@loan), :message => {:error => "Please select a StaffMember who is pre-closing this loan"}
+      else
+        raise ArgumentError.new("No applicable fee for penalty") if (params[:fee].blank? and (not params[:penalty_amount].blank?))
+        @date = Date.parse(params[:date])
 
-      # make new applicable fees for the penalties
-      pmt_params = {:received_by => staff, :loan_id => @loan.id, :created_by => session.user, :client => @loan.client, :received_on => @date}
-      unless params[:fees].blank?
+        # make new applicable fees for the penalties
+        pmt_params = {:received_by => staff, :loan_id => @loan.id, :created_by => session.user, :client => @loan.client, :received_on => @date}
+        unless params[:fees].blank?
           params[:fees].each do |fee_id, amount|
-          fee = Fee.get(fee_id)
-          amount = amount.to_f
-          af = ApplicableFee.create(:amount => amount, :applicable_type => 'Loan', :applicable_id => @loan.id, :fee_id => fee_id.to_i, :applicable_on => @date)
-        end
+            fee = Fee.get(fee_id)
+            amount = amount.to_f
+            af = ApplicableFee.create(:amount => amount, :applicable_type => 'Loan', :applicable_id => @loan.id, :fee_id => fee_id.to_i, :applicable_on => @date)
+          end
           # then create the payments
           fee_payments = params[:fees].map do |k,v| 
-          fee = Fee.get(k)
-          Payment.new({:amount => v.to_f, :fee => fee, :comment => fee.name, :type => :fees}.merge(pmt_params))
-        end.compact
+            fee = Fee.get(k)
+            Payment.new({:amount => v.to_f, :fee => fee, :comment => fee.name, :type => :fees}.merge(pmt_params))
+          end.compact
         end
-      ppmt = Payment.new({:amount => params[:principal].to_f, :type => :principal}.merge(pmt_params))
-      ipmt = Payment.new({:amount => params[:interest].to_f, :type => :interest}.merge(pmt_params))
-      
-      pmts = ((fee_payments || []) + [ppmt, ipmt].compact).select{|p| p.amount > 0}
-      
-      if pmts.blank?
+        ppmt = Payment.new({:amount => params[:principal].to_f, :type => :principal}.merge(pmt_params))
+        ipmt = Payment.new({:amount => params[:interest].to_f, :type => :interest}.merge(pmt_params))
+
+        pmts = ((fee_payments || []) + [ppmt, ipmt].compact).select{|p| p.amount > 0}
+
+        if pmts.blank?
           success = true
         else
           success, @p, @i, @f = @loan.make_payments(pmts)
         end
-      #raise unless success # rollback
-      if params[:writeoff]
+        #raise unless success # rollback
+        if params[:writeoff]
           @loan.preclosed_on = @date
           @loan.preclosed_by = staff
         end
-      @loan.save
-      @loan.history_disabled = false
-      # update history after reloading object
-      Loan.first(:id => @loan.id).reload.update_history(true)
-      redirect url_for_loan(@loan), :message => {:notice => "Loan has been prepayed"} 
-      render :layout => layout?
+        @loan.save
+        @loan.history_disabled = false
+        # update history after reloading object
+        Loan.first(:id => @loan.id).reload.update_history(true)
+        redirect url_for_loan(@loan), :message => {:notice => "Loan has been prepayed"} 
+        render :layout => layout?
+      end
     end
   end
 
