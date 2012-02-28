@@ -1,7 +1,23 @@
+:javascript
+  $(document).ready(function() {
+    $('#toggle_choose_loan_utilization').change(function() {
+      $('.choose_loan_utilization').attr('checked',$(this).attr('checked'))
+    });
+    $('#bulk_form tbody select').change(function() {
+      if ($('#lock').attr('checked')) {
+        $('#bulk_form tbody select').attr('selectedIndex', $(this).attr('selectedIndex'))
+        }
+    });
+  });
+
 - loan_utilizations = LoanUtilization.all.map{|x| [x.id, x.name]}
 %table.report.nojs    
   %thead
     %tr{:style => "font-size: 0.85em;"}
+      %th
+        Select All
+        %br
+          = check_box :id => "toggle_choose_loan_utilization"
       %th
         id
       %th
@@ -15,25 +31,27 @@
       %th
         Disbursed on
       %th
-        Selected
-      %th
-        Utilization    
-  -@loans_to_utilize.each do |loan|   
+        Utilization
+        %br
+          (Choose Default
+          = check_box :id => :lock
+          )
+  - @loans_to_utilize.each do |loan|   
     %tr{:class => cycle('odd','')}
+      %td
+        = check_box :name => "loans[#{loan.id}][approved?]", :class => "choose_loan_utilization"
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
       %td.text
-        = link_to loan.client.name
+        = link_to loan.client.name, url(:quick_link, "clients", loan.client.id)
       %td.number
-        = loan.description
+        = link_to loan.description, url(:quick_link, "loans", loan.id)
       %td.number
         = loan.amount
       %td.text
-        = loan.client.center.name      
+        = link_to loan.client.center.name, url(:quick_link, "centers", loan.client.center.id)
       %td.text
         = loan.disbursal_date
-      %td
-        = check_box :name => "loans[#{loan.id}][approved?]"
       %td.text
         = select :name => "loans[#{loan.id}][loan_utilization_id]", :collection => loan_utilizations, :prompt => "Select Utilization"     
   %tfoot
