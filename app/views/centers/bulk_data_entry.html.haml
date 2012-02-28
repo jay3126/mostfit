@@ -16,7 +16,11 @@
   %table.report.nojs
     %thead
       %tr
-        %th ID
+        %th
+          - if @model==Client
+            Client Id
+          - else
+            Loan Id
         %th Reference
         %th Name
         %th 
@@ -45,7 +49,7 @@
             - loans[client].each do |loan|
               %tr{:class => cycle('odd','')}
                 %td
-                  = loan.id
+                  = link_to loan.id, resource(loan)
                 %td
                   = client.reference
                 %td
@@ -61,7 +65,7 @@
         - else        
           %tr{:class => cycle('odd','')}
             %td
-              = client.id
+              = link_to client.id, resource(@branch, @center, client)
             %td
               = client.reference
             %td
