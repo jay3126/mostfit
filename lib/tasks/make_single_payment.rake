@@ -15,103 +15,116 @@ namespace :mostfit do
   namespace :suryoday do
 
     desc "records a single principal repaid payment for each loan to match the POS data in uploads"
-    task :make_single_payment, :branch_name, :file_name do |t, args|
+    task :make_single_payment, :directory do |t, args|
       require 'fastercsv'
       USAGE = <<USAGE_TEXT
-[bin/]rake mostfit:suryoday:make_single_payment[<'branch_name'>, <'file_name'>]
-Convert loans tab in the upload file to a .csv to use as <file_name>
+[bin/]rake mostfit:suryoday:make_single_payment[<'directory'>]
+Convert loans tab in the upload file to a .csv and put them into <directory>
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'LAN No'
       POS_COLUMN = 'POS'
       AS_ON_DATE_COLUMN = 'AS On Date'
       RECEIVED_BY_STAFF_ID = 1; CREATED_BY_USER_ID = 1
+      results = {}
+      instance_file_prefix = 'single_payment' + '_' + DateTime.now.to_s
+      results_file_name = File.join(Merb.root, instance_file_prefix + ".results")
       begin
-        branch_name_str = args[:branch_name]
-        raise ArgumentError, "branch name supplied #{branch_name_str} is invalid" unless (branch_name_str and not (branch_name_str.empty?))
-        branch = Branch.first(:name => branch_name_str)
-        raise ArgumentError, "No branch found with name #{branch_name_str}" unless branch
 
-        file_name_str = args[:file_name]
-        raise ArgumentError, "File name supplied #{file_name_str} is invalid" unless (file_name_str and not (file_name_str.empty?))
-        read_file_path = File.join(Merb.root, file_name_str)
+        dir_name_str = args[:directory]
+        raise ArgumentError, USAGE unless (dir_name_str and !(dir_name_str.empty?))
 
-        file_options = {:headers => true}
-        loan_ids_read = []; loans_not_found = []; loan_ids_updated = []; errors = []
-        FasterCSV.foreach(read_file_path, file_options) do |row|
-          reference = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]
+        out_dir_name = (dir_name_str + '_out')
+        out_dir = FileUtils.mkdir_p(out_dir_name)
+        error_file_path = File.join(Merb.root, out_dir_name, instance_file_prefix + '_errors.csv')
+        success_file_path = File.join(Merb.root, out_dir_name, instance_file_prefix + '_success.csv')
 
-          pos = nil
-          begin
-            pos = pos_str.to_f
-          rescue => ex
-            errors << [reference, pos_str, "pos not parsed"]
-            next
-          end
+        csv_files_to_read = Dir.entries(dir_name_str)
+        results = {}
+        csv_files_to_read.each do |csv_loan_tab|
+          next if ['.', '..'].include?(csv_loan_tab)
+          file_to_read = File.join(Merb.root, dir_name_str, csv_loan_tab)
+          file_result = {}
 
-          as_on_date = nil
-          begin
-            as_on_date = Date.parse(as_on_date_str)
-          rescue => ex
-            errors << [reference, as_on_date_str, "as on date not parsed"]
-            next
-          end
+          file_options = {:headers => true}
+          loan_ids_read = []; loans_not_found = []; loan_ids_updated = []; errors = []
+          FasterCSV.foreach(file_to_read, file_options) do |row|
+            reference = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]
 
-          if (as_on_date.year < 1900)
-            p "WARNING!!! WARNING!!! WARNING!!!"
-            p "Date from the file is being read in the ancient past, for the year #{as_on_date.year}"
-            p "Hit Ctrl-C to ABORT NOW otherwise 2000 years are being added to this date as a correction"
-            as_on_date = Date.new(as_on_date.year + 2000, as_on_date.mon, as_on_date.day)
-          end
+            pos = nil
+            begin
+              pos = pos_str.to_f
+            rescue => ex
+              errors << [reference, pos_str, "pos not parsed"]
+              next
+            end
 
-          loan = nil
-          loan = Loan.first(:reference => reference) if reference
-          unless loan
-            errors << [reference, "loan not found"]
-            loans_not_found << [reference]
-            next
-          end
-          loan_ids_read << [loan.id]
-          
-          principal_receipt = loan.amount - pos
-          p principal_receipt
-          if (principal_receipt > 0)
-            branch_id = loan.c_branch_id; center_id = loan.c_center_id
-            principal_repayment = Payment.create(:type => :principal, :amount => principal_receipt, :received_on => as_on_date,
-              :received_by_staff_id => RECEIVED_BY_STAFF_ID, :created_by_user_id => CREATED_BY_USER_ID, :loan_id => loan.id,
-              :c_branch_id => branch_id, :c_center_id => center_id)
-            if (principal_repayment and principal_repayment.valid?)
-              loan.update_history
-              loan_ids_updated << [loan.id]
+            as_on_date = nil
+            begin
+              as_on_date = Date.parse(as_on_date_str)
+            rescue => ex
+              errors << [reference, as_on_date_str, "as on date not parsed"]
+              next
+            end
+
+            if (as_on_date.year < 1900)
+              p "WARNING!!! WARNING!!! WARNING!!!"
+              p "Date from the file is being read in the ancient past, for the year #{as_on_date.year}"
+              p "Hit Ctrl-C to ABORT NOW otherwise 2000 years are being added to this date as a correction"
+              as_on_date = Date.new(as_on_date.year + 2000, as_on_date.mon, as_on_date.day)
+            end
+
+            loan = nil
+            loan = Loan.first(:reference => reference) if reference
+            unless loan
+              errors << [reference, "loan not found"]
+              loans_not_found << [reference]
+              next
+            end
+            loan_ids_read << [loan.id]
+
+            principal_receipt = loan.amount - pos
+            if (principal_receipt > 0)
+              branch_id = loan.c_branch_id; center_id = loan.c_center_id
+              principal_repayment = Payment.create(:type => :principal, :amount => principal_receipt, :received_on => as_on_date,
+                :received_by_staff_id => RECEIVED_BY_STAFF_ID, :created_by_user_id => CREATED_BY_USER_ID, :loan_id => loan.id,
+                :c_branch_id => branch_id, :c_center_id => center_id)
+              if (principal_repayment and principal_repayment.valid?)
+                loan.update_history
+                loan_ids_updated << [loan.id, "Payments were recorded to match POS"]
+              else
+                errors << [loan.id, "Payment not saved"]
+              end
             else
-              p principal_repayment.errors
-              errors << [reference, "payment not saved"]
+              loan_ids_updated << [loan.id, "No payment needed"]
             end
           end
-        end
 
-        unless errors.empty?
-          error_file_path = read_file_path + '_errors.csv'
-          FasterCSV.open(error_file_path, "w") { |fastercsv|
-            errors.each do |error|
-              fastercsv << error
+          unless errors.empty?
+            FasterCSV.open(error_file_path, "a") { |fastercsv|
+              errors.each do |error|
+                fastercsv << error
+              end
+            }
+          end
+
+          FasterCSV.open(success_file_path, "a") { |fastercsv|
+            loan_ids_updated.each do |lid|
+              fastercsv << lid
             end
           }
-        end
-        
-        success_file_path = read_file_path + '_success.csv'
-        FasterCSV.open(success_file_path, "w") { |fastercsv|
-          loan_ids_updated.each do |lid|
-            fastercsv << lid
-          end
-        }
 
-        p "For branch #{branch_name_str} using file: #{read_file_path}"
-        p "loan ids read: #{loan_ids_read.length}"
-        p "loan ids updated: #{loan_ids_updated.length}"
-        p "loan ids not found: #{loans_not_found.length}"
-        p "#{errors.empty? ? "No errors" : "Errors written to #{error_file_path}"}"
-        p "Loan ids updated written to #{success_file_path}"
+          file_result[:loan_ids_read] = loan_ids_read
+          file_result[:loan_ids_updated] = loan_ids_updated
+          file_result[:loans_not_found] = loans_not_found
+          file_result[:errors] = errors
+          file_result[:error_file_path] = error_file_path
+          file_result[:success_file_path] = success_file_path
+
+          results[csv_loan_tab] = file_result
+        end
+
+        p results
 
       rescue => ex
         p "An exception occurred: #{ex}"
@@ -120,4 +133,3 @@ USAGE_TEXT
     end
   end
 end
-                             
