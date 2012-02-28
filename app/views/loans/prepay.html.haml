@@ -89,17 +89,24 @@
           %th
             Penalty
           %td
-            - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
-              = f.name
+            - if @loan.loan_product.fees(:payable_on => :penalty).empty?
+              = "No Penalty fees applicable on this loan product"
+            - else
+              - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
+                = f.name
           %td
-            - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
-              - fee_amt = f.amount_for(@loan, @date)
-              - total_due = total_pi_due + fee_amt
-              - if allow_override_penalty
-                = text_field :name => "fees[#{f.id}]", :value => fee_amt, :id  => "penalty_amount"
-              - else
-                = fee_amt
-                = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
+            - if @loan.loan_product.fees(:payable_on => :penalty).empty?
+              = hidden_field :name => "dummy_fees", :value => 0, :id => "penalty_amount"
+              = "---"
+            - else
+              - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
+                - fee_amt = f.amount_for(@loan, @date)
+                - total_due = total_pi_due + fee_amt
+                - if allow_override_penalty
+                  = text_field :name => "fees[#{f.id}]", :value => fee_amt, :id  => "penalty_amount"
+                - else
+                  = fee_amt
+                  = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
         %tr.total
           %th
             Total Due
