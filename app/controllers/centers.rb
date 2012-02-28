@@ -99,7 +99,6 @@ class Centers < Application
       @centers = @branch.centers
       render
     else
-      debugger
       @branch = Branch.get(params[:branch_id])
       raise NotFound unless @branch
       @date = Date.parse(params[:date]) rescue nil
@@ -132,7 +131,6 @@ class Centers < Application
       @center.branch = @branch  # set direct context
     end
     if @center.save
-      debugger
       @center_meeting_day.center_id = @center.id
       @center_meeting_day.save
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])

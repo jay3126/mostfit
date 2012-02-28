@@ -1,7 +1,12 @@
 :javascript
-  document.getElementById('total_pi_due').innerHTML=(parseFloat($('#outstanding_principal').val()) + parseFloat($('#interest_due').val()))
-  document.getElementById('total_due').innerHTML=(parseFloat($('#outstanding_principal').val()) + parseFloat($('#interest_due').val()))
-
+  function calculate_totals(){
+    $('#total_pi_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()));
+    $('#total_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()) + parseFloat($('#penalty_amount').val()));    
+  }
+  calculate_totals();
+  $('#total_interest_due').change(function(){calculate_totals();});
+  $('#penalty_amount').focusout(function(){calculate_totals();});
+  
 %div.box#repayment_form
   - unless params[:date]
     .help{:style => "width: 75%"}
@@ -20,6 +25,7 @@
     - accrued_int = @date > info.date ? info.actual_outstanding_principal * @loan.interest_rate * ((@date - info.date) - 1) / 365 : 0
     - allow_override_principal = false
     - allow_override_interest = true
+    - allow_override_penalty = true
     - total_due = 0
     - total_pi_due = 0
     %h2
@@ -67,14 +73,11 @@
             Remaining Interest
             = os_int.to_currency
           %td
-            - interest_due = (missed_int + accrued_int).round(2)
             - if allow_override_interest
-              = text_field :name => :interest, :value => total_interest_due.to_currency
-              = hidden_field :name => "interest_calculation", :value => interest_due, :id => "interest_due"
+              = text_field :name => :interest, :value => total_interest_due.round(2), :id => "total_interest_due"
             - else
               = total_interest_due.to_currency
-              = hidden_field :name => :interest, :value => total_interest_due.to_currency
-              = hidden_field :name => "interest_calculation", :value => interest_due, :id => "interest_due"
+              = hidden_field :name => :interest, :value => total_interest_due.round(2), :id => "total_interest_due"
         %tr.total
           %th
             Total P and I due
@@ -86,14 +89,24 @@
           %th
             Penalty
           %td
-            - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
-              = f.name
+            - if @loan.loan_product.fees(:payable_on => :penalty).empty?
+              = "No Penalty fees applicable on this loan product"
+            - else
+              - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
+                = f.name
           %td
-            - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
-              - fee_amt = f.amount_for(@loan, @date)
-              - total_due = total_pi_due + fee_amt
-              = fee_amt
-              = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
+            - if @loan.loan_product.fees(:payable_on => :penalty).empty?
+              = hidden_field :name => "dummy_fees", :value => 0, :id => "penalty_amount"
+              = "---"
+            - else
+              - @loan.loan_product.fees(:payable_on => :penalty).each do |f|
+                - fee_amt = f.amount_for(@loan, @date)
+                - total_due = total_pi_due + fee_amt
+                - if allow_override_penalty
+                  = text_field :name => "fees[#{f.id}]", :value => fee_amt, :id  => "penalty_amount"
+                - else
+                  = fee_amt
+                  = hidden_field :name => "fees[#{f.id}]", :value => fee_amt, :id => "penalty_amount"
         %tr.total
           %th
             Total Due

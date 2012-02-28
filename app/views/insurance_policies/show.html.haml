@@ -35,6 +35,10 @@
     %td
       = @insurance_policy.status
   %tr
+    %td Beneficiary Name
+    %td
+      = @insurance_policy.beneficiary_name
+  %tr
     %td
     %td
       = link_to 'Edit',  resource(@client, @insurance_policy,  :edit)
