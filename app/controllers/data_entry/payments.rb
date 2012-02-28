@@ -74,6 +74,13 @@ module DataEntry
           send_data(File.read("#{Merb.root}/public/pdfs/weeksheet_of_center_#{@center.id}_#{@date.strftime('%Y_%m_%d')}.pdf"),
                                     :filename => "#{Merb.root}/public/pdfs/weeksheet_of_center_#{@center.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
         else
+          if params[:branch_id] == ""
+            @errors = "Please select a branch" 
+          elsif params[:center_id] == ""
+            @errors = "Please select a center"
+          else
+            @errors = nil
+          end
           render
         end
       end
