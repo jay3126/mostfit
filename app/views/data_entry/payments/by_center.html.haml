@@ -209,7 +209,11 @@
       - else
         No LUC pending
 - else
-  %h1  Choose a center to record a repayment for
+  %h1  Choose a branch and a date to make repayments at centers paying on that date  
+  - if @errors
+    %div.error
+      = @errors
+      
   = form_for(@payment, :action => url(:enter_payments, :action => 'by_center'), :method => :get) do
     %table.form
       %tr
@@ -227,7 +231,7 @@
         %th
           Centers repaying today
         %td
-          = select :name => 'center_id', :id => 'paying_center_selector', :collection => Center.all(:branch_id => params[:branch_id]), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center'
+          = select :name => 'center_id', :id => 'paying_center_selector', :collection => ((params[:branch_id] == "" || params[:branch_id].nil?) ? nil : Center.paying_today(session.user, @date || Date.today, params[:branch_id] || nil)), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center'
       %tr
         %td{:colspan => "2"}
           = submit 'Submit'
