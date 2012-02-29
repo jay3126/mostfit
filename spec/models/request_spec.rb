@@ -31,7 +31,6 @@ describe Request do
   end
 
   it "status should go from to to_be_present/not_to_be_present to closed" do
-    debugger
     result1 = @request1.set_status(:closed)
     result1.should be_true
     result2 = @request2.set_status(:closed)
