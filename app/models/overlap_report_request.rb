@@ -3,7 +3,7 @@ class OverlapReportRequest
   include Constants::Status
 
   property :id,     Serial
-  property :status, Enum.send('[]', *REQUEST_STATUSES), :nullable => false, :default => CREATED
+  property :status, Enum.send('[]', *REQUEST_STATUSES), :nullable => false, :default => CREATED_STATUS
 
   # Call this method to obtain the 'local' status of a request
   def get_status

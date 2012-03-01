@@ -11,7 +11,7 @@ describe OverlapReportRequest do
   end
 
   it "should return the created status for a new report request" do
-    @overlap_report_request.get_status.should == Constants::Status::CREATED
+    @overlap_report_request.get_status.should == Constants::Status::CREATED_STATUS
   end
 
   it "should raise an error if a status is requested to be set that is not supported" do
@@ -19,7 +19,7 @@ describe OverlapReportRequest do
   end
 
   it "should fail to set the status if the status value requested is the same as the current status of the request" do
-    @overlap_report_request.set_status(Constants::Status::CREATED).should == false
+    @overlap_report_request.set_status(Constants::Status::CREATED_STATUS).should == false
   end
 
   it "should allow the status of a created request to be set to sent" do
