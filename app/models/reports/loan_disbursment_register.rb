@@ -47,7 +47,7 @@ class LoanDisbursementRegister < Report
       data[branch][center][client.client_group] ||= []
 
       premia, amount_to_disburse = 0, nil
-      if l.loan_product.linked_to_insurance
+      if l.loan_product.linked_to_insurance and l.insurance_policy 
         premia = l.insurance_policy.premium
         amount_to_disburse = l.amount - l.insurance_policy.premium
       end
