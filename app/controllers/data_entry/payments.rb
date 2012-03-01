@@ -257,7 +257,9 @@ module DataEntry
               @loan.preclosed_on = @date; @loan.preclosed_by = @staff; 
               @loan.save
             end
-            unless defer_updation
+            if defer_updation
+              DirtyLoan.add(@loan)
+            else
               @loan.history_disabled = false
               @loan.already_updated  = false
               @loan.update_history(true)
