@@ -23,12 +23,19 @@ describe OverlapReportRequest do
   end
 
   it "should allow the status of a created request to be set to sent" do
-    @overlap_report_request.set_status(:sent).should == :sent
+    @overlap_report_request.set_status(Constants::Status::SENT_STATUS)
+    @overlap_report_request.get_status.should == Constants::Status::SENT_STATUS
   end
 
   it "should not allow the status of a sent request to be set to created"
   
   it "should not allow the status of a 'response_received' request to be set to created"
 
+  it "should return only requests in created status as pending credit bureau"
+
+  it "should set the status of a request as 'sent' when marked sent" do
+    @overlap_report_request.mark_sent
+    @overlap_report_request.get_status.should == Constants::Status::SENT_STATUS
+  end
 
 end
