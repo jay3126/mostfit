@@ -85,10 +85,10 @@
         Fees payments
         %b
           = "(#{@fee_paying_things.values.reject{|v| v.empty?}.count})"
-      %li#luc
-        Loan utilization check 
-        %b
-          = "(#{@loans_to_utilize.size})"
+      -# %li#luc
+      -#   Loan utilization check 
+      -#   %b
+      -#     = "(#{@loans_to_utilize.size})"
     %div.tab    
       %h1 Repayments
       = form_for(@payment, :action => url(:enter_payments, :action => 'by_center', :return => params[:return] || (request.path + "?for_date=#{@date}&center_id=#{@center.id}")), :onsubmit => "if ($('#payments_received_by').val() != '#{@center.manager.id}'){return(confirm('Payment receiver is not center manager. Proceed with payments?'));};", :class => "_disable_button_") do
