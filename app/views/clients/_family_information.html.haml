@@ -40,6 +40,11 @@
       3.
     %td
       4.
+    %td
+      5.
+    %td
+      6.
+
   %tr
     %td
       Name
@@ -51,6 +56,11 @@
       = text_field :family_3_name, :size => 10
     %td
       = text_field :family_4_name, :size => 10
+    %td
+      = text_field :family_5_name, :size => 10
+    %td
+      = text_field :family_6_name, :size => 10
+  
   %tr
     - gender_prompt = 'Choose'
     - gender_choice = [['', gender_prompt], [:male, 'Male'], [:female, 'Female']]
@@ -64,6 +74,10 @@
       = select :family_3_gender, :collection => gender_choice
     %td
       = select :family_4_gender, :collection => gender_choice
+    %td
+      = select :family_5_gender, :collection => gender_choice
+    %td
+      = select :family_6_gender, :collection => gender_choice
   %tr
     %td
       Age
@@ -75,6 +89,10 @@
       = text_field :family_3_age, :size => 3
     %td
       = text_field :family_4_age, :size => 3
+    %td
+      = text_field :family_5_age, :size => 3
+    %td
+      = text_field :family_6_age, :size => 3
   %tr
     - relationship_prompt = 'Choose'
     - relationships = [[data_not_recorded, relationship_prompt], [:spouse, 'Spouse'], [:brother, 'Brother'], [:sister, 'Sister'], [:father, 'Father'], [:mother, 'Mother'], [:son, 'Son'], [:daughter, 'Daughter']]
@@ -88,6 +106,10 @@
       = select :family_3_relationship, :collection => relationships
     %td
       = select :family_4_relationship, :collection => relationships
+    %td
+      = select :family_5_relationship, :collection => relationships
+    %td
+      = select :family_6_relationship, :collection => relationships
   %tr
     - marital_status_prompt = 'Choose'
     - marital_status = [['', marital_status_prompt], [:married, 'Married'], [:single, 'Single'], [:divorced, 'Divorced'], [:widow, 'Widow']]
@@ -101,6 +123,10 @@
       = select :family_3_marital_status, :collection => marital_status
     %td
       = select :family_4_marital_status, :collection => marital_status
+    %td
+      = select :family_5_marital_status, :collection => marital_status
+    %td
+      = select :family_6_marital_status, :collection => marital_status
   %tr
     %td
       Occupation
@@ -112,6 +138,10 @@
       = text_field :family_3_occupation, :size => 10
     %td
       = text_field :family_4_occupation, :size => 10
+    %td
+      = text_field :family_5_occupation, :size => 10
+    %td
+      = text_field :family_6_occupation, :size => 10
   %tr
     %td
       Education
@@ -123,6 +153,10 @@
       = text_field :family_3_education, :size => 10
     %td
       = text_field :family_4_education, :size => 10
+    %td
+      = text_field :family_5_education, :size => 10
+    %td
+      = text_field :family_6_education, :size => 10
   %tr
     %td
       Source of income
@@ -134,6 +168,10 @@
       = text_field :family_3_source_of_income, :size => 10
     %td
       = text_field :family_4_source_of_income, :size => 10
+    %td
+      = text_field :family_5_source_of_income, :size => 10
+    %td
+      = text_field :family_6_source_of_income, :size => 10
   %tr
     %td
       NREGA
@@ -145,6 +183,10 @@
       = text_field :family_3_nrega, :size => 10
     %td
       = text_field :family_4_nrega, :size => 10
+    %td
+      = text_field :family_5_nrega, :size => 10
+    %td
+      = text_field :family_6_nrega, :size => 10
   %tr
     %td
       Monthly income
@@ -156,6 +198,10 @@
       = text_field :family_3_monthly_income, :size => 6, :class => "income"
     %td
       = text_field :family_4_monthly_income, :size => 6, :class => "income"
+    %td
+      = text_field :family_5_monthly_income, :size => 6, :class => "income"
+    %td
+      = text_field :family_6_monthly_income, :size => 6, :class => "income"
   %tr
     %th
       Total Monthly Income

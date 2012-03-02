@@ -3,6 +3,7 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
   include FeesContainer
+  include Constants::Client
 
   FLAGS = [:insincere]
   GENDER = ['', 'male', 'female']
@@ -27,7 +28,7 @@ class Client
   property :address,         Text,   :lazy => true
   property :phone_number,    String, :length => 12,  :index => true, :lazy => true
   property :marital_status,  Enum.send('[]', *MARITAL_STATUS), :nullable => true, :index => true
-  property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
+  property :caste, Enum.send('[]', *CASTES), :nullable => true
   property :place_of_birth,  String, :length => 100, :index => true, :lazy => true
   property :nationality,     String, :length => 100, :index => true, :lazy => true
   property :kyc_documents,   Flag.send('[]',*KYC_DOCUMENTS)
@@ -47,46 +48,68 @@ class Client
   property :tags, Flag.send("[]", *FLAGS)
   
   property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
-  property :family_1_name, String, :lazy => true
+  property :family_1_name, String, :lazy => true, :nullable => true
   property :family_1_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_1_age, Integer, :lazy => true
+  property :family_1_age, Integer, :lazy => true, :nullable => true
   property :family_1_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
   property :family_1_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_1_occupation, String, :lazy => true
-  property :family_1_education, String, :lazy => true
-  property :family_1_nrega, String, :lazy => true
-  property :family_1_source_of_income, String, :lazy => true
-  property :family_1_monthly_income, Integer, :lazy => true
-  property :family_2_name, String, :lazy => true
+  property :family_1_occupation, String, :lazy => true, :nullable => true
+  property :family_1_education, String, :lazy => true, :nullable => true
+  property :family_1_nrega, String, :lazy => true, :nullable => true
+  property :family_1_source_of_income, String, :lazy => true, :nullable => true
+  property :family_1_monthly_income, Integer, :lazy => true, :nullable => true
+  property :family_2_name, String, :lazy => true, :nullable => true
   property :family_2_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_2_age, Integer, :lazy => true
+  property :family_2_age, Integer, :lazy => true, :nullable => true
   property :family_2_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
   property :family_2_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_2_occupation, String, :lazy => true
-  property :family_2_education, String, :lazy => true
-  property :family_2_nrega, String, :lazy => true
-  property :family_2_source_of_income, String, :lazy => true
-  property :family_2_monthly_income, Integer, :lazy => true
-  property :family_3_name, String, :lazy => true
+  property :family_2_occupation, String, :lazy => true, :nullable => true
+  property :family_2_education, String, :lazy => true, :nullable => true
+  property :family_2_nrega, String, :lazy => true, :nullable => true
+  property :family_2_source_of_income, String, :lazy => true, :nullable => true
+  property :family_2_monthly_income, Integer, :lazy => true, :nullable => true
+  property :family_3_name, String, :lazy => true, :nullable => true
   property :family_3_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_3_age, Integer, :lazy => true
+  property :family_3_age, Integer, :lazy => true, :nullable => true
   property :family_3_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
   property :family_3_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_3_occupation, String, :lazy => true
-  property :family_3_education, String, :lazy => true
-  property :family_3_nrega, String, :lazy => true
-  property :family_3_source_of_income, String, :lazy => true
-  property :family_3_monthly_income, Integer, :lazy => true
-  property :family_4_name, String, :lazy => true
+  property :family_3_occupation, String, :lazy => true, :nullable => true
+  property :family_3_education, String, :lazy => true, :nullable => true
+  property :family_3_nrega, String, :lazy => true, :nullable => true
+  property :family_3_source_of_income, String, :lazy => true, :nullable => true
+  property :family_3_monthly_income, Integer, :lazy => true, :nullable => true
+  property :family_4_name, String, :lazy => true, :nullable => true
   property :family_4_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_4_age, Integer, :lazy => true
+  property :family_4_age, Integer, :lazy => true, :nullable => true
   property :family_4_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
   property :family_4_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_4_occupation, String, :lazy => true
-  property :family_4_education, String, :lazy => true
-  property :family_4_nrega, String, :lazy => true
-  property :family_4_source_of_income, String, :lazy => true
-  property :family_4_monthly_income, Integer, :lazy => true
+  property :family_4_occupation, String, :lazy => true, :nullable => true
+  property :family_4_education, String, :lazy => true, :nullable => true
+  property :family_4_nrega, String, :lazy => true, :nullable => true
+  property :family_4_source_of_income, String, :lazy => true, :nullable => true
+  property :family_4_monthly_income, Integer, :lazy => true, :nullable => true
+
+  property :family_5_name, String, :lazy => true, :nullable => true
+  property :family_5_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
+  property :family_5_age, Integer, :lazy => true, :nullable => true
+  property :family_5_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
+  property :family_5_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
+  property :family_5_occupation, String, :lazy => true, :nullable => true
+  property :family_5_education, String, :lazy => true, :nullable => true
+  property :family_5_nrega, String, :lazy => true, :nullable => true
+  property :family_5_source_of_income, String, :lazy => true, :nullable => true
+  property :family_5_monthly_income, Integer, :lazy => true, :nullable => true
+
+  property :family_6_name, String, :lazy => true, :nullable => true
+  property :family_6_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
+  property :family_6_age, Integer, :lazy => true, :nullable => true
+  property :family_6_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
+  property :family_6_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
+  property :family_6_occupation, String, :lazy => true, :nullable => true
+  property :family_6_education, String, :lazy => true, :nullable => true
+  property :family_6_nrega, String, :lazy => true, :nullable => true
+  property :family_6_source_of_income, String, :lazy => true, :nullable => true
+  property :family_6_monthly_income, Integer, :lazy => true, :nullable => true
 
   property :total_monthly_income, Integer, :lazy => true
   property :total_annual_income, Integer, :lazy => true
@@ -151,7 +174,7 @@ class Client
   property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
 
   # fields before May 2011, preserved for backward compatibility and data on old clients
-  property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
+  property :religion, Enum.send('[]', *RELIGIONS), :nullable => true
   property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
   property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
   property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
