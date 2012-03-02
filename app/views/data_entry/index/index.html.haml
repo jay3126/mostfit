@@ -76,6 +76,8 @@
           %br
           = link_to "Bulk add clients", url(:controller => :clients, :action => :bulk_entry), :class => 'add_small'
           %br
+          = link_to_with_rights("Bulk add applications", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small')
+          %br
           - cl = Client.all(:active => false).aggregate(:id.count)
           = link_to_with_rights("Inactive Clients", url(:controller => :clients, :action => :inactive_client_count), :class => 'edit_small')
           %span.number-hint

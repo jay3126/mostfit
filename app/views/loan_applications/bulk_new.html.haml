@@ -1,0 +1,17 @@
+%h1 New Loan Applications
+
+= form :action => url(:controller => :loan_applications, :action => :bulk_new, :method => :post) do
+  %table.tall.shaded
+    %tr
+      %th
+        Branch
+      %td
+        = select :name => :branch_id, :text_method => :name, :value_method => :id, :collection => get_accessible_branches, :prompt => "Select branch", :id => 'branch_selector', :class => 'chosen', :style => "width:230px;"
+      %th
+        Center
+      %td
+        = select :name => :center_id, :text_method => :name, :value_method => :id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;"
+
+
+
+    

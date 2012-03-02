@@ -1,5 +1,6 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :loan_applications, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
@@ -117,6 +118,7 @@ Merb::Router.prepare do
 
   namespace :data_entry, :name_prefix => 'enter' do  # for url(:enter_payment) and the likes
     match('/clients(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
+    match('/loan_applications(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
     match('/loans/approve_by_center/:id').to(:controller => 'loans', :action => 'approve').name(:approval_by_center)
     match('/loans(/:action)(.:format)').to(:controller => 'loans').name(:loans)
     match('/payments(/:action)(.:format)').to(:controller => 'payments').name(:payments)
