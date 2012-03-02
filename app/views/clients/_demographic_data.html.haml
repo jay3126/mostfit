@@ -6,13 +6,13 @@
     %td
       Religion:
     %td
-      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddha, "Buddha"], [:christian, "Christian"]] , :prompt => "Select religion")
+      = select(:religion, :collection => Constants::Client::RELIGIONS , :prompt => "Select religion")
       %br/
   %tr
     %td
       Caste:
     %td
-      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select caste")
+      = select(:caste, :collection => Constants::Client::CASTES, :prompt => "Select caste")
       %br/
   %tr
     %td
@@ -22,7 +22,7 @@
       %br/
   %tr
     %td
-      Husband litrate:
+      Husband literate:
     %td
       = select(:husband_litrate, :collection => [[:no, "No"], [:yes, "Yes"]] , :prompt => "is spouse litrate?")
       %br/
