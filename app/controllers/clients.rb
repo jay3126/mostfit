@@ -47,6 +47,7 @@ class Clients < Application
     model_name = (params[:client_type])
     model = Kernel.const_get(model_name)
     client = params[:client].merge(params[model_name.snake_case])
+    client['number_of_family_members'] = client['number_of_family_members'].to_i
     @client = model.new(client)
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
@@ -79,6 +80,8 @@ class Clients < Application
     raise NotFound unless @client
     disallow_updation_of_verified_clients
     client = params[:client].merge(params[@client.class.to_s.snake_case])
+    client['number_of_family_members'] = client['number_of_family_members'].to_i
+
     @client.update_attributes(client)      
     if @client.errors.blank?
       if params[:tags]
