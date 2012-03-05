@@ -34,15 +34,14 @@
     %td
       Premium
     %td
-      - if @loan_product.fees
-        - if @loan_product.fees(:name.like => "%insurance%", :payable_on => :loan_disbursal_date)
-          - premium_amount = @loan_product.fees(:name.like => "%insurance%", :payable_on => :loan_disbursal_date)[0].amount
-          = premium_amount
-          = hidden_field :premium, :value => premium_amount
-        - elsif @loan_product.fees(:name.like => "%premium%", :payable_on => :loan_disbursal_date)
-          - premium_amount = @loan_product.fees(:name.like => "%premium%", :payable_on => :loan_disbursal_date)[0].amount
-          = premium_amount
-          = hidden_field :premium, :value => premium_amount
+      - if @loan_product.fees and @loan_product.fees(:name.like => "%insurance%", :payable_on => :loan_disbursal_date)
+        - premium_amount = @loan_product.fees(:name.like => "%insurance%", :payable_on => :loan_disbursal_date)[0].amount
+        = premium_amount
+        = hidden_field :premium, :value => premium_amount
+      - elsif @loan_product.fees and @loan_product.fees(:name.like => "%premium%", :payable_on => :loan_disbursal_date)
+        - premium_amount = @loan_product.fees(:name.like => "%premium%", :payable_on => :loan_disbursal_date)[0].amount
+        = premium_amount
+        = hidden_field :premium, :value => premium_amount
       - else
         = text_field :premium
         %br
