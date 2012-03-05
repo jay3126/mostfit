@@ -1,0 +1,49 @@
+#client_list
+  - if @center
+    %h3
+      Branch:
+      = @center.branch.name
+      = "|"
+      Center:
+      = @center.name
+  - if @clients
+    = form :action => url(:controller => :loan_applications, :action => :bulk_new, :method => :post) do
+      %table.report.nojs
+        %thead
+          %tr
+            %th
+              = check_box
+            %th
+              Client ID
+            %th
+              Name
+            %th
+              Address
+        %tbody
+          - @clients.each do |client|
+            - if LoanApplication.allow_new_loan_application?(client.id) 
+              %tr
+                %td
+                  = check_box
+                %td
+                  = client.id
+                %td
+                  = client.name
+                %td
+                  = client.address
+            - else
+              %tr{:style => 'background-color:gray;'}
+                %td
+                  = check_box
+                %td
+                  = client.id
+                %td
+                  = client.name
+                %td
+                  = client.address
+        %tfoot
+          %tr
+            %td{:colspan => '4'}
+              = submit 'Submit'
+  - else
+    %h3 No clients to display. Please select a center.

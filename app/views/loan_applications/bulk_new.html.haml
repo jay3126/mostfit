@@ -1,6 +1,6 @@
 %h1 New Loan Applications
 
-= form :action => url(:controller => :loan_applications, :action => :bulk_new, :method => :post) do
+%form{:action => url(:controller => :loan_applications, :action => :list), :method => :get}
   %table.tall.shaded
     %tr
       %th
@@ -10,8 +10,13 @@
       %th
         Center
       %td
-        = select :name => :center_id, :text_method => :name, :value_method => :id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;"
-
-
+        = select :name => :center_id, :text_method => :name, :value_method => :id, :collection => get_accessible_centers(params[:branch_id].to_i), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;"
+      %td
+        = submit "Proceed"
+        
+= partial :list
+      
+  
+      
 
     

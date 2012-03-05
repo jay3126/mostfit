@@ -15,4 +15,15 @@ class LoanApplication
     self.get_status == APPROVED_STATUS
   end
 
+  # returns whether a client with the client_id is eligible for a new loan application
+  #
+  # @param [Integer] the client_id of the client in question
+  # @return [Boolean] true/false value that tells whether the client in question is eligible for a new loan application
+  def self.allow_new_loan_application?(client_id)
+    client = Client.get(client_id)
+    raise ArgumentError, "Invalid client id" unless client
+    return true # this is dummy
+    # the logic that will decide whether a said client is allowed to file a loan application
+  end
+
 end
