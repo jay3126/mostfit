@@ -9,6 +9,9 @@ module Constants
 
     NEW_STATUS = :new; APPROVED_STATUS = :approved
     APPLICATION_STATUSES = [NEW_STATUS, :pending_overlap_report, :overlap_report_cleared, :overlap_report_rejected, APPROVED_STATUS, :rejected, :on_hold]
+
+    LOAN_OUTSTANDING_STATUS = :outstanding
+    LOAN_STATUSES = [LOAN_OUTSTANDING_STATUS]
     
   end
 

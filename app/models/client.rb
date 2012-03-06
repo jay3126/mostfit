@@ -3,6 +3,7 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
   include FeesContainer
+  include ClientValidations
 
   FLAGS = [:insincere]
 

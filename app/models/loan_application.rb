@@ -2,8 +2,13 @@ class LoanApplication
   include DataMapper::Resource
   include Constants::Status
 
-  property :id,     Serial
-  property :status, Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :id,                  Serial
+  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :created_by_staff_id, Integer, :nullable => false
+  property :created_by_user_id,  Integer, :nullable => false
+  property :created_at,          DateTime, :nullable => false, :default => DateTime.now
+
+  has n, :client_verifications
 
   # Returns the status of loan applications
   def get_status
