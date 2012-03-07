@@ -1,22 +1,21 @@
 #moreinfo
-  - if @render_form
-    = form(:action => "/info/moreinfo/#{@obj.id}?for=#{@obj.class.name.snake_case}", :class => "_remote_") do
-      %input{:type => 'hidden', :value => "moreinfo", :name => "_target_"}
-      %br
-      %b From
-      = date_select "from_date", @from_date
-      &nbsp;
-      %b To
-      &nbsp;
-      - if params[:type] and params[:type]=="managed"
-        = @to_date
-        = hidden_field :to_date, :value => @to_date
-      - else
-        = date_select "to_date", @to_date
-      - if params[:type]
-        = hidden_field :type, :value => params[:type]
-      &nbsp;
-      = submit "GO", :class => "grey_button"
+  = form(:action => "/info/moreinfo/#{@obj.id}?for=#{@obj.class.name.snake_case}", :class => "_remote_") do
+    %input{:type => 'hidden', :value => "moreinfo", :name => "_target_"}
+    %br
+    %b From
+    = date_select "from_date", @from_date
+    &nbsp;
+    %b To
+    &nbsp;
+    - if params[:type] and params[:type]=="managed"
+      = @to_date
+      = hidden_field :to_date, :value => @to_date
+    - else
+      = date_select "to_date", @to_date
+    - if params[:type]
+      = hidden_field :type, :value => params[:type]
+    &nbsp;
+    = submit "GO", :class => "grey_button"
   %table.moreinfo.shaded
     %br
     %tr
@@ -32,9 +31,7 @@
         %td
           Number of Areas
         %td
-          = (@areas[:new] and @areas[:new].length>0) ? @areas[:new].count : 0
-        %td
-          = (@areas[:upto] and @areas[:upto].length>0) ? @areas[:upto].count : 0
+          = @areas.count
     %thead
       %tr
         %td{:style => "background: #eee;"}
@@ -48,9 +45,9 @@
         %td
           Number of Branches
         %td
-          = (@branches[:new] and @branches[:new].length>0) ? @branches[:new].count : 0
+          = (@branches[:new] ? @branches[:new].count : 0)
         %td
-          = (@branches[:upto] and @branches[:upto].length>0) ? @branches[:upto].count : 0
+          = (@branches[:upto] ? @branches[:upto].count : 0)
     - if @centers and not @obj.class==Center
       %tr
         %td
@@ -63,7 +60,7 @@
       %td
         Number of Groups
       %td.lightpurple
-        - if @groups_new_count then
+        - if @groups_new_count
           = @groups_new_count
         - else
           = 0
@@ -90,9 +87,9 @@
         %td
           Number of death Cases
         %td.lightpurple
-          = (@death_cases and @death_cases>0 and @death_cases.length>0) ? @death_cases : 0
+          = (@death_cases ? @death_cases : 0)
         %td.purple
-          = (@total_death_cases and @total_death_cases>0 and @total_death_cases.length>0) ? @total_death_cases : 0
+          = (@total_death_cases ? @total_death_cases : 0)
     - if @pending_death_cases
       %tr
         %td
@@ -100,35 +97,35 @@
         %td.lightpurple
           = '-'
         %td.purple
-          = (@pending_death_cases and @pending_death_cases>0 and @pending_death_cases.length>0) ? @pending_death_cases : 0  
+          = (@pending_death_cases ? @pending_death_cases : 0)  
     %tr
       %td
         Borrower clients
       %td.lightpurple
-        = @loan_histories.aggregate(:client_id.count)
+        = @loan_histories.aggregate(:client_id.count) if @loan_histories
       %td.purple
-        = @some_loan_histories.aggregate(:client_id.count)
+        = @some_loan_histories.aggregate(:client_id.count) if @some_loan_histories
     %tr
       %td
         Number of Loans
       %td.lightpurple
-        = (@loan_disbursed and @loan_disbursed>0) ? @loan_disbursed.loan_count : 0
+        = (@loan_disbursed and @loan_disbursed.loan_count>0) ? @loan_disbursed.loan_count : 0
       %td.purple
-        = (@total_disbursed and @total_disbursed>0) ? @total_disbursed.loan_count : 0  
+        = (@total_disbursed and @total_disbursed.loan_count>0) ? @total_disbursed.loan_count : 0  
     %tr
       %td
         Number of loans Repaid
       %td.lightpurple
-        = (@loans_repaid and @loans_repaid>0) ? @loans_repaid : 0
+        = (@loans_repaid ? @loans_repaid : 0)
       %td.purple
-        = (@loans_repaid_total and @loans_repaid_total>0) ? @loans_repaid_total : 0
+        = (@loans_repaid_total ? @loans_repaid_total : 0)
     %tr
       %td
         Amount Disbursed
       %td.lightpurple
-        = (@loan_disbursed and @loan_disbursed>0 and @loan_disbursed.amount) ? @loan_disbursed.amount.to_currency : 0
+        = (@loan_disbursed and @loan_disbursed.amount and @loan_disbursed.amount>0) ? @loan_disbursed.amount.to_currency : 0
       %td.purple
-        = (@total_disbursed and @total_disbursed>0 and @total_disbursed.amount) ? @total_disbursed.amount.to_currency : 0
+        = (@total_disbursed and @total_disbursed.amount and @total_disbursed.amount>0) ? @total_disbursed.amount.to_currency : 0
     %tr
       %td
         Principal Received
@@ -167,17 +164,17 @@
       %td
         Amount Outstanding
       %td{:colspan => "2"}
-        = (@loan_data and @loan_data>0 and @loan_data.length>0 and @loan_data.first.actual_outstanding_principal) ? @loan_data[0].actual_outstanding_principal.to_currency : "-"
+        = (@loan_data and @loan_data.length>0 and @loan_data.first.actual_outstanding_principal) ? @loan_data[0].actual_outstanding_principal.to_currency : "-"
     %tr
       %td
         Total Principal Overdue
       %td{:colspan => "2"}
-        = (@defaulted and @defaulted>0 and @defaulted.principal_due) ? @defaulted.principal_due.to_currency : 0
+        = (@defaulted and @defaulted.principal_due) ? @defaulted.principal_due.to_currency : 0
     %tr
       %td
         Total Interest Overdue
       %td{:colspan => "2"}
-        - if @defaulted and @defaulted>0 and @defaulted.total_due and @defaulted.principal_due
+        - if @defaulted and @defaulted.total_due and @defaulted.principal_due
           = (@defaulted.total_due-@defaulted.principal_due).to_currency
         - else
           0
