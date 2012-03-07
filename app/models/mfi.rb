@@ -57,6 +57,8 @@ class Mfi
 
   property :system_state, Enum.send('[]', *SYSTEM_STATES), :default => :running
 
+  property :preclosure_by_center, Boolean, :default => false, :index => true
+
   property :main_text, Text, :nullable => true, :lazy => true
   validates_length :name, :min => 0, :max => 20
   before :valid?, :save_image

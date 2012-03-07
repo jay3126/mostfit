@@ -20,8 +20,9 @@
   collected on
   = date_select "received_on", @date
   &nbsp;&nbsp;
-  preclose all?
-  = check_box :id => "preclose_all", :name => "preclose_all"
+  - if Mfi.first.preclosure_by_center
+    preclose all?
+    = check_box :id => "preclose_all", :name => "preclose_all"
   %table.report.nojs
     %thead
       %tr{:style => "font-size: 0.85em;"}
