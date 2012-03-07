@@ -256,7 +256,7 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      %h2== Repayments #{link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
+      %h2
       - if @payments.blank?
         %p
           %i No repayments have been made so far.
