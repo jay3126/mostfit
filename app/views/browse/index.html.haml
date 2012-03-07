@@ -22,6 +22,8 @@
       %li
         = link_to_with_rights('Regions', resource(:regions), :class => 'edit')
       %li
+        = link_to_with_rights('Browse Aggregate Data', url(:cachers, :date => Date.today.strftime('%Y-%m-%d')), :class => 'edit')
+      %li
         = link_to_with_rights 'Verify data', resource(:verifications), :class => 'edit'
       %li
         = link_to_with_rights 'Documents', resource(:documents), :class => 'edit'
