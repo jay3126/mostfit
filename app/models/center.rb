@@ -1,6 +1,7 @@
 class Center
   include DataMapper::Resource
   include DateParser
+  include Constants::Center
 
   attr_accessor :meeting_day_change_date
 
@@ -23,6 +24,7 @@ class Center
   property :meeting_time_hours,   Integer, :length => 2, :index => true
   property :meeting_time_minutes, Integer, :length => 2, :index => true
   property :meeting_calendar,     Text # this is a comma separated list of dates and takes precedence over everything else.
+  property :center_category,      Enum.send('[]', *CENTER_CATEGORIES), :nullable => true, :lazy => true, :default => ''
   property :created_at,           DateTime, :nullable => false, :default => Time.now, :index => true
   property :creation_date,        Date
   belongs_to :branch

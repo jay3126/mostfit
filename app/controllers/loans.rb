@@ -108,10 +108,6 @@ class Loans < Application
     redirect url_for_loan(@loan) + "#misc", :message => {:notice => 'Fees levied'}
   end
 
-  def bulk_restore_payments(id)
-  end
-
-
   def edit(id)
     only_provides :html
     @loan = Loan.get(id)

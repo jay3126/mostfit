@@ -10,8 +10,6 @@
     %th
       Full Name with Initials
     %th
-      Gender
-    %th
       Age
     %th
       Date of Birth
@@ -21,9 +19,7 @@
       Branch Name
     %th
       Occupation
-    %th
-      Member(M)/ Guarantor(G)
-  - @data.each do  |row|
+  - @data.each do |row|
     %tr 
       %td{:width => "10px"}
         = row[:loan_id]
@@ -34,15 +30,10 @@
       %td
         = row[:client_name]
       %td
-        - if row[:client_gender] == 3
-          = "Male"
-        - elsif row[:client_gender] == 2
-          = "Female"
-        - else
-          = "-"
-      %td
         - age = row[:c_date_of_birth] ? (Time.now.year - row[:c_date_of_birth].year) : ""
         = age
+        - if age
+          yrs.
       %td
         = row[:c_date_of_birth]
       %td
@@ -52,35 +43,3 @@
       %td
         - occupation = row[:c_occupation_id] ? Occupation.get(row[:c_occupation_id]).name : "-"
         = occupation
-      %td
-        = "M"
-    %tr
-      %td{:width => "10px"}
-        = row[:loan_id]
-      %td
-        = "G-" + row[:guarantor_id].to_s
-      %td
-        = row[:amount]
-      %td
-        = row[:guarantor_name]
-      %td
-        - if row[:g_gender] == 3
-          = "Male"
-        - elsif row[:g_gender] == 2
-          = "Female"
-        - else
-          = "-"
-      %td
-        - age = row[:g_date_of_birth] ? (Time.now.year - row[:g_date_of_birth].year) : ""
-        = age
-      %td
-        = row[:g_date_of_birth]
-      %td
-        = row[:disbursal_date]
-      %td
-        = row[:branch_name]
-      %td
-        - occcupation = row[:g_occupation_id] ? (Occupation.get(row[:g_occupation_id]).name) : "-"
-        = occupation
-      %td
-        = "G"

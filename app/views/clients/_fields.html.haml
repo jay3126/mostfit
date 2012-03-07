@@ -3,15 +3,18 @@
     %li#basic_info Basic info
     %li#family_information Family Information
     %li#other_information Other Information
-    %li#pre_may_11 Before May 2011
+    %li#demographic_details Demographic Data
+    -#%li#pre_may_11 Before May 2011
   %div.tab
-    = partial 'clients/basic_info'
+    =partial 'clients/basic_info'
   %div.tab
     =partial 'clients/family_information'
   %div.tab
     =partial 'clients/other_information'
   %div.tab
-    =partial 'clients/pre_may_11'
+    =partial 'clients/demographic_data'
+-#  %div.tab
+-#    =partial 'clients/pre_may_11'
 -#  CHANGES made to MRF (Member Registration Form) for Sahayog in May 2011 obsoleted the following tabs
 -#  The content in these tabs has been consolidated into a single tab: "Before May 2011"
 -#    %li#family_details Family Details
@@ -27,5 +30,4 @@
 -#    =partial 'clients/bank_account_data'
 -#  %div.tab
 -#    =partial 'clients/poverty_overview'
--#  %div.tab
--#    =partial 'clients/demographic_data'
+

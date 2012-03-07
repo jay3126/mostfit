@@ -14,12 +14,20 @@
       %b Center Name
     %td
       = text_field :name, :size => 40
+
   %tr
     %td
       %b Center Code
     %td
       = text_field :code, :size => 2
       %span.greytext a two letter unique code for the center
+  
+  %tr
+    %td
+      %b Center Category
+    %td
+      = select :center_category, :collection => [['',''],[:urban,'urban'],[:rural,'rural']]
+
   %tr
     %td
       %b Creation Date

@@ -33,7 +33,6 @@
           |
           %a{:href => "#", :onclick => "javascript:$('.#{dh}').attr('checked',false); return false"} uncheck all
           |
-          = link_to 'restore all', :action => url(:controller => :loans, :action => :bulk_restore_payments, :date => "#{d.to_s}")
 
     - gpmts[d].each_with_index do |payment, pi|
       - tr_style = (pi == 0) ? "border-top: solid 1px grey;" : ""
@@ -57,8 +56,5 @@
           = payment.deleted_at
         %td
           = User.get(payment.deleted_by_user_id).login
-        %td
-          - if payment.loan_id 
-            restore
 
 %p= link_to 'new repayment >>', url_for_loan(@loan, 'payments/new'), :class => "button"
