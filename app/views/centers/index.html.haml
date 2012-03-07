@@ -102,7 +102,7 @@
       %div#container_centers_list
         =partial "centers/list"
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :info, :action => :branchinfo, :id => @branch.id)}
+      %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@branch.id}?for=branch"}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/exceptions/#{@branch.id}?for=branch"}
     %div.tab
