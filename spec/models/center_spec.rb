@@ -20,7 +20,6 @@ describe Center do
   end
 
   before(:each) do
-    debugger
     Center.all.destroy!
     @center = Center.new(:name => "Munnar hill center")
     @center.manager = @manager

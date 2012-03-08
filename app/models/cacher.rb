@@ -172,7 +172,6 @@ class BranchCache < Cacher
     BranchCache.transaction do |t|
       # updates the cache object for a branch
       # first create caches for the centers that do not have them
-      debugger
       t0 = Time.now; t = Time.now;
       branch_ids = Branch.all.aggregate(:id) unless branch_ids
       #branch_centers = Branch.all(:id => branch_ids).centers.aggregate(:id)
@@ -391,7 +390,6 @@ class Cache < Cacher
 
 
   def self.update(hash = {})
-    debugger
     # is our cache based off fields in the loan history table?
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
@@ -433,7 +431,6 @@ class Cache < Cacher
     _fls = fls.map{|fl| fl.delete(loan_history_field); fl}
     sql = get_bulk_insert_sql("cachers", _fls)
     # destroy the relevant funding_line caches in the database
-    debugger
     ids = fl_data.map{|center_id, models|
       models.map{|fl_id, data|
         [center_id, fl_id]
@@ -445,7 +442,6 @@ class Cache < Cacher
 
     # now do the branch aggregates for each funding line cache
     Kernel.const_get(base_model_name).all.each do |fl|
-      debugger
       relevant_branch_ids = (hash[:center_ids] ? Center.all(:id => hash[:center_ids]) : Center.all).aggregate(:branch_id)
       branch_data_hash = self.all(:model_name => base_model_name, :branch_id => relevant_branch_ids, :date => date, :center_id.gt => 0, :model_id => fl.id).group_by{|x| x.branch_id}.to_hash
 
@@ -464,7 +460,6 @@ class Cache < Cacher
       # when you add clients directly to the branch, do also update the code here
 
       branch_data.map do |bid, c|
-        debugger
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         if bc.new?
@@ -480,7 +475,6 @@ class Cache < Cacher
 
   def self.create(hash = {})
     # creates a cacher from loan_history table for any arbitrary condition. Also does grouping
-    debugger
     base_model_name = self.to_s.gsub("Cache","")
     loan_history_field = "#{base_model_name.snake_case}_id".to_sym
     date = hash.delete(:date) || Date.today
