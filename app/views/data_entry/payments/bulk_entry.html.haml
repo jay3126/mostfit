@@ -1,0 +1,18 @@
+%h1
+  Bulk Repayments
+%form{:action => url(:enter_payments, :action => 'centers_list')}  
+  %table.tall.shaded
+    %tr
+      %th
+        Branch
+      %td
+        = select :name => :branch_id, :collection => get_accessible_branches, :text_method => :name, :value_method => :id, :prompt => "Select Branch"
+      %th
+        Date repayments are expected on
+      %td
+        = date_select 'for_date', (@date || Date.today), {:id => 'for_date'}
+      %td
+        = submit 'Proceed'
+
+= partial :center_staff_member_list      
+        

@@ -10,6 +10,20 @@ module DataEntry
       render
     end
 
+    def centers_list
+      @branch = Branch.get(params[:branch_id])
+      @for_date = Date.parse(params[:for_date])
+      @date = Date.parse(params[:for_date])
+      @centers = Center.paying_today(session.user, @for_date, (@branch ? @branch.id : nil))
+      staff_member_ids = @centers.managers.aggregate(:id)
+      @staff_members = StaffMember.all(:id => staff_member_ids)
+      render :bulk_entry
+    end
+
+    def bulk_entry
+      render
+    end
+    
     def by_center
       @option = params[:option] if params[:option]
       @info = params[:info] if params[:info]
@@ -29,7 +43,7 @@ module DataEntry
       else
         @date = Date.today
       end
-
+ 
       unless @center.nil?
         @branch = @center.branch
         @clients = Client.all(:center_id => @center.id, :fields => [:id, :name, :center_id, :client_group_id])
@@ -99,7 +113,7 @@ module DataEntry
             @staff_member = StaffMember.get(staff_id.to_i)
             raise NotFound unless @staff_member
           end
-          
+
           unless @staff_member.nil?
             # select clients and centers
             @centers                         = Center.all(:manager => @staff_member)

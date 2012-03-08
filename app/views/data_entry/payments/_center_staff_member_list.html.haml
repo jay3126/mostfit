@@ -1,0 +1,65 @@
+.shaded
+  %div.tab_container.clearfix
+    %ul.tabs
+      %li#staff_members
+        Staff Members
+      %li#centers
+        Centers
+    %div.tab
+      - if @staff_members
+        %table.narrow.form{:width => "100%"}
+          %thead
+            %tr
+              %th
+                Serial No.
+              %th
+                Staff member
+              %th
+          %tbody
+            - scls = 'odd'
+            - @staff_members.each_with_index do |staff_member, idx|
+              - scls = scls == 'odd' ? 'even' : 'odd'
+              %tr{:class => scls}
+                %td
+                  = idx + 1
+                %td
+                  = staff_member.name
+                %td
+                  = form_for(@payment, :action => url(:enter_payments, :action => 'by_staff_member'), :method => :get) do
+                    = hidden_field :name => 'return', :value => url(:data_entry)
+                    = hidden_field :name => 'staff_member_id', :value => @staff_member.id
+                    = submit 'Record Payments'
+      - else
+        %h3
+          No staff members paying today
+    %div.tab
+      - if @centers
+        %table.narrow.form{:width => "100%"}
+          %thead
+            %tr
+              %th
+                Serial No.
+              %th
+                Center
+              %th
+          %tbody
+            - cls = 'odd'
+            - @centers.each_with_index do |center, idx|
+              - cls = cls == 'odd' ? 'even' : 'odd'
+              %tr{:class => cls}
+                %td
+                  = idx + 1
+                %td
+                  = center.name
+                %td
+                  = form_for(@payment, :action => url(:enter_payments, :action => 'by_center'), :method => :get) do
+                    = hidden_field :name => 'return', :value => url(:data_entry)
+                    = hidden_field :name => 'center_id', :value => center.id
+                    = submit 'Record Payments'
+      - else
+        %h3
+          No centers paying today
+        
+          
+          
+      
