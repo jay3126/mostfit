@@ -25,7 +25,8 @@
         = link_to_with_rights 'Verify data', resource(:verifications), :class => 'edit'
       %li
         = link_to_with_rights 'Documents', resource(:documents), :class => 'edit'
-      %li
-        = link_to 'Funder page', url(:funders), :class => 'edit' if session.user.role == :funder
+      - if session.user.role == :funder
+        %li
+          = link_to 'Funder page', url(:funders), :class => 'edit'
       %li
         = link_to_with_rights 'Book keeping', resource(:accounts), :class => 'edit'
