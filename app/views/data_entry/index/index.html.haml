@@ -28,11 +28,9 @@
         - if thing == :payment
           = link_to "Record a repayment", url("enter_#{plural}".to_sym, :action => 'record'), :class => 'add_small'
           %br
-          = link_to "Bulk Payments on", url("enter_#{plural}".to_sym, :action => 'bulk_entry'), :class => 'add_small'  
+          = link_to "By Center", url("enter_#{plural}".to_sym, :action => 'bulk_entry'), :class => 'add_small'
           %br
-          = link_to "By Center", url("enter_#{plural}".to_sym, :action => 'by_center'), :class => 'add_small'
-          %br
-          = link_to "By Staff Member", url("enter_#{plural}".to_sym, :action => 'by_staff_member'), :class => 'add_small'
+          = link_to "By Staff Member", url("enter_#{plural}".to_sym, :action => 'bulk_entry'), :class => 'add_small'
           %br
           = link_to "Delete a repayment <br/>", url("enter_#{plural}".to_sym, :action => 'delete'), :class => 'add_small' 
           = link_to_with_rights("Collection sheet<br/>", url(:enter_payments,:action => 'staff_collection_sheet'), :class => 'edit_small')

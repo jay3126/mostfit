@@ -6,14 +6,20 @@
       %li#centers
         Centers
     %div.tab
-      - if @staff_members
+      - if @staff_members and not @staff_members == []
+        %h2
+          = "Staff Members paying on #{@for_date.to_s}"
+          - if @branch
+            = "for branch #{@branch.name}"
+          - else
+            = "for all branches"
         %table.narrow.form{:width => "100%"}
           %thead
             %tr
               %th
                 Serial No.
               %th
-                Staff member
+                Staff Member
               %th
           %tbody
             - scls = 'odd'
@@ -21,19 +27,26 @@
               - scls = scls == 'odd' ? 'even' : 'odd'
               %tr{:class => scls}
                 %td
-                  = idx + 1
+                  = idx + 1 
                 %td
-                  = staff_member.name
+                  = link_to staff_member.name, resource(staff_member)
                 %td
                   = form_for(@payment, :action => url(:enter_payments, :action => 'by_staff_member'), :method => :get) do
                     = hidden_field :name => 'return', :value => url(:data_entry)
-                    = hidden_field :name => 'staff_member_id', :value => @staff_member.id
+                    = hidden_field :name => 'staff_member_id', :value => staff_member.id
+                    = hidden_field :name => 'for_date', :value => @for_date.to_s
                     = submit 'Record Payments'
       - else
         %h3
           No staff members paying today
     %div.tab
-      - if @centers
+      - if @centers and not @centers == []
+        %h2
+          = "Centers paying on #{@for_date.to_s}"
+          - if @branch
+            = "for branch #{@branch.name}"
+          - else
+            = "for all branches"
         %table.narrow.form{:width => "100%"}
           %thead
             %tr
@@ -50,11 +63,12 @@
                 %td
                   = idx + 1
                 %td
-                  = center.name
+                  = link_to center.name, resource(center)
                 %td
                   = form_for(@payment, :action => url(:enter_payments, :action => 'by_center'), :method => :get) do
                     = hidden_field :name => 'return', :value => url(:data_entry)
                     = hidden_field :name => 'center_id', :value => center.id
+                    = hidden_field :name => 'for_date', :value => @for_date.to_s
                     = submit 'Record Payments'
       - else
         %h3
