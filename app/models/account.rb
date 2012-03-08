@@ -85,10 +85,10 @@ class Account
   def closing_balance_as_of(for_date = Date.today)
     return nil if for_date > Date.today
     opening_balance_on_date = opening_balance_as_of for_date
-    postings_on_date = postings("journal.date" => for_date).aggregate(:amount.sum)
+    postings_on_date = (postings("journal.date" => for_date).aggregate(:amount.sum)).to_f
     return nil if opening_balance_on_date.nil? && postings_on_date.nil?
     opening_balance_on_date ||= 0.0; postings_on_date ||= 0.0
-    return opening_balance_on_date + postings_on_date
+    return (opening_balance_on_date + postings_on_date)
   end
 
   def change_closing_over_opening_balance_for_period(for_date = Date.today)
