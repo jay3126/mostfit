@@ -6,13 +6,23 @@
       %th
         Branch
       %td
-        = select :name => :branch_id, :collection => get_accessible_branches, :text_method => :name, :value_method => :id, :prompt => "Select Branch"
+        = select :name => :branch_id, :collection => get_accessible_branches, :text_method => :name, :value_method => :id, :prompt => "Select Branch", :selected => (@branch ? @branch.id : nil)
       %th
         Date repayments are expected on
       %td
-        = date_select 'for_date', (@date || Date.today), {:id => 'for_date'}
+        = date_select 'for_date', (@for_date || Date.today), {:id => 'for_date'}
       %td
         = submit 'Proceed'
 
+- if @for_date       
+  .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
+    = "For"
+    - if @branch
+      = @branch.name
+    - else
+      = "all branches"
+    = "on #{@for_date}"
+    
+        
 = partial :center_staff_member_list      
         

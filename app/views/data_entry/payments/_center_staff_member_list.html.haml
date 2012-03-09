@@ -8,7 +8,7 @@
     %div.tab
       - if @staff_members and not @staff_members == []
         %h2
-          = "Staff Members paying on #{@for_date.to_s}"
+          = "Staff Members collecting on #{@for_date.to_s}"
           - if @branch
             = "for branch #{@branch.name}"
           - else
@@ -38,15 +38,19 @@
                     = submit 'Record Payments'
       - else
         %h3
-          No staff members paying today
+          - if @for_date
+            = "No staff members collecting on #{@for_date.to_s}"
+          - else
+            = "Please select a date"
     %div.tab
       - if @centers and not @centers == []
         %h2
-          = "Centers paying on #{@for_date.to_s}"
+          = "Centers "
           - if @branch
-            = "for branch #{@branch.name}"
+            = "at branch #{@branch.name}"
           - else
-            = "for all branches"
+            = "at all branches"
+          = "repaying on #{@for_date.to_s}"
         %table.narrow.form{:width => "100%"}
           %thead
             %tr
@@ -72,8 +76,11 @@
                     = submit 'Record Payments'
       - else
         %h3
-          No centers paying today
-        
+          - if @for_date
+            = "No centers paying on #{@for_date.to_s}"
+          - else
+            = "Please select a date"
+               
           
           
       
