@@ -45,4 +45,21 @@ describe ClientVerification do
     ClientVerification.get_CPV2_status(loan_application_id).should == Constants::Verification::NOT_VERIFIED
   end
 
+  it "should tell that CPV process is complete only if both CPV1 and CPV2 are done" do
+    #when no CPV is recorded
+    loan_application_id = ((Time.now - @time_datum) * 1000).to_i
+    ClientVerification.is_cpv_complete?(loan_application_id).should == false
+
+    #when only CPV1 is recorded
+    loan_application_id = ((Time.now - @time_datum) * 1000).to_i
+    ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.is_cpv_complete?(loan_application_id).should == false
+
+    #when both CPV1 and CPV2 are recorded
+    loan_application_id = ((Time.now - @time_datum) * 1000).to_i
+    ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.record_CPV2_rejected(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.is_cpv_complete?(loan_application_id).should == true
+  end
+
 end

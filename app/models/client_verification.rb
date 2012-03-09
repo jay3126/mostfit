@@ -93,6 +93,24 @@ class ClientVerification
     get_CPV2_status(loan_application_id) == VERIFIED_ACCEPTED
   end
 
+  #check whether the whole CPV process is complete ?
+  def self.is_cpv_complete?(loan_application_id)
+    #a CPV is deemed complete only when BOTH CPV1 and CPV2 are complete (either rejected or approved, but not NOT_VERIFIED)
+    if get_CPV1_status(loan_application_id) == NOT_VERIFIED
+        return false
+    end
+    
+    if get_CPV1_status(loan_application_id) == VERIFIED_ACCEPTED and get_CPV2_status(loan_application_id) == NOT_VERIFIED
+        return false
+    end
+    
+    #when a CPV2 is done, it's complete.
+    #the validation rules on models ensure that CPV2 won't happen before CPV1
+    if get_CPV2_status(loan_application_id) == VERIFIED_ACCEPTED or get_CPV2_status(loan_application_id) == VERIFIED_REJECTED
+        return true
+    end
+  end
+
   private
 
   # Queries CPV status for a loan application
