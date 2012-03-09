@@ -15,7 +15,7 @@ module DataEntry
       @for_date = Date.parse(params[:for_date])
       @date = Date.parse(params[:for_date])
       @centers = Center.paying_today(session.user, @for_date, (@branch ? @branch.id : nil))
-      staff_member_ids = (@centers.empty? ? nil : @centers.managers.aggregate(:id))
+      staff_member_ids = (@centers.empty? ? nil : @centers.map{|center| center.manager_staff_id}.uniq)
       @staff_members = StaffMember.all(:id => staff_member_ids)
       render :bulk_entry
     end
