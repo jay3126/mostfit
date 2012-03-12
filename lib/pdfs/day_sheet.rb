@@ -7,7 +7,7 @@ module Pdf
       filename = File.join(folder, "collection_#{self.id}_#{date.strftime('%Y_%m_%d')}.pdf")
       center_ids = LoanHistory.all(:date => [date, date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
       centers = self.centers(:id => center_ids).sort_by{|x| x.name}
-      pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
+      pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
       pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 24, :justification => :center
       pdf.text("\n")
@@ -45,47 +45,54 @@ module Pdf
               next if LOANS_NOT_PAYABLE.include? lh.status
               loan_row_count+=1
               fee = fees_applicable[loan.id] ? fees_applicable[loan.id].due : 0
-              actual_outstanding = (lh ? lh.actual_outstanding_principal : 0)
+              #actual_outstanding = (lh ? lh.actual_outstanding_principal : 0)
               principal_due      = [(lh ? lh.principal_due : 0), 0].max
               interest_due       = [(lh ? lh.interest_due : 0), 0].max
               total_due          = [(lh ? (fee+lh.principal_due+lh.interest_due): 0), 0].max
               number_of_installments = loan.number_of_installments_before(date)
               
               table.data.push({"name" => client.name, "loan id" => loan.id, "amount" => loan.amount.to_currency, 
-                                "outstanding" => actual_outstanding.to_currency, "status" => lh.status.to_s,                                
-                                "disbursed" => loan.disbursal_date.to_s, "installment" =>  number_of_installments,
-                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, "days absent/total" => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,"fee" => fee.to_currency, "total due" =>  total_due.to_currency, "signature" => "" })
+                                "status" => lh.status.to_s,                                
+                                "disbursed" => loan.disbursal_date.to_s, "inst." =>  number_of_installments,
+                                "principal" => principal_due.to_currency, "interest" => interest_due.to_currency, 
+                                "att." => (days_absent[client.id]||0).to_s / (days_present[client.id]||0).to_s,
+                                "total due" =>  total_due.to_currency, "sign" => "" })
               group_amount       += loan.amount
-              group_outstanding  += actual_outstanding
+              #group_outstanding  += actual_outstanding
               group_installments += number_of_installments
               group_principal    += principal_due
               group_interest     += interest_due
-              group_fee          += fee
+              #group_fee          += fee
               group_due          += total_due
             } # loans end
             if loan_row_count==0
-              table.data.push({"name" => client.name, "signature" => "", "status" => "nothing outstanding"})              
+              table.data.push({"name" => client.name, "sign" => "", "status" => "nothing outstanding"})              
             end
           } #clients end
-          table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
-                            "principal" => group_principal.to_currency, "interest" => group_interest.to_currency,
-                            "fee" => group_fee.to_currency, "total due" => group_due.to_currency                            
+          table.data.push({"amount" => group_amount.to_currency, 
+                            #"outstanding" => group_outstanding.to_currency,
+                            "principal" => group_principal.to_currency, 
+                            "interest" => group_interest.to_currency,
+                            #"fee" => group_fee.to_currency, 
+                            "total due" => group_due.to_currency                            
                           })
           tot_amount         += group_amount
-          tot_outstanding    += group_outstanding
+          #tot_outstanding    += group_outstanding
           tot_installments   += group_installments
           tot_principal      += group_principal
           tot_interest       += group_interest
-          tot_fee            += group_fee
+          #tot_fee            += group_fee
           total_due          += (group_principal + group_interest + group_fee)
         } #groups end
-        table.data.push({"amount" => tot_amount.to_currency, "outstanding" => tot_outstanding.to_currency,
+        table.data.push({"amount" => tot_amount.to_currency, 
+                          #"outstanding" => tot_outstanding.to_currency,
                           "principal" => tot_principal.to_currency,
-                          "interest" => tot_interest.to_currency, "fee" => tot_fee.to_currency,
+                          "interest" => tot_interest.to_currency, 
+                          #"fee" => tot_fee.to_currency,
                           "total due" => (tot_principal + tot_interest + tot_fee).to_currency
                         })
         
-        table.column_order  = ["name", "loan id" , "amount", "outstanding", "status", "disbursed", "installment", "principal", "interest", "fee", "total due", "days absent/total", "signature"]
+        table.column_order  = ["name", "loan id" , "amount", "status", "disbursed", "inst.", "principal", "interest", "total due", "att.", "sign"]
         table.show_lines    = :all
         table.show_headings = true
         table.shade_rows    = :none
@@ -170,7 +177,7 @@ module Pdf
                             })
           end
           table.data.push({"amount" => tot_amount.to_currency})
-          table.column_order  = ["name", "spouse name",  "group", "amount", "insurance premium", "balance to disburse", "loan product", "first payment", "loan status", "signature"]
+          table.column_order  = ["name", "spouse name",  "group", "amount", "insurance premium", "balance to disburse", "loan product", "first payment", "loan status", "sign"]
           table.show_lines    = :all
           table.shade_rows    = :none
           table.show_headings = true          
