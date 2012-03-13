@@ -15,11 +15,13 @@ namespace :mostfit do
   namespace :suryoday do
 
     desc "records a single principal repaid payment for each loan to match the POS data in uploads"
-    task :make_single_payment, :directory do |t, args|
+    task :make_single_payment, :directory, :only_interest do |t, args|
       require 'fastercsv'
       USAGE = <<USAGE_TEXT
-[bin/]rake mostfit:suryoday:make_single_payment[<'directory'>]
+[bin/]rake mostfit:suryoday:make_single_payment[<'directory'>,<'only_interest'>]
 Convert loans tab in the upload file to a .csv and put them into <directory>
+Run it without the second argument to record principal payments
+Run once again with the second argument to record only the interest payment
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'LAN No'
@@ -30,6 +32,9 @@ USAGE_TEXT
       instance_file_prefix = 'single_payment' + '_' + DateTime.now.to_s
       results_file_name = File.join(Merb.root, instance_file_prefix + ".results")
       begin
+
+        only_interest_str = args[:only_interest]
+        record_interest_only = (only_interest_str and not(only_interest_str.empty?)) ? only_interest_str == 'only_interest' : false
 
         dir_name_str = args[:directory]
         raise ArgumentError, USAGE unless (dir_name_str and !(dir_name_str.empty?))
@@ -83,21 +88,52 @@ USAGE_TEXT
             end
             loan_ids_read << [loan.id]
 
+            #            if (principal_receipt > 0)
+            branch_id = loan.c_branch_id; center_id = loan.c_center_id
+            center = Center.get(center_id)
+            staff_id = center ? center.manager_staff_id : CREATED_BY_USER_ID
+
+            common_payment_params = {}
+            common_payment_params[:received_on] = as_on_date
+            common_payment_params[:received_by_staff_id] = staff_id
+            common_payment_params[:created_by_user_id] = CREATED_BY_USER_ID
+            common_payment_params[:loan_id] = loan.id
+            common_payment_params[:c_branch_id] = branch_id
+            common_payment_params[:c_center_id] = center_id
+
             principal_receipt = loan.amount - pos
-            if (principal_receipt > 0)
-              branch_id = loan.c_branch_id; center_id = loan.c_center_id
-              principal_repayment = Payment.create(:type => :principal, :amount => principal_receipt, :received_on => as_on_date,
-                :received_by_staff_id => RECEIVED_BY_STAFF_ID, :created_by_user_id => CREATED_BY_USER_ID, :loan_id => loan.id,
-                :c_branch_id => branch_id, :c_center_id => center_id)
+            principal_payment_was_recorded = false
+
+            if (principal_receipt > 0 and not (record_interest_only))
+              principal_payment_params = common_payment_params.merge(:type => :principal, :amount => principal_receipt)
+              principal_repayment = Payment.create(principal_payment_params)
+
               if (principal_repayment and principal_repayment.valid?)
+                principal_payment_was_recorded = true
                 loan.update_history
-                loan_ids_updated << [loan.id, "Payments were recorded to match POS"]
+                loan_ids_updated << [loan.id, "Principal repayment #{principal_receipt} were recorded to match POS"]
               else
-                errors << [loan.id, "Payment not saved"]
+                errors << [loan.id, "Principal repayment not saved"]
               end
-            else
-              loan_ids_updated << [loan.id, "No payment needed"]
             end
+
+            if record_interest_only
+              lh_rows = loan.loan_history(:date => as_on_date)
+              only_row = lh_rows[0] if lh_rows
+              interest_owed = only_row ? only_row.interest_due : 0
+              if (interest_owed and (interest_owed > 0))
+                interest_payment_params = common_payment_params.merge(:type => :interest, :amount => interest_owed)
+                interest_payment = Payment.create(interest_payment_params)
+
+                if (interest_payment and interest_payment.valid?)
+                  loan.update_history
+                  loan_ids_updated << [loan.id, "Interest payment #{interest_owed} was recorded to match POS"]
+                else
+                  errors << [loan.id, "Interest payment not saved"]
+                end
+              end
+            end
+
           end
 
           unless errors.empty?
