@@ -146,6 +146,7 @@ class Client
   has n, :attendances
   has n, :claims
   has n, :guarantors
+  has n, :loan_applications
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
 

@@ -1,3 +1,9 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});  
+  });
+  
 #client_list
   - if @center
     %h3
@@ -7,43 +13,50 @@
       Center:
       = @center.name
   - if @clients
-    = form :action => url(:controller => :loan_applications, :action => :bulk_new, :method => :post) do
+    %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
+      = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member", :class => 'chosen'
       %table.report.nojs
         %thead
           %tr
             %th
-              = check_box
+              = check_box :id => "toggle_select"
             %th
               Client ID
             %th
               Name
             %th
               Address
+            %th
+              Amount
         %tbody
           - @clients.each do |client|
             - if LoanApplication.allow_new_loan_application?(client.id) 
               %tr
                 %td
-                  = check_box
+                  = check_box :name => "clients[#{client.id}][selected]", :class => "select" 
                 %td
                   = client.id
                 %td
                   = client.name
                 %td
                   = client.address
+                %td
+                  = text_field :name => "clients[#{client.id}][amount]"
             - else
               %tr{:style => 'background-color:gray;'}
                 %td
-                  = check_box
+                  = check_box :name => "clients[#{client.id}]", :class => "select" 
                 %td
                   = client.id
                 %td
                   = client.name
                 %td
                   = client.address
+                %td
+                  = text_field :name => "clients[#{client.id}][amount]"
         %tfoot
           %tr
-            %td{:colspan => '4'}
+            %td{:colspan => 5}
               = submit 'Submit'
   - else
     %h3 No clients to display. Please select a center.

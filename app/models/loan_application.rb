@@ -7,8 +7,11 @@ class LoanApplication
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
+  property :amount,              Float
 
   has n, :client_verifications
+  
+  belongs_to :client
 
   # Returns the status of loan applications
   def get_status
