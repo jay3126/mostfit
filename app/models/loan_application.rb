@@ -38,14 +38,18 @@ class LoanApplication
   
   #tells whether the given Loan Application is pending verification or not
   def is_pending_verification?
-    ClientVerification.is_cpv_complete?(self.id)
+    not ClientVerification.is_cpv_complete?(self.id)
   end
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_verification(at_branch_id = nil, at_center_id = nil)
     predicates = {}
-    predicates[:at_branch_id] = at_branch_id if at_branch_id
-    predicates[:at_center_id] = at_center_id if at_center_id
+    if (at_branch_id and !at_branch_id.nil?)
+        predicates[:at_branch_id] = at_branch_id
+    end
+    if (at_center_id and !at_center_id.nil?)
+        predicates[:at_center_id] = at_center_id 
+    end
 
     all(predicates).select {| l |l.is_pending_verification?}    
   end
