@@ -1,6 +1,8 @@
+#the date when you want the fee to be applicable
 date: '23-03-2012'
 
-
+# mapping for loan product and fees
+# loan_product_id : fee_id
 loan_product_fee_mapping:
   13 : 19
 
