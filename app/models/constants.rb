@@ -17,10 +17,10 @@ module Constants
 
   module Verification
     
-    CPV1 = :cpv1; CPV2 = :cpv2
+    CPV1 = 'cpv1'; CPV2 = 'cpv2'
     CLIENT_VERIFICATION_TYPES = [CPV1, CPV2]
 
-    NOT_VERIFIED = :not_verified; VERIFIED_ACCEPTED = :verified_accepted; VERIFIED_REJECTED = :verified_rejected
+    NOT_VERIFIED = 'not_verified'; VERIFIED_ACCEPTED = 'verified_accepted'; VERIFIED_REJECTED = 'verified_rejected'
     CLIENT_VERIFICATION_STATUSES = [NOT_VERIFIED, VERIFIED_ACCEPTED, VERIFIED_REJECTED]
 
   end
