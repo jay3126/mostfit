@@ -56,8 +56,32 @@ namespace :mostfit do
       end
     end
 
+    desc "levy arbitrary fees on loans"
+    task :levy_arbitrary_fees do
+      #applicable_on = Date.parse(args[:applicable_on])
+      filename = File.join(Merb.root, 'doc', "fee_loan_product_mapping.yml")
+      input_hash = YAML.load_file(filename)
+      applicable_on = Date.parse(input_hash['date'])
+      loan_product_fee_mapping = input_hash['loan_product_fee_mapping']
+      loan_product_ids = loan_product_fee_mapping.keys
+      loan_product_ids.each do |loan_product_id|
+        loan_ids = Loan.all(:loan_product_id => loan_product_id).aggregate(:id)
+        loan_ids.each do |loan_id|
+          fee_ids = []
+          fee_ids << loan_product_fee_mapping[loan_product_id]
+          fee_ids.each do |fee_id|
+            fee = Fee.get(fee_id)
+            #applicable_on = Fee.
+            af = ApplicableFee.new(:applicable_id => loan_id, :applicable_type => "Loan", :applicable_on => applicable_on, :fee_id => fee.id, :amount => fee.amount)
+            unless af.save
+              puts 'Cannot save applicable fee'
+              p af.errors
+            end
+          end
+        end
+      end
+    end
+
 
   end
-
-
 end
