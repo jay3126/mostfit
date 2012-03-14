@@ -65,7 +65,8 @@ namespace :mostfit do
       loan_product_fee_mapping = input_hash['loan_product_fee_mapping']
       loan_product_ids = loan_product_fee_mapping.keys
       loan_product_ids.each do |loan_product_id|
-        loan_ids = Loan.all(:loan_product_id => loan_product_id).aggregate(:id)
+        all_loan_ids = Loan.all(:loan_product_id => loan_product_id).aggregate(:id)
+        loan_ids = LoanHistory.all(:loan_id => all_loan_ids, :status => :outstanding).aggregate(:loan_id)
         loan_ids.each do |loan_id|
           fee_ids = []
           fee_ids << loan_product_fee_mapping[loan_product_id]
