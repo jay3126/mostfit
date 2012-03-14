@@ -3,7 +3,9 @@ class LoanApplication
   include Constants::Status
 
   property :id,                  Serial
-  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => Constants::Status::NEW_STATUS
+  property :at_branch_id,        Integer, :nullable => false
+  property :at_center_id,        Integer, :nullable => false
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
@@ -32,6 +34,20 @@ class LoanApplication
     raise ArgumentError, "Invalid client id" unless client
     return true # this is dummy
     # the logic that will decide whether a said client is allowed to file a loan application
+  end
+  
+  #tells whether the given Loan Application is pending verification or not
+  def is_pending_verification?
+    ClientVerification.is_cpv_complete?(self.id)
+  end
+
+  #returns all loan applications which are pending for CPV1 and/or CPV2
+  def self.pending_verification(at_branch_id = nil, at_center_id = nil)
+    predicates = {}
+    predicates[:at_branch_id] = at_branch_id if at_branch_id
+    predicates[:at_center_id] = at_center_id if at_center_id
+
+    all(predicates).select {| l |l.is_pending_verification?}    
   end
 
 end
