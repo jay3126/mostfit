@@ -1,6 +1,7 @@
 class LoanApplication
   include DataMapper::Resource
   include Constants::Status
+  include Constants::Masters
 
   property :id,                  Serial
   property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => Constants::Status::NEW_STATUS
@@ -10,6 +11,20 @@ class LoanApplication
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
   property :amount,              Float
+
+  #basic client info
+  property :client_id,           Integer, :nullable => true
+  property :client_name,         String
+  property :client_dob,          Date
+  property :client_address,      String
+  property :client_state,        String
+  property :client_pincode,      Integer
+  property :client_reference1,   String
+  property :client_reference1_type, Enum.send('[]', *REFERENCE_TYPES), :default => :others
+  property :client_reference2,   String
+  property :client_reference2_type, Enum.send('[]', *REFERENCE_TYPES)
+  property :client_guarantor_name, String
+  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS)
 
   has n, :client_verifications
   

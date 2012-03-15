@@ -12,7 +12,14 @@ module Constants
 
     LOAN_OUTSTANDING_STATUS = :outstanding
     LOAN_STATUSES = [LOAN_OUTSTANDING_STATUS]
+
+    REFERENCE_TYPES = [:passport, :voter_id, :uid, :others, :ration_card, :driving_license, :pan]
     
+  end
+
+  module Masters
+    RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
+    LOAN_AMOUNTS = [10000, 12000, 15000]
   end
 
   module Verification

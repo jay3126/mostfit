@@ -11,16 +11,15 @@
       %th
   %tbody
     - @loan_applications.each do |loan_application|
-      - client = loan_application.client
       %tr
         %td
-          = client.id
+          = loan_application.client_id
         %td
-          = client.name
+          = loan_application.client_name
         %td
-          = client.date_of_birth.nil? ? "Unknown" : Date.today.year - client.date_of_birth.year
+          = loan_application.client_dob.nil? ? "Unknown" : Date.today.year - loan_application.client_dob.year
         %td
-          = client.address
+          = loan_application.client_address
         %td
           = loan_application.amount  
 

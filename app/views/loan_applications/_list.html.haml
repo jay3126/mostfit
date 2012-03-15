@@ -40,11 +40,11 @@
               %td
                 = client.name
               %td
-                = client.date_of_birth.nil? ? "Unknown" : Date.today.year - client.date_of_birth.year
+                = (client.date_of_birth.nil? ? "Unknown" : (Date.today.year - client.date_of_birth.year))
               %td
                 = client.address
               %td
-                = select :name => "clients[#{client.id}][amount]", :text_method => :name, :value_method => :id, :collection => [["10000", "10000"]]  
+                = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}  
         %tfoot
           %tr
             %td{:colspan => 5}

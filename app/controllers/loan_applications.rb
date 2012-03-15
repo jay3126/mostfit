@@ -7,7 +7,12 @@ class LoanApplications < Application
       @loan_applications = []
       client_ids = params[:clients].keys
       client_ids.each do |client_id|
+        client = Client.get(client_id)
         loan_application = LoanApplication.new(:client_id => client_id, 
+                                               :client_name => client.name,
+                                               :client_dob => client.date_of_birth,
+                                               :client_address => client.address,
+                                               :client_reference1 => client.reference,
                                                :amount => params[:clients][client_id][:amount],
                                                :created_by_staff_id => params[:staff_member_id].to_i,
                                                :at_branch_id => params[:at_branch_id].to_i,
@@ -17,7 +22,6 @@ class LoanApplications < Application
         @loan_applications << loan_application if loan_application
         @errors[client_id] = loan_application.errors if (save_status == false)
       end
-     
       render :index
     else
       @errors = {}
