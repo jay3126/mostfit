@@ -1,0 +1,27 @@
+%h1
+  Loan Applications 
+%table.narrow.form{:width => "100%"}
+  %thead
+    %tr
+      %th Client ID
+      %th Name
+      %th Age
+      %th Address
+      %th Loan Amount
+      %th
+  %tbody
+    - @loan_applications.each do |loan_application|
+      - client = loan_application.client
+      %tr
+        %td
+          = client.id
+        %td
+          = client.name
+        %td
+          = client.date_of_birth.nil? ? "Unknown" : Date.today.year - client.date_of_birth.year
+        %td
+          = client.address
+        %td
+          = loan_application.amount  
+
+= link_to 'New', url(:controller => :loan_applications, :action => :bulk_new)
