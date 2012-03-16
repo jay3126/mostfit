@@ -30,17 +30,28 @@ class ClientVerification
     true
   end
 
+  # Get all CPVs' Info objects on the given loan application
+  def self.get_CPVs_infos(for_loan_application)
+    cpvs_infos = Hash.new()
+    #not using get_all_CPVs here so that it becomes easier to identify the CPV object on first look rather than looking deep.
+    #need to use 0 because these methods return a collection
+    cpvs_infos['cpv1'] = get_CPV1(for_loan_application)[0].to_info
+    cpvs_infos['cpv2'] = get_CPV2(for_loan_application)[0].to_info
+
+    cpvs_infos
+  end
+
   # Get all CPVs on the loan application
   def self.get_CPVs(for_loan_application)
     all(:loan_application_id => for_loan_application)
   end
 
-  # Get CPV1 on the loan application
+  # Get CPV1 on the loan application -- remember: this returns a collection
   def self.get_CPV1(for_loan_application)
     all(:loan_application_id => for_loan_application, :verification_type => CPV1)
   end
 
-  # Get CPV2 on the loan application
+  # Get CPV2 on the loan application -- remember: this returns a collection
   def self.get_CPV2(for_loan_application)
     all(:loan_application_id => for_loan_application, :verification_type => CPV2)
   end
@@ -100,7 +111,7 @@ class ClientVerification
         return false
     end
     
-    if get_CPV1_status(loan_application_id) == VERIFIED_ACCEPTED  and get_CPV2_status(loan_application_id) == NOT_VERIFIED
+    if get_CPV1_status(loan_application_id) == VERIFIED_ACCEPTED and get_CPV2_status(loan_application_id) == NOT_VERIFIED
         return false
     end
     
@@ -115,6 +126,28 @@ class ClientVerification
         return true
     end
 
+  end
+  
+  #returns an info model for this ClientVerification
+  def to_info
+    ClientVerificationInfo.new(
+        self.loan_application_id,
+        self.verification_type,
+        self.verification_status,
+        self.verified_by_staff_id,
+        self.verified_on_date,
+        self.created_by_user_id,
+        self.created_at
+    )
+  end
+
+  #returns a bunch of CPV information objects related to this loan application id
+  def self.get_all_CPV_information(loan_application_id)
+    cpvs = get_CPVs(loan_application_id)
+    cpvinfos = []
+    cpvs.each {|c| cpvinfos.push(c.to_info)} 
+
+    cpvinfos
   end
 
   private
@@ -136,4 +169,19 @@ class ClientVerification
       :created_by_user_id => by_user_id)
   end
 
+end
+
+#An in-memory class containing all information about a ClientVerification
+class ClientVerificationInfo
+    attr_reader :loan_application_id, :verification_type, :verification_status, :verified_by_staff_id, :verified_on_date, :created_by_user_id, :created_at
+
+    def initialize(loan_application_id, verification_type, verification_status, verified_by_staff_id, verified_on_date, created_by_user_id, created_at)
+        @loan_application_id = loan_application_id
+        @verification_type = verification_type
+        @verification_status = verification_status
+        @verified_by_staff_id = verified_by_staff_id
+        @verified_on_date = verified_on_date
+        @created_by_user_id = created_by_user_id
+        @created_at = created_at
+    end
 end

@@ -80,4 +80,19 @@ describe ClientVerification do
     ClientVerification.is_cpv_complete?(loan_application_id).should == true
   end
 
+  it "should be convertible into a rightly-formed ClientVerificationInfo object" do
+     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
+     ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+     cpv1 = ClientVerification.get_CPV1(loan_application_id)[0] #because it returns an array
+     cpv1Info = cpv1.to_info
+     
+     cpv1Info.loan_application_id.should == cpv1.loan_application_id
+     cpv1Info.verification_type.should == cpv1.verification_type
+     cpv1Info.verification_status.should == cpv1.verification_status
+     cpv1Info.verified_by_staff_id.should == cpv1.verified_by_staff_id
+     cpv1Info.verified_on_date.should == cpv1.verified_on_date
+     cpv1Info.created_by_user_id.should == cpv1.created_by_user_id
+     cpv1Info.created_at.should == cpv1.created_at
+
+  end
 end
