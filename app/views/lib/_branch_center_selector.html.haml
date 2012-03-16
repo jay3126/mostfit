@@ -7,6 +7,6 @@
     %th
       Center
     %td
-      = select :name => :center_id, :collection => get_accessible_centers(params[:branch_id].to_i), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;", :selected => params[:center_id]
+      = select :name => :center_id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;", :selected => params[:center_id]
     %td
       = submit "Proceed"
