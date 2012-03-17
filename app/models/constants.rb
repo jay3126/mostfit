@@ -13,13 +13,49 @@ module Constants
     LOAN_OUTSTANDING_STATUS = :outstanding
     LOAN_STATUSES = [LOAN_OUTSTANDING_STATUS]
 
-    REFERENCE_TYPES = [:passport, :voter_id, :uid, :others, :ration_card, :driving_license, :pan]
-    
   end
 
   module Masters
+    REFERENCE_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
     LOAN_AMOUNTS = [10000, 12000, 15000]
+    STATES = [
+              "andhra_pradesh"     , 
+              "arunachal_pradesh"  , 
+              "assam"              , 
+              "bihar"              , 
+              "chattisgarh"        , 
+              "goa"                , 
+              "gujarat"            , 
+              "haryana"            , 
+              "himachal_pradesh"   , 
+              "jammu_kashmir"      , 
+              "jharkhand"          , 
+              "karnataka"          , 
+              "kerala"             , 
+              "madhya_pradesh"     , 
+              "maharashtra"        , 
+              "manipur"            , 
+              "meghalaya"          , 
+              "mizoram"            , 
+              "nagaland"           , 
+              "orissa"             , 
+              "punjab"             , 
+              "rajasthan"          , 
+              "sikkim"             , 
+              "tamil_nadu"         , 
+              "tripura"            , 
+              "uttarakhand"        , 
+              "uttar_pradesh"      , 
+              "west_bengal"        , 
+              "andaman_nicobar"    , 
+              "chandigarh"         , 
+              "dadra_nagar_haveli" , 
+              "daman_diu"          , 
+              "delhi"              , 
+              "lakshadweep"        , 
+              "pondicherry"                  
+             ]
   end
 
   module Verification

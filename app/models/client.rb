@@ -4,6 +4,7 @@ class Client
   include DataMapper::Resource
   include FeesContainer
   include ClientValidations
+  include Constants::Masters
 
   FLAGS = [:insincere]
 
@@ -16,12 +17,17 @@ class Client
   
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
+  property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
+  property :reference2,      String
+  property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
+  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
   property :address,         Text, :lazy => true
+  property :pincode,         Integer 
+  property :state,           Enum.send('[]', *STATES), :nullable => true 
   property :active,          Boolean, :default => true, :nullable => false, :index => true
   property :inactive_reason, Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :index => true, :default => ''
   property :date_joined,     Date,    :index => true
@@ -244,6 +250,23 @@ class Client
       end
     end
     @errors.blank? ? true : @errors
+  end
+
+  def to_loan_application
+    _to_loan_application = {
+      :client_id              => id, 
+      :client_name            => name,
+      :client_dob             => date_of_birth,
+      :client_address         => address,
+      :client_state           => state,
+      :client_pincode         => pincode,
+      :client_reference1      => reference,
+      :client_reference1_type => reference_type,
+      :client_reference2      => reference2,
+      :client_reference2_type => reference2_type,
+      :client_guarantor_name  => spouse_name,
+      :client_guarantor_relationship => "Husband"
+    }
   end
 
   def self.flags

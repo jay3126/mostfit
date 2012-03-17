@@ -8,9 +8,15 @@
       %th Age
       %th Address
       %th Loan Amount
-      %th
   %tbody
     - @loan_applications.each do |loan_application|
+      - if @errors[loan_application.client_id]
+        %tr
+          %td{:colspan => 5}
+            .error
+              - @errors[loan_application.client_id].keys.each do |key|
+                = "#{key} : #{@errors[loan_application.client_id][key]}"
+                %br
       %tr
         %td
           = loan_application.client_id

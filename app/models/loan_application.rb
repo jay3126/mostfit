@@ -16,15 +16,15 @@ class LoanApplication
   property :client_id,           Integer, :nullable => true
   property :client_name,         String
   property :client_dob,          Date
-  property :client_address,      String
-  property :client_state,        String
+  property :client_address,      Text
+  property :client_state,        Enum.send('[]', *STATES), :nullable => true
   property :client_pincode,      Integer
   property :client_reference1,   String
-  property :client_reference1_type, Enum.send('[]', *REFERENCE_TYPES), :default => :others
+  property :client_reference1_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
   property :client_reference2,   String
-  property :client_reference2_type, Enum.send('[]', *REFERENCE_TYPES)
+  property :client_reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
   property :client_guarantor_name, String
-  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS)
+  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :nullable => true
 
   has n, :client_verifications
   
