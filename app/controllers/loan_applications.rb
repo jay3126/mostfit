@@ -28,9 +28,15 @@ class LoanApplications < Application
   end
 
   def list
+    if params[:branch_id] == ""
+      @errors = "Please select a branch" 
+    elsif params[:center_id] == ""
+      @errors = "Please select a center"
+    else
+      @errors = nil
+    end
     @center = Center.get(params[:center_id].to_i)
-    raise NotFound unless @center
-    @clients = @center.clients
+    @clients = @center.clients if @center
     render :bulk_new
   end
 

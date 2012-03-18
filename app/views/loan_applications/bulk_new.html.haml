@@ -1,5 +1,17 @@
 %h1 New Loan Applications
 
+- unless @errors.blank?
+  .error
+    - if @errors.is_a?(Array)
+      - @errors.each do |error|
+        == Loan <b>#{error.resource.class == Payment ? error.resource.loan.id : error.resource.id} :</b>
+        = error.values.join("*")
+        %br
+    - else
+      - @errors.each do |error|
+        = error
+        %br
+          
 %form{:action => url(:controller => :loan_applications, :action => :list), :method => :get}
   = partial 'lib/branch_center_selector'      
 
