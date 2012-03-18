@@ -15,6 +15,13 @@ module Constants
 
   end
 
+  module Space
+
+    OPEN_CENTER_CYCLE_STATUS = 'open_center_cycle_status'; CLOSED_CENTER_CYCLE_STATUS = 'closed_center_cycle_status'
+    CENTER_CYCLE_STATUSES = [ OPEN_CENTER_CYCLE_STATUS, CLOSED_CENTER_CYCLE_STATUS ]
+    
+  end
+
   module Masters
     REFERENCE_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
