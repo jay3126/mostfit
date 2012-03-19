@@ -69,6 +69,8 @@ namespace :mostfit do
         next if all_loan_ids.empty?
         loan_ids = LoanHistory.all(:loan_id => all_loan_ids, :status => :outstanding).aggregate(:loan_id)
         loan_ids.each do |loan_id|
+          loan = Loan.get(loan_id)
+          next unless loan.status == :outstanding
           fee_ids = []
           fee_ids << loan_product_fee_mapping[loan_product_id]
           fee_ids.each do |fee_id|
