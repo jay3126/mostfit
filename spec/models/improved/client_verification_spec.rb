@@ -48,7 +48,7 @@ describe ClientVerification do
   it "should tell that CPV process is incomplete when no CPVs are recorded" do
     #when no CPV is recorded
     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
-    ClientVerification.get_CPVs(loan_application_id).should == []
+    ClientVerification.get_CPVs(loan_application_id).should == nil
     ClientVerification.is_cpv_complete?(loan_application_id).should == false
   end
 
@@ -83,7 +83,7 @@ describe ClientVerification do
   it "should be convertible into a rightly-formed ClientVerificationInfo object" do
      loan_application_id = ((Time.now - @time_datum) * 1000).to_i
      ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
-     cpv1 = ClientVerification.get_CPV1(loan_application_id)[0] #because it returns an array
+     cpv1 = ClientVerification.get_CPV1(loan_application_id) #because it returns an array
      cpv1Info = cpv1.to_info
      
      cpv1Info.loan_application_id.should == cpv1.loan_application_id
