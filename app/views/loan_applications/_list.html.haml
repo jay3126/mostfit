@@ -6,6 +6,8 @@
   
 #client_list
   .shaded
+    %h1
+      Add new loan applications
     - if @clients and @clients != []
       %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
         %table.form{:style => "width:100%;"}
@@ -27,7 +29,9 @@
             - @clients.each do |client|
               %tr
                 %td
-                  = check_box :name => "clients[#{client.id}][selected]", :class => "select", :disabled => (LoanApplication.allow_new_loan_application?(client.id) ? false : true)
+                  - is_eligible = LoanApplication.allow_new_loan_application?(client.id)
+                  - if (is_eligible)
+                    = check_box :name => "clients[#{client.id}][selected]", :class => "select"
                 %td
                   = client.id
                 %td
@@ -49,4 +53,4 @@
                 = hidden_field :name => :at_center_id, :value => @center.id
                 = submit 'Submit'
     - else
-      %h3 No clients in this center. Please select a center with clients.
+      %h3 No clients at this center

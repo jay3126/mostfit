@@ -1,10 +1,12 @@
 .shaded
+  %h1
+    Loan applications added recently
+
   - if @loan_applications and  not @loan_applications.empty?
-    %h1
-      Existing Loan Applications 
     %table.form{:width => "100%"}
       %thead
         %tr
+          %th ID
           %th Client ID
           %th Name
           %th Age
@@ -13,6 +15,8 @@
       %tbody
         - @loan_applications.each do |loan_application|
           %tr
+            %td
+              = loan_application.id
             %td
               = loan_application.client_id
             %td
@@ -26,5 +30,5 @@
             
   - else
     %h3
-      No existing loan applications for this center
+      No loan applications added recently for this center
 

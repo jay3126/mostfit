@@ -6,7 +6,7 @@ class ConfigurationFacade
   end
 
   def allow_multiple_loans?
-    true
+    false
   end
 
 end

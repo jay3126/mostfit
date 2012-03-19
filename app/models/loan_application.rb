@@ -47,9 +47,8 @@ class LoanApplication
   # @return [Boolean] true/false value that tells whether the client in question is eligible for a new loan application
   def self.allow_new_loan_application?(client_id)
     client = Client.get(client_id)
-    raise ArgumentError, "Invalid client id" unless client
-    return true # this is dummy
-    # the logic that will decide whether a said client is allowed to file a loan application
+    raise ArgumentError, "Unable to locate client with ID: #{client_id}" unless client
+    client.new_loan_permitted?
   end
   
   # returns the age of the client as calculated from her year of birth
