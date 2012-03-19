@@ -5,55 +5,56 @@
   });
   
 #client_list
-  - if @center
-    .menu-strip
-      %h3
-        Branch:
-        = @center.branch.name
-        = "|"
-        Center:
-        = @center.name
-  - if @clients and @clients != []
-    %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
-      %table.form.shaded{:style => "width:100%;"}
-        %thead
-          %tr
-            %th
-              = check_box :id => "toggle_select" 
-            %th
-              Client ID
-            %th
-              Name
-            %th
-              Age
-            %th
-              Address
-            %th
-              New Loan
-        %tbody
-          - @clients.each do |client|
+  .shaded
+    - if @center
+      .menu-strip
+        %h3
+          Branch:
+          = @center.branch.name
+          = "|"
+          Center:
+          = @center.name
+    - if @clients and @clients != []
+      %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
+        %table.form{:style => "width:100%;"}
+          %thead
             %tr
+              %th
+                = check_box :id => "toggle_select" 
+              %th
+                Client ID
+              %th
+                Name
+              %th
+                Age
+              %th
+                Address
+              %th
+                New Loan
+          %tbody
+            - @clients.each do |client|
+              %tr
+                %td
+                  = check_box :name => "clients[#{client.id}][selected]", :class => "select", :disabled => (LoanApplication.allow_new_loan_application?(client.id) ? false : true)
+                %td
+                  = client.id
+                %td
+                  = client.name
+                %td
+                  = (client.age.nil? ? "Unknown" : client.age)
+                %td
+                  = client.address
+                %td
+                  = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}  
+          %tfoot
+            %tr
+              %td{:colspan => 5}
+                %b
+                  Loan Applications created by
+                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
               %td
-                = check_box :name => "clients[#{client.id}][selected]", :class => "select", :disabled => (LoanApplication.allow_new_loan_application?(client.id) ? false : true)
-              %td
-                = client.id
-              %td
-                = client.name
-              %td
-                = (client.date_of_birth.nil? ? "Unknown" : (Date.today.year - client.date_of_birth.year))
-              %td
-                = client.address
-              %td
-                = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}  
-        %tfoot
-          %tr
-            %td{:colspan => 5}
-              %b
-                Loan Applications created by
-              = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-            %td
-              = hidden_field :name => :at_branch_id, :value => @branch.id
-              = hidden_field :name => :at_center_id, :value => @center.id
-              = submit 'Submit'
-  - else
-    %h3 No clients in this center. Please select a center with clients.
+                = hidden_field :name => :at_branch_id, :value => @branch.id
+                = hidden_field :name => :at_center_id, :value => @center.id
+                = submit 'Submit'
+    - else
+      %h3 No clients in this center. Please select a center with clients.

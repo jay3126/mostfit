@@ -29,6 +29,7 @@ class LoanApplication
   has n, :client_verifications
   
   belongs_to :client
+  belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
 
   # Returns the status of loan applications
   def get_status
@@ -51,6 +52,11 @@ class LoanApplication
     # the logic that will decide whether a said client is allowed to file a loan application
   end
   
+  # returns the age of the client as calculated from her year of birth
+  def client_age
+    client_dob.nil? ? nil : (Date.today.year - client_dob.year)
+  end
+
   #tells whether the given Loan Application is pending verification or not
   def is_pending_verification?
     not ClientVerification.is_cpv_complete?(self.id)

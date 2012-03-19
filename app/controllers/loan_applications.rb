@@ -5,6 +5,8 @@ class LoanApplications < Application
     if request.method == :post
       @errors = {}
       @loan_applications = []
+      @center = Center.get(params[:at_center_id].to_i)
+      @clients = @center.clients if @center
       client_ids = params[:clients].keys
       client_ids.each do |client_id|
         client = Client.get(client_id)
@@ -20,7 +22,7 @@ class LoanApplications < Application
         @loan_applications << loan_application if loan_application
         @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
       end
-      render :index
+      render 
     else
       @errors = {}
       render
@@ -37,6 +39,7 @@ class LoanApplications < Application
     end
     @center = Center.get(params[:center_id].to_i)
     @clients = @center.clients if @center
+    @loan_applications = LoanApplication.all(:at_center_id => @center.id) if @center
     render :bulk_new
   end
 

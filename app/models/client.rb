@@ -192,6 +192,11 @@ class Client
     loans.each{|l| l.update_loan_cache(true); l.save}
   end
 
+  # returns the age of the client as calculated from her year of birth
+  def age
+    (date_of_birth.nil? ? nil : (Date.today.year - date_of_birth.year))
+  end
+
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
       if center   = Center.first(:name => center_attr)
