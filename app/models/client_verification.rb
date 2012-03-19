@@ -32,28 +32,30 @@ class ClientVerification
 
   # Get all CPVs' Info objects on the given loan application
   def self.get_CPVs_infos(for_loan_application)
-    cpvs_infos = Hash.new()
-    #not using get_all_CPVs here so that it becomes easier to identify the CPV object on first look rather than looking deep.
-    #need to use 0 because these methods return a collection
-    cpvs_infos['cpv1'] = get_CPV1(for_loan_application)[0].to_info
-    cpvs_infos['cpv2'] = get_CPV2(for_loan_application)[0].to_info
+    cpv_info = {}
 
-    cpvs_infos
+    cpv1 = get_CPV1(for_loan_application)
+    cpv_info[CPV1] = cpv1 ? cpv1.to_info : nil
+
+    cpv2 = get_CPV2(for_loan_application)
+    cpv_info[CPV2] = cpv2 ? cpv2.to_info : nil
+
+    cpv_info
   end
 
   # Get all CPVs on the loan application
   def self.get_CPVs(for_loan_application)
-    all(:loan_application_id => for_loan_application)
+    first(:loan_application_id => for_loan_application)
   end
 
   # Get CPV1 on the loan application -- remember: this returns a collection
   def self.get_CPV1(for_loan_application)
-    all(:loan_application_id => for_loan_application, :verification_type => CPV1)
+    first(:loan_application_id => for_loan_application, :verification_type => CPV1)
   end
 
   # Get CPV2 on the loan application -- remember: this returns a collection
   def self.get_CPV2(for_loan_application)
-    all(:loan_application_id => for_loan_application, :verification_type => CPV2)
+    first(:loan_application_id => for_loan_application, :verification_type => CPV2)
   end
 
   # Submit an approved CPV1
@@ -108,22 +110,22 @@ class ClientVerification
   def self.is_cpv_complete?(loan_application_id)
     #a CPV is deemed complete only when BOTH CPV1 and CPV2 are complete (either rejected or approved, but not NOT_VERIFIED)
     if get_CPV1_status(loan_application_id) == NOT_VERIFIED
-        return false
+      return false
     end
     
     if get_CPV1_status(loan_application_id) == VERIFIED_ACCEPTED and get_CPV2_status(loan_application_id) == NOT_VERIFIED
-        return false
+      return false
     end
     
     #when a CPV2 is done, it's complete.
     #the validation rules on models ensure that CPV2 won't happen before CPV1
     if get_CPV2_status(loan_application_id) == VERIFIED_ACCEPTED or get_CPV2_status(loan_application_id) == VERIFIED_REJECTED
-        return true
+      return true
     end
   
     #when the CPV1 is rejected, the process is complete. Because CPV2 won't happen any longer.
     if get_CPV1_status(loan_application_id) == VERIFIED_REJECTED 
-        return true
+      return true
     end
 
   end
@@ -131,13 +133,13 @@ class ClientVerification
   #returns an info model for this ClientVerification
   def to_info
     ClientVerificationInfo.new(
-        self.loan_application_id,
-        self.verification_type,
-        self.verification_status,
-        self.verified_by_staff_id,
-        self.verified_on_date,
-        self.created_by_user_id,
-        self.created_at
+      self.loan_application_id,
+      self.verification_type,
+      self.verification_status,
+      self.verified_by_staff_id,
+      self.verified_on_date,
+      self.created_by_user_id,
+      self.created_at
     )
   end
 
@@ -173,15 +175,15 @@ end
 
 #An in-memory class containing all information about a ClientVerification
 class ClientVerificationInfo
-    attr_reader :loan_application_id, :verification_type, :verification_status, :verified_by_staff_id, :verified_on_date, :created_by_user_id, :created_at
+  attr_reader :loan_application_id, :verification_type, :verification_status, :verified_by_staff_id, :verified_on_date, :created_by_user_id, :created_at
 
-    def initialize(loan_application_id, verification_type, verification_status, verified_by_staff_id, verified_on_date, created_by_user_id, created_at)
-        @loan_application_id = loan_application_id
-        @verification_type = verification_type
-        @verification_status = verification_status
-        @verified_by_staff_id = verified_by_staff_id
-        @verified_on_date = verified_on_date
-        @created_by_user_id = created_by_user_id
-        @created_at = created_at
-    end
+  def initialize(loan_application_id, verification_type, verification_status, verified_by_staff_id, verified_on_date, created_by_user_id, created_at)
+    @loan_application_id = loan_application_id
+    @verification_type = verification_type
+    @verification_status = verification_status
+    @verified_by_staff_id = verified_by_staff_id
+    @verified_on_date = verified_on_date
+    @created_by_user_id = created_by_user_id
+    @created_at = created_at
+  end
 end
