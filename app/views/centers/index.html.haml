@@ -47,6 +47,10 @@
           %td
             = (Attendance.count("client.center.branch_id" => @branch.id, :status => "present") * 100.0 / total_attendance_at_branch).round(2)
             = "%"
+      %tr.odd
+        %th.odd Loan Applications Pending for verification
+        %td
+          = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :branch_id => @branch.id)
         %tr
           %td{:colspan => "2"}
 

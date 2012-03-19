@@ -1,7 +1,8 @@
 class ClientVerifications < Application
   # provides :xml, :yaml, :js
 
-  def pending_verifications
+  #gets data from models using the provided params
+  def get_data(params)
     if params['center_id'] and not params['center_id'].empty?
         @center_id = params['center_id'] 
     else
@@ -13,40 +14,55 @@ class ClientVerifications < Application
     else
         @branch_id = nil
     end
-    @recorded = true
 
     @loan_applications_pending_verification = LoanApplication.pending_verification(@branch_id, @center_id)
     @loan_applications_recently_recorded = LoanApplication.recently_recorded(@branch_id, @center_id)
-    render 
   end
 
-  #records the given CPVs 
+  #gives the loan applications pending for verification
+  def pending_verifications
+    @show_pending = true
+    get_data(params)
+    render :verifications 
+  end
+
+  #records the given CPVs and shows the list of recently recorded AND the other Loan Applications pending verifications
   def record_verifications
-    params['verification_status'].keys.each do | cpv_type |
-      puts "Verifying for #{cpv_type}"
-
-      #construct the right method name to call -- record_CPVNUMBER_approve or record_CPVNUMBER_reject
-      params['verification_status'][cpv_type].keys.each do | id |
-          data = params['verification_status'][cpv_type][id]
-          method_name = 'record_' + cpv_type.to_s.split('_')[0];
-          
-          if data == Constants::Verification::VERIFIED_ACCEPTED
-            method_name = method_name + '_approved';
-          elsif data == Constants::Verification::VERIFIED_REJECTED
-            method_name = method_name + '_rejected'
-          end
-          puts "Calling #{method_name} on ClientVerification"
-          
-          #placeholder code -- needs to be refined
-          ClientVerification.send(method_name,*[id,2,Date.today(),2])
-      end
+  #show the recently recorded verifications
+   if params.key?('verification_status')
+       params['verification_status'].keys.each do | cpv_type |
+          puts "Verifying for #{cpv_type}"
+              params['verification_status'][cpv_type].keys.each do | id |
+                  verified_by_staff_id = params['verified_by_staff_id'][cpv_type][id]
+                  verification_status = params['verification_status'][cpv_type][id]
+                  verified_on_date = params['verified_on_date'][cpv_type][id]
+                  if cpv_type == Constants::Verification::CPV1
+                    if verification_status == Constants::Verification::VERIFIED_ACCEPTED
+                        ClientVerification.record_CPV1_approved(id,verified_by_staff_id, verified_on_date, session.user.id)
+                    elsif verification_status == Constants::Verification::VERIFIED_REJECTED 
+                        ClientVerification.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date, session.user.id)
+                    end
+                  elsif cpv_type == Constants::Verification::CPV2
+                    if verification_status == Constants::Verification::VERIFIED_ACCEPTED 
+                        ClientVerification.record_CPV2_approved(id,verified_by_staff_id, verified_on_date, session.user.id)
+                    elsif verification_status == Constants::Verification::VERIFIED_REJECTED 
+                        ClientVerification.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date, session.user.id)
+                    end
+                  end
+              end
+       end
    end
-   
-    render
+   #get data required to show the filter form and the pending verifications form 
+   get_data(params)
+    
+   @show_pending = true
+   @show_recorded = true
+   render :verifications
   end
 
+  #default page
   def index
-    render partial "filter_form"
+    render :verifications
   end
 
   def show(id)

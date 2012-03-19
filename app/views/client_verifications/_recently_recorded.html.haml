@@ -1,0 +1,69 @@
+- if @loan_applications_recently_recorded and not @loan_applications_recently_recorded.empty?
+  %table.nojs{:style => "text-align:center"}
+    %thead
+      %tr
+        %td
+          = "ID"
+        %td
+          = "Applicant"
+        %td{:colspan => 4}
+          = "Contact Point Verification 1"
+        %td{:colspan => 4}
+          = "Contact Point Verification 2"
+      %tr
+        %td{:colspan=>2}
+          = "&nbsp;"
+        %td
+          = "Verified on date"
+        %td
+          = "Status"
+        %td
+          = "Verified By"
+        %td
+          = "Recorded on date"
+        %td
+          = "Verified on date"
+        %td
+          = "Status"
+        %td
+          = "Verified By"
+        %td
+          = "Recorded on date"
+    %tbody
+      - @loan_applications_recently_recorded.each do |l|
+        %tr
+          %td
+            = l.loan_application_id
+          %td
+            = l.applicant
+          %td
+            = l.cpv1.verified_on_date.display
+          %td
+            = get_status_display(l.cpv1.verification_status)
+          %td
+            = StaffMember.get(l.cpv1.verified_by_staff_id).name 
+          %td
+            = l.cpv1.created_at.display
+          %td
+            - if not l.cpv2.nil? 
+              = l.cpv2.verified_on_date
+            - else
+              = "&nbsp;"
+          %td
+            - if not l.cpv2.nil?
+              = get_status_display(l.cpv2.verification_status)
+            - else
+              = "&nbsp;"
+          %td
+            - if not l.cpv2.nil?
+              = StaffMember.get(l.cpv2.verified_by_staff_id).name
+            - else
+              = "&nbsp;"
+          %td
+            - if not l.cpv2.nil?
+              = l.cpv2.created_at.display
+            - else
+              = "&nbsp;"
+- else
+  %h4
+    = "No recently recorded applications"

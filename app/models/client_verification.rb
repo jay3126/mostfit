@@ -15,6 +15,7 @@ class ClientVerification
   validates_with_method :one_status_only_per_CPV, :record_CPV2_only_when_CPV1_approved
 
   # A CPV can only be approved or rejected
+  # TODO: this somehow still allows for creating a new row for same CPV type but doesn't save it to database. WEIRD. Verified on Merb console
   def one_status_only_per_CPV
     statuses = ClientVerification.get_all_CPV_status(loan_application_id)
     status_for_type = statuses[self.verification_type]
@@ -147,8 +148,13 @@ class ClientVerification
   def self.get_all_CPV_information(loan_application_id)
     cpvs = get_CPVs(loan_application_id)
     cpvinfos = []
-    cpvs.each {|c| cpvinfos.push(c.to_info)} 
-
+    cpvs.each do |c| 
+        if not c.nil?
+            cpvinfos.push(c.to_info)
+        else
+            cpvinfos.push(nil)
+        end
+    end
     cpvinfos
   end
 
@@ -177,6 +183,7 @@ end
 class ClientVerificationInfo
   attr_reader :loan_application_id, :verification_type, :verification_status, :verified_by_staff_id, :verified_on_date, :created_by_user_id, :created_at
 
+
   def initialize(loan_application_id, verification_type, verification_status, verified_by_staff_id, verified_on_date, created_by_user_id, created_at)
     @loan_application_id = loan_application_id
     @verification_type = verification_type
@@ -186,4 +193,15 @@ class ClientVerificationInfo
     @created_by_user_id = created_by_user_id
     @created_at = created_at
   end
+end    
+
+#this is a seperate function because it is needed on both ClientVerification and ClientVerificationInfo class and I can't figure out a good place for it.
+#returns the text to be displayed for a given status in views
+public
+def get_status_display(status)
+    if status == Constants::Verification::VERIFIED_ACCEPTED
+        return "Accepted"
+    elsif status == Constants::Verification::VERIFIED_REJECTED
+        return "Rejected"
+    end
 end

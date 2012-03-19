@@ -1,5 +1,6 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  
   resources :loan_applications, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats
@@ -129,6 +130,7 @@ Merb::Router.prepare do
     match('/client_groups(/:action)(/:id)(.:format)').to(:controller => 'client_groups').name(:groups)
   end
 
+  match('/client_verifications(/:action)').to(:controller => 'client_verifications').name(:client_verifications)
   match('/admin(/:action)').to(:controller => 'admin').name(:admin)
   match('/admin(/:action/:id)').to(:controller => 'admin').name(:admin)
   match('/dashboard/clients/:id(/group_by/:group_by)(/branch_id/:branch_id)(/center_id/:center_id)(/staff_member_id/:staff_member_id)').to(:id => ":id", :action => "clients", :controller => 'dashboard').name(:dashboard_breakup_clients)

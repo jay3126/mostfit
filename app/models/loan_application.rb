@@ -88,20 +88,23 @@ class LoanApplication
     #take all those which are NOT pending verification
     lar = all(predicates).reject {|l|l.is_pending_verification?}
     linfos = []
-    lar.each{|l| linfos.push(l.to_info)}
+    lar.each do |l|
+        puts "Processing #{l}"
+        linfos.push(l.to_info)
+    end
     linfos
   end
 
   #returns an object containing all information about a Loan Application
   def to_info
-    debugger
     cpvs_infos = ClientVerification.get_CPVs_infos(self.id)
+    puts cpvs_infos
     linfo = LoanApplicationInfo.new(
                          self.id,
                          self.client_name,
                          cpvs_infos['cpv1'],
-                         cpvs_infos['cpv2']
-                    )
+                         cpvs_infos['cpv2'])
+    puts linfo
     linfo
   end
 end
