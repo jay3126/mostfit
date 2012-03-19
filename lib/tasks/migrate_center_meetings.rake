@@ -21,6 +21,7 @@ namespace :mostfit do
 Produces a .csv file that has information about center meeting schedules as currently configured in the system
 USAGE_TEXT
 
+      DATE_FORMAT = "%d-%m-%Y"
       begin
 
         centers_and_meeting_days = {}
@@ -44,7 +45,11 @@ USAGE_TEXT
             meeting_days = centers_and_meeting_days[center]
             if meeting_days
               meeting_days.each { |md|
-                row = [center.id, center_name, md.meeting_day, md.valid_from, md.valid_upto, md.every, md.what, md.of_every, md.period, md.new_what, md.to_s]
+                row = [
+                  center.id, center_name, md.meeting_day,
+                  md.valid_from.strftime(DATE_FORMAT), md.valid_upto.strftime(DATE_FORMAT),
+                  md.every, md.what, md.of_every, md.period, md.new_what, md.to_s
+                ]
                 data_rows << row
               }
               data_rows_sorted = data_rows.sort_by {|row| row.first}
@@ -53,22 +58,37 @@ USAGE_TEXT
           branch_center_meetings[branch] = data_rows_sorted
         }
 
+        HEADER_ROW = [
+          "Center ID", "Center Name", "meeting day", "from",	"until", "every",	"what", "of_every", "period",	"new_what",	"description"
+        ]
+
         org_name = (Mfi.first and Mfi.first.name) ? Mfi.first.name : "organisation"
         write_to_folder = File.join(Merb.root, org_name)
         FileUtils.mkdir_p(write_to_folder)
         branch_center_meetings.each { |branch, center_meetings|
           file_name = File.join(write_to_folder, "#{branch}.center_meetings.as_of_#{Date.today}.csv")
+          header_was_written = false
           FasterCSV.open(file_name, "w", :force_quotes => true) { |fastercsv|
+            unless header_was_written
+              fastercsv << HEADER_ROW
+              header_was_written = true
+            end
             center_meetings.each do |row|
               fastercsv << row
             end
           }
         }
 
+        NO_MEETINGS_HEADER_ROW = ["Branch", "Center ID", "Center name"]
         unless centers_without_meeting_days.empty?
           sorted_centers_without_meeting_days = centers_without_meeting_days.sort_by {|center| center.branch.name }
           no_center_meetings_file_name = File.join(write_to_folder, "no_center_meetings.as_of_#{Date.today}.csv")
+          header_was_written = false
           FasterCSV.open(no_center_meetings_file_name, "w", :force_quotes => true) { |fastercsv|
+            unless header_was_written
+              fastercsv << NO_MEETINGS_HEADER_ROW
+              header_was_written = true
+            end
             sorted_centers_without_meeting_days.each { |center|
               fastercsv << [center.branch.name, center.id, center.name]
             }
