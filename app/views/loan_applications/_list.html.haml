@@ -6,14 +6,6 @@
   
 #client_list
   .shaded
-    - if @center
-      .menu-strip
-        %h3
-          Branch:
-          = @center.branch.name
-          = "|"
-          Center:
-          = @center.name
     - if @clients and @clients != []
       %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
         %table.form{:style => "width:100%;"}

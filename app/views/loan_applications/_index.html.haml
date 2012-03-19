@@ -1,5 +1,5 @@
-- if @loan_applications and  not @loan_applications.empty?
-  .shaded
+.shaded
+  - if @loan_applications and  not @loan_applications.empty?
     %h1
       Existing Loan Applications 
     %table.form{:width => "100%"}
@@ -24,7 +24,7 @@
             %td
               = loan_application.amount
             
-- else
-  %h3
-    No existing loan applications for this center
+  - else
+    %h3
+      No existing loan applications for this center
 
