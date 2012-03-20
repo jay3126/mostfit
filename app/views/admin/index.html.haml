@@ -83,3 +83,10 @@
     %ul
       %li 
         = link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
+    %div.clearfix
+  .admin-box
+    %h2 Credit Bureaus
+    %ul.icon_links
+      %li
+        = link_to "Highmark", url(:controller => :overlap_report_requests, :action => :index), :class => 'icon audit'
+    

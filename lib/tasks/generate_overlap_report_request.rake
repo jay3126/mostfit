@@ -41,7 +41,7 @@ namespace :mostfit do
       end
       
       log_folder = File.join(Merb.root, "log","highmark","requests")
-      FileUtils.mkdir_p folder
+      FileUtils.mkdir_p log_folder
       error_filename = File.join(log_folder, "#{credit_bureau_name}.#{request_name}.#{DateTime.now.strftime('%Y-%m-%d_%H:%M')}.csv")
       FasterCSV.open(error_filename, "w", {:col_sep => "|"}) do |csv|
         csv << ["generation_errors"]

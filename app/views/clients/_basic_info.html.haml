@@ -35,6 +35,7 @@
       Name:
     %td
       = text_field :name, :size => 40
+      = hidden_field :name => :client_type_id, :value => ClientType.first.id
       %br
       - unless @client.new?
         %b 
@@ -43,15 +44,15 @@
         - Client.flags.each do |f|
           = f
           = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
-  %tr
-    - if ClientType.count==0 and session.user.role==:admin
-      %div.error
-        You have not set any Client Types. Create them 
-        = link_to("here", resource(:client_types, :new), :target => "_blank")
-    %th
-      Client Type
-    %td
-      = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
+  -# %tr
+  -#   - if ClientType.count==0 and session.user.role==:admin
+  -#     %div.error
+  -#       You have not set any Client Types. Create them 
+  -#       = link_to("here", resource(:client_types, :new), :target => "_blank")
+  -#   %th
+  -#     Client Type
+  -#   %td
+  -#     = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
   %tr
     %th
       Gender
@@ -59,34 +60,20 @@
       = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Please choose a gender"
   %tr
     %th
-      Reference 1:
+      Ration Card
     %td
       = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
-      %br/
-      %span.greytext
-        references are unique, a way to check that this is the only record of a client
-        %br/
-        for this reason it is advisable to use a government ID as reference
+      = hidden_field :name => :reference_type, :value => Constants::Masters::REFERENCE_TYPES[4]
   %tr
     %th
-      Reference Type 1:
+      ID Proof
     %td
-      = select :reference_type, :collection => Constants::Masters::REFERENCE_TYPES.each{|x| [x.to_s, x]}
+      = text_field(:reference2, :size => 40, :value => ((@client.reference2.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference2))
   %tr
     %th
-      Reference 2:
+      ID Proof Type
     %td
-      = text_field(:reference2, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
-      %br/
-      %span.greytext
-        references are unique, a way to check that this is the only record of a client
-        %br/
-        for this reason it is advisable to use a government ID as reference
-  %tr
-    %th
-      Reference Type 2:
-    %td
-      = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES.each{|x| [x.to_s, x]}
+      = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES_ID_PROOF.each{|x| [x.to_s, x]}
   %tr
     %th
       Date of birth:
