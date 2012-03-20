@@ -2,9 +2,10 @@ class LoanApplication
   include DataMapper::Resource
   include Constants::Status
   include Constants::Masters
+  include Constants::Space
 
   property :id,                  Serial
-  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => Constants::Status::NEW_STATUS
+  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
   property :at_branch_id,        Integer, :nullable => false
   property :at_center_id,        Integer, :nullable => false
   property :for_cycle_number,    Integer, :nullable => false, :default => MINIMUM_CENTER_CYCLE_NUMBER
