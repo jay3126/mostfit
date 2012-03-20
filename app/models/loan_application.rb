@@ -40,7 +40,7 @@ class LoanApplication
     return [false, "cannot be later than today"] if created_on > Date.today
     unless client_id.nil?
       client = Client.get(client_id)
-      return [false, "You cannot create a loan application for a client before he has joined"] if created_on <= client.date_joined
+      return [false, "You cannot create a loan application for a client before he has joined"] if created_on < client.date_joined
     end
     return true 
   end
