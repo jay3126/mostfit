@@ -2,11 +2,11 @@
 
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
-    - @loan_applications.each do |loan_application|
-      - if @errors[loan_application.client_id]
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
         .error
-          - @errors[loan_application.client_id].keys.each do |key|
-            = "#{loan_application.client_id}: #{key} => #{@errors[loan_application.client_id][key]}"
+          - @errors[client_id].keys.each do |key|
+            = "#{client_id}: #{key} => #{@errors[client_id][key]}"
             %br
   - else    
     - @errors.each do |error|

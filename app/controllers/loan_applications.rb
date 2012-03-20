@@ -4,7 +4,8 @@ class LoanApplications < Application
   def bulk_new
     if request.method == :post
       @errors = {}
-      @center = Center.get(params[:at_center_id].to_i)    
+      @center = Center.get(params[:at_center_id].to_i)
+      created_on = Date.parse(params[:created_on])
       center_cycle = CenterCycle.get_cycle(@center.id, params[:center_cycle_number].to_i)
       client_ids_from_center = @center.clients.aggregate(:id) if @center
       client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
