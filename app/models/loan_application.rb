@@ -8,7 +8,6 @@ class LoanApplication
   property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
   property :at_branch_id,        Integer, :nullable => false
   property :at_center_id,        Integer, :nullable => false
-  property :for_cycle_number,    Integer, :nullable => false, :default => MINIMUM_CENTER_CYCLE_NUMBER
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
@@ -32,6 +31,7 @@ class LoanApplication
   
   belongs_to :client
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
+  belongs_to :center_cycle
 
   # Returns the status of loan applications
   def get_status

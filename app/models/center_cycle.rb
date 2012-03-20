@@ -20,6 +20,8 @@ class CenterCycle
   property :updated_at,            DateTime, :nullable => false, :default => DateTime.now
 
   belongs_to :center, :nullable => false
+  
+  has n, :loan_applications
 
   validates_with_method :is_cycle_incremented?
 
@@ -35,6 +37,10 @@ class CenterCycle
   def self.get_current_center_cycle(center_id)
     latest = first(:center_id => center_id, :order => [:cycle_number.desc])
     (latest and latest.cycle_number) ? latest.cycle_number : 0
+  end
+
+  def self.get_cycle(for_center, by_cycle_number)
+    first(:center_id => for_center, :cycle_number => by_cycle_number, :order => [:cycle_number.desc])
   end
 
   # Encapsulates fetching the status of a center cycle
