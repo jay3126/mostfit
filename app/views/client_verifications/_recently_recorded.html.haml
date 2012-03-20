@@ -1,4 +1,5 @@
 - if @loan_applications_recently_recorded and not @loan_applications_recently_recorded.empty?
+  - loan_applications_recently_recorded_sorted = @loan_applications_recently_recorded.sort.reverse
   %table.nojs{:style => "text-align:center"}
     %thead
       %tr
@@ -6,9 +7,9 @@
           = "ID"
         %td
           = "Applicant"
-        %td{:colspan => 4}
+        %td{:colspan => 5}
           = "Contact Point Verification 1"
-        %td{:colspan => 4}
+        %td{:colspan => 5}
           = "Contact Point Verification 2"
       %tr
         %td{:colspan=>2}
@@ -22,6 +23,8 @@
         %td
           = "Recorded on date"
         %td
+          = "Recorded by"
+        %td
           = "Verified on date"
         %td
           = "Status"
@@ -29,8 +32,10 @@
           = "Verified By"
         %td
           = "Recorded on date"
+        %td
+          = "Recorded By"
     %tbody
-      - @loan_applications_recently_recorded.each do |l|
+      - loan_applications_recently_recorded_sorted.each do |l|
         %tr
           %td
             = l.loan_application_id
@@ -44,6 +49,8 @@
             = StaffMember.get(l.cpv1.verified_by_staff_id).name 
           %td
             = l.cpv1.created_at.display
+          %td
+            = User.get(l.cpv1.created_by_user_id).name
           %td
             - if not l.cpv2.nil? 
               = l.cpv2.verified_on_date
@@ -64,6 +71,11 @@
               = l.cpv2.created_at.display
             - else
               = "&nbsp;"
+          %td
+            - if not l.cpv2.nil?
+              = User.get(l.cpv2.created_by_user_id).name
+            - else
+              = "&nbsp;"
 - else
-  %h4
+  %h3
     = "No recently recorded applications"

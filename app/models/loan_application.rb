@@ -89,21 +89,24 @@ class LoanApplication
   end
 
   #returns all loan applications for which CPV was recently recorded
-  def self.recently_recorded(at_branch_id = nil, at_center_id = nil)
-    predicates = {}
-    if (at_branch_id and !at_branch_id.nil?)
-      predicates[:at_branch_id] = at_branch_id
-    end
-    if (at_center_id and !at_center_id.nil?)
-      predicates[:at_center_id] = at_center_id
-    end
+  def self.recently_recorded_by_user(by_user_id)
+    raise ArgumentError, "User id not supplied" unless by_user_id
 
-    #take all those which are NOT pending verification
-    lar = all(predicates).reject {|l|l.is_pending_verification?}
+    #get all client_verifications which were done by this user
+    verifications_by_this_user = ClientVerification.all(:created_by_user_id => by_user_id)
+
+    #get corresponding loan applications
+    loan_applications_which_have_CPVs_by_this_user = []
+    verifications_by_this_user.each do |v|
+        loan_applications_which_have_CPVs_by_this_user.push(LoanApplication.get(v.loan_application_id))
+    end
+    loan_applications_which_have_CPVs_by_this_user.uniq!
+
+    #get all loan application info objects
     linfos = []
-    lar.each do |l|
-      puts "Processing #{l}"
-      linfos.push(l.to_info)
+    loan_applications_which_have_CPVs_by_this_user.each do |l|
+        puts "Processing #{l}"
+        linfos.push(l.to_info)
     end
     linfos
   end
@@ -124,14 +127,28 @@ end
 
 #In-memory class for storing a LoanApplication's total information to be passed around 
 class LoanApplicationInfo
-  attr_reader :loan_application_id, :applicant
-  attr_reader :cpv1
-  attr_reader :cpv2
+    include Comparable
+    attr_reader :loan_application_id, :applicant 
+    attr_reader :cpv1 
+    attr_reader :cpv2
     
-  def initialize(loan_application_id, applicant, cpv1=nil, cpv2=nil)
-    @loan_application_id = loan_application_id
-    @applicant = applicant
-    @cpv1 = cpv1
-    @cpv2 = cpv2
-  end
+    def initialize(loan_application_id, applicant, cpv1=nil, cpv2=nil)
+      @loan_application_id = loan_application_id
+      @applicant = applicant
+      @cpv1 = cpv1
+      @cpv2 = cpv2
+    end
+
+    #sort based on cpv recording date in the order of most-recent-first
+    def <=>(other)
+      return nil unless other.is_a?(LoanApplicationInfo)
+      cpv_self = self.cpv2 || self.cpv1
+      self_latest_cpv_at = cpv_self ? cpv_self.created_at : nil
+      
+      cpv_other = other.cpv2 || other.cpv1
+      other_latest_cpv_at = cpv_other ? cpv_other.created_at : nil
+
+      return nil unless (self_latest_cpv_at and other_latest_cpv_at)
+      self_latest_cpv_at <=> other_latest_cpv_at
+    end
 end

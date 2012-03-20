@@ -1,80 +1,82 @@
 - total_columns = 7
-- if @loan_applications_pending_verification and not @loan_applications_pending_verification.empty?
-  = form(:action => url(:controller => 'client_verifications', :action => 'record_verifications'), :method => :post) do
-    %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
-    %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
-    %table.nojs{:style => "text-align:center"}
-      %thead
-        %tr
-          %td
-            = "ID"
-          %td
-            = "Applicant"
-          %td
-            = "Address"
-          %td{:colspan => 4}
-            = "Contact Point Verification 1"
-          %td{:colspan => 4}
-            = "Contact Point Verification 2"
-        %tr
-          %td{:colspan=>3}
-            = "&nbsp;"
-          %td
-            = "Approved"
-          %td
-            = "Rejected"
-          %td
-            = "Verified on Date"
-          %td
-            = "Verified by Staff Member"
-          %td
-            = "Approved"
-          %td
-            = "Rejected"
-          %td
-            = "Verified on Date"
-          %td
-            = "Verified by Staff Member"
-      %tbody.form
-        - unless @loan_applications_pending_verification.empty?
-          - @loan_applications_pending_verification.each do |l|
+#pending_list
+  .shaded
+    - if @loan_applications_pending_verification and not @loan_applications_pending_verification.empty?
+      = form(:action => url(:controller => 'client_verifications', :action => 'record_verifications'), :method => :post) do
+        %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
+        %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
+        %table.nojs{:style => "text-align:center"}
+          %thead
             %tr
               %td
-                = l.id
+                = "ID"
               %td
-                = l.client_name
+                = "Applicant"
               %td
-                = l.client_address
-              -# CPV1 can be recorded only if CPV1 is not already done.
-              - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
-                %td
-                  %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
-                %td
-                  %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
-                %td
-                  = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
-                %td
-                  = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-              - else
-                %td{:colspan => 4}
-                  = get_status_display(ClientVerification.get_CPV1_status(l.id))
-              
-              - if ClientVerification.is_CPV1_verified?(l.id)
-                %td
-                  %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
-                %td
-                  %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
-                %td
-                  = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 10)
-                %td
-                  = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-              - else
-                %td{:colspan => 4}
-                  = "CPV1 not complete"
-          %tr
-            %td{:colspan => 7,:style=>"text-align : right"}
-              = submit "Save all"
-              %input{:value => "Reset all", :type => "reset"}
-- else
-  %h2
-    = "No loan applications pending for verification"
+                = "Address"
+              %td{:colspan => 4}
+                = "Contact Point Verification 1"
+              %td{:colspan => 4}
+                = "Contact Point Verification 2"
+            %tr
+              %td{:colspan=>3}
+                = "&nbsp;"
+              %td
+                = "Approved"
+              %td
+                = "Rejected"
+              %td
+                = "Verified on Date"
+              %td
+                = "Verified by Staff Member"
+              %td
+                = "Approved"
+              %td
+                = "Rejected"
+              %td
+                = "Verified on Date"
+              %td
+                = "Verified by Staff Member"
+          %tbody.form
+            - unless @loan_applications_pending_verification.empty?
+              - @loan_applications_pending_verification.each do |l|
+                %tr
+                  %td
+                    = l.id
+                  %td
+                    = l.client_name
+                  %td
+                    = l.client_address
+                  -# CPV1 can be recorded only if CPV1 is not already done.
+                  - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
+                    %td
+                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                    %td
+                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                    %td
+                      = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
+                    %td
+                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+                  - else
+                    %td{:colspan => 4}
+                      = get_status_display(ClientVerification.get_CPV1_status(l.id))
+                  
+                  - if ClientVerification.is_CPV1_verified?(l.id)
+                    %td
+                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                    %td
+                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                    %td
+                      = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 10)
+                    %td
+                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+                  - else
+                    %td{:colspan => 4}
+                      = "CPV1 not complete"
+              %tr
+                %td{:colspan => 7,:style=>"text-align : right"}
+                  = submit "Save all"
+                  %input{:value => "Reset all", :type => "reset"}
+    - else
+      %h3
+        = "No loan applications pending for verification"

@@ -128,4 +128,22 @@ describe LoanApplication do
     lapinfo.cpv2.created_at.should == cpv2.created_at
     
   end
+
+  it "should return the most recently recorded first when comparing " do
+    date
+  
+    lap = LoanApplication.new()
+    lap.id = ((Time.now - @time_datum) * 1000).to_i
+    lap.at_branch_id = @at_branch_id
+    lap.at_center_id = @at_center_id
+    lap.created_by_staff_id = @created_by_staff_id
+    lap.created_by_user_id = @created_by_user_id
+    lap.amount = @amount
+    lap.save
+ 
+    ClientVerification.record_CPV1_approved(lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV2_approved(lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+
+ end
+
 end
