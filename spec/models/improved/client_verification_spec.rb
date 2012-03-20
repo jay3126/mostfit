@@ -93,4 +93,5 @@ describe ClientVerification do
      cpv1Info.created_at.should == cpv1.created_at
 
   end
+
 end

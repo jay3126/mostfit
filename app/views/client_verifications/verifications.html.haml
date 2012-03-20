@@ -1,15 +1,16 @@
-%h3
-  = "Filter form"
+.shaded
+%h1
+  = "Client Verifications"
 = partial :filter_form
 
+%br
+%hr
 - if (@show_pending and @show_pending == true)
-  %h3
-    = "Loan Applications pending for verification"
-  
   = partial :pending
 
-- if (@show_recorded and @show_recorded == true) 
-  %h3
-    = "Recently Recorded Verifications"
-  
-  = partial :recently_recorded
+%br
+%hr
+= partial :recently_recorded
+
+%br
+%br
