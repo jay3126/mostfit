@@ -14,6 +14,7 @@ class ClientVerifications < Application
     else
         @branch_id = nil
     end
+    @center = Center.get(@center_id)
     @user_id = session.user.id 
     @loan_applications_pending_verification = LoanApplication.pending_verification(@branch_id, @center_id)
     @loan_applications_recently_recorded = LoanApplication.recently_recorded_by_user(@user_id)

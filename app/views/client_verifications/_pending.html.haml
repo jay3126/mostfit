@@ -1,11 +1,14 @@
-- total_columns = 7
+- total_columns = 14
+- center_text = "text-align: center"
+%h1
+  = "Pending verifications"
 #pending_list
   .shaded
     - if @loan_applications_pending_verification and not @loan_applications_pending_verification.empty?
       = form(:action => url(:controller => 'client_verifications', :action => 'record_verifications'), :method => :post) do
         %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
         %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
-        %table.nojs{:style => "text-align:center"}
+        %table.form{:style => "width:100%; border:1px;"}
           %thead
             %tr
               %td
@@ -14,9 +17,9 @@
                 = "Applicant"
               %td
                 = "Address"
-              %td{:colspan => 4}
+              %td{:colspan => 4,:style => center_text}
                 = "Contact Point Verification 1"
-              %td{:colspan => 4}
+              %td{:colspan => 4,:style => center_text}
                 = "Contact Point Verification 2"
             %tr
               %td{:colspan=>3}
@@ -56,27 +59,32 @@
                     %td
                       = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
                   - else
-                    %td{:colspan => 4}
+                    %td{:colspan => 2,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
-                  
+                    %td
+                      = ClientVerification.get_CPV1(l.id).verified_on_date.display
+                    %td
+                      = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
                   - if ClientVerification.is_CPV1_verified?(l.id)
                     %td
                       %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
                     %td
                       %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
                     %td
-                      = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 10)
+                      = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
                   - else
-                    %td{:colspan => 4}
-                      = "CPV1 not complete"
-              %tr
-                %td{:colspan => 7,:style=>"text-align : right"}
-                  = submit "Save all"
-                  %input{:value => "Reset all", :type => "reset"}
+                    %td{:colspan => 4, :style => center_text}
+                      %i
+                        = "CPV1 is pending"
+          %tfoot
+            %tr
+              %td{:colspan => total_columns,:style=>"text-align : right"}
+                = submit "Save all"
+                %input{:value => "Reset all", :type => "reset"}
     - else
       %h3
         = "No loan applications pending for verification"
