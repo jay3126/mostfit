@@ -65,7 +65,7 @@
               = l.cpv2.created_at.display
             %td
               = User.get(l.cpv2.created_by_user_id).name
-          - elsif ClientVerification.is_CPV1_verified?(l.id)
+          - elsif ClientVerification.is_CPV1_verified?(l.loan_application_id)
             %td{:colspan => 5,:style => center_text}
               %i
                 = "CPV2 is pending"
@@ -74,6 +74,6 @@
               %i
                 = "Not Applicable"
 %br
-- else
+- if not @loan_applications_recently_recorded or @loan_applications_recently_recorded.empty?
   %h3
     = "No recently recorded applications"
