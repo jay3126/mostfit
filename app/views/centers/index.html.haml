@@ -5,9 +5,10 @@
 
     %h1== Branch: <i>#{@branch.name}</i>
     %p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
-      = link_to_with_rights 'edit this branch\'s details ', resource(@branch, :edit), :class => "edit grey_button"
-      &nbsp;&nbsp;
-      = link_to_with_rights 'create a new center', resource(@branch, :centers, :new), :class => "add grey_button"
+      = link_to_with_rights 'edit branch details ', resource(@branch, :edit), :class => "edit grey_button"
+      &nbsp;
+      = link_to_with_rights 'center', resource(@branch, :centers, :new), :class => "add grey_button"
+      = link_to_with_rights 'loan applications', url(:controller => :loan_applications, :action => :bulk_new, :branch_id => @branch.id), :class => "add grey_button"
     %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
       %tr.odd
         %th.odd Name
