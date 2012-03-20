@@ -19,6 +19,7 @@ module Constants
 
     OPEN_CENTER_CYCLE_STATUS = 'open_center_cycle_status'; CLOSED_CENTER_CYCLE_STATUS = 'closed_center_cycle_status'
     CENTER_CYCLE_STATUSES = [ OPEN_CENTER_CYCLE_STATUS, CLOSED_CENTER_CYCLE_STATUS ]
+    MINIMUM_CENTER_CYCLE_NUMBER = 1
     
   end
 

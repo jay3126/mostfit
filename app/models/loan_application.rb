@@ -7,6 +7,7 @@ class LoanApplication
   property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => Constants::Status::NEW_STATUS
   property :at_branch_id,        Integer, :nullable => false
   property :at_center_id,        Integer, :nullable => false
+  property :for_cycle_number,    Integer, :nullable => false, :default => MINIMUM_CENTER_CYCLE_NUMBER
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
@@ -65,10 +66,10 @@ class LoanApplication
   def self.pending_verification(at_branch_id = nil, at_center_id = nil)
     predicates = {}
     if (at_branch_id and !at_branch_id.nil?)
-        predicates[:at_branch_id] = at_branch_id
+      predicates[:at_branch_id] = at_branch_id
     end
     if (at_center_id and !at_center_id.nil?)
-        predicates[:at_center_id] = at_center_id 
+      predicates[:at_center_id] = at_center_id
     end
 
     all(predicates).select {| l |l.is_pending_verification?}    
@@ -78,18 +79,18 @@ class LoanApplication
   def self.recently_recorded(at_branch_id = nil, at_center_id = nil)
     predicates = {}
     if (at_branch_id and !at_branch_id.nil?)
-        predicates[:at_branch_id] = at_branch_id
+      predicates[:at_branch_id] = at_branch_id
     end
     if (at_center_id and !at_center_id.nil?)
-        predicates[:at_center_id] = at_center_id 
+      predicates[:at_center_id] = at_center_id
     end
 
     #take all those which are NOT pending verification
     lar = all(predicates).reject {|l|l.is_pending_verification?}
     linfos = []
     lar.each do |l|
-        puts "Processing #{l}"
-        linfos.push(l.to_info)
+      puts "Processing #{l}"
+      linfos.push(l.to_info)
     end
     linfos
   end
@@ -99,10 +100,10 @@ class LoanApplication
     cpvs_infos = ClientVerification.get_CPVs_infos(self.id)
     puts cpvs_infos
     linfo = LoanApplicationInfo.new(
-                         self.id,
-                         self.client_name,
-                         cpvs_infos['cpv1'],
-                         cpvs_infos['cpv2'])
+      self.id,
+      self.client_name,
+      cpvs_infos['cpv1'],
+      cpvs_infos['cpv2'])
     puts linfo
     linfo
   end
@@ -110,14 +111,14 @@ end
 
 #In-memory class for storing a LoanApplication's total information to be passed around 
 class LoanApplicationInfo
-    attr_reader :loan_application_id, :applicant 
-    attr_reader :cpv1 
-    attr_reader :cpv2
+  attr_reader :loan_application_id, :applicant
+  attr_reader :cpv1
+  attr_reader :cpv2
     
-    def initialize(loan_application_id, applicant, cpv1=nil, cpv2=nil)
-       @loan_application_id = loan_application_id
-       @applicant = applicant
-       @cpv1 = cpv1
-       @cpv2 = cpv2
-    end
+  def initialize(loan_application_id, applicant, cpv1=nil, cpv2=nil)
+    @loan_application_id = loan_application_id
+    @applicant = applicant
+    @cpv1 = cpv1
+    @cpv2 = cpv2
+  end
 end
