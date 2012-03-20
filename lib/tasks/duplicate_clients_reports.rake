@@ -10,7 +10,7 @@ namespace :mostfit do
   task :de_dupe_report do
     require 'fastercsv'
 
-    duplicates = Hash.new()
+    duplicates = {}
     duplicates[:same_ration_card_number_clients]= []      #this array is to get duplicate clients.
     duplicates[:same_ration_card_number_loan_applicants]= []    #this array is to get duplicate loan_applicants.
     ration_card_is_nil_for_clients = []   #this array is to store all those clients whose ration_card is nil.
@@ -49,25 +49,24 @@ namespace :mostfit do
     end
 
     begin
-      out_file_path = File.join(Merb.root, "/tmp/duplicate_clients_report(clients).#{DateTime.now.to_s}.csv")
-      FasterCSV.open(out_file_path, "w", :force_quotes => true) do |results_csv|
-        duplicates.each{ |reason, rows|
-          results_csv << [reason]
-          rows.each { |dup|
-            client = dup.first
-            results_csv << [client.id, client.name, client.reference]
-          }
+      clients_out_file_path = File.join(Merb.root, "/tmp/duplicate_clients_report.clients.#{DateTime.now.to_s}.csv")
+      FasterCSV.open(clients_out_file_path, "w", :force_quotes => true) do |results_csv|
+        client_rows = duplicates[:same_ration_card_number_clients]
+        client_rows.each { |row|
+          client = row.first
+          ration_card_number = client.reference
+          results_csv << [client.id, client.name, ration_card_number]
         }
       end
 
-      out_file_path = File.join(Merb.root, "/tmp/duplicate_clients_report(loan_applicants).#{DateTime.now.to_s}.csv")
-      FasterCSV.open(out_file_path, "w", :force_quotes => true) do |results_csv|
-        duplicates.each{ |reason, rows|
-          results_csv << [reason]
-          rows.each { |dup|
-            applicant = dup.first
-            results_csv << [applicant.id, applicant.client_name, applicant.client_reference1]
-          }
+      loan_applicants_out_file_path = File.join(Merb.root, "/tmp/duplicate_clients_report.loan_applicants.#{DateTime.now.to_s}.csv")
+      FasterCSV.open(loan_applicants_out_file_path, "w", :force_quotes => true) do |results_csv|
+        loan_applicant_rows = duplicates[:same_ration_card_number_loan_applicants]
+        loan_applicant_rows.each { |row|
+          loan_applicant = row.first
+          ration_card_number = loan_applicant.client_reference1
+          loan_applicant_name = (loan_applicant and loan_applicant.respond_to?(:client_name)) ? loan_applicant.client_name : "-"
+          results_csv << [loan_applicant.id, loan_applicant_name, ration_card_number]
         }
       end
     rescue
