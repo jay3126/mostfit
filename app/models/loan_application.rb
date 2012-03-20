@@ -11,6 +11,7 @@ class LoanApplication
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
+  property :created_on,          Date
   property :amount,              Float
 
   #basic client info
@@ -32,6 +33,17 @@ class LoanApplication
   belongs_to :client
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
   belongs_to :center_cycle
+
+  validates_with_method :created_on, :method => :is_date_within_range?
+
+  def is_date_within_range?
+    return [false, "Created on cannot be later than today"] if created_on > Date.today
+    unless client_id.nil?
+      client = Client.get(client_id)
+      return [false, "You cannot create a loan application for a client before he has joined"] if created_on <= client.date_joined
+    end
+    return true 
+  end
 
   # Returns the status of loan applications
   def get_status

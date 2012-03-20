@@ -12,6 +12,7 @@
           %th Age
           %th Address
           %th Loan Amount
+          %th Created at
       %tbody
         - @loan_applications.each do |loan_application|
           %tr
@@ -27,6 +28,8 @@
               = loan_application.client_address
             %td
               = loan_application.amount
+            %td
+              = loan_application.created_at
             
   - else
     %h3
