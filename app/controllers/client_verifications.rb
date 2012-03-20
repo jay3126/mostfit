@@ -29,8 +29,9 @@ class ClientVerifications < Application
 
   #records the given CPVs and shows the list of recently recorded AND the other Loan Applications pending verifications
   def record_verifications
-  #show the recently recorded verifications
-   if params.key?('verification_status')
+    @center = Center.get(@center_id)
+    #show the recently recorded verifications
+    if params.key?('verification_status')
        params['verification_status'].keys.each do | cpv_type |
           puts "Verifying for #{cpv_type}"
               params['verification_status'][cpv_type].keys.each do | id |

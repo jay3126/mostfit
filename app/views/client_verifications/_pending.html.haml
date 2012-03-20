@@ -85,6 +85,7 @@
               %td{:colspan => total_columns,:style=>"text-align : right"}
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "reset"}
-    - else
-      %h3
-        = "No loan applications pending for verification"
+                  
+- if not @loan_applications_pending_verification or @loan_applications_pending_verification.empty?
+  %h3
+    = "No loan applications pending for verification"

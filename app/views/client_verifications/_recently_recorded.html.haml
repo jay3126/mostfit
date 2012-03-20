@@ -54,7 +54,7 @@
             = l.cpv1.created_at.display
           %td
             = User.get(l.cpv1.created_by_user_id).name
-          - unless l.cpv2.nil?
+          - if not l.cpv2.nil?
             %td
               = l.cpv2.verified_on_date
             %td
@@ -65,11 +65,15 @@
               = l.cpv2.created_at.display
             %td
               = User.get(l.cpv2.created_by_user_id).name
-          - else
+          - elsif ClientVerification.is_CPV1_verified?(l.id)
             %td{:colspan => 5,:style => center_text}
               %i
                 = "CPV2 is pending"
-
+          - else
+            %td{:colspan => 5,:style => center_text}
+              %i
+                = "Not Applicable"
+%br
 - else
   %h3
     = "No recently recorded applications"
