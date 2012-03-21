@@ -35,6 +35,13 @@ class LoanApplication
   belongs_to :center_cycle
 
   validates_with_method :created_on, :method => :is_date_within_range?
+  validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
+
+  def is_unique_for_center_cycle?
+    client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
+    return [false, "A loan application for this client #{client_id} already exists for the current loan cycle"] if client_ids.include?(client_id)
+    return true
+  end
 
   def is_date_within_range?
     return [false, "cannot be later than today"] if created_on > Date.today
