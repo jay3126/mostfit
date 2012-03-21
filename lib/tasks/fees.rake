@@ -69,7 +69,7 @@ namespace :mostfit do
         loan_ids = LoanHistory.all(:loan_id => all_loan_ids, :status => :outstanding).aggregate(:loan_id)
         loan_ids.each do |loan_id|
           loan = Loan.get(loan_id)
-          applicable_on = loan.loan_history.last.date
+          applicable_on = loan.loan_history.max(:date, :conditions => ['principal_due_today != ?', 0.0], :conditions => ['interest_due_today != ?', 0.0])
           next unless loan.status == :outstanding
           fee_ids = []
           fee_ids << loan_product_fee_mapping[loan_product_id]
