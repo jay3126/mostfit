@@ -6,7 +6,7 @@
       - if @errors[client_id]
         .error
           - @errors[client_id].keys.each do |key|
-            = "#{client_id}: #{key} => #{@errors[client_id][key]}"
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
             %br
   - else    
     - @errors.each do |error|
