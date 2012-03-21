@@ -7,10 +7,6 @@ class LoanApplications < Application
       @center = Center.get(params[:at_center_id].to_i)
       created_on = Date.parse(params[:created_on])
       center_cycle = CenterCycle.get_cycle(@center.id, params[:center_cycle_number].to_i)
-      client_ids_from_center = @center.clients.aggregate(:id) if @center
-      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
-      final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
-      @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
       client_ids = params[:clients].keys
       if params[:staff_member_id].empty? or params[:created_on].empty?
         @errors = []
@@ -33,6 +29,10 @@ class LoanApplications < Application
           @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
         end
       end
+      client_ids_from_center = @center.clients.aggregate(:id) if @center
+      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
+      final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
+      @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
       @loan_applications = LoanApplication.all(:created_by_user_id => session.user.id, :at_center_id => @center.id, :center_cycle_id => center_cycle.id, :order => [:created_at.desc])
       render 
     else
