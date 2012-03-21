@@ -58,10 +58,9 @@ namespace :mostfit do
 
     desc "levy arbitrary fees on loans"
     task :levy_arbitrary_fees do
-      #applicable_on = Date.parse(args[:applicable_on])
       filename = File.join(Merb.root, 'doc', "fee_loan_product_mapping.yml") 
       input_hash = YAML.load_file(filename)
-      applicable_on = Date.parse(input_hash['date'])
+      #applicable_on = Date.parse(input_hash['date'])
       loan_product_fee_mapping = input_hash['loan_product_fee_mapping']
       loan_product_ids = loan_product_fee_mapping.keys
       loan_product_ids.each do |loan_product_id|
@@ -70,6 +69,7 @@ namespace :mostfit do
         loan_ids = LoanHistory.all(:loan_id => all_loan_ids, :status => :outstanding).aggregate(:loan_id)
         loan_ids.each do |loan_id|
           loan = Loan.get(loan_id)
+          applicable_on = loan.loan_history.last.date
           next unless loan.status == :outstanding
           fee_ids = []
           fee_ids << loan_product_fee_mapping[loan_product_id]
