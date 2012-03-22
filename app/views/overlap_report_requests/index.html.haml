@@ -9,6 +9,7 @@
       %thead
         %th Serial No.
         %th Filename
+        %th Created at
       %tbody
         - @files.reverse.each_with_index do |file, idx|
           - fname = file.split("/")[-1].chomp
@@ -17,5 +18,6 @@
               = idx + 1
             %td
               = link_to fname, url(:controller => :overlap_report_requests, :action => :send_csv, :filename => file)
-
-
+            %td
+              = File.mtime(file)
+            
