@@ -82,6 +82,10 @@ class LoanApplication
     not ClientVerification.is_cpv_complete?(self.id)
   end
 
+  def is_pending_authorization?
+    LoanAuthorization.get_authorization(self.id).nil?
+  end
+
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_verification(at_branch_id = nil, at_center_id = nil)
     predicates = {}
