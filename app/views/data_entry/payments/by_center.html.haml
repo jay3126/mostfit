@@ -220,6 +220,11 @@
           = hidden_field :name => 'return', :value => url(:data_entry)
       %tr
         %th
+          Centers repaying today
+        %td
+          = select :name => 'center_id', :id => 'paying_center_selector', :collection => Center.all(:branch_id => params[:branch_id]), :text_method => :name, :value_method => :id, :selected => params[:center_id].to_s, :prompt => 'Select a center'
+      %tr
+        %th
           On Date
         %td
           = date_select 'for_date', (@date || Date.today), {:id => 'for_date'}
