@@ -2,8 +2,10 @@ class OverlapReportRequest
   include DataMapper::Resource
   include Constants::Status
 
-  property :id,     Serial
-  property :status, Enum.send('[]', *REQUEST_STATUSES), :nullable => false, :default => CREATED_STATUS
+  property :id,                  Serial
+  property :status,              Enum.send('[]', *REQUEST_STATUSES), :nullable => false, :default => CREATED_STATUS
+  property :loan_application_id, Integer
+  property :created_at,          DateTime
 
   # Call this method to obtain the 'local' status of a request
   def get_status
