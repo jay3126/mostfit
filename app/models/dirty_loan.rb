@@ -29,7 +29,8 @@ class DirtyLoan
       end
       begin
         break unless @@poke_thread
-        dl.loan.update_history(true)
+        # for now, it will run but not update history, while we observe this in production
+        #dl.loan.update_history(true)
         dl.cleaned_at = Time.now
         dl.save
       rescue Exception => e

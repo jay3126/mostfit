@@ -42,7 +42,7 @@ class Centers < Application
     only_provides :html
     @center = Center.get(id)
     raise NotFound unless @center
-    @clients = @center.clients
+    @clients = @center.clients(:active => true)   #getting only active clients
     raise NotFound unless params[:field_name]
     match, model_name, field = /(\w+)\[(\w+)\]/.match(params[:field_name]).to_a
     return unless model_name and field
@@ -69,7 +69,29 @@ class Centers < Application
           obj = model.get(id)     
           next unless obj
           obj.history_disabled=true if model==Loan
-          obj.update(attr)
+          #this loop is to check for model Loan and set funding_line and occupation as they were throwing ArgumentError
+          #if we update it directly.
+          if model==Loan
+            if attr.keys[0].to_sym==:funding_line
+              attribute = {:funding_line_id => attr.values[0]}
+              obj.update(attribute)
+            elsif attr.keys[0].to_sym==:occupation
+              attribute = {:occupation_id => attr.values[0]}
+              obj.update(attribute)
+            else
+              obj.update(attr)
+            end
+            #following loop will set the occupation for client. Other than this, all fields will be updated normally.
+          elsif model==Client
+            if attr.keys[0].to_sym==:occupation
+              attribute = {:occupation_id => attr.values[0]}
+              obj.update(attribute)
+            else
+              obj.update(attr)
+            end
+          else
+            obj.update(attr)
+          end
           @errors[id] = obj.errors.values.join(",") unless obj.errors.blank?
         end
       }
