@@ -171,7 +171,7 @@ class LoanApplication
             created_on.strftime("%d-%m-%Y"),                                         # account opening date
             id,                                                                      # account id / number
             at_branch_id,                                                            # branch id
-            client_id,                                                               # member id
+            id,                                                                      # member id
             at_center_id,                                                            # kendra id
             amount,                                                                  # applied for amount / current balance
             client_guarantor_name,                                                   # key person name
