@@ -8,8 +8,6 @@ class OverlapReportResponse
   property :no_of_active_loans,  Integer
   property :total_outstanding,   Integer
   property :loan_application_id, Integer
-  property :not_matched,         Boolean, :nullable => :false
-
-  
+  property :not_matched,         Boolean, :nullable => false
 
 end
