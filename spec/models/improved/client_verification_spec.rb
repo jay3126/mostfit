@@ -54,36 +54,43 @@ describe ClientVerification do
     #when only CPV1 is recorded as approved
     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
     ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
     ClientVerification.is_cpv_complete?(loan_application_id).should == false
-
   end
   
   it "should tell that CPV is process is complete when CPV1 is rejected" do
      loan_application_id = ((Time.now - @time_datum) * 1000).to_i
      ClientVerification.record_CPV1_rejected(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+     ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_REJECTED
      ClientVerification.is_cpv_complete?(loan_application_id).should == true
   end
 
- 
   it "should tell that CPV process is complete when CPV2 has been recorded" do
     #when both CPV1 and CPV2 are recorded 
     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
     ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
     ClientVerification.record_CPV2_rejected(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.get_CPV2_status(loan_application_id).should == Constants::Verification::VERIFIED_REJECTED
     ClientVerification.is_cpv_complete?(loan_application_id).should == true
 
     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
     ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
     ClientVerification.record_CPV2_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+    ClientVerification.get_CPV2_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
     ClientVerification.is_cpv_complete?(loan_application_id).should == true
   end
 
   it "should be convertible into a rightly-formed ClientVerificationInfo object" do
      loan_application_id = ((Time.now - @time_datum) * 1000).to_i
      ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
-     cpv1 = ClientVerification.get_CPV1(loan_application_id) #because it returns an array
+     ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
+     cpv1 = ClientVerification.get_CPV1(loan_application_id)
+     cpv1.should_not be_nil
      cpv1Info = cpv1.to_info
-     
+     cpv1Info.should_not be_nil
+
      cpv1Info.loan_application_id.should == cpv1.loan_application_id
      cpv1Info.verification_type.should == cpv1.verification_type
      cpv1Info.verification_status.should == cpv1.verification_status
@@ -91,7 +98,6 @@ describe ClientVerification do
      cpv1Info.verified_on_date.should == cpv1.verified_on_date
      cpv1Info.created_by_user_id.should == cpv1.created_by_user_id
      cpv1Info.created_at.should == cpv1.created_at
-
   end
 
 end
