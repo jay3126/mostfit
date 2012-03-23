@@ -45,6 +45,8 @@ dependency "uuid"
 dependency "builder"
 #dependency "dm-is-paginated"
 dependency "mongrel", "1.1.5"
+#for parsing xml files
+dependency "crack"
 # <<<<<<< HEAD
 # dependency "ya2yaml", "0.30"
 # dependency "i18n", "0.6.0"
