@@ -37,7 +37,9 @@ class User
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
 
-  validates_with_method :role, :method => :appropriate_roles_mapping?
+#  Disabling this validation as it kicks in even if an existing 'invalid' user is changing passwords
+#  Needs to be re-implemented with more thought and correct consideration of roles
+#  validates_with_method :role, :method => :appropriate_roles_mapping?
 
   def appropriate_roles_mapping?
     if self.funder
