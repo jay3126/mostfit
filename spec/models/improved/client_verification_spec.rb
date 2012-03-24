@@ -100,4 +100,17 @@ describe ClientVerification do
      cpv1Info.created_at.should == cpv1.created_at
   end
 
+  it "CPV2 date should be greater than CPV1 date" do
+     loan_application_id = ((Time.now - @time_datum) * 1000).to_i
+     ClientVerification.record_CPV1_approved(loan_application_id, @by_p_staff_id, @on_date, @by_x_user_id)
+     ClientVerification.get_CPV1_status(loan_application_id).should == Constants::Verification::VERIFIED_ACCEPTED
+     cpv1 = ClientVerification.get_CPV1(loan_application_id)
+     cpv1.should_not be_nil
+     
+     @cpv2_date = @on_date - 1 #one day before CPV1 date
+     ClientVerification.record_CPV2_approved(loan_application_id, @by_p_staff_id, @cpv2_date, @by_x_user_id)
+     cpv2 = ClientVerification.get_CPV2(loan_application_id)
+     cpv2.should_not be_nil
+  end
+
 end
