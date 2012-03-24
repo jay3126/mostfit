@@ -36,7 +36,7 @@ class DataAccessObserver
         end
         return if diff.length==0
         model = (/Loan$/.match(obj.class.to_s) ? "Loan" : obj.class.to_s)
-        log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log,
+        log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml,
                              :auditable_type => model, :user => @_user, :created_at => DateTime.now)
         log.save
       end
