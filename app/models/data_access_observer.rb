@@ -1,7 +1,8 @@
 class DataAccessObserver
   include DataMapper::Observer
-  observe *(DataMapper::Model.descendants.to_a - [AuditTrail, Cacher, BranchCache, CenterCache, FundingLineCache, LoanProductCache] + [Branch, Center, ClientGroup, Client, Loan, Payment, Fee]).uniq # strange bug where observer drops some of the descnedants.
+  # observe *(DataMapper::Model.descendants.to_a - [AuditTrail, Cacher, BranchCache, CenterCache, FundingLineCache, LoanProductCache] + [Branch, Center, ClientGroup, Client, Loan, Payment, Fee]).uniq # strange bug where observer drops some of the descnedants.
 
+  observe *(Constants::Change::MODELS_TO_BE_AUDITED)
   
   def self.insert_session(id)
     @_session = ObjectSpace._id2ref(id)
