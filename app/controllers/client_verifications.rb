@@ -29,15 +29,24 @@ class ClientVerifications < Application
 
   #records the given CPVs and shows the list of recently recorded AND the other Loan Applications pending verifications
   def record_verifications
+
     @center = Center.get(@center_id)
     #show the recently recorded verifications
+    @errors = {}
     if params.key?('verification_status')
        params['verification_status'].keys.each do | cpv_type |
-          puts "Verifying for #{cpv_type}"
               params['verification_status'][cpv_type].keys.each do | id |
                   verified_by_staff_id = params['verified_by_staff_id'][cpv_type][id]
                   verification_status = params['verification_status'][cpv_type][id]
                   verified_on_date = params['verified_on_date'][cpv_type][id]
+                  if verified_by_staff_id.empty?
+                     @errors[id] = "Loan Application ID #{id} : Staff ID must be provided for #{cpv_type}"
+                     next
+                  elsif verified_on_date.empty?
+                     @errors[id] = "Loan Application ID #{id} : Verified-on Date must be provided for #{cpv_type}"
+                     next
+                  end
+
                   if cpv_type == Constants::Verification::CPV1
                     if verification_status == Constants::Verification::VERIFIED_ACCEPTED
                         ClientVerification.record_CPV1_approved(id,verified_by_staff_id, verified_on_date, session.user.id)
@@ -53,10 +62,11 @@ class ClientVerifications < Application
                   end
               end
        end
+   else
+     @errors['CPV Recording'] = "No data was passed!"
    end
    #get data required to show the filter form and the pending verifications form 
    get_data(params)
-    
    @show_pending = true
    @show_recorded = true
    render :verifications
