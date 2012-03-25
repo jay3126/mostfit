@@ -1,12 +1,12 @@
 class OverlapReportResponse
   include DataMapper::Resource
+  include Constants::Masters
   
   property :id,                  Serial
   property :created_at,          DateTime
   property :created_by_user_id,  Integer
   property :total_outstanding,   Integer
   property :no_of_active_loans,  Integer
-  property :total_outstanding,   Integer
   property :loan_application_id, Integer
   property :not_matched,         Boolean, :nullable => false
   property :response_text,       Text # Marshal.dump of response hash
@@ -37,6 +37,14 @@ class OverlapReportResponse
       self.not_matched = true
     end
     self.save
+  end
+
+  def status
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    return false if no_of_active_loans > Constants::Masters::PERMISSIBLE_ACTIVE_LOANS
+    return false if ((total_outstanding + loan_application.amount) > Constants::Masters::PERMISSIBLE_TOTAL_OUTSTANDING)
+    true
   end
 
 end

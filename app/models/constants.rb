@@ -33,6 +33,8 @@ module Constants
   end
 
   module Masters
+    PERMISSIBLE_ACTIVE_LOANS = 1
+    PERMISSIBLE_TOTAL_OUTSTANDING = 50000
     REFERENCE_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
     REFERENCE_TYPES_ID_PROOF = ["Passport", "Voter ID", "UID", "Others", "Driving Licence No", "Pan"]
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
