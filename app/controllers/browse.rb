@@ -1,10 +1,12 @@
 class Browse < Application
   provides :xml 
   before :get_centers_and_template
+  before :display_from_cache, :only => [:hq_tab]
+  after  :store_to_cache,     :only => [:hq_tab]
   Line = Struct.new(:ip, :date_time, :method, :model, :url, :status, :response_time)
   
   def index
-    render
+    display @template
   end
 
   def today
@@ -31,7 +33,7 @@ class Browse < Application
   end
 
   def hq_tab
-    partial :totalinfo rescue partial :missing_caches
+    partial :totalinfo
   end
 
   def centers_paying_today
