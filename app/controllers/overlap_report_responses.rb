@@ -9,7 +9,6 @@ class OverlapReportResponses < Application
     # since the XML upload changes the data in the system, it would be very useful to track all these changes
     # and keep a copy of the XML file as well
     # TODO: to check the uploaded file for MIME type matching and file types
-    debugger
     if params[:file][:tempfile]
       message = {}
       responses = []
@@ -20,7 +19,8 @@ class OverlapReportResponses < Application
       filepath = File.join(folder, filename)
       FileUtils.mv(params[:file][:tempfile].path, filepath)
       message[:notice] = "File uploaded successfully"
-      
+      @responses = nil
+
       @data = Crack::XML.parse(File.read(filepath))
       reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
       OverlapReportResponse.transaction do |t|
@@ -45,9 +45,15 @@ class OverlapReportResponses < Application
         end
       end
 
-      redirect url(:controller => :overlap_report_responses, :action => :index), :message => message
+      render :index, :message => message
     end     
  
+  end
+
+  def show(id)
+    @overlap_report_response = OverlapReportResponse.get(id)
+    raise NotFound unless @overlap_report_response
+    display @overlap_report_response
   end
  
 end

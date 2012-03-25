@@ -1,0 +1,44 @@
+%h1 Credit Bureau Responses
+
+.shaded
+  %h2 Upload Credit Bureau Response Files
+  
+  %form{:action => url(:controller => :overlap_report_responses, :action => :upload_response), :enctype => "multipart/form-data", :method => "post"}
+    %input{:name => "file", :size => "80", :type => "file"}
+    %input{:type => "submit", :value => "Upload"}
+
+%br
+%hr
+  
+- if @responses      
+  .shaded
+    %h2 Results
+    %table.form{:width => "100%"}
+      %thead
+        %th Loan Application ID
+        %th Name
+        %th Date of Birth
+        %th Address
+        %th Response 
+        %th Status
+      %tbody
+        - @responses.each do |response|
+          - loan_application = LoanApplication.get(response.loan_application_id)
+          %tr
+            %td
+              = loan_application.id
+            %td
+              = loan_application.client_name
+            %td
+              = loan_application.client_dob
+            %td
+              = loan_application.client_address
+            %td
+              = link_to response.id, resource(response)
+            %td
+              = "" 
+              
+          
+          
+  
+      

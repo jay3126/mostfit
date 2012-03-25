@@ -2,6 +2,7 @@ Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   
   resources :loan_applications, :id => %r(\d+)
+  resources :overlap_report_responses, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
