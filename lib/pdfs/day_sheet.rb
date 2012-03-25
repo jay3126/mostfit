@@ -188,13 +188,14 @@ module Pdf
 
       pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
       pdf.select_font "Times-Roman"
-      pdf.text "Daily Disbursement Sheet for #{self.name} for #{date}", :font_size => 24, :justification => :center
+      pdf.image "#{Merb.root}/public/images/moral_logo_cds.png", :justification => :left
+      pdf.text "Daily Disbursement Sheet for #{self.name} for #{date}", :font_size => 14, :justification => :center
       pdf.text("\n")
       return nil if centers.empty?   
       days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
-        pdf.text "Center: #{center.name}, Manager: #{self.name}, signature: ______________________", :font_size => 12, :justification => :left
+        pdf.text "Branch: #{center.branch.name}, Center: #{center.name}, Manager: #{self.name}, signature: ______________________", :font_size => 12, :justification => :left
         pdf.text("Center leader: #{center.leader.client.name}, signature: ______________________", :font_size => 12, :justification => :left) if center.leader
         pdf.text("Date: #{date}, Time: #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}", :font_size => 12, :justification => :left)
         pdf.text("Actual Disbursement on ___________________________, signature: ______________________", :font_size => 12, :justification => :left)
@@ -235,7 +236,10 @@ module Pdf
           pdf.text "Disbursements today"
           pdf.text("\n")
           table.render_on(pdf)
-        end        
+        end
+        pdf.text "_______________________________________________________________________________________________________", :justification => :center
+        pdf.text("\n")
+        pdf.text "Address : Royal Arcade 565-Ka-94/2, Sneh Nagar, Alambagh, Lucknow(U.P) - 226005", :font_size => 11, :justification => :center
       } #centers end
       pdf.save_as(filename)
       return pdf
