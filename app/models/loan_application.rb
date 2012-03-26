@@ -5,7 +5,7 @@ class LoanApplication
   include Constants::Space
 
   property :id,                  Serial
-  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :status,              Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
   property :at_branch_id,        Integer, :nullable => false
   property :at_center_id,        Integer, :nullable => false
   property :created_by_staff_id, Integer, :nullable => false
@@ -290,7 +290,7 @@ end
 #In-memory class for storing a LoanApplication's total information to be passed around 
 class LoanApplicationInfo
     include Comparable
-    attr_reader :loan_application_id, :applicant 
+    attr_reader :loan_application_id, :applicant
     attr_reader :cpv1 
     attr_reader :cpv2
     
