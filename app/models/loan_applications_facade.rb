@@ -84,6 +84,7 @@ class LoanApplicationsFacade
   end
 
   def pending_authorization(search_options = {})
+    LoanApplication.pending_authorization(search_options)
   end
 
   def pending_CPV(search_options = {})

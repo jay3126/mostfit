@@ -100,6 +100,12 @@ class LoanApplication
     all(predicates).select {| l |l.is_pending_verification?}    
   end
 
+  # Returns all loan applications pending authorization
+  # Has placeholder code for now
+  def self.pending_authorization(search_options = {})
+    all.collect {|lap| lap.to_info}
+  end
+
   #returns all loan applications for which CPV was recently recorded
   def self.recently_recorded_by_user(by_user_id)
     raise ArgumentError, "User id not supplied" unless by_user_id
