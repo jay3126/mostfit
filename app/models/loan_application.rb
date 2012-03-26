@@ -33,6 +33,7 @@ class LoanApplication
   belongs_to :client
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
   belongs_to :center_cycle
+  belongs_to :loan_file, :nullable => true
 
   validates_with_method :created_on, :method => :is_date_within_range?
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
