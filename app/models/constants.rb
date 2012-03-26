@@ -7,8 +7,24 @@ module Constants
     CREATED_STATUS = :created; SENT_STATUS = :sent
     REQUEST_STATUSES = [CREATED_STATUS, SENT_STATUS, :response_received]
 
-    NEW_STATUS = :new; APPROVED_STATUS = :approved
-    APPLICATION_STATUSES = [NEW_STATUS, :pending_overlap_report, :overlap_report_cleared, :overlap_report_rejected, APPROVED_STATUS, :rejected, :on_hold]
+    NEW_STATUS = "new";
+    SUSPECTED_DUPLICATE_STATUS = "suspected_duplicate"; NOT_DUPLICATE_STATUS = "not_duplicate"
+    CONFIRMED_DUPLICATE_STATUS = "confirmed_duplicate"; CLEARED_NOT_DUPLICATE_STATUS = "cleared_not_duplicate"
+    OVERLAP_REPORT_REQUEST_GENERATED_STATUS = "overlap_report_request_generated"; OVERLAP_REPORT_RESPONSE_MARKED_STATUS = "overlap_report_response_marked"
+    AUTHORIZED_APPROVED_STATUS = "authorized_approved"; AUTHORIZED_REJECTED_STATUS = "authorized_rejected"
+    AUTHORIZED_APPROVED_OVERRIDE_STATUS = "authorized_approved_override"; AUTHORIZED_REJECTED_OVERRIDE_STATUS = "authorized_rejected_override"
+    CPV1_APPROVED_STATUS = "cpv1_approved"; CPV1_REJECTED_STATUS = "cpv1_rejected"; CPV2_APPROVED_STATUS = "cpv2_approved"; CPV2_REJECTED_STATUS = "cpv2_rejected"
+    LOAN_FILE_GENERATED_STATUS = "loan_file_generated"
+
+    CREATION_STATUSES = [NEW_STATUS]
+    DEDUPE_STATUSES = [SUSPECTED_DUPLICATE_STATUS, NOT_DUPLICATE_STATUS, CONFIRMED_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
+    OVERLAP_REPORT_STATUSES = [OVERLAP_REPORT_REQUEST_GENERATED_STATUS, OVERLAP_REPORT_RESPONSE_MARKED_STATUS]
+    AUTHORIZATION_STATUSES = [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, AUTHORIZED_REJECTED_STATUS, AUTHORIZED_REJECTED_OVERRIDE_STATUS]
+    CPV_STATUSES = [CPV1_APPROVED_STATUS, CPV1_REJECTED_STATUS, CPV2_APPROVED_STATUS, CPV2_REJECTED_STATUS]
+    LOAN_FILE_GENERATION_STATUSES = [LOAN_FILE_GENERATED_STATUS]
+
+    LOAN_APPLICATION_STATUSES = 
+      (CREATION_STATUSES + DEDUPE_STATUSES + OVERLAP_REPORT_STATUSES + AUTHORIZATION_STATUSES + CPV_STATUSES + LOAN_FILE_GENERATION_STATUSES).flatten
 
     LOAN_OUTSTANDING_STATUS = :outstanding
     LOAN_STATUSES = [LOAN_OUTSTANDING_STATUS]
@@ -41,42 +57,42 @@ module Constants
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
     LOAN_AMOUNTS = [10000, 12000, 15000]
     STATES = [
-              "andhra_pradesh"     ,
-              "arunachal_pradesh"  ,
-              "assam"              ,
-              "bihar"              ,
-              "chattisgarh"        ,
-              "goa"                ,
-              "gujarat"            ,
-              "haryana"            ,
-              "himachal_pradesh"   ,
-              "jammu_kashmir"      ,
-              "jharkhand"          ,
-              "karnataka"          ,
-              "kerala"             ,
-              "madhya_pradesh"     ,
-              "maharashtra"        ,
-              "manipur"            ,
-              "meghalaya"          ,
-              "mizoram"            ,
-              "nagaland"           ,
-              "orissa"             ,
-              "punjab"             ,
-              "rajasthan"          ,
-              "sikkim"             ,
-              "tamil_nadu"         ,
-              "tripura"            ,
-              "uttarakhand"        ,
-              "uttar_pradesh"      ,
-              "west_bengal"        ,
-              "andaman_nicobar"    ,
-              "chandigarh"         ,
-              "dadra_nagar_haveli" ,
-              "daman_diu"          ,
-              "delhi"              ,
-              "lakshadweep"        ,
-              "pondicherry"
-             ]
+      "andhra_pradesh"     ,
+      "arunachal_pradesh"  ,
+      "assam"              ,
+      "bihar"              ,
+      "chattisgarh"        ,
+      "goa"                ,
+      "gujarat"            ,
+      "haryana"            ,
+      "himachal_pradesh"   ,
+      "jammu_kashmir"      ,
+      "jharkhand"          ,
+      "karnataka"          ,
+      "kerala"             ,
+      "madhya_pradesh"     ,
+      "maharashtra"        ,
+      "manipur"            ,
+      "meghalaya"          ,
+      "mizoram"            ,
+      "nagaland"           ,
+      "orissa"             ,
+      "punjab"             ,
+      "rajasthan"          ,
+      "sikkim"             ,
+      "tamil_nadu"         ,
+      "tripura"            ,
+      "uttarakhand"        ,
+      "uttar_pradesh"      ,
+      "west_bengal"        ,
+      "andaman_nicobar"    ,
+      "chandigarh"         ,
+      "dadra_nagar_haveli" ,
+      "daman_diu"          ,
+      "delhi"              ,
+      "lakshadweep"        ,
+      "pondicherry"
+    ]
   end
 
   module Verification

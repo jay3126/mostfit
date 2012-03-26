@@ -5,7 +5,7 @@ class LoanApplication
   include Constants::Space
 
   property :id,                  Serial
-  property :status,              Enum.send('[]', *APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :status,              Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
   property :at_branch_id,        Integer, :nullable => false
   property :at_center_id,        Integer, :nullable => false
   property :created_by_staff_id, Integer, :nullable => false
@@ -40,8 +40,10 @@ class LoanApplication
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def is_unique_for_center_cycle?
-    client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
-    return [false, "A loan application for this client #{client_id} already exists for the current loan cycle"] if client_ids.include?(client_id)
+    unless client_id.nil?
+      client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
+      return [false, "A loan application for this client #{client_id} already exists for the current loan cycle"] if client_ids.include?(client_id)
+    end
     return true
   end
 

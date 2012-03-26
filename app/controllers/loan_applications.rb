@@ -1,6 +1,13 @@
 class LoanApplications < Application
   # provides :xml, :yaml, :js
 
+  def index
+    @errors = {}
+    @loan_applications = LoanApplication.all(:order => [:created_at.desc])
+    display @loan_applications
+  end
+
+  # this controller is responsible for the bulk addition of clients to loan applications
   def bulk_new
     if request.method == :post
       @errors = {}
@@ -41,6 +48,7 @@ class LoanApplications < Application
     end
   end
 
+  # this lists the clients in the center that has been selected
   def list
     if params[:branch_id] == ""
       @errors = "Please select a branch"  
@@ -62,10 +70,31 @@ class LoanApplications < Application
     render :bulk_new
   end
 
-  def index
-    @errors = {}
-    @loan_applications = LoanApplication.all(:order => [:created_at.desc])
-    display @loan_applications
+  # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
+  def bulk_create
+    if request.method == :post
+      @loan_applications = []
+      loan_application = params[:loan_application]
+      client_dob = Date.parse(params[:client_dob])
+      created_on = Date.parse(params[:created_on])
+      center_cycle_number = params[:center_cycle_number].to_i
+      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+      @loan_application = LoanApplication.new(loan_application)
+      @loan_application.client_dob = client_dob
+      @loan_application.created_on = created_on || Date.today
+      @loan_application.created_by_user_id = session.user.id
+      @loan_application.center_cycle_id = center_cycle.id
+      if @loan_application.save
+        @loan_applications << @loan_application
+        message[:success] = "The Loan Application has been successfully saved"        
+      else
+        @errors = @loan_application.errors
+      end
+    else
+      @branch = Branch.get(params["branch_id"])
+      @center = Center.get(params["center_id"])      
+    end
+    render
   end
 
 end # LoanApplications
