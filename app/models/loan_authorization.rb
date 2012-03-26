@@ -18,17 +18,17 @@ end
 class LoanAuthorization
   include DataMapper::Resource
   include Constants::Status
-  
+
   property :id,              Serial
   property :status,          Enum.send('[]', *APPLICATION_AUTHORIZATION_STATUSES), :nullable => false
   property :by_staff_id,     Integer, :nullable => false
-  property :override_reason, Enum.send('[]', *LOAN_AUTHORIZATION_OVERRIDE_REASONS), :nullable => true
+  property :override_reason, Enum.send('[]', *LOAN_AUTHORIZATION_OVERRIDE_REASONS), :nullable => false, :default => REASON_FOR_NO_OVERRIDES
   property :performed_on,    Date, :nullable => false
   property :created_by,      Integer, :nullable => false
   property :created_at,      DateTime, :nullable => false, :default => DateTime.now
 
   belongs_to :loan_application
-  
+
   def to_info
     LoanApplicationInfo.new(self.loan_application_id, self.status, self.by_staff_id, self.performed_on, self.created_by, self.created_at, self.override_reason)
   end
@@ -38,19 +38,10 @@ class LoanAuthorization
   # No override reason needed if not overridden
   # Override reason is a must when overridden
   def override_includes_reason?
-    not_override_no_reason = ((APPLICATION_AUTHORIZATION_NOT_OVERRIDES.include?(self.status)) and (self.override_reason.nil?))
-    if not_override_no_reason
-      return [false, "No override reason accepted when authorization (#{self.status}) is not an override"]
-    else
-      return true
-    end
+    return true if APPLICATION_AUTHORIZATION_NOT_OVERRIDES.include?(self.status)
 
-    override_with_reason = ((APPLICATION_AUTHORIZATION_OVERRIDES.include?(self.status)) and self.override_reason)
-    if override_with_reason
-      return [false, "Override reason is a must when authorization (#{self.status}) is an override"]
-    else
-      return true
-    end
+    override_with_reason = ((APPLICATION_AUTHORIZATION_OVERRIDES.include?(self.status)) and (self.override_reason and self.override_reason != REASON_FOR_NO_OVERRIDES))
+    override_with_reason ? true : [false, "Override reason is a must when authorization (#{self.status}) is an override"]
   end
 
   # Record authorization on loan application
@@ -62,7 +53,8 @@ class LoanAuthorization
     query_params[:performed_on] = on_date
     query_params[:created_by] = by_user
     query_params[:override_reason] = with_override_reason if with_override_reason
-    create(query_params)
+    auth = create(query_params)
+    auth
   end
 
   # Finds the authorization for a loan application, given the loan application id

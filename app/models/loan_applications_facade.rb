@@ -42,15 +42,19 @@ class LoanApplicationsFacade
   # Loan authorization
 
   def authorize_approve(loan_application_id, by_staff, on_date)
+    LoanAuthorization.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, @user.id)
   end
 
   def authorize_approve_override(loan_application_id, by_staff, on_date, override_reason)
+    LoanAuthorization.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_APPROVED, by_staff, on_date, @user.id, override_reason)
   end
 
-  def authorize_reject(loan_application_id, by_staff, on_date)
+  def authorize_reject(loan_application_id,by_staff, on_date)
+    LoanAuthorization.record_authorization(loan_application_id, Constants::Status::APPLICATION_REJECTED, by_staff, on_date, @user.id)
   end
 
   def authorize_reject_override(loan_application_id, by_staff, on_date, override_reason)
+    LoanAuthorization.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_REJECTED, by_staff, on_date, @user.id, override_reason)
   end
 
   # CPVs
@@ -110,6 +114,10 @@ class LoanApplicationsFacade
   end
 
   def completed_credit_bureau_rating(search_options = {})
+  end
+
+  def completed_authorization(search_options = {})
+    LoanApplication.completed_authorization(search_options)
   end
 
 end

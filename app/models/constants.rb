@@ -21,7 +21,10 @@ module Constants
     APPLICATION_AUTHORIZATION_NOT_OVERRIDES = [APPLICATION_APPROVED, APPLICATION_REJECTED]
     APPLICATION_AUTHORIZATION_OVERRIDES = [APPLICATION_OVERRIDE_APPROVED, APPLICATION_OVERRIDE_REJECTED]
 
-    LOAN_AUTHORIZATION_OVERRIDE_REASONS = ['Hare Rama', 'Hare Krishna']
+    REASON_FOR_NO_OVERRIDES = 'not_overriden'
+    REASON_1 = 'reason_one'
+    REASON_2 = 'reason_two'
+    LOAN_AUTHORIZATION_OVERRIDE_REASONS = [REASON_FOR_NO_OVERRIDES, REASON_1, REASON_2]
   end
 
   module Space
@@ -29,57 +32,55 @@ module Constants
     OPEN_CENTER_CYCLE_STATUS = 'open_center_cycle_status'; CLOSED_CENTER_CYCLE_STATUS = 'closed_center_cycle_status'
     CENTER_CYCLE_STATUSES = [ OPEN_CENTER_CYCLE_STATUS, CLOSED_CENTER_CYCLE_STATUS ]
     MINIMUM_CENTER_CYCLE_NUMBER = 1
-    
+
   end
 
   module Masters
-    PERMISSIBLE_ACTIVE_LOANS = 1
-    PERMISSIBLE_TOTAL_OUTSTANDING = 50000
     REFERENCE_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
     REFERENCE_TYPES_ID_PROOF = ["Passport", "Voter ID", "UID", "Others", "Driving Licence No", "Pan"]
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
     LOAN_AMOUNTS = [10000, 12000, 15000]
     STATES = [
-              "andhra_pradesh"     , 
-              "arunachal_pradesh"  , 
-              "assam"              , 
-              "bihar"              , 
-              "chattisgarh"        , 
-              "goa"                , 
-              "gujarat"            , 
-              "haryana"            , 
-              "himachal_pradesh"   , 
-              "jammu_kashmir"      , 
-              "jharkhand"          , 
-              "karnataka"          , 
-              "kerala"             , 
-              "madhya_pradesh"     , 
-              "maharashtra"        , 
-              "manipur"            , 
-              "meghalaya"          , 
-              "mizoram"            , 
-              "nagaland"           , 
-              "orissa"             , 
-              "punjab"             , 
-              "rajasthan"          , 
-              "sikkim"             , 
-              "tamil_nadu"         , 
-              "tripura"            , 
-              "uttarakhand"        , 
-              "uttar_pradesh"      , 
-              "west_bengal"        , 
-              "andaman_nicobar"    , 
-              "chandigarh"         , 
-              "dadra_nagar_haveli" , 
-              "daman_diu"          , 
-              "delhi"              , 
-              "lakshadweep"        , 
-              "pondicherry"                  
+              "andhra_pradesh"     ,
+              "arunachal_pradesh"  ,
+              "assam"              ,
+              "bihar"              ,
+              "chattisgarh"        ,
+              "goa"                ,
+              "gujarat"            ,
+              "haryana"            ,
+              "himachal_pradesh"   ,
+              "jammu_kashmir"      ,
+              "jharkhand"          ,
+              "karnataka"          ,
+              "kerala"             ,
+              "madhya_pradesh"     ,
+              "maharashtra"        ,
+              "manipur"            ,
+              "meghalaya"          ,
+              "mizoram"            ,
+              "nagaland"           ,
+              "orissa"             ,
+              "punjab"             ,
+              "rajasthan"          ,
+              "sikkim"             ,
+              "tamil_nadu"         ,
+              "tripura"            ,
+              "uttarakhand"        ,
+              "uttar_pradesh"      ,
+              "west_bengal"        ,
+              "andaman_nicobar"    ,
+              "chandigarh"         ,
+              "dadra_nagar_haveli" ,
+              "daman_diu"          ,
+              "delhi"              ,
+              "lakshadweep"        ,
+              "pondicherry"
              ]
   end
 
   module Verification
-    
+
     CPV1 = 'cpv1'; CPV2 = 'cpv2'
     CLIENT_VERIFICATION_TYPES = [CPV1, CPV2]
 

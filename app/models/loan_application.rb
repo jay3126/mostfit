@@ -29,6 +29,7 @@ class LoanApplication
   property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :nullable => true
 
   has n, :client_verifications
+  has 1, :loan_authorization
   
   belongs_to :client
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
@@ -106,6 +107,14 @@ class LoanApplication
     all.collect {|lap| lap.to_info}
   end
 
+  def self.completed_authorization(search_options = {})
+    loan_applications = all(search_options)
+    applications_completed_authorization = loan_applications.select { |lap|
+      lap.loan_authorization
+    }
+    applications_completed_authorization.collect {|lap| lap.to_info}
+  end
+
   #returns all loan applications for which CPV was recently recorded
   def self.recently_recorded_by_user(by_user_id)
     raise ArgumentError, "User id not supplied" unless by_user_id
@@ -136,6 +145,8 @@ class LoanApplication
     linfo = LoanApplicationInfo.new(
       self.id,
       self.client_name,
+      self.client_dob,
+      self.client_address,
       cpvs_infos['cpv1'],
       cpvs_infos['cpv2'])
     puts linfo
@@ -290,13 +301,15 @@ end
 #In-memory class for storing a LoanApplication's total information to be passed around 
 class LoanApplicationInfo
     include Comparable
-    attr_reader :loan_application_id, :applicant 
+    attr_reader :loan_application_id, :client_name, :client_dob, :client_address
     attr_reader :cpv1 
     attr_reader :cpv2
     
-    def initialize(loan_application_id, applicant, cpv1=nil, cpv2=nil)
+    def initialize(loan_application_id, client_name, client_dob, client_address, cpv1=nil, cpv2=nil)
       @loan_application_id = loan_application_id
-      @applicant = applicant
+      @client_name = client_name
+      @client_dob = client_dob
+      @client_address = client_address
       @cpv1 = cpv1
       @cpv2 = cpv2
     end
