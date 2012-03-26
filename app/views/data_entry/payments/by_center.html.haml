@@ -199,8 +199,6 @@
           
           
     %div.tab
-      %h1 Insurance Premia
-    %div.tab
       %h1 Loan Utilization Check
       - if @loans_to_utilize.size > 0
         = form_for(@loan, :action => url(:enter_loans, 'make_loan_utilization', :return => resource(@branch, @center)), :class => "_disable_button_") do
