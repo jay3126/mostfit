@@ -75,7 +75,7 @@ class LoanApplications < Application
     if request.method == :post
       @loan_applications = []
       loan_application = params[:loan_application]
-      client_dob = Date.parse(params[:client_dob])
+      client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
       created_on = Date.parse(params[:created_on])
       center_cycle_number = params[:center_cycle_number].to_i
       center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)

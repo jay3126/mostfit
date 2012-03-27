@@ -21,7 +21,7 @@
       %td
         = text_field :name => "loan_application[client_guarantor_name]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_name]))
       %td
-        = select :name => "loan_application[client_guarantor_relationship]", :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_relationship]))
+        = select :name => "loan_application[client_guarantor_relationship]", :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_relationship])), :prompt => 'Select'
       %td
         = date_select :client_dob, (@errors.nil? ? nil : params[:client_dob]), :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
       %td
@@ -31,7 +31,7 @@
         = text_field :name => "loan_application[client_reference2]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference2]))
         = hidden_field :name => "loan_application[client_reference2_type]", :value => "Voter ID"
       %td
-        = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:clients] and params[:loan_application][:amount]))
+        = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:clients] and params[:loan_application][:amount])), :prompt => 'Select'
       %td
         = text_field :name =>"loan_application[client_address]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_address]))
       %td
@@ -41,8 +41,8 @@
         = hidden_field :center_id, :value => @center.nil? ? params[:center_id] : @center.id
         = hidden_field :branch_id, :value => @branch.nil? ? params[:branch_id] : @branch.id
         = hidden_field :center_cycle_number, :value => center_cycle_number
-        = hidden_field :name => "loan_application[at_center_id]", :value => @center.nil? ? params[:loan_application][:at_center_id] : @center.id
-        = hidden_field :name => "loan_application[at_branch_id]", :value => @branch.nil? ? params[:loan_application][:at_branch_id] : @branch.id
+        = hidden_field :name => "loan_application[at_center_id]", :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
+        = hidden_field :name => "loan_application[at_branch_id]", :value => @branch.nil? ? (params[:loan_application] and params[:loan_application][:at_branch_id]) : @branch.id
   %tfoot
     %tr
       %td{:colspan => 3}

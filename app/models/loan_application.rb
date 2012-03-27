@@ -42,22 +42,22 @@ class LoanApplication
   property :created_by_staff_id, Integer, :nullable => false
   property :created_by_user_id,  Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
-  property :created_on,          Date
-  property :amount,              Float
+  property :created_on,          Date,     :nullable => false
+  property :amount,              Float,    :nullable => false
 
   #basic client info
-  property :client_id,           Integer, :nullable => true
-  property :client_name,         String
-  property :client_dob,          Date
-  property :client_address,      Text
-  property :client_state,        Enum.send('[]', *STATES), :nullable => true
-  property :client_pincode,      Integer
-  property :client_reference1,   String
+  property :client_id,           Integer,  :nullable => true
+  property :client_name,         String,   :nullable => false
+  property :client_dob,          Date,     :nullable => false
+  property :client_address,      Text,     :nullable => false
+  property :client_state,        Enum.send('[]', *STATES)
+  property :client_pincode,      Integer,  :nullable => false
+  property :client_reference1,   String,   :nullable => false
   property :client_reference1_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
-  property :client_reference2,   String
+  property :client_reference2,   String,   :nullable => false
   property :client_reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
-  property :client_guarantor_name, String
-  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :nullable => true
+  property :client_guarantor_name, String, :nullable => false
+  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS)
 
   belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
