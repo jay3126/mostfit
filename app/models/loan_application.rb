@@ -3,13 +3,15 @@ class LoanApplicationInfo
   include Comparable
   attr_reader :loan_application_id, :client_name, :client_dob, :client_address
   attr_reader :amount, :status
+  attr_reader :authorization_info
   attr_reader :cpv1
   attr_reader :cpv2
 
-  def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, cpv1 = nil, cpv2 = nil)
+  def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
     @loan_application_id = loan_application_id
     @client_name = client_name; @client_dob = client_dob; @client_address = client_address
     @amount = amount; @status = status
+    @authorization_info = authorization_info if authorization_info
     @cpv1 = cpv1 if cpv1
     @cpv2 = cpv2 if cpv2
   end
@@ -97,7 +99,6 @@ class LoanApplication
         loan_file_addition = LoanFileAddition.add_to_loan_file(lap_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
         if loan_file_addition
           loan_application.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS)
-          debugger
           status_saved = loan_application.save
           lap_ids_statuses[lap_id] = status_saved
         end
@@ -131,6 +132,19 @@ class LoanApplication
   # Returns the status of loan application
   def get_status
     self.status
+  end
+
+  def self.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason = nil)
+    status_updated = false
+    loan_application = get(on_loan_application)
+    auth = LoanAuthorization.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason)
+    was_saved = (not (auth.id.nil?))
+    application_status = AUTHORIZATION_AND_APPLICATION_STATUSES[as_status]
+    if was_saved
+      loan_application.set_status(application_status)
+      status_updated = loan_application.save
+    end
+    status_updated
   end
 
   # Sets the status
@@ -168,12 +182,13 @@ class LoanApplication
   end
 
   def is_pending_authorization?
-    LoanAuthorization.get_authorization(self.id).nil?
+    self.loan_authorization.nil?
   end
 
   # Returns all loan applications pending authorization
   def self.pending_authorization(search_options = {})
-    all(search_options).collect {|lap| lap.to_info}
+    pending = all(search_options).select {|lap| lap.is_pending_authorization?}
+    pending.collect {|lap| lap.to_info}
   end
 
   def self.completed_authorization(search_options = {})
@@ -182,6 +197,20 @@ class LoanApplication
       lap.loan_authorization
     }
     applications_completed_authorization.collect {|lap| lap.to_info}
+  end
+
+  # Is pending loan file generation
+  def is_pending_loan_file_generation?
+    not (self.loan_files and not (self.loan_files.empty?))
+  end
+
+  # All loan applications pending loan file generation
+  def self.pending_loan_file_generation(search_options = {})
+    loan_applications = all(search_options)
+    applications_pending_loan_file_generation = loan_applications.select { |lap|
+      lap.is_pending_loan_file_generation?
+    }
+    applications_pending_loan_file_generation.collect {|lap| lap.to_info}
   end
 
   #returns all loan applications for which CPV was recently recorded
@@ -209,6 +238,7 @@ class LoanApplication
 
   #returns an object containing all information about a Loan Application
   def to_info
+    authorization_info = self.loan_authorization ? self.loan_authorization.to_info : nil
     cpvs_infos = ClientVerification.get_CPVs_infos(self.id)
     linfo = LoanApplicationInfo.new(
       self.id,
@@ -217,9 +247,9 @@ class LoanApplication
       self.client_address,
       self.amount,
       self.get_status,
+      authorization_info,
       cpvs_infos['cpv1'],
       cpvs_infos['cpv2'])
-    puts linfo
     linfo
   end
 

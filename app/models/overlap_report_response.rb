@@ -42,7 +42,7 @@ class OverlapReportResponse
 
   # to_be replaced
   def status
-    "to_be_replaced"
+    rate_report
   end
 
   # Returns the loan amount applied for on the loan application that this overlap report response was received for
