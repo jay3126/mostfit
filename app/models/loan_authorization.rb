@@ -3,7 +3,7 @@ class LoanAuthorizationInfo
 
   attr_reader :loan_application_id, :status, :performed_by_staff_id, :performed_on, :created_by_user_id, :created_at, :override_reason
 
-  def initialize(loan_application_id, status, performed_by_staff_id, performed_on, created_by_user_id, created_at, override_reason = nil)
+    def initialize(loan_application_id, status, performed_by_staff_id, performed_on, created_by_user_id, created_at, override_reason = nil)
     @loan_application_id = loan_application_id
     @status = status
     @performed_by_staff_id = performed_by_staff_id
@@ -30,7 +30,7 @@ class LoanAuthorization
   belongs_to :loan_application
 
   def to_info
-    LoanApplicationInfo.new(self.loan_application_id, self.status, self.by_staff_id, self.performed_on, self.created_by, self.created_at, self.override_reason)
+    LoanAuthorizationInfo.new(self.loan_application_id, self.status, self.by_staff_id, self.performed_on, self.created_by, self.created_at, self.override_reason)
   end
 
   validates_with_method :override_includes_reason?
