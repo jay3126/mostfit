@@ -1,6 +1,14 @@
 module Constants
   # All constants for use in the application should be namespaces under further modules under this module
 
+  module CenterFormation
+
+    GRT_NOT_DONE = 'grt_not_done'; GRT_PASSED = 'grt_passed'; GRT_FAILED = 'grt_failed'
+    GRT_STATUSES = [GRT_NOT_DONE, GRT_PASSED, GRT_FAILED]
+    GRT_COMPLETION_STATUSES = [GRT_PASSED, GRT_FAILED]
+    
+  end
+
   module Status
     #All constants that are related to statuses, handle with care
 

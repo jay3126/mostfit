@@ -1,31 +1,31 @@
 #In-memory class for storing a LoanApplication's total information to be passed around
 class LoanApplicationInfo
-    include Comparable
-    attr_reader :loan_application_id, :client_name, :client_dob, :client_address
-    attr_reader :amount, :status
-    attr_reader :cpv1
-    attr_reader :cpv2
+  include Comparable
+  attr_reader :loan_application_id, :client_name, :client_dob, :client_address
+  attr_reader :amount, :status
+  attr_reader :cpv1
+  attr_reader :cpv2
 
-    def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, cpv1=nil, cpv2=nil)
-      @loan_application_id = loan_application_id
-      @client_name = client_name; @client_dob = client_dob; @client_address = client_address
-      @amount = amount; @status = status
-      @cpv1 = cpv1
-      @cpv2 = cpv2
-    end
+  def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, cpv1 = nil, cpv2 = nil)
+    @loan_application_id = loan_application_id
+    @client_name = client_name; @client_dob = client_dob; @client_address = client_address
+    @amount = amount; @status = status
+    @cpv1 = cpv1 if cpv1
+    @cpv2 = cpv2 if cpv2
+  end
 
-    #sort based on cpv recording date in the order of most-recent-first
-    def <=>(other)
-      return nil unless other.is_a?(LoanApplicationInfo)
-      cpv_self = self.cpv2 || self.cpv1
-      self_latest_cpv_at = cpv_self ? cpv_self.created_at : nil
+  #sort based on cpv recording date in the order of most-recent-first
+  def <=>(other)
+    return nil unless other.is_a?(LoanApplicationInfo)
+    cpv_self = self.cpv2 || self.cpv1
+    self_latest_cpv_at = cpv_self ? cpv_self.created_at : nil
 
-      cpv_other = other.cpv2 || other.cpv1
-      other_latest_cpv_at = cpv_other ? cpv_other.created_at : nil
+    cpv_other = other.cpv2 || other.cpv1
+    other_latest_cpv_at = cpv_other ? cpv_other.created_at : nil
 
-      return nil unless (self_latest_cpv_at and other_latest_cpv_at)
-      self_latest_cpv_at <=> other_latest_cpv_at
-    end
+    return nil unless (self_latest_cpv_at and other_latest_cpv_at)
+    self_latest_cpv_at <=> other_latest_cpv_at
+  end
 end
 
 class LoanApplication
@@ -120,14 +120,9 @@ class LoanApplication
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_verification(at_branch_id = nil, at_center_id = nil)
     predicates = {}
-    if (at_branch_id and !at_branch_id.nil?)
-      predicates[:at_branch_id] = at_branch_id
-    end
-    if (at_center_id and !at_center_id.nil?)
-      predicates[:at_center_id] = at_center_id
-    end
-
-    all(predicates).select {| l |l.is_pending_verification?}
+    predicates[:at_branch_id] = at_branch_id if at_branch_id
+    predicates[:at_center_id] = at_center_id if at_center_id
+    all(predicates).select {|lap| lap.is_pending_verification?}
   end
 
   def is_pending_authorization?
@@ -136,7 +131,7 @@ class LoanApplication
 
   # Returns all loan applications pending authorization
   def self.pending_authorization(search_options = {})
-    all.collect {|lap| lap.to_info}
+    all(search_options).collect {|lap| lap.to_info}
   end
 
   def self.completed_authorization(search_options = {})
@@ -157,15 +152,15 @@ class LoanApplication
     #get corresponding loan applications
     loan_applications_which_have_CPVs_by_this_user = []
     verifications_by_this_user.each do |v|
-        loan_applications_which_have_CPVs_by_this_user.push(LoanApplication.get(v.loan_application_id))
+      loan_applications_which_have_CPVs_by_this_user.push(LoanApplication.get(v.loan_application_id))
     end
     loan_applications_which_have_CPVs_by_this_user.uniq!
 
     #get all loan application info objects
     linfos = []
     loan_applications_which_have_CPVs_by_this_user.each do |l|
-        puts "Processing #{l}"
-        linfos.push(l.to_info)
+      puts "Processing #{l}"
+      linfos.push(l.to_info)
     end
     linfos
   end
@@ -189,61 +184,61 @@ class LoanApplication
   # creates a row for a loan as per highmarks pipe delimited format 
   def row_to_delimited_file(datetime = DateTime.now)
     return [
-            "CRDRQINQR",                                                             # segment identifier
-            "JOIN",                                                                  # credit request type
-            nil,                                                                     # credit report transaction id
-            "ACCT-ORIG",                                                             # credit inquiry purpose type
-            nil,                                                                     # credit inquiry purpose type description
-            "PRE-DISB",                                                              # credit inquiry stage
-            datetime.strftime("%d-%m-%Y %H:%M:%S"),                                  # credit report transaction date time 
-            client_name,                                                             # applicant name 1
-            nil,                                                                     # applicant name 2
-            nil,                                                                     # applicant name 3 
-            nil,                                                                     # applicant name 4
-            nil,                                                                     # applicant name 5 
-            nil,  # member father name
-            nil,                                                                     # member mother name 
-            client_guarantor_name, # member spouse name  
-            nil,                                                                     # member relationship type 1 
-            nil,                                                                     # member relationship name 1
-            nil,                                                                     # member relationship type 2
-            nil,                                                                     # member relationship name 2
-            nil,                                                                     # member relationship type 3
-            nil,                                                                     # member relationship name 3
-            nil,                                                                     # member relationship type 4
-            nil,                                                                     # member relationship name 4
-            client_dob.strftime("%d-%m-%Y"),                                         # applicant date of birth
-            client_age,                                                              # applicant age
-            Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
-            client_reference2.blank? ? nil : id_type[client_reference2_type],        # applicant id type 1
-            client_reference2.blank? ? nil : client_reference2,                      # applicant id 1
-            client_reference1.blank? ? nil : "ID05",                                 # applicant id type 2
-            client_reference1.blank? ? nil : client_reference1,                      # applicant id 2
-            created_on.strftime("%d-%m-%Y"),                                         # account opening date
-            id,                                                                      # account id / number
-            at_branch_id,                                                            # branch id
-            id,                                                                      # member id
-            at_center_id,                                                            # kendra id
-            amount,                                                                  # applied for amount / current balance
-            client_guarantor_name,                                                   # key person name
-            client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_s.downcase.to_sym], # key person relationship
-            nil,                                                                     # nominee name
-            nil,                                                                     # nominee relationship
-            nil, #client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
-            nil, #client.telephone_number,                                           # applicant telephone number number 1
-            nil,                                                                     # applicant telephone number type 2
-            nil,                                                                     # applicant telephone number number 2
-            "D01",                                                                   # applicant address type 1
-            client_address,                                                          # applicant address 1
-            Branch.get(at_branch_id).name,                                               # applicant address 1 city
-            states[(client_state).to_sym],                                # applicant address 1 state
-            client_pincode,                                                          # applicant address 1 pincode
-            nil,                                                                     # applicant address type 2
-            nil,                                                                     # applicant address 2
-            nil,                                                                     # applicant address 2 city
-            nil,                                                                     # applicant address 2 state
-            nil                                                                      # applicant address 2 pincode
-           ]
+      "CRDRQINQR",                                                             # segment identifier
+      "JOIN",                                                                  # credit request type
+      nil,                                                                     # credit report transaction id
+      "ACCT-ORIG",                                                             # credit inquiry purpose type
+      nil,                                                                     # credit inquiry purpose type description
+      "PRE-DISB",                                                              # credit inquiry stage
+      datetime.strftime("%d-%m-%Y %H:%M:%S"),                                  # credit report transaction date time
+      client_name,                                                             # applicant name 1
+      nil,                                                                     # applicant name 2
+      nil,                                                                     # applicant name 3
+      nil,                                                                     # applicant name 4
+      nil,                                                                     # applicant name 5
+      nil,  # member father name
+      nil,                                                                     # member mother name
+      client_guarantor_name, # member spouse name
+      nil,                                                                     # member relationship type 1
+      nil,                                                                     # member relationship name 1
+      nil,                                                                     # member relationship type 2
+      nil,                                                                     # member relationship name 2
+      nil,                                                                     # member relationship type 3
+      nil,                                                                     # member relationship name 3
+      nil,                                                                     # member relationship type 4
+      nil,                                                                     # member relationship name 4
+      client_dob.strftime("%d-%m-%Y"),                                         # applicant date of birth
+      client_age,                                                              # applicant age
+      Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
+      client_reference2.blank? ? nil : id_type[client_reference2_type],        # applicant id type 1
+      client_reference2.blank? ? nil : client_reference2,                      # applicant id 1
+      client_reference1.blank? ? nil : "ID05",                                 # applicant id type 2
+      client_reference1.blank? ? nil : client_reference1,                      # applicant id 2
+      created_on.strftime("%d-%m-%Y"),                                         # account opening date
+      id,                                                                      # account id / number
+      at_branch_id,                                                            # branch id
+      id,                                                                      # member id
+      at_center_id,                                                            # kendra id
+      amount,                                                                  # applied for amount / current balance
+      client_guarantor_name,                                                   # key person name
+      client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_s.downcase.to_sym], # key person relationship
+      nil,                                                                     # nominee name
+      nil,                                                                     # nominee relationship
+      nil, #client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
+      nil, #client.telephone_number,                                           # applicant telephone number number 1
+      nil,                                                                     # applicant telephone number type 2
+      nil,                                                                     # applicant telephone number number 2
+      "D01",                                                                   # applicant address type 1
+      client_address,                                                          # applicant address 1
+      Branch.get(at_branch_id).name,                                               # applicant address 1 city
+      states[(client_state).to_sym],                                # applicant address 1 state
+      client_pincode,                                                          # applicant address 1 pincode
+      nil,                                                                     # applicant address type 2
+      nil,                                                                     # applicant address 2
+      nil,                                                                     # applicant address 2 city
+      nil,                                                                     # applicant address 2 state
+      nil                                                                      # applicant address 2 pincode
+    ]
   end
 
   private

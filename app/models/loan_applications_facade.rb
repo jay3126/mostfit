@@ -8,10 +8,10 @@ class LoanApplicationsFacade
 
   # creation
 
-  def create_for_client(client, loan_amount, at_branch, at_center, by_staff, on_date)
+  def create_for_client(client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
   end
 
-  def create_for_new_applicant(new_application_info, loan_amount, at_branch, at_center, by_staff, on_date)
+  def create_for_new_applicant(new_application_info, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
   end
 
   # General information
@@ -104,6 +104,7 @@ class LoanApplicationsFacade
 
   # Lists by status
 
+  # General purpose search
   def search(search_options = {})
     LoanApplication.search(search_options)
   end
