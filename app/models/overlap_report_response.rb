@@ -40,12 +40,9 @@ class OverlapReportResponse
     self.save
   end
 
+  # to_be replaced
   def status
-    loan_application = LoanApplication.get(loan_application_id)
-    raise NotFound if loan_application.nil?
-    return false if no_of_active_loans > Constants::Masters::PERMISSIBLE_ACTIVE_LOANS
-    return false if ((total_outstanding + loan_application.amount) > Constants::Masters::PERMISSIBLE_TOTAL_OUTSTANDING)
-    true
+    "to_be_replaced"
   end
 
   # Returns the loan amount applied for on the loan application that this overlap report response was received for
