@@ -9,4 +9,12 @@ class ConfigurationFacade
     false
   end
 
+  def regulation_total_loans_allowed
+    2
+  end
+
+  def regulation_total_oustanding_allowed
+    50000
+  end
+
 end
