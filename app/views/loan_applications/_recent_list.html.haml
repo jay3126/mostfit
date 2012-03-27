@@ -1,4 +1,4 @@
-%h1 Loan applications added recently
+%h2 Loan applications added recently
 
 - if @loan_applications and not @loan_applications.empty?
   %table.form.shaded
@@ -18,7 +18,7 @@
       - @loan_applications.each do |loan_application|
         %tr
           %td
-            = loan_application.id
+            = loan_application.client_name
           %td
             = loan_application.client_guarantor_name
           %td
