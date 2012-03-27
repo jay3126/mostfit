@@ -3,23 +3,17 @@
 %table.narrow.form{:width => "100%"}
   %thead
     %tr
-      %th Client ID
+      %th ID
       %th Name
       %th Age
       %th Address
       %th Loan Amount
+      %th Status
   %tbody
     - @loan_applications.each do |loan_application|
-      - if @errors[loan_application.client_id]
-        %tr
-          %td{:colspan => 5}
-            .error
-              - @errors[loan_application.client_id].keys.each do |key|
-                = "#{key} : #{@errors[loan_application.client_id][key]}"
-                %br
       %tr
         %td
-          = loan_application.client_id
+          = loan_application.loan_application_id
         %td
           = loan_application.client_name
         %td
@@ -27,6 +21,8 @@
         %td
           = loan_application.client_address
         %td
-          = loan_application.amount  
+          = loan_application.amount
+        %td
+          = loan_application.status
 
 = link_to 'New', url(:controller => :loan_applications, :action => :bulk_new)

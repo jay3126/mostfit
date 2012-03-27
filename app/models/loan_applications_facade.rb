@@ -103,6 +103,10 @@ class LoanApplicationsFacade
   end
 
   # Lists by status
+
+  def search(search_options = {})
+    LoanApplication.search(search_options)
+  end
   
   def newly_created(search_options = {})
   end

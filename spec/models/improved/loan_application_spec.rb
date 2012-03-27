@@ -18,10 +18,6 @@ describe LoanApplication do
     @lap.get_status.should == Constants::Status::NEW_STATUS
   end
 
-  it "should not be approved when created" do
-    @lap.is_approved?.should == false
-  end
-
   it "should be pending verification when newly created" do
     @lap.is_pending_verification?.should == true
   end

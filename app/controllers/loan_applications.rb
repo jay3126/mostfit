@@ -3,7 +3,7 @@ class LoanApplications < Application
 
   def index
     @errors = {}
-    @loan_applications = LoanApplication.all(:order => [:created_at.desc])
+    @loan_applications = LoanApplicationsFacade.new(session.user).search
     display @loan_applications
   end
 

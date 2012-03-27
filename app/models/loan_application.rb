@@ -1,8 +1,39 @@
+#In-memory class for storing a LoanApplication's total information to be passed around
+class LoanApplicationInfo
+    include Comparable
+    attr_reader :loan_application_id, :client_name, :client_dob, :client_address
+    attr_reader :amount, :status
+    attr_reader :cpv1
+    attr_reader :cpv2
+
+    def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, cpv1=nil, cpv2=nil)
+      @loan_application_id = loan_application_id
+      @client_name = client_name; @client_dob = client_dob; @client_address = client_address
+      @amount = amount; @status = status
+      @cpv1 = cpv1
+      @cpv2 = cpv2
+    end
+
+    #sort based on cpv recording date in the order of most-recent-first
+    def <=>(other)
+      return nil unless other.is_a?(LoanApplicationInfo)
+      cpv_self = self.cpv2 || self.cpv1
+      self_latest_cpv_at = cpv_self ? cpv_self.created_at : nil
+
+      cpv_other = other.cpv2 || other.cpv1
+      other_latest_cpv_at = cpv_other ? cpv_other.created_at : nil
+
+      return nil unless (self_latest_cpv_at and other_latest_cpv_at)
+      self_latest_cpv_at <=> other_latest_cpv_at
+    end
+end
+
 class LoanApplication
   include DataMapper::Resource
   include Constants::Status
   include Constants::Masters
   include Constants::Space
+  include LoanApplicationWorkflow
 
   property :id,                  Serial
   property :status,              Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -28,13 +59,12 @@ class LoanApplication
   property :client_guarantor_name, String
   property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :nullable => true
 
-  has n, :client_verifications
-  has 1, :loan_authorization
-  
-  belongs_to :client
+  belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
   belongs_to :center_cycle
   belongs_to :loan_file, :nullable => true
+  has n, :client_verifications
+  has 1, :loan_authorization
 
   validates_with_method :created_on, :method => :is_date_within_range?
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
@@ -56,14 +86,15 @@ class LoanApplication
     return true 
   end
 
-  # Returns the status of loan applications
+  # Returns the status of loan application
   def get_status
     self.status
   end
 
-  # Returns true if the loan application is approved, else false
-  def is_approved?
-    self.get_status == APPROVED_STATUS
+  # Sets the status
+  def set_status(new_status)
+    return false if get_status == new_status
+    self.status = new_status
   end
 
   # returns whether a client with the client_id is eligible for a new loan application
@@ -86,10 +117,6 @@ class LoanApplication
     not ClientVerification.is_cpv_complete?(self.id)
   end
 
-  def is_pending_authorization?
-    LoanAuthorization.get_authorization(self.id).nil?
-  end
-
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_verification(at_branch_id = nil, at_center_id = nil)
     predicates = {}
@@ -100,11 +127,14 @@ class LoanApplication
       predicates[:at_center_id] = at_center_id
     end
 
-    all(predicates).select {| l |l.is_pending_verification?}    
+    all(predicates).select {| l |l.is_pending_verification?}
+  end
+
+  def is_pending_authorization?
+    LoanAuthorization.get_authorization(self.id).nil?
   end
 
   # Returns all loan applications pending authorization
-  # Has placeholder code for now
   def self.pending_authorization(search_options = {})
     all.collect {|lap| lap.to_info}
   end
@@ -143,12 +173,13 @@ class LoanApplication
   #returns an object containing all information about a Loan Application
   def to_info
     cpvs_infos = ClientVerification.get_CPVs_infos(self.id)
-    puts cpvs_infos
     linfo = LoanApplicationInfo.new(
       self.id,
       self.client_name,
       self.client_dob,
       self.client_address,
+      self.amount,
+      self.get_status,
       cpvs_infos['cpv1'],
       cpvs_infos['cpv2'])
     puts linfo
@@ -298,34 +329,10 @@ class LoanApplication
     }
   end
 
-end
+  # All searches
 
-#In-memory class for storing a LoanApplication's total information to be passed around 
-class LoanApplicationInfo
-    include Comparable
-    attr_reader :loan_application_id, :client_name, :client_dob, :client_address
-    attr_reader :cpv1 
-    attr_reader :cpv2
-    
-    def initialize(loan_application_id, client_name, client_dob, client_address, cpv1=nil, cpv2=nil)
-      @loan_application_id = loan_application_id
-      @client_name = client_name
-      @client_dob = client_dob
-      @client_address = client_address
-      @cpv1 = cpv1
-      @cpv2 = cpv2
-    end
-
-    #sort based on cpv recording date in the order of most-recent-first
-    def <=>(other)
-      return nil unless other.is_a?(LoanApplicationInfo)
-      cpv_self = self.cpv2 || self.cpv1
-      self_latest_cpv_at = cpv_self ? cpv_self.created_at : nil
-      
-      cpv_other = other.cpv2 || other.cpv1
-      other_latest_cpv_at = cpv_other ? cpv_other.created_at : nil
-
-      return nil unless (self_latest_cpv_at and other_latest_cpv_at)
-      self_latest_cpv_at <=> other_latest_cpv_at
-    end
+  def self.search(search_options = {})
+    all(search_options).collect{|lap| lap.to_info}
+  end
+  
 end
