@@ -62,11 +62,13 @@ class LoanApplication
   belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
   belongs_to :center_cycle
-  belongs_to :loan_file, :nullable => true
+
+  has n, :loan_file_additions
+  has n, :loan_files, :through => :loan_file_additions
+
   has n, :client_verifications
   has 1, :loan_authorization
 
-  validates_with_method :created_on, :method => :is_date_within_range?
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def is_unique_for_center_cycle?
@@ -77,13 +79,53 @@ class LoanApplication
     return true
   end
 
-  def is_date_within_range?
-    return [false, "cannot be later than today"] if created_on > Date.today
-    unless client_id.nil?
-      client = Client.get(client_id)
-      return [false, "You cannot create a loan application for a client before he has joined"] if created_on < client.date_joined
+  def self.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user, *loan_application_id)
+    loan_file = LoanFile.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
+
+    unless loan_file
+      loan_file = LoanFile.generate_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user)
+      raise StandardError, "Unable to create a new loan file" unless loan_file
     end
-    return true 
+    
+    lap_ids = loan_application_id
+    return loan_file.loan_file_identifier unless (lap_ids and not(lap_ids.empty?))
+
+    lap_ids_statuses = {}; lap_ids.each {|lap_id| lap_ids_statuses[lap_id] = false}
+    lap_ids.each { |lap_id|
+      loan_application = get(lap_id)
+      if loan_application
+        loan_file_addition = LoanFileAddition.add_to_loan_file(lap_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
+        if loan_file_addition
+          loan_application.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS)
+          debugger
+          status_saved = loan_application.save
+          lap_ids_statuses[lap_id] = status_saved
+        end
+      end
+    }
+    [loan_file.loan_file_identifier, lap_ids_statuses]
+  end
+
+  def self.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user, *loan_application_id)
+    lap_ids = loan_application_id
+    raise ArgumentError, "No loan application IDs were supplied" unless (lap_ids and not (lap_ids.empty?))
+
+    loan_file = LoanFile.locate_loan_file(on_loan_file)
+    raise ArgumentError, "No loan file was located for loan file identifier: #{on_loan_file}" unless loan_file
+
+    lap_ids_statuses = {}; lap_ids.each {|lap_id| lap_ids_statuses[lap_id] = false}
+    lap_ids.each { |lap_id|
+      loan_application = get(lap_id)
+      if loan_application
+        loan_file_addition = LoanFileAddition.add_to_loan_file(lap_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
+        if loan_file_addition
+          loan_application.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS)
+          status_saved = loan_application.save
+          lap_ids_statuses[lap_id] = status_saved
+        end
+      end
+    }
+    [on_loan_file, lap_ids_statuses]
   end
 
   # Returns the status of loan application
