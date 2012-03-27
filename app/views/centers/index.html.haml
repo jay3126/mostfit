@@ -54,9 +54,12 @@
         %th.odd Loan Applications Pending for verification
         %td
           = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :branch_id => @branch.id)
+      %tr.even
+        %th.even New Loan Authorizations
+        %td
+          = link_to "Loan Authorizations", url(:controller => :loan_authorizations, :action => :index)
         %tr
           %td{:colspan => "2"}
-
   %div.tab_container.shaded
     %ul.tabs
       %li#centers

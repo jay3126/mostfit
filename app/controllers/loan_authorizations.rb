@@ -21,7 +21,9 @@ class LoanAuthorizations < Application
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
     override_reason = params[:override_reason]
-    @errors['Loan Authorizations'] = by_staff.empty? ? "Staff member is not selected" : {}
+    if by_staff.empty?
+     @errors['Loan Authorizations'] = "Staff member is not selected"
+    end
     if params.key?('status')
       params[:status].keys.each do |lap|
         status = params[:status][lap]
