@@ -143,22 +143,22 @@ module Pdf
         pdf.start_new_page if idx > 0
         table1 = PDF::SimpleTable.new
         table1.data = [{"col1"=>"<b>Center</b>", "col2"=>"#{center.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{center.clients.count}"},
-                        {"col1"=>"<b>R.O Name</b>", "col2"=>"#{center.manager.name}", "col3"=>"<b>Disbursal Date</b>", "col4"=>"#{date}"},
-                        {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{center.address}", "col3"=>"<b>Time</b>", "col4"=>"#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"}
-                       ]
+          {"col1"=>"<b>R.O Name</b>", "col2"=>"#{center.manager.name}", "col3"=>"<b>Disbursal Date</b>", "col4"=>"#{date}"},
+          {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{center.address}", "col3"=>"<b>Time</b>", "col4"=>"#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"}
+        ]
 
-         table1.column_order  = ["col1", "col2", "col3","col4"]
-      table1.show_lines    = :none
-      table1.shade_rows    = :none
-      table1.show_headings = false
-      table1.shade_headings = true
-      table1.orientation   = :center
-      table1.position      = :center
-      table1.title_font_size = 16
-      table1.header_gap = 20
-      table1.width = 500
-      table1.render_on(pdf)
-      pdf.text("\n")
+        table1.column_order  = ["col1", "col2", "col3","col4"]
+        table1.show_lines    = :none
+        table1.shade_rows    = :none
+        table1.show_headings = false
+        table1.shade_headings = true
+        table1.orientation   = :center
+        table1.position      = :center
+        table1.title_font_size = 16
+        table1.header_gap = 20
+        table1.width = 500
+        table1.render_on(pdf)
+        pdf.text("\n")
         
         #draw table for scheduled disbursals
         loans_to_disburse = center.clients.loans(:scheduled_disbursal_date => date) #, :disbursal_date => nil, :approved_on.not => nil, :rejected_on => nil)
@@ -168,7 +168,7 @@ module Pdf
           tot_amount = 0
           loans_to_disburse.each do |loan|
             tot_amount += loan.amount
-           table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.amount.to_currency, "Name" => loan.client.name,
+            table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.amount.to_currency, "Name" => loan.client.name,
                 "Group" => (loan.client.client_group or Nothing).name
               })
           end
@@ -184,42 +184,39 @@ module Pdf
           table.header_gap = 20
           table.width = 500
           table.render_on(pdf)
+          pdf.text("\n")
+          table2 = PDF::SimpleTable.new
+          table2.data = [{"col1"=>"<b>Disbursement Authorised By</b>", "col3"=>"<b>Disbursement Authorised By</b>"},
+            {"col1"=>"", "col3"=>""},
+            {"col1"=> "","col3"=>"Received the total amount" },
+            {"col1"=>"", "col3"=>""},
+            {"col1"=>"", "col3"=>""},
+            {"col1"=>"<b>Operation Manager</b>", "col3"=>"<b>Branch Manager</b>"},
+            {"col1"=>"", "col3"=>""},
+            {"col1"=>"", "col3"=>""},
+            {"col1"=>"Charges Recevied", "col3"=>"<b>Denomination</b>"},
+            {"col1"=>"", "col3"=>"500 x     ="},
+            {"col1"=>"", "col3"=>"100 x     ="},
+            {"col1"=>"", "col2"=>"", "col3"=>"50   x     =    "},
+            {"col1"=>"<b>Signature (Accountant)</b>", "col3"=>"20   x     =    "},
+            {"col1"=>"", "col3"=>"10   x     =    "},
+            {"col1"=>"", "col3"=>"5     x     =    "},
+          ]
+          table2.column_order  = ["col1", "col3"]
+          table2.show_lines    = :none
+          table2.shade_rows    = :none
+          table2.show_headings = false
+          table2.shade_headings = true
+          table2.orientation   = :center
+          table2.position      = :center
+          table2.title_font_size = 16
+          table2.header_gap = 20
+          table2.width = 500
+          table2.render_on(pdf)
+
         end
       } #centers end
-
-      pdf.text("\n")
-      table2 = PDF::SimpleTable.new
-      table2.data = [{"col1"=>"<b>Disbursement Authorised By</b>", "col3"=>"<b>Disbursement Authorised By</b>"},
-        {"col1"=>"", "col3"=>""},
-        {"col1"=> "","col3"=>"Received the total amount" },
-        {"col1"=>"", "col3"=>""},
-        {"col1"=>"", "col3"=>""},
-        {"col1"=>"<b>Operation Manager</b>", "col3"=>"<b>Branch Manager</b>"},
-        {"col1"=>"", "col3"=>""},
-        {"col1"=>"", "col3"=>""},
-        {"col1"=>"Charges Recevied", "col3"=>"<b>Denomination</b>"},
-        {"col1"=>"", "col3"=>"500 x     ="},
-        {"col1"=>"", "col3"=>"100 x     ="},
-        {"col1"=>"", "col2"=>"", "col3"=>"50   x     =    "},
-        {"col1"=>"<b>Signature (Accountant)</b>", "col3"=>"20   x     =    "},
-        {"col1"=>"", "col3"=>"10   x     =    "},
-        {"col1"=>"", "col3"=>"5     x     =    "},
-      ]
-      table2.column_order  = ["col1", "col3"]
-      table2.show_lines    = :none
-      table2.shade_rows    = :none
-      table2.show_headings = false
-      table2.shade_headings = true
-      table2.orientation   = :center
-      table2.position      = :center
-      table2.title_font_size = 16
-      table2.header_gap = 20
-      table2.width = 500
-      table2.render_on(pdf)
       pdf.save_as(filename)
-      pdf.text("\n")
-      pdf.text "Disbursements today"
-      pdf.text("\n")
       return pdf
     end
     def generate_weeksheet_pdf(center, date)
