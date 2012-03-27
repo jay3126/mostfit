@@ -36,7 +36,9 @@
             %td
               = link_to response.id, resource(response)
             %td
-              = response.status 
+              - response_status = 'Not rated'
+              - begin; response_status = response.status; rescue; response_status = 'Error'; end
+              = response_status
               
           
           
