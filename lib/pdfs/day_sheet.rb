@@ -185,24 +185,43 @@ module Pdf
           table.width = 500
           table.render_on(pdf)
           pdf.text("\n")
+          pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
+          pdf.rounded_rectangle(pdf.absolute_right_margin-215, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
+          pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 115, 125, 50, 5).stroke
+          pdf.rounded_rectangle(pdf.absolute_right_margin-215, pdf.y+pdf.top_margin - 115, 125, 50, 5).stroke
+          pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 210, 125, 50, 5).stroke
+          pdf.text("\n")
+          pdf.text("\n")
+          pdf.text("\n")
           table2 = PDF::SimpleTable.new
-          table2.data = [{"col1"=>"<b>Disbursement Authorised By</b>", "col3"=>"<b>Disbursement Authorised By</b>"},
-            {"col1"=>"", "col3"=>""},
-            {"col1"=> "","col3"=>"Received the total amount" },
-            {"col1"=>"", "col3"=>""},
-            {"col1"=>"", "col3"=>""},
-            {"col1"=>"<b>Operation Manager</b>", "col3"=>"<b>Branch Manager</b>"},
-            {"col1"=>"", "col3"=>""},
-            {"col1"=>"", "col3"=>""},
-            {"col1"=>"Charges Recevied", "col3"=>"<b>Denomination</b>"},
-            {"col1"=>"", "col3"=>"500 x     ="},
-            {"col1"=>"", "col3"=>"100 x     ="},
-            {"col1"=>"", "col2"=>"", "col3"=>"50   x     =    "},
-            {"col1"=>"<b>Signature (Accountant)</b>", "col3"=>"20   x     =    "},
-            {"col1"=>"", "col3"=>"10   x     =    "},
-            {"col1"=>"", "col3"=>"5     x     =    "},
+          table2.data = [{"col1"=>"<b>Disbursement Authorised By</b>","col2"=>"<b>Disbursement Authorised By</b>","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=> "","col2"=>"Received the total amount","col3"=>"" },
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"<b>Operation Manager</b>", "col2"=>"<b>Branch Manager</b>","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"", "col2"=>"","col3"=>""},
+            {"col1"=>"Charges Recevied", "col2"=>"<b>Denomination</b>","col3"=>""},
+            {"col1"=>"", "col2"=>"500 x     =","col3"=>""},
+            {"col1"=>"", "col2"=>"100 x     =","col3"=>""},
+            {"col1"=>"", "col2"=>"50   x     =    ","col3"=>""},
+            {"col1"=>"", "col2"=>"20   x     =    ","col3"=>""},
+            {"col1"=>"<b>Signature (Accountant)</b>", "col2"=>"10   x     =    ","col3"=>""},
+            {"col1"=>"", "col2"=>"5     x     =    ","col3"=>""},
           ]
-          table2.column_order  = ["col1", "col3"]
+          table2.column_order  = ["col1", "col3", "col2"]
           table2.show_lines    = :none
           table2.shade_rows    = :none
           table2.show_headings = false
@@ -216,6 +235,7 @@ module Pdf
 
         end
       } #centers end
+     
       pdf.save_as(filename)
       return pdf
     end
