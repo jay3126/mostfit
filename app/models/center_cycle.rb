@@ -54,7 +54,6 @@ class CenterCycle
   has n, :loan_applications
 
   validates_with_method :is_cycle_incremented?
-  validates_with_method :CGT_complete_before_GRT?
 
   def schedule_CGT(cgt_dates, performed_by, scheduled_by_staff, scheduled_by_user)
     raise ArgumentError, "Three different dates for CGT must be supplied. Dates supplied were: #{cgt_dates}" unless ((cgt_dates.uniq).length == 3)
