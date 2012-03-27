@@ -53,8 +53,7 @@ class LoanAuthorization
     query_params[:performed_on] = on_date
     query_params[:created_by] = by_user
     query_params[:override_reason] = with_override_reason if with_override_reason
-    auth = create(query_params)
-    auth
+    create(query_params)
   end
 
   # Finds the authorization for a loan application, given the loan application id
