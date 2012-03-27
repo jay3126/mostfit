@@ -99,7 +99,6 @@ class LoanApplication
         loan_file_addition = LoanFileAddition.add_to_loan_file(lap_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
         if loan_file_addition
           loan_application.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS)
-          debugger
           status_saved = loan_application.save
           lap_ids_statuses[lap_id] = status_saved
         end
@@ -188,7 +187,8 @@ class LoanApplication
 
   # Returns all loan applications pending authorization
   def self.pending_authorization(search_options = {})
-    all(search_options).collect {|lap| lap.to_info}
+    pending = all(search_options).select {|lap| lap.is_pending_authorization?}
+    pending.collect {|lap| lap.to_info}
   end
 
   def self.completed_authorization(search_options = {})
