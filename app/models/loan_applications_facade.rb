@@ -71,12 +71,28 @@ class LoanApplicationsFacade
   def record_CPV2_rejected(loan_application_id, by_staff, on_date)
   end
 
-  # Create loan file
+  # Locate loan files
 
-  def create_loan_file(at_branch, at_center, by_staff, on_date, *loan_application_id)
+  def locate_loan_file(by_loan_file_identifier)
+    LoanFile.locate_loan_file(by_identifier)
   end
 
-  def add_to_loan_file(on_loan_file, by_staff, on_date, *loan_application_id)
+  def locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
+    LoanFile.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
+  end
+
+  def get_loan_file_info(loan_file_identifier)
+    LoanFile.get_loan_file_info(loan_file_identifier)
+  end
+
+  # Create loan file
+
+  def create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, *loan_application_id)
+    LoanApplication.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, @user.id, *loan_application_id)
+  end
+
+  def add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, *loan_application_id)
+    LoanApplication..add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, @user.id, *loan_application_id)
   end
 
   # Awaiting action
@@ -93,6 +109,10 @@ class LoanApplicationsFacade
 
   def pending_CPV(search_options = {})
   end
+
+  def pending_loan_file_generation(search_options = {})
+  end
+
 
   # Update action completed (background tasks)
 
