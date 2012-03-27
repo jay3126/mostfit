@@ -1,0 +1,67 @@
+%h1
+  = "Credit officer authorize loan application"
+#pending_list
+  .shaded
+    = form(:action => url(:controller => 'loan_authorizations', :action => 'record_authorizations'), :method => :post) do
+      %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
+      %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
+      %table.form{:style => "width:100%; border:1px;"}
+        %thead
+          %tr
+            %td
+              = "Sl."
+            %td
+              = "Application ID"
+            %td
+              = "Name"
+            %td
+              = "D.O.B."
+            %td
+              = "Address"
+            %td
+              = "Rating"
+            %td{:colspan => 2, :align => "center"}
+              = "Loan Authorization"
+            %td{:colspan => 2}
+              = "Override reason"
+        %tbody.form
+          - s_no = 0
+          - unless @loan_application_pending_authorization.empty?
+            - @pending_authorization.each do |lpa|
+              %tr
+                %td
+                  - s_no = s_no + 1
+                  = s_no
+                %td
+                  = lpa.loan_application_id
+                %td
+                  = lpa.client_name
+                %td
+                  = lpa.client_dob
+                %td
+                  = lpa.client_address
+                %td
+                  = "No Value"
+                %td
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
+                  Approved
+                %td
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
+                  Rejected
+                %td
+                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :text_method => :name, :value_method => :id, :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS
+          - else
+            No pending authorizations!
+        %tfoot
+          %tr{:style=>"text-align : right"}
+            %td
+              By
+            %td{:colspan => 3}
+              = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+            %td
+              On
+            %td{:colspan => 2}
+              = date_select("performed_on", Date.today, :id => "performed_on", :size => 8)
+            %td{:colspan => 2}
+              = submit "Save all"
+              %input{:value => "Reset all", :type => "reset"}

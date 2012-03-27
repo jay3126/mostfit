@@ -26,6 +26,8 @@ class LoanAuthorizations < Application
     @center = Center.get(@center_id)
     @user_id = session.user.id
     @loan_application_pending_authorization = LoanApplication.pending_authorization(search_options(@branch_id, @center_id))
+    facade = LoanApplicationsFacade.new(session.user)
+    @recent_authorization = facade.completed_authorization(search_options(@branch_id, @center_id))
   end
 
   def pending_authorizations
@@ -43,12 +45,13 @@ class LoanAuthorizations < Application
 
   def record_authorizations
     @errors = {}
+    get_data(params)
     @center = Center.get(@center_id)
     facade = LoanApplicationsFacade.new(session.user)
+    @pending_authorization = facade.pending_authorization(search_options(@branch_id, @center_id))
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
     override_reason = params[:override_reason]
-    get_data(params)
     if params.key?('status')
       params[:status].keys.each do |lap|
         status = params[:status][lap]

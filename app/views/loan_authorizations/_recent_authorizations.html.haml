@@ -1,0 +1,58 @@
+%h1
+  = "Recently authorized loan application"
+- if @recent_authorization and not @recent_authorization.empty?
+  - recent_authorization = @recent_authorization.sort.reverse
+  %table.form{:style => "width:100%; border:1px;"}
+    %thead
+      %tr
+        %td
+          = "Sl."
+        %td
+          = "Application ID"
+        %td
+          = "Name"
+        %td
+          = "D.O.B."
+        %td
+          = "Address"
+        %td
+          = "By"
+        %td
+          = "Date"
+        %td
+          = "Rating"
+        %td{:colspan => 2, :align => "center"}
+          = "Loan Authorization Status"
+        %td{:colspan => 2}
+          = "Override reason"
+    %tbody.form
+      - s_no = 0
+      - recent_authorization.each do |lpa|
+        %tr
+          %td
+            - s_no = s_no + 1
+            = s_no
+          %td
+            = lpa.loan_application_id
+          %td
+            = lpa.client_name
+          %td
+            = lpa.client_dob
+          %td
+            = lpa.client_address
+          %td
+            = "No Value"
+          %td
+            = "by"
+          %td
+            = "created_at"
+          %td
+            %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
+            Approved
+          %td
+            %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
+            Rejected
+          %td
+            = select :name => "[override_reason][#{lpa.loan_application_id}]", :text_method => :name, :value_method => :id, :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS
+- else
+  No recent authorizations!
