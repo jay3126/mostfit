@@ -111,6 +111,7 @@ class LoanApplicationsFacade
   end
 
   def pending_loan_file_generation(search_options = {})
+    LoanApplication.pending_loan_file_generation(search_options)
   end
 
 

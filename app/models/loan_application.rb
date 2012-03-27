@@ -199,6 +199,20 @@ class LoanApplication
     applications_completed_authorization.collect {|lap| lap.to_info}
   end
 
+  # Is pending loan file generation
+  def is_pending_loan_file_generation?
+    not (self.loan_files and not (self.loan_files.empty?))
+  end
+
+  # All loan applications pending loan file generation
+  def self.pending_loan_file_generation(search_options = {})
+    loan_applications = all(search_options)
+    applications_pending_loan_file_generation = loan_applications.select { |lap|
+      lap.is_pending_loan_file_generation?
+    }
+    applications_pending_loan_file_generation.collect {|lap| lap.to_info}
+  end
+
   #returns all loan applications for which CPV was recently recorded
   def self.recently_recorded_by_user(by_user_id)
     raise ArgumentError, "User id not supplied" unless by_user_id
