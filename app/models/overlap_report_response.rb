@@ -1,6 +1,7 @@
 class OverlapReportResponse
   include DataMapper::Resource
   include Constants::Masters
+  include OverlapReportInterpreter
   
   property :id,                  Serial
   property :created_at,          DateTime
@@ -45,6 +46,14 @@ class OverlapReportResponse
     return false if no_of_active_loans > Constants::Masters::PERMISSIBLE_ACTIVE_LOANS
     return false if ((total_outstanding + loan_application.amount) > Constants::Masters::PERMISSIBLE_TOTAL_OUTSTANDING)
     true
+  end
+
+  # Returns the loan amount applied for on the loan application that this overlap report response was received for
+  # Returns nil if it cannot find this amount
+  def applied_for_amount
+    return nil unless self.loan_application_id
+    loan_application = Loan.get(self.loan_application_id)
+    (loan_application and loan_application.amount) ? loan_application.amount : nil
   end
 
 end

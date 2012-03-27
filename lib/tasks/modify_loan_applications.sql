@@ -8,5 +8,4 @@ ALTER TABLE `loan_applications`
  MODIFY COLUMN `client_reference2` VARCHAR(50) NOT NULL,
  MODIFY COLUMN `client_guarantor_name` VARCHAR(50) NOT NULL,
  MODIFY COLUMN `client_state` INTEGER  NOT NULL,
- MODIFY COLUMN `received_on` DATE  NOT NULL,
  MODIFY COLUMN `created_on` DATE  NOT NULL;

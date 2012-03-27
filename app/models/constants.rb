@@ -9,6 +9,12 @@ module Constants
     
   end
 
+  module CreditBureau
+
+    RATED_POSITIVE = 'positive'; RATED_NEGATIVE = 'negative'
+
+  end
+
   module Status
     #All constants that are related to statuses, handle with care
 
