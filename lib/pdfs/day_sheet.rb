@@ -134,13 +134,13 @@ module Pdf
 
       pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
-      pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
-      pdf.text "Disbursal Report and Acknowledgement", :font_size => 18, :justification => :center
-      pdf.text("\n")
       return nil if centers.empty?
       days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes.to_i}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
+        pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
+        pdf.text "Disbursal Report and Acknowledgement", :font_size => 18, :justification => :center
+        pdf.text("\n")
         table1 = PDF::SimpleTable.new
         table1.data = [{"col1"=>"<b>Center</b>", "col2"=>"#{center.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{center.clients.count}"},
           {"col1"=>"<b>R.O Name</b>", "col2"=>"#{center.manager.name}", "col3"=>"<b>Disbursal Date</b>", "col4"=>"#{date}"},
