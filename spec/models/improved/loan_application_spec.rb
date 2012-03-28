@@ -9,7 +9,8 @@ describe LoanApplication do
     @branch = Factory(:branch)
   end
 
-  before(:each) do    
+  before(:each) do
+    LoanApplication.all.destroy!
     @lap = LoanApplication.new
     @lap.created_on = Date.today
     @lap.created_by_user_id = @user.id
@@ -31,6 +32,18 @@ describe LoanApplication do
     @lap.center_cycle_id = 1
     @lap.valid?.should be_true
     @lap.save.should be_true
+  end
+
+  it "should not have duplicate references within the same center cycle" do
+    attributes = @lap.attributes
+    attributes.delete(:id)
+    lap = LoanApplication.new(attributes)
+    lap.valid?.should be_false
+    lap.save.should be_false
+    lap.client_reference1 = "123459IJU"
+    lap.client_reference2 = "MH4521890"
+    lap.valid?.should be_true
+    lap.save.should be_true
   end
 
   it "should have a new status when created" do
