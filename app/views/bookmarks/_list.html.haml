@@ -1,6 +1,9 @@
 .admin-box
   %h2
-    = "Your #{@text.pluralize.capitalize}  "
+    - if @text
+      = "Your #{@text.pluralize.capitalize}  "
+    - else
+      No Bookmarks
   - if @bookmarks[:own]
     %table{:style => "width: 100%"}
       - @bookmarks[:own].each do |bookmark|
@@ -12,7 +15,10 @@
 
 .admin-box
   %h2
-    #{@text.pluralize.capitalize} shared with you
+    - if @text
+      #{@text.pluralize.capitalize} shared with you
+    - else
+      No bookmarks shared with you
   %ul.bookmarks
     - if @bookmarks[:shared]
       - @bookmarks[:shared].each do |bookmark|
@@ -26,4 +32,3 @@
               = transform_raw_post_to_hidden_fields(bookmark.params)
               %a{:href => "#", :onclick => "$(this).parent().submit()"}
                 = bookmark.name
-  
