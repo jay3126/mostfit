@@ -71,6 +71,8 @@ class LoanApplication
   has n, :client_verifications
   has 1, :loan_authorization
 
+  validates_is_unique :client_reference1, :scope => :center_cycle_id
+  validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def is_unique_for_center_cycle?

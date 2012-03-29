@@ -2,16 +2,21 @@ require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 
 describe LoanApplication do
 
-  before(:each) do
-    @created_by_user_id = 1
-    @created_by_staff_id = 2
+  before(:all) do
+    @staff_member = Factory(:staff_member)
+    @user = Factory(:user)
+    @center = Factory(:center)
+    @branch = Factory(:branch)
+  end
 
+  before(:each) do
+    LoanApplication.all.destroy!
     @lap = LoanApplication.new
     @lap.created_on = Date.today
-    @lap.created_by_user_id = 1
-    @lap.created_by_staff_id = 2
-    @lap.at_branch_id = 1
-    @lap.at_center_id = 2
+    @lap.created_by_user_id = @user.id
+    @lap.created_by_staff_id = @staff_member.id
+    @lap.at_branch_id = @branch.id
+    @lap.at_center_id = @center.id
     @lap.amount = 4200
     @lap.client_name = 'HetalBen'
     @lap.client_dob  = Date.new(1962, 4, 1)
@@ -29,6 +34,18 @@ describe LoanApplication do
     @lap.save.should be_true
   end
 
+  it "should not have duplicate references within the same center cycle" do
+    attributes = @lap.attributes
+    attributes.delete(:id)
+    lap = LoanApplication.new(attributes)
+    lap.valid?.should be_false
+    lap.save.should be_false
+    lap.client_reference1 = "123459IJU"
+    lap.client_reference2 = "MH4521890"
+    lap.valid?.should be_true
+    lap.save.should be_true
+  end
+
   it "should have a new status when created" do
     @lap.get_status.should == Constants::Status::NEW_STATUS
   end
@@ -38,41 +55,41 @@ describe LoanApplication do
   end
 
   it "should be pending verification when only CPV1 is accepted" do
-    ClientVerification.record_CPV1_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
     @lap.is_pending_verification?.should == true
   end
 
   it "should NOT be pending verification when CPV2 is accepted" do
-    ClientVerification.record_CPV1_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
-    ClientVerification.record_CPV2_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV2_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
 
     @lap.is_pending_verification?.should_not == true
   end 
 
   it "should NOT be pending verification when CPV2 is rejected" do
-    ClientVerification.record_CPV1_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
 
-    ClientVerification.record_CPV2_rejected(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV2_rejected(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_REJECTED
     
     @lap.is_pending_verification?.should_not == true
   end 
 
   it "should NOT be pending verification when CPV1 is rejected" do
-    ClientVerification.record_CPV1_rejected(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_rejected(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_REJECTED
 
     @lap.is_pending_verification?.should_not == true
   end 
   
   it "should return a info object containing info about all CPVs related to this LoanApplication" do
-    ClientVerification.record_CPV1_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
-    ClientVerification.record_CPV2_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV2_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
 
     lapinfo = @lap.to_info()
@@ -104,9 +121,9 @@ describe LoanApplication do
   end
 
   it "should return the most recently recorded first when comparing " do
-    ClientVerification.record_CPV1_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV1_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
-    ClientVerification.record_CPV2_approved(@lap.id, @created_by_staff_id, Date.today, @created_by_user_id)
+    ClientVerification.record_CPV2_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
  end
 

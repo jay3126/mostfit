@@ -57,7 +57,7 @@
       %tr.even
         %th.even New Loan Authorizations
         %td
-          = link_to "Loan Authorizations", url(:controller => :loan_authorizations, :action => :index)
+          = link_to "Loan Authorizations", url(:controller => :loan_authorizations, :action => :pending_authorizations, :branch_id => @branch.id)
         %tr
           %td{:colspan => "2"}
   %div.tab_container.shaded
