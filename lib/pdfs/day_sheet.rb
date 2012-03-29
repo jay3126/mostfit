@@ -135,11 +135,10 @@ module Pdf
       pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
       return nil if centers.empty?
-      days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash
       centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes.to_i}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
         pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
-        pdf.text "Disbursal Report and Acknowledgement", :font_size => 18, :justification => :center
+        pdf.text "Disbursal Report and Acknowledgement", :font_size => 16, :justification => :center
         pdf.text("\n")
         table1 = PDF::SimpleTable.new
         table1.data = [{"col1"=>"<b>Center</b>", "col2"=>"#{center.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{center.clients.count}"},
@@ -172,7 +171,7 @@ module Pdf
                 "Group" => (loan.client.client_group or Nothing).name
               })
           end
-          table.data.push({"Group"=>"Total","Disb. Amount" => tot_amount.to_currency})
+          table.data.push({"Group"=>"Total#{s}=#{loans_to_disburse.count}","Disb. Amount" => tot_amount.to_currency})
           table.column_order  = ["LAN", "Name", "Group", "Disb. Amount"]
           table.show_lines    = :all
           table.shade_rows    = :none
@@ -184,6 +183,7 @@ module Pdf
           table.header_gap = 20
           table.width = 500
           table.render_on(pdf)
+          pdf.start_new_page if pdf.y < 315
           pdf.text("\n")
           pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
           pdf.rounded_rectangle(pdf.absolute_right_margin-215, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
