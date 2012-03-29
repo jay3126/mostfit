@@ -159,6 +159,7 @@ Merb::Router.prepare do
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)
+  match('/loan_files/:action').to(:controller => 'loan_files').name(:loan_files)
 
   #API Route
   match('/api/v1') do

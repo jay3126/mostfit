@@ -1,0 +1,37 @@
+%hr
+%h3
+  = "Group Recognition Test"
+
+%table.shaded
+  %tbody
+    - unless @grt_is_complete
+      %tr
+        %td
+          = "Completed on"
+        %td
+          = date_select("grt_completed_on", Date.today, :id => "grt_completed_on", :size => 8)
+        %td
+          = "Completed by"
+        %td
+          = select :name => "grt_completed_by", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+      %tr
+        %th
+          %b
+            = "Result: "
+        %td
+          = input :name => 'grt_result', :type => 'radio', :id => 'grt_result_passed', :value => true
+        %td
+          = "G.R.T. Passed"
+        %td
+          = input :name => 'grt_result', :type => 'radio', :id => 'grt_result_failed', :value => false
+        %td
+          = "G.R.T. Failed"
+    - else
+      %tr
+        %td
+          - if @grt_result
+            = "G.R.T. passed on #{grt_completed_on} by #{grt_completed_by}" 
+              %td
+                = submit "Generate Loan File" 
+          - else
+            = "G.R.T. failed on #{grt_completed_on} by #{grt_completed_by}"
