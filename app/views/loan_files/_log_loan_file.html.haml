@@ -1,0 +1,36 @@
+%h3
+  = "Log of Loan File <loan_file_identifier>"
+
+%table{:style => "width:100%;"}
+  %thead
+    %tr
+      %th{:width => '5%'}
+        = "Sr.No."
+      %th
+        = "Loan Application ID"
+      %th
+        = "Name"
+      %th
+        = "Address"
+      %th
+        = "Age"
+      %th
+        = "Loan Amount"
+  %tbody
+    - if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
+      - srno = 0
+      - @loan_applications_added_to_loan_file.each do |laa|
+        %tr
+          %td
+            - srno = srno + 1
+            = srno
+          %td
+            = laa.id
+          %td
+            = laa.client_name
+          %td
+            = (Date.today - lap.client_dob).display
+          %td
+            = laa.client_address
+          %td
+            = laa.amount

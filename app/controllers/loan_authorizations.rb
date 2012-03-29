@@ -2,6 +2,7 @@ class LoanAuthorizations < Application
 
   def index
     get_branch_and_center(params)
+    get_pending_and_completed_auth(params)
     render :authorizations
   end
   
@@ -22,7 +23,7 @@ class LoanAuthorizations < Application
     on_date = params[:performed_on]
     override_reason = params[:override_reason]
     if by_staff.empty?
-     @errors['Loan Authorizations'] = "Staff member is not selected"
+      @errors['Loan Authorizations'] = "Staff member is not selected"
     end
     if params.key?('status')
       params[:status].keys.each do |lap|
