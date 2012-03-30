@@ -84,6 +84,11 @@ class LoanApplicationsFacade
   def get_loan_file_info(loan_file_identifier)
     LoanFile.get_loan_file_info(loan_file_identifier)
   end
+  
+  #return all loan files at a center in a branch for cycle number
+  def locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
+    LoanFile.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
+  end
 
   # Create loan file
 
@@ -92,7 +97,7 @@ class LoanApplicationsFacade
   end
 
   def add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, *loan_application_id)
-    LoanApplication..add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, @user.id, *loan_application_id)
+    LoanApplication.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, @user.id, *loan_application_id)
   end
 
   # Awaiting action
@@ -113,7 +118,6 @@ class LoanApplicationsFacade
   def pending_loan_file_generation(search_options = {})
     LoanApplication.pending_loan_file_generation(search_options)
   end
-
 
   # Update action completed (background tasks)
 

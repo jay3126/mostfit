@@ -36,7 +36,8 @@ class LoanFile
   property :created_by,           Integer, :nullable => false
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
   property :health_check_status,  Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => HEALTH_CHECK_PENDING
-
+  property :health_status_remark, Text, :nullable => true, :lazy => true
+  
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
 
@@ -63,7 +64,14 @@ class LoanFile
   end
 
   def self.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
-    first(:at_branch_id => at_branch, :at_center_id => at_center, :for_cycle_number => for_cycle_number)
+    first(:at_branch_id => at_branch, :at_center_id => at_center, :for_cycle_number => for_cycle_number).to_info
+  end
+  
+  def self.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
+    loan_files_infos = all(:at_branch_id => at_branch, 
+                     :at_center_id => at_center, 
+                     :for_cycle_number => for_cycle_number).collect { |lf| lf.to_info}
+    loan_files_infos
   end
 
   def self.get_loan_file_info(loan_file_identifier)
