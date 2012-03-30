@@ -21,6 +21,7 @@ end
 # A loan file lists a number of loan applications that are being processed together
 class LoanFile
   include DataMapper::Resource
+  include Constants::Status
 
   property :id,                   Serial
   property :at_branch_id,         Integer, :nullable => false
@@ -34,6 +35,7 @@ class LoanFile
   property :created_on,           Date, :nullable => false
   property :created_by,           Integer, :nullable => false
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
+  property :health_check_status,  Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => HEALTH_CHECK_PENDING
 
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
