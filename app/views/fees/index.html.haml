@@ -8,6 +8,8 @@
   %thead
     %tr
       %th
+        Id
+      %th
         Name
       %th
         Description
@@ -18,6 +20,8 @@
   - for fee in @fees
     %tr{:class => cycle('odd','even')}
       %td
+        = fee.id
+      %td
         = fee.name
       %td
         = fee.description
@@ -25,4 +29,3 @@
         = link_to 'Show', url(:fee, fee)
       %td
         = link_to 'Edit', url(:edit_fee,  fee)
-
