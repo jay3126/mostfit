@@ -12,6 +12,8 @@
   %tr
     %thead
       %th
+        Id
+      %th
         Product name
       %th
         Repayment Style
@@ -30,6 +32,8 @@
   %tr
   - @loan_products.find_all{|x| x.valid_upto >= Date.today}.each do |loan_product|
     %tr{:class => cycle('odd','')}
+      %td
+        = loan_product.id
       %td
         = link_to loan_product.name, url(:loan_product, loan_product) 
       %td
@@ -50,6 +54,8 @@
       - @loan_products.find_all{|x| x.valid_from > Date.today}.each do |loan_product|
         %tr{:class => cycle('odd','')}
           %td
+            = loan_product.id
+          %td
             = link_to loan_product.name, url(:loan_product, loan_product) 
           %td
             = loan_product.repayment_style.name if loan_product.repayment_style
@@ -68,6 +74,8 @@
     %tr
       - @loan_products.find_all{|x| x.valid_upto < Date.today}.each do |loan_product|
         %tr{:class => cycle('odd','')}
+          %td
+            = loan_product.id
           %td
             = link_to loan_product.name, url(:loan_product, loan_product) 
           %td
