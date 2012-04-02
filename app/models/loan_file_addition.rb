@@ -10,8 +10,8 @@ class LoanFileAddition
   property :created_by_user,     Integer, :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
   
-  belongs_to :loan_application, :key => true
-  belongs_to :loan_file, :key => true
+  belongs_to :loan_application
+  belongs_to :loan_file
 
   def self.add_to_loan_file(loan_application_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
     query_params = {}
