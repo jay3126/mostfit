@@ -80,7 +80,17 @@
       %p.menu-strip 
         = link_to 'Create new client', resource(@branch, @center, :clients, :new), :class => "add grey_button"
         = link_to "Bulk entry of loans", url(:enter_loans, :action => :bulk_form, :query => @center), :class => "edit grey_button"
-    %div.tab    
+      - debugger
+      - unless @center_cycle.blank?
+        %form._remote_{:action => url(:controller => :center_cycles, :action => :update, :id => @center_cycle.id), :method => :get}
+          %p.menu-strip
+            = @center_cycle.status
+            = date_select "date", Date.today, :id => "cycle_start_date"
+            - if @center_cycle.is_open?
+              = submit "Stop"
+            - else
+              = submit "Start"
+    %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@center.id}?for=center"}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:weeksheet, :center_id => @center.id, :branch_id => @branch.id, :date => @date)}

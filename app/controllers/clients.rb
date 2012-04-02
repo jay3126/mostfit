@@ -244,7 +244,9 @@ class Clients < Application
   def get_context
     if params[:branch_id] and params[:center_id] 
       @branch = Branch.get(params[:branch_id]) 
-      @center = Center.get(params[:center_id]) 
+      @center = Center.get(params[:center_id])
+      center_cycle_no = CenterCycle.get_current_center_cycle @center.id
+      @center_cycle =  CenterCycle.get_cycle(@center.id, center_cycle_no)
       raise NotFound unless @branch and @center
     end
   end

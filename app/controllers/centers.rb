@@ -194,6 +194,8 @@ class Centers < Application
     @branch       = Branch.get(params[:branch_id])
     @staff_member = StaffMember.get(params[:staff_member_id])
     @center       = Center.get(params[:center_id]) if params[:center_id]
+    center_cycle_no = CenterCycle.get_current_center_cycle @center.id
+    @center_cycle =  CenterCycle.get_cycle(@center.id, center_cycle_no)
     # raise NotFound unless @branch
   end
 
