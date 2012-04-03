@@ -1,11 +1,10 @@
 class LoanFiles < Application
 
   def index
-    render :loan_file_generation
+    render :loan_files_index
   end
 
   def get_loan_applications
-    debugger
     @branch_id = params['branch_id'] ? params['branch_id'] : nil
     @center_id = params['center_id'] ? params['center_id'] : nil
     facade = LoanApplicationsFacade.new(session.user)
@@ -25,6 +24,34 @@ class LoanFiles < Application
         loan_file = laf.create_loan_file(at_branch, at_center, for_cycle_number, by_staff, on_date, *loan_applications)
       end
     end
+  end
+
+  def loan_files_for_health_checkup
+    if params[:branch_id] == ""
+      @errors = "Please select a branch"  
+    elsif params[:center_id] == ""
+      @errors = "Please select a center"
+    else
+      @errors = nil
+    end
+    @branch = Branch.get(params[:branch_id].to_i) 
+    @center = Center.get(params[:center_id].to_i)
+    for_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+    facade = LoanApplicationsFacade.new(session.user)
+    @loan_files_at_center_at_branch_for_cycle = facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
+    render :health_checkup
+  end
+
+  def record_health_check_status
+    @errors = {}
+    loan_files =  params[:loan_files].keys
+    loan_files.each do |loan_file_id|
+      loan_file = LoanFile.get(loan_file_id)
+      health_status_remark = params[:loan_files][loan_file_id][:health_status_remark]
+      status = loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_status_remark) if params[:loan_files][loan_file_id][:health_check_status] == 'on'
+      @errors[loan_file.id] = loan_file.errors if status == false
+    end
+    render :loan_files_index
   end
 
 end
