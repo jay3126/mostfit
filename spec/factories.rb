@@ -458,7 +458,7 @@ FactoryGirl.define do
   factory :condition do
     keys                'amount'
     comparator          :<
-    value               '10'
+      value               '10'
 
     association         :rule
   end
@@ -644,6 +644,38 @@ FactoryGirl.define do
     status                'Passed'
 
     association           :client_group
+  end
+  
+  factory :loan_application do
+    created_on                    { Date.today }
+    created_by_user_id            { Factory(:user).id }
+    created_by_staff_id           { Factory(:staff_member).id }
+    at_branch_id                  { Factory(:branch).id }
+    at_center_id                  { Factory(:center).id }
+    amount                        '4200'
+    client_name                   'HetalBen'
+    client_dob                    { Date.new(1962, 4, 1) }
+    client_guarantor_name         'Hetalbhai'
+    client_guarantor_relationship 'Husband'
+    client_reference1             'ration_card_no'
+    client_reference1_type        'Ration Card'
+    client_reference2             'Voter ID String'
+    client_reference2_type        'Voter ID'
+    client_address                'Limbdi, Ahmedabad'
+    client_state                  'gujarat'
+    client_pincode                '364002'
+    center_cycle_id               1
+  end
+
+  factory :loan_file do
+    at_branch_id                  { Factory(:branch).id }
+    at_center_id                  { Factory(:center).id }
+    for_cycle_number              1
+    scheduled_disbursal_date      {Date.today + 2}
+    scheduled_first_payment_date  { Date.today + 5}
+    created_by_staff_id           3
+    created_on                    Date.today + 9
+    created_by                    { Factory(:user).id }
   end
 
 end
