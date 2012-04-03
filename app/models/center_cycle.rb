@@ -77,7 +77,7 @@ class CenterCycle
   # The cycle number can only be incremented by one each time
   def is_cycle_incremented?
     latest_cycle_number = CenterCycle.get_current_center_cycle(self.center_id)
-    ((self.cycle_number - latest_cycle_number) == 1) ? true :
+    ((self.cycle_number.to_i - latest_cycle_number) == 1) ? true :
       [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"]
   end
 
