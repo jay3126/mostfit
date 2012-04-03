@@ -27,12 +27,11 @@ class LoanFiles < Application
   end
 
   def loan_files_for_health_checkup
-    if params[:branch_id] == ""
-      @errors = "Please select a branch"  
-    elsif params[:center_id] == ""
-      @errors = "Please select a center"
-    else
-      @errors = nil
+    @errors = {}
+    if params[:branch_id] && params[:branch_id].empty?
+      @errors["Loan File"] = "Please select a branch"
+    elsif params[:center_id] && params[:center_id].empty?
+      @errors["Loan File"] = "Please select center"
     end
     @branch = Branch.get(params[:branch_id].to_i) 
     @center = Center.get(params[:center_id].to_i)
