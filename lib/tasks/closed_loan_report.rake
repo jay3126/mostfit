@@ -22,7 +22,7 @@ namespace :mostfit do
     loan_ids = LoanHistory.all(:loan_id => all_loan_ids, :status => [:repaid, :preclosed, :claim_settlement]).aggregate(:loan_id)
 
     sl_no = 0
-    date = Date.new(2012, 03, 22)
+    date = Date.new(2012, 03, 31)
 
     loan_ids.each do |l|
 
@@ -56,4 +56,47 @@ namespace :mostfit do
     end
     f.close
   end
+
+  desc "Report to find loans which are repaid, closed for Intellecash"
+  task :loan_closed_report_for_a_period do
+    f = File.open("tmp/closed_loan_report_for_a_period_#{DateTime.now.to_s}.csv", "w")
+    f.puts("\"Sl.No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Client Group\", \"Loan Id\", \"Loan Amount\", \"Disbursement Date\", \"Loan Closing Date\", \"Status of loan\", \"Processing Fees Collected from Client\", \"Actual Outstanding Principal\", \"Actual Outstanding Interest\"")
+
+    all_loan_ids = LoanHistory.all(:date.gte => Date.new(2012, 03, 21), :date.lte => Date.new(2012, 03, 31), :status => [:repaid, :preclosed, :claim_settlement]).aggregate(:loan_id)
+    loan_ids = LoanHistory.latest({:loan_id => all_loan_ids})
+
+    sl_no = 0
+    date = Date.new(2012, 03, 31)
+
+    loan_ids.each do |l|
+
+      sl_no += 1
+
+      loan = Loan.get(l.loan_id)
+      loan_id = loan.id
+      loan_amount = loan.amount
+      loan_disbursal_date = loan.disbursal_date
+      loan_closing_date = l.date
+      loan_status = loan.status.to_s.capitalize rescue "Something went wrong"
+      loan_actual_outstanding_principal = loan.actual_outstanding_principal_on(date) rescue "Something went wrong"
+      loan_actual_outstanding_interest = loan.actual_outstanding_interest_on(date) rescue "Something went wrong"
+
+      client_id = l.client_id
+      client_name = l.client.name
+      client_group_name = l.client.client_group.name rescue "Not Attached to any group"
+
+      center_id = l.center_id
+      center_name = l.center.name
+
+      branch_id = l.branch_id
+      branch_name = l.branch.name
+
+      fees = Payment.all(:type => :fees, :fee_id => Fee.first.id, :loan_id => loan_id, :client_id => client_id)
+      fees_amount = fees[0].amount rescue "No Fees"
+
+      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", \"#{client_group_name}\", #{loan_id}, #{loan_amount}, #{loan_disbursal_date}, #{loan_closing_date}, \"#{loan_status}\", #{fees_amount}, #{loan_actual_outstanding_principal}, #{loan_actual_outstanding_interest}")
+    end
+    f.close
+  end
+
 end
