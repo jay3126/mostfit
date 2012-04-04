@@ -1,2 +1,36 @@
-%h1
-  = "Health checked for Loan Files"
+
+.shaded
+  %h2
+    = "Health checked for Loan Files"
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty?
+    %table.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "Loan file Identifier"
+          %th
+            = "Center name"
+          %th
+            = "Number of applications"
+          %th
+            = "Health check status"
+          %th
+            = "Remark"
+      %tbody
+        - @loan_files_at_center_at_branch_for_cycle.each do |lf|
+          - unless lf.health_check_status == "Pending"
+            %tr
+              %td
+                = lf.loan_file_identifier
+              %td
+                = Center.get(lf.at_center_id).name
+              %td
+                = lf.loan_applications.count
+              %td
+                = lf.health_check_status
+              %td
+                = lf.health_status_remark
+  - else
+    No Loan Files found for health checked.
+
+%br
