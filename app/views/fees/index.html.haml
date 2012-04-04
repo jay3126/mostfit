@@ -12,9 +12,9 @@
       %th
         Description
       %th
-        Show
+        Payable On
       %th
-        Edit
+        Action
   - for fee in @fees
     %tr{:class => cycle('odd','even')}
       %td
@@ -22,7 +22,10 @@
       %td
         = fee.description
       %td
-        = link_to 'Show', url(:fee, fee)
+        = fee.payable_on.humanize
       %td
+        = link_to 'Show', url(:fee, fee)
+        &nbsp;
+        |
+        &nbsp;
         = link_to 'Edit', url(:edit_fee,  fee)
-
