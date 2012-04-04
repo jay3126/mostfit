@@ -44,7 +44,8 @@ module Pdf
               next if not lh
               next if LOANS_NOT_PAYABLE.include? lh.status
               loan_row_count+=1
-              fee = fees_applicable[loan.id] ? fees_applicable[loan.id].due : 0
+              #fee = fees_applicable[loan.id] ? fees_applicable[loan.id].due : 0
+              fee = loan.total_fees_payable_on(date) || 0
               actual_outstanding = (lh ? lh.actual_outstanding_principal : 0)
               principal_due      = [(lh ? lh.principal_due : 0), 0].max
               interest_due       = [(lh ? lh.interest_due : 0), 0].max

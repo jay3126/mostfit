@@ -1,10 +1,10 @@
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
-  =form_for(@staff_member, :action => url(:day_sheet, @staff_member), :method => :get) do
+  = form_for(@staff_member, :action => url(:day_sheet, @staff_member), :method => :get) do
     Change date
     = date_select "date", @date
-    =submit "Go"
+    = submit "Go"
     - all_centers = @staff_member.centers
-    -if all_centers.length>0
+    - if all_centers.length>0
       = link_to 'previous day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.lt => @date).max(:date))
       = link_to 'next day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.gt => @date).min(:date)), :style => "padding-left: 120px;"
 %h1 
@@ -27,7 +27,8 @@
     = center.code
     ) at 
     = "#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
-  = partial "centers/payments", {:clients => center.clients, :branch => center.branch, :center => center, :date => @date, :loans => center.loans}
+  - clients = Client.all(:center_id => center.id, :active => true, :date_joined.lte => @date, :fields => [:id, :name, :client_group_id, :center_id])
+  = partial "centers/payments_new", {:clients => clients, :branch => center.branch, :center => center, :date => @date, :loans => center.clients.loans}
   - clients = center.clients
   - loans_to_disburse = clients.loans(:scheduled_disbursal_date => @date)
   - if clients.count > 0 and loans_to_disburse.count > 0
