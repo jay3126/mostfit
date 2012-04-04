@@ -76,7 +76,7 @@ class LoanApplication
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def is_unique_for_center_cycle?
-    unless client_id.nil?
+    unless client_id.nil? or self.saved?
       client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
       return [false, "A loan application for this client #{client_id} already exists for the current loan cycle"] if client_ids.include?(client_id)
     end

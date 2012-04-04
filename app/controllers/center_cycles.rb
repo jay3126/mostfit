@@ -1,20 +1,38 @@
 class CenterCycles < Application
 
-  def new
+  provides :xml, :yaml, :js, :html
+  
+  def create
     center =  Center.get(params[:center_id])
-    center_cycle  = center.center_cycles.new(:closed_on => params[:date], :created_by => session.user.id,
-                                             :initiated_by_staff_id => center.manager.id, :created_at => Date.today)
-     if center_cycle.save
-       message = "Save Succussfully"
-     else
-       message = "Can not save..."
-     end
-    redirect resource(center) ,:message => {:notice => message}
+    center_cycle  = center.center_cycles.new(:initiated_on => params[:initiated_date], :created_by => session.user.id,
+      :initiated_by_staff_id => center.manager.id, :created_at => Date.today, :cycle_number => 1,
+      :status => 'open_center_cycle_status')
+    if center_cycle.save
+      redirect resource(center.branch, center) ,:message => {:notice => "Save Successfully"}
+    else
+      redirect resource(center.branch, center) ,:message => {:error => "Cannot save..."}
+    end
   end
 
   def update(id)
     center_cycle = CenterCycle.get params[:id]
-    center_cycle.update(params[])
+    center = center_cycle.center
+    unless params[:closed_date].blank?
+      if Date.today >= Date.parse(params[:closed_date])
+        center_cycle.update(:status => 'closed_center_cycle_status', :closed_on => params[:closed_date], :closed_by_staff_id => center.manager.id)
+      else
+        error = "INVALID DATE"
+      end
+    else
+      c_number = center_cycle.cycle_number + 1
+      center_cycle.update(:status => 'open_center_cycle_status', :closed_on => nil, :cycle_number => c_number, :closed_by_staff_id => nil, :initiated_on => params[:initiated_date])
+    end
+    
+    if center_cycle.errors.blank? && error.blank?
+      redirect resource(center.branch, center), :message => {:notice => "Save Successfully"}
+    else
+      redirect resource(center.branch, center), :message => {:error => "Cannot update.."}
+    end
   end
 
 end # AccountBalances
