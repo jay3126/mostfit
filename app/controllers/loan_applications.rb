@@ -20,18 +20,10 @@ class LoanApplications < Application
         @errors << "Please select a Staff Member" if params[:staff_member_id].empty?
         @errors << "Please select a created on date" if params[:created_on].empty?
       else 
+        loan_applications_facade = LoanApplicationsFacade.new(session.user)
         client_ids.each do |client_id|
           client = Client.get(client_id)
-          hash = client.to_loan_application + {
-            :amount              => params[:clients][client_id][:amount],
-            :created_by_staff_id => params[:staff_member_id].to_i,
-            :at_branch_id        => params[:at_branch_id].to_i,
-            :at_center_id        => params[:at_center_id].to_i,
-            :created_by_user_id  => session.user.id,
-            :center_cycle_id     => center_cycle.id,
-            :created_on          => created_on
-          }
-          loan_application = LoanApplication.new(hash) if params[:clients][client_id][:selected] == "on"
+          loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, params[:at_branch_id].to_i, params[:at_center_id].to_i, center_cycle.id, params[:staff_member_id].to_i, created_on) if params[:clients][client_id][:selected] == "on"
           save_status = loan_application.save if loan_application
           @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
         end
@@ -79,11 +71,15 @@ class LoanApplications < Application
       created_on = Date.parse(params[:created_on])
       center_cycle_number = params[:center_cycle_number].to_i
       center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-      @loan_application = LoanApplication.new(loan_application)
-      @loan_application.client_dob = client_dob
-      @loan_application.created_on = created_on || Date.today
-      @loan_application.created_by_user_id = session.user.id
-      @loan_application.center_cycle_id = center_cycle.id
+      loan_applications_facade = LoanApplicationsFacade.new(session.user)
+      new_application_info = {}
+      loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
+      new_application_info.delete(:amount)
+      new_application_info.delete(:at_branch_id)
+      new_application_info.delete(:at_center_id)
+      new_application_info.delete(:created_by_staff_id)
+      new_application_info += {:client_dob => client_dob}
+      @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
       if @loan_application.save
         @loan_applications << @loan_application
         message[:success] = "The Loan Application has been successfully saved"        

@@ -9,9 +9,29 @@ class LoanApplicationsFacade
   # creation
 
   def create_for_client(client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
+    hash = client.to_loan_application + {
+      :amount              => loan_amount,  #params[:clients][client_id][:amount],
+      :created_by_staff_id => by_staff,     #params[:staff_member_id].to_i,
+      :at_branch_id        => at_branch,    #params[:at_branch_id].to_i,
+      :at_center_id        => at_center,    #params[:at_center_id].to_i,
+      :created_by_user_id  => @user.id,      #session.user.id,
+      :center_cycle_id     => for_cycle, #center_cycle.id,
+      :created_on          => on_date       #created_on1
+    }
+    loan_application = LoanApplication.new(hash)
   end
 
   def create_for_new_applicant(new_application_info, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
+    hash = new_application_info + {
+      :amount              => loan_amount,
+      :at_branch_id        => at_branch,
+      :at_center_id        => at_center,
+      :center_cycle_id     => for_cycle,
+      :created_by_staff_id => by_staff,
+      :created_on          => on_date,
+      :created_by_user_id  => @user.id
+    }
+    loan_application = LoanApplication.new(hash)
   end
 
   # General information

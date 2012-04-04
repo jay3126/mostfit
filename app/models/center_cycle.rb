@@ -8,6 +8,7 @@ class CenterCycle
   # The cycle has a cycle number that identifies it
   # Cycle numbers are monotonically increasing integers starting at 1,
   # and bumped up by one, each time a new cycle is begun at a center
+  before :create, :is_cycle_incremented?
   
   property :id,                    Serial
   property :cycle_number,          Integer, :nullable => false, :min => 1
@@ -52,8 +53,6 @@ class CenterCycle
   belongs_to :center, :nullable => false
   
   has n, :loan_applications
-
-  validates_with_method :is_cycle_incremented?
 
   def schedule_CGT(cgt_dates, performed_by, scheduled_by_staff, scheduled_by_user)
     raise ArgumentError, "Three different dates for CGT must be supplied. Dates supplied were: #{cgt_dates}" unless ((cgt_dates.uniq).length == 3)
