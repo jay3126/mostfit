@@ -5,13 +5,15 @@
         - if @errors[lap_id]
           = "#{@errors[lap_id]}"
           %br
+%h1
+  = "Health check for Loan Files"
 
 %form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
   = partial "lib/branch_center_selector"
 
-%h1
-  = "Health check for Loan Files"
 .shaded
+  %h2
+    = "Health check for Loan Files"
   - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty?
     = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
       = hidden_field :name => 'branch_id', :value => @branch.id
@@ -50,3 +52,7 @@
               %input{:value => "Reset all", :type => "reset"}
   - else
     No Loan Files found for health checkup.
+
+%br
+
+= partial :health_checked
