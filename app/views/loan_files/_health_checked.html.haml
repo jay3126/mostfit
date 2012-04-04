@@ -2,7 +2,8 @@
 .shaded
   %h2
     = "Health checked for Loan Files"
-  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty?
+  - statuses = @loan_files_at_center_at_branch_for_cycle.aggregate(:health_check_status)
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && statuses.include?('1')
     %table.form{:style => "width:100%;"}
       %thead
         %tr

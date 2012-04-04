@@ -33,16 +33,10 @@ class LoanFiles < Application
     elsif params[:center_id] && params[:center_id].empty?
       @errors["Loan File"] = "Please select center"
     end
-    @branch = Branch.get(params[:branch_id].to_i) 
-    @center = Center.get(params[:center_id].to_i)
-    for_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-    facade = LoanApplicationsFacade.new(session.user)
-    @loan_files_at_center_at_branch_for_cycle = facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
-    render :health_checkup
+    fetch_loan_files_for_branch_and_center(params)
   end
 
   def record_health_check_status
-    if request.method == :post
       @errors = {}
       loan_files =  params[:loan_files].keys
       loan_files.each do |loan_file_id|
@@ -51,7 +45,12 @@ class LoanFiles < Application
         status = loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_status_remark) if params[:loan_files][loan_file_id][:health_check_status] == 'on'
         @errors[loan_file.id] = loan_file.errors if status == false
       end
-    end
+    fetch_loan_files_for_branch_and_center(params)
+  end
+
+  private
+
+  def fetch_loan_files_for_branch_and_center(params)
     @branch = Branch.get(params[:branch_id].to_i)
     @center = Center.get(params[:center_id].to_i)
     for_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
