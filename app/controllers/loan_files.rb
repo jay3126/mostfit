@@ -5,7 +5,6 @@ class LoanFiles < Application
   end
 
   def get_loan_applications
-    debugger
     @branch_id = params['branch_id'] ? params['branch_id'] : nil
     @center_id = params['center_id'] ? params['center_id'] : nil
     facade = LoanApplicationsFacade.new(session.user)
