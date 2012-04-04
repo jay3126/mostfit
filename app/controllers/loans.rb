@@ -443,16 +443,28 @@ class Loans < Application
   end
 
   def unpreclose(id)
-    raise NotPrivileged unless [:mis_manager, :admin].include?(session.user.role) # this should be handled by the ACL
     @loan = Loan.get(id)
     raise NotFound unless @loan
     @loan.preclosed_on = @loan.preclosed_by = nil
-    @loan.save
-    redirect request.referer, :message => {:success => "Loan has been unpreclosed!"}
+    if @loan.save
+      redirect request.referer, :message => {:success => "Loan has been unpreclosed!"}
+    else
+      redirect request.referer, :message => {:error => "Loan could not be unpreclosed because #{@loan.errors.values.join(',')}"}
+    end
   end
 
-                    
-  
+  def unreject(id)
+    @loan = Loan.get(id)
+    raise NotFound unless @loan
+    @loan.rejected_on = @loan.rejected_by = nil
+    if @loan.save
+      @loan.update_history
+      @loan.update_loan_cache
+      redirect request.referer, :message => {:success => "Loan status restored back to #{@loan.status.to_s}"}
+    else
+      redirect request.referer, :message => {:error => "Loan status could not be restored because #{@loan.errors.values.join(',')}"}
+    end
+  end
     
   def diagnose(id)
     @loan = Loan.get(id)

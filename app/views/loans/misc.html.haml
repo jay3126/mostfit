@@ -16,20 +16,26 @@
         = submit 'Reallocate loans with style', :class => "grey_button", :style => "margin: 4px"
         = repayment_style_select
 
-.box
-  %fieldset
-    - if @loan.status == :outstanding    
-      %legend Preclose
-      = link_to("Prepay This Loan",  url(:prepay_loan, @loan.id), :class => "_remote_ grey_button")
-    - if @loan.status == :preclosed
-      %legend Unpreclose(!)
-      = link_to 'Unpreclose', url(:controller => :loans, :action => :unpreclose, :id => @loan.id), :class => "grey_button"
-
 - if [:admin, :mis_manager].include?(session.user.role)
   .box
     %fieldset
-      %legend Levy Penalty/Fee
-      = partial "applicable_fees/form", :layout => false
+      - if @loan.status == :outstanding    
+        %legend Preclose
+        = link_to("Prepay This Loan",  url(:prepay_loan, @loan.id), :class => "_remote_ grey_button")
+      - if @loan.status == :preclosed
+        %legend Unpreclose(!)
+        = link_to 'Unpreclose', url(:controller => :loans, :action => :unpreclose, :id => @loan.id), :class => "grey_button"
+
+- if session.user.role == :admin
+  .box
+    %fieldset
+      - if @loan.status == :rejected
+        %legend Unreject
+        = link_to 'Unreject the loan', url(:controller => :loans, :action => :unreject, :id => @loan.id), :class => "grey_button"
+
+- if [:admin, :mis_manager].include?(session.user.role)
+  .box
+    = partial "applicable_fees/form", :layout => false
 
   .box
     %fieldset
