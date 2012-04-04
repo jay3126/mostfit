@@ -74,9 +74,10 @@ class LoanApplicationsFacade
   # Locate loan files
 
   def locate_loan_file(by_loan_file_identifier)
-    LoanFile.locate_loan_file(by_identifier)
+    LoanFile.locate_loan_file(by_loan_file_identifier)
   end
 
+  #get a single loan file at a center, at a branch for a cycle number 
   def locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
     LoanFile.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
   end
