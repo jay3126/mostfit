@@ -28,6 +28,11 @@ class LoanApplicationInfo
     return nil unless (self_latest_cpv_at and other_latest_cpv_at)
     self_latest_cpv_at <=> other_latest_cpv_at
   end
+
+  # returns the age of the client as calculated from her year of birth
+  def client_age
+    client_dob.nil? ? nil : (Date.today.year - client_dob.year)
+  end
 end
 
 class LoanApplication

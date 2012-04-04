@@ -1,36 +1,42 @@
-%h3
-  = "Log of Loan File <loan_file_identifier>"
+- if @loan_file
+  %h1
+    = "Log of Loan File #{@loan_file.loan_file_identifier}"
 
-%table{:style => "width:100%;"}
-  %thead
-    %tr
-      %th{:width => '5%'}
-        = "Sr.No."
-      %th
-        = "Loan Application ID"
-      %th
-        = "Name"
-      %th
-        = "Address"
-      %th
-        = "Age"
-      %th
-        = "Loan Amount"
-  %tbody
-    - if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
+- if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
+  - loan_applications_added_to_loan_file_sorted = @loan_applications_added_to_loan_file.sort.reverse
+  %table{:style => "width:100%;"}
+    %thead
+      %tr
+        %th{:width => '5%'}
+          = "Sr.No."
+        %th{:width => '10%'}
+          = "Loan Application ID"
+        %th
+          = "Name"
+        %th
+          = "Age"
+        %th
+          = "Address"
+        %th
+          = "Loan Amount"
+    %tbody
       - srno = 0
-      - @loan_applications_added_to_loan_file.each do |laa|
+      - loan_applications_added_to_loan_file_sorted.each do |laa|
         %tr
           %td
             - srno = srno + 1
             = srno
           %td
-            = laa.id
+            = laa.loan_application_id
           %td
             = laa.client_name
           %td
-            = (Date.today - lap.client_dob).display
+            = (laa.client_age.nil? ? "Unknown" : laa.client_age)
           %td
             = laa.client_address
           %td
             = laa.amount
+%br
+- if not @loan_applications_added_to_loan_file or @loan_applications_added_to_loan_file.empty?
+  %h3
+    = "No recently added loan applications"

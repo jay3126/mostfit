@@ -4,7 +4,7 @@
 
 %table.shaded
   %tbody
-    - unless @grt_is_complete
+    - if not @grt_is_complete
       %tr
         %td
           = "Completed on"
@@ -18,20 +18,19 @@
         %th
           %b
             = "Result: "
-        %td
-          = input :name => 'grt_result', :type => 'radio', :id => 'grt_result_passed', :value => true
-        %td
+        %td{:colspan => 2}
+          %input{:name => 'grt_result', :type => 'radio', :id => 'grt_result_passed', :value => true}
           = "G.R.T. Passed"
-        %td
-          = input :name => 'grt_result', :type => 'radio', :id => 'grt_result_failed', :value => false
-        %td
+        %td{:colspan => 2}
+          %input{:name => 'grt_result', :type => 'radio', :id => 'grt_result_failed', :value => false}
           = "G.R.T. Failed"
     - else
       %tr
         %td
           - if @grt_result
             = "G.R.T. passed on #{grt_completed_on} by #{grt_completed_by}" 
-              %td
-                = submit "Generate Loan File" 
+            %td
+              = submit "Generate Loan File" 
           - else
             = "G.R.T. failed on #{grt_completed_on} by #{grt_completed_by}"
+%br

@@ -1,3 +1,4 @@
+require 'pdf/quickref'
 module Pdf
   module LoanSchedule
 
@@ -18,8 +19,8 @@ module Pdf
         client_info.data.push({ "identifier" => "Amount Disbursed", "value" => "#{self.amount.to_currency} by #{self.disbursed_by.name} on #{self.disbursal_date.strftime("%d-%m-%Y")}"}) 
       end
       client_info.data.push({ "identifier" => "Loan Product", "value" => self.loan_product.name },
-                            { "identifier" => "Loan Type", "value" => self.type.to_s }
-                            )
+        { "identifier" => "Loan Type", "value" => self.type.to_s }
+      )
       self.applicable_fees.each_with_index do |fee, idx|
         client_info.data.push({ "identifier" => "Fee #{idx + 1}", "value" => "#{Fee.get(fee.fee_id).name} of amount #{fee.amount} applicable on #{fee.applicable_on.strftime("%d-%m-%Y")}"})
       end
@@ -40,11 +41,11 @@ module Pdf
         scheduled_principal = i > 0 ? (loan_history[i-1].scheduled_outstanding_principal - lh.scheduled_outstanding_principal) : 0
         scheduled_interest =  i > 0 ? (loan_history[i-1].scheduled_outstanding_total - lh.scheduled_outstanding_total - scheduled_principal) : 0
         table.data.push({"Date Due" => lh.date, "Scheduled Balance" => lh.scheduled_outstanding_principal.to_currency, 
-                          "Scheduled Principal" => scheduled_principal.to_currency,
-                          "Scheduled Interest" => scheduled_interest.to_currency, 
-                          "Scheduled Total" => (scheduled_principal + scheduled_interest).to_currency,
-                          "RO Signature" => "",
-                        })
+            "Scheduled Principal" => scheduled_principal.to_currency,
+            "Scheduled Interest" => scheduled_interest.to_currency,
+            "Scheduled Total" => (scheduled_principal + scheduled_interest).to_currency,
+            "RO Signature" => "",
+          })
         # if 
         # table.data.push({ "actual balance" => "",
         #                   "actual repayments"  => ""
@@ -61,6 +62,32 @@ module Pdf
       table.title_font_size = 14
       table.header_gap = 10
       table.render_on(pdf)
+      return pdf
+    end
+
+    def generate_disbursement_labels(id)
+      
+      folder   = File.join(Merb.root, "doc", "pdfs", "staff", self.name, "disbursement_sheets")
+      FileUtils.mkdir_p(folder)
+      filename = File.join(folder, "disbursement.pdf")
+      loan_file = LoanFile.get id
+      loan_applications = loan_file.loan_applications
+      pdf =  PDF::QuickRef.new("LETTER", 2)
+      pdf.body_font_size  = 12
+      loan_applications.each do |la|
+        center = Center.get(la.at_center_id)
+        pdf.h1 "Purpose of Loan                   #{la.id}"
+        pdf.h1 "Name                              #{la.status}"
+        pdf.h1 "Gtr. Name                         #{la.client_guarantor_name}"
+        pdf.h1 "Center Name                       #{center.name}"
+        pdf.h1 "Meeting Address                   #{center.address}"
+        pdf.h1 "Meeting Day / Time                #{center.meeting_day}/#{center.meeting_time}"
+        pdf.h1 "Disbursal Date        #{la.scheduled_disbursal_date}        Loan A/c. No.       1223445"
+        pdf.h1 "Start Date            2012/12/13                            End Date            2013/12/12"
+        pdf.body "\n"
+        pdf.body "\n"
+      end
+      pdf.save_as(filename)
       return pdf
     end
   end
