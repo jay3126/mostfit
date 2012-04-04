@@ -75,7 +75,7 @@
       - if Mfi.first.map_enabled
         %li#map
           Map
-    %div.tab    
+    %div.tab
       = partial "clients/list", :center_leader => @clients.first
       %p.menu-strip 
         = link_to 'Create new client', resource(@branch, @center, :clients, :new), :class => "add grey_button"
@@ -83,7 +83,7 @@
       - unless @center_cycle.blank?
         =form_for(@center_cycle, :action => resource(@center, @center_cycle), :method => :put) do
           %p.menu-strip
-            = @center_cycle.status
+            = "#{@center_cycle.cycle_number} - #{@center_cycle.status.humanize} "
             - if @center_cycle.is_open?
               = date_select "closed_date", @center_cycle.initiated_on, :id => "cycle_date", :min_date => @center_cycle.initiated_on, :max_date => Date.today
               = submit "Stop"
