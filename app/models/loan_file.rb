@@ -65,7 +65,12 @@ class LoanFile
   end
 
   def self.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
-    first(:at_branch_id => at_branch, :at_center_id => at_center, :for_cycle_number => for_cycle_number).to_info
+    laf = first(:at_branch_id => at_branch, :at_center_id => at_center, :for_cycle_number => for_cycle_number)
+    if laf.nil?
+      nil
+    else
+      laf.to_info
+    end
   end
   
   def self.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
