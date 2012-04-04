@@ -13,10 +13,10 @@
               = "Loan Application ID"
             %th
               = "Name"
-            %th
-              = "Address"
             %th{:width => '5%'}
               = "Age"
+            %th
+              = "Address"
             %th
               = "Loan Amount"
         %tbody.form
@@ -35,9 +35,9 @@
               %td
                 = lap.client_name
               %td
-                = lap.client_address
-              %td
                 = (Date.today - lap.client_dob).display
+              %td
+                = lap.client_address
               %td
                 = lap.amount
         %tfoot
