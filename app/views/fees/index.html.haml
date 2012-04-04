@@ -8,6 +8,8 @@
   %thead
     %tr
       %th
+        Id
+      %th
         Name
       %th
         Description
@@ -17,6 +19,8 @@
         Action
   - for fee in @fees
     %tr{:class => cycle('odd','even')}
+      %td
+        = fee.id
       %td
         = fee.name
       %td
