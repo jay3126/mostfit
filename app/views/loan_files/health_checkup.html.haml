@@ -1,0 +1,58 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+%h1
+  = "Health check for Loan Files"
+
+%form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
+  = partial "lib/branch_center_selector"
+
+.shaded
+  %h2
+    = "Health check for Loan Files"
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty?
+    = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
+      = hidden_field :name => 'branch_id', :value => @branch.id
+      = hidden_field :name => 'center_id', :value => @center.id
+      %table.form{:style => "width:100%;"}
+        %thead
+          %tr
+            %th
+              = "Approve files."
+            %th
+              = "Loan file Identifier"
+            %th
+              = "Center name"
+            %th
+              = "Number of applications"
+            %th
+              = "Remark"
+        %tbody
+          - @loan_files_at_center_at_branch_for_cycle.each do |lf|
+            - unless lf.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
+              %tr
+                %td
+                  = check_box :name => "[loan_files][#{lf.id}][health_check_status]"
+                %td
+                  = lf.loan_file_identifier
+                %td
+                  = Center.get(lf.at_center_id).name
+                %td
+                  = lf.loan_applications.count
+                %td
+                  = text_field :name => "[loan_files][#{lf.id}][health_status_remark]"
+        %tfoot
+          %tr
+            %td{:colspan => 6, :style=>"text-align : center" }
+              = submit "Save all"
+              %input{:value => "Reset all", :type => "reset"}
+  - else
+    No Loan Files found for health checkup.
+
+%br
+
+= partial :health_checked

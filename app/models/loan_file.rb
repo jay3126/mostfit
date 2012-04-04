@@ -1,8 +1,9 @@
 class LoanFileInfo
 
-  attr_reader :loan_file_identifier, :at_branch_id, :at_center_id, :for_cycle_number, :scheduled_disbursal_date, :scheduled_first_payment_date, :created_by_staff_id, :created_on, :created_by, :created_at, :loan_applications
+  attr_reader :id, :loan_file_identifier, :at_branch_id, :at_center_id, :for_cycle_number, :scheduled_disbursal_date, :scheduled_first_payment_date, :created_by_staff_id, :created_on, :created_by, :created_at, :loan_applications
 
-  def initialize(loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_by_staff_id, created_on, created_by, created_at, loan_applications = [])
+  def initialize(id, loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_by_staff_id, created_on, created_by, created_at, loan_applications = [])
+    @id = id
     @loan_file_identifier = loan_file_identifier
     @at_branch_id = at_branch_id
     @at_center_id = at_center_id
@@ -68,10 +69,8 @@ class LoanFile
   end
   
   def self.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
-    loan_files_infos = all(:at_branch_id => at_branch, 
-                     :at_center_id => at_center, 
-                     :for_cycle_number => for_cycle_number).collect { |lf| lf.to_info}
-    loan_files_infos
+    loan_files = all(:at_branch_id => at_branch, :at_center_id => at_center, :for_cycle_number => for_cycle_number)#.collect{ |lf| lf.to_info}
+    loan_files
   end
 
   def self.get_loan_file_info(loan_file_identifier)
