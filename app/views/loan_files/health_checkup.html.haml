@@ -1,3 +1,9 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});
+  });
+
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -14,7 +20,8 @@
 .shaded
   %h2
     = "Health check for Loan Files"
-  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty?
+  - statuses = @loan_files_at_center_at_branch_for_cycle.aggregate(:health_check_status)
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && statuses.include?('2')
     = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
       = hidden_field :name => 'branch_id', :value => @branch.id
       = hidden_field :name => 'center_id', :value => @center.id
@@ -22,6 +29,7 @@
         %thead
           %tr
             %th
+              = check_box :id => "toggle_select"
               = "Approve files."
             %th
               = "Loan file Identifier"
@@ -36,7 +44,7 @@
             - unless lf.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
               %tr
                 %td
-                  = check_box :name => "[loan_files][#{lf.id}][health_check_status]"
+                  = check_box :name => "[loan_files][#{lf.id}][health_check_status]", :class => "select"
                 %td
                   = lf.loan_file_identifier
                 %td
