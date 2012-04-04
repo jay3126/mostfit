@@ -1,0 +1,67 @@
+%h1
+  = "Loan File #{@loan_file.id}"
+.shaded
+  = "Branch #{Branch.get(@loan_file.at_branch_id).name}"
+  = "Center #{Center.get(@loan_file.at_branch_id).name}"
+  = "Status #{@loan_file.health_check_status}"
+  
+%br
+%hr
+
+.shaded
+  %h2
+    = "Loan Applications"
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "ID"
+        %th
+          = "Name"
+        %th
+          = "Guarantor Name"
+        %th
+          = "Relationship"
+        %th
+          = "Applicant Birth Date"
+        %th
+          = "Ration Card No."
+        %th
+          = "Voter Card No."
+        %th
+          = "Amount"
+        %th
+          = "Address"
+        %th
+          = "State"
+        %th
+          = "Pincode"
+        %th
+          = "Status"
+    %tbody
+      - @loan_file.loan_applications.each do |lap|
+        %tr
+          %td
+            = lap.id
+          %td
+            = lap.client_name
+          %td
+            = lap.client_guarantor_name
+          %td
+            = lap.client_guarantor_relationship
+          %td
+            = lap.client_dob
+          %td
+            = lap.client_reference1
+          %td
+            = lap.client_reference2
+          %td
+            = lap.amount
+          %td
+            = lap.client_address
+          %td
+            = lap.client_state
+          %td
+            = lap.client_pincode
+          %td
+            = lap.status

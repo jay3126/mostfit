@@ -1,7 +1,14 @@
 class LoanFiles < Application
 
   def index
+    @loan_file = LoanFile.all
     render :index
+  end
+
+  def show(id)
+    @loan_file = LoanFile.get(id)
+    raise NotFound unless @loan_file
+    display @loan_file
   end
 
   def get_loan_applications
@@ -37,14 +44,14 @@ class LoanFiles < Application
   end
 
   def record_health_check_status
-      @errors = {}
-      loan_files =  params[:loan_files].keys
-      loan_files.each do |loan_file_id|
-        loan_file = LoanFile.get(loan_file_id)
-        health_status_remark = params[:loan_files][loan_file_id][:health_status_remark]
-        status = loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_status_remark) if params[:loan_files][loan_file_id][:health_check_status] == 'on'
-        @errors[loan_file.id] = loan_file.errors if status == false
-      end
+    @errors = {}
+    loan_files =  params[:loan_files].keys
+    loan_files.each do |loan_file_id|
+      loan_file = LoanFile.get(loan_file_id)
+      health_status_remark = params[:loan_files][loan_file_id][:health_status_remark]
+      status = loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_status_remark) if params[:loan_files][loan_file_id][:health_check_status] == 'on'
+      @errors[loan_file.id] = loan_file.errors if status == false
+    end
     fetch_loan_files_for_branch_and_center(params)
   end
 
