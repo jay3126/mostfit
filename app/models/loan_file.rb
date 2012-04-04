@@ -44,7 +44,7 @@ class LoanFile
 
   def to_info
     loan_applications = self.loan_applications.collect{|lap| lap.to_info}
-    LoanFileInfo.new(loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_on, created_by_staff_id, created_by, created_at, loan_applications)
+    LoanFileInfo.new(id, loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_on, created_by_staff_id, created_by, created_at, loan_applications)
   end
 
   def self.generate_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user)

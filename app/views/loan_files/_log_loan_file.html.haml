@@ -31,7 +31,7 @@
           %td
             = laa.client_name
           %td
-            = (Date.today - laa.client_dob).display
+            = (laa.client_age.nil? ? "Unknown" : laa.client_age)
           %td
             = laa.client_address
           %td
