@@ -23,6 +23,7 @@ end
 class LoanFile
   include DataMapper::Resource
   include Constants::Status
+  include Pdf::LoanSchedule if PDF_WRITER
 
   property :id,                   Serial
   property :at_branch_id,         Integer, :nullable => false

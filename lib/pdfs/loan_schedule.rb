@@ -65,29 +65,27 @@ module Pdf
       return pdf
     end
 
-    def generate_disbursement_labels(id)
+    def generate_disbursement_labels_pdf
       
-      folder   = File.join(Merb.root, "doc", "pdfs", "staff", self.name, "disbursement_sheets")
-      FileUtils.mkdir_p(folder)
-      filename = File.join(folder, "disbursement.pdf")
-      loan_file = LoanFile.get id
-      loan_applications = loan_file.loan_applications
+      loan_applications = self.loan_applications
       pdf =  PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 12
+      pdf.h1_font_size = 11
+      count = 0
       loan_applications.each do |la|
+        count = count + 1
         center = Center.get(la.at_center_id)
         pdf.h1 "Purpose of Loan                   #{la.id}"
-        pdf.h1 "Name                              #{la.status}"
-        pdf.h1 "Gtr. Name                         #{la.client_guarantor_name}"
-        pdf.h1 "Center Name                       #{center.name}"
+        pdf.h1 "Name                                    #{la.status}"
+        pdf.h1 "Gtr. Name                             #{la.client_guarantor_name}"
+        pdf.h1 "Center Name                         #{center.name}"
         pdf.h1 "Meeting Address                   #{center.address}"
-        pdf.h1 "Meeting Day / Time                #{center.meeting_day}/#{center.meeting_time}"
-        pdf.h1 "Disbursal Date        #{la.scheduled_disbursal_date}        Loan A/c. No.       1223445"
-        pdf.h1 "Start Date            2012/12/13                            End Date            2013/12/12"
+        pdf.h1 "Meeting Day / Time              #{center.meeting_day}/#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
+        pdf.h1 "Disbursal Date        #{self.scheduled_disbursal_date}        Loan A/c. No.       1223445"
+        pdf.h1 "Start Date                2012/12/13        End Date               2013/12/12"
         pdf.body "\n"
-        pdf.body "\n"
+        pdf.body "\n" if count%5 == 0
       end
-      pdf.save_as(filename)
       return pdf
     end
   end
