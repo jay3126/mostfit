@@ -14,9 +14,9 @@
 
 .shaded
   %h2
-    = "Health check for Loan Files"
-  - statuses = @loan_files_at_center_at_branch_for_cycle.aggregate(:health_check_status)
-  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && statuses.include?('2')
+    = "Loan files pending for health checkup"
+  - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && (status_map.include?(Constants::Status::HEALTH_CHECK_PENDING) || status_map.include?(Constants::Status::HEALTH_CHECK_PENDING))
     = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
       = hidden_field :name => 'branch_id', :value => @branch.id
       = hidden_field :name => 'center_id', :value => @center.id
@@ -50,7 +50,7 @@
                   %input{:name => "[loan_files][#{lf.id}][health_check_status]", :type => "radio", :value => Constants::Status::HEALTH_CHECK_PENDING, :checked => "checked"}
                   Pending
                 %td
-                  = text_field :name => "[loan_files][#{lf.id}][health_status_remark]"
+                  = text_field :name => "[loan_files][#{lf.id}][health_status_remark]", :value => lf.health_status_remark
         %tfoot
           %tr
             %td{:colspan => 8, :style=>"text-align : center" }

@@ -78,7 +78,7 @@ class LoanFiles < Application
 
     render :loan_file_generation
   end
-
+  1
   def loan_files_for_health_checkup
     @errors = {}
     if params[:branch_id] && params[:branch_id].empty?
@@ -91,14 +91,26 @@ class LoanFiles < Application
 
   def record_health_check_status
     @errors = {}
+    fetch_loan_files_for_branch_and_center(params)
+
     loan_files =  params[:loan_files].keys
     loan_files.each do |loan_file_id|
       loan_file = LoanFile.get(loan_file_id)
-      health_status_remark = params[:loan_files][loan_file_id][:health_status_remark]
-      status = loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_status_remark) if params[:loan_files][loan_file_id][:health_check_status] == 'on'
-      @errors[loan_file.id] = loan_file.errors if status == false
+      health_remark = !params[:loan_files][loan_file_id][:health_status_remark].blank? ? params[:loan_files][loan_file_id][:health_status_remark] : loan_file.health_status_remark
+      health_status = !params[:loan_files][loan_file_id][:health_check_status].blank? ? params[:loan_files][loan_file_id][:health_check_status] : loan_file.health_check_status 
+      pending_or_new_status = health_status == Constants::Status::HEALTH_CHECK_PENDING || health_status == Constants::Status::NEW_STATUS
+      if pending_or_new_status
+        if health_remark.blank?
+          @message = "please provide remark to Loan file pending for health checkup"
+        else
+          loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_PENDING, :health_status_remark => health_remark )
+        end
+      else
+        loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_remark )
+      end
     end
-    fetch_loan_files_for_branch_and_center(params)
+    @errors["loan_file"] = @message unless @message.blank?
+    render :health_checkup
   end
 
   def generate_disbursement_labels
