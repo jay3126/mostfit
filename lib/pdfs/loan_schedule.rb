@@ -66,7 +66,7 @@ module Pdf
     end
 
     def generate_disbursement_labels_pdf
-      
+
       loan_applications = self.loan_applications
       pdf =  PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 12
@@ -75,14 +75,18 @@ module Pdf
       loan_applications.each do |la|
         count = count + 1
         center = Center.get(la.at_center_id)
-        pdf.h1 "Purpose of Loan                   #{la.id}"
-        pdf.h1 "Name                                    #{la.status}"
-        pdf.h1 "Gtr. Name                             #{la.client_guarantor_name}"
-        pdf.h1 "Center Name                         #{center.name}"
-        pdf.h1 "Meeting Address                   #{center.address}"
-        pdf.h1 "Meeting Day / Time              #{center.meeting_day}/#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
-        pdf.h1 "Disbursal Date        #{self.scheduled_disbursal_date}        Loan A/c. No.       1223445"
-        pdf.h1 "Start Date                2012/12/13        End Date               2013/12/12"
+        start_date = la.loan.loan_history.first.date.strftime('%d/%m/%Y') rescue ''
+        end_date = la.loan.loan_history.last.date.strftime('%d/%m/%Y') rescue ''
+        disburse_date = la.loan.scheduled_disbursal_date.strftime('%d/%m/%Y') rescue ''
+        loan_purpose = la.loan.loan_purpose rescue ''
+        pdf.h1 "<b>Purpose of Loan</b>                   #{loan_purpose}"
+        pdf.h1 "<b>Name</b>                                     #{la.client_name}"
+        pdf.h1 "<b>Gtr. Name</b>                             #{la.client_guarantor_name}"
+        pdf.h1 "<b>Center Name</b>                         #{center.name}"
+        pdf.h1 "<b>Meeting Address</b>                   #{center.address}"
+        pdf.h1 "<b>Meeting Day / Time</b>              #{center.meeting_day}/#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
+        pdf.h1 "<b>Disbursal Date</b>        #{disburse_date}        <b>Loan A/c. No.</b>       #{la.loan.id}"
+        pdf.h1 "<b>Start Date</b>                #{start_date}        <b>End Date</b>               #{end_date}"
         pdf.body "\n"
         pdf.body "\n" if count%5 == 0
       end

@@ -71,4 +71,4 @@
 .shaded
   %h2
     = "Actions"
-  = link_to "Download pdf", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button' if @loan_file.loan_applications.count > 0
+  = link_to "Download pdf", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button' if @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == 'ready_for_disbursement'
