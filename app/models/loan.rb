@@ -86,6 +86,7 @@ class Loan
   property :cheque_number,                     String,  :length => 20, :nullable => true, :index => true
   property :cycle_number,                      Integer, :default => 1, :nullable => false, :index => true
   property :loan_pool_id,                      Integer, :nullable => true, :index => true
+  property :loan_application_id,               Integer, :nullable => true
 
   #these amount and disbursal dates are required for TakeOver loan types. 
   property :original_amount,                    Integer
@@ -125,6 +126,7 @@ class Loan
   
 
   # associations
+  belongs_to :loan_application           :nullable => true
   belongs_to :client
   belongs_to :funding_line,              :nullable => true
   belongs_to :loan_product
