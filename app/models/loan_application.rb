@@ -51,11 +51,13 @@ class LoanApplication
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
   property :created_on,           Date,     :nullable => false
   property :amount,               Float,    :nullable => false
-
+  property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES)
+  property :credit_bureau_rated_at, DateTime
+  
   #basic client info
   property :client_id,            Integer,  :nullable => true
   property :client_name,          String,   :nullable => false
-  property :client_dob,           Date,     :nullable => false
+  property :client_dob,           Date
   property :client_address,       Text,     :nullable => false
   property :client_state,         Enum.send('[]', *STATES)
   property :client_pincode,       Integer,  :nullable => false
@@ -77,6 +79,7 @@ class LoanApplication
   has 1, :loan_authorization
   has 1, :loan
 
+  validates_present   :client_dob
   validates_is_unique :client_reference1, :scope => :center_cycle_id
   validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?

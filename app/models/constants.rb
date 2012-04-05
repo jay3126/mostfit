@@ -17,7 +17,8 @@ module Constants
 
   module Status
     #All constants that are related to statuses, handle with care
-
+    
+    CREDIT_BUREAU_STATUSES = [CreditBureau::RATED_POSITIVE, CreditBureau::RATED_NEGATIVE]
     CREATED_STATUS = :created; SENT_STATUS = :sent
     REQUEST_STATUSES = [CREATED_STATUS, SENT_STATUS, :response_received]
 
