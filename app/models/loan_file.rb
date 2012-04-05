@@ -84,4 +84,36 @@ class LoanFile
     loan_file ? loan_file.to_info : nil
   end
 
+  #is the loan file in the state that new clients can be created for loan applications which do not have any?
+  def is_ready_for_client_creation?
+    return true if self.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
+    return false
+  end
+
+  #creates corresponding client instances for loan applications which do not have ones.
+  def create_clients
+    #are we ready to create clients for this loan file ?
+    return false unless self.is_ready_for_client_creation?
+    
+    return_status = {:clients_created => [], :clients_not_created => []}
+
+    self.loan_applications.each do |l|
+      if l.client.nil? and l.client_id.nil?
+        Client.transaction do |t|
+        begin
+          c = Client.new(l.to_client)
+          c.save()
+          
+          #associate the client
+          l.client_id = c.id
+          return_status[:clients_created] << l.id
+        rescue 
+          t.rollback
+          return_status[:clients_not_created] << l.id
+        end
+       end
+      end 
+    end
+    return_status
+  end
 end

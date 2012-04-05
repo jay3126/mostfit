@@ -84,6 +84,22 @@ class LoanApplication
   validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
+  #gives info for creating clients using the given loan application 
+  def to_client
+    _to_client = {
+      :name => client_name,
+      :reference => client_reference1,
+      :reference_type => client_reference1_type,
+      :reference2 => client_reference2,
+      :reference2_type => client_reference2_type,
+      :date_of_birth => client_dob,
+      :address => client_address,
+      :pincode => client_pincode,
+      :state => client_state,
+      :spouse_name => client_guarantor_name
+     }
+  end
+
   def is_unique_for_center_cycle?
     unless client_id.nil? or self.saved?
       client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
