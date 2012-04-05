@@ -7,13 +7,13 @@
       %thead
         %tr
           %th
+            = "ID"
+          %th
             = "Loan file Identifier"
           %th
-            = "Center name"
-          %th
             = "Number of applications"
-          %th
-            = "Health checkup status"
+          %th{:colspan => 2, :align => "center"}
+            = "Status"
           %th
             = "Remark"
       %tbody
@@ -21,9 +21,9 @@
           - unless lf.health_check_status == "Pending"
             %tr
               %td
-                = lf.loan_file_identifier
+                = lf.id
               %td
-                = Center.get(lf.at_center_id).name
+                = link_to lf.loan_file_identifier, resource(lf)
               %td
                 = lf.loan_applications.count
               %td
@@ -31,6 +31,6 @@
               %td
                 = lf.health_status_remark
   - else
-    No Loan Files found for health checked.
+    No health checked Loan Files found.
 
 %br

@@ -1,8 +1,14 @@
 class LoanFiles < Application
 
+  # Index page is used for showing health checkup statuses by default
   def index
-    @loan_files = LoanFile.all(:order => [:created_at.desc])
-    render :index
+    @errors = {}
+    if params[:branch_id] && params[:branch_id].empty?
+      @errors["Loan File"] = "Please select a branch"
+    elsif params[:center_id] && params[:center_id].empty?
+      @errors["Loan File"] = "Please select center"
+    end
+    fetch_loan_files_for_branch_and_center(params)
   end
 
   def show(id)
@@ -59,8 +65,8 @@ class LoanFiles < Application
         laf.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
       else
         @loan_file = laf.create_loan_file(@branch_id, @center_id, @for_cycle_number, 
-                                       scheduled_disbursal_date, scheduled_first_payment_date, 
-                                       created_by_staff_id, created_on, *@loan_applications)
+          scheduled_disbursal_date, scheduled_first_payment_date,
+          created_by_staff_id, created_on, *@loan_applications)
       end
     else
       @errors['Loan File Generation'] = "No loan applications selected!"
