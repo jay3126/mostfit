@@ -126,7 +126,7 @@ class Loan
   
 
   # associations
-  belongs_to :loan_application           :nullable => true
+  belongs_to :loan_application,          :nullable => true
   belongs_to :client
   belongs_to :funding_line,              :nullable => true
   belongs_to :loan_product
