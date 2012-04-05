@@ -17,8 +17,7 @@ module Constants
 
   module Status
     #All constants that are related to statuses, handle with care
-    
-    CREDIT_BUREAU_STATUSES = [CreditBureau::RATED_POSITIVE, CreditBureau::RATED_NEGATIVE]
+
     CREATED_STATUS = :created; SENT_STATUS = :sent
     REQUEST_STATUSES = [CREATED_STATUS, SENT_STATUS, :response_received]
 
@@ -66,6 +65,8 @@ module Constants
     HEALTH_CHECK_PENDING = 'pending'
     READY_FOR_DISBURSEMENT = 'ready_for_disbursement'
     HEALTH_CHECK_STATUSES = [ NEW_STATUS, HEALTH_CHECK_PENDING, HEALTH_CHECK_APPROVED, READY_FOR_DISBURSEMENT ]
+    CREDIT_BUREAU_STATUSES = [NEW_STATUS, CreditBureau::RATED_POSITIVE, CreditBureau::RATED_NEGATIVE]
+
   end
 
   module Space

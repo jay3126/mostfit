@@ -51,7 +51,7 @@ class LoanApplication
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
   property :created_on,           Date,     :nullable => false
   property :amount,               Float,    :nullable => false
-  property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES)
+  property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => NEW_STATUS
   property :credit_bureau_rated_at, DateTime
   
   #basic client info
