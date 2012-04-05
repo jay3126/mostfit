@@ -1,9 +1,3 @@
-:javascript
-  $(document).ready(function() {
-  $('#toggle_select').change(function() {
-    $('.select').attr('checked',$(this).attr('checked'))});
-  });
-
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -14,7 +8,7 @@
 %h1
   = "Health checkup for Loan Files"
 
-%form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
+%form{:action => url(:controller => :loan_files, :action => :index), :method => :get}
   = partial "lib/branch_center_selector"
 %hr
 
@@ -30,14 +24,13 @@
         %thead
           %tr
             %th
-              = check_box :id => "toggle_select"
-              = "Approve files."
+              = "ID"
             %th
               = "Loan file Identifier"
             %th
-              = "Center name"
-            %th
               = "Number of applications"
+            %th{:colspan => 2, :align => "center"}
+              = "Status"
             %th
               = "Remark"
         %tbody
@@ -45,18 +38,22 @@
             - unless lf.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
               %tr
                 %td
-                  = check_box :name => "[loan_files][#{lf.id}][health_check_status]", :class => "select"
+                  = lf.id
                 %td
-                  = lf.loan_file_identifier
-                %td
-                  = Center.get(lf.at_center_id).name
+                  = link_to lf.loan_file_identifier, resource(lf)
                 %td
                   = lf.loan_applications.count
+                %td
+                  %input{:name => "[loan_files][#{lf.id}][health_check_status]", :type => "radio", :value => Constants::Status::HEALTH_CHECK_APPROVED}
+                  Approved
+                %td
+                  %input{:name => "[loan_files][#{lf.id}][health_check_status]", :type => "radio", :value => Constants::Status::HEALTH_CHECK_PENDING, :checked => "checked"}
+                  Pending
                 %td
                   = text_field :name => "[loan_files][#{lf.id}][health_status_remark]"
         %tfoot
           %tr
-            %td{:colspan => 6, :style=>"text-align : center" }
+            %td{:colspan => 8, :style=>"text-align : center" }
               = submit "Save all"
               %input{:value => "Reset all", :type => "reset"}
   - else

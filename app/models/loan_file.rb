@@ -23,6 +23,7 @@ end
 class LoanFile
   include DataMapper::Resource
   include Constants::Status
+  include Pdf::LoanSchedule if PDF_WRITER
 
   property :id,                   Serial
   property :at_branch_id,         Integer, :nullable => false
@@ -36,7 +37,7 @@ class LoanFile
   property :created_on,           Date, :nullable => false
   property :created_by,           Integer, :nullable => false
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
-  property :health_check_status,  Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => HEALTH_CHECK_PENDING
+  property :health_check_status,  Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => NEW_STATUS
   property :health_status_remark, Text, :nullable => true, :lazy => true
   
   has n, :loan_file_additions

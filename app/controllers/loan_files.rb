@@ -1,8 +1,14 @@
 class LoanFiles < Application
 
+  # Index page is used for showing health checkup statuses by default
   def index
-    @loan_files = LoanFile.all(:order => [:created_at.desc])
-    render :index
+    @errors = {}
+    if params[:branch_id] && params[:branch_id].empty?
+      @errors["Loan File"] = "Please select a branch"
+    elsif params[:center_id] && params[:center_id].empty?
+      @errors["Loan File"] = "Please select center"
+    end
+    fetch_loan_files_for_branch_and_center(params)
   end
 
   def show(id)
@@ -59,8 +65,8 @@ class LoanFiles < Application
         laf.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
       else
         @loan_file = laf.create_loan_file(@branch_id, @center_id, @for_cycle_number, 
-                                       scheduled_disbursal_date, scheduled_first_payment_date, 
-                                       created_by_staff_id, created_on, *@loan_applications)
+          scheduled_disbursal_date, scheduled_first_payment_date,
+          created_by_staff_id, created_on, *@loan_applications)
       end
     else
       @errors['Loan File Generation'] = "No loan applications selected!"
@@ -93,6 +99,17 @@ class LoanFiles < Application
       @errors[loan_file.id] = loan_file.errors if status == false
     end
     fetch_loan_files_for_branch_and_center(params)
+  end
+
+  def generate_disbursement_labels
+    loan_file = LoanFile.get params[:id]
+    raise NotFound unless loan_file
+    file = loan_file.generate_disbursement_labels_pdf
+    if file
+      send_data(file.to_s, :filename => "disbursement_labels_#{loan_file.id}.pdf")
+    else
+      redirect :back
+    end
   end
 
   private
