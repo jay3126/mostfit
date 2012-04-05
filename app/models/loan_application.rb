@@ -96,8 +96,12 @@ class LoanApplication
       :address => client_address,
       :pincode => client_pincode,
       :state => client_state,
-      :spouse_name => client_guarantor_name
-     }
+      :spouse_name => client_guarantor_name,
+      :created_by_staff_member_id => created_by_staff_id,
+      :created_by_user_id => created_by_user_id,
+      :center_id => at_center_id,
+      :date_joined => Date.today()
+    }
   end
 
   def is_unique_for_center_cycle?

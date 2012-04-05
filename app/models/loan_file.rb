@@ -100,17 +100,16 @@ class LoanFile
     self.loan_applications.each do |l|
       if l.client.nil? and l.client_id.nil?
         Client.transaction do |t|
-        begin
           c = Client.new(l.to_client)
-          c.save()
-          
-          #associate the client
-          l.client_id = c.id
-          return_status[:clients_created] << l.id
-        rescue 
-          t.rollback
-          return_status[:clients_not_created] << l.id
-        end
+          if c.save()
+            #associate the client
+            l.client_id = c.id
+            return_status[:clients_created] << l.id
+          else
+            puts c.errors
+            return_status[:clients_not_created] << l.id
+            t.rollback
+          end
        end
       end 
     end
