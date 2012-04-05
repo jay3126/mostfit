@@ -7,7 +7,7 @@ class BankAccount
 
   has n, :money_deposits
 
-  belongs_to :branch
+  belongs_to :bank_branch
 
 
 

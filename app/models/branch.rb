@@ -21,7 +21,6 @@ class Branch
   has n, :audit_trails, :auditable_type => "Branch", :child_key => ["auditable_id"]
   has n, :accounts
   has n, :api_accesses
-  has n, :bank_accounts
 
   belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false
   
