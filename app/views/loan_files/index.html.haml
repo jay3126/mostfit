@@ -24,9 +24,9 @@
           - unless lf.health_check_status == "pending"
             %tr
               %td
-                = link_to lf.id, resource(lf)
+                = lf.id
               %td
-                = lf.loan_file_identifier
+                = link_to lf.loan_file_identifier, resource(lf)
               %td
                 = Branch.get(lf.at_branch_id).name
               %td

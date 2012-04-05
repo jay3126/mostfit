@@ -12,10 +12,11 @@
           = "#{@errors[lap_id]}"
           %br
 %h1
-  = "Health check for Loan Files"
+  = "Health checkup for Loan Files"
 
 %form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
   = partial "lib/branch_center_selector"
+%hr
 
 .shaded
   %h2
@@ -60,7 +61,7 @@
               %input{:value => "Reset all", :type => "reset"}
   - else
     No Loan Files found for health checkup.
-
 %br
+%hr
 
 = partial :health_checked
