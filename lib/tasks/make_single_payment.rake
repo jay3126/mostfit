@@ -24,9 +24,10 @@ Run it without the second argument to record principal payments
 Run once again with the second argument to record only the interest payment
 USAGE_TEXT
 
-      LAN_NO_COLUMN = 'LAN No'
+      LAN_NO_COLUMN = 'reference'
       POS_COLUMN = 'POS'
-      AS_ON_DATE_COLUMN = 'AS On Date'
+      INTEREST_OUTSTANDING_COLUMN = 'Int OS'
+      AS_ON_DATE_COLUMN = 'arguments'
       RECEIVED_BY_STAFF_ID = 1; CREATED_BY_USER_ID = 1
       results = {}
       instance_file_prefix = 'single_payment' + '_' + DateTime.now.to_s
@@ -54,13 +55,21 @@ USAGE_TEXT
           file_options = {:headers => true}
           loan_ids_read = []; loans_not_found = []; loan_ids_updated = []; errors = []
           FasterCSV.foreach(file_to_read, file_options) do |row|
-            reference = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]
+            reference = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]; int_os_str = row[INTEREST_OUTSTANDING_COLUMN]
 
             pos = nil
             begin
               pos = pos_str.to_f
             rescue => ex
               errors << [reference, pos_str, "pos not parsed"]
+              next
+            end
+
+            int_os = nil
+            begin 
+              int_os = int_os_str.to_f
+            rescue => ex
+              errors << [reference, int_os_str, "int os not parsed"]
               next
             end
 
@@ -118,9 +127,10 @@ USAGE_TEXT
             end
 
             if record_interest_only
-              lh_rows = loan.loan_history(:date => as_on_date)
-              only_row = lh_rows[0] if lh_rows
-              interest_owed = only_row ? only_row.interest_due : 0
+              #lh_rows = loan.loan_history(:date => as_on_date)
+              #only_row = lh_rows[0] if lh_rows
+              interest_owed = loan.total_interest_to_be_received - int_os  
+              #interest_owed = only_row ? only_row.interest_due : 0
               if (interest_owed and (interest_owed > 0))
                 interest_payment_params = common_payment_params.merge(:type => :interest, :amount => interest_owed)
                 interest_payment = Payment.create(interest_payment_params)
