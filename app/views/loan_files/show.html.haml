@@ -1,10 +1,13 @@
 %h1
   = "Loan File #{@loan_file.id}"
-.shaded
-  = "Branch #{Branch.get(@loan_file.at_branch_id).name}"
-  = "Center #{Center.get(@loan_file.at_branch_id).name}"
-  = "Status #{@loan_file.health_check_status}"
-  
+.menu-strip
+  %h3
+    = "Branch #{Branch.get(@loan_file.at_branch_id).name}"
+    |
+    = "Center #{Center.get(@loan_file.at_center_id).name}"
+    - unless @loan_file.health_check_status.blank?
+      |
+      = "Status #{@loan_file.health_check_status}"
 %br
 %hr
 
@@ -61,3 +64,11 @@
             = lap.client_pincode
           %td
             = lap.status
+
+%br
+%hr
+
+.shaded
+  %h2
+    = "Actions"
+  = link_to "Health Check", url(:controller => :loan_files, :action => :loan_files_for_health_checkup, :branch_id => @loan_file.at_branch_id, :center_id => @loan_file.at_center_id)
