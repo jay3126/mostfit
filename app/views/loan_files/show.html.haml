@@ -67,8 +67,3 @@
 
 %br
 %hr
-
-.shaded
-  %h2
-    = "Actions"
-  = link_to "Health Check", url(:controller => :loan_files, :action => :loan_files_for_health_checkup, :branch_id => @loan_file.at_branch_id, :center_id => @loan_file.at_center_id)
