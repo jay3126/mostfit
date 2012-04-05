@@ -9,6 +9,4 @@ class BankAccount
 
   belongs_to :bank_branch
 
-
-
 end

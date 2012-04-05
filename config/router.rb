@@ -7,6 +7,7 @@ Merb::Router.prepare do
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
+  resources :money_deposits
 
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
