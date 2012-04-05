@@ -1,7 +1,8 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
   
-  resources :loan_applications, :id => %r(\d+)
+  resources :loan_files,               :id => %r(\d+)
+  resources :loan_applications,        :id => %r(\d+)
   resources :overlap_report_responses, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats
@@ -160,7 +161,7 @@ Merb::Router.prepare do
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)
-  match('/loan_files/:action').to(:controller => 'loan_files').name(:loan_files)
+  #match('/loan_files/:action').to(:controller => 'loan_files').name(:loan_files)
 
   #API Route
   match('/api/v1') do

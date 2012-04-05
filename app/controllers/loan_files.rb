@@ -1,7 +1,7 @@
 class LoanFiles < Application
 
   def index
-    @loan_file = LoanFile.all
+    @loan_files = LoanFile.all(:order => [:created_at.desc])
     render :index
   end
 
@@ -10,7 +10,7 @@ class LoanFiles < Application
     raise NotFound unless @loan_file
     display @loan_file
   end
-
+  
   def get_data(params)
     @branch_id = params['branch_id'] ? params['branch_id'] : nil
     @center_id = params['center_id'] ? params['center_id'] : nil
