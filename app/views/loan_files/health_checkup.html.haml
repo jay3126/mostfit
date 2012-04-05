@@ -16,7 +16,7 @@
   %h2
     = "Loan files pending for health checkup"
   - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
-  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && (status_map.include?(Constants::Status::HEALTH_CHECK_PENDING) || status_map.include?(Constants::Status::HEALTH_CHECK_PENDING))
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && (status_map.include?(Constants::Status::HEALTH_CHECK_PENDING) || status_map.include?(Constants::Status::NEW_STATUS))
     = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
       = hidden_field :name => 'branch_id', :value => @branch.id
       = hidden_field :name => 'center_id', :value => @center.id
