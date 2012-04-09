@@ -64,7 +64,7 @@
         %td
           = link_to "Generation", url(:controller => :loan_files, :action => :loan_file_generation, :branch_id => @branch.id)
           = " | "
-          = link_to "Health Check", url(:controller => :loan_files, :action => :index, :branch_id => @branch.id)
+          = link_to "Health Check", url(:controller => :loan_files, :action => :loan_files_for_health_checkup, :branch_id => @branch.id)
   %div.tab_container.shaded
     %ul.tabs
       %li#centers
