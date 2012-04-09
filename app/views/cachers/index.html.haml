@@ -80,10 +80,12 @@
     = submit 'apply filter'
     
   %b by
+  &nbsp;&nbsp;
   - root_url_hash = query_params.dup
   - root_url_hash.delete(:by); root_url_hash.delete(:branch_id); root_url_hash.delete(:center_id); root_url_hash.delete(:model_id)
-  = link_to 'funding_line', url(:consolidate_cachers, root_url_hash.merge(:by => "funding_line"))
-  = link_to 'loan_product', url(:consolidate_cachers, root_url_hash.merge(:by => "loan_product"))
+  = link_to 'Funding Line', url(:consolidate_cachers, root_url_hash.merge(:by => "funding_line")), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
+  &nbsp;&nbsp;
+  = link_to 'Loan Product', url(:consolidate_cachers, root_url_hash.merge(:by => "loan_product")), :class => "grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 6px;"
 
   - if @cachers.count == 0
     %h3 
@@ -98,4 +100,3 @@
       == for #{@date}
 
 = partial @level
-
