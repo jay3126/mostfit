@@ -12,5 +12,6 @@ class MoneyDeposit
   belongs_to :user, :child_key => [:created_by_user_id], :model => 'User'
   belongs_to :staff_member, :child_key => [:created_by_staff_id], :model => 'StaffMember'
 
+  validates_present :created_by_staff_id
 
 end

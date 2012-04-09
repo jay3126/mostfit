@@ -8,11 +8,12 @@ class MoneyDeposits < Application
   def create
     @branch = Branch.get(params[:branch_id])
     @account = BankAccount.get params[:account]
-    if params[:by_staff_id].blank? || params[:account].blank?
-      message = {:error => 'Money Deposit failed to be created'}
+    raise NotFound unless @account
+    @money_deposit = @account.money_deposits.new(:amount => params[:amount], :created_by_user_id => session.user.id, :created_by_staff_id => params[:by_staff_id], :created_on => params[:created_on], :bank_account_id => params[:account].id)
+    if @money_deposit.save
+      message = {:notice => "Save Successfully"}
     else
-      @money_deposit = @account.money_deposits.new(:created_by_user_id => session.user.id, :created_by_staff_id => params[:by_staff_id], :created_on => params[:created_on], :bank_account_id => params[:account].id)
-      message = {:notice => "Money Deposit was successfully created"}
+      message = {:error => "#{@money_deposit.errors.first.to_s}"}
     end
     redirect url("branches/#{@branch.id}#bank_deposits"), :message => message
   end
