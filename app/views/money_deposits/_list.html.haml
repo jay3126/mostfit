@@ -1,0 +1,35 @@
+%h2
+  = "Money deposits"
+- unless @money_deposits.blank?
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "Bank"
+        %th
+          = "Branch"
+        %th
+          = "Accounts"
+        %th
+          = "Amount"
+        %th
+          = "By"
+        %th
+          = "Date"
+    %tbody
+      - @money_deposits.each do |md|
+        %tr
+          %td
+            = md.bank_account.bank_branch.bank.name
+          %td
+            = md.bank_account.bank_branch.name
+          %td
+            = md.bank_account.name
+          %td
+            = md.amount
+          %td
+            = StaffMember.get(md.created_by_staff_id).name
+          %td
+            = md.created_on
+- else
+  No money deposits found

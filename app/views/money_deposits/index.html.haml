@@ -1,3 +1,36 @@
+:javascript
+  function load_bank_branches() {
+    $("#bank_branch_selector").html('');
+    $.ajax({
+      type: "GET",
+      url: "/money_deposits/get_bank_branches/?bank_id="+$("#bank_selector").val(),
+      success: function(data){
+        $("#bank_branch_selector").html(data);
+      }
+    });
+  }
+
+  function load_bank_accounts() {
+    $("#bank_account_selector").html('');
+    $.ajax({
+      type: "GET",
+      url: "/money_deposits/get_bank_accounts/?branch_id="+$("#bank_branch_selector").val(),
+      success: function(data){
+        $("#bank_account_selector").html(data);
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    $("#bank_selector").change(function() {
+      load_bank_branches();
+    });
+
+    $("#bank_branch_selector").change(function() {
+      load_bank_accounts();
+    });
+  });
+
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -10,7 +43,8 @@
       = @errors
 %h2
   = "Make deposits"
-= form(:action => url(:controller => 'money_deposits', :action => 'index'), :method => :post) do
+= form(:action => url(:controller => 'money_deposits', :action => 'create'), :method => :post) do
+  %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
   %table.form{:style => "width:100%;"}
     %thead
       %tr
@@ -27,22 +61,22 @@
     %tbody
       %tr
         %td
-          = select :name => "bank", :collection => Bank.all.collect{|x| [x.id, x.name]}
+          = select :name => "bank", :id => "bank_selector", :collection => Bank.all.collect{|x| [x.id, x.name]}, :prompt => 'Select bank'
         %td
-          = select :name => "bank_branch", :collection => BankBranch.all.collect{|x| [x.id, x.name]}
+          = select :name => "bank_branch", :id => "bank_branch_selector", :prompt => 'Select branch'
         %td
-          =  select :name => "account", :collection => Account.all.collect{|x| [x.id, x.name]}
+          =  select :name => "account", :id => "bank_account_selector", :prompt => 'Select account'
         %td
           = text_field :name => "amount"
         %td
-          = date_select "deposit_date", Date.today, :id => "deposit_date"
+          = date_select "created_on", Date.today, :id => "deposit_date"
     %tfoot
       %tr
         %td{:colspan => 3}
           = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-        %td
+        %td{:colspan => 2}
           = submit "Create"
-        %td
-          = submit "Create & Continue"
 %br
 %hr
+
+= partial :list
