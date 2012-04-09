@@ -122,7 +122,7 @@ class Cacher
     # it is used for summing cachers across time
     return self if other.nil?
     raise ArgumentError "cannot add cacher to something that is not a cacher" unless other.is_a? Cacher
-    raise ArgumentError "cannot add cachers of different classes" unless self.class == other.class
+    #raise ArgumentError "cannot add cachers of different classes" unless self.class == other.class
 
     # first copy the attributes of the later one
     later_cacher = (self.date > other.date ? self : other)
