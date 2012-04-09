@@ -2,6 +2,7 @@ class MoneyDeposit
   include DataMapper::Resource
   
   property :id, Serial
+  property :amount, Integer, :default => 0
   property :created_on, Date, :default => Date.today
   property :created_at, Date, :default => Date.today
   property :created_by_user_id, Integer, :nullable => false

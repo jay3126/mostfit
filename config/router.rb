@@ -8,6 +8,11 @@ Merb::Router.prepare do
   resources :report_formats
   resources :checkers
   resources :money_deposits
+  resources :banks do
+    resources :bank_branches do
+      resources :bank_accounts
+    end
+  end
 
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
