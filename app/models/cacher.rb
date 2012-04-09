@@ -167,7 +167,10 @@ class BranchCache < Cacher
     self.update(:date => date, :branch_ids => branch_ids, :force => true)
   end
 
-  def self.update(date = Date.today, branch_ids = nil, force = false)
+  def self.update(input_hash= {})
+    date       = input_hash[:date]
+    branch_ids = input_hash[:branch_ids]
+    force      = input_hash[:force].nil? ? false : input_hash[:force] 
     # cache updates must be pristine, so rollback on failure.
     BranchCache.transaction do |t|
       # updates the cache object for a branch
@@ -467,10 +470,10 @@ class Cache < Cacher
         bc = self.first_or_new({:model_name => base_model_name, :branch_id => bid, :date => date, :model_id => fl.id, :center_id => 0})
         attrs = c.merge(:branch_id => bid, :center_id => 0, :model_id => fl.id, :stale => false, :updated_at => DateTime.now, :model_name => base_model_name)
         if bc.new?
-          bc.attributes = attrs.merge(:id => nil, :updated_at => DateTime.now)
+          bc.attributes = attrs.merge(:updated_at => DateTime.now)
           bc.save
         else
-          bc.update(attrs.merge(:id => bc.id))
+          bc.update(attrs)
         end
       end
     end

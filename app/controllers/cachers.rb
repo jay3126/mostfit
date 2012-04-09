@@ -29,9 +29,9 @@ class Cachers < Application
       @model.update(:date => (@date || Date.today))
       if Branch.count > 0
         if @from_date and @to_date
-          (@from_date..@to_date).each{|date| BranchCache.update(date)}
+          (@from_date..@to_date).each{|date| BranchCache.update(:date => date)}
         else
-          BranchCache.update(@date || Date.today)
+          BranchCache.update(:date => (@date || Date.today))
         end
         redirect request.referer
       else
@@ -41,7 +41,7 @@ class Cachers < Application
   end
 
   def update
-    BranchCache.update(@date)
+    BranchCache.update(:date => @date)
     redirect resource(:cachers, :date => @date)
   end
 
@@ -92,7 +92,7 @@ class Cachers < Application
     raise NotFound unless @center
     CenterCache.stalify(:center_id => params[:center_id], :date => (@date || @center.creation_date))
     @center.loans.each{|l| l.update_history}
-    BranchCache.update(@date, @center.branch.id)
+    BranchCache.update(:date => @date, :branch_ids => @center.branch.id)
     redirect request.referer, :message => {:notice => 'Rebuilt caches for today. Marked caches after today as stale. They will be rebuilt upon request'}
   end
 
@@ -103,7 +103,7 @@ class Cachers < Application
     CenterCache.stalify(:center_id => params[:center_id], :date => (@date || @center.creation_date))
     only_schedule_mismatches = (not params[:only_mismatches].blank?)
     @loans.each{|l| l.reallocate(params[:style].to_sym, session.user, nil, only_schedule_mismatches)}
-    BranchCache.update(@date, @center.branch.id)
+    BranchCache.update(:date => @date, :branch_ids => @center.branch.id)
     redirect request.referer, :message => {:notice => 'Reallocated all loans. Marked caches after today as stale. They will be rebuilt upon request'}
   end
 
