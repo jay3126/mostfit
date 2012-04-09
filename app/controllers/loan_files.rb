@@ -1,14 +1,8 @@
 class LoanFiles < Application
 
-  # Index page is used for showing health checkup statuses by default
   def index
-    @errors = {}
-    if params[:branch_id] && params[:branch_id].empty?
-      @errors["Loan File"] = "Please select a branch"
-    elsif params[:center_id] && params[:center_id].empty?
-      @errors["Loan File"] = "Please select center"
-    end
-    fetch_loan_files_for_branch_and_center(params)
+    @loan_files = LoanFile.all
+    render :index
   end
 
   def show(id)
@@ -78,7 +72,7 @@ class LoanFiles < Application
 
     render :loan_file_generation
   end
-  1
+
   def loan_files_for_health_checkup
     @errors = {}
     if params[:branch_id] && params[:branch_id].empty?

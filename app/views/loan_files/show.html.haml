@@ -1,13 +1,17 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 %h1
   = "Loan File #{@loan_file.id}"
 .menu-strip
   %h3
-    = "Branch #{Branch.get(@loan_file.at_branch_id).name}"
+    = "Branch: #{Branch.get(@loan_file.at_branch_id).name}"
     |
-    = "Center #{Center.get(@loan_file.at_center_id).name}"
+    = "Center: #{Center.get(@loan_file.at_center_id).name}"
     - unless @loan_file.health_check_status.blank?
       |
-      = "Status #{@loan_file.health_check_status}"
+      = "Status: #{@loan_file.health_check_status}"
+    |
+    = "Center Cycle Number: #{center_cycle_number}"
+
 %br
 %hr
 
