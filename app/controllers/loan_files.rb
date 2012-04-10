@@ -119,6 +119,17 @@ class LoanFiles < Application
     end
   end
 
+  def generate_disbursement_sheet
+    loan_file = LoanFile.get params[:id]
+    raise NotFound unless loan_file
+    file = loan_file.loan_file_generate_disbursement_pdf
+    if file
+      send_data(file.to_s, :filename => "lon_file_disbursement_sheet_#{loan_file.id}.pdf")
+    else
+      redirect :back
+    end
+  end
+
   private
 
   def fetch_loan_files_for_branch_and_center(params)

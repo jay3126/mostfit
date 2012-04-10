@@ -2,11 +2,12 @@ class BankAccounts < Application
 
   def create
     @bank_branch = BankBranch.get(params[:branch_id])
-    @bank_account =  @bank_branch.bank_accounts.new(:name => params[:name], :created_by_user_id => session.user.id)
+    @bank_account =  @bank_branch.bank_accounts.new(:name => params[:name], :account_no => params[:account_no], :created_by_user_id => session.user.id)
     if @bank_account.save
       redirect resource(@bank_branch.bank,@bank_branch), :message => {:notice => "Save Successfully"}
     else
-      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => "#{@bank_account.errors.first.to_s}"}
+      error = @bank_account.errors.to_a.flatten.uniq.join(", ") rescue "Cannot Save Successfully"
+      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => error}
     end
   end
 

@@ -1,5 +1,5 @@
 %h1
-  = "Bank Account #{@bank_account.name}"
+  = "Bank Account :- #{@bank_account.name}"
 .shaded
   .menu-strip
     = link_to_with_rights 'Add Bank Money Deposite',resource(:money_deposits), :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"

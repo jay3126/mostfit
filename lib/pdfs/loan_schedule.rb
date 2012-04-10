@@ -92,5 +92,110 @@ module Pdf
       end
       return pdf
     end
+
+    def loan_file_generate_disbursement_pdf
+      center = Center.get(self.at_center_id)
+      pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
+      pdf.select_font "Times-Roman"
+      return nil if center.blank?
+      pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
+      pdf.text "Disbursal Report and Acknowledgement", :font_size => 16, :justification => :center
+      pdf.text("\n")
+      table1 = PDF::SimpleTable.new
+      table1.data = [{"col1"=>"<b>Center</b>", "col2"=>"#{center.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{center.clients.count}"},
+        {"col1"=>"<b>R.O Name</b>", "col2"=>"#{center.manager.name}", "col3"=>"<b>Scheduled Disbursal Date</b>", "col4"=>"#{self.scheduled_disbursal_date}"},
+        {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{center.address}", "col3"=>"<b>Time</b>", "col4"=>"#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"}
+      ]
+
+      table1.column_order  = ["col1", "col2", "col3","col4"]
+      table1.show_lines    = :none
+      table1.shade_rows    = :none
+      table1.show_headings = false
+      table1.shade_headings = true
+      table1.orientation   = :center
+      table1.position      = :center
+      table1.title_font_size = 16
+      table1.header_gap = 20
+      table1.width = 500
+      table1.render_on(pdf)
+      pdf.text("\n")
+
+      #draw table for scheduled disbursals
+      loans_to_disburse = self.loan_applications.map(&:loan).compact
+      if loans_to_disburse.count > 0
+        table = PDF::SimpleTable.new
+        table.data = []
+        tot_amount = 0
+        loans_to_disburse.each do |loan|
+          tot_amount += loan.amount
+          table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.amount.to_currency, "Name" => loan.client.name,
+              "Group" => (loan.client.client_group or Nothing).name
+            })
+        end
+        table.data.push({"Group"=>"Total=#{loans_to_disburse.count}","Disb. Amount" => tot_amount.to_currency})
+        table.column_order  = ["LAN", "Name", "Group", "Disb. Amount"]
+        table.show_lines    = :all
+        table.shade_rows    = :none
+        table.show_headings = true
+        table.shade_headings = true
+        table.orientation   = :center
+        table.position      = :center
+        table.title_font_size = 16
+        table.header_gap = 20
+        table.width = 500
+        table.render_on(pdf)
+        pdf.start_new_page if pdf.y < 315
+        pdf.text("\n")
+        pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
+        pdf.rounded_rectangle(pdf.absolute_right_margin-215, pdf.y+pdf.top_margin - 30, 125, 50, 5).stroke
+        pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 115, 125, 50, 5).stroke
+        pdf.rounded_rectangle(pdf.absolute_right_margin-215, pdf.y+pdf.top_margin - 115, 125, 50, 5).stroke
+        pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 210, 125, 50, 5).stroke
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("\n")
+        table2 = PDF::SimpleTable.new
+        table2.data = [{"col1"=>"<b>Disbursement Authorised By</b>","col2"=>"<b>Disbursement Authorised By</b>","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=> "","col2"=>"Received the total amount","col3"=>"" },
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"<b>Operation Manager</b>", "col2"=>"<b>Branch Manager</b>","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"", "col2"=>"","col3"=>""},
+          {"col1"=>"Charges Recevied", "col2"=>"<b>Denomination</b>","col3"=>""},
+          {"col1"=>"", "col2"=>"500 x     =","col3"=>""},
+          {"col1"=>"", "col2"=>"100 x     =","col3"=>""},
+          {"col1"=>"", "col2"=>"50   x     =    ","col3"=>""},
+          {"col1"=>"", "col2"=>"20   x     =    ","col3"=>""},
+          {"col1"=>"<b>Signature (Accountant)</b>", "col2"=>"10   x     =    ","col3"=>""},
+          {"col1"=>"", "col2"=>"5     x     =    ","col3"=>""},
+        ]
+        table2.column_order  = ["col1", "col3", "col2"]
+        table2.show_lines    = :none
+        table2.shade_rows    = :none
+        table2.show_headings = false
+        table2.shade_headings = true
+        table2.orientation   = :center
+        table2.position      = :center
+        table2.title_font_size = 16
+        table2.header_gap = 20
+        table2.width = 500
+        table2.render_on(pdf)
+
+      end
+      return pdf
+    end
   end
 end

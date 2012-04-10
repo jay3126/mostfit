@@ -1,5 +1,5 @@
 %h1
-  = "Bank #{@bank.name}"
+  = "Bank :- #{@bank.name}"
 .shaded
   .menu-strip
     = link_to_with_rights 'Add Bank Branch','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
