@@ -1,8 +1,8 @@
 %h1
-  = "Bank Branch #{@bank_branch.name}"
+  = "Bank Branch :- #{@bank_branch.name}"
 .shaded
-  .menu-strip
-    = link_to_with_rights 'Add Bank Branch','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+  #bank{:style=>"width:auto", :class => 'menu-strip'}
+    = link_to_with_rights 'Add Bank Account','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
     %br
     %br
     = partial 'bank_accounts/form'
@@ -20,6 +20,8 @@
         %th
           = "Name"
         %th
+          = "Account No."
+        %th
           = "Created Date"
     %tbody
       - @bank_accounts.each do |ba|
@@ -28,6 +30,8 @@
             = ba.id
           %td
             = link_to ba.name, resource(@bank_branch.bank, @bank_branch, ba)
+          %td
+            = ba.account_no
           %td
             = ba.created_at.strftime('%d/%m/%Y')
 %br
