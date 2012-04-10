@@ -15,7 +15,9 @@ class OverlapReportResponse
   after :save, :update_loan_application_status
 
   def update_loan_application_status
-    LoanApplication.record_credit_bureau_response(self.loan_application_id, rate_report)
+    loan_application = LoanApplication.get(self.loan_application_id)
+    raise NotFound unless loan_application
+    loan_application.record_credit_bureau_response(rate_report) 
   end
 
   # this checks the response against the accepted limits and marks the status appropriately

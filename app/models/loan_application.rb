@@ -112,9 +112,13 @@ class LoanApplication
     return true
   end
 
-  def self.record_credit_bureau_response(loan_application_id, credit_bureau_status)
-    loan_application = LoanApplication.get(loan_application_id)
-    loan_application.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now, :status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+  def generate_credit_bureau_request
+    OverlapReportRequest.create(:loan_application_id => self.id)
+    self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS)
+  end
+
+  def record_credit_bureau_response(credit_bureau_status)
+    self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now) if self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
   end
 
   def self.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user, *loan_application_id)
@@ -183,10 +187,27 @@ class LoanApplication
     status_updated
   end
 
-  # Sets the status
+  # Sets the status of the loan application if the status is conformant iwht the loan application workflow
+  #
+  # @param  [String] has to be one of the statuses of Constants::Status::LOAN_APPLICATION_STATUSES
+  # @return [Boolean] returns true if the status is saved else false 
   def set_status(new_status)
-    return false if get_status == new_status
-    self.status = new_status
+    return [false, "The loan application already has this status"] if get_status == new_status
+    return [false, "The #{get_status} being tried to save is not a part of the LOAN application statuses"] unless LOAN_APPLICATION_STATUSES.include?(new_status)
+    
+    # checks to make sure that the new_status does that needs to be saved does not precede the current status in the loan application workflow
+    return [false, "The status is being updated as new"] if CREATION_STATUSES.include?(new_status) 
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (DEDUPE_STATUSES.include?(new_status) and (OVERLAP_REPORT_STATUSES.include?(get_status) or AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (OVERLAP_REPORT_STATUSES.include?(new_status) and (AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (AUTHORIZATION_STATUSES.include?(new_status) and (CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status) or CREATION_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (CPV_STATUSES.include?(new_status) and ((LOAN_FILE_GENERATION_STATUSES.include?(get_status)) or CREATION_STATUSES.include?(get_status) or OVERLAP_REPORT_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+
+    # for all dead end statuses
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CONFIRMED_DUPLICATE_STATUS
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV1_REJECTED_STATUS
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV2_REJECTED_STATUS
+    
+    self.update(:status => new_status)
   end
 
   # returns whether a client with the client_id is eligible for a new loan application
