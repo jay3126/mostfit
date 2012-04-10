@@ -11,7 +11,7 @@ module Constants
 
   module CreditBureau
 
-    RATED_POSITIVE = 'positive'; RATED_NEGATIVE = 'negative'
+    RATED_POSITIVE = 'positive'; RATED_NEGATIVE = 'negative'; NO_MATCH = 'no_match'
 
   end
 
@@ -65,7 +65,7 @@ module Constants
     HEALTH_CHECK_PENDING = 'pending'
     READY_FOR_DISBURSEMENT = 'ready_for_disbursement'
     HEALTH_CHECK_STATUSES = [ NEW_STATUS, HEALTH_CHECK_PENDING, HEALTH_CHECK_APPROVED, READY_FOR_DISBURSEMENT ]
-    CREDIT_BUREAU_STATUSES = [NEW_STATUS, CreditBureau::RATED_POSITIVE, CreditBureau::RATED_NEGATIVE]
+    CREDIT_BUREAU_STATUSES = [CreditBureau::NO_MATCH, CreditBureau::RATED_POSITIVE, CreditBureau::RATED_NEGATIVE]
 
   end
 
