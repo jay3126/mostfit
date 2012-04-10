@@ -125,7 +125,7 @@ module Pdf
       return pdf
     end
 
-    def generate_disbursement_pdf(date, loan_file = nil)
+    def generate_disbursement_pdf(date)
       folder   = File.join(Merb.root, "doc", "pdfs", "staff", self.name, "disbursement_sheets")
       FileUtils.mkdir_p(folder)
       filename = File.join(folder, "disbursement.pdf")
@@ -160,14 +160,7 @@ module Pdf
         pdf.text("\n")
         
         #draw table for scheduled disbursals
-        if loan_file.nil? || loan_file.blank?
-          loans_to_disburse = center.clients.loans(:scheduled_disbursal_date => date) #, :disbursal_date => nil, :approved_on.not => nil, :rejected_on => nil)
-        else
-          loan_file_obj = LoanFile.get loan_file
-          return nil if loan_file_obj.nil?
-          loans = loan_file_obj.loan_applications.map(&:loan).compact
-          loans_to_disburse = loans.select{|loan| loan.scheduled_disbursal_date == date}
-        end
+        loans_to_disburse = center.clients.loans(:scheduled_disbursal_date => date) #, :disbursal_date => nil, :approved_on.not => nil, :rejected_on => nil)
         if center.clients.count>0 and loans_to_disburse.count > 0
           table = PDF::SimpleTable.new
           table.data = []
