@@ -14,7 +14,7 @@
       %td
         = client_group.name
       %td
-        = client_group.center.name
+        = client_group.center.name if (client_group and client_group.center)
       %td
         = link_to('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
 
