@@ -6,8 +6,7 @@ class BankAccounts < Application
     if @bank_account.save
       redirect resource(@bank_branch.bank,@bank_branch), :message => {:notice => "Save Successfully"}
     else
-      error = @bank_account.errors.to_a.flatten.uniq.join(", ") rescue "Cannot Save Successfully"
-      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => error}
+      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => error_messages(@bank_account)}
     end
   end
 

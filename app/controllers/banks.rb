@@ -10,13 +10,13 @@ class Banks < Application
     if @bank.save
       redirect resource(:banks), :message => {:notice => "Save Successfully"}
     else
-      redirect resource(:banks), :message => {:error => "#{@bank.errors.first.to_s}"}
+      redirect resource(:banks), :message => {:error => error_messages(@bank)}
     end
   end
 
   def show
     @bank = Bank.get params[:id]
-    @bank_branches =  @bank.bank_branches
+    @bank_branches = @bank.bank_branches
     display @bank
   end
   

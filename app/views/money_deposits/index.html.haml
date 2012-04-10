@@ -1,6 +1,6 @@
 :javascript
   function load_bank_branches() {
-    $("#bank_branch_selector").html('');
+    $("#bank_account_selector").attr('length' ,'1')
     $.ajax({
       type: "GET",
       url: "/money_deposits/get_bank_branches/?bank_id="+$("#bank_selector").val(),
@@ -11,7 +11,6 @@
   }
 
   function load_bank_accounts() {
-    $("#bank_account_selector").html('');
     $.ajax({
       type: "GET",
       url: "/money_deposits/get_bank_accounts/?branch_id="+$("#bank_branch_selector").val(),
