@@ -1,15 +1,16 @@
 #In-memory class for storing a LoanApplication's total information to be passed around
 class LoanApplicationInfo
   include Comparable
-  attr_reader :loan_application_id, :client_name, :client_dob, :client_address
+  attr_reader :loan_application_id, :client_name, :client_dob, :client_address, :credit_bureau_status
   attr_reader :amount, :status
   attr_reader :authorization_info
   attr_reader :cpv1
   attr_reader :cpv2
 
-  def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
+  def initialize(loan_application_id, client_name, client_dob, client_address, credit_bureau_status, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
     @loan_application_id = loan_application_id
     @client_name = client_name; @client_dob = client_dob; @client_address = client_address
+    @credit_bureau_status = credit_bureau_status
     @amount = amount; @status = status
     @authorization_info = authorization_info if authorization_info
     @cpv1 = cpv1 if cpv1
@@ -221,7 +222,6 @@ class LoanApplication
     self.loan_authorization.nil?
   end
 
-  # Returns all loan applications pending authorization
   def self.pending_authorization(search_options = {})
     pending = all(search_options).select {|lap| lap.is_pending_authorization?}
     pending.collect {|lap| lap.to_info}
@@ -281,6 +281,7 @@ class LoanApplication
       self.client_name,
       self.client_dob,
       self.client_address,
+      self.credit_bureau_status,
       self.amount,
       self.get_status,
       authorization_info,

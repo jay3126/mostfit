@@ -21,20 +21,30 @@ class LoanAuthorizations < Application
     facade = LoanApplicationsFacade.new(session.user)
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
-    override_reason = params[:override_reason]
+    
     if by_staff.empty?
       @errors['Loan Authorizations'] = "Staff member is not selected"
     end
     if params.key?('status')
       params[:status].keys.each do |lap|
         status = params[:status][lap]
-        if status == Constants::Status::APPLICATION_APPROVED
+        override_reason = params[:override_reason][lap]
+        if params[:credit_bureau_status] == Constants::CreditBureau::RATED_NEGATIVE && status == Constants::Status::APPLICATION_APPROVED
+          final_status = Constants::Status::APPLICATION_OVERRIDE_APPROVED
+        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_NEGATIVE && status == Constants::Status::APPLICATION_REJECTED
+          final_status = Constants::Status::APPLICATION_REJECTED
+        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_POSITIVE && status == Constants::Status::APPLICATION_APPROVED
+          final_status = Constants::Status::APPLICATION_APPROVED
+        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_POSITIVE && status == Constants::Status::APPLICATION_REJECTED
+          final_status = Constants::Status::APPLICATION_OVERRIDE_REJECTED
+        end
+        if final_status == Constants::Status::APPLICATION_APPROVED
           facade.authorize_approve(lap, by_staff, on_date)
 
-        elsif status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
+        elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
           facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
-        elsif status == Constants::Status::APPLICATION_REJECTED
+        elsif final_status == Constants::Status::APPLICATION_REJECTED
           facade.authorize_reject(lap, by_staff, on_date)
 
         else

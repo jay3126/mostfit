@@ -1,7 +1,7 @@
-%h1
-  = "Credit officer authorizes loan application"
 #pending_list
   .shaded
+    %h2
+      = "Credit officer authorizes loan application"
     - if @pending_authorizations && !@pending_authorizations.empty?
       = form(:action => url(:controller => 'loan_authorizations', :action => 'record_authorizations'), :method => :post) do
         %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
@@ -41,7 +41,8 @@
                 %td
                   = lpa.client_address
                 %td
-                  = "No Value"
+                  = lpa.credit_bureau_status
+                  %input{:type => :hidden, :value => lpa.credit_bureau_status, :name => 'credit_bureau_status'}
                 %td
                   %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
                   Approved
