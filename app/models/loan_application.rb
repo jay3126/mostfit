@@ -1,15 +1,16 @@
 #In-memory class for storing a LoanApplication's total information to be passed around
 class LoanApplicationInfo
   include Comparable
-  attr_reader :loan_application_id, :client_name, :client_dob, :client_address
+  attr_reader :loan_application_id, :client_name, :client_dob, :client_address, :credit_bureau_status
   attr_reader :amount, :status
   attr_reader :authorization_info
   attr_reader :cpv1
   attr_reader :cpv2
 
-  def initialize(loan_application_id, client_name, client_dob, client_address, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
+  def initialize(loan_application_id, client_name, client_dob, client_address, credit_bureau_status, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
     @loan_application_id = loan_application_id
     @client_name = client_name; @client_dob = client_dob; @client_address = client_address
+    @credit_bureau_status = credit_bureau_status
     @amount = amount; @status = status
     @authorization_info = authorization_info if authorization_info
     @cpv1 = cpv1 if cpv1
@@ -112,9 +113,13 @@ class LoanApplication
     return true
   end
 
-  def self.record_credit_bureau_response(loan_application_id, credit_bureau_status)
-    loan_application = LoanApplication.get(loan_application_id)
-    loan_application.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now, :status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+  def generate_credit_bureau_request
+    OverlapReportRequest.create(:loan_application_id => self.id)
+    self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS)
+  end
+
+  def record_credit_bureau_response(credit_bureau_status)
+    self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now) if self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
   end
 
   def self.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user, *loan_application_id)
@@ -177,16 +182,32 @@ class LoanApplication
     was_saved = (not (auth.id.nil?))
     application_status = AUTHORIZATION_AND_APPLICATION_STATUSES[as_status]
     if was_saved
-      loan_application.set_status(application_status)
-      status_updated = loan_application.save
+      status_updated = loan_application.set_status(application_status)
     end
     status_updated
   end
 
-  # Sets the status
+  # Sets the status of the loan application if the status is conformant iwht the loan application workflow
+  #
+  # @param  [String] has to be one of the statuses of Constants::Status::LOAN_APPLICATION_STATUSES
+  # @return [Boolean] returns true if the status is saved else false 
   def set_status(new_status)
-    return false if get_status == new_status
-    self.status = new_status
+    return [false, "The loan application already has this status"] if get_status == new_status
+    return [false, "The #{get_status} being tried to save is not a part of the LOAN application statuses"] unless LOAN_APPLICATION_STATUSES.include?(new_status)
+    
+    # checks to make sure that the new_status does that needs to be saved does not precede the current status in the loan application workflow
+    return [false, "The status is being updated as new"] if CREATION_STATUSES.include?(new_status) 
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (DEDUPE_STATUSES.include?(new_status) and (OVERLAP_REPORT_STATUSES.include?(get_status) or AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (OVERLAP_REPORT_STATUSES.include?(new_status) and (AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (AUTHORIZATION_STATUSES.include?(new_status) and (CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status) or CREATION_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (CPV_STATUSES.include?(new_status) and ((LOAN_FILE_GENERATION_STATUSES.include?(get_status)) or CREATION_STATUSES.include?(get_status) or OVERLAP_REPORT_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+
+    # for all dead end statuses
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CONFIRMED_DUPLICATE_STATUS
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV1_REJECTED_STATUS
+    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV2_REJECTED_STATUS
+    
+    self.update(:status => new_status)
   end
 
   # returns whether a client with the client_id is eligible for a new loan application
@@ -217,22 +238,16 @@ class LoanApplication
     all(predicates).select {|lap| lap.is_pending_verification?}
   end
 
-  def is_pending_authorization?
-    self.loan_authorization.nil?
-  end
-
-  # Returns all loan applications pending authorization
   def self.pending_authorization(search_options = {})
-    pending = all(search_options).select {|lap| lap.is_pending_authorization?}
+    search_options.merge!(:status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+    pending = all(search_options)
     pending.collect {|lap| lap.to_info}
   end
 
   def self.completed_authorization(search_options = {})
+    search_options.merge!(:status => AUTHORIZATION_STATUSES)
     loan_applications = all(search_options)
-    applications_completed_authorization = loan_applications.select { |lap|
-      lap.loan_authorization
-    }
-    applications_completed_authorization.collect {|lap| lap.to_info}
+    loan_applications.collect {|lap| lap.to_info}
   end
 
   # Is pending loan file generation
@@ -281,6 +296,7 @@ class LoanApplication
       self.client_name,
       self.client_dob,
       self.client_address,
+      self.credit_bureau_status,
       self.amount,
       self.get_status,
       authorization_info,

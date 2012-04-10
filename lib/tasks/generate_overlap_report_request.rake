@@ -34,8 +34,8 @@ namespace :mostfit do
           rescue Exception => error
             errors[:generation_errors][loan_application.id] = error  
           end
-          loan_application.update(:status => Constants::Status::OVERLAP_REPORT_REQUEST_GENERATED_STATUS)
-          errors[:save_status_errors][loan_application.id] = loan_application.errors unless loan_application.save
+          loan_application.generate_credit_bureau_request
+          errors[:save_status_errors][loan_application.id] = loan_application.errors unless loan_application.save or loan_application.generate_credit_bureau_request
         end        
       end
       

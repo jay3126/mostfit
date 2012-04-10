@@ -125,6 +125,12 @@ describe LoanApplication do
     ClientVerification.get_CPV1_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
     ClientVerification.record_CPV2_approved(@lap.id, @staff_member.id, Date.today, @user.id)
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
- end
+  end
+
+  it "should follow the loan application workflow" do
+    @lap.set_status(Constants::Status::NEW_STATUS).include?(false).should be_true
+    @lap.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS).should be_true
+    @lap.set_status(Constants::Status::NOT_DUPLICATE_STATUS).should be_true
+  end
 
 end

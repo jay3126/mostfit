@@ -1,6 +1,6 @@
-%h1
-  = "Recently authorized loan application"
 .shaded
+  %h2
+    = "Recently authorized loan application"
   - if @completed_authorizations && !@completed_authorizations.empty?
     %table.form{:style => "width:100%; border:1px;"}
       %thead
@@ -49,9 +49,9 @@
             %td
               = lauth.created_at.display
             %td
-              = "No Value"
+              = lpa.credit_bureau_status
             %td{:colspan => 2, :align => "center"}
-              = lauth.status
+              = lauth.status.humanize
             %td{:colspan => 2}
               = lauth.override_reason
   - else
