@@ -6,7 +6,7 @@ class BankBranches < Application
     if @bank_branch.save
       redirect resource(@bank), :message => {:notice => "Save Successfully"}
     else
-      redirect resource(@bank), :message => {:error => "#{@bank_branch.errors.first.to_s}"}
+      redirect resource(@bank), :message => {:error => error_messages(@bank_branch)}
     end
   end
 
