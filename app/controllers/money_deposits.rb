@@ -35,7 +35,7 @@ class MoneyDeposits < Application
       bank_branch = BankBranch.get(params[:branch_id])
       return("<option value=''>Select account</option>") unless bank_branch
       bank_accounts = bank_branch.bank_accounts
-      return("<option value=''>Select account</option>"+bank_accounts.map{|b| "<option value=#{b.id}>#{b.name}</option>"}.join)
+      return("<option value=''>Select account</option>"+bank_accounts.map{|b| "<option value=#{b.id}>#{b.name}-#{b.account_no}</option>"}.join)
     end
   end
 

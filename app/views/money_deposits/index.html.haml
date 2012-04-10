@@ -11,6 +11,7 @@
   }
 
   function load_bank_accounts() {
+    $("#bank_account_selector").attr('length' ,'1')
     $.ajax({
       type: "GET",
       url: "/money_deposits/get_bank_accounts/?branch_id="+$("#bank_branch_selector").val(),
@@ -20,6 +21,15 @@
     });
   }
 
+  function disable_submit_button(){
+    if(jQuery('#bank_selector').val() == "" || jQuery('#bank_branch_selector').val() == "" || jQuery('#bank_account_selector').val() == "" || jQuery('#amount').val() == ""|| jQuery('#by_staff_id').val() == ""){
+        jQuery("form.bank_deposites input#submit").attr('disabled', true);
+    }
+    else{
+        jQuery("form.bank_deposites input#submit").attr('disabled', false);
+    }
+  }
+
   $(document).ready(function() {
     $("#bank_selector").change(function() {
       load_bank_branches();
@@ -27,6 +37,10 @@
 
     $("#bank_branch_selector").change(function() {
       load_bank_accounts();
+    });
+
+    $("form.bank_deposites input,select").change(function(){
+      disable_submit_button();
     });
   });
 
@@ -42,7 +56,7 @@
       = @errors
 %h2
   = "Make deposits"
-= form(:action => url(:controller => 'money_deposits', :action => 'create'), :method => :post) do
+= form(:action => url(:controller => 'money_deposits', :action => 'create'), :method => :post, :class => 'bank_deposites') do
   %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
   %table.form{:style => "width:100%;"}
     %thead
@@ -74,7 +88,7 @@
         %td{:colspan => 3}
           = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
         %td{:colspan => 2}
-          = submit "Create"
+          = submit "Create", :disabled => true
 %br
 %hr
 
