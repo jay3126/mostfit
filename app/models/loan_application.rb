@@ -87,20 +87,20 @@ class LoanApplication
   #gives info for creating clients using the given loan application 
   def to_client
     _to_client = {
-      :name => client_name,
-      :reference => client_reference1,
-      :reference_type => client_reference1_type,
-      :reference2 => client_reference2,
-      :reference2_type => client_reference2_type,
-      :date_of_birth => client_dob,
-      :address => client_address,
-      :pincode => client_pincode,
-      :state => client_state,
-      :spouse_name => client_guarantor_name,
+      :name                       => client_name,
+      :reference                  => client_reference1,
+      :reference_type             => client_reference1_type,
+      :reference2                 => client_reference2,
+      :reference2_type            => client_reference2_type,
+      :date_of_birth              => client_dob,
+      :address                    => client_address,
+      :pincode                    => client_pincode,
+      :state                      => client_state,
+      :spouse_name                => client_guarantor_name,
       :created_by_staff_member_id => created_by_staff_id,
-      :created_by_user_id => created_by_user_id,
-      :center_id => at_center_id,
-      :date_joined => Date.today()
+      :created_by_user_id         => created_by_user_id,
+      :center_id                  => at_center_id,
+      :date_joined                => Date.today()
     }
   end
 
@@ -110,6 +110,11 @@ class LoanApplication
       return [false, "A loan application for this client #{client_id} already exists for the current loan cycle"] if client_ids.include?(client_id)
     end
     return true
+  end
+
+  def self.record_credit_bureau_response(loan_application_id, credit_bureau_status)
+    loan_application = LoanApplication.get(loan_application_id)
+    loan_application.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now, :status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
   end
 
   def self.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user, *loan_application_id)

@@ -12,6 +12,12 @@ class OverlapReportResponse
   property :not_matched,         Boolean, :nullable => false
   property :response_text,       Text # Marshal.dump of response hash
 
+  after :save, :update_loan_application_status
+
+  def update_loan_application_status
+    LoanApplication.record_credit_bureau_response(self.loan_application_id, rate_report)
+  end
+
   # this checks the response against the accepted limits and marks the status appropriately
   def process_response
     unless self.response_text.blank?
@@ -29,11 +35,6 @@ class OverlapReportResponse
       active_loans_number = 0 
       responses.each{|x| existing_loans_amount += x["LOAN_DETAILS"]["DISBURSED_AMT"].to_f}
       self.not_matched = false
-      # if (no_of_active_accounts >= 2) or ((loan.amount + existing_loans_amount) >= 50000)
-      #   self.status = :rejected          
-      # else
-      #   self.status = :accepted
-      # end
     else
       self.not_matched = true
     end
