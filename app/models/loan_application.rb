@@ -182,8 +182,7 @@ class LoanApplication
     was_saved = (not (auth.id.nil?))
     application_status = AUTHORIZATION_AND_APPLICATION_STATUSES[as_status]
     if was_saved
-      loan_application.set_status(application_status)
-      status_updated = loan_application.save
+      status_updated = loan_application.set_status(application_status)
     end
     status_updated
   end
@@ -239,21 +238,16 @@ class LoanApplication
     all(predicates).select {|lap| lap.is_pending_verification?}
   end
 
-  def is_pending_authorization?
-    self.loan_authorization.nil?
-  end
-
   def self.pending_authorization(search_options = {})
-    pending = all(search_options).select {|lap| lap.is_pending_authorization?}
+    search_options.merge!(:status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+    pending = all(search_options)
     pending.collect {|lap| lap.to_info}
   end
 
   def self.completed_authorization(search_options = {})
+    search_options.merge!(:status => AUTHORIZATION_STATUSES)
     loan_applications = all(search_options)
-    applications_completed_authorization = loan_applications.select { |lap|
-      lap.loan_authorization
-    }
-    applications_completed_authorization.collect {|lap| lap.to_info}
+    loan_applications.collect {|lap| lap.to_info}
   end
 
   # Is pending loan file generation
