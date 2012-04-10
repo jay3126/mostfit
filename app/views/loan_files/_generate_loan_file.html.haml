@@ -1,3 +1,9 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});  
+  });
+
 %h1 
   = "Add to Loan File"
 #pending_loan_file_generation
@@ -29,7 +35,7 @@
           - @loan_applications_pending_loan_file_generation.each do |lap|
             %tr
               %td{:width => '5%'}
-                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id
+                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select'
               %td
                 = lap.loan_application_id
               %td
