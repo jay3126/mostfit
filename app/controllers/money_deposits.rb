@@ -8,7 +8,7 @@ class MoneyDeposits < Application
   def create
     @branch = Branch.get(params[:branch_id])
     @account = BankAccount.get params[:account]
-    unless @account.nil?
+    unless @account.nil? || @branch.nil?
       @money_deposit = @account.money_deposits.new(:amount => params[:amount], :created_by_user_id => session.user.id, :created_by_staff_id => params[:by_staff_id], :created_on => params[:created_on])
       if @money_deposit.save
         message = {:notice => "Save Successfully"}

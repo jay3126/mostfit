@@ -131,6 +131,7 @@ describe LoanApplication do
     @lap.set_status(Constants::Status::NEW_STATUS).include?(false).should be_true
     @lap.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS).should be_true
     @lap.set_status(Constants::Status::NOT_DUPLICATE_STATUS).should be_true
+    @lap.set_status(Constants::Status::AUTHORIZATION_STATUSES).include?(false).should be_true
   end
 
 end
