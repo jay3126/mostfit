@@ -538,8 +538,10 @@ class Loans < Application
       @loan = Loan.get(params[:id])
       raise NotFound unless @loan
       @client = @loan.client
-      @center = @client.center
-      @branch = @center.branch
+      if @client
+        @center = @client.center
+        @branch = @center.branch
+      end
     else
       if params[:client_id]
         @client = Client.get(params[:client_id])

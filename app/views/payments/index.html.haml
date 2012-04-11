@@ -4,21 +4,32 @@
       = ofc2(550, 400, 'http://' + (request.env['HTTP_HOST'] or 'example.org') + url(:graph_data, :action => 'loan', :id => @loan.id, :scope_unit => 'months', :scope_size => 3) )
   
   = error_messages_for @payment
-  - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time)
+  - if @loan.client
+    - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time)
+      .error
+        History of this loan is not updated. Click
+        = link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
+        to repair
+  - else
     .error
-      History of this loan is not updated. Click
-      = link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
-      to repair
+      There is some problem with the client
   %h1
     Loan
-    = link_to "#{@loan.description}", url_for_loan(@loan)
+    - if @loan.client
+      = link_to "#{@loan.description}", url_for_loan(@loan)
+    - else
+      = link_to "#{@loan.description}", resource(@loan)
     by client
-    = link_to "#{@client.name}", resource(@branch, @center, @client)
+    - if @loan.client
+      = link_to "#{@client.name}", resource(@branch, @center, @client)
+    - else
+      = "Something went wrong with client"
   - @history = @loan.loan_history
   .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-    = link_to 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit"
-    = link_to 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add"
-    = link_to 'visit center', resource(@loan.client.center)
+    - if @loan.client
+      = link_to 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit"
+      = link_to 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add"
+      = link_to 'visit center', resource(@loan.client.center)
   
   %table.loan{ :style => 'width : 50%; border: solid 1px #c9c9c9' }
     %tr
@@ -186,7 +197,8 @@
     %div.tab
       %h2 
         Repayment schedule
-        = link_to "Download pdf", url(:action =>'repayment_sheet', :controller => 'loans', :format => "pdf", :id =>@loan.id), :style => "float: right; margin-right: 25px", :class => "button"
+        - if @loan.client
+          = link_to "Download pdf", url(:action =>'repayment_sheet', :controller => 'loans', :format => "pdf", :id =>@loan.id), :style => "float: right; margin-right: 25px", :class => "button"
       %table{ :style => 'width:98%; margin: auto' }
         %thead
           %tr{:style => "box-shadow: 0px 2px 2px #cfcfcf; -moz-box-shadow: 0px 2px 2px #cfcfcf;"}
@@ -257,12 +269,13 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      %h2== Repayments #{link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
-      - if @payments.blank?
-        %p
-          %i No repayments have been made so far.
-      - else
-        = partial "payments/list", {:pmts => @payments, :context => :received}
+      - if @loan.client
+        %h2== Repayments #{link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
+        - if @payments.blank?
+          %p
+            %i No repayments have been made so far.
+        - else
+          = partial "payments/list", {:pmts => @payments, :context => :received}
     - if @loan.insurance_policy
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(@loan.insurance_policy)}
