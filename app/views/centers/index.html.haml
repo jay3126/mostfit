@@ -119,7 +119,7 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/accounts/branch?branch_id=#{@branch.id}"}
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:money_deposits)}
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:money_deposits, :branch_id => @branch.id)}
     - if Mfi.first.branch_diary_enabled
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(:branch_diaries, :branch_id => @branch.id, :model => "Branch")}
