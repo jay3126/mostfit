@@ -3,9 +3,12 @@
   $('#toggle_approve').change(function() {
     $('.approve').attr('checked',$(this).attr('checked'))});  
   });
+
 %table.report.nojs    
   %thead
     %tr{:style => "font-size: 0.85em;"}
+      %th
+        Sl. No.
       %th
         Loan id
       %th
@@ -32,19 +35,28 @@
       %th
         Approved By
   - staff_members_allowed = staff_members_collection
+  - sl_no = 0
   - @loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
     %tr{:class => cycle('odd','')}
       %td.number
+        = sl_no +=1
+      %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
       %td.text
-        = link_to loan.client.name, resource(client)
+        - if loan.client
+          = link_to loan.client.name, resource(client)
+        - else
+          = "Could not find client"
       %td.number
         = loan.description
       %td.number
         = text_field :name => "loans[#{loan.id}][amount_sanctioned]", :value => loan.amount, :size => 6
       %td.text
-        = link_to client.center.name, url(:quick_link, "centers", client.center.id)
+        - if (client)
+          = link_to client.center.name, url(:quick_link, "centers", client.center.id)
+        - else
+          = "Could not find center"  
       %td.text
         - min_date = (loan.applied_on > Date.min_transaction_date ? loan.applied_on : Date.min_transaction_date)
         = date_select("loans[#{loan.id}][approved_on]", min_date, :id => "loans_#{loan.id}_approved_on", :min_date => min_date, :max_date => Date.max_transaction_date)
@@ -58,16 +70,22 @@
         = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, :id => "loans_#{loan.id}_scheduled_first_payment_date", :min_date => min_date, :max_date => Date.max_transaction_date)
         = loan.scheduled_first_payment_date.strftime('%A')
       %td.text
-        = loan.client.center.meeting_day.to_s.camelcase
+        - if (loan and loan.client and loan.client.center)
+          = loan.client.center.meeting_day.to_s.camelcase
+        - else
+          = "Something went wrong"
       %td.text
         = loan.status.to_s.camelcase(' ')
       %td
-        = check_box :name => "loans[#{loan.id}][approved?]", :class => "approve"
+        - if client and loan
+          = check_box :name => "loans[#{loan.id}][approved?]", :class => "approve"
       %td.text
-        = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
+        - if client
+          = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
+        - else
+          = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed
   %tfoot
     %tr
-      %td{:colspan => 12}
+      %td{:colspan => 13}
   
 = paginate @loans_to_approve if @loans_to_approve.respond_to?(:page)
- 
