@@ -21,6 +21,16 @@ class LoanFiles < Application
     @loan_applications_pending_loan_file_generation = facade.pending_loan_file_generation({:at_branch_id=>@branch_id, :at_center_id => @center_id})
     @loan_applications_added_to_loan_file = (not @loan_file.nil?) ? @loan_file.loan_applications : nil
   end
+  
+  #for generating 
+  def generate_loans(id)
+    return NotFound unless params['id'] 
+    @loan_file = LoanFile.get(id)
+    raise NotFound unless @loan_file
+    @center = Center.get(@loan_file.at_center_id)
+    @clients = @loan_file.loan_applications.collect {|l| Client.get(l.client_id) if not l.client_id.nil?}  
+    render :template => 'data_entry/loans/bulk_form'
+  end
 
   def loan_file_generation
     render :loan_file_generation
