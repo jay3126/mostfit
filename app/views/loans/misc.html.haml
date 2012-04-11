@@ -26,12 +26,11 @@
         %legend Unpreclose(!)
         = link_to 'Unpreclose', url(:controller => :loans, :action => :unpreclose, :id => @loan.id), :class => "grey_button"
 
-- if session.user.role == :admin
+- if session.user.role == :admin and @loan.status == :rejected
   .box
     %fieldset
-      - if @loan.status == :rejected
-        %legend Unreject
-        = link_to 'Unreject the loan', url(:controller => :loans, :action => :unreject, :id => @loan.id), :class => "grey_button"
+      %legend Unreject
+      = link_to 'Unreject the loan', url(:controller => :loans, :action => :unreject, :id => @loan.id), :class => "grey_button"
 
 - if [:admin, :mis_manager].include?(session.user.role)
   .box
@@ -40,10 +39,11 @@
   .box
     %fieldset
       %legend Applicable fees
-      - if @loan.applicable_fees.empty?
-        = form_for(@loan, :action => url(:controller => 'loans', :action => 'levy_fees', :id => @loan.id)) do
-          = submit 'Apply Fees'
-      = partial "applicable_fees/list", :layout => false, :applicable_fees => @loan.applicable_fees, :return_url => url_for_loan(@loan) + "#misc"
+      - if @loan.client
+        - if @loan.applicable_fees.empty?
+          = form_for(@loan, :action => url(:controller => 'loans', :action => 'levy_fees', :id => @loan.id)) do
+            = submit 'Apply Fees'
+        = partial "applicable_fees/list", :layout => false, :applicable_fees => @loan.applicable_fees, :return_url => url_for_loan(@loan) + "#misc"
   .box
     %fieldset
       %legend Values
@@ -58,28 +58,29 @@
   .box
     %fieldset
       %legend Write Off Loan
-      = form_for(@loan, :action => url(:action => :write_off, :id => @loan.id), :method => "POST", :class => "_disable_button_") do
-        %table.tall.shaded
-          %tr
-            %th
-              Write off Date : 
-            %td
-              = date_select_for @loan, :written_off_on
-          %tr
-            %th
-              Select Staff Member :
-            %td
-              - center = @client.center
-              - branch = center.branch
-              = select :written_off_by_staff_id, :id => "written_off_by_staff_id", :collection => [branch.manager, center.manager].uniq.map{|m| [m.id, m.name]}, :prompt => "select staff member"
-              %br
-              %span.greytext 
-                Pick the staff member who is writing off the loan
-          %tr
-            %td{:colspan => "2"}
-              = submit "Write off", :class => "grey_button", :style => "margin: 4px"
-              - if @loan.status == :written_off
-                = link_to("Reverse Write Off", url(:controller => "loans", :id => @loan.id, :action => "reverse_write_off"), :class => "grey_button")
+      - if @loan.client
+        = form_for(@loan, :action => url(:action => :write_off, :id => @loan.id), :method => "POST", :class => "_disable_button_") do
+          %table.tall.shaded
+            %tr
+              %th
+                Write off Date : 
+              %td
+                = date_select_for @loan, :written_off_on
+            %tr
+              %th
+                Select Staff Member :
+              %td
+                - center = @client.center
+                - branch = center.branch
+                = select :written_off_by_staff_id, :id => "written_off_by_staff_id", :collection => [branch.manager, center.manager].uniq.map{|m| [m.id, m.name]}, :prompt => "select staff member"
+                %br
+                  %span.greytext 
+                    Pick the staff member who is writing off the loan
+            %tr
+              %td{:colspan => "2"}
+                = submit "Write off", :class => "grey_button", :style => "margin: 4px"
+                - if @loan.status == :written_off
+                  = link_to("Reverse Write Off", url(:controller => "loans", :id => @loan.id, :action => "reverse_write_off"), :class => "grey_button")
 - elsif staff_member = session.user.staff_member
   = form_for(@loan, :action => url(:action => :suggest_write_off, :id => @loan.id), :method => "POST", :class => "_disable_button_") do
     %table
