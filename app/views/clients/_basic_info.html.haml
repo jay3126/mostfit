@@ -90,16 +90,6 @@
       = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES_ID_PROOF.each{|x| [x.to_s, x]}
   %tr
     %th
-      Reference type:
-    %td
-      = select :type_of_id, :collection => ID_TYPES, :prompt => "Select"
-  %tr
-    %th
-      Ration Card:
-    %td
-      = text_field :ration_card_number
-  %tr
-    %th
       Date of birth:
     %td
       = date_select_for @client, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
@@ -114,26 +104,26 @@
         Date of sucessful group recognization test:
       %td
         = date_select_for @client, :grt_pass_date, :nullable => true, :max_date => Date.today
-  %tr
-    %th
-      Kin name:
-    %td
-      = text_field :next_to_kin, :size => 40
-  %tr
-    %th
-      Kin Relationship
-    %td
-      = select :next_to_kin_relationship, :collection => ["Husband", "Father"], :prompt => "Select"
   -# %tr
   -#   %th
-  -#     Spouse name:
+  -#     Kin name:
   -#   %td
-  -#     = text_field :spouse_name, :size => 40
+  -#     = text_field :next_to_kin, :size => 40
   -# %tr
   -#   %th
-  -#     Spouse Date of Birth:
+  -#     Kin Relationship
   -#   %td
-  -#     = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  -#     = select :next_to_kin_relationship, :collection => ["Husband", "Father"], :prompt => "Select"
+  %tr
+    %th
+      Spouse name:
+    %td
+      = text_field :spouse_name, :size => 40
+  %tr
+    %th
+      Spouse Date of Birth:
+    %td
+      = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %th
       Guarantor name:
