@@ -12,7 +12,7 @@ module Pdf
       return nil if centers.empty?
       days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash 
       days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
-      centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
+      centers.sort_by{|x| x.meeting_time_of_day}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
         pdf.image "#{Merb.root}/public/images/moral_logo_cds.png", :justification => :left
         pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 11, :justification => :center
