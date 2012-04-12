@@ -1,0 +1,21 @@
+.shaded
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+%h1
+  = "Loan File Generation"
+= partial :filter_form
+
+%br
+%hr
+= partial :generate_loan_file
+
+%br
+%hr
+
+- if @loan_file
+  = partial :log_loan_file

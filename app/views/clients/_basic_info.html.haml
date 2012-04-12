@@ -44,6 +44,7 @@
       Name:
     %td
       = text_field :name, :size => 40
+      = hidden_field :name => :client_type_id, :value => ClientType.first.id
       %br
       - unless @client.new?
         %b 
@@ -52,15 +53,15 @@
         - Client.flags.each do |f|
           = f
           = check_box :name => "tags[#{f}]", :checked => @client.tags && @client.tags.include?(f)
-  %tr
-    - if ClientType.count==0 and session.user.role==:admin
-      %div.error
-        You have not set any Client Types. Create them 
-        = link_to("here", resource(:client_types, :new), :target => "_blank")
-    %th
-      Client Type
-    %td
-      = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
+  -# %tr
+  -#   - if ClientType.count==0 and session.user.role==:admin
+  -#     %div.error
+  -#       You have not set any Client Types. Create them 
+  -#       = link_to("here", resource(:client_types, :new), :target => "_blank")
+  -#   %th
+  -#     Client Type
+  -#   %td
+  -#     = select :client_type_id, :collection => ClientType.all, :value_method => :id, :text_method => :type
   %tr
     %th
       Gender
@@ -73,14 +74,20 @@
       =  select :marital_status, :collection => MARITAL_STATUS, :prompt => "Select"
   %tr
     %th
-      Reference:
+      Ration Card
     %td
       = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
-      %br/
-      %span.greytext
-        references are unique, a way to check that this is the only record of a client
-        %br/
-        for this reason it is advisable to use a government ID as reference
+      = hidden_field :reference_type, :value => Constants::Masters::REFERENCE_TYPES[4]
+  %tr
+    %th
+      ID Proof
+    %td
+      = text_field(:reference2, :size => 40, :value => ((@client.reference2.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference2))
+  %tr
+    %th
+      ID Proof Type
+    %td
+      = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES_ID_PROOF.each{|x| [x.to_s, x]}
   %tr
     %th
       Reference type:
@@ -154,9 +161,9 @@
       = text_area :address, :rows => 6, :cols => 38
   %tr
     %th
-      State:
+      State:    
     %td
-      = select :state, :collection => STATES, :prompt => "Select"
+      = select :state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x]}, :prompt => "---"
   %tr
     %th
       Pincode:
@@ -199,7 +206,7 @@
       = text_field :cb_approval_number
   %tr
     %th
-      Occupation
+      Occupation:
     %td
       = select :occupation_id, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "Select"
   %tr

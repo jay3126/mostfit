@@ -100,7 +100,7 @@ class Application < Merb::Controller
       error += "verified data cannot be deleted"
     end
 
-      # if flag is still set to true delete the object
+    # if flag is still set to true delete the object
     if flag == true and obj.destroy
       # delete all the loan history
       LoanHistory.all(:loan_id => obj.id).destroy if obj.is_a?(Loan)
@@ -141,6 +141,10 @@ class Application < Merb::Controller
       error  += " under this #{model}" if children_present.length>0
       redirect(params[:return], :message => {:notice =>  "#{error}"})
     end    
+  end
+
+  def error_messages(obj)
+    obj.errors.to_a.flatten.uniq.join(", ") rescue "Cannot Save Successfully"
   end
 
   private 

@@ -3,10 +3,18 @@ Merb::Router.prepare do
   resources :psl_sub_categories
   resources :priority_sector_lists
   resources :districts
+  resources :loan_files,               :id => %r(\d+)
+  resources :loan_applications,        :id => %r(\d+)
+  resources :overlap_report_responses, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
-
+  resources :banks do
+    resources :bank_branches do
+      resources :bank_accounts
+    end
+  end
+  resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get]}
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
 
@@ -71,6 +79,7 @@ Merb::Router.prepare do
   resources :loans, :id => %r(\d+), :member => {:prepay => [:get, :put]} 
   resources :centers, :id => %r(\d+) do
     resources :center_meeting_days
+    resources :center_cycles
   end
   resources :payments
   resources :branches, :id => %r(\d+)  do    
@@ -124,6 +133,7 @@ Merb::Router.prepare do
 
   namespace :data_entry, :name_prefix => 'enter' do  # for url(:enter_payment) and the likes
     match('/clients(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
+    match('/loan_applications(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
     match('/loans/approve_by_center/:id').to(:controller => 'loans', :action => 'approve').name(:approval_by_center)
     match('/loans(/:action)(.:format)').to(:controller => 'loans').name(:loans)
     match('/payments(/:action)(.:format)').to(:controller => 'payments').name(:payments)
@@ -134,6 +144,7 @@ Merb::Router.prepare do
     match('/client_groups(/:action)(/:id)(.:format)').to(:controller => 'client_groups').name(:groups)
   end
 
+  match('/client_verifications(/:action)').to(:controller => 'client_verifications').name(:client_verifications)
   match('/admin(/:action)').to(:controller => 'admin').name(:admin)
   match('/admin(/:action/:id)').to(:controller => 'admin').name(:admin)
   match('/dashboard/clients/:id(/group_by/:group_by)(/branch_id/:branch_id)(/center_id/:center_id)(/staff_member_id/:staff_member_id)').to(:id => ":id", :action => "clients", :controller => 'dashboard').name(:dashboard_breakup_clients)
@@ -161,6 +172,7 @@ Merb::Router.prepare do
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)
+  #match('/loan_files/:action').to(:controller => 'loan_files').name(:loan_files)
 
   #API Route
   match('/api/v1') do

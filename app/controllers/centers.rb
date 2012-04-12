@@ -26,7 +26,8 @@ class Centers < Application
     @all_clients   = (LoanHistory.all(:center_id => @center.id).clients + @clients).uniq
     @moved_clients = @all_clients - @clients
     @moved_loans   = LoanHistory.all(:center_id => @center.id).loans   - @center.clients.loans
-
+    center_cycle_no = CenterCycle.get_current_center_cycle @center.id
+    @center_cycle =  CenterCycle.get_cycle(@center.id, center_cycle_no)
     if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
       display [@center, @clients, @date]
     else

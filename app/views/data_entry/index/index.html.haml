@@ -73,4 +73,4 @@
             = cl
         - if thing == :center
           %br
-          = link_to_with_rights("Loan Utilization", url(:enter_loans,:action => 'make_loan_utilization'), :class => 'edit_small') if ((user.role == :admin) or (user.role == :mis_manager))          
+          = link_to_with_rights("Loan Utilization", url(:enter_loans,:action => 'make_loan_utilization'), :class => 'edit_small') if ((user.role == :admin) or (user.role == :mis_manager))

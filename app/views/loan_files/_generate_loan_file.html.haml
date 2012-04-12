@@ -1,0 +1,73 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});  
+  });
+
+%h1 
+  = "Add to Loan File"
+#pending_loan_file_generation
+.shaded
+  - if @loan_applications_pending_loan_file_generation and not @loan_applications_pending_loan_file_generation.empty?
+    %form{:action => url(:controller => :loan_files, :action => :record_loan_file), :method => :post}
+      %table.form{:style => "width:100%;"}
+        %thead
+          %tr
+            %th{:width => '5%'}
+              = check_box :id => "toggle_select"
+            %th{:width => '5%'}
+              = "Loan Application ID"
+            %th
+              = "Name"
+            %th{:width => '5%'}
+              = "Age"
+            %th
+              = "Address"
+            %th
+              = "Loan Amount"
+        %tbody.form
+          - if @loan_file
+            %input{:type => :hidden, :name => 'loan_file_identifier', :value => @loan_file.loan_file_identifier}
+
+          %input{:type => :hidden, :name => 'branch_id', :value => @branch_id}
+          %input{:type => :hidden, :name => 'center_id', :value => @center_id}
+
+          - @loan_applications_pending_loan_file_generation.each do |lap|
+            %tr
+              %td{:width => '5%'}
+                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select'
+              %td
+                = lap.loan_application_id
+              %td
+                = lap.client_name
+              %td
+                = (lap.client_age.nil? ? "Unknown" : lap.client_age)
+              %td
+                = lap.client_address
+              %td
+                = lap.amount
+        %tfoot
+          %tr
+            %td{:colspan => 2}
+              = "Scheduled Disbursal Date"
+            %td
+              = date_select("scheduled_disbursal_date", Date.today, :id => "scheduled_disbursal_date", :size => 10)
+            %td
+              = "Scheduled First Payment Date"
+            %td
+              = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)   
+          %tr
+            %td{:width => '5%'}
+              = "Staff"
+            %td
+              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+            %td
+              = "On Date"
+            %td
+              = date_select("created_on", Date.today, :id => "created_on", :size => 10)
+            %td
+              = submit "Generate Loan File"
+  - else
+    %h3
+      = "No Loan applications pending for Loan File Generation"
+%br

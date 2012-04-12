@@ -1,0 +1,27 @@
+.shaded
+  %table.form
+    %thead
+      %tr
+        %th
+          Branch
+        %th
+          = select :name => :branch_id, :text_method => :name, :value_method => :id, :collection => get_accessible_branches, :prompt => "Select branch", :id => 'branch_selector', :class => 'chosen', :style => "width:230px;", :selected => params[:branch_id]
+        %th
+          Center
+        %th
+          = select :name => :center_id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :class => 'chosen', :style => "width:230px;", :selected => params[:center_id]
+        %td
+          = submit "Proceed"
+
+  - if @center
+    .menu-strip
+      %h3
+        Branch:
+        = @center.branch.name
+        = "|"
+        Center:
+        = @center.name
+        - if @center_cycle_number
+          = "|"
+          Center Cycle:
+          = @center_cycle_number

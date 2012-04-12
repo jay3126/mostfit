@@ -1,0 +1,66 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});  
+  });
+  
+#client_list
+  .shaded
+    - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+    %h2
+      Add new loan applications
+    - if center_cycle_number == 0
+      %h3 Center not open for new loan applications. Please create a fresh center cycle for this center.
+    - elsif @clients and @clients != [] 
+      %h3
+        = "Center Cycle Number #{center_cycle_number}"
+      %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
+        %table.form{:style => "width:100%;"}
+          %thead
+            %tr
+              %th
+                = check_box :id => "toggle_select" 
+              %th
+                Client ID
+              %th
+                Name
+              %th
+                Age
+              %th
+                Address
+              %th
+                New Loan
+          %tbody
+            - @clients.each do |client|
+              %tr
+                %td
+                  - is_eligible = LoanApplication.allow_new_loan_application?(client.id)
+                  - if (is_eligible)
+                    = check_box :name => "clients[#{client.id}][selected]", :class => "select"
+                %td
+                  = client.id
+                %td
+                  = client.name
+                %td
+                  = (client.age.nil? ? "Unknown" : client.age)
+                %td
+                  = client.address
+                %td
+                  = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}  
+          %tfoot
+            %tr
+              %td{:colspan => 3}
+                %b
+                  Loan Applications created by
+                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+              %td{:colspan => 2}
+                %b
+                  Created on
+                = date_select :created_on, Date.today
+              %td
+                = hidden_field :name => :at_branch_id, :value => @center.branch_id
+                = hidden_field :name => :at_center_id, :value => @center.id
+                = hidden_field :name => :center_cycle_number, :value => center_cycle_number
+                = submit 'Submit'
+    - else
+      %h3 No clients at this center

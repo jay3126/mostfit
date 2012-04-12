@@ -1,0 +1,51 @@
+%h1 
+  == Overlap Report Response for Loan Application ID #{@overlap_report_response.loan_application_id}
+
+%h3
+  -# status:
+  -# = @overlap_report_response.status
+- r = JSON::parse(@overlap_report_response.response_text || "{}")
+- r.keys.each do |key|
+  .shaded
+    %h2 
+      = key
+    - unless key == "RESPONSES"
+      %table.form{:width => "100%"}
+        - r[key].keys.each_with_index do |k, idx|
+          %tr
+            %th
+              = idx + 1
+            %td 
+              = k.gsub("_", " ")	  
+            %td
+              - unless k == "SUMMARY"
+                = r[key][k]
+              - else
+                - r[key][k].keys.each do |ki|
+                  %div
+                    %code
+                      = ki.downcase
+                    %i
+                      = r[key][k][ki]
+    - else
+      - responses = [r[key]["RESPONSE"]].flatten rescue []
+      - responses.each do |response|
+        %table.form{:width => "100%"}
+          - response.keys.each_with_index do |ke, idx|
+            %tr
+              %th
+                = idx + 1
+              %td
+                = ke.gsub("_", " ")
+              %td
+                - unless ke == "LOAN_DETAILS"
+                  = response[ke]
+                - else
+                  - response[ke].keys.each do |ky|
+                    %div
+                      %code
+                        = ky.downcase
+                      %i
+                        = response[ke][ky]
+  %br
+  %hr

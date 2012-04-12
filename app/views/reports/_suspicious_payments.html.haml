@@ -1,0 +1,120 @@
+= partial :form
+
+- @data_by_diff = @data.group_by { |d| d.diff }
+- @diff_days = @data_by_diff.keys.sort!
+- @data_by_negative_and_positive = @diff_days.group_by { |d| d > 0 }
+
+-# payment records which were recorded before they were received.
+- @recorded_earlier = @data_by_negative_and_positive[true]
+
+-# payment records which were recorded after they were received.
+- @recorded_later = @data_by_negative_and_positive[false]
+
+- no_of_cols = 8
+- date_display_format = "%d-%m-%Y" 
+
+%h3
+  = "Recorded earlier"
+-if @recorded_earlier.nil? or @recorded_earlier.empty?
+  %h4
+    = "No records found"
+-else
+  %table.report
+    %tr.header
+      %th
+        = "Payment ID"
+      %th
+        = "Amount"
+      %th
+        = "Received on"
+      %th
+        -# Called created_on in our model
+        = "Recorded on"
+      %th
+        = "Deleted"
+      %th
+        = "Deleted at"
+      %th
+        = "Deleted by"
+    - @recorded_earlier.each do |diff|
+      %tr
+        %th{:colspan => no_of_cols, :style => "text-align: center"}
+          - if diff > 0
+            = "#{diff} days earlier"
+          - else
+            = "#{diff.abs} days later"
+      - @data_by_diff[diff].each do |d|
+        %tr
+          %td
+            = d.id
+          %td
+            = d.amount
+          %td
+            = d.received_on
+          %td
+            = d.created_at.strftime(date_display_format)
+          %td
+            = d.deleted
+          %td
+            - if d.deleted == 'No'
+              = "-"
+            - else
+              = d.deleted_at.strftime(date_display_format)
+          %td
+            - if d.deleted == 'No'
+              = "-"
+            - else
+              = User.get(d.deleted_by_user_id).login
+
+%h3 
+  = "Recorded later"  
+-if @recorded_later.nil? or @recorded_later.empty?
+  %h4
+    = "No records found"
+-else
+  %table.report
+    %tr.header
+      %th
+        = "Payment ID"
+      %th
+        = "Amount"
+      %th
+        = "Received on"
+      %th
+        -# Called created_on in our model
+        = "Recorded on"
+      %th
+        = "Deleted"
+      %th
+        = "Deleted at"
+      %th
+        = "Deleted by"
+    - @recorded_later.each do |diff|
+      %tr
+        %th{:colspan => no_of_cols, :style => "text-align: center"}
+          - if diff > 0
+            = "#{diff} days earlier"
+          - else
+            = "#{diff.abs} days later"
+      - @data_by_diff[diff].each do |d|
+        %tr
+          %td
+            = d.id
+          %td
+            = d.amount
+          %td
+            = d.received_on
+          %td
+            = d.created_at.strftime(date_display_format)
+          %td
+            = d.deleted
+          %td
+            - if d.deleted == 'No'
+              = "-"
+            - else
+              = d.deleted_at.strftime(date_display_format)
+          %td
+            - if d.deleted == 'No'
+              = "-"
+            - else
+              = User.get(d.deleted_by_user_id).login

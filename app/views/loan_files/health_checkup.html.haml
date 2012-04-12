@@ -1,0 +1,64 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+%h1
+  = "Health checkup for Loan Files"
+
+%form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
+  = partial "lib/branch_center_selector"
+%hr
+
+.shaded
+  %h2
+    = "Loan files pending for health checkup"
+  - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && (status_map.include?(Constants::Status::HEALTH_CHECK_PENDING) || status_map.include?(Constants::Status::NEW_STATUS))
+    = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
+      = hidden_field :name => 'branch_id', :value => @branch.id
+      = hidden_field :name => 'center_id', :value => @center.id
+      %table.form{:style => "width:100%;"}
+        %thead
+          %tr
+            %th
+              = "ID"
+            %th
+              = "Loan file Identifier"
+            %th
+              = "Number of applications"
+            %th{:colspan => 2, :align => "center"}
+              = "Status"
+            %th
+              = "Remark"
+        %tbody
+          - @loan_files_at_center_at_branch_for_cycle.each do |lf|
+            - unless lf.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
+              %tr
+                %td
+                  = lf.id
+                %td
+                  = link_to lf.loan_file_identifier, resource(lf)
+                %td
+                  = lf.loan_applications.count
+                %td
+                  %input{:name => "[loan_files][#{lf.id}][health_check_status]", :type => "radio", :value => Constants::Status::HEALTH_CHECK_APPROVED}
+                  Approved
+                %td
+                  %input{:name => "[loan_files][#{lf.id}][health_check_status]", :type => "radio", :value => Constants::Status::HEALTH_CHECK_PENDING, :checked => "checked"}
+                  Pending
+                %td
+                  = text_field :name => "[loan_files][#{lf.id}][health_status_remark]", :value => lf.health_status_remark
+        %tfoot
+          %tr
+            %td{:colspan => 8, :style=>"text-align : center" }
+              = submit "Save all"
+              %input{:value => "Reset all", :type => "reset"}
+  - else
+    No Loan Files found for health checkup.
+%br
+%hr
+
+= partial :health_checked

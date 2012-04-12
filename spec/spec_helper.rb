@@ -82,6 +82,9 @@ Spec::Runner.configure do |config|
   end
 end
 
+# Don't include the factories until the environment has been loaded
+require 'spec/factories'
+
 
 class MockLog
   def info(data)

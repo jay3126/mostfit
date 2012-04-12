@@ -3,7 +3,8 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
   include FeesContainer
-  include Highmark::Client
+  include ClientValidations
+  include Constants::Masters
 
   FLAGS = [:insincere]
 
@@ -41,10 +42,17 @@ class Client
   property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :female
   property :marital_status, Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
+  property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
+  property :reference2,      String
+  property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
+  property :name,            String, :length => 100, :nullable => false, :index => true
+  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
   property :address,         Text, :lazy => true
+  property :pincode,         Integer 
+  property :state,           Enum.send('[]', *STATES), :nullable => true 
   property :active,          Boolean, :default => true, :nullable => false, :index => true
   property :inactive_reason, Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :index => true, :default => ''
   property :date_joined,     Date,    :index => true
@@ -198,6 +206,7 @@ class Client
   has n, :attendances
   has n, :claims
   has n, :guarantors
+  has n, :loan_applications
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
 
@@ -238,6 +247,11 @@ class Client
 
   def update_loan_cache
     loans.each{|l| l.update_loan_cache(true); l.save}
+  end
+
+  # returns the age of the client as calculated from her year of birth
+  def age
+    (date_of_birth.nil? ? nil : (Date.today.year - date_of_birth.year))
   end
 
   def self.from_csv(row, headers)
@@ -298,6 +312,23 @@ class Client
       end
     end
     @errors.blank? ? true : @errors
+  end
+
+  def to_loan_application
+    _to_loan_application = {
+      :client_id              => id, 
+      :client_name            => name,
+      :client_dob             => date_of_birth,
+      :client_address         => address,
+      :client_state           => state,
+      :client_pincode         => pincode,
+      :client_reference1      => reference,
+      :client_reference1_type => reference_type,
+      :client_reference2      => reference2,
+      :client_reference2_type => reference2_type,
+      :client_guarantor_name  => spouse_name,
+      :client_guarantor_relationship => "Husband"
+    }
   end
 
   def self.flags

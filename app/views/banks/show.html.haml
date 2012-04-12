@@ -1,0 +1,29 @@
+%h1
+  = "Bank :- #{@bank.name}"
+.shaded
+  .menu-strip
+    = link_to_with_rights 'Add Bank Branch','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+    %br
+    %br
+    = partial 'bank_branches/form'
+%br
+%hr
+
+.shaded
+  %h2
+    = "Bank Branches"
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "ID"
+        %th
+          = "Name"
+    %tbody
+      - @bank_branches.each do |bb|
+        %tr
+          %td
+            = bb.id
+          %td
+            = link_to bb.name, resource(@bank,bb)
+%br

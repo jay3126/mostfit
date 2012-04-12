@@ -5,9 +5,12 @@
 
     %h1== Branch: <i>#{@branch.name}</i>
     %p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
-      = link_to_with_rights 'edit this branch\'s details ', resource(@branch, :edit), :class => "edit grey_button"
-      &nbsp;&nbsp;
-      = link_to_with_rights 'create a new center', resource(@branch, :centers, :new), :class => "add grey_button"
+      = link_to_with_rights 'edit branch details ', resource(@branch, :edit), :class => "edit grey_button"
+      &nbsp;
+      = link_to_with_rights 'loan applications for existing clients', url(:controller => :loan_applications, :action => :bulk_new, :branch_id => @branch.id), :class => "add grey_button"
+      = link_to_with_rights 'new center', resource(@branch, :centers, :new), :class => "add grey_button"
+      &nbsp; &nbsp;
+      = link_to_with_rights 'new loan applicants', url(:controller => :loan_applications, :action => :bulk_create, :branch_id => @branch.id), :class => "add grey_button"
     %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
       %tr.odd
         %th.odd Name
@@ -47,9 +50,21 @@
           %td
             = (Attendance.count("client.center.branch_id" => @branch.id, :status => "present") * 100.0 / total_attendance_at_branch).round(2)
             = "%"
-        %tr
-          %td{:colspan => "2"}
-
+      %tr.odd
+        %th.odd Loan Applications Pending for verification
+        %td
+          = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :branch_id => @branch.id)
+      %tr.even
+        %th.even New Loan Authorizations
+        %td
+          = link_to "Loan Authorizations", url(:controller => :loan_authorizations, :action => :pending_authorizations, :branch_id => @branch.id)
+      %tr.odd
+        %th.odd
+          Loan File
+        %td
+          = link_to "Generation", url(:controller => :loan_files, :action => :loan_file_generation, :branch_id => @branch.id)
+          = " | "
+          = link_to "Health Check", url(:controller => :loan_files, :action => :loan_files_for_health_checkup, :branch_id => @branch.id)
   %div.tab_container.shaded
     %ul.tabs
       %li#centers
@@ -61,13 +76,15 @@
       %li#documents
         Documents
       %li#comments
-        Comments
+        Comments 
       %li#audit
         Audit
       %li#history
         History
       %li#accounting
         Accounting
+      %li#bank_deposits
+        Bank Deposits
       - if Mfi.first.branch_diary_enabled
         %li#branch_diary
           Diary
@@ -101,6 +118,8 @@
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/accounts/branch?branch_id=#{@branch.id}"}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:money_deposits, :branch_id => @branch.id)}
     - if Mfi.first.branch_diary_enabled
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(:branch_diaries, :branch_id => @branch.id, :model => "Branch")}
@@ -110,6 +129,7 @@
     - if Mfi.first.asset_register_enabled
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(:asset_registers, :branch_id => @branch.id, :model => "Branch")}
+      
     - if Mfi.first.map_enabled        
       %div.tab
         = js_include_tag :map

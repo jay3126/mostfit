@@ -1,0 +1,24 @@
+.shaded
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+
+%h1
+  = "Client Verifications"
+= partial :filter_form
+
+%br
+%hr
+- if (@show_pending and @show_pending == true)
+  = partial :pending
+
+%br
+%hr
+= partial :recently_recorded
+
+%br
+%br
