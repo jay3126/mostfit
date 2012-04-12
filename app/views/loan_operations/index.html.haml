@@ -1,0 +1,33 @@
+%h1 
+  Loan Actions
+%table#data_entry_index
+  %tr
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Loan Application
+      = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create), :class => 'add_small'
+      %br
+      = link_to "Create loan applications for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        De-duplication reports
+  %tr
+  %tr
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Credit Bureau
+      = link_to "Generated request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'add_small'
+      %br
+      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'add_small'
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Client verification
+      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'add_small'
+      %br
+      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'add_small'
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Loan File
+      = link_to "Loan file Generation", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
+      %br
+      = link_to "Health check on loan files", url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :class => 'add_small'

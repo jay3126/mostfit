@@ -15,6 +15,7 @@ Merb::Router.prepare do
     end
   end
   resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get]}
+  resources :loan_operations  
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
 
