@@ -12,7 +12,7 @@ module Pdf
       return nil if centers.empty?
       days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash
       days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
-      centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes}.each_with_index{|center, idx|
+      centers.sort_by{|x| x.meeting_time_of_day}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
         pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 11, :justification => :center
         pdf.text("\n")
@@ -138,7 +138,7 @@ module Pdf
       pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
       return nil if centers.empty?
-      centers.sort_by{|x| x.meeting_time_hours*60 + x.meeting_time_minutes.to_i}.each_with_index{|center, idx|
+      centers.sort_by{|x| x.meeting_time_of_day}.each_with_index{|center, idx|
         pdf.start_new_page if idx > 0
         pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
         pdf.text "Disbursal Report and Acknowledgement", :font_size => 16, :justification => :center
