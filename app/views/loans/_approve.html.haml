@@ -3,12 +3,9 @@
   $('#toggle_approve').change(function() {
     $('.approve').attr('checked',$(this).attr('checked'))});  
   });
-
 %table.report.nojs    
   %thead
     %tr{:style => "font-size: 0.85em;"}
-      %th
-        Sl.
       %th
         Loan id
       %th
@@ -21,10 +18,10 @@
         Center
       %th
         Approval Date
-      -# %th
-      -#   Scheduled Disbursal Date
-      -# %th
-      -#   Scheduled 1st Payment Date
+      %th
+        Scheduled Disbursal Date
+      %th
+        Scheduled 1st Payment Date
       %th
         Center Meeting Day
       %th
@@ -33,17 +30,11 @@
         Selected
         = check_box :id => "toggle_approve"
       %th
-        credit bureau
-      %th
         Approved By
   - staff_members_allowed = staff_members_collection
-  - row_number = 0
   - @loans_to_approve.each do |loan|
     - client = @clients.find{|x| x.id==loan.client_id} || loan.client
     %tr{:class => cycle('odd','')}
-      %td.number
-        - row_number = row_number + 1
-        = row_number
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
       %td.text
@@ -55,33 +46,28 @@
       %td.text
         = link_to client.center.name, url(:quick_link, "centers", client.center.id)
       %td.text
-        - if Mfi.first.allow_approval_date_selection
-          - min_date = (loan.applied_on > Date.min_transaction_date ? loan.applied_on : Date.min_transaction_date)
-          = date_select("loans[#{loan.id}][approved_on]", min_date, :id => "loans_#{loan.id}_approved_on", :min_date => min_date, :max_date => Date.max_transaction_date)
-        - else
-          = Date.today
-          = hidden_field(:name => "loans[#{loan.id}][approved_on]", :value => Date.today)
+        - min_date = (loan.applied_on > Date.min_transaction_date ? loan.applied_on : Date.min_transaction_date)
+        = date_select("loans[#{loan.id}][approved_on]", min_date, :id => "loans_#{loan.id}_approved_on", :min_date => min_date, :max_date => Date.max_transaction_date)
+      %td.text
+        - min_date = (loan.scheduled_disbursal_date > Date.min_transaction_date ? loan.scheduled_disbursal_date : Date.min_transaction_date)
+        = date_select("loans[#{loan.id}][scheduled_disbursal_date]", min_date, :id => "loans_#{loan.id}_scheduled_disbursal_date", :min_date => min_date, :max_date => Date.max_transaction_date)
+        = loan.scheduled_first_payment_date.strftime('%A')
+
+      %td.text
+        - min_date = (loan.scheduled_first_payment_date > Date.min_transaction_date ? loan.scheduled_first_payment_date : Date.min_transaction_date)
+        = date_select("loans[#{loan.id}][scheduled_first_payment_date]", min_date, :id => "loans_#{loan.id}_scheduled_first_payment_date", :min_date => min_date, :max_date => Date.max_transaction_date)
+        = loan.scheduled_first_payment_date.strftime('%A')
       %td.text
         = loan.client.center.meeting_day.to_s.camelcase
       %td.text
         = loan.status.to_s.camelcase(' ')
       %td
-        - hr = loan.highmark_responses.first
-        - if hr
-          - if hr.status == :rejected
-            = check_box :name => "loans[#{loan.id}][approved?]", :onclick => "javascript:$('#approval_reason_#{loan.id}').toggle();", :class => "approve"
-          - else
-            = check_box :name => "loans[#{loan.id}][approved?]", :class => "approve"
-        - else
-          = check_box :name => "loans[#{loan.id}][approved?]", :class => "approve"
-        = select :name => "loans[#{loan.id}][approval_reason]", :collection => APPROVAL_REASONS.map{|k,v| [k,v]}, :style => "display:none;", :id => "approval_reason_#{loan.id}"
-      %td
-        = hr ? (link_to "HR", url(:controller => :highmarks, :action => :response, :id => hr.id), :class => hr.status) : "!!"
+        = check_box :name => "loans[#{loan.id}][approved?]", :class => "approve"
       %td.text
         = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
   %tfoot
     %tr
-      %td{:colspan => 13}
+      %td{:colspan => 12}
   
 = paginate @loans_to_approve if @loans_to_approve.respond_to?(:page)
  
