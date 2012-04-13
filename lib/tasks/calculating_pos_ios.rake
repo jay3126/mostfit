@@ -18,7 +18,7 @@ namespace :mostfit do
     task :calculating_pos_ios, :directory do |t, args|
       require 'fastercsv'
       USE = <<USAGE_TEXT
-[bin/]rake mostfit:suryoday:calculating_pos_ios[<'directory'>
+[bin/]rake mostfit:suryoday:calculating_pos_ios[<'directory'>]
 Convert loans tab in the upload file to a .csv and put them into <directory>
 USAGE_TEXT
 
