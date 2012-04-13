@@ -18,10 +18,8 @@ namespace :mostfit do
     task :calculating_pos_ios, :directory do |t, args|
       require 'fastercsv'
       USE = <<USAGE_TEXT
-[bin/]rake mostfit:suryoday:make_single_payment[<'directory'>,<'only_interest'>]
+[bin/]rake mostfit:suryoday:calculating_pos_ios[<'directory'>
 Convert loans tab in the upload file to a .csv and put them into <directory>
-Run it without the second argument to record principal payments
-Run once again with the second argument to record only the interest payment
 USAGE_TEXT
 
       t1= Time.now
