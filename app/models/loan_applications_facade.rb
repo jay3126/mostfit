@@ -56,7 +56,10 @@ class LoanApplicationsFacade
 
   # Rate on credit bureau response
 
-  def rate_by_credit_bureau_response(loan_application_id)
+  def rate_by_credit_bureau_response(loan_application_id, rating)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_credit_bureau_response(rating)
   end
 
   # Loan authorization
