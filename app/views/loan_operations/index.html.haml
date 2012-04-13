@@ -16,18 +16,18 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Credit Bureau
-      = link_to "Generated request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'add_small'
+      = link_to "Generated request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
       %br
-      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'add_small'
+      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Client verification
-      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'add_small'
+      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'edit_small'
       %br
-      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'add_small'
+      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'edit_small'
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan File
-      = link_to "Loan file Generation", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
+      = link_to "Loan file Generation", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'edit_small'
       %br
       = link_to "Health check on loan files", url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :class => 'add_small'
