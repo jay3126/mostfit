@@ -2,6 +2,7 @@ class Center
   include DataMapper::Resource
   include DateParser
   include Constants::Center
+  include IsLocation
 
   attr_accessor :meeting_day_change_date
 
@@ -35,6 +36,7 @@ class Center
   has n, :loan_history
   has n, :center_meeting_days
   has n, :weeksheets
+  has n, :meeting_schedules, :through => Resource
   
   validates_is_unique   :code, :scope => :branch_id
   validates_length      :code, :min => 1, :max => 12
@@ -340,6 +342,13 @@ class Center
     hours_to_minutes = @meeting_time_hours ? (@meeting_time_hours * 60) : 0
     time_of_day = hours_to_minutes + (@meeting_time_minutes || 0)
     time_of_day
+  end
+
+  def meeting_schedule_effective(on_date)
+    query = {}
+    query[:schedule_begins_on.lte] = on_date
+    query[:order] = [:schedule_begins_on.desc]
+    self.meeting_schedules.first(query)
   end
 
 end
