@@ -48,23 +48,19 @@
                 = lap.amount
         %tfoot
           %tr
-            %td{:colspan => 2}
-              = "Scheduled Disbursal Date"
-            %td
+            %td{:colspan => 3}
+              = "Scheduled Disbursal"
               = date_select("scheduled_disbursal_date", Date.today, :id => "scheduled_disbursal_date", :size => 10)
-            %td
-              = "Scheduled First Payment Date"
-            %td
-              = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)   
-          %tr
-            %td{:width => '5%'}
-              = "Staff"
-            %td
-              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
-            %td
-              = "On Date"
-            %td
+            %td{:colspan => 2}
+              = "Scheduled First Payment"
+              = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)
+            %td{:colspan => 1}
+              = "Loan File Created on"
               = date_select("created_on", Date.today, :id => "created_on", :size => 10)
+          %tr
+            %td{:colspan => 5}
+              = "Staff Member"
+              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
             %td
               = submit "Generate Loan File"
   - else
