@@ -33,6 +33,7 @@ class ClientVerifications < Application
     @center = Center.get(@center_id)
     #show the recently recorded verifications
     @errors = {}
+    facade = LoanApplicationsFacade.new(session.user)
     if params.key?('verification_status')
        params['verification_status'].keys.each do | cpv_type |
               params['verification_status'][cpv_type].keys.each do | id |
@@ -49,15 +50,15 @@ class ClientVerifications < Application
 
                   if cpv_type == Constants::Verification::CPV1
                     if verification_status == Constants::Verification::VERIFIED_ACCEPTED
-                        ClientVerification.record_CPV1_approved(id,verified_by_staff_id, verified_on_date, session.user.id)
+                        facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
                     elsif verification_status == Constants::Verification::VERIFIED_REJECTED 
-                        ClientVerification.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date, session.user.id)
+                        facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
                     end
                   elsif cpv_type == Constants::Verification::CPV2
                     if verification_status == Constants::Verification::VERIFIED_ACCEPTED 
-                        ClientVerification.record_CPV2_approved(id,verified_by_staff_id, verified_on_date, session.user.id)
+                        facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
                     elsif verification_status == Constants::Verification::VERIFIED_REJECTED 
-                        ClientVerification.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date, session.user.id)
+                        facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
                     end
                   end
               end
