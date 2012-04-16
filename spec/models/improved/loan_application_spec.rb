@@ -127,31 +127,34 @@ describe LoanApplication do
     ClientVerification.get_CPV2_status(@lap.id).should == Constants::Verification::VERIFIED_ACCEPTED
   end
 
-  it "should follow the loan application workflow" do
-    @lap.set_status(Constants::Status::NEW_STATUS).include?(false).should be_true
-    @lap.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS).should be_true
-    @lap.set_status(Constants::Status::NOT_DUPLICATE_STATUS).should be_true
-    @lap.set_status(Constants::Status::OVERLAP_REPORT_REQUEST_GENERATED_STATUS).should be_true
-    #@lap.set_status(Constants::Status::AUTHORIZED_APPROVED_STATUS).include?(false).should be_true
-    @lap.set_status(Constants::Status::OVERLAP_REPORT_RESPONSE_MARKED_STATUS).should be_true
-    @lap.set_status(Constants::Status::AUTHORIZATION_STATUSES).include?(false).should be_true
-    @lap.set_status(Constants::Status::AUTHORIZED_APPROVED_OVERRIDE_STATUS). should be_true
-    @lap.set_status(Constants::Status::CPV1_APPROVED_STATUS).should be_true
-    #@lap.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS).include?(false).should be_true
-    @lap.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS).should be_true
-  end
-
+# Life cycle of loan application status/ loan application work-flow
   it "should return true if status is new_status and set to suspected_duplicate or not_duplicate" do
     @lap.set_status(Constants::Status::NEW_STATUS).include?(false).should be_true
     @lap.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS).should be_true
   end
 
-  it "should return true if status is suspected_duplicate and set to confirmed_duplicate or cleared_not_duplicate" 
+  it "should return true if status is suspected_duplicate and set to confirmed_duplicate or cleared_not_duplicate" do
+    @lap.set_status(Constants::Status::NOT_DUPLICATE_STATUS).should be_true
+  end
 
-  it "should return true if status is confirmed_duplicate and set to overlap_report_request_generated"
+  it "should return true if status is confirmed_duplicate and set to overlap_report_request_generated" do
+    @lap.set_status(Constants::Status::CONFIRMED_DUPLICATE_STATUS).should be_true
+    @lap.set_status(Constants::Status::OVERLAP_REPORT_REQUEST_GENERATED_STATUS).should be_true
+  end
 
-  it "should return true if status is overlap_report_request_generated set to overlap_report_response_marked"
+  it "should return true if status is overlap_report_request_generated set to overlap_report_response_marked" do
+    @lap.set_status(Constants::Status::OVERLAP_REPORT_RESPONSE_MARKED_STATUS).should be_true
+  end
 
-  it "should return true if status is overlap_report_request_generated set to authorized_approved_override"
+  it "should return true if status is overlap_report_request_generated set to authorized_approved_override" do
+    @lap.set_status(Constants::Status::AUTHORIZED_APPROVED_OVERRIDE_STATUS). should be_true
+  end
+
+  it "should return true if status is overlap_report_request_generated set to cpv1_approved" do
+    @lap.set_status(Constants::Status::CPV1_APPROVED_STATUS).should be_true
+  end
+  it "should return true if status is cpv1_approved and set to loan_file_generated" do
+    @lap.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS).should be_true
+  end
 
 end
