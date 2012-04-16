@@ -194,7 +194,7 @@ class LoanApplication
     OverlapReportRequest.transaction do |t|
       OverlapReportRequest.create(:loan_application_id => self.id)
       status = self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS) 
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
@@ -203,7 +203,7 @@ class LoanApplication
     LoanApplication.transaction do |t|
       self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
       status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
@@ -212,7 +212,7 @@ class LoanApplication
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_approved(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV1_APPROVED_STATUS)
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
@@ -221,7 +221,7 @@ class LoanApplication
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_rejected(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV1_REJECTED_STATUS)
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
@@ -230,7 +230,7 @@ class LoanApplication
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_approved(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV2_APPROVED_STATUS)
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
@@ -239,7 +239,7 @@ class LoanApplication
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_rejected(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV2_REJECTED_STATUS)
-      t.rollback if status.include?(false)
+      t.rollback unless status == true
       return status
     end
   end
