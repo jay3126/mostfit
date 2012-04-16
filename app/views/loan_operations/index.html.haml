@@ -36,7 +36,7 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Client verification
-      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'edit_small'
+      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true'), :class => 'edit_small'
       %br
       = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'edit_small'
     %td
