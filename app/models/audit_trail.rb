@@ -8,7 +8,7 @@ class AuditTrail
   property :action,          Enum[:create, :update, :delete],  :nullable => false, :index => true
   property :changes,         Yaml, :length => 20000
   property :created_at,      DateTime, :index => true
-  property :type, Enum[:log, :warning, :error], :index => true
+  property :user_role,       Enum.send('[]', *User::ROLES), :nullable => false, :index => true, :default => lambda {|obj, p| obj.user.role}
   belongs_to :user
 
   # we need this dummy validation to define the reallocation context which bubbles down into AuditTrail as well. 

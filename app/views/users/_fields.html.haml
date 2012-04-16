@@ -9,18 +9,11 @@
         %span.greytext (only letters and numbers are allowed)
       - else
         = @user.name
-  - unless @user.role and @user.saved?
-    %tr
-      %td
-        Select role
-      %td
-        = select :role, :collection => User.roles, :prompt => 'Select Role', :class => 'chosen', :id => 'user_role'
-  - else
-    %tr
-      %td
-        Role
-      %td
-        = @user.role_to_s
+  %tr
+    %td
+      Select role
+    %td
+      = select :role, :collection => User.roles, :prompt => 'Select Role', :class => 'chosen', :id => 'user_role'
   - unless @user.staff_member and @user.saved?
     %tr.staff_member#is_staff_member
       %td

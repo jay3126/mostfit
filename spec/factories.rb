@@ -459,7 +459,6 @@ FactoryGirl.define do
     keys                'amount'
     comparator          :<
       value               '10'
-
     association         :rule
   end
 
