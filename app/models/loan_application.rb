@@ -193,42 +193,54 @@ class LoanApplication
   def generate_credit_bureau_request
     OverlapReportRequest.transaction do |t|
       OverlapReportRequest.create(:loan_application_id => self.id)
-      t.rollback if self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS).include?(false)
+      status = self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS) 
+      t.rollback if status.include?(false)
+      return status
     end
   end
 
   def record_credit_bureau_response(credit_bureau_status)
     LoanApplication.transaction do |t|
-      self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now) 
-      t.rollback if self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS).include?(false)
+      self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
+      status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+      t.rollback if status.include?(false)
+      return status
     end
   end
 
   def record_CPV1_approved(by_staff, on_date, by_user_id)
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_approved(self.id, by_staff, on_date, by_user_id) 
-      t.rollback if self.set_status(CPV1_APPROVED_STATUS).include?(false)
+      status = self.set_status(CPV1_APPROVED_STATUS)
+      t.rollback if status.include?(false)
+      return status
     end
   end
 
   def record_CPV1_rejected(by_staff, on_date, by_user_id)
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_rejected(self.id, by_staff, on_date, by_user_id) 
-      t.rollback if self.set_status(CPV1_REJECTED_STATUS).include?(false)
+      status = self.set_status(CPV1_REJECTED_STATUS)
+      t.rollback if status.include?(false)
+      return status
     end
   end
   
   def record_CPV2_approved(by_staff, on_date, by_user_id)
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_approved(self.id, by_staff, on_date, by_user_id) 
-      t.rollback if self.set_status(CPV2_APPROVED_STATUS).include?(false)
+      status = self.set_status(CPV2_APPROVED_STATUS)
+      t.rollback if status.include?(false)
+      return status
     end
   end
 
   def record_CPV2_rejected(by_staff, on_date, by_user_id)
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_rejected(self.id, by_staff, on_date, by_user_id) 
-      t.rollback if self.set_status(CPV2_REJECTED_STATUS).include?(false)
+      status = self.set_status(CPV2_REJECTED_STATUS)
+      t.rollback if status.include?(false)
+      return status
     end
   end
 
