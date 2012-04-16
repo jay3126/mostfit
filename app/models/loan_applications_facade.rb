@@ -36,22 +36,37 @@ class LoanApplicationsFacade
 
   # General information
   def get_loan_application_status(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.get_status
   end
 
   def get_loan_application_info(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.to_info
   end
 
   # Rate suspect on de-dupe
 
   def rate_suspected_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS)
   end
   
   # Confirm or clear suspect from de-dupe
 
   def confirm_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(Constants::Status::CONFIRMED_DUPLICATE_STATUS)
   end
 
   def confirm_not_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(Constants::Status::CLEARED_NOT_DUPLICATE_STATUS)
   end
 
   # Rate on credit bureau response
@@ -83,15 +98,27 @@ class LoanApplicationsFacade
   # CPVs
 
   def record_CPV1_approved(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV1_approved(by_staff, on_date, @user.id)
   end
 
   def record_CPV1_rejected(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV1_rejected(by_staff, on_date, @user.id)
   end
 
   def record_CPV2_approved(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV2_approved(by_staff, on_date, @user.id)
   end
 
   def record_CPV2_rejected(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV2_rejected(by_staff, on_date, @user.id)
   end
 
   # Locate loan files
