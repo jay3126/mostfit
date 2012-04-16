@@ -5,6 +5,7 @@ class MeetingSchedule
 
   property :id,                         Serial
   property :meeting_frequency,          Enum.send('[]', *MEETING_FREQUENCIES), :nullable => false
+  property :meeting_weekday,            Enum.send('[]', *DAYS_OF_THE_WEEK), :nullable => false, :default => lambda { |obj, p| Constants::Time.get_week_day(obj.schedule_begins_on) }
   property :schedule_begins_on,         Date, :nullable => false
   property :meeting_time_begins_hours,  Integer, :min => EARLIEST_MEETING_HOURS_ALLOWED, :max => LATEST_MEETING_HOURS_ALLOWED
   property :meeting_time_begins_minutes,Integer, :min => EARLIEST_MEETING_MINUTES_ALLOWED, :max => LATEST_MEETING_MINUTES_ALLOWED

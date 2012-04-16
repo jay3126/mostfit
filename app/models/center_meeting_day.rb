@@ -31,7 +31,24 @@ class CenterMeetingDay
   belongs_to :center
 
   before :valid?, :convert_blank_to_nil
-  
+
+  #WARNING: currently DOES NOT WORK for biweekly and monthly
+  def to_meeting_schedule
+    return nil if self.meeting_day == :none
+    return nil unless self.center
+
+    meeting_time_begins_hours = self.center.meeting_time_hours || 0
+    meeting_time_begins_minutes = self.center.meeting_time_minutes || 0
+
+    meeting_schedule_info = {}
+
+    meeting_schedule_info[:meeting_frequency] = Constants::Time::WEEKLY
+    meeting_schedule_info[:schedule_begins_on] = self.valid_from
+    meeting_schedule_info[:meeting_time_begins_hours] = meeting_time_begins_hours
+    meeting_schedule_info[:meeting_time_begins_minutes] = meeting_time_begins_minutes
+    meeting_schedule_info[:center_id] = self.center_id
+    meeting_schedule_info
+  end
   
   def either_meeting_day_or_date_vector
     date_vector_valid = every and (not every.blank?) and what and (not what.blank?) and of_every and (not of_every.blank?) and period and (not period.blank?)
