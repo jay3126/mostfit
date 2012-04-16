@@ -18,6 +18,10 @@ class MeetingFacade
     #TBD
   end
 
+  def setup_meeting_calendar(on_date)
+    MeetingCalendar.setup_calendar(on_date)
+  end
+
   # Creates a new meeting schedule for the given location
   def setup_meeting_schedule(for_location, meeting_schedule_info)
     #TBD

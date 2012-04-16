@@ -1,3 +1,20 @@
+class MeetingScheduleInfo
+  include IsMeeting
+
+  attr_reader :meeting_frequency, :schedule_begins_on, :meeting_time_begins_hours, :meeting_time_begins_minutes
+
+  def initialize(meeting_frequency, schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
+    @meeting_frequency = meeting_frequency
+    @schedule_begins_on = schedule_begins_on
+    @meeting_time_begins_hours = meeting_time_begins_hours; @meeting_time_begins_minutes = meeting_time_begins_minutes
+  end
+
+  def to_s
+    "Meeting schedule with frequency #{self.meeting_frequency} effective #{self.schedule_begins_on} at #{self.meeting_begins_at}"
+  end
+  
+end
+
 class MeetingSchedule
   include DataMapper::Resource
   include Constants::Time
@@ -14,6 +31,10 @@ class MeetingSchedule
   
   # getters added for conventional access
   def from_date; self.schedule_begins_on; end
+
+  def to_info
+    MeetingScheduleInfo.new(meeting_frequency, schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
+  end
 
   def to_s
     "Meeting schedule with frequency #{self.meeting_frequency} effective #{self.schedule_begins_on} at #{self.meeting_begins_at}"
