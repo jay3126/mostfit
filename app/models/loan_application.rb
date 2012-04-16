@@ -295,8 +295,8 @@ class LoanApplication
     predicates = {}
     predicates[:at_branch_id] = at_branch_id if at_branch_id
     predicates[:at_center_id] = at_center_id if at_center_id
-    predicates[:status] = [APPLICATION_APPROVED, APPLICATION_OVERRIDE_APPROVED]
-    all(predicates)#.select {|lap| lap.is_pending_verification?}
+    predicates[:status] = [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS]
+    LoanApplication.all(predicates)#.select {|lap| lap.is_pending_verification?}
   end
 
   def self.pending_authorization(search_options = {})
