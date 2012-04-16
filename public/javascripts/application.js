@@ -191,7 +191,7 @@ function attachFormRemote(){
     $("form._remote_").live('submit', function(f){
 				form=$(f.currentTarget);
 				$(form).find("input[type='submit']").attr("disabled", true);
-				$(form).after("<img id='spinner' src='/images/spinner.gif' />");
+				$(form).after("<img id='spinner' src='/images/spinner.gif' style='position:absolute;'/>");
 				$(".floatingBox").remove();
 				$.ajax({
 					   type: form.attr("method"),

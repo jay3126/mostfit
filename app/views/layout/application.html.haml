@@ -14,7 +14,6 @@
     = css_include_tag "jquery-ui", :media => "screen, projection"
     = css_include_tag :chosen
     = js_include_tag :jquery, :application, :swfobject, "jquery.highlight.js", "jquery.floatheader.min.js", "jquery-ui.min.js", "chosen/chosen/chosen.jquery.js", "less.js"
-    %link{ :rel => "stylesheet", :type => "text/css" :href => 'http://fonts.googleapis.com/css?family=Pontano+Sans'}
   %body
     - if session.authenticated?
       .bookmark
