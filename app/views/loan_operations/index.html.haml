@@ -1,7 +1,11 @@
 %h1 
-  Loan Actions
+  Loan Applications
 %table#data_entry_index
   %tr
+  %tr
+    %td
+      %br
+      = image_tag('/images/loan.png', :height=> 70, :width=> 79)
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan Application
@@ -9,25 +13,40 @@
       %br
       = link_to "Create loan applications for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
     %td
+      %br
+      = image_tag('/images/Dub_report.png', :height=> 70, :width=> 79)
+    %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-duplication reports
-  %tr
-  %tr
+    %td
+      %br
+      = image_tag('/images/credit.png', :height=> 70, :width=> 79)
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Credit Bureau
-      = link_to "Generated request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'add_small'
+      = link_to "Generated request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
       %br
-      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'add_small'
+      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
+  %tr
     %td
+      %br
+      %br
+      = image_tag('/images/authorize.png', :height=> 70, :width=> 79)
+    %td
+      %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Client verification
-      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'add_small'
+      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'edit_small'
       %br
-      = link_to "Loan application authorization", url(:controller => :loan_authorizations, :action => :pending_authorizations), :class => 'add_small'
+      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'edit_small'
     %td
+      %br
+      %br
+      = image_tag('/images/loanfile.png', :height=> 70, :width=> 79)
+    %td
+      %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan File
-      = link_to "Loan file Generation", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
+      = link_to "Loan file Generation", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'edit_small'
       %br
       = link_to "Health check on loan files", url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :class => 'add_small'
