@@ -191,57 +191,63 @@ class LoanApplication
 
   # FUNCTIONS THAT SET STATUS FOR LOAN APPLICATIONS AND ARE GATE KEEPER FUNCTIONS AS LOAN APPLICATIONS PROCEED THROUGH THE LOAN APPLICATION WORKFLOW
   def generate_credit_bureau_request
+    status = nil
     OverlapReportRequest.transaction do |t|
       OverlapReportRequest.create(:loan_application_id => self.id)
       status = self.set_status(OVERLAP_REPORT_REQUEST_GENERATED_STATUS) 
       t.rollback unless status == true
-      return status
     end
+    return status
   end
 
   def record_credit_bureau_response(credit_bureau_status)
+    status = nil
     LoanApplication.transaction do |t|
       self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
       status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
       t.rollback unless status == true
-      return status
     end
+    return status
   end
 
   def record_CPV1_approved(by_staff, on_date, by_user_id)
+    status = nil
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_approved(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV1_APPROVED_STATUS)
       t.rollback unless status == true
-      return status
     end
+    return status
   end
 
   def record_CPV1_rejected(by_staff, on_date, by_user_id)
+    status = nil
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV1_rejected(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV1_REJECTED_STATUS)
       t.rollback unless status == true
-      return status
     end
+    return status
   end
   
   def record_CPV2_approved(by_staff, on_date, by_user_id)
+    status = nil
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_approved(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV2_APPROVED_STATUS)
       t.rollback unless status == true
-      return status
     end
+    return status
   end
 
   def record_CPV2_rejected(by_staff, on_date, by_user_id)
+    status = nil
     ClientVerification.transaction do |t|
       ClientVerification.record_CPV2_rejected(self.id, by_staff, on_date, by_user_id) 
       status = self.set_status(CPV2_REJECTED_STATUS)
       t.rollback unless status == true
-      return status
     end
+    return status
   end
 
   def self.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason = nil)
@@ -276,6 +282,12 @@ class LoanApplication
   #tells whether the given Loan Application is pending verification or not
   def is_pending_verification?
     not ClientVerification.is_cpv_complete?(self.id)
+  end
+
+  #returns all loan applications which are pending for overlap report requests generation
+  def self.pending_overlap_report_request_generation
+    eligible_statuses = [NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
+    pending = all(:status => eligible_statuses)
   end
 
   #returns all loan applications which are pending for CPV1 and/or CPV2

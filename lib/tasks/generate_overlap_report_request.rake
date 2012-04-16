@@ -20,7 +20,7 @@ namespace :mostfit do
       errors = {}
       errors[:generation_errors] = {}
       errors[:save_status_errors] = {}
-      loan_applications = LoanApplication.all(:status => Constants::Status::NEW_STATUS)
+      loan_applications = LoanApplication.pending_overlap_report_request_generation
       credit_bureau_name = "Highmark"
       request_name = "overlap_report_request"
 
