@@ -295,7 +295,8 @@ class LoanApplication
     predicates = {}
     predicates[:at_branch_id] = at_branch_id if at_branch_id
     predicates[:at_center_id] = at_center_id if at_center_id
-    all(predicates).select {|lap| lap.is_pending_verification?}
+    predicates[:status] = [APPLICATION_APPROVED, APPLICATION_OVERRIDE_APPROVED]
+    all(predicates)#.select {|lap| lap.is_pending_verification?}
   end
 
   def self.pending_authorization(search_options = {})
@@ -317,10 +318,11 @@ class LoanApplication
 
   # All loan applications pending loan file generation
   def self.pending_loan_file_generation(search_options = {})
+    search_options[:status] = CPV2_APPROVED_STATUS
     loan_applications = all(search_options)
-    applications_pending_loan_file_generation = loan_applications.select { |lap|
-      lap.is_pending_loan_file_generation?
-    }
+    applications_pending_loan_file_generation = loan_applications#.select { |lap|
+    #   lap.is_pending_loan_file_generation?
+    # }
     applications_pending_loan_file_generation.collect {|lap| lap.to_info}
   end
 
