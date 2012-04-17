@@ -6,7 +6,7 @@
           = "#{@errors[lap_id]}"
           %br
 %h1
-  = "Health checkup for Loan Files"
+  = "Health check for Loan Files"
 
 %form{:action => url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :method => :get}
   = partial "lib/branch_center_selector"
@@ -14,7 +14,7 @@
 
 .shaded
   %h2
-    = "Loan files pending for health checkup"
+    = "Loan files pending for health check"
   - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
   - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && (status_map.include?(Constants::Status::HEALTH_CHECK_PENDING) || status_map.include?(Constants::Status::NEW_STATUS))
     = form(:action => url(:controller => 'loan_files', :action => 'record_health_check_status'), :method => :post) do
@@ -57,7 +57,7 @@
               = submit "Save all"
               %input{:value => "Reset all", :type => "reset"}
   - else
-    No Loan Files found for health checkup.
+    No Loan Files found for health check.
 %br
 %hr
 
