@@ -40,13 +40,13 @@ class LoanAuthorizations < Application
           final_status = Constants::Status::APPLICATION_OVERRIDE_REJECTED
         end
         if final_status == Constants::Status::APPLICATION_APPROVED
-          result = facade.authorize_approve(lap, by_staff, on_date)
+          result = facade.authorize_approve(lap, by_staff, on_date, override_reason)
 
         elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
           result = facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
         elsif final_status == Constants::Status::APPLICATION_REJECTED
-          result = facade.authorize_reject(lap, by_staff, on_date)
+          result = facade.authorize_reject(lap, by_staff, on_date, override_reason)
 
         else
           result = facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
