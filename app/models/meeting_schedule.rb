@@ -5,15 +5,20 @@ class MeetingScheduleManager
     for_location.save_meeting_schedule(ms)
   end
 
+  def self.get_meeting_schedules(for_location)
+    for_location.meeting_schedules.collect {|ms| ms.to_info}
+  end
+
 end
 
 class MeetingScheduleInfo
   include IsMeeting
   include Comparable
 
+  # sorted most recent first by the schedule begin date
   def <=>(other)
     other.respond_to?(:schedule_begins_on) ?
-      @schedule_begins_on <=> other.schedule_begins_on : nil
+      other.schedule_begins_on <=> @schedule_begins_on : nil
   end
 
   attr_reader :meeting_frequency, :schedule_begins_on, :meeting_time_begins_hours, :meeting_time_begins_minutes

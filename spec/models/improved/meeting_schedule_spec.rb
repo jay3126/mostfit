@@ -12,6 +12,29 @@ def populate_dates(begin_date, upto_but_not_including_date, frequency = 1)
   dates
 end
 
+describe MeetingScheduleInfo do
+
+  before(:all) do
+    @meeting_schedule_infos = []
+    @some_numbers = [28, 26, 11 , 23, 17, 19]
+    @some_dates = @some_numbers.collect { |num| Date.parse("2012-04-#{num}") }
+    @some_dates.each { |date|
+      @meeting_schedule_infos.push(
+        MeetingSchedule.new(:schedule_begins_on => date, :meeting_frequency => Constants::Time::WEEKLY,
+          :meeting_time_begins_hours => 12, :meeting_time_begins_minutes => 20).to_info)
+    }
+  end
+
+  it "should be sorted most recent first" do
+    sorted_dates = @some_dates.sort.reverse
+    sorted_schedules = @meeting_schedule_infos.sort
+    sorted_schedules.each_with_index { |ms, idx|
+      ms.schedule_begins_on.should == sorted_dates[idx]
+    }
+  end
+
+end
+
 describe MeetingSchedule do
 
   before(:all) do
@@ -47,6 +70,7 @@ describe MeetingSchedule do
       :schedule_begins_on => @second_schedule_begins,
       :meeting_time_begins_hours => @second_meeting_time_begins_hours, :meeting_time_begins_minutes => @second_meeting_time_begins_minutes
     )
+
   end
 
   it "should indicate a meeting date on meeting days per weekly frequency" do

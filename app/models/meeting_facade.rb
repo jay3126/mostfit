@@ -48,7 +48,7 @@ class MeetingFacade
 
   # Gets meeting schedules in effect for the given location
   def get_meeting_schedules(for_location)
-    #TBD
+    MeetingScheduleManager.get_meeting_schedules(for_location)
   end
 
   # Creates a holiday at the location as specified
