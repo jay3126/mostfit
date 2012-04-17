@@ -39,9 +39,10 @@
           MOSTFIT
       #green-header
         #header_search_div
-          %form._remote_{:action => '/search',:id => 'search-form' :class => 'search', :method => "POST",}
-            %input{:name => 'query', :class => "search-form", :value => params[:query], :autocomplete => "off"}
-            %input{:type => 'hidden',  :name => '_target_', :value => "content p:first"}
+          - if session.authenticated?
+            %form._remote_{:action => '/search',:id => 'search-form' :class => 'search', :method => "POST",}
+              %input{:name => 'query', :class => "search-form", :value => params[:query], :autocomplete => "off"}
+              %input{:type => 'hidden',  :name => '_target_', :value => "content p:first"}
         #navigation
           - if session.authenticated?
             = link_to_with_class('Home', url(:browse))
@@ -56,7 +57,7 @@
       = breadcrumbs
       #login
         - if session.authenticated?
-          =link_to 'change password', url(:change_password)
+          = link_to 'change password', url(:change_password)
           |
           = current_user_info
         - else
@@ -89,4 +90,3 @@
       .footerright
         =image_tag("/images/mostfit_logo.png", :height => 80)
       == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.
-
