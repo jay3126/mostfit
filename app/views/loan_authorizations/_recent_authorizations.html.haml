@@ -29,30 +29,31 @@
         - s_no = 0
         - @completed_authorizations.each do |lpa|
           - lauth = lpa.authorization_info
-          %tr
-            %td
-              - s_no = s_no + 1
-              = s_no
-            %td
-              = lpa.loan_application_id
-            %td
-              = lpa.client_name
-            %td
-              = lpa.client_dob
-            %td
-              = lpa.client_address
-            - staff_member_id = lauth.performed_by_staff_id
-            - staff_member = staff_member_id ? StaffMember.get(staff_member_id) : nil
-            - staff_member_name = staff_member ? staff_member.name : "Not found"
-            %td
-              = staff_member_name
-            %td
-              = lauth.created_at.display
-            %td
-              = lpa.credit_bureau_status
-            %td{:colspan => 2, :align => "center"}
-              = lauth.status.humanize
-            %td{:colspan => 2}
-              = lauth.override_reason
+          - unless lauth.nil?
+            %tr
+              %td
+                - s_no = s_no + 1
+                = s_no
+              %td
+                = lpa.loan_application_id
+              %td
+                = lpa.client_name
+              %td
+                = lpa.client_dob
+              %td
+                = lpa.client_address
+              - staff_member_id = lauth.performed_by_staff_id
+              - staff_member = staff_member_id ? StaffMember.get(staff_member_id) : nil
+              - staff_member_name = staff_member ? staff_member.name : "Not found"
+              %td
+                = staff_member_name
+              %td
+                = lauth.created_at.display
+              %td
+                = lpa.credit_bureau_status
+              %td{:colspan => 2, :align => "center"}
+                = lauth.status.humanize
+              %td{:colspan => 2}
+                = lauth.override_reason
   - else
     No recent authorizations.
