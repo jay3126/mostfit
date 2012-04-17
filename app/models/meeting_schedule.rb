@@ -1,3 +1,12 @@
+class MeetingScheduleManager
+
+  def self.create_meeting_schedule(for_location, meeting_schedule_info)
+    ms = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
+    for_location.save_meeting_schedule(ms)
+  end
+
+end
+
 class MeetingScheduleInfo
   include IsMeeting
   include Comparable
@@ -49,6 +58,12 @@ class MeetingSchedule
     my_attributes[:meeting_time_begins_hours] = meeting_schedule_info.meeting_time_begins_hours
     my_attributes[:meeting_time_begins_minutes] = meeting_schedule_info.meeting_time_begins_minutes
     new(my_attributes)
+  end
+
+  def self.record_meeting_schedule(meeting_schedule_info)
+    meeting_schedule = from_info(meeting_schedule_info)
+    meeting_schedule.save
+    meeting_schedule
   end
 
   def to_s

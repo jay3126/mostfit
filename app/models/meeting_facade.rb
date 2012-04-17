@@ -43,7 +43,7 @@ class MeetingFacade
 
   # Creates a new meeting schedule for the given location
   def setup_meeting_schedule(for_location, meeting_schedule_info)
-    #TBD
+    MeetingScheduleManager.create_meeting_schedule(for_location, meeting_schedule_info)
   end
 
   # Gets meeting schedules in effect for the given location

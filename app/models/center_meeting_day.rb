@@ -37,6 +37,22 @@ class CenterMeetingDay
     return nil if self.meeting_day == :none
     return nil unless self.center
 
+=begin
+observations from customer data
+[every, what, of_every, period] are all null is a weekly schedule
+
+what is either day or a day of the week
+period is either nil, week, or month
+
+period is nil: weekly loans
+period is week (2): weekly/bi-weekly?
+period is month (3): monthly
+
+what value of 1 is :day
+new_what is null
+
+=end
+
     meeting_time_begins_hours = self.center.meeting_time_hours || 0
     meeting_time_begins_minutes = self.center.meeting_time_minutes || 0
 
