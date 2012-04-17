@@ -17,6 +17,7 @@ class LoanAuthorizations < Application
   end
 
   def record_authorizations
+    result = true
     get_branch_and_center(params)
     facade = LoanApplicationsFacade.new(session.user)
     by_staff = params[:by_staff_id]
@@ -39,20 +40,23 @@ class LoanAuthorizations < Application
           final_status = Constants::Status::APPLICATION_OVERRIDE_REJECTED
         end
         if final_status == Constants::Status::APPLICATION_APPROVED
-          facade.authorize_approve(lap, by_staff, on_date)
+          result = facade.authorize_approve(lap, by_staff, on_date)
 
         elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
-          facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
+          result = facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
         elsif final_status == Constants::Status::APPLICATION_REJECTED
-          facade.authorize_reject(lap, by_staff, on_date)
+          result = facade.authorize_reject(lap, by_staff, on_date)
 
         else
-          facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
+          result = facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
         end
       end
     else
-      @errors['Loan Authorizations'] = "No data was passed!"
+      @errors['Loan Authorizations'] = "No data was passed."
+    end
+    if result == false
+      @errors['Loan Authorizations'] = "Please provide reason"
     end
     get_pending_and_completed_auth(params)
     render :authorizations
