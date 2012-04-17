@@ -1,5 +1,11 @@
 class MeetingScheduleInfo
   include IsMeeting
+  include Comparable
+
+  def <=>(other)
+    other.respond_to?(:schedule_begins_on) ?
+      @schedule_begins_on <=> other.schedule_begins_on : nil
+  end
 
   attr_reader :meeting_frequency, :schedule_begins_on, :meeting_time_begins_hours, :meeting_time_begins_minutes
 
@@ -34,6 +40,15 @@ class MeetingSchedule
 
   def to_info
     MeetingScheduleInfo.new(meeting_frequency, schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
+  end
+  
+  def self.from_info(meeting_schedule_info)
+    my_attributes = {}
+    my_attributes[:meeting_frequency] = meeting_schedule_info.meeting_frequency
+    my_attributes[:schedule_begins_on] = meeting_schedule_info.schedule_begins_on
+    my_attributes[:meeting_time_begins_hours] = meeting_schedule_info.meeting_time_begins_hours
+    my_attributes[:meeting_time_begins_minutes] = meeting_schedule_info.meeting_time_begins_minutes
+    new(my_attributes)
   end
 
   def to_s

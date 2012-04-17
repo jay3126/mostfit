@@ -65,7 +65,7 @@ class MeetingCalendar
   end
 
   # Gets meeting information for a given location on specified date
-  def self.meeting_at_location_on_date(location, on_date = Date.today, meeting_status = PROPOSED_MEETING_STATUS)
+  def self.meeting_at_location_on_date(location, on_date = Date.today, meeting_status = nil)
     meeting = find_by_instance_on_date(location, on_date, meeting_status)
     meeting ? meeting.to_info : nil
   end
@@ -79,6 +79,10 @@ class MeetingCalendar
 
   def self.proposed_meeting_calendar(location, from_date = Date.today, till_date = from_date + DEFAULT_FUTURE_MAX_DURATION_IN_DAYS)
     meetings_for_location(location, from_date, till_date, PROPOSED_MEETING_STATUS).collect {|meeting| meeting.to_info}
+  end
+
+  def self.meeting_calendar(location, from_date = Date.today, till_date = from_date + DEFAULT_FUTURE_MAX_DURATION_IN_DAYS)
+    meetings_for_location(location, from_date, till_date)
   end
 
   # When invoked, consults a location facade for meeting schedules,
@@ -129,15 +133,15 @@ class MeetingCalendar
   def self.find_by_instance_on_date(location, on_date, meeting_status)
     query = predicates_for_location(location)
     query.merge!(:on_date => on_date)
-    query.merge!(:meeting_status => meeting_status)
+    query.merge!(:meeting_status => meeting_status) if meeting_status
     first(query)
   end
 
   # Returns all meetings for a location in the date range specified
-  def self.meetings_for_location(location, from_date, till_date, meeting_status = PROPOSED_MEETING_STATUS)
+  def self.meetings_for_location(location, from_date, till_date, meeting_status = nil)
     query = predicates_for_location(location)
     query.merge!(predicates_for_date_range(from_date, till_date))
-    query.merge!(:meeting_status => meeting_status)
+    query.merge!(:meeting_status => meeting_status) if meeting_status
     all(query)
   end
 
