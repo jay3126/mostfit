@@ -23,12 +23,24 @@
       = link_to "Clean or confirm duplicates", '#', :class => 'add_small'
     %td
       %br
+      %br
+      = image_tag('/images/credit.png', :height=> 70, :width=> 79)
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Credit Bureau
+      = link_to "Download request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
+      %br
+      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
+    
+  %tr
+    %td
+      %br
       = image_tag('/images/authorize.png', :height=> 70, :width=> 79)
     %td
+      %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Authorization
       = link_to "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true'), :class => 'add_small'
-  %tr
     %td
       %br
       %br
@@ -40,17 +52,6 @@
       = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'add_small'
       %br
       = link_to "Record CGT, GRT", '#', :class => 'add_small'
-    %td
-      %br
-      %br
-      = image_tag('/images/credit.png', :height=> 70, :width=> 79)
-    %td
-      %br
-      %h3{:style => "border-bottom: dotted 1px #999"}
-        Credit Bureau
-      = link_to "Download request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
-      %br
-      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
     %td
       %br
       %br
