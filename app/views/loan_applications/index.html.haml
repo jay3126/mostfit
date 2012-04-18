@@ -18,9 +18,7 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-dupe
-      = link_to "Suspected duplicates", '#', :class => 'add_small'
-      %br
-      = link_to "Clear or confirm duplicates", '#', :class => 'add_small'
+      = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates), :class => 'edit_small'
     %td
       %br
       = image_tag('/images/credit.png', :height=> 70, :width=> 79)

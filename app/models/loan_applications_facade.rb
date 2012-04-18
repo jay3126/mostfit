@@ -201,6 +201,16 @@ class LoanApplicationsFacade
     LoanApplication.completed_authorization(search_options)
   end
 
+  # Return list of loan files which are suspected duplicates
+  def suspected_duplicate_loan_files
+    LoanApplication.suspected_duplicate_loan_files
+  end
+
+  # Return all loan files which has status cleared_not_duplicate and confirmed_duplicate
+  def cleared_or_confirmed_diplicate_list
+    LoanApplication.cleared_or_confirmed_diplicate_list
+  end
+
 end
 
 # A loan application is created either for existing clients or new loan applicants

@@ -349,6 +349,16 @@ class LoanApplication
     linfos
   end
 
+  # returns all loan applications which are suspected duplicates
+  def self.suspected_duplicate_loan_files
+    all(:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS)
+  end
+
+  # Return all loan files which has status cleared_not_duplicate and confirmed_duplicate
+  def self.cleared_or_confirmed_diplicate_list
+    all(:status => [Constants::Status::CONFIRMED_DUPLICATE_STATUS, Constants::Status::CLEARED_NOT_DUPLICATE_STATUS])
+  end
+
   #returns an object containing all information about a Loan Application
   def to_info
     authorization_info = self.loan_authorization ? self.loan_authorization.to_info : nil

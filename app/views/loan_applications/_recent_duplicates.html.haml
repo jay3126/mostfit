@@ -1,0 +1,31 @@
+#pending_list
+  .shaded
+    %h2
+      = "Recently recorded"
+    - if @cleared_or_confirmed_diplicate_loan_files && !@cleared_or_confirmed_diplicate_loan_files.empty?
+      %table.narrow.form{:width => "100%"}
+        %thead
+          %tr
+            %th ID
+            %th Name
+            %th Age
+            %th Address
+            %th Loan Amount
+            %th Status
+        %tbody
+          - @cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
+            %tr
+              %td
+                = loan_application.id
+              %td
+                = loan_application.client_name
+              %td
+                = loan_application.client_dob.nil? ? "Unknown" : Date.today.year - loan_application.client_dob.year
+              %td
+                = loan_application.client_address
+              %td
+                = loan_application.amount
+              %td
+                = loan_application.status.humanize
+    - else
+      No records found.

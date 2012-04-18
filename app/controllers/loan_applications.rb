@@ -93,4 +93,48 @@ class LoanApplications < Application
     render
   end
 
+  def suspected_duplicates
+    get_de_dupe_loan_files
+    render :suspected_duplicates
+  end
+
+  def record_suspected_duplicates
+    # GATE-KEEPING
+    @errors = {}
+
+    # VALIDATIONS
+    if params[:staff_member_id].empty?
+      @errors["Suspected duplicates"] = 'Please select staff member'
+    end
+    if params[:clear_or_confirm_duplicate].nil?
+      @errors["Suspected duplicates"] = 'No data passed'
+    end
+
+    # POPULATING RESPONSE AND OTHER VARIABLES
+    get_de_dupe_loan_files
+
+    # OPERATIONS PERFORMED
+    unless @errors.empty? || params[:clear_or_confirm_duplicate].nil?
+      params[:clear_or_confirm_duplicate].keys.each do |id|
+        loan_file = LoanApplication.get(id)
+        if params[:clear_or_confirm_duplicate][id] == '1'
+          loan_file.update(:status => Constants::Status::CLEARED_NOT_DUPLICATE_STATUS)
+        elsif params[:clear_or_confirm_duplicate][id] == '2'
+          loan_file.update(:status => Constants::Status::CONFIRMED_DUPLICATE_STATUS)
+        end
+      end
+    end
+
+    # RENDER/RE-DIRECT
+    render :suspected_duplicates
+  end
+
+  private
+
+  def get_de_dupe_loan_files
+    facade = LoanApplicationsFacade.new(session.user)
+    @suspected_duplicates = facade.suspected_duplicate_loan_files
+    @cleared_or_confirmed_diplicate_loan_files = facade.cleared_or_confirmed_diplicate_list
+  end
+
 end # LoanApplications
