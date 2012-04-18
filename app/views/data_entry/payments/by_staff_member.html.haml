@@ -43,7 +43,7 @@
         Repayments
         %b
           (
-          = LoanHistory.all(:date => @date, :loan_id => @loan_ids, :status => [:outstanding]).count
+          = LoanHistory.all(:date => @date, :center => @centers, :status => [:outstanding]).count
           )
     %div.tab    
       %h1 Repayments

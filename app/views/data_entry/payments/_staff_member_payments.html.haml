@@ -27,7 +27,7 @@
           %th loan
           %th principal due
           %th interest due
-          %th fees_due
+          %th fees due
           %th total due
           %th paid
           %th repay type
@@ -44,15 +44,15 @@
             - @loans.find_all{|l| l.client_id == client.id and l.disbursal_date}.each do |loan|
               - lh = @loan_histories.find_all{|x| x.loan_id==loan.id}.sort_by{|x| x.created_at}[-1]
               - next if not lh
-              - next if LOANS_NOT_PAYABLE.include? lh.status
+              - next if lh and LOANS_NOT_PAYABLE.include?(lh.status) and not (lh.principal_paid>0 or lh.interest_paid>0)
               - loan_row_count += 1
-              - if lh
-                - p = [lh.principal_due, 0].max
-                - i = [lh.interest_due,0].max
-                - f = [lh.fees_due_today,0].max
+              - if lh and lh.total_principal_due and lh.total_principal_due > 0
+                - p = [lh.principal_due_today, 0].max
+                - i = [lh.interest_due_today,0].max
+                - f = loan.total_fees_payable_on(@date)
               - else
-                - p = 0
-                - i = 0
+                - p = [(lh ? lh.principal_due : 0), 0].max
+                - i = [(lh ? lh.interest_due : 0), 0].max
 
               %tr{ :class => cycle('odd','even') }
                 %td.text
@@ -69,7 +69,7 @@
                   = f.round(2).to_currency
                   - tot_fees += f.round(2)
                 %td.number
-                  - a = (p + i + f).round(2)
+                  - a = (p + i).round(2)
                   = a.to_currency
                   - tot_total += a
                 %td.number
@@ -115,7 +115,7 @@
         %th loan
         %th principal due
         %th interest due
-        %th fees_due
+        %th fees due
         %th total due
         %th paid
         %th repay type
