@@ -47,8 +47,8 @@
               - next if lh and LOANS_NOT_PAYABLE.include?(lh.status) and not (lh.principal_paid>0 or lh.interest_paid>0)
               - loan_row_count += 1
               - if lh and lh.total_principal_due and lh.total_principal_due > 0
-                - p = lh.total_principal_due - lh.total_principal_paid #[lh.principal_due, 0].max
-                - i = lh.total_interest_due - lh.total_interest_paid #[lh.interest_due,0].max
+                - p = [lh.principal_due_today, 0].max
+                - i = [lh.interest_due_today,0].max
                 - f = loan.total_fees_payable_on(@date)
               - else
                 - p = [(lh ? lh.principal_due : 0), 0].max
