@@ -1,0 +1,30 @@
+- if add_new
+  %h1
+    == Center Meeting Schedule for center #{@center.name}
+  .menu-strip
+    = link_to 'Add Meeting Schedule', resource(:meeting_schedules, :new, :center_id => @center.id), :class => 'add'
+%br
+%table.narrow.form{ :width => '80%' }
+  %thead
+    %tr
+      %td
+        Begin On
+      %td
+        Frequency
+      %td
+        Meeting Time
+      %td
+        Description
+  - @meeting_schedule_infos.sort.each do |msi|
+    %tr{ :class => cycle('odd','')}
+      %td
+        = msi.schedule_begins_on
+      %td
+        = msi.meeting_frequency
+      %td
+        = msi.meeting_begins_at
+      %td
+        = msi.to_s
+  %tfoot
+    %tr
+      %td{ :colspan => 7 }

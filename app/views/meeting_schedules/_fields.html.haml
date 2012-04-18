@@ -1,0 +1,20 @@
+%table{:style => "width: 80%"}
+  %tr
+    %td
+      Begin Date
+    %td
+      = date_select_for @meeting_schedule, :schedule_begins_on, :min_date => Date.today ,:date => Date.today
+  %tr
+    %td
+      Frequency
+    %td
+      = select :meeting_frequency, :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+  %tr
+    %td
+      Meeting Time
+    %td
+      = text_field :meeting_time_begins_hours, :size => 2, :maxlength => 2
+      %b 
+      = text_field :meeting_time_begins_minutes, :size => 2, :maxlength => 2
+      &nbsp;&nbsp;
+      %span.greytext time is in a 24 hour format

@@ -48,7 +48,7 @@
               == from #{cmd.valid_from} to #{cmd.valid_upto} this center meets every <b>#{cmd.meeting_day_string}</b>
       %br
       - unless @center.new?
-        = link_to 'Manage meeting schedule', resource(:center_meeting_days, :center_id => @center.id)
+        = link_to 'Manage meeting schedule', resource(:meeting_schedules, :new, :center_id => @center.id)
     - if @center.new?
       %tr
         %th

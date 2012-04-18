@@ -1,0 +1,6 @@
+%h1
+  == New Center Meeting Schedule for center #{@center.name}
+= form_for(@meeting_schedule, :action => url(:controller => :meeting_schedules,:action => :create, :center_id => @center.id), :method => "POST", :class => "tall shaded") do
+  = partial :fields
+  = submit 'Create Meeting Schedule'
+= partial :list, {:add_new => false}

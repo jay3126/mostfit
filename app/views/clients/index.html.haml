@@ -73,17 +73,19 @@
         Data Entry
       %li#history
         History
-      %li#miscellaneous
-        Miscellaneous
+      %li#calendar
+        Calendar
+      %li#meeting_schedule
+        Meeting Schedule
       - if Mfi.first.map_enabled
         %li#map
           Map
-    %div.tab    
+    %div.tab
       = partial "clients/list", :center_leader => @clients.first
-      %p.menu-strip 
+      %p.menu-strip
         = link_to 'Create new client', resource(@branch, @center, :clients, :new), :class => "add grey_button"
         = link_to "Bulk entry of loans", url(:enter_loans, :action => :bulk_form, :query => @center), :class => "edit grey_button"
-    %div.tab    
+    %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@center.id}?for=center"}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:weeksheet, :center_id => @center.id, :branch_id => @branch.id, :date => @date)}
@@ -102,7 +104,9 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :id => @center.id, :action => :misc)}
+      =#%input{:type => "hidden", :name => "_load_remote", :value => "#"}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :action => :meeting_schedule, :id => @center.id)}
     - if Mfi.first.map_enabled
       %div.tab
         = js_include_tag :map

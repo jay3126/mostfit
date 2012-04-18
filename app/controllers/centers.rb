@@ -179,11 +179,12 @@ class Centers < Application
     partial "centers/weeksheet"
   end
   
-  def misc
+  def meeting_schedule
     @center =  Center.get(params[:id])
     raise NotFound unless @center
-    @meeting_days  =  @center.center_meeting_days(:order => [:valid_from])
-    partial "centers/misc"
+    mf = MeetingFacade.new session.user
+    @meeting_schedule_infos = mf.get_meeting_schedules(@center)
+    partial "meeting_schedules/list", {:add_new => true}
   end
 
   private

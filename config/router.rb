@@ -22,6 +22,7 @@ Merb::Router.prepare do
   resources :rule_books, :id => %r(\d+)
   resources :applicable_fees
   resources :account_types
+  resources :meeting_schedules
   resources :accounts, :id => %r(\d+) do
     resources :accounting_periods do
       resources :account_balances
