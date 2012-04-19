@@ -361,19 +361,19 @@ class LoanApplication
 
   # returns all loan applications which has status not_duplicate
   def self.not_duplicate(search_options = {})
-    search_options.merge!({:status => Constants::Status::NOT_DUPLICATE_STATUS})
+    search_options.merge!({:status => NOT_DUPLICATE_STATUS})
     all(search_options)
   end
 
   # returns all loan applications which has status suspected_duplicate
   def self.suspected_duplicate(search_options = {})
-    search_options.merge!({:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS})
+    search_options.merge!({:status => SUSPECTED_DUPLICATE_STATUS})
     all(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
   def self.clear_or_confirm_duplicate(search_options = {})
-    search_options.merge!({:status => [Constants::Status::CONFIRMED_DUPLICATE_STATUS, Constants::Status::CLEARED_NOT_DUPLICATE_STATUS]})
+    search_options.merge!({:status => [CONFIRMED_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]})
     all(search_options)
   end
 
