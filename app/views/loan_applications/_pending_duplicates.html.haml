@@ -9,10 +9,11 @@
             %tr
               %th ID
               %th Name
-              %th Age
+              %th Guarantor Name
+              %th Relationship
+              %th DOB
               %th Address
-              %th Loan Amount
-              %th{:colspan => 2} Actions
+              %th{:colspan => 2, :style=>"text-align : center" } Actions
           %tbody
             - @suspected_duplicates.each do |loan_application|
               %tr
@@ -21,11 +22,13 @@
                 %td
                   = loan_application.client_name
                 %td
-                  = loan_application.client_dob.nil? ? "Unknown" : Date.today.year - loan_application.client_dob.year
+                  = loan_application.client_guarantor_name
+                %td
+                  = loan_application.client_guarantor_relationship
+                %td
+                  = loan_application.client_dob
                 %td
                   = loan_application.client_address
-                %td
-                  = loan_application.amount
                 %td
                   %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 1}
                   Clear
