@@ -13,6 +13,14 @@ class LoanFileAddition
   belongs_to :loan_application
   belongs_to :loan_file
 
+  validates_with_method :loan_file_id, :method => :is_loan_application_compatible_with_loan_file?
+
+  def is_loan_application_compatible_with_loan_file?
+    return [false, "Loan file branch id doest not match with loan application branch id"] if loan_application.at_branch_id != loan_file.at_branch_id
+    return [false, "Loan file center id doest not match with loan application center id"] if loan_application.at_center_id != loan_file.at_center_id
+    return [false, "Loan file center cycle number doest not match with loan application center cycle number"] if loan_application.center_cycle.cycle_number != loan_file.for_cycle_number
+  end
+
   def self.add_to_loan_file(loan_application_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
     query_params = {}
     query_params[:loan_application_id] = loan_application_id
