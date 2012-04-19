@@ -22,6 +22,10 @@
   
   %table.loan{ :style => 'width : 50%; border: solid 1px #c9c9c9' }
     %tr
+      %th.even Loan Reference No.
+      %td
+        = @loan.reference if @loan.reference 
+    %tr
       %th.odd{ :width => '30%', :rowspan => "2" } Application
       %td
         == <b>#{@loan.amount_applied_for}</b> @
