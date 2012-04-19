@@ -18,7 +18,7 @@
     %thead
       %tr
         %th
-        %th id
+        %th client id
         %th name
         %th loans
         %th
@@ -53,6 +53,10 @@
               %li
                 - moved = @moved_loans.include?(l)
                 = link_to l.short_tag, url_for_loan(l), :class => (moved ? 'moved' : (l.info or Nothing)[:status] or l.get_status)
+                - if l.reference
+                  (
+                  = link_to l.reference, url_for_loan(l), :class => (moved ? 'moved' : (l.info or Nothing)[:status] or l.get_status)
+                  )
         %td
           = link_to 'edit', resource(@branch, @center, client, :edit)
           &nbsp;|&nbsp;
