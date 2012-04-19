@@ -38,19 +38,20 @@
         Ration Card
       - (1..no_of_fields).each do |i|
         %td
-          = text_field :name => "clients[#{i}][ration_card_number]", :value => (params[:clients] and params[:clients][i.to_s][:ration_card_number]), :tabindex => 1*i
+          = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference]), :tabindex => 1*i
+          = hidden_field :name => "clients[#{i}][reference_type]", :value => "Ration Card"
     %tr
       %th
         Reference
       - (1..no_of_fields).each do |i| 
         %td
-          = text_field :name => "clients[#{i}][reference]", :value => (params[:clients] and params[:clients][i.to_s][:reference]), :tabindex => 1*i
+          = text_field :name => "clients[#{i}][reference2]", :value => (params[:clients] and params[:clients][i.to_s][:reference]), :tabindex => 1*i
     %tr
       %th
         Reference type
       - (1..no_of_fields).each do |i|
         %td
-          = select :name => "clients[#{i}][type_of_id]", :value => (params[:clients] and params[:clients][i.to_s][:type_of_id]), :collection => ID_TYPES, :tabindex => 1*i
+          = select :name => "clients[#{i}][reference2_type]", :value => (params[:clients] and params[:clients][i.to_s][:reference2_type]), :collection => Constants::Status::RELATIONSHIPS, :tabindex => 1*i
     %tr
       %th
         D.O.B.

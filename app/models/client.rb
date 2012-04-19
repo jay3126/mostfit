@@ -24,7 +24,7 @@ class Client
   property :next_to_kin_relationship, Enum.send('[]', *["Husband", "Father"]), :default => "Husband"
   property :guarantor_name,  String
   property :guarantor_dob,   Date, :index => true, :lazy => true
-  property :guarantor_relationship, Enum.send('[]', *(CLIENT_RELATIONSHIPS)), :default => 'Other'
+  property :guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :default => 'Other'
   property :telephone_number, String, :nullable => true
   property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Untagged"
   property :state,           Enum.send('[]', *([nil] + STATES)), :nullable => true
@@ -34,14 +34,12 @@ class Client
   property :seating,         Integer
   property :earning_members, Integer
   property :cb_approval_number, String
-  property :ration_card_number, String
   property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true, :default => 'not_applicable'
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
-  property :type_of_id, Enum.send('[]', *(ID_TYPES)), :nullable => false, :lazy => true, :default => "Others"
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,     Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => 'female'
-  property :marital_status, Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
+  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => 'female'
+  property :marital_status,  Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
   property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
   property :reference2,      String
   property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
@@ -239,7 +237,7 @@ class Client
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
-  validates_is_unique :ration_card_number
+  validates_is_unique :reference2
   validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
@@ -326,8 +324,8 @@ class Client
       :client_reference1_type => reference_type,
       :client_reference2      => reference2,
       :client_reference2_type => reference2_type,
-      :client_guarantor_name  => spouse_name,
-      :client_guarantor_relationship => "Husband"
+      :client_guarantor_name  => guarantor_name,
+      :client_guarantor_relationship => guarantor_relationship
     }
   end
 

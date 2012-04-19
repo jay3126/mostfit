@@ -97,7 +97,8 @@ class LoanApplication
       :address                    => client_address,
       :pincode                    => client_pincode,
       :state                      => client_state,
-      :spouse_name                => client_guarantor_name,
+      :guarantor_name             => client_guarantor_name,
+      :guarantor_relationship     => client_guarantor_relationship,
       :created_by_staff_member_id => created_by_staff_id,
       :created_by_user_id         => created_by_user_id,
       :center_id                  => at_center_id,
@@ -356,6 +357,12 @@ class LoanApplication
       linfos.push(l.to_info)
     end
     linfos
+  end
+
+  # returns all loan applications which are suspected duplicates
+  def self.suspected_duplicate_loan_applications(search_options = {})
+    search_options.merge!({:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS})
+    all(search_options)
   end
 
   # returns all loan applications which are suspected duplicates
