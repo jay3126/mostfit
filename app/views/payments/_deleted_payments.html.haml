@@ -56,6 +56,4 @@
           = payment.deleted_at
         %td
           - if payment.loan_id 
-            restore
-
-%p= link_to 'new repayment >>', url_for_loan(@loan, 'payments/new'), :class => "button"
+            -#restore

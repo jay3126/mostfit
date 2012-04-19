@@ -129,7 +129,8 @@
           %thead
             %tr
               %th
-              %th id
+              %th loan id
+              %th loan reference
               %th amount
               %th interest
               %th installments
@@ -143,6 +144,8 @@
               %td &nbsp;
               %td
                 = link_to loan.id, url(:quick_link, "loans", loan.id)
+              %td
+                = (link_to loan.reference, url(:quick_link, "loans", loan.id)) if loan.reference
               %td
                 %b= (loan.amount).to_currency
               %td
@@ -195,7 +198,7 @@
       
           %tfoot
             %tr
-              %td{ :colspan => 9 }
+              %td{ :colspan => 10 }
     %div.tab  
       = partial 'comments/index', :object => @client
       %p

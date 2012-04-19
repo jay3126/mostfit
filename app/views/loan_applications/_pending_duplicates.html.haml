@@ -1,0 +1,52 @@
+#pending_list
+  .shaded
+    %h2
+      = "Suspected duplicate loan applicants"
+    - if @suspected_duplicates && !@suspected_duplicates.empty?
+      = form(:action => url(:controller => 'loan_applications', :action => 'record_suspected_duplicates'), :method => :post) do
+        %table.narrow.form{:width => "100%"}
+          %thead
+            %tr
+              %th ID
+              %th Name
+              %th Guarantor Name
+              %th Relationship
+              %th DOB
+              %th Address
+              %th{:colspan => 2, :style=>"text-align : center" } Actions
+          %tbody
+            - @suspected_duplicates.each do |loan_application|
+              %tr
+                %td
+                  = loan_application.id
+                %td
+                  = loan_application.client_name
+                %td
+                  = loan_application.client_guarantor_name
+                %td
+                  = loan_application.client_guarantor_relationship
+                %td
+                  = loan_application.client_dob
+                %td
+                  = loan_application.client_address
+                %td
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 1}
+                  Clear
+                %td
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 2}
+                  Confirm
+          %tfoot
+            %tr
+              %td{:colspan => 3}
+                %b
+                  By
+                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+              %td{:colspan => 2}
+                %b
+                  On
+                = date_select :created_on, Date.today
+              %td{:colspan => 8, :style=>"text-align : center" }
+                = submit "Save all"
+                %input{:value => "Reset all", :type => "reset"}
+    - else
+      No suspected duplicate loan applicants

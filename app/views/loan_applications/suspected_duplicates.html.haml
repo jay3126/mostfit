@@ -1,0 +1,18 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+
+%h1
+  = "Suspected duplicate loan applicants"
+= partial :pending_duplicates
+
+%br
+%hr
+= partial :recent_duplicates
+
+%br
+%br

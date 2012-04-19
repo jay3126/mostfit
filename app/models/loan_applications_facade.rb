@@ -79,16 +79,16 @@ class LoanApplicationsFacade
 
   # Loan authorization
 
-  def authorize_approve(loan_application_id, by_staff, on_date, override_reason=nil)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, @user.id, override_reason)
+  def authorize_approve(loan_application_id, by_staff, on_date)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, @user.id)
   end
 
   def authorize_approve_override(loan_application_id, by_staff, on_date, override_reason)
     LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_APPROVED, by_staff, on_date, @user.id, override_reason)
   end
 
-  def authorize_reject(loan_application_id,by_staff, on_date,override_reason=nil)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_REJECTED, by_staff, on_date, @user.id,override_reason)
+  def authorize_reject(loan_application_id,by_staff, on_date)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_REJECTED, by_staff, on_date, @user.id)
   end
 
   def authorize_reject_override(loan_application_id, by_staff, on_date, override_reason)
@@ -199,6 +199,16 @@ class LoanApplicationsFacade
 
   def completed_authorization(search_options = {})
     LoanApplication.completed_authorization(search_options)
+  end
+
+  # Return list of loan files which are suspected duplicates
+  def suspected_duplicate_loan_files
+    LoanApplication.suspected_duplicate_loan_files
+  end
+
+  # Return all loan files which has status cleared_not_duplicate and confirmed_duplicate
+  def cleared_or_confirmed_diplicate_list
+    LoanApplication.cleared_or_confirmed_diplicate_list
   end
 
 end
