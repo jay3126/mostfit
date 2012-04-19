@@ -359,13 +359,13 @@ class LoanApplication
   end
 
   # returns all loan applications which are suspected duplicates
-  def self.suspected_duplicate_loan_applications(search_options = {})
+  def self.suspected_dedupe(search_options = {})
     search_options.merge!({:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS})
     all(search_options)
   end
 
-  # Return all loan files which has status cleared_not_duplicate and confirmed_duplicate
-  def self.cleared_or_confirmed_duplicate_list(search_options = {})
+  # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
+  def self.clear_or_confirm_dedupe(search_options = {})
     search_options.merge!({:status => [Constants::Status::CONFIRMED_DUPLICATE_STATUS, Constants::Status::CLEARED_NOT_DUPLICATE_STATUS]})
     all(search_options)
   end

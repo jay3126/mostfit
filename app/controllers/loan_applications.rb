@@ -94,7 +94,7 @@ class LoanApplications < Application
   end
 
   def suspected_duplicates
-    get_de_dupe_loan_applicants
+    get_de_dupe_loan_applications
     render :suspected_duplicates
   end
 
@@ -109,7 +109,7 @@ class LoanApplications < Application
       @errors["Suspected duplicates"] = 'No data passed'
     end
     # POPULATING RESPONSE AND OTHER VARIABLES
-    get_de_dupe_loan_applicants
+    get_de_dupe_loan_applications
     # OPERATIONS PERFORMED
     if @errors.empty?
       params[:clear_or_confirm_duplicate].keys.each do |id|
@@ -129,10 +129,10 @@ class LoanApplications < Application
   private
 
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
-  def get_de_dupe_loan_applicants
+  def get_de_dupe_loan_applications
     facade = LoanApplicationsFacade.new(session.user)
-    @suspected_duplicates = facade.suspected_duplicate_loan_files
-    @cleared_or_confirmed_diplicate_loan_files = facade.cleared_or_confirmed_diplicate_list
+    @suspected_duplicates = facade.suspected_dedupe
+    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_dedupe
   end
 
 end # LoanApplications
