@@ -280,22 +280,31 @@ class LoanApplication
   end
 
   #tells whether the given Loan Application is pending verification or not
-  def is_pending_verification?
+  def is_pending_verification? 
     not ClientVerification.is_cpv_complete?(self.id)
   end
 
+  #returns all loan applications that have been recently created
+  def self.recently_created_new_loan_applicants(search_options = {})
+    search_options.merge!({:status => NEW_STATUS, :client_id => nil})
+    pending = all(search_options)
+  end
+
+  def self.recently_created_new_loan_applications_from_existing_clients(search_options = {})
+    search_options.merge!({:status => NEW_STATUS, :client_id.not => nil})
+    pending = all(search_options)
+  end
+
   #returns all loan applications which are pending for overlap report requests generation
-  def self.pending_overlap_report_request_generation
+  def self.pending_overlap_report_request_generation(search_options ={})
     eligible_statuses = [NEW_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
-    pending = all(:status => eligible_statuses)
+    search_options.merge!(:status => eligible_statuses)
+    pending = all(search_options)
   end
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
-  def self.pending_verification(at_branch_id = nil, at_center_id = nil)
-    predicates = {}
-    predicates[:at_branch_id] = at_branch_id if at_branch_id
-    predicates[:at_center_id] = at_center_id if at_center_id
-    predicates[:status] = [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS]
+  def self.pending_verification(search_options = {})
+    search_options.merge!(:status => [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS])
     LoanApplication.all(predicates)#.select {|lap| lap.is_pending_verification?}
   end
 
@@ -350,13 +359,15 @@ class LoanApplication
   end
 
   # returns all loan applications which are suspected duplicates
-  def self.suspected_duplicate_loan_files
-    all(:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS)
+  def self.suspected_duplicate_loan_applications(search_options = {})
+    search_options.merge!({:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS})
+    all(search_options)
   end
 
   # Return all loan files which has status cleared_not_duplicate and confirmed_duplicate
-  def self.cleared_or_confirmed_diplicate_list
-    all(:status => [Constants::Status::CONFIRMED_DUPLICATE_STATUS, Constants::Status::CLEARED_NOT_DUPLICATE_STATUS])
+  def self.cleared_or_confirmed_duplicate_list(search_options = {})
+    search_options.merge!({:status => [Constants::Status::CONFIRMED_DUPLICATE_STATUS, Constants::Status::CLEARED_NOT_DUPLICATE_STATUS]})
+    all(search_options)
   end
 
   #returns an object containing all information about a Loan Application

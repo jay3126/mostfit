@@ -151,12 +151,27 @@ class LoanApplicationsFacade
     LoanApplication.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, @user.id, *loan_application_id)
   end
 
+  # Recently Added Loan Applications
+  def recently_added_applicants(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.recently_created_new_loan_applicants(search_options)
+  end
+
+  def recently_added_applications_for_existing_clients(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
+  end
+
   # Awaiting action
 
   def pending_dedupe(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.suspected_duplicate_loan_applications(search_options)
   end
 
   def pending_credit_bureau_check(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.pending_overlap_report_request_generation(search_options)
   end
 
   def pending_authorization(search_options = {})
