@@ -162,14 +162,19 @@ class LoanApplicationsFacade
     LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
   end
 
+  # returns all loan applications which has status not_duplicate
+  def self.not_duplicate(search_options = {})
+    LoanApplication.not_duplicate(search_options)
+  end
+
   # Return all loan applications which has status suspected_duplicate
-  def suspected_dedupe(search_options = {})
-    LoanApplication.suspected_dedupe(search_options)
+  def suspected_duplicate(search_options = {})
+    LoanApplication.suspected_duplicate(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
-  def clear_or_confirm_dedupe(search_options = {})
-    LoanApplication.clear_or_confirm_dedupe(search_options)
+  def clear_or_confirm_duplicate(search_options = {})
+    LoanApplication.clear_or_confirm_duplicate(search_options)
   end
   
   def pending_credit_bureau_check(search_options = {})

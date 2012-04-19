@@ -131,8 +131,8 @@ class LoanApplications < Application
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
   def get_de_dupe_loan_applications
     facade = LoanApplicationsFacade.new(session.user)
-    @suspected_duplicates = facade.suspected_dedupe
-    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_dedupe
+    @suspected_duplicates = facade.suspected_duplicate
+    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_duplicate
   end
 
 end # LoanApplications
