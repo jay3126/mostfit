@@ -16,9 +16,9 @@
     = link_to "#{@client.name}", resource(@branch, @center, @client)
   - @history = @loan.loan_history
   .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-    = link_to 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit"
-    = link_to 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add"
-    = link_to 'visit center', resource(@loan.client.center)
+    = link_to 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit grey_button"
+    = link_to 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"
+    = link_to 'visit center', resource(@loan.client.center), :class => "grey_button"
   
   %table.loan{ :style => 'width : 50%; border: solid 1px #c9c9c9' }
     %tr
@@ -93,7 +93,8 @@
       %td
         = link_to @loan.loan_product.name, resource(@loan.loan_product)
         %br
-        = @loan.loan_product.repayment_style.name if @loan.loan_product.repayment_style
+        - if @loan.loan_product.repayment_style
+          = link_to @loan.loan_product.repayment_style.name, resource(@loan.loan_product.repayment_style)
     %tr
       %th.odd Installments
       %td
@@ -261,12 +262,7 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      - if @payments.blank?
-        %p
-          %i No repayments have been made so far.
-          = link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"
-      - else
-        = partial "payments/list", {:pmts => @payments, :context => :received}
+      = partial "payments/list", {:pmts => @payments, :context => :received}
     - if @loan.insurance_policy
       %div.tab
         %input{:type => "hidden", :name => "_load_remote", :value => resource(@loan.insurance_policy)}
