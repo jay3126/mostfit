@@ -101,27 +101,30 @@ class LoanApplications < Application
   def record_suspected_duplicates
     # GATE-KEEPING
     @errors = {}
+    staff_member_id = params[:staff_member_id]
+    clear_or_confirm_duplicate = params[:clear_or_confirm_duplicate]
+    facade = LoanApplicationsFacade.new(session.user)
+
     # VALIDATIONS
-    if params[:staff_member_id].empty?
-      @errors["Suspected duplicates"] = 'Please select staff member'
-    end
-    if params[:clear_or_confirm_duplicate].nil?
-      @errors["Suspected duplicates"] = 'No data passed'
-    end
+    @errors["Suspected duplicates"] = 'Please select staff member' if staff_member_id.blank?
+    @errors["Suspected duplicates"] = 'No data passed' if clear_or_confirm_duplicate.blank?
+
     # POPULATING RESPONSE AND OTHER VARIABLES
     get_de_dupe_loan_applications
+
     # OPERATIONS PERFORMED
     if @errors.empty?
-      params[:clear_or_confirm_duplicate].keys.each do |id|
-        lap = LoanApplication.get(id)
-        if params[:clear_or_confirm_duplicate][id] == '1'
-          result = lap.set_status(Constants::Status::CLEARED_NOT_DUPLICATE_STATUS)
-        elsif params[:clear_or_confirm_duplicate][id] == '2'
-          result = lap.set_status(Constants::Status::CONFIRMED_DUPLICATE_STATUS)
+      params[:clear_or_confirm_duplicate].keys.each do |lap_id|
+        loan_app = LoanApplication.get(lap_id)
+        if  params[:clear_or_confirm_duplicate][lap_id].include?('clear')
+          is_saved = facade.set_cleared_not_duplicate(lap_id)
+        elsif params[:clear_or_confirm_duplicate][lap_id].include?('confirm')
+          is_saved = facade.set_confirm_duplicate(lap_id)
         end
-        @errors["Suspected duplicates"] = "Mandatory details of client is blank.Like pin code, references" if result == false
+        @errors[loan_app.client_id] = loan_app.errors.to_a if is_saved == false
       end
     end
+    
     # RENDER/RE-DIRECT
     render :suspected_duplicates
   end

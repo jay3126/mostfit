@@ -376,16 +376,24 @@ class LoanApplication
     all(search_options)
   end
 
-  # returns all loan applications which are suspected duplicates
-  def self.suspected_duplicate_loan_applications(search_options = {})
-    search_options.merge!({:status => SUSPECTED_DUPLICATE_STATUS})
-    all(search_options)
-  end
-
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
   def self.clear_or_confirm_duplicate(search_options = {})
     search_options.merge!({:status => [CONFIRMED_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]})
     all(search_options)
+  end
+
+  # set loan application status as cleared_not_duplicate
+  def self.set_cleared_not_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(CLEARED_NOT_DUPLICATE_STATUS)
+  end
+
+  # set loan application status as confirm_duplicate
+  def self.set_confirm_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(CONFIRMED_DUPLICATE_STATUS)
   end
 
   #returns an object containing all information about a Loan Application

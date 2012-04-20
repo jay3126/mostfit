@@ -30,10 +30,10 @@
                 %td
                   = loan_application.client_address
                 %td
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 1}
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'clear'}
                   Clear
                 %td
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 2}
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm'}
                   Confirm
           %tfoot
             %tr

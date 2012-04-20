@@ -54,20 +54,6 @@ class LoanApplicationsFacade
     raise NotFound if loan_application.nil?
     loan_application.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS)
   end
-  
-  # Confirm or clear suspect from de-dupe
-
-  def confirm_duplicate(loan_application_id)
-    loan_application = LoanApplication.get(loan_application_id)
-    raise NotFound if loan_application.nil?
-    loan_application.set_status(Constants::Status::CONFIRMED_DUPLICATE_STATUS)
-  end
-
-  def confirm_not_duplicate(loan_application_id)
-    loan_application = LoanApplication.get(loan_application_id)
-    raise NotFound if loan_application.nil?
-    loan_application.set_status(Constants::Status::CLEARED_NOT_DUPLICATE_STATUS)
-  end
 
   # Rate on credit bureau response
 
@@ -180,6 +166,16 @@ class LoanApplicationsFacade
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
   def clear_or_confirm_duplicate(search_options = {})
     LoanApplication.clear_or_confirm_duplicate(search_options)
+  end
+
+  # set loan application status as cleared_not_duplicate
+  def set_cleared_not_duplicate(lap_id)
+    LoanApplication.set_cleared_not_duplicate(lap_id)
+  end
+
+  # set loan application status as confirm_duplicate
+  def set_confirm_duplicate(lap_id)
+    LoanApplication.set_confirm_duplicate(lap_id)
   end
   
   def pending_credit_bureau_check(search_options = {})
