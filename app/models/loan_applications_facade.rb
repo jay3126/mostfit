@@ -169,16 +169,19 @@ class LoanApplicationsFacade
 
   # returns all loan applications which has status not_duplicate
   def self.not_duplicate(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.not_duplicate(search_options)
   end
 
   # Return all loan applications which has status suspected_duplicate
   def suspected_duplicate(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.suspected_duplicate(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
   def clear_or_confirm_duplicate(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.clear_or_confirm_duplicate(search_options)
   end
   
@@ -188,13 +191,17 @@ class LoanApplicationsFacade
   end
 
   def pending_authorization(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.pending_authorization(search_options)
   end
 
   def pending_CPV(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.pending_verification(search_options)
   end
 
   def pending_loan_file_generation(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.pending_loan_file_generation(search_options)
   end
 
