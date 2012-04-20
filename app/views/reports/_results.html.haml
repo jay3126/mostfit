@@ -24,8 +24,8 @@
               - values3.each_with_index do |row, idx|
                 %td
                   - if row
-                    =row.to_currency 
-                    -key2_total[idx]+=row
+                    = row.abs.to_currency
+                    - key2_total[idx]+=row
           %tr.center_total
             %td
               %b==Total:
@@ -33,7 +33,7 @@
             - key2_total.each do |ele|
               %td
                 %b
-                  =ele.to_currency
+                  = ele.abs.to_currency
         - else
           %tr.center
             %td
@@ -42,7 +42,7 @@
             - values2.each_with_index do |ele, idx|
               %td.number
                 %b
-                  = ele.to_currency                    
+                  = ele.abs.to_currency
       %tr.branch_total
         %td
         - if key1_total[0].class == Array
@@ -52,7 +52,7 @@
         - org_total.last.each do |ele|
           %td
             %b
-              =ele.to_currency
+              = ele.abs.to_currency
     - else
       %tr
         %td.text
@@ -60,13 +60,13 @@
             = key1.name
         - values1.each_with_index do |ele, idx|
           %td
-            = ele.to_currency
+            = ele.abs.to_currency
         - org_total << values1
   
 %tr.org_total
   %td.text
     %b Total
-  -org_total.find_all{|x| x.length==length}.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}.each do |ele|
+  - org_total.find_all{|x| x.length==length}.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}.each do |ele|
     %td
       %b
-        =ele.to_currency
+        = ele.abs.to_currency
