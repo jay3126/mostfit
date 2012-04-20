@@ -148,27 +148,26 @@ class LoanApplicationsFacade
     LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
   end
 
+  # De-dupe
+
   # returns all loan applications which are pending for de-dupe process
   def self.pending_dedupe
     LoanApplication.pending_dedupe
   end
 
   # returns all loan applications which has status not_duplicate
-  def self.not_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
-    LoanApplication.not_duplicate(search_options)
+  def self.not_duplicate
+    LoanApplication.not_duplicate
   end
 
   # Return all loan applications which has status suspected_duplicate
-  def suspected_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
-    LoanApplication.suspected_duplicate(search_options)
+  def suspected_duplicate
+    LoanApplication.suspected_duplicate
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
-  def clear_or_confirm_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
-    LoanApplication.clear_or_confirm_duplicate(search_options)
+  def clear_or_confirm_duplicate
+    LoanApplication.clear_or_confirm_duplicate
   end
 
   # set loan application status as cleared_not_duplicate
@@ -181,6 +180,8 @@ class LoanApplicationsFacade
     LoanApplication.set_confirm_duplicate(lap_id)
   end
   
+  #
+
   def pending_credit_bureau_check(search_options = {})
     search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.pending_overlap_report_request_generation(search_options)
