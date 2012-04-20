@@ -25,18 +25,19 @@
   %table.report.nojs
     %thead
       %tr{:style => "font-size: 0.85em;"}
-        %th name
-        %th id
-        %th amount
-        %th outstanding
-        %th disbursed on
-        %th installment
-        %th principal due
-        %th interest due
-        %th total due
-        %th paid
-        %th repay type
-        %th attendance
+        %th Name
+        %th Loan Id
+        %th Loan Reference No.
+        %th Amount
+        %th Outstanding
+        %th Disbursed on
+        %th Installment
+        %th Principal due
+        %th Interest due
+        %th Total due
+        %th Paid
+        %th Repay type
+        %th Attendance
           
     %tbody{:style => "text-align:left;" }
       - @branch||=@center.branch
@@ -56,9 +57,9 @@
       - repayment_style_choices = Mfi.first.allow_choice_of_repayment_style ? default_repayment_style_choice + (all_repayment_style_choices.reject {|style| style[0] == default_repayment_style}) : default_repayment_style_choice
       - clients.group_by{|x| x.client_group}.sort_by{|x| x[0] ? x[0].name : "none"}.each do |group, clients_grouped|
         %tr.group{:style => 'font-weight: bold; text-align: center; background: grey'}
-          %td{:colspan => 12}
-            =group ? group.name : "none"
-        -clients_grouped.sort_by{|x| x.name}.each do |client|
+          %td{:colspan => 13}
+            = group ? group.name : "none"
+        - clients_grouped.sort_by{|x| x.name}.each do |client|
           - loan_row_count = 0
           - loans.find_all{|l| l.client_id == client.id and l.disbursal_date}.each do |loan|
             - lh = histories.find_all{|x| x.loan_id==loan.id}.sort_by{|x| x.created_at}[-1]
@@ -81,6 +82,8 @@
                 %b= link_to client.name, resource(@branch, @center, client)
               %td.number
                 = link_to loan.id, url_for_loan(loan)
+              %td.text
+                = (link_to loan.reference, url_for_loan(loan)) if loan.reference
               %td.number
                 - amt = loan.amount
                 %b= amt.to_currency
@@ -131,6 +134,7 @@
         %tr
           %td
           %td
+          %td
           %td.numeric
             %b= tot_amount.to_currency
           %td.numeric
@@ -144,6 +148,7 @@
           %td
             %b= tot_total.to_currency
           %td
+            %b= tot_total.to_currency
           %td.numeric            
     %tfoot    
       %tr
