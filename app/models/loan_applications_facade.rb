@@ -162,6 +162,11 @@ class LoanApplicationsFacade
     LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
   end
 
+  # returns all loan applications which are pending for de-dupe process
+  def self.pending_dedupe
+    LoanApplication.pending_dedupe
+  end
+
   # returns all loan applications which has status not_duplicate
   def self.not_duplicate(search_options = {})
     LoanApplication.not_duplicate(search_options)

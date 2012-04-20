@@ -359,6 +359,10 @@ class LoanApplication
     linfos
   end
 
+  # returns all loan applications which are pending for de-dupe process
+  def self.pending_dedupe
+    all(:status => NEW_STATUS)
+  end
 
   # returns all loan applications which has status not_duplicate
   def self.not_duplicate(search_options = {})
@@ -374,7 +378,7 @@ class LoanApplication
 
   # returns all loan applications which are suspected duplicates
   def self.suspected_duplicate_loan_applications(search_options = {})
-    search_options.merge!({:status => Constants::Status::SUSPECTED_DUPLICATE_STATUS})
+    search_options.merge!({:status => SUSPECTED_DUPLICATE_STATUS})
     all(search_options)
   end
 
