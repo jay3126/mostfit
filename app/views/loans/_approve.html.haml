@@ -9,6 +9,8 @@
       %th
         Loan id
       %th
+        Loan Reference
+      %th
         Client Name
       %th
         Loan Details
@@ -37,6 +39,8 @@
     %tr{:class => cycle('odd','')}
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
+      %td.text
+        = (link_to loan.reference, url(:quick_link, "loans", loan.id)) if loan.reference
       %td.text
         = link_to loan.client.name, resource(client)
       %td.number
@@ -67,7 +71,6 @@
         = select :name => "loans[#{loan.id}][approved_by_staff_id]", :collection => staff_members_allowed, :selected => client.center.branch.manager.id.to_s
   %tfoot
     %tr
-      %td{:colspan => 12}
+      %td{:colspan => 13}
   
 = paginate @loans_to_approve if @loans_to_approve.respond_to?(:page)
- 

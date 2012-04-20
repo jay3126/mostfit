@@ -9,9 +9,10 @@ class LoanApplications < Application
 
   # this controller is responsible for the bulk addition of clients to loan applications
   def bulk_new
+    loan_applications_facade = LoanApplicationsFacade.new(session.user)
+    @errors = {}
+    @center = Center.get(params[:at_center_id].to_i) if params[:at_center_id]
     if request.method == :post
-      @errors = {}
-      @center = Center.get(params[:at_center_id].to_i)
       created_on = Date.parse(params[:created_on])
       center_cycle = CenterCycle.get_cycle(@center.id, params[:center_cycle_number].to_i)
       client_ids = params[:clients].keys
@@ -20,7 +21,6 @@ class LoanApplications < Application
         @errors << "Please select a Staff Member" if params[:staff_member_id].empty?
         @errors << "Please select a created on date" if params[:created_on].empty?
       else 
-        loan_applications_facade = LoanApplicationsFacade.new(session.user)
         client_ids.each do |client_id|
           client = Client.get(client_id)
           loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, params[:at_branch_id].to_i, params[:at_center_id].to_i, center_cycle.id, params[:staff_member_id].to_i, created_on) if params[:clients][client_id][:selected] == "on"
@@ -32,12 +32,9 @@ class LoanApplications < Application
       client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
       final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
       @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
-      @loan_applications = LoanApplication.all(:created_by_user_id => session.user.id, :at_center_id => @center.id, :center_cycle_id => center_cycle.id, :order => [:created_at.desc])
-      render 
-    else
-      @errors = {}
-      render
     end
+    @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_branch_id => @center.branch.id, :at_center_id => @center.id) if @center
+    render
   end
 
   # this lists the clients in the center that has been selected
@@ -64,14 +61,13 @@ class LoanApplications < Application
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
+    loan_applications_facade = LoanApplicationsFacade.new(session.user)
     if request.method == :post
-      @loan_applications = []
       loan_application = params[:loan_application]
       client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
       created_on = Date.parse(params[:created_on])
       center_cycle_number = params[:center_cycle_number].to_i
       center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-      loan_applications_facade = LoanApplicationsFacade.new(session.user)
       new_application_info = {}
       loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
       new_application_info.delete(:amount)
@@ -81,7 +77,6 @@ class LoanApplications < Application
       new_application_info += {:client_dob => client_dob}
       @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
       if @loan_application.save
-        @loan_applications << @loan_application
         message[:success] = "The Loan Application has been successfully saved"        
       else
         @errors = @loan_application.errors
@@ -90,6 +85,7 @@ class LoanApplications < Application
       @branch = Branch.get(params["branch_id"])
       @center = Center.get(params["center_id"])      
     end
+    @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
     render
   end
 

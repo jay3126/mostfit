@@ -10,7 +10,9 @@
       %th
         Sl.
       %th
-        Id
+        Loan Id
+      %th
+        Loan Reference No.
       %th
         Client Name
       %th
@@ -38,6 +40,8 @@
         = row_number
       %td.number
         = link_to loan.id, url(:quick_link, "loans", loan.id)
+      %td.text
+        = (link_to loan.reference, url(:quick_link, "loans", loan.id)) if loan.reference
       %td.text
         = link_to loan.client.name, resource(loan.client)
       %td.number  
@@ -67,6 +71,6 @@
         = select :name => "loans[#{loan.id}][disbursed_by_staff_id]", :collection => staff_members, :selected => loan.client.center.manager.id.to_s
   %tfoot
     %tr
-      %td{:colspan => 11}
+      %td{:colspan => 12}
 
 = paginate loans_to_disburse if loans_to_disburse.respond_to?(:page)

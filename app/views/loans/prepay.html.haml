@@ -1,7 +1,7 @@
 :javascript
   function calculate_totals(){
-    $('#total_pi_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()));
-    $('#total_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()) + parseFloat($('#penalty_amount').val()));    
+    $('#total_pi_due').html(parseFloat(Math.round($('#outstanding_principal').val())) + parseFloat(Math.round($('#total_interest_due').val())));
+    $('#total_due').html(parseFloat(Math.round($('#outstanding_principal').val())) + parseFloat(Math.round($('#total_interest_due').val())) + parseFloat($('#penalty_amount').val()));    
   }
   calculate_totals();
   $('#total_interest_due').change(function(){calculate_totals();});
@@ -44,7 +44,7 @@
           %th
             Outstanding Principal
           %td
-            = os_prin
+            = os_prin.round(2)
             - outstanding_principal = os_prin
             = hidden_field :name => "outstanding_principal", :value => outstanding_principal, :id => "outstanding_principal"
           %td

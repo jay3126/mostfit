@@ -2,6 +2,7 @@
   %tr{:style => "border: solid 1px black; background: lightyellow"}
     %th{:rowspan => "2"}=I18n.t "center.payment.table.on_name", :default => "on name"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.loan_id", :default => "loan id"
+    %th{:rowspan => "2"}=I18n.t "center.payment.table.loan_reference", :default => "loan reference"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.amount", :default => "amount"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.outstanding", :default => "outstanding"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.disbursed_on", :default => "disbursed on" 
@@ -30,7 +31,7 @@
     - num_loans_to_pay = num_fees_to_pay = 0
     - clients.group_by{|x| x.client_group}.sort_by{|x| x[0] ? x[0].name : "none"}.each do |group, client_grouped|
       %tr.group{:style => 'font-weight: bold; text-align: center; background: #cfcfcf'}
-        %td{:colspan => 6}
+        %td{:colspan => 7}
           = group ? group.name : "none"
         %td.left-numeric.due
         %td.right-numeric.paid
@@ -66,6 +67,8 @@
               %b= link_to client.name, resource(branch, center, client)            
             %td
               = link_to loan.id, url(:quick_link, "loans", loan.id)
+            %td
+              = (link_to loan.reference, url(:quick_link, "loans", loan.id)) if loan.reference
             %td
               - i = loan.amount
               %b= i.to_currency
@@ -133,6 +136,7 @@
             %td.right-numeric.paid
       %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }  
         %td{:colspan => 2}
+        %td
         %td.numeric
           %b= grp_amount.to_currency
         %td.numeric
@@ -156,6 +160,7 @@
           %b= grp_total_paid.to_currency
     %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }  
     %tr
+      %td
       %td
       %td
       %td.numeric
