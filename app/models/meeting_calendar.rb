@@ -85,6 +85,21 @@ class MeetingCalendar
     meetings_for_location(location, from_date, till_date)
   end
 
+  def self.all_locations_meeting_on_date(on_date = Date.today, meeting_status = nil)
+    query = {:on_date => on_date}
+    query.merge!(:meeting_status => meeting_status) if meeting_status
+    all_meetings = all(query)
+    locations_and_meetings = all_meetings.group_by {|meeting| meeting.location_type}
+    all_locations = {}
+    locations_and_meetings.each { |type, meetings|
+      all_locations[type] ||= []
+      meetings.each { |meeting_calendar|
+        all_locations[type].push(meeting_calendar.location_id)
+      }
+    }
+    all_locations
+  end
+
   # When invoked, consults a location facade for meeting schedules,
   # then creates meetings for any locations on the date
   def self.setup_calendar(on_date)

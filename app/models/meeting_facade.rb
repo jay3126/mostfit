@@ -1,6 +1,6 @@
 class MeetingFacade
   include Constants::Time
-  
+
   # Use the facade to:
   # get meeting schedules for a location (Center)
   # create new meeting schedules for a location
@@ -47,8 +47,29 @@ class MeetingFacade
     MeetingScheduleManager.get_all_meeting_schedule_infos(for_location)
   end
 
+  # Returns a simple list of meeting dates as per the meeting schedule, or nil if there are no meeting schedules for the location
+  # REMEMBER these are not as per the meeting calendar and therefore, there is no guarantee about their conduct
   def get_meetings_per_schedule(for_location, from_date = Date.today, till_date = from_date + DEFAULT_FUTURE_MAX_DURATION_IN_DAYS)
     MeetingScheduleManager.get_meetings_per_schedule(for_location, from_date, till_date)
+  end
+
+  # Get a data structure that has IDs for locations meeting on
+  # the date as per the meeting calendar, including both proposed and confirmed
+  # meetings
+  def get_locations_meeting_on_date(on_date = Date.today)
+    MeetingCalendar.all_locations_meeting_on_date(on_date)
+  end
+
+  # Get a data structure that has IDs for locations that have CONFIRMED meetings
+  # on a given date
+  def get_locations_confirmed_meeting_on_date(on_date = Date.today)
+    MeetingCalendar.all_locations_meeting_on_date(on_date, Constants::Space::CONFIRMED_MEETING_STATUS)
+  end
+
+  # Get a data structure that has IDs for locations that have PROPOSED meetings
+  # on a given date
+  def get_locations_proposed_meeting_on_date(on_date = Date.today)
+    MeetingCalendar.all_locations_meeting_on_date(on_date, Constants::Space::PROPOSED_MEETING_STATUS)
   end
 
   # Returns any holiday that is in force for the given location on date
