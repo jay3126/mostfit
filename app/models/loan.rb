@@ -389,7 +389,9 @@ class Loan
 
   def self.search(q, per_page)
     if /^\d+$/.match(q)
-      all(:conditions => {:id => q}, :limit => per_page)
+      Loan.all(:conditions => {:id => q}, :limit => per_page)
+    else
+      Loan.all(:conditions => ["reference=? or reference like ?", q, q+'%'], :limit => per_page)
     end
   end
 
