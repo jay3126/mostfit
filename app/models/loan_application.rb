@@ -304,9 +304,9 @@ class LoanApplication
   end
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
-  def self.pending_verification(search_options = {})
+  def self.pending_CPV(search_options = {})
     search_options.merge!(:status => [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS])
-    LoanApplication.all(predicates)#.select {|lap| lap.is_pending_verification?}
+    all(search_options)
   end
 
   def self.pending_authorization(search_options = {})

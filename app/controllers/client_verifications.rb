@@ -16,8 +16,9 @@ class ClientVerifications < Application
     end
     @center = Center.get(@center_id)
     @user_id = session.user.id 
-    @loan_applications_pending_verification = LoanApplication.pending_verification(@branch_id, @center_id)
-    @loan_applications_recently_recorded = LoanApplication.recently_recorded_by_user(@user_id)
+    facade = LoanApplicationsFacade.new(session.user)
+    @loan_applications_pending_verification = facade.pending_CPV({:at_center_id => @center.id, :at_branch_id => @center.branch.id}) unless @center.nil?
+    @loan_applications_recently_recorded = facade.recently_recorded_CPV(@user_id)
   end
 
   #gives the loan applications pending for verification
@@ -40,7 +41,7 @@ class ClientVerifications < Application
                   verified_by_staff_id = params['verified_by_staff_id'][cpv_type][id]
                   verification_status = params['verification_status'][cpv_type][id]
                   verified_on_date = params['verified_on_date'][cpv_type][id]
-                  if verified_by_staff_id.empty?
+          if verified_by_staff_id.empty?
                      @errors[id] = "Loan Application ID #{id} : Staff ID must be provided for #{cpv_type}"
                      next
                   elsif verified_on_date.empty?
