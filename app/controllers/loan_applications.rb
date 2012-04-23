@@ -62,6 +62,8 @@ class LoanApplications < Application
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
+    @center = Center.get(params["center_id"]) if params["center_id"]
+    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
     if request.method == :post
       loan_application = params[:loan_application]
       client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
@@ -81,9 +83,6 @@ class LoanApplications < Application
       else
         @errors = @loan_application.errors
       end
-    else
-      @branch = Branch.get(params["branch_id"])
-      @center = Center.get(params["center_id"])      
     end
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
     render

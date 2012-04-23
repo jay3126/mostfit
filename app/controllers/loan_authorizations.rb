@@ -8,10 +8,14 @@ class LoanAuthorizations < Application
   
   def pending_authorizations
     get_branch_and_center(params)
-    if @branch_id.nil? 
-      @errors['Search Form'] = "No branch selected"  unless params[:flag] == 'true'
-    else
-      get_pending_and_completed_auth(params)
+    unless params[:flag] == 'true'
+      if @branch_id.nil?
+        @errors['Search Form'] = "No branch selected"
+      elsif @center_id.nil?
+        @errors['Search Form'] = "No center selected"
+      else
+        get_pending_and_completed_auth(params)
+      end
     end
     render :authorizations
   end
