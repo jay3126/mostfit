@@ -104,7 +104,7 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
-      =#%input{:type => "hidden", :name => "_load_remote", :value => "#"}
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :action => :meeting_calendar, :id => @center.id)}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :action => :meeting_schedule, :id => @center.id)}
     - if Mfi.first.map_enabled

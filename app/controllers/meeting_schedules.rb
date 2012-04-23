@@ -17,7 +17,7 @@ class MeetingSchedules < Application
 
   def create
     @center = Center.get params[:center_id]
-    if Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_hours]) && Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_minutes])
+    if Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_hours].to_i) && Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_minutes].to_i)
       message = {:error => "Please fill vaild value of Meeting Time."}
     else
       msi = MeetingScheduleInfo.new(params[:meeting_schedule][:meeting_frequency],params[:meeting_schedule][:schedule_begins_on],params[:meeting_schedule][:meeting_time_begins_hours],params[:meeting_schedule][:meeting_time_begins_minutes])

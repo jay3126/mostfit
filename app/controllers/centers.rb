@@ -187,6 +187,14 @@ class Centers < Application
     partial "meeting_schedules/list", {:add_new => true}
   end
 
+  def meeting_calendar
+    @center =  Center.get(params[:id])
+    raise NotFound unless @center
+    mf = MeetingFacade.new session.user
+    @meeting_dates = mf.get_meeting_calendar(@center)
+    partial "centers/meeting_calendar"
+  end
+
   private
   include DateParser  # for the parse_date method used somewhere here..
 

@@ -1,0 +1,30 @@
+%h1
+  == Center Meeting Calender for center #{@center.name}
+%br
+- if @meeting_dates.blank?
+  %b= "No Meeting Dates in Calendar."
+- else
+  %table.narrow.form{ :width => '80%' }
+    %thead
+      %tr
+        %td
+          Meeting Date
+        %td
+          Meeting Status
+        %td
+          Meeting Time
+        %td
+          Description
+    - @meeting_dates.each do |md|
+      %tr{ :class => cycle('odd','')}
+        %td
+          = md.on_date
+        %td
+          = md.meeting_status
+        %td
+          = md.meeting_begins_at
+        %td
+          = md.to_info.to_s
+    %tfoot
+      %tr
+        %td{ :colspan => 7 }
