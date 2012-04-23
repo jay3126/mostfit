@@ -42,16 +42,16 @@
           = hidden_field :name => "clients[#{i}][reference_type]", :value => "Ration Card"
     %tr
       %th
-        Reference
+        ID Proof
       - (1..no_of_fields).each do |i| 
         %td
           = text_field :name => "clients[#{i}][reference2]", :value => (params[:clients] and params[:clients][i.to_s][:reference]), :tabindex => 1*i
     %tr
       %th
-        Reference type
+        ID Proof Type
       - (1..no_of_fields).each do |i|
         %td
-          = select :name => "clients[#{i}][reference2_type]", :value => (params[:clients] and params[:clients][i.to_s][:reference2_type]), :collection => Constants::Status::RELATIONSHIPS, :tabindex => 1*i
+          = select :name => "clients[#{i}][reference2_type]", :value => (params[:clients] and params[:clients][i.to_s][:reference2_type]), :collection => Constants::Masters::REFERENCE_TYPES_ID_PROOF, :tabindex => 1*i
     %tr
       %th
         D.O.B.
