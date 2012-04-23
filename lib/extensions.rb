@@ -155,10 +155,10 @@ module Misfit
           return true  if params[:parent_model]=="Branch" and (role==:staff_member and Branch.get(params[:parent_id]).manager==@staff)
           return false
         end
-        
+
         if role == :data_entry 
           return true if @controller == "searches"
-          return ["new", "edit", "create", "update", "bulk_entry"].include?(@action) if ["clients", "loans", "client_groups", "centers", "data_entry/centers"].include?(@controller)
+          return ["new", "edit", "create", "update", "bulk_entry", "show", "loan", "center", "client"].include?(@action) if ["clients", "loans", "client_groups", "centers", "data_entry/centers", "graph_data"].include?(@controller)
           return ["centers"].include?(@action) if ["branches"].include?(@controller) # this is so data entry can get a list of centers on bulk add clients page.
           
           return (@action == "disbursement_sheet" or @action == "day_sheet") if @controller == "staff_members"
