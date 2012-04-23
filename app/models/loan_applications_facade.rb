@@ -186,8 +186,6 @@ class LoanApplicationsFacade
     LoanApplication.set_confirm_duplicate(lap_id)
   end
   
-  #
-
   def pending_credit_bureau_check(search_options = {})
     search_options.merge!({:created_by_user_id => @user.id})
     LoanApplication.pending_overlap_report_request_generation(search_options)
@@ -205,7 +203,7 @@ class LoanApplicationsFacade
 
   def recently_recorded_CPV(search_options = {})
     #search_options.merge!({:created_by_user_id => @user.id})
-    LoanApplication.recently_recorded_by_user(search_options)
+    LoanApplication.recently_recorded_by_user(@user.id)
   end
   
   def pending_loan_file_generation(search_options = {})
