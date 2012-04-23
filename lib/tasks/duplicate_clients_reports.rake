@@ -46,7 +46,7 @@ namespace :mostfit do
     duplicates[:same_id_proof_driving_licence_loan_applicants] = []
 
     clients = Client.all(:fields => [:id, :name, :reference]).map{|cl| [cl.id, cl]}.to_hash
-    loan_applicants = LoanApplication.all(:fields => [:id, :client_id, :client_name, :client_reference1]).map{|la| [la.id, la]}.to_hash
+    loan_applicants = LoanApplicationsFacade.pending_dedupe.map{|la| [la.id, la]}.to_hash
 
     #checking for duplicate clients handling both the conditions, i.e., ration_card and various id_proofs.
     clients.each do |cid, client|
@@ -57,7 +57,7 @@ namespace :mostfit do
       elsif client.reference2.nil?
         id_proof_is_nil_for_clients.push(client)
 
-      #checking for dupliates start here.
+        #checking for dupliates start here.
       elsif client.reference and client.reference.length>0
         if ration_card_numbers.key?(client.reference)
           duplicates[:same_ration_card_number_clients].push([client, ration_card_numbers[client.reference]])
@@ -111,7 +111,11 @@ namespace :mostfit do
 
     #checking for duplicate loan_applicants handing both the conditions, i.e, ration_card and varous id_proofs.
     loan_applicants.each do |laid, applicant|
-      next if applicant.client_id
+      loan_applicant_duplicate = false
+      if applicant.client_id
+        LoanApplicationsFacade.new(User.first).not_duplicate(applicant.id)
+        next
+      end
 
       #handling conditions where the ration_card and id_proof are nil.
       if applicant.client_reference1.nil?
@@ -119,24 +123,28 @@ namespace :mostfit do
       elsif applicant.client_reference2.nil?
         id_proof_is_nil_for_loan_applicants.push(applicant)
 
-      #checking for duplications start here inside the loop.
+        #checking for duplications start here inside the loop.
       elsif (applicant.client_reference1 and applicant.client_reference1.length>0)
         if ration_card_numbers.key?(applicant.client_reference1)
           duplicates[:same_ration_card_number_loan_applicants].push([applicant, ration_card_numbers[applicant.client_reference1]])
+          loan_applicant_duplicate = true
         else
           ration_card_numbers[applicant.client_reference1] = applicant
         end
+      end
 
-      elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Passport") and applicant.client_reference2.length>0)
+      if (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Passport") and applicant.client_reference2.length>0)
         if id_proof_passport.key?(applicant.client_reference2)
           duplicates[:same_id_proof_passport_loan_applicants].push([applicant, id_proof_passport[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_passport[applicant.client_reference2] = applicant
         end
 
-      elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Voter Id") and applicant.client_reference2.length>0)
+      elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Voter ID") and applicant.client_reference2.length>0)
         if id_proof_voter_id.key?(applicant.client_reference2)
           duplicates[:same_id_proof_voter_id_loan_applicants].push([applicant, id_proof_voter_id[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_voter_id[applicant.client_reference2] = applicant
         end
@@ -144,6 +152,7 @@ namespace :mostfit do
       elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "UID") and applicant.client_reference2.length>0)
         if id_proof_uid.key?(applicant.client_reference2)
           duplicates[:same_id_proof_uid_loan_applicants].push([applicant, id_proof_uid[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_uid[applicant.client_reference2] = applicant
         end
@@ -151,6 +160,7 @@ namespace :mostfit do
       elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Others") and applicant.client_reference2.length>0)
         if id_proof_others.key?(applicant.client_reference2)
           duplicates[:same_id_proof_others_loan_applicants].push([applicant, id_proof_others[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_others[applicant.client_reference2] = applicant
         end
@@ -158,6 +168,7 @@ namespace :mostfit do
       elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Driving Licence No") and applicant.client_reference2.length>0)
         if id_proof_driving_licence.key?(applicant.client_reference2)
           duplicates[:same_id_proof_driving_licence_loan_applicants].push([applicant, id_proof_driving_licence[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_driving_licence[applicant.client_reference2] = applicant
         end
@@ -165,11 +176,19 @@ namespace :mostfit do
       elsif (applicant.client_reference2 and applicant.client_reference2_type and (applicant.client_reference2_type == "Pan") and applicant.client_applicant2.length>0)
         if id_proof_pan.key?(applicant.client_reference2)
           duplicates[:same_id_proof_pan_loan_applicants].push([applicant, id_proof_pan[applicant.client_reference2]])
+          loan_applicant_duplicate = true
         else
           id_proof_pan[applicant.client_reference2] = applicant
         end
-
       end
+
+      #Update loan application status suspected_duplicate or not_duplicate
+      if loan_applicant_duplicate
+        LoanApplicationsFacade.new(User.first).rate_suspected_duplicate(applicant.id)
+      else
+        LoanApplicationsFacade.new(User.first).not_duplicate(applicant.id)
+      end
+      
     end
 
     #getting the list on a file in csv format in 2 different files. One is for clients and the other is for loan_applicants.

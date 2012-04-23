@@ -55,6 +55,12 @@ class LoanApplicationsFacade
     loan_application.set_status(Constants::Status::SUSPECTED_DUPLICATE_STATUS)
   end
 
+  def not_duplicate(loan_application_id)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.set_status(Constants::Status::NOT_DUPLICATE_STATUS)
+  end
+  
   # Rate on credit bureau response
 
   def rate_by_credit_bureau_response(loan_application_id, rating)
@@ -201,7 +207,7 @@ class LoanApplicationsFacade
     LoanApplication.pending_loan_file_generation(search_options)
   end
 
-  # Update action completed (background tasks)
+   # Update action completed (background tasks)
 
   def dedupe_screened(*loan_application_ids)
   end

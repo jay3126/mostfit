@@ -81,8 +81,9 @@ class LoanApplication
   has 1, :loan
 
   validates_present   :client_dob
-  validates_is_unique :client_reference1, :scope => :center_cycle_id
-  validates_is_unique :client_reference2, :scope => :center_cycle_id
+  # this validation should be skip when client_id exist.
+ # validates_is_unique :client_reference1, :scope => :center_cycle_id
+ # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   #gives info for creating clients using the given loan application 
