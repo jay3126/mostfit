@@ -1,8 +1,8 @@
 :javascript
   function calculate_totals(){
-    $('#total_pi_due').html(parseFloat(Math.round($('#outstanding_principal').val())) + parseFloat(Math.round($('#total_interest_due').val())));
-    $('#total_due').html(parseFloat(Math.round($('#outstanding_principal').val())) + parseFloat(Math.round($('#total_interest_due').val())) + parseFloat($('#penalty_amount').val()));    
-  }
+   $('#total_pi_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()));
+   $('#total_due').html(parseFloat($('#outstanding_principal').val()) + parseFloat($('#total_interest_due').val()) + parseFloat($('#penalty_amount').val()));
+   }
   calculate_totals();
   $('#total_interest_due').change(function(){calculate_totals();});
   $('#penalty_amount').focusout(function(){calculate_totals();});
@@ -45,7 +45,7 @@
             Outstanding Principal
           %td
             = os_prin.round(2)
-            - outstanding_principal = os_prin
+            - outstanding_principal = os_prin.round(2)
             = hidden_field :name => "outstanding_principal", :value => outstanding_principal, :id => "outstanding_principal"
           %td
             - if allow_override_principal
@@ -75,9 +75,15 @@
           %td
             - if allow_override_interest
               = text_field :name => :interest, :value => total_interest_due.round(2), :id => "total_interest_due"
+              %br
+                .greytext
+                  Please put zero (0) in case no interest is to taken.
             - else
               = total_interest_due.to_currency
               = hidden_field :name => :interest, :value => total_interest_due.round(2), :id => "total_interest_due"
+              %br
+                .greytext
+                  Please put zero (0) in case no interest is to taken.
         %tr.total
           %th
             Total P and I due
