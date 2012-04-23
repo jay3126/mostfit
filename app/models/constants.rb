@@ -35,6 +35,14 @@ module Constants
     def self.get_week_day(on_date)
       DAYS_OF_THE_WEEK[on_date.wday]
     end
+    
+    def self.get_next_date_for_day(weekday, on_or_after_date)
+      raise ArgumentError, "Weekday not recognized: #{weekday}" unless DAYS_OF_THE_WEEK.include?(weekday)
+      on_or_after_weekday = get_week_day(on_or_after_date)
+      return on_or_after_date if on_or_after_weekday == weekday
+      weekday_difference = DAYS_OF_THE_WEEK.index(weekday) - DAYS_OF_THE_WEEK.index(on_or_after_weekday)
+      weekday_difference > 0 ? on_or_after_date + weekday_difference : on_or_after_date + (7 - weekday_difference.abs)
+    end
 
   end
 

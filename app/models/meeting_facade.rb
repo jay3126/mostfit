@@ -5,7 +5,8 @@ class MeetingFacade
   # get meeting schedules for a location (Center)
   # create new meeting schedules for a location
   # get meetings for a location
-  # get a meeting calendar for a location
+  # get a meeting calendar for a location from the meeting calendar
+  # get meetings as per the current meeting schedule for a location
   #
   # TODO
   # setup holidays
@@ -25,6 +26,10 @@ class MeetingFacade
     @user = user; @created_at = DateTime.now
   end
 
+  ##################
+  ## QUERIES       #
+  ##################
+
   # This returns a meeting for the given location on the date,
   # or nil if there is none currently scheduled
   def get_meeting(for_location, on_date = Date.today)
@@ -37,23 +42,13 @@ class MeetingFacade
     MeetingCalendar.meeting_calendar(for_location, from_date, till_date)
   end
 
-  def setup_meeting_calendar(on_date)
-    MeetingCalendar.setup_calendar(on_date)
-  end
-
-  # Creates a new meeting schedule for the given location
-  def setup_meeting_schedule(for_location, meeting_schedule_info)
-    MeetingScheduleManager.create_meeting_schedule(for_location, meeting_schedule_info)
-  end
-
   # Gets meeting schedules in effect for the given location
   def get_meeting_schedules(for_location)
-    MeetingScheduleManager.get_meeting_schedules(for_location)
+    MeetingScheduleManager.get_all_meeting_schedule_infos(for_location)
   end
 
-  # Creates a holiday at the location as specified
-  def setup_holiday(for_location, holiday_info)
-    #TBD
+  def get_meetings_per_schedule(for_location, from_date = Date.today, till_date = from_date + DEFAULT_FUTURE_MAX_DURATION_IN_DAYS)
+    MeetingScheduleManager.get_meetings_per_schedule(for_location, from_date, till_date)
   end
 
   # Returns any holiday that is in force for the given location on date
@@ -65,6 +60,26 @@ class MeetingFacade
   # the specified date, and an empty list when there are none
   def get_holiday_calendar(at_location, beginning_on)
     #TBD
+  end
+
+  ##################
+  ## UPDATES       #
+  ##################
+
+  # Creates a new meeting schedule for the given location
+  def setup_meeting_schedule(for_location, meeting_schedule_info)
+    MeetingScheduleManager.create_meeting_schedule(for_location, meeting_schedule_info)
+  end
+
+  # Creates a holiday at the location as specified
+  def setup_holiday(for_location, holiday_info)
+    #TBD
+  end
+
+  # This setups a calendar with meetings after consulting meeting schedules
+  # and TODO: after consulting holiday schedules
+  def setup_meeting_calendar(on_date)
+    MeetingCalendar.setup_calendar(on_date)
   end
 
 end

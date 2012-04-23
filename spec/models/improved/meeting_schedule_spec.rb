@@ -127,4 +127,42 @@ describe MeetingSchedule do
     @weekly_second.is_proposed_scheduled_on_date?(second_earlier_date).should == false
   end
 
+  it "should return all meeting dates in the schedule preceding the before date as expected for weekly schedules" do
+    weekly_first = MeetingSchedule.new(
+      :meeting_frequency => Constants::Time::WEEKLY,
+      :schedule_begins_on => Date.parse('2012-01-05'),
+      :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
+    )
+
+    test_date_strs = ['2012-01-05', '2012-01-12', '2012-01-19', '2012-01-26']; before_date = Date.parse('2012-01-31')
+    test_dates = test_date_strs.collect {|date_str| Date.parse(date_str)}
+    weekly_first.all_meeting_dates_in_schedule(before_date).should == test_dates
+  end
+
+  it "should return all meeting dates in the schedule preceding the before date as expected for biweekly schedules" do
+    biweekly_first = MeetingSchedule.new(
+      :meeting_frequency => Constants::Time::BIWEEKLY,
+      :schedule_begins_on => Date.parse('2012-01-05'),
+      :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
+    )
+
+    test_date_strs = ['2012-01-05', '2012-01-19', '2012-02-02', '2012-02-16']; before_date = Date.parse('2012-02-18')
+    test_dates = test_date_strs.collect {|date_str| Date.parse(date_str)}
+    biweekly_first.all_meeting_dates_in_schedule(before_date).should == test_dates
+  end
+
+  it "should return all meeting dates in the schedule preceding the before date as expected for monthly schedules" do
+    monthly = MeetingSchedule.new(
+      :meeting_frequency => Constants::Time::MONTHLY,
+      :schedule_begins_on => Date.parse('2012-01-05'),
+      :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
+    )
+
+    test_date_strs = ['2012-01-05', '2012-02-05', '2012-03-05', '2012-04-05', '2012-05-05']; before_date = Date.parse('2012-05-22')
+    test_dates = test_date_strs.collect {|date_str| Date.parse(date_str)}
+    monthly.all_meeting_dates_in_schedule(before_date).should == test_dates
+  end
+
+  it "meeting schedules for a particular location should have different schedule begin dates" 
+
 end

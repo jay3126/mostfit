@@ -32,7 +32,7 @@ USAGE_TEXT
           center_id = schedule_info.delete(:center_id)
           center = Center.get(center_id)
 
-          ms = MeetingSchedule.create(schedule_info)
+          ms = MeetingSchedule.first_or_create(schedule_info)
           center.meeting_schedules << ms
           center.save
         }

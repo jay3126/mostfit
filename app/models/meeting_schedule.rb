@@ -1,12 +1,49 @@
 class MeetingScheduleManager
+  include Constants::Time
 
+  # Intermediates in creating and managing the relationship between locations
+  # and schedules
+
+  # Creates a new meeting schedule for the location
   def self.create_meeting_schedule(for_location, meeting_schedule_info)
-    ms = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
-    for_location.save_meeting_schedule(ms)
+    validity_test = MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
+    return validity_test unless validity_test
+    meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
+    for_location.save_meeting_schedule(meeting_schedule)
   end
 
-  def self.get_meeting_schedules(for_location)
-    for_location.meeting_schedules.collect {|ms| ms.to_info}
+  # Returns a series of dates which are the scheduled meeting dates
+  # as per the meeting schedules for the location
+  def self.get_meetings_per_schedule(for_location, on_or_after_date = Date.today, until_date = on_or_after_date + DEFAULT_FUTURE_MAX_DURATION_IN_DAYS)
+    meeting_schedules = get_all_meeting_schedules(for_location)
+    return nil unless (meeting_schedules and (not (meeting_schedules.empty?)))
+    earliest_meeting_schedules = meeting_schedules.sort.reverse
+    next_schedule_begin_dates = []
+
+    earliest_meeting_schedules.each_with_index { |ms, idx|
+      next if idx == 0
+      next_schedule_begin_dates.push(ms.from_date)
+    }
+    next_schedule_begin_dates.push(until_date)
+
+    meetings_per_schedule = []
+    earliest_meeting_schedules.each_with_index { |ms, idx|
+      before_date = next_schedule_begin_dates[idx]
+      meetings_per_schedule += ms.all_meeting_dates_in_schedule(before_date)
+    }
+    DateValidator.screen_dates(meetings_per_schedule, on_or_after_date, until_date)
+  end
+
+  # Returns the meeting schedules for the location
+  def self.get_all_meeting_schedule_infos(for_location)
+    (for_location.meeting_schedules.collect {|ms| ms.to_info})
+  end
+
+  private
+
+  # Returns the meeting schedules for the location
+  def self.get_all_meeting_schedules(for_location)
+    for_location.meeting_schedules
   end
 
 end
@@ -18,7 +55,7 @@ class MeetingScheduleInfo
   # sorted most recent first by the schedule begin date
   def <=>(other)
     other.respond_to?(:schedule_begins_on) ?
-      other.schedule_begins_on <=> @schedule_begins_on : nil
+      other.schedule_begins_on <=> self.schedule_begins_on : nil
   end
 
   attr_reader :meeting_frequency, :schedule_begins_on, :meeting_time_begins_hours, :meeting_time_begins_minutes
@@ -32,6 +69,8 @@ class MeetingScheduleInfo
   def to_s
     "Meeting schedule with frequency #{self.meeting_frequency} effective #{self.schedule_begins_on} at #{self.meeting_begins_at}"
   end
+
+  def from_date; @schedule_begins_on; end
   
 end
 
@@ -42,7 +81,8 @@ class MeetingSchedule
 
   property :id,                         Serial
   property :meeting_frequency,          Enum.send('[]', *MEETING_FREQUENCIES), :nullable => false
-  property :meeting_weekday,            Enum.send('[]', *DAYS_OF_THE_WEEK), :nullable => false, :default => lambda { |obj, p| Constants::Time.get_week_day(obj.schedule_begins_on) }
+  property :meeting_weekday,            Enum.send('[]', *DAYS_OF_THE_WEEK), :nullable => false,
+    :default => lambda { |obj, p| Constants::Time.get_week_day(obj.schedule_begins_on) }
   property :schedule_begins_on,         Date, :nullable => false
   property :meeting_time_begins_hours,  Integer, :min => EARLIEST_MEETING_HOURS_ALLOWED, :max => LATEST_MEETING_HOURS_ALLOWED
   property :meeting_time_begins_minutes,Integer, :min => EARLIEST_MEETING_MINUTES_ALLOWED, :max => LATEST_MEETING_MINUTES_ALLOWED
@@ -51,6 +91,15 @@ class MeetingSchedule
   
   # getters added for conventional access
   def from_date; self.schedule_begins_on; end
+
+  def self.validate_new_meeting_schedule(for_location, meeting_schedule_info)
+    existing_meeting_schedules = for_location.meeting_schedules
+    return true if existing_meeting_schedules.empty?
+    most_recent_schedule = existing_meeting_schedules.sort.first
+    most_recent_schedule_date = most_recent_schedule.schedule_begins_on
+    most_recent_schedule_date < meeting_schedule_info.schedule_begins_on ? true :
+      [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location}"]
+  end
 
   def to_info
     MeetingScheduleInfo.new(meeting_frequency, schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
@@ -67,7 +116,8 @@ class MeetingSchedule
 
   def self.record_meeting_schedule(meeting_schedule_info)
     meeting_schedule = from_info(meeting_schedule_info)
-    meeting_schedule.save
+    was_saved = meeting_schedule.save
+    raise Errors::DataError, "Meeting schedule was not saved: #{meeting_schedule.errors.first.first}" unless was_saved
     meeting_schedule
   end
 
@@ -75,10 +125,15 @@ class MeetingSchedule
     "Meeting schedule with frequency #{self.meeting_frequency} effective #{self.schedule_begins_on} at #{self.meeting_begins_at}"
   end
 
+  def <=>(other)
+    other.respond_to?(:schedule_begins_on) ?
+      other.schedule_begins_on <=> self.schedule_begins_on : nil
+  end
+
   # query this method for whether a meeting is scheduled on the date
   # as per the meeting frequency for this meeting schedule
   def is_proposed_scheduled_on_date?(on_date)
-    return false if on_date < @schedule_begins_on
+    return false if on_date < self.schedule_begins_on
     occurs_on_meeting_frequency?(on_date)
   end
 
