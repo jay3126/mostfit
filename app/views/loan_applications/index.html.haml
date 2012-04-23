@@ -46,7 +46,7 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Center formation
-      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications), :class => 'add_small'
+      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
       %br
       = link_to "Record CGT, GRT", '#', :class => 'add_small'
     %td
