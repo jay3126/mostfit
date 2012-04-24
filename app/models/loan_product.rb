@@ -1,5 +1,6 @@
 class LoanProduct
-  include DataMapper::Resource  
+  include DataMapper::Resource
+  include MarkerInterfaces::Recurrence
   before :save, :convert_blank_to_nil
 
   property :id, Serial, :nullable => false, :index => true
@@ -56,6 +57,12 @@ class LoanProduct
   # while migrating, we have to provde a reference for every data point
   # this is for reasons of sanity.
   # validates_present :reference, :if => Proc.new{|t| Mfi.first.state == :migration}
+
+  # Implementing MarkerInterfaces::Recurrency#frequency
+  def frequency
+    loan_product_frequency = self.installment_frequency
+    FREQUENCIES.include?(loan_product_frequency) ? loan_product_frequency : nil
+  end
   
   def self.from_csv(row, headers)
     min_interest = row[headers[:min_interest_rate]].to_f < 1 ? row[headers[:min_interest_rate]].to_f*100 : row[headers[:min_interest_rate]]
