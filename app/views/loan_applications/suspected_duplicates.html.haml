@@ -3,7 +3,7 @@
     .error
       - @errors.keys.each do |lap_id|
         - if @errors[lap_id]
-          = "#{@errors[lap_id]}"
+          = "Client ID #{lap_id}:#{@errors[lap_id]}"
           %br
 
 %h1

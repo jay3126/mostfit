@@ -1,3 +1,9 @@
+- unless @errors.blank?
+  - @errors.keys.each do |key|
+    .error
+      = "#{@errors[key]}"
+      %br
+
 %h1 Credit Bureau Responses
 
 .shaded
@@ -38,9 +44,4 @@
             %td
               - response_status = 'Not rated'
               - begin; response_status = response.status; rescue; response_status = 'Error'; end
-              = response_status
-              
-          
-          
-  
-      
+              = response_status      
