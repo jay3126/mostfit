@@ -37,7 +37,6 @@
         %td
           %span
             = @meeting_dates.find{|x| x.location_id == center.id}.meeting_begins_at
-            =# #{center.meeting_day_for(Date.today).to_s.capitalize}#{(center.meeting_time_hours and center.meeting_time_minutes) ? ", #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}" : ''}
         %td
           = clients_count[center.id] if clients_count.key?(center.id)
         %td
