@@ -46,6 +46,16 @@ module Constants
       weekday_difference > 0 ? on_or_after_date + weekday_difference : on_or_after_date + (7 - weekday_difference.abs)
     end
 
+    def self.get_beginning_sunday(for_date)
+      for_date - (for_date.wday - 0)
+    end
+    
+    def self.get_current_week_dates(for_date)
+      week_days = []
+      beginning_date_of_week = get_beginning_sunday(for_date)
+      (1..7).each{|x| week_days << beginning_date_of_week; beginning_date_of_week = beginning_date_of_week + 1; }
+      week_days
+    end
   end
 
   # points in space

@@ -14,9 +14,15 @@ class Branches < Application
   def show(id)
     @option = params[:option] if params[:option]
     @branch = Branch.get(id)
+    @meeting_dates = []
     raise NotFound unless @branch
     if @branch.centers.count > 0
-      @centers = @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
+      branch_centers = @branch.centers
+      mf = MeetingFacade.new(session.user)
+      meeting_center_ids = mf.get_locations_meeting_on_date(Date.today)
+      center_ids_on_date = branch_centers.map(&:id) & meeting_center_ids[:center] rescue []
+      @centers = Center.all :id => center_ids_on_date
+      @centers.each{|center| @meeting_dates << mf.get_meeting(center, Date.today)}
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display [@branch, @centers]
       else

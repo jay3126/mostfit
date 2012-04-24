@@ -13,7 +13,14 @@ class Centers < Application
   end
 
   def list
-    @centers = @centers ? @centers.all(:meeting_day => params[:meeting_day]||Date.today) : @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
+    branch_centers = @branch.centers
+    @meeting_dates = []
+    @date = Date.parse params[:meeting_day] || Date.today
+    mf = MeetingFacade.new(session.user)
+    meeting_center_ids = mf.get_locations_meeting_on_date(@date)
+    center_ids_on_date = branch_centers.map(&:id) & meeting_center_ids[:center] rescue []
+    @centers = Center.all :id => center_ids_on_date
+    @centers.each{|center| @meeting_dates << mf.get_meeting(center, @date)}
     partial "centers/list", :layout => layout?
   end
 
@@ -55,10 +62,10 @@ class Centers < Application
     elsif request.method==:post
       model = Kernel.const_get(params["model"])
       column = if property = model.properties.find{|x| x.name == @field}
-                 property.name
-               elsif model.relationships[@field]
-                 model.relationships[@field].child_key.first.name
-               end
+        property.name
+      elsif model.relationships[@field]
+        model.relationships[@field].child_key.first.name
+      end
       raise NotAllowed unless column
       saved = []
       params[params["model"].snake_case].each{|id, attr|

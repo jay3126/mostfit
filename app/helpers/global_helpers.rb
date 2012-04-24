@@ -528,13 +528,13 @@ module Merb
              :prompt       => (attrs[:prompt] or "&lt;select a field&gt;")).gsub("!!!", "&nbsp;")
     end
 
-    def paginate_on_weekdays(branch, selected=Date.today.weekday)      
-      (Center::DAYS + [:monthly]).map{|wday|
-        weekday = (wday==:none ? "Not defined" : wday.to_s)
-        if selected==wday
-          "<strong>#{weekday}</strong>"
+    def paginate_on_weekdays(branch, selected=Date.today.weekday)
+      days = Constants::Time::get_current_week_dates(Date.today)
+      days.map{|day|
+        if day == selected
+          "<strong>#{day.weekday.to_s.capitalize}</strong>"
         else
-          link_to(weekday, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => wday.to_s), :id => "centers_list", :class => "_remote_")
+          link_to(day.weekday.to_s.capitalize, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => day), :id => "centers_list", :class => "_remote_")
         end
       }.join(' | ')
     end
