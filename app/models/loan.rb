@@ -4,6 +4,7 @@ class Loan
   include Identified
   include Pdf::LoanSchedule if PDF_WRITER
   include ExcelFormula
+  include MarkerInterfaces::Recurrence
 
   DAYS = [:none, :monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday]
 
@@ -209,6 +210,11 @@ class Loan
   validates_with_method  :clients,                      :method => :check_client_sincerity
   validates_with_method  :insurance_policy,             :method => :check_insurance_policy    
 
+  # Implements MarkerInterfaces::Recurrence#frequency
+  def frequency
+    _loan_frequency = self.installment_frequency
+    FREQUENCIES.include?(_loan_frequency) ? _loan_frequency : nil
+  end
 
   def update_loan_cache(force = true)
     update_non_history_attributes(true)
