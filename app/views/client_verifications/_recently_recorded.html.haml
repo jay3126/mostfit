@@ -1,7 +1,6 @@
 - center_text = "text-align: center"
-%h1
-  = "Recently recorded verifications"
 .shaded
+  %h2 Recently recorded verifications
   - if @loan_applications_recently_recorded and not @loan_applications_recently_recorded.empty?
     - loan_applications_recently_recorded_sorted = @loan_applications_recently_recorded.sort.reverse
     %table.nojs{:style => "text-align:center"}
@@ -75,4 +74,4 @@
                 %i
                   = "Not Applicable"
   - else
-    = "No recently recorded verifications"
+    %h3 No recently recorded verifications

@@ -1,7 +1,6 @@
 #pending_list
   .shaded
-    %h2
-      = "Recently recorded"
+    %h2 Recently recorded
     - if @cleared_or_confirmed_diplicate_loan_files && !@cleared_or_confirmed_diplicate_loan_files.empty?
       %table.narrow.form{:width => "100%"}
         %thead
@@ -31,4 +30,4 @@
               %td
                 = loan_application.status.humanize
     - else
-      No records found.
+      %h3 No recenlty recorded loan application

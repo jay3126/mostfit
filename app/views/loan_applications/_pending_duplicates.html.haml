@@ -1,7 +1,6 @@
 #pending_list
   .shaded
-    %h2
-      = "Suspected duplicate loan applicants"
+    %h2 Suspected duplicate loan applications
     - if @suspected_duplicates && !@suspected_duplicates.empty?
       = form(:action => url(:controller => 'loan_applications', :action => 'record_suspected_duplicates'), :method => :post) do
         %table.narrow.form{:width => "100%"}
@@ -49,4 +48,4 @@
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "reset"}
     - else
-      No suspected duplicate loan applicants
+      %h3 No suspected duplicate loan applicantion

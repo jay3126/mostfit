@@ -40,9 +40,9 @@ class LoanApplications < Application
   # this lists the clients in the center that has been selected
   def list
     if params[:branch_id] == ""
-      @errors = "Please select a branch"  
+      @errors = "No branch selected"
     elsif params[:center_id] == ""
-      @errors = "Please select a center"
+      @errors = "No center selected"
     else
       @errors = nil
     end
@@ -61,6 +61,14 @@ class LoanApplications < Application
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
+    @errors = {}
+    unless params[:flag] == 'true'
+      if params[:branch_id].blank?
+        @errors['search'] = "No branch selected"
+      elsif params[:center_id].blank?
+        @errors['search'] = "No center selected"
+      end
+    end
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
     @center = Center.get(params["center_id"]) if params["center_id"]
     @branch = Branch.get(params["branch_id"]) if params["branch_id"]

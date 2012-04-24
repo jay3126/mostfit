@@ -9,7 +9,7 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan Applications
-      = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create), :class => 'add_small'
+      = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true'), :class => 'add_small'
       %br
       = link_to "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
     %td

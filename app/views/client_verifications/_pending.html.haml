@@ -1,9 +1,9 @@
 - total_columns = 14
 - center_text = "text-align: center"
-%h1
-  = "Pending verifications"
+
 #pending_list
   .shaded
+    %h2 Pending verifications
     - if @loan_applications_pending_verification and not @loan_applications_pending_verification.empty?
       = form(:action => url(:controller => 'client_verifications', :action => 'record_verifications'), :method => :post) do
         %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
@@ -86,4 +86,4 @@
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "reset"}
     - else
-      = "No loan applications pending for verification"
+      %h3 No loan application pending for verification
