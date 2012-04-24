@@ -58,7 +58,7 @@ class LoanProduct
   # this is for reasons of sanity.
   # validates_present :reference, :if => Proc.new{|t| Mfi.first.state == :migration}
 
-  # Implementing MarkerInterfaces::Recurrency#frequency
+  # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency
     loan_product_frequency = self.installment_frequency
     FREQUENCIES.include?(loan_product_frequency) ? loan_product_frequency : nil

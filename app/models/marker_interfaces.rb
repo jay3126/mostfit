@@ -11,6 +11,12 @@ module MarkerInterfaces
 
     DAILY = :daily; WEEKLY = :weekly; BIWEEKLY = :biweekly; MONTHLY = :monthly
     FREQUENCIES = [DAILY, WEEKLY, BIWEEKLY, MONTHLY]
+    ACCOMODATES_FREQUENCIES = {
+      DAILY => [WEEKLY, BIWEEKLY, MONTHLY],
+      WEEKLY => [BIWEEKLY],
+      BIWEEKLY => [],
+      MONTHLY => []
+    }
 
     # All models that include this module must define a single no-argument method
     # "frequency" that returns a value
@@ -26,6 +32,16 @@ module MarkerInterfaces
       # Return a value from MarkerInterfaces::Recurrence::FREQUENCIES
     end
 =end
+
+    # Answers whether the frequency of reccurence can 'accomodate' another
+    # frequency of recurrence
+    def can_accomodate?(other_frequency)
+      my_frequency = self.frequency
+      return true if my_frequency == other_frequency
+      frequencies_accomodated = ACCOMODATES_FREQUENCIES[my_frequency]
+      frequencies_accomodated.include?(other_frequency)
+    end
+
   end
     
 end
