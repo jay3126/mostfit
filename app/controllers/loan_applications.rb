@@ -89,7 +89,7 @@ class LoanApplications < Application
       if @loan_application.save
         message[:success] = "The Loan Application has been successfully saved"        
       else
-        @errors = @loan_application.errors
+        @errors['submit form'] = @loan_application.errors.to_a.flatten.join(', ')
       end
     end
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center

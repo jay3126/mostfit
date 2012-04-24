@@ -3,11 +3,9 @@
   $('#toggle_select').change(function() {
     $('.select').attr('checked',$(this).attr('checked'))});  
   });
-
-%h1 
-  = "Add to Loan File"
 #pending_loan_file_generation
 .shaded
+  %h1 Add to Loan File
   - if @loan_applications_pending_loan_file_generation and not @loan_applications_pending_loan_file_generation.empty?
     %form{:action => url(:controller => :loan_files, :action => :record_loan_file), :method => :post}
       %table.form{:style => "width:100%;"}
@@ -64,6 +62,5 @@
             %td
               = submit "Generate Loan File"
   - else
-    %h3
-      = "No Loan applications pending for Loan File Generation"
+    %h3 No Loan application pending for loan file generation
 %br
