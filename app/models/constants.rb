@@ -14,9 +14,11 @@ module Constants
 
   # points in time	
   module Time
-    DAILY = :daily; WEEKLY = :weekly; BIWEEKLY = :biweekly; MONTHLY = :monthly
-    MEETING_FREQUENCIES = [DAILY, WEEKLY, BIWEEKLY, MONTHLY]
-    MEETING_FREQUENCIES_AS_DAYS = { DAILY => 1, WEEKLY => 7, BIWEEKLY => 14 }
+    
+    MEETING_FREQUENCIES = 
+      [MarkerInterfaces::Recurrence::DAILY, MarkerInterfaces::Recurrence::WEEKLY, MarkerInterfaces::Recurrence::BIWEEKLY, MarkerInterfaces::Recurrence::MONTHLY]
+    MEETING_FREQUENCIES_AS_DAYS = 
+      { MarkerInterfaces::Recurrence::DAILY => 1, MarkerInterfaces::Recurrence::WEEKLY => 7, MarkerInterfaces::Recurrence::BIWEEKLY => 14 }
 
     EARLIEST_MEETING_HOURS_ALLOWED = 0; LATEST_MEETING_HOURS_ALLOWED = 23
     MEETING_HOURS_PERMISSIBLE_RANGE = Range.new(EARLIEST_MEETING_HOURS_ALLOWED, LATEST_MEETING_HOURS_ALLOWED)

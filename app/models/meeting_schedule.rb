@@ -78,6 +78,7 @@ class MeetingSchedule
   include DataMapper::Resource
   include Constants::Time
   include IsMeeting
+  include MarkerInterfaces::Recurrence
 
   property :id,                         Serial
   property :meeting_frequency,          Enum.send('[]', *MEETING_FREQUENCIES), :nullable => false
@@ -91,6 +92,7 @@ class MeetingSchedule
   
   # getters added for conventional access
   def from_date; self.schedule_begins_on; end
+  def frequency; self.meeting_frequency; end
 
   def self.validate_new_meeting_schedule(for_location, meeting_schedule_info)
     existing_meeting_schedules = for_location.meeting_schedules
