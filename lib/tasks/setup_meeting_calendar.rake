@@ -32,7 +32,7 @@ USAGE_TEXT
         number_of_days = (number_of_days_str and (not (number_of_days_str.empty?))) ? number_of_days_str.to_i : 7
 
         admin_user = User.get(1)
-        meeting_facade = MeetingFacade.new(admin_user)
+        meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, admin_user)
 
         # First setup proposed meetings
         calendar_date = on_date
