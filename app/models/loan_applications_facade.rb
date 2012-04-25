@@ -202,8 +202,8 @@ class LoanApplicationsFacade
   end
 
   def recently_recorded_CPV(search_options = {})
-    #search_options.merge!({:created_by_user_id => @user.id})
-    LoanApplication.recently_recorded_by_user(@user.id)
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.pending_loan_file_generation(search_options)
   end
   
   def pending_loan_file_generation(search_options = {})

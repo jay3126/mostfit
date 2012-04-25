@@ -75,7 +75,7 @@ class ClientVerifications < Application
     # POPULATING RESPONSE AND OTHER VARIABLES
     facade = LoanApplicationsFacade.new(session.user)
     @loan_applications_pending_verification = facade.pending_CPV({:at_branch_id => params[:branch_id], :at_center_id => params[:center_id]})
-    @loan_applications_recently_recorded = facade.recently_recorded_CPV(session.user.id)
+    @loan_applications_recently_recorded = facade.recently_recorded_CPV({:at_branch_id => params[:branch_id], :at_center_id => params[:center_id]})
   end
 
 end # ClientVerifications
