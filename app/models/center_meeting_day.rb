@@ -53,12 +53,23 @@ new_what is null
 
 =end
 
+    meeting_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    if period == :week
+      if of_every == 2
+        meeting_frequency = MarkerInterfaces::Recurrence::BIWEEKLY
+      end
+    elsif period == :month
+      meeting_frequency = MarkerInterfaces::Recurrence::MONTHLY
+    end
+
+    # If a weekday is specified, then use the weekday to determine the schedule begin date
+
     meeting_time_begins_hours = self.center.meeting_time_hours || 0
     meeting_time_begins_minutes = self.center.meeting_time_minutes || 0
 
     meeting_schedule_info = {}
 
-    meeting_schedule_info[:meeting_frequency] = Constants::Time::WEEKLY
+    meeting_schedule_info[:meeting_frequency] = meeting_frequency
     meeting_schedule_info[:schedule_begins_on] = self.valid_from
     meeting_schedule_info[:meeting_time_begins_hours] = meeting_time_begins_hours
     meeting_schedule_info[:meeting_time_begins_minutes] = meeting_time_begins_minutes
