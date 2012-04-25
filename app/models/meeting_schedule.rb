@@ -36,7 +36,30 @@ class MeetingScheduleManager
 
   # Returns the meeting schedules for the location
   def self.get_all_meeting_schedule_infos(for_location)
-    (for_location.meeting_schedules.collect {|ms| ms.to_info})
+    get_all_meeting_schedules(for_location).collect {|ms| ms.to_info}
+  end
+  
+  # Gets all meeting schedules in effect on a given date
+  def self.get_all_meeting_schedules_on_date(on_date, for_locations)
+    current_meeting_schedules = {}
+    for_locations.each { |location_type, location_instances|
+      location_ids_and_schedules = {}
+      location_instances.each { |location|
+        schedule_effective = location.meeting_schedule_effective(on_date)
+        location_ids_and_schedules[location.id] = schedule_effective if schedule_effective
+      }
+      current_meeting_schedules[location_type] = location_ids_and_schedules
+    }
+    current_meeting_schedules
+  end
+
+  # Returns a list of frequencies that can be accomodated at the center
+  #
+  # TBD: the list of accomocated frequencies is sensitive to the point in time,
+  # since the meeting schedule frequency can change, but for now,
+  # we are defaulting this to the current date
+  def self.accomodated_frequencies(loan_frequencies, on_date = Date.today)
+    
   end
 
   private
@@ -45,12 +68,13 @@ class MeetingScheduleManager
   def self.get_all_meeting_schedules(for_location)
     for_location.meeting_schedules
   end
-
+  
 end
 
 class MeetingScheduleInfo
   include IsMeeting
   include Comparable
+  include MarkerInterfaces::Recurrence
 
   # sorted most recent first by the schedule begin date
   def <=>(other)
@@ -71,6 +95,9 @@ class MeetingScheduleInfo
   end
 
   def from_date; @schedule_begins_on; end
+
+  # implements MarkerInterfaces::Recurrence#frequency
+  def frequency; @meeting_frequency; end
   
 end
 

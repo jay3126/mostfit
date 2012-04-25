@@ -20,7 +20,7 @@ describe MeetingScheduleInfo do
     @some_dates = @some_numbers.collect { |num| Date.parse("2012-04-#{num}") }
     @some_dates.each { |date|
       @meeting_schedule_infos.push(
-        MeetingSchedule.new(:schedule_begins_on => date, :meeting_frequency => Constants::Time::WEEKLY,
+        MeetingSchedule.new(:schedule_begins_on => date, :meeting_frequency => MarkerInterfaces::Recurrence::WEEKLY,
           :meeting_time_begins_hours => 12, :meeting_time_begins_minutes => 20).to_info)
     }
   end
@@ -48,25 +48,25 @@ describe MeetingSchedule do
     @second_schedule_dates_range = populate_dates(@second_schedule_begins, (@second_schedule_begins + Constants::Time::DEFAULT_FUTURE_MAX_DURATION_IN_DAYS))
 
     @weekly_first = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::WEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::WEEKLY,
       :schedule_begins_on => @first_schedule_begins,
       :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
     )
 
     @weekly_second = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::WEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::WEEKLY,
       :schedule_begins_on => @second_schedule_begins,
       :meeting_time_begins_hours => @second_meeting_time_begins_hours, :meeting_time_begins_minutes => @second_meeting_time_begins_minutes
     )
 
     @biweekly_first = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::BIWEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::BIWEEKLY,
       :schedule_begins_on => @first_schedule_begins,
       :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
     )
 
     @biweekly_second = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::BIWEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::BIWEEKLY,
       :schedule_begins_on => @second_schedule_begins,
       :meeting_time_begins_hours => @second_meeting_time_begins_hours, :meeting_time_begins_minutes => @second_meeting_time_begins_minutes
     )
@@ -129,7 +129,7 @@ describe MeetingSchedule do
 
   it "should return all meeting dates in the schedule preceding the before date as expected for weekly schedules" do
     weekly_first = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::WEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::WEEKLY,
       :schedule_begins_on => Date.parse('2012-01-05'),
       :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
     )
@@ -141,7 +141,7 @@ describe MeetingSchedule do
 
   it "should return all meeting dates in the schedule preceding the before date as expected for biweekly schedules" do
     biweekly_first = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::BIWEEKLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::BIWEEKLY,
       :schedule_begins_on => Date.parse('2012-01-05'),
       :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
     )
@@ -153,7 +153,7 @@ describe MeetingSchedule do
 
   it "should return all meeting dates in the schedule preceding the before date as expected for monthly schedules" do
     monthly = MeetingSchedule.new(
-      :meeting_frequency => Constants::Time::MONTHLY,
+      :meeting_frequency => MarkerInterfaces::Recurrence::MONTHLY,
       :schedule_begins_on => Date.parse('2012-01-05'),
       :meeting_time_begins_hours => @first_meeting_time_begins_hours, :meeting_time_begins_minutes => @first_meeting_time_begins_minutes
     )

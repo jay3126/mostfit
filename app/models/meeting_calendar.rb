@@ -102,10 +102,9 @@ class MeetingCalendar
 
   # When invoked, consults a location facade for meeting schedules,
   # then creates meetings for any locations on the date
-  def self.setup_calendar(on_date)
-    locations_and_schedules = LocationFacade.new.all_location_meeting_schedules(on_date)
+  def self.setup_calendar(on_date, for_locations_and_schedules)
     locations_and_meetings = {}
-    locations_and_schedules.each { |location_type, schedule_map|
+    for_locations_and_schedules.each { |location_type, schedule_map|
       meeting_map = {}
       schedule_map.each { |id, meeting_schedule|
         meeting_map[id] = meeting_schedule if meeting_schedule.is_proposed_scheduled_on_date?(on_date)

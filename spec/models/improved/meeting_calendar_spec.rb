@@ -33,7 +33,9 @@ describe MeetingCalendar do
       center.save
     }
 
-    @first_date_range.each {|on_date| MeetingCalendar.setup_calendar(on_date)}
+    for_user = Factory(:user)
+    meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, for_user)
+    @first_date_range.each {|on_date| meeting_facade.setup_meeting_calendar(on_date)}
     
   end
 

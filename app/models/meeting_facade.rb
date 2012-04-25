@@ -1,4 +1,4 @@
-class MeetingFacade
+class MeetingFacade < StandardFacade
   include Constants::Time
 
   # Use the facade to:
@@ -19,13 +19,7 @@ class MeetingFacade
   # Expect to use the following lightweight objects
   # MeetingInfo
   # MeetingScheduleInfo
-
-  attr_reader :user, :created_at
-
-  def initialize(user)
-    @user = user; @created_at = DateTime.now
-  end
-
+  
   ##################
   ## QUERIES       #
   ##################
@@ -72,6 +66,12 @@ class MeetingFacade
     MeetingCalendar.all_locations_meeting_on_date(on_date, Constants::Space::PROPOSED_MEETING_STATUS)
   end
 
+  def get_accomodated_frequencies(at_location, on_date)
+    loan_facade = FacadeFactory.instance.get_other_facade(FacadeFactory::LOAN_FACADE, self)
+    all_loan_frequencies = loan_facade.get_loan_frequencies_at_location(at_location, on_date)
+    MarkerInterfaces::Recurrence.accomodated_frequencies(all_loan_frequencies)
+  end
+
   # Returns any holiday that is in force for the given location on date
   def get_holiday(for_location, on_date)
     #TBD
@@ -100,7 +100,10 @@ class MeetingFacade
   # This setups a calendar with meetings after consulting meeting schedules
   # and TODO: after consulting holiday schedules
   def setup_meeting_calendar(on_date)
-    MeetingCalendar.setup_calendar(on_date)
+    location_facade = FacadeFactory.instance.get_other_facade(FacadeFactory::LOCATION_FACADE, self)
+    for_locations = location_facade.all_locations_that_can_meet
+    for_locations_and_schedules = MeetingScheduleManager.get_all_meeting_schedules_on_date(on_date, for_locations)
+    MeetingCalendar.setup_calendar(on_date, for_locations_and_schedules)
   end
 
 end

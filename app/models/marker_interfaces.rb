@@ -1,6 +1,6 @@
 module MarkerInterfaces
   
-  # A marker interface is a module that does not provide any methods to mixin
+  # A marker interface is a module that (usually) does not provide any methods to mixin
   # It however specifies that classes that include the module
   # must respond in certain ways
 
@@ -17,6 +17,8 @@ module MarkerInterfaces
       BIWEEKLY => [],
       MONTHLY => []
     }
+    FREQUENCIES_AS_PSEUDO_DAYS =
+      { DAILY => 1, WEEKLY => 7, BIWEEKLY => 14, MONTHLY => 30}
 
     # All models that include this module must define a single no-argument method
     # "frequency" that returns a value
@@ -40,6 +42,17 @@ module MarkerInterfaces
       return true if my_frequency == other_frequency
       frequencies_accomodated = ACCOMODATES_FREQUENCIES[my_frequency]
       frequencies_accomodated.include?(other_frequency)
+    end
+
+    # Given a list of frequencies, it returns a list of all frequencies that
+    # frequencies in the given list can accomodate
+    def self.accomodated_frequencies(for_frequencies)
+      accomodated_frequencies = for_frequencies.collect { |frequency| ACCOMODATES_FREQUENCIES[frequency] }
+      sort_frequencies((accomodated_frequencies + for_frequencies).flatten.uniq)
+    end
+
+    def self.sort_frequencies(frequencies_ary)
+      frequencies_ary.sort_by { |frequency| FREQUENCIES_AS_PSEUDO_DAYS[frequency] }
     end
 
   end

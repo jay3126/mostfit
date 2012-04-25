@@ -16,7 +16,7 @@ class Centers < Application
     branch_centers = @branch.centers
     @meeting_dates = []
     @date = Date.parse params[:meeting_day] || Date.today
-    mf = MeetingFacade.new(session.user)
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
     meeting_center_ids = mf.get_locations_meeting_on_date(@date)
     center_ids_on_date = branch_centers.map(&:id) & meeting_center_ids[:center] rescue []
     @centers = Center.all :id => center_ids_on_date
@@ -189,7 +189,7 @@ class Centers < Application
   def meeting_schedule
     @center =  Center.get(params[:id])
     raise NotFound unless @center
-    mf = MeetingFacade.new session.user
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
     @meeting_schedule_infos = mf.get_meeting_schedules(@center)
     partial "meeting_schedules/list", {:add_new => true}
   end
@@ -197,7 +197,7 @@ class Centers < Application
   def meeting_calendar
     @center =  Center.get(params[:id])
     raise NotFound unless @center
-    mf = MeetingFacade.new session.user
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
     @meeting_dates = mf.get_meeting_calendar(@center)
     partial "centers/meeting_calendar"
   end

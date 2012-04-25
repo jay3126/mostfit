@@ -4,10 +4,10 @@ describe MeetingScheduleManager do
 
   before(:each) do
     @center = Factory(:center)
-    @first_msi = MeetingScheduleInfo.new(Constants::Time::WEEKLY, Date.parse('2012-01-05'), 10, 20)
-    @second_msi = MeetingScheduleInfo.new(Constants::Time::MONTHLY, Date.parse('2012-01-26'), 10, 20)
-    @third_msi = MeetingScheduleInfo.new(Constants::Time::BIWEEKLY, Date.parse('2012-03-28'), 10, 20)
-    @fourth_msi = MeetingScheduleInfo.new(Constants::Time::DAILY, Date.parse('2012-05-23'), 10, 20)
+    @first_msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::WEEKLY, Date.parse('2012-01-05'), 10, 20)
+    @second_msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::MONTHLY, Date.parse('2012-01-26'), 10, 20)
+    @third_msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::BIWEEKLY, Date.parse('2012-03-28'), 10, 20)
+    @fourth_msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::DAILY, Date.parse('2012-05-23'), 10, 20)
   end
 
   it "should return nil for meetings by schedule if a location does not have any meeting schedules" do
