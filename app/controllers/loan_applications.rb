@@ -69,31 +69,36 @@ class LoanApplications < Application
         @errors['search'] = "No center selected"
       end
     end
-    loan_applications_facade = LoanApplicationsFacade.new(session.user)
-    @center = Center.get(params["center_id"]) if params["center_id"]
-    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
-    if request.method == :post
-      loan_application = params[:loan_application]
-      client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
-      created_on = Date.parse(params[:created_on])
-      center_cycle_number = params[:center_cycle_number].to_i
-      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-      new_application_info = {}
-      loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
-      new_application_info.delete(:amount)
-      new_application_info.delete(:at_branch_id)
-      new_application_info.delete(:at_center_id)
-      new_application_info.delete(:created_by_staff_id)
-      new_application_info += {:client_dob => client_dob}
-      @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
-      if @loan_application.save
-        message[:success] = "The Loan Application has been successfully saved"        
-      else
-        @errors['submit form'] = @loan_application.errors.to_a.flatten.join(', ')
+    if @errors.empty?
+      loan_applications_facade = LoanApplicationsFacade.new(session.user)
+      @center = Center.get(params["center_id"]) if params["center_id"]
+      @branch = Branch.get(params["branch_id"]) if params["branch_id"]
+      if request.method == :post
+        loan_application = params[:loan_application]
+        client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
+        created_on = Date.parse(params[:created_on])
+        center_cycle_number = params[:center_cycle_number].to_i
+        center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+        new_application_info = {}
+        loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
+        new_application_info.delete(:amount)
+        new_application_info.delete(:at_branch_id)
+        new_application_info.delete(:at_center_id)
+        new_application_info.delete(:created_by_staff_id)
+        new_application_info += {:client_dob => client_dob}
+        params.delete(:loan_application)
+        @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
+        if @loan_application.save
+          message[:success] = "The Loan Application has been successfully saved"
+        else
+          @errors['submit form'] = @loan_application.errors.to_a.flatten.join(', ')
+        end
       end
     end
+
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
-    render
+
+    render :bulk_create
   end
 
   def suspected_duplicates
