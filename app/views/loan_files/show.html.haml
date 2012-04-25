@@ -16,59 +16,60 @@
 %hr
 
 .shaded
-  %h2
-    = "Loan Applications"
-  %table.form{:style => "width:100%;"}
-    %thead
-      %tr
-        %th
-          = "ID"
-        %th
-          = "Name"
-        %th
-          = "Guarantor Name"
-        %th
-          = "Applicant Birth Date"
-        %th
-          = "Ration Card No."
-        %th
-          = "Voter Card No."
-        %th
-          = "Amount"
-        %th
-          = "Address"
-        %th
-          = "State"
-        %th
-          = "Pincode"
-        %th
-          = "Status"
-    %tbody
-      - @loan_file.loan_applications.each do |lap|
+  %h2 Loan Applications
+  - unless @loan_file.loan_applications.blank?
+    %table.form{:style => "width:100%;"}
+      %thead
         %tr
-          %td
-            = lap.id
-          %td
-            = lap.client_name
-          %td
-            = lap.client_guarantor_name
-          %td
-            = lap.client_dob
-          %td
-            = lap.client_reference1
-          %td
-            = lap.client_reference2
-          %td
-            = lap.amount
-          %td
-            = lap.client_address
-          %td
-            = lap.client_state
-          %td
-            = lap.client_pincode
-          %td
-            = lap.status
-
+          %th
+            = "ID"
+          %th
+            = "Name"
+          %th
+            = "Guarantor Name"
+          %th
+            = "Applicant Birth Date"
+          %th
+            = "Ration Card No."
+          %th
+            = "Voter Card No."
+          %th
+            = "Amount"
+          %th
+            = "Address"
+          %th
+            = "State"
+          %th
+            = "Pincode"
+          %th
+            = "Status"
+      %tbody
+        - @loan_file.loan_applications.each do |lap|
+          %tr
+            %td
+              = lap.id
+            %td
+              = lap.client_name
+            %td
+              = lap.client_guarantor_name
+            %td
+              = lap.client_dob
+            %td
+              = lap.client_reference1
+            %td
+              = lap.client_reference2
+            %td
+              = lap.amount
+            %td
+              = lap.client_address
+            %td
+              = lap.client_state.humanize
+            %td
+              = lap.client_pincode
+            %td
+              = lap.status.humanize
+  - else
+    %h3 No loan applications
 %br
 %hr
 
