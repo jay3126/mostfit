@@ -86,6 +86,15 @@ class LoanApplication
  # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
+  # Returns a list of the client IDs for loan applications in progress at the center
+  # for the specified center cycle
+  # TODO: Remove the reference to the 'physical' center cycle with a center cycle number
+  # We should resolve the center cycle using just the center and center cycle number
+  def self.all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
+    raise ArgumentError, "No center cycle available at center #{for_center_id}" unless (for_center_cycle and (for_center_cycle > 0))
+    all(:at_center_id => for_center_id, :center_cycle => for_center_cycle).aggregate(:client_id)
+  end
+
   #mapping of loan application to client 
   def to_client
     _to_client = {

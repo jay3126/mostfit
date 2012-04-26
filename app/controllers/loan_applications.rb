@@ -37,25 +37,63 @@ class LoanApplications < Application
     render
   end
 
+  def get_param_value(param_name_sym)
+    param_value_str = params[param_name_sym]
+    param_value = (param_value_str and (not (param_value_str.empty?))) ? param_value_str : nil
+    param_value
+  end
+
   # this lists the clients in the center that has been selected
   def list
-    if params[:branch_id] == ""
-      @errors = "No branch selected"
-    elsif params[:center_id] == ""
-      @errors = "No center selected"
-    else
-      @errors = nil
+    
+    # INITIALIZING VARIABLES USED THROUGHOUT
+
+    @errors = []
+    laf = LoanApplicationsFacade.new(session.user)
+
+    # GATEKEEPING
+
+    branch_id = get_param_value(:branch_id)
+    center_id = get_param_value(:center_id)
+
+    # VALIDATION
+
+    @errors << "No branch was selected" unless branch_id
+    @errors << "No center was selected" unless center_id
+
+    @center = center_id ? Center.get(center_id) : nil
+    @errors << "No center was located for center ID: #{center_id}" unless @center
+
+    # OPERATIONS PERFORMED
+
+    if @errors.empty?
+
+      begin
+        center_cycle_number = laf.get_current_center_cycle_number(center_id)
+
+        if center_cycle_number > 0
+          center_cycle = laf.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
+          client_ids_from_center = @center.clients.aggregate(:id)
+          client_ids_from_existing_loan_applications = laf.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
+          final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
+          @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
+        else
+          @errors << "No center cycles exist at the center"
+        end
+      rescue => ex
+        @errors << "An error has occurred: #{ex.message}"
+      end
+
     end
-    @center = Center.get(params[:center_id].to_i)
-    if @center
-      center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-      client_ids_from_center = @center.clients.aggregate(:id) 
-      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
-      final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
-      @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
-      @loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id, :order => [:created_at.desc])
+
+    # POPULATING RESPONSE AND OTHER VARIABLES
+
+    if center_id
+      @loan_applications = laf.recently_added_applications_for_existing_clients(:at_center_id => center_id)
     end
+
+    # RENDER/RE-DIRECT
+
     render :bulk_new
   end
 
