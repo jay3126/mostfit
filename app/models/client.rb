@@ -182,7 +182,7 @@ class Client
   validates_with_method :is_there_space_in_the_client_group?
 
   def is_there_space_in_the_client_group?
-    unless self.client_group.nil?
+    if (self.client_group.nil? and self.new?)
       return [false, "The number of clients in this group exceeds the maximum number of members permissible"] if self.client_group.clients.count >= self.client_group.number_of_members
     end
     return true
