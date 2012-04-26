@@ -86,7 +86,7 @@ class LoanApplication
  # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
-  #gives info for creating clients using the given loan application 
+  #mapping of loan application to client 
   def to_client
     _to_client = {
       :name                       => client_name,
@@ -105,6 +105,11 @@ class LoanApplication
       :center_id                  => at_center_id,
       :date_joined                => Date.today()
     }
+  end
+
+  #creates a client for this particular loan application
+  def create_client
+    Client.create(self.to_client)    
   end
 
   def is_unique_for_center_cycle?
@@ -286,17 +291,6 @@ class LoanApplication
     not ClientVerification.is_cpv_complete?(self.id)
   end
 
-  #returns all loan applications that have been recently created
-  def self.recently_created_new_loan_applicants(search_options = {})
-    search_options.merge!({:status => NEW_STATUS, :client_id => nil})
-    pending = all(search_options)
-  end
-
-  def self.recently_created_new_loan_applications_from_existing_clients(search_options = {})
-    search_options.merge!({:status => NEW_STATUS, :client_id.not => nil})
-    pending = all(search_options)
-  end
-
   #returns all loan applications which are pending for overlap report requests generation
   def self.pending_overlap_report_request_generation(search_options ={})
     eligible_statuses = [NEW_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
@@ -335,6 +329,25 @@ class LoanApplication
     #   lap.is_pending_loan_file_generation?
     # }
     applications_pending_loan_file_generation.collect {|lap| lap.to_info}
+  end
+
+  #returns all loan applications that have been recently created
+  def self.recently_created_new_loan_applicants(search_options = {})
+    search_options.merge!({:status => NEW_STATUS, :client_id => nil})
+    pending = all(search_options)
+  end
+
+  def self.recently_created_new_loan_applications_from_existing_clients(search_options = {})
+    search_options.merge!({:status => NEW_STATUS, :client_id.not => nil})
+    pending = all(search_options)
+  end
+
+  #returns all loan applications for which CPV was recently recorded
+  def self.recently_recorded_client_verifications(search_options = {})
+    cpv_completed_statuses = [CPV1_APPROVED_STATUS, CPV2_APPROVED_STATUS]
+    search_options.merge!({:status => cpv_completed_statuses})
+    recent = all(search_options)
+    recent.collect{|lap| lap.to_info}
   end
 
   #returns all loan applications for which CPV was recently recorded
