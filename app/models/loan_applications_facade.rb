@@ -113,6 +113,24 @@ class LoanApplicationsFacade
     loan_application.record_CPV2_rejected(by_staff, on_date, @user.id)
   end
 
+  # Locate center cycle information
+
+  def get_current_center_cycle_number(at_center_id)
+    CenterCycle.get_current_center_cycle(at_center_id)
+  end
+
+  def get_center_cycle(at_center_id, for_cycle_number)
+    CenterCycle.get_cycle(at_center_id, for_cycle_number)
+  end
+
+  # Locate loan applications in progress
+
+  # Returns a list of all client IDs for existing clients that have a loan application
+  # submitted at a center for a given center cycle
+  def all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
+    LoanApplication.all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
+  end
+
   # Locate loan files
 
   def locate_loan_file(by_loan_file_identifier)
@@ -187,7 +205,7 @@ class LoanApplicationsFacade
   end
   
   def pending_credit_bureau_check(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!(:created_by_user_id => @user.id)
     LoanApplication.pending_overlap_report_request_generation(search_options)
   end
 
