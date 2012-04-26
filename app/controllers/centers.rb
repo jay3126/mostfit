@@ -13,14 +13,10 @@ class Centers < Application
   end
 
   def list
-    branch_centers = @branch.centers
-    @meeting_dates = []
+    @centers = @branch.centers
     @date = Date.parse params[:meeting_day] || Date.today
     mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    meeting_center_ids = mf.get_locations_meeting_on_date(@date)
-    center_ids_on_date = branch_centers.map(&:id) & meeting_center_ids[:center] rescue []
-    @centers = Center.all :id => center_ids_on_date
-    @centers.each{|center| @meeting_dates << mf.get_meeting(center, @date)}
+    @meeting_dates = mf.get_meetings_for_loncations_on_date(@centers, @date)
     partial "centers/list", :layout => layout?
   end
 

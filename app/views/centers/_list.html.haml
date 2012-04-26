@@ -4,7 +4,7 @@
 %p{:style => "margin-left: 15px;"}
   %b Select center meeting day: &nbsp;
   = paginate_on_weekdays(@branch, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
-- if @centers.blank?
+- if @centers.blank? || @meeting_dates.blank?
   - if @branch.centers.count==0
     %p
       %i No centers have been created yet.
@@ -23,7 +23,8 @@
     %tbody
     - clients_count = Client.all(:center => @centers).aggregate(:center_id, :id.count).to_hash
     - today = Date.today.weekday
-    - @centers.sort_by{|c| c.id}.each do |center|
+    - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
+      - center = @centers.find{|x| x.id == meeting_date.location_id}
       %tr{:class => cycle('odd','')}
         %td
           = center.id
@@ -36,7 +37,7 @@
           = link_to center.manager.name, resource(center.manager)
         %td
           %span
-            = @meeting_dates.find{|x| x.location_id == center.id}.meeting_begins_at
+            = meeting_date.meeting_begins_at
         %td
           = clients_count[center.id] if clients_count.key?(center.id)
         %td

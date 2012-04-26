@@ -17,14 +17,9 @@ class Branches < Application
     @meeting_dates = []
     raise NotFound unless @branch
     if @branch.centers.count > 0
-      branch_centers = @branch.centers
+      @centers = @branch.centers
       mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      meeting_center_ids = mf.get_locations_meeting_on_date(Date.today)
-      centers_meeting = meeting_center_ids[Constants::Locations::CENTER] || []
-
-      center_ids_on_date = branch_centers.map(&:id) & meeting_center_ids[:center] rescue []
-      @centers = Center.all :id => center_ids_on_date
-      @centers.each{|center| @meeting_dates << mf.get_meeting(center, Date.today)}
+      @meeting_dates = mf.get_meetings_for_loncations_on_date(@centers, Date.today)
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display [@branch, @centers]
       else

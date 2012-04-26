@@ -54,6 +54,10 @@ class MeetingFacade < StandardFacade
     MeetingCalendar.all_locations_meeting_on_date(on_date)
   end
 
+  def get_meetings_for_loncations_on_date(locations = [], on_date = Date.today)
+    locations.collect{|location| get_meeting(location, on_date)}.compact
+  end
+
   # Get a data structure that has IDs for locations that have CONFIRMED meetings
   # on a given date
   def get_locations_confirmed_meeting_on_date(on_date = Date.today)
