@@ -8,6 +8,7 @@ class ClientVerifications < Application
   # Gives the loan applications pending for verification
   def pending_verifications
     get_data(params)
+    get_pending_and_recent_recorded_verification(params)
     render :verifications
   end
 
@@ -49,7 +50,7 @@ class ClientVerifications < Application
     else
       @errors['CPV Recording'] = "Choose verification status, either Approved or Rejected."
     end
-
+    get_pending_and_recent_recorded_verification(params)
     # RENDER/RE-DIRECT
     render :verifications
   end
@@ -71,7 +72,9 @@ class ClientVerifications < Application
         @errors["'verification_status'"] = "Please select center"
       end
     end
-    
+  end
+
+  def get_pending_and_recent_recorded_verification(params)
     # POPULATING RESPONSE AND OTHER VARIABLES
     facade = LoanApplicationsFacade.new(session.user)
     @loan_applications_pending_verification = facade.pending_CPV({:at_branch_id => params[:branch_id], :at_center_id => params[:center_id]})
