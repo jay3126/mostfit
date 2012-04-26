@@ -109,7 +109,14 @@ class LoanApplication
 
   #creates a client for this particular loan application
   def create_client
-    Client.create(self.to_client)    
+    client = nil
+    return client unless self.client_id.nil? and self.client.nil?
+    Client.transaction do |t|
+      client = Client.create(self.to_client)
+      self.client_id = client.id
+      t.rollback unless client.saved?
+    end
+    client
   end
 
   def is_unique_for_center_cycle?

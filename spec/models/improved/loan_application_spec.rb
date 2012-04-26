@@ -34,17 +34,19 @@ describe LoanApplication do
     @lap.save.should be_true
   end
 
-  it "should not have duplicate references within the same center cycle" do
-    attributes = @lap.attributes
-    attributes.delete(:id)
-    lap = LoanApplication.new(attributes)
-    lap.valid?.should be_false
-    lap.save.should be_false
-    lap.client_reference1 = "123459IJU"
-    lap.client_reference2 = "MH4521890"
-    lap.valid?.should be_true
-    lap.save.should be_true
-  end
+  # NOTE: THIS TEST HAS BEEN COMMENTED OUT BECAUSE VALIDATIONS DISALLOWING DUPLICATE REFERENCES HAVE BEEN COMMENTED OUT OF LOAN APPLICATION MODEL
+  #       HENCE TO MAKE THIS TEST RUN, UNCOMMENT THE COMMENTED OUT VALIDATIONS AND THEN UNCOMMENT THIS TEST AND RUN THE TEST SUITE
+  # it "should not have duplicate references within the same center cycle" do
+  #   attributes = @lap.attributes
+  #   attributes.delete(:id)
+  #   lap = LoanApplication.new(attributes)
+  #   lap.valid?.should be_false
+  #   lap.save.should be_false
+  #   lap.client_reference1 = "123459IJU"
+  #   lap.client_reference2 = "MH4521890"
+  #   lap.valid?.should be_true
+  #   lap.save.should be_true
+  # end
 
   it "should have a new status when created" do
     @lap.get_status.should == Constants::Status::NEW_STATUS
@@ -153,8 +155,25 @@ describe LoanApplication do
   it "should return true if status is overlap_report_request_generated set to cpv1_approved" do
     @lap.set_status(Constants::Status::CPV1_APPROVED_STATUS).should be_true
   end
+  
   it "should return true if status is cpv1_approved and set to loan_file_generated" do
     @lap.set_status(Constants::Status::LOAN_FILE_GENERATED_STATUS).should be_true
+  end
+
+  it "should create a client" do
+    client = @lap.create_client
+    client.should be_valid
+    client.saved?.should be_true
+    client.destroy
+  end
+
+  it "should not create a client if a client already has been created for that loan application" do
+    client = @lap.create_client
+    client.should be_valid
+    client.saved?.should be_true
+    client = @lap.create_client
+    client.nil?.should be_true
+    client.destroy
   end
 
 end
