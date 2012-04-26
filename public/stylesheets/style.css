@@ -1433,6 +1433,7 @@ table.clearform tr td.legend{
 .arrears { font-weight: bold; color: red;}
 .written-off { font-weight: bold; color: black;}
 .preclosed { font-weight: bold; color: orange;}
+.reject { font-weight: bold; color: purple;}
 
 table.tall {
   margin: 14px;

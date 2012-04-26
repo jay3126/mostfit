@@ -1,7 +1,7 @@
 %span{:style => "font-family: Georgia; font-size: 2em;"} 
   == #{@clients.count} clients in this center
 
-.menu-strip
+.menu-strip-key
   %b Key =>
   %span.applied applied
   %span.approved approved
@@ -10,6 +10,7 @@
   %span.arrears in arrears
   %span.written-off written-off
   %span.preclosed preclosed
+  %span.reject rejected
 - if @clients.blank? and @center.client_groups.length==0
   %p
     %i== No clients for the #{@branch.name} branch yet.
@@ -18,17 +19,19 @@
     %thead
       %tr
         %th
+        %th Sl. No.
         %th client id
         %th name
         %th loans
         %th
     %tbody
     - group=-1
+    - sl_no = 0
     - @all_clients.sort_by{|x| [x.client_group.id, x.id]}.each do |client|
       - if group!=client.client_group_id
         - group = client.client_group_id 
         %tr.group
-          %td{:colspan => 5}
+          %td{:colspan => 6}
             - if client.client_group
               %b
                 = link_to client.client_group.name, resource(client.client_group)
@@ -40,6 +43,8 @@
             
       %tr{ :class => cycle('odd','')}
         %td &nbsp;
+        %td
+          = sl_no += 1
         %td
           = client.id
           - unless client.active
