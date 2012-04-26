@@ -94,25 +94,20 @@ class LoanFile
   def create_clients
     #are we ready to create clients for this loan file ?
     return false unless self.is_ready_for_client_creation?
-    
     return_status = {:clients_created => [], :clients_not_created => []}
 
-    self.loan_applications.each do |l|
-      if l.client.nil? and l.client_id.nil?
-        Client.transaction do |t|
-          c = Client.new(l.to_client)
-          if c.save()
-            #associate the client
-            l.client_id = c.id
-            return_status[:clients_created] << l.id
-          else
-            puts c.errors
-            return_status[:clients_not_created] << l.id
-            t.rollback
-          end
-       end
-      end 
+    self.loan_applications.each do |loan_application|
+      client = loan_application.create_client
+      if client.nil?
+        next
+      elsif client.saved?
+        return_status[:clients_created] << [loan_application.id, client.id]
+      else
+        return_status[:clients_not_created] << [loan_application.id, client.errors.to_a].flatten
+      end
     end
+
     return_status
   end
+
 end
