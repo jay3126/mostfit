@@ -37,11 +37,6 @@ class LoanApplications < Application
     render
   end
 
-  def get_param_value(param_name_sym)
-    param_value_str = params[param_name_sym]
-    param_value = (param_value_str and (not (param_value_str.empty?))) ? param_value_str : nil
-    param_value
-  end
 
   # this lists the clients in the center that has been selected
   def list
@@ -70,7 +65,6 @@ class LoanApplications < Application
 
       begin
         center_cycle_number = laf.get_current_center_cycle_number(center_id)
-
         if center_cycle_number > 0
           center_cycle = laf.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
           client_ids_from_center = @center.clients.aggregate(:id)
@@ -145,37 +139,55 @@ class LoanApplications < Application
   end
 
   def record_suspected_duplicates
+    
+    # INITIALIZING VARIABLES USED THROUGHOUT
+
+    @errors = []
+
     # GATE-KEEPING
-    @errors = {}
-    staff_member_id = params[:staff_member_id]
-    clear_or_confirm_duplicate = params[:clear_or_confirm_duplicate]
+
+    staff_member_id = get_param_value(:staff_member_id)
+    clear_or_confirm_duplicate = get_param_value(:clear_or_confirm_duplicate)
     facade = LoanApplicationsFacade.new(session.user)
 
     # VALIDATIONS
-    @errors["Suspected duplicates"] = 'Please select staff member' if staff_member_id.blank?
-    @errors["Suspected duplicates"] = 'No data passed' if clear_or_confirm_duplicate.blank?
+    
+    @errors << 'Please select Staff member' unless staff_member_id
+    @errors <<  'Please select Action either Cleared not duplicate or Confirm duplicate' unless clear_or_confirm_duplicate
 
     # POPULATING RESPONSE AND OTHER VARIABLES
+
     get_de_dupe_loan_applications
 
     # OPERATIONS PERFORMED
+
     if @errors.empty?
-      params[:clear_or_confirm_duplicate].keys.each do |lap_id|
-        loan_app = LoanApplication.get(lap_id)
-        if  params[:clear_or_confirm_duplicate][lap_id].include?('clear')
-          is_saved = facade.set_cleared_not_duplicate(lap_id)
-        elsif params[:clear_or_confirm_duplicate][lap_id].include?('confirm')
-          is_saved = facade.set_confirm_duplicate(lap_id)
+      clear_or_confirm_duplicate.keys.each do |lap_id|
+
+        begin
+          if  clear_or_confirm_duplicate[lap_id].include?('clear')
+            facade.set_cleared_not_duplicate(lap_id)
+          elsif clear_or_confirm_duplicate[lap_id].include?('confirm')
+            facade.set_confirm_duplicate(lap_id)
+          end
+        rescue => ex
+          @errors << "An error has occurred: #{ex.message}"
         end
-        @errors[loan_app.client_id] = loan_app.errors.to_a if is_saved == false
+
       end
     end
-    
+
     # RENDER/RE-DIRECT
     render :suspected_duplicates
   end
 
   private
+
+  def get_param_value(param_name_sym)
+    param_value_str = params[param_name_sym]
+    param_value = (param_value_str and (not (param_value_str.empty?))) ? param_value_str : nil
+    param_value
+  end
 
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
   def get_de_dupe_loan_applications

@@ -12,7 +12,7 @@
               %th Relationship
               %th DOB
               %th Address
-              %th{:colspan => 2, :style=>"text-align : center" } Actions
+              %th{:colspan => 2, :style=>"text-align : center"} Actions
           %tbody
             - @suspected_duplicates.each do |loan_application|
               %tr
@@ -34,17 +34,16 @@
                 %td
                   %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm'}
                   Confirm
+        %table.narrow.form
           %tfoot
             %tr
-              %td{:colspan => 3}
-                %b
-                  By
+              %td
+                %b By
                 = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-              %td{:colspan => 2}
-                %b
-                  On
+              %td
+                %b On
                 = date_select :created_on, Date.today
-              %td{:colspan => 8, :style=>"text-align : center" }
+              %td
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "reset"}
     - else

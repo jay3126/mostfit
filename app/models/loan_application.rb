@@ -82,8 +82,8 @@ class LoanApplication
 
   validates_present   :client_dob
   # this validation should be skip when client_id exist.
- # validates_is_unique :client_reference1, :scope => :center_cycle_id
- # validates_is_unique :client_reference2, :scope => :center_cycle_id
+  # validates_is_unique :client_reference1, :scope => :center_cycle_id
+  # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   # Returns a list of the client IDs for loan applications in progress at the center
@@ -415,14 +415,16 @@ class LoanApplication
   def self.set_cleared_not_duplicate(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.set_status(CLEARED_NOT_DUPLICATE_STATUS)
+    is_saved = loan_application.set_status(CLEARED_NOT_DUPLICATE_STATUS)
+    raise ArgumentError, "Client ID #{loan_application.client_id} : #{loan_application.errors.to_a}" unless is_saved
   end
 
   # set loan application status as confirm_duplicate
   def self.set_confirm_duplicate(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.set_status(CONFIRMED_DUPLICATE_STATUS)
+    is_saved = loan_application.set_status(CONFIRMED_DUPLICATE_STATUS)
+    raise ArgumentError, "Client ID #{loan_application.client_id} : #{loan_application.errors.to_a}" unless is_saved
   end
 
   #returns an object containing all information about a Loan Application

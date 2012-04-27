@@ -1,11 +1,16 @@
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
-    .error
-      - @errors.keys.each do |lap_id|
-        - if @errors[lap_id]
-          = "Client ID #{lap_id}:#{@errors[lap_id]}"
-          %br
-
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
 %h1
   = "Suspected duplicate loan applicants"
 = partial :pending_duplicates

@@ -13,7 +13,7 @@
             %th Address
             %th Status
         %tbody
-          - @cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
+          - @cleared_or_confirmed_diplicate_loan_files.sort.reverse.each do |loan_application|
             %tr
               %td
                 = loan_application.id
