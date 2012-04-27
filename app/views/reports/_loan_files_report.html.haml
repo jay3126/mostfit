@@ -1,0 +1,32 @@
+= partial :form
+- unless @data.blank?
+  %br
+  %table
+    %tr
+      %th
+        Branch
+      %th
+        Center
+      %th
+        Status
+      %th
+        count
+    - @data.each do |branch, value1|
+      - value1.each do |center, value2|
+        - value2.each do |status, value3|
+          %tr
+            %td
+              = branch
+            %td
+              = center
+            %td
+              = status.humanize
+            %td
+              = value3
+- else
+  %h3 No records found
+
+
+
+
+  

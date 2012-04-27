@@ -21,6 +21,7 @@
   - loan_cycle = (params[report] and params[report][:loan_cycle] and not params[report][:loan_cycle].blank?) ? params[report][:loan_cycle] : nil
   - weekday = (params[report] and params[report][:weekday] and not params[report][:weekday].blank?) ? params[report][:weekday] : nil
   - loan_application_status = (params[report] and params[report][:loan_application_status] and not params[report][:loan_application_status].blank?) ? params[report][:loan_application_status] : nil
+  - loan_file_status = (params[report] and params[report][:loan_file_status] and not params[report][:loan_file_status].blank?) ? params[report][:loan_file_status] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -95,8 +96,12 @@
         = weekday_hash[params[report][:weekday].to_i]
       - if loan_application_status
         |
-        Status:
+        Loan Application Status:
         = params[report][:loan_application_status]
+      - if loan_file_status
+        |
+        Loan File Status:
+        = params[report][:loan_file_status]
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed' : ''}"}
@@ -158,8 +163,12 @@
         %tr
           - if @report.respond_to?(:loan_application_status)
             %td
-              Status:
+              Loan Application Status:
               = select(:loan_application_status, :collection => Constants::Status::LOAN_APPLICATION_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_application_status, :include_blank => true, :id => "loan_application_status_selector")
+          - if @report.respond_to?(:loan_file_status)
+            %td
+              Loan File Status:
+              = select(:loan_file_status, :collection => Constants::Status::HEALTH_CHECK_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_file_status, :include_blank => true, :id => "loan_file_status_selector")
           - if @report.respond_to?(:area_id)
             %td
               Area:
