@@ -67,7 +67,7 @@
             %td
               = lap.client_pincode
             %td
-              = lap.status.humanize
+              = lap.status.humanize rescue nil
   - else
     %h3 No loan applications
 %br
