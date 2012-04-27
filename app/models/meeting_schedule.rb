@@ -7,7 +7,7 @@ class MeetingScheduleManager
   # Creates a new meeting schedule for the location
   def self.create_meeting_schedule(for_location, meeting_schedule_info)
     validity_test = MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
-    return validity_test unless validity_test
+    return validity_test unless validity_test.to_s == "true"
     meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
     for_location.save_meeting_schedule(meeting_schedule)
   end
@@ -126,7 +126,7 @@ class MeetingSchedule
     return true if existing_meeting_schedules.empty?
     most_recent_schedule = existing_meeting_schedules.sort.first
     most_recent_schedule_date = most_recent_schedule.schedule_begins_on
-    most_recent_schedule_date < meeting_schedule_info.schedule_begins_on ? true :
+    most_recent_schedule_date < Date.parse(meeting_schedule_info.schedule_begins_on.to_s) ? true :
       [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location}"]
   end
 

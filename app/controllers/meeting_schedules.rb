@@ -18,13 +18,13 @@ class MeetingSchedules < Application
   def create
     @center = Center.get params[:center_id]
     if Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_hours].to_i) && Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_minutes].to_i)
-      debugger
       msi = MeetingScheduleInfo.new(params[:meeting_schedule][:meeting_frequency],params[:meeting_schedule][:schedule_begins_on],params[:meeting_schedule][:meeting_time_begins_hours],params[:meeting_schedule][:meeting_time_begins_minutes])
       mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      if mf.setup_meeting_schedule @center, msi
+      validate = mf.setup_meeting_schedule @center, msi
+      if validate == true
         message = {:notice => "Add Meeting Schedule Successfully"}
       else
-        message = {:error => "Cannot Add Meeting Schedule Successfully"}
+        message = {:error => validate[1]}
       end
     else
       message = {:error => "Please fill vaild value of Meeting Time."}
