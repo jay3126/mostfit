@@ -25,9 +25,6 @@ USAGE_TEXT
         on_date_str = args[:on_date]
         on_date = (on_date_str and (not (on_date_str.empty?))) ? Date.parse(on_date_str) : Date.today
 
-        # The following restriction will most likely need to be lifted, but will be done so after further consideration
-        raise ArgumentError, "Cannot setup meeting calendar for a past date" if on_date < Date.today
-
         number_of_days_str = args[:number_of_days]
         number_of_days = (number_of_days_str and (not (number_of_days_str.empty?))) ? number_of_days_str.to_i : 7
 

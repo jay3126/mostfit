@@ -53,6 +53,13 @@ new_what is null
 
 =end
 
+    adjusted_schedule_begins_on = self.valid_from
+    meeting_day_from_center = self.center ? self.center.meeting_day : nil
+    meeting_weekday = meeting_day_from_center == :none ? self.meeting_day : meeting_day_from_center
+    if (meeting_weekday and (not (meeting_weekday == :none)))
+      adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
+    end
+
     meeting_frequency = MarkerInterfaces::Recurrence::WEEKLY
     if period == :week
       if of_every == 2
@@ -70,7 +77,7 @@ new_what is null
     meeting_schedule_info = {}
 
     meeting_schedule_info[:meeting_frequency] = meeting_frequency
-    meeting_schedule_info[:schedule_begins_on] = self.valid_from
+    meeting_schedule_info[:schedule_begins_on] = adjusted_schedule_begins_on
     meeting_schedule_info[:meeting_time_begins_hours] = meeting_time_begins_hours
     meeting_schedule_info[:meeting_time_begins_minutes] = meeting_time_begins_minutes
     meeting_schedule_info[:center_id] = self.center_id
