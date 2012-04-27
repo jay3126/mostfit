@@ -1,0 +1,82 @@
+%h1== Loan Schedule Information
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table{ :style => "width:100%" }
+    %tr{:style => "background: #b6b6b6;"}
+      %th Loan ID
+      %td= @loan.id
+      %th Loan Product
+      %td= @loan.loan_product.name
+      %th Status
+      %td= @loan.status.to_s
+      %th Amount
+      %td= @loan.amount
+      %th Tenure
+      %td= ''
+      %th Frequency
+      %td= @loan.frequency.to_s
+    %tr{:style => "background: #f5f5f5; "}
+      %th Total Interest
+      %td= ''
+      %th Total Principal
+      %td= ''
+      %th Total
+      %td= ''
+      %th Disbursement
+      %td= ''
+      %th First Payment
+      %td= ''
+      %th Last Update
+      %td= ''
+    %tr{:style => "background: #b6b6b6;"}
+      %th Amortization
+      %td= ''
+      %th Allocation
+      %td= ''
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table
+    %tr
+      = form_for(@loan, :action => resource(:loans, :search_loan_by_id), :method => :get) do
+        %th Change Loan
+        %td= text_field :id
+        %th= submit "Go", :class => "grey_button"
+        %th= submit "Refresh", :class => "grey_button"
+%h1== Make Repayment
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table
+    %tr
+      = form_for(@loan, :action => resource(:loans, :search_loan_by_id), :method => :get) do
+        %th Amount
+        %td= text_field :amount
+        %th Date
+        %td= date_select :date
+        %th= submit "Record Payment", :class => "grey_button"
+%h1== Loan Schedule
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table
+    %tr
+      %th SI
+      %th Date
+      %th Total
+      %th Principle Due
+      %th Interest Due
+%h1== Loan Balances
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table
+    %tr
+      %th SI
+      %th Date
+      %th Total
+      %th Principle O/S
+      %th Interest O/S
+      %th Advance Balance
+      %th Advance Adjusted
+%h1== Loan Repayments
+.shaded{:style => "padding: 5px; margin-bottom: 10px;"}
+  %table
+    %tr
+      %th Date
+      %th Total
+      %th Principle
+      %th Interest
+      %th Advance Balance
+      %th Advance Adjusted
