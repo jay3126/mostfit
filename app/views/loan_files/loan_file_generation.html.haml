@@ -5,6 +5,11 @@
         - if @errors[lap_id]
           = "#{@errors[lap_id]}"
           %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
 %h1
   = "Loan File Generation"
 = partial :filter_form
