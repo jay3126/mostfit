@@ -311,7 +311,7 @@ class LoanApplication
 
   #returns all loan applications which are pending for overlap report requests generation
   def self.pending_overlap_report_request_generation(search_options ={})
-    eligible_statuses = [NEW_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
+    eligible_statuses = [NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
     search_options.merge!(:status => eligible_statuses)
     pending = all(search_options)
   end
