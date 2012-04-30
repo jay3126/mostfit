@@ -16,37 +16,48 @@ class MeetingSchedules < Application
   end
 
   def create
+
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+
+    message = {}
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
+
+    # GATE-KEEPING
+
+    meeting_schedule = params[:meeting_schedule][:meeting_frequency]
+    meeting_begin_on = Date.parse params[:meeting_schedule][:schedule_begins_on]
+    meeting_time_begins_hours = params[:meeting_schedule][:meeting_time_begins_hours].to_i
+    meeting_time_begins_minutes = params[:meeting_schedule][:meeting_time_begins_minutes].to_i
     @center = Center.get params[:center_id]
-    if Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_hours].to_i) && Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(params[:meeting_schedule][:meeting_time_begins_minutes].to_i)
-      msi = MeetingScheduleInfo.new(params[:meeting_schedule][:meeting_frequency],params[:meeting_schedule][:schedule_begins_on],params[:meeting_schedule][:meeting_time_begins_hours],params[:meeting_schedule][:meeting_time_begins_minutes])
-      mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      validate = mf.setup_meeting_schedule @center, msi
-      if validate == true
-        message = {:notice => "Add Meeting Schedule Successfully"}
-      else
-        message = {:error => validate[1]}
+
+    # VALIDATIONS
+
+    message[:error] = "Please fill right value of time" unless Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(meeting_time_begins_hours) &&
+      Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(meeting_time_begins_minutes)
+
+    # OPERATIONS PERFORMED
+
+    if message[:error].blank?
+      begin
+        msi = MeetingScheduleInfo.new(meeting_schedule, meeting_begin_on, meeting_time_begins_hours, meeting_time_begins_minutes)  
+        if mf.setup_meeting_schedule @center, msi
+          message = {:notice => "Center Meeing Schedule successfully created"}
+        else
+          message = {:error => "Center Meeting Schedule creation fail"}
+        end
+      rescue => ex
+        message = {:error => "An error has occured: #{ex.message}"}
       end
-    else
-      message = {:error => "Please fill vaild value of Meeting Time."}
     end
+
+    #REDIRECT/RENDER
+
     redirect resource(:meeting_schedules, :center_id => @center.id), :message => message
   end
 
   def edit
-    @center = Center.get params[:center_id]
-    @meeting_schedule = MeetingSchedule.get params[:id]
-    display @meeting_schedule
   end
 
   def update
-    @center = Center.get params[:center_id]
-    @meeting_schedule = MeetingSchedule.get params[:id]
-    if @meeting_schedule.update(params[:meeting_schedule])
-      message = {:notice => "Add Meeting Schedule Successfully"}
-      redirect resource(:meeting_schedules, :center_id => @center.id), :message => message
-    else
-      message = {:error => "Cannot Add Meeting Schedule Successfully"}
-      render :edit
-    end
   end
 end
