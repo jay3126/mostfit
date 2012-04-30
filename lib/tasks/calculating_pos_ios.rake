@@ -90,6 +90,10 @@ USAGE_TEXT
             loan_ids_read << [loan.id]
           end
 
+          # Firstly, we calculate total principal from Payment table and total principal from LoanHistory table for each loan 
+          # After this we match both the figures. i.e. principal sums from Payment table and Loan History table.
+          # If they are equal the figure is printed in the file else a message is printed that "loan history and payments are not matching"
+          # Similarly we are doing this for interest as well.
           FasterCSV.open(filename, "a"){ |fastercsv|
             fastercsv << [ 'Loan ID', 'Reference', 'Amount', 'Total interest to be received', 'input POS', 'input IOS','Calculated POS', 'Calculated IOS']
             loans_hash.keys.each{|loan_id|
