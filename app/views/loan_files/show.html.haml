@@ -76,7 +76,7 @@
 .shaded
   %h2
     = "Actions"
-  - if @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
+  - if @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil))
     = link_to "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
   - elsif @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT
     = link_to "Download Labels", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button'
