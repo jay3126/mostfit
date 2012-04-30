@@ -6,7 +6,9 @@ class MeetingScheduleManager
 
   # Creates a new meeting schedule for the location
   def self.create_meeting_schedule(for_location, meeting_schedule_info)
-    MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
+    validity_result = MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
+    is_valid = validity_result.is_a?(Array) ? validity_result.first : validity_result
+    raise Errors::BusinessValidationError, validity_result.last unless is_valid
     meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
     for_location.save_meeting_schedule(meeting_schedule)
   end
@@ -125,7 +127,8 @@ class MeetingSchedule
     return true if existing_meeting_schedules.empty?
     most_recent_schedule = existing_meeting_schedules.sort.first
     most_recent_schedule_date = most_recent_schedule.schedule_begins_on
-    raise ArgumentError, "A new meeting schedule can only begin after #{most_recent_schedule_date.to_s} for the specified location #{for_location.name}" unless most_recent_schedule_date < meeting_schedule_info.schedule_begins_on
+    most_recent_schedule_date < meeting_schedule_info.schedule_begins_on ? true :
+       [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location}"]
   end
 
   def to_info
