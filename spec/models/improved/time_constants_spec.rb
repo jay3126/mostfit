@@ -16,7 +16,7 @@ describe Constants::Time do
     Constants::Time.get_next_date_for_day(Constants::Time::SATURDAY, on_or_after_date).should == on_or_after_date + 5
   end
 
-  it "should be return start date of week(sunday)" do
+  it "should return the Sunday immediately preceding" do
     sunday = Date.parse('2012-04-22')
     on_date_mon = Date.parse('2012-04-23')
     on_date_tue = Date.parse('2012-04-24')
@@ -35,7 +35,7 @@ describe Constants::Time do
     Constants::Time::get_beginning_sunday(on_date_sun).should == on_date_sun
   end
 
-  it "should be return Array of Dates of week" do
+  it "should return a list of the dates of the week commencing from the immediately preceding Sunday" do
     on_date = Date.parse('2012-04-23')
     on_date_sun = Date.parse('2012-04-22')
     on_date_mon = Date.parse('2012-04-23')
@@ -69,4 +69,36 @@ describe Constants::Time do
     week_dates[6].should == on_date_sat
 
   end
+
+  it "should get the next date for the weekly frequency as expected" do
+    monday = Date.parse('2012-04-30')
+    Constants::Time.get_next_date(monday, MarkerInterfaces::Recurrence::WEEKLY).should == (monday + 7)
+  end
+
+  it "should get the next date for the biweekly frequency as expected" do
+    monday = Date.parse('2012-04-30')
+    Constants::Time.get_next_date(monday, MarkerInterfaces::Recurrence::BIWEEKLY).should == (monday + 14)
+  end
+
+  it "should get the next date for monthly frequency as expected" do
+    saturday = Date.parse('2012-04-28')
+    Constants::Time.get_next_date(saturday, MarkerInterfaces::Recurrence::MONTHLY).should == Date.parse('2012-05-28')
+  end
+  
+  it "should raise an error if requested for a date with an interval of one month when the date is beyond the permitted date limit" do
+    monday = Date.parse('2012-04-30')
+    lambda { Constants::Time.get_next_date(monday, MarkerInterfaces::Recurrence::MONTHLY) }.should raise_error
+  end
+
+  it "should get the date for the next month as expected using the date of the month" do
+    thirtieth_jan = Date.parse('2012-01-30')
+    lambda { Constants::Time.get_next_month_date(thirtieth_jan) }.should raise_error
+
+    thirty_first_december = Date.parse('2011-12-31')
+    Constants::Time.get_next_month_date(thirty_first_december).should == Date.parse('2012-01-31')
+    
+    fifteenth_april = Date.parse('2012-04-15')
+    Constants::Time.get_next_month_date(fifteenth_april).should == Date.parse('2012-05-15')
+  end
+
 end

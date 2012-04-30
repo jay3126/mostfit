@@ -29,6 +29,8 @@ module Constants
     SUNDAY = :sunday; MONDAY = :monday; TUESDAY = :tuesday; WEDNESDAY = :wednesday; THURSDAY = :thursday; FRIDAY = :friday; SATURDAY = :saturday
     DAYS_OF_THE_WEEK = [SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY]
 
+    MONTHLY_MEETING_DATE_LIMIT = 28
+
     TWELVE_HOUR_FORMAT = :am_pm_format; TWENTY_FOUR_HOUR_FORMAT = :twenty_four_hour_format
     DEFAULT_MEETING_TIME_FORMAT = TWELVE_HOUR_FORMAT
     TIME_FORMATS = [TWELVE_HOUR_FORMAT, TWENTY_FOUR_HOUR_FORMAT]
@@ -46,16 +48,33 @@ module Constants
       weekday_difference > 0 ? on_or_after_date + weekday_difference : on_or_after_date + (7 - weekday_difference.abs)
     end
 
+    # Gets the date for the immediately preceding Sunday (or today if today is Sunday)
     def self.get_beginning_sunday(for_date)
-      for_date - (for_date.wday - 0)
+      for_date - (for_date.wday)
     end
-    
+
+    # Gets a list of dates for the current week beginning with the immediately preceding Sunday
     def self.get_current_week_dates(for_date)
-      week_days = []
-      beginning_date_of_week = get_beginning_sunday(for_date)
-      (1..7).each{|x| week_days << beginning_date_of_week; beginning_date_of_week = beginning_date_of_week + 1; }
-      week_days
+      sunday = get_beginning_sunday(for_date)
+      0.upto(6).collect {|day| sunday + day}
     end
+
+    # Returns the date in the next month with the same 'date' of the month as the specified date
+    def self.get_next_month_date(for_date)
+      next_month_month, next_month_year = for_date.mon == 12 ? [1, for_date.year + 1] : [for_date.mon + 1, for_date.year]
+      Date.new(next_month_year, next_month_month, for_date.day)
+    end
+
+    # Returns the next date as per the specified date incremented by the frequency
+    def self.get_next_date(from_date, frequency)
+      if frequency == MarkerInterfaces::Recurrence::MONTHLY
+        raise ArgumentError, "Date cannot be after the #{MONTHLY_MEETING_DATE_LIMIT} for monthly frequency" if from_date.day > MONTHLY_MEETING_DATE_LIMIT
+        return get_next_month_date(from_date)
+      end
+      number_of_days = MEETING_FREQUENCIES_AS_DAYS[frequency]
+      from_date + number_of_days
+    end
+
   end
 
   # points in space
