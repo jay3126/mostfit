@@ -11,7 +11,7 @@ class OverlapReportResponses < Application
     # TODO: to check the uploaded file for MIME type matching and file types
     @errors = {}
     @errors['File'] = "Please select file" if params[:file].blank?
-    @errors['File'] = "Invalid file selection" if params[:file][:content_type] != "text/xml"
+    @errors['File'] = "Invalid file selection" if params[:file][:content_type] && params[:file][:content_type] != "text/xml"
     if @errors.blank?
       if params[:file][:tempfile]
         message = {}

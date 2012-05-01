@@ -15,7 +15,7 @@
           %th Location
           %th Pincode
       %tbody
-        - @loan_applications.each do |loan_application|
+        - @loan_applications.sort.reverse.each do |loan_application|
           %tr
             %td
               = loan_application.client_name
