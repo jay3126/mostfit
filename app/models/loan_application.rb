@@ -41,6 +41,7 @@ class LoanApplication
   include Constants::Status
   include Constants::Masters
   include Constants::Space
+  include Constants::CreditBureau
   include LoanApplicationWorkflow
 
   property :id,                   Serial
@@ -281,9 +282,7 @@ class LoanApplication
     auth = LoanAuthorization.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason)
     was_saved = (not (auth.id.nil?))
     application_status = AUTHORIZATION_AND_APPLICATION_STATUSES[as_status]
-    if was_saved
-      status_updated = loan_application.set_status(application_status)
-    end
+    status_updated = loan_application.set_status(application_status) if was_saved
     status_updated
   end
 
@@ -322,6 +321,22 @@ class LoanApplication
     all(search_options)
   end
 
+  def self.check_loan_authorization_status(credit_bureau_status, authorization_status)
+    if credit_bureau_status == RATED_NEGATIVE && authorization_status == APPLICATION_APPROVED
+      APPLICATION_OVERRIDE_APPROVED
+    elsif credit_bureau_status == RATED_NEGATIVE && authorization_status == APPLICATION_REJECTED
+      APPLICATION_REJECTED
+    elsif credit_bureau_status == RATED_POSITIVE && authorization_status == APPLICATION_APPROVED
+      APPLICATION_APPROVED
+    elsif credit_bureau_status == RATED_POSITIVE && authorization_status == APPLICATION_REJECTED
+      APPLICATION_OVERRIDE_REJECTED
+    elsif credit_bureau_status == NO_MATCH && authorization_status == APPLICATION_REJECTED
+      APPLICATION_OVERRIDE_REJECTED
+    elsif credit_bureau_status == NO_MATCH && authorization_status == APPLICATION_APPROVED
+      APPLICATION_OVERRIDE_APPROVED
+    end
+  end
+  
   def self.pending_authorization(search_options = {})
     search_options.merge!(:status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
     pending = all(search_options)
@@ -445,7 +460,7 @@ class LoanApplication
     linfo
   end
 
-  # creates a row for a loan as per highmarks pipe delimited format 
+  # creates a row for a loan as per highmarks pipe delimited format
   def row_to_delimited_file(datetime = DateTime.now)
     return [
       "CRDRQINQR",                                                             # segment identifier
@@ -522,7 +537,7 @@ class LoanApplication
       :son_in_law      => "K12",
       :brother_in_law  => "K13",
       :other           => "K14"
-    }   
+    }
   end
 
   def phone
@@ -543,7 +558,7 @@ class LoanApplication
       "UID"                => "ID03",
       "Others"             => "ID04",
       "Ration Card"        => "ID05",
-      "Driving Licence No" => "ID06", 
+      "Driving Licence No" => "ID06",
       "Pan"                => "ID07"
     }
   end

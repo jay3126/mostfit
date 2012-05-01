@@ -9,40 +9,39 @@ class LoanAuthorizations < Application
   def pending_authorizations
     get_branch_and_center(params)
     unless params[:flag] == 'true'
-      if @branch_id.nil?
-        @errors['Search Form'] = "No branch selected"
-      elsif @center_id.nil?
-        @errors['Search Form'] = "No center selected"
-      else
-        get_pending_and_completed_auth(params)
-      end
+      @errors << "No branch selected" if @branch_id.nil?
+      @errors << "No center selected" if @center_id.nil?
+      get_pending_and_completed_auth(params)
     end
     render :authorizations
   end
 
   def record_authorizations
+    # INITIALIZING VARIABLES USED THROUGHOUT
+
     result = true
     get_branch_and_center(params)
     facade = LoanApplicationsFacade.new(session.user)
+
+    # GATEKEEPING
+
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
-    
-    if by_staff.empty?
-      @errors['Loan Authorizations'] = "Staff member is not selected"
-    end
-    if params.key?('status')
+    credit_bureau_status = params[:credit_bureau_status]
+
+    # VALIDATIONS
+
+    @errors << "Staff member is not selected " if by_staff.blank?
+    @errors << "Please select authorization status " if params[:status].blank?
+
+    # OPERATIONS PERFORMED
+
+    if @errors.blank?
       params[:status].keys.each do |lap|
-        status = params[:status][lap]
+        authorization_status = params[:status][lap]
         override_reason = params[:override_reason][lap]
-        if params[:credit_bureau_status] == Constants::CreditBureau::RATED_NEGATIVE && status == Constants::Status::APPLICATION_APPROVED
-          final_status = Constants::Status::APPLICATION_OVERRIDE_APPROVED
-        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_NEGATIVE && status == Constants::Status::APPLICATION_REJECTED
-          final_status = Constants::Status::APPLICATION_REJECTED
-        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_POSITIVE && status == Constants::Status::APPLICATION_APPROVED
-          final_status = Constants::Status::APPLICATION_APPROVED
-        elsif params[:credit_bureau_status] == Constants::CreditBureau::RATED_POSITIVE && status == Constants::Status::APPLICATION_REJECTED
-          final_status = Constants::Status::APPLICATION_OVERRIDE_REJECTED
-        end
+        final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
+
         if final_status == Constants::Status::APPLICATION_APPROVED
           result = facade.authorize_approve(lap, by_staff, on_date)
 
@@ -56,20 +55,23 @@ class LoanAuthorizations < Application
           result = facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
         end
       end
-    else
-      @errors['Loan Authorizations'] = "No data was passed."
     end
-    if result == false
-      @errors['Loan Authorizations'] = "Please provide reason"
-    end
+    @errors << "Please provide reason" if result == false
+
+    # POPULATING RESPONSE AND OTHER VARIABLES
+    
     get_pending_and_completed_auth(params)
+
+    # RENDER/RE-DIRECT
+
     render :authorizations
   end
+
 
   private
 
   def get_branch_and_center(params)
-    @errors = {}
+    @errors = []
     @center_id = params[:center_id] && !params[:center_id].empty? ? params[:center_id] : nil
     @branch_id = params[:branch_id] && !params[:branch_id].empty? ? params[:branch_id] : nil
     @center = Center.get(@center_id)

@@ -71,6 +71,10 @@ class LoanApplicationsFacade
 
   # Loan authorization
 
+  def check_loan_authorization_status(credit_bureau_status, authorization_status)
+    LoanApplication.check_loan_authorization_status(credit_bureau_status, authorization_status)
+  end
+
   def authorize_approve(loan_application_id, by_staff, on_date)
     LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, @user.id)
   end
@@ -229,7 +233,7 @@ class LoanApplicationsFacade
     LoanApplication.pending_loan_file_generation(search_options)
   end
 
-   # Update action completed (background tasks)
+  # Update action completed (background tasks)
 
   def dedupe_screened(*loan_application_ids)
   end
