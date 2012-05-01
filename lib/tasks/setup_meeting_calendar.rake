@@ -23,7 +23,7 @@ USAGE_TEXT
 
       begin
         on_date_str = args[:on_date]
-        on_date = (on_date_str and (not (on_date_str.empty?))) ? Date.parse(on_date_str) : Date.today
+        on_date = (on_date_str and (not (on_date_str.empty?))) ? Date.parse(on_date_str) : Constants::Time.get_beginning_sunday(Date.today)
 
         number_of_days_str = args[:number_of_days]
         number_of_days = (number_of_days_str and (not (number_of_days_str.empty?))) ? number_of_days_str.to_i : 7

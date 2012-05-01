@@ -25,6 +25,7 @@ USAGE_TEXT
       begin
         centers_and_schedules = []
         centers_included_from_cmd = []
+        unsave_centers = []
         CenterMeetingDay.all.each { |cmd|
           centers_and_schedules.push(cmd.to_meeting_schedule) if cmd.to_meeting_schedule
           centers_included_from_cmd.push(cmd.center.id) if (cmd.center and cmd.center.id)
@@ -39,7 +40,9 @@ USAGE_TEXT
 
           ms = MeetingSchedule.first_or_create(schedule_info)
           center.meeting_schedules << ms
-          center.save
+          unless center.save
+            unsave_centers << [center.id, false, center.errors.first.first]
+          end
         }
 
         all_center_ids = Center.all.aggregate(:id)
@@ -59,10 +62,26 @@ USAGE_TEXT
             msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::WEEKLY, adjusted_schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
             ms = MeetingSchedule.from_info(msi)
             center.meeting_schedules << ms
-            center.save
+            unless center.save
+              unsave_centers << [center.id, false, center.errors.first.first]
+            end
           end
         }
 
+        unless unsave_centers.blank?
+          HEADER_ROW = ["Center id", "Save","Status"]
+
+          org_name = (Mfi.first && Mfi.first.name) ? Mfi.first.name : "Mostfit"
+          write_file = File.join(Merb.root, org_name)
+          FileUtils.mkdir_p(write_file)
+          file_name = File.join(write_file, "center_meeting_status")
+          FasterCSV.open(file_name, "w", :force_quotes => true){|fastercsv|
+            fastercsv << HEADER_ROW
+            unsave_centers.each do |center|
+              fastercsv << center
+            end
+          }
+        end
       rescue => ex
         puts "Exception: #{ex}"
         puts "USAGE: #{USAGE}"

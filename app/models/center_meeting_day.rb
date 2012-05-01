@@ -55,7 +55,7 @@ new_what is null
 
     adjusted_schedule_begins_on = self.valid_from
     meeting_day_from_center = self.center ? self.center.meeting_day : nil
-    meeting_weekday = meeting_day_from_center == :none ? self.meeting_day : meeting_day_from_center
+    meeting_weekday = self.meeting_day == :none ? meeting_day_from_center : self.meeting_day
     if (meeting_weekday and (not (meeting_weekday == :none)))
       adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
     end
