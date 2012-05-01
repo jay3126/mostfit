@@ -34,7 +34,11 @@ class LoanFiles < Application
     raise NotFound unless @loan_file
     @center = Center.get(@loan_file.at_center_id)
     @clients = @loan_file.loan_applications.collect {|l| Client.get(l.client_id) if not l.client_id.nil?}  
-    render :template => 'data_entry/loans/bulk_form'
+    if @clients.include?(nil)
+      redirect resource(@loan_file), :message => {:error => 'Cannot generate loans for this loan file because clients have not been created for certain loan applications'} 
+    else
+      display([@center, @clients], "data_entry/loans/bulk_form")
+    end
   end
 
   def loan_file_generation
