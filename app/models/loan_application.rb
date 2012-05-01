@@ -125,7 +125,7 @@ class LoanApplication
     Client.transaction do |t|
       client = Client.create(self.to_client)
       self.client_id = client.id
-      t.rollback unless client.saved?
+      t.rollback unless client.saved? and self.save
     end
     client
   end
