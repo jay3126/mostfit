@@ -51,6 +51,7 @@ class LoanApplication
   property :created_by_staff_id,  Integer,  :nullable => false
   property :created_by_user_id,   Integer,  :nullable => false
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
+  property :updated_at,           DateTime, :default => DateTime.now
   property :created_on,           Date,     :nullable => false
   property :amount,               Float,    :nullable => false
   property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH

@@ -11,7 +11,7 @@
         %th Filename
         %th Created at
       %tbody
-        - @files.reverse.each_with_index do |file, idx|
+        - @files.sort.reverse.each_with_index do |file, idx|
           - fname = file.split("/")[-1].chomp
           %tr
             %td

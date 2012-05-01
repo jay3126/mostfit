@@ -16,7 +16,7 @@
           %th Staff Member
           %th Created on
       %tbody
-        - @loan_applications.each do |loan_application|
+        - @loan_applications.sort.reverse.each do |loan_application|
           %tr
             %td
               = loan_application.id

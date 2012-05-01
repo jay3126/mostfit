@@ -2,6 +2,7 @@
   .shaded
     %h2 Recently recorded
     - if @cleared_or_confirmed_diplicate_loan_files && !@cleared_or_confirmed_diplicate_loan_files.empty?
+      - cleared_or_confirmed_diplicate_loan_files = @cleared_or_confirmed_diplicate_loan_files.sort_by {|lap| lap.updated_at}.reverse
       %table.narrow.form{:width => "100%"}
         %thead
           %tr
@@ -13,7 +14,7 @@
             %th Address
             %th Status
         %tbody
-          - @cleared_or_confirmed_diplicate_loan_files.sort.reverse.each do |loan_application|
+          - cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
             %tr
               %td
                 = loan_application.id
