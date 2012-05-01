@@ -10,6 +10,8 @@
       %td
         Begin On
       %td
+        Weekday
+      %td
         Frequency
       %td
         Meeting Time
@@ -19,6 +21,8 @@
     %tr{ :class => cycle('odd','')}
       %td
         = msi.schedule_begins_on
+      %td
+        = msi.schedule_begins_on.weekday.to_s
       %td
         = msi.meeting_frequency
       %td

@@ -12,6 +12,8 @@
         %td
           Meeting Status
         %td
+          Meeting Weekday
+        %td
           Meeting Time
         %td
           Description
@@ -21,6 +23,8 @@
           = md.on_date
         %td
           = md.meeting_status
+        %td
+          = md.on_date.weekday.to_s
         %td
           = md.meeting_begins_at
         %td
