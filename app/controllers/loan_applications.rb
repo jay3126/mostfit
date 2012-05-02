@@ -118,9 +118,11 @@ class LoanApplications < Application
         new_application_info.delete(:at_center_id)
         new_application_info.delete(:created_by_staff_id)
         new_application_info += {:client_dob => client_dob}
-        params.delete(:loan_application)
         @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
         if @loan_application.save
+          params.delete(:client_dob)
+          params.delete(:created_on)
+          params.delete(:loan_application)
           message[:success] = "The Loan Application has been successfully saved"
         else
           @errors['submit form'] = @loan_application.errors.to_a.flatten.join(', ')

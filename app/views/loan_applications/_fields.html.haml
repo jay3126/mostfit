@@ -31,7 +31,7 @@
         = text_field :name => "loan_application[client_reference2]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference2]))
         = hidden_field :name => "loan_application[client_reference2_type]", :value => "Voter ID"
       %td
-        = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:clients] and params[:loan_application][:amount])), :prompt => 'Select'
+        = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:amount])), :prompt => 'Select'
       %td
         = text_field :name =>"loan_application[client_address]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_address]))
       %td
