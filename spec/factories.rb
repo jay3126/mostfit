@@ -194,6 +194,14 @@ FactoryGirl.define do
     association :center
   end
 
+  factory :center_cycle do
+    cycle_number          1
+    initiated_by_staff_id 1
+    initiated_on          { Date.today }
+    created_by            1
+    association           :center
+  end
+
   factory :location do
     parent_id       { Factory(:area).id }
     parent_type     'Area'
@@ -663,7 +671,7 @@ FactoryGirl.define do
     client_address                'Limbdi, Ahmedabad'
     client_state                  'gujarat'
     client_pincode                '364002'
-    center_cycle_id               1
+    association                   :center_cycle
   end
 
   factory :loan_file do

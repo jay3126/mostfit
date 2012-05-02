@@ -13,8 +13,8 @@ describe LoanFile do
   before(:each) do 
     LoanFile.all.destroy!
     @lf = LoanFile.new()
-    @lf.at_branch_id = 1
-    @lf.at_center_id = 1
+    @lf.at_branch_id = @branch.id
+    @lf.at_center_id = @center.id
     @lf.for_cycle_number = 1
     @lf.scheduled_disbursal_date = Date.today + 2
     @lf.scheduled_first_payment_date = Date.today + 5
@@ -28,15 +28,48 @@ describe LoanFile do
       @lf.for_cycle_number, @lf.created_by_staff_id, @lf.created_on, @lf.created_by, *lap_id)
   end
 
-  it "should have a branch and center specified when created"
+  it "should have a branch and center specified when created" do
+    @lf.at_branch_id = nil
+    @lf.should_not be_valid
+    @lf.at_branch_id = @branch.id
+    @lf.should be_valid
+    @lf.at_center_id = nil
+    @lf.should_not be_valid
+    @lf.at_center_id = @center.id
+    @lf.should be_valid
+  end
 
-  it "should have a created_on date specified"
+  it "should have a created_on date specified" do
+    @lf.created_on = nil
+    @lf.should_not be_valid
+    @lf.created_on = Date.today
+    @lf.should be_valid
+  end
 
-  it "should have a staff member specified that created the loan file"
+  it "should have a staff member specified that created the loan file" do
+    @lf.created_by_staff_id = nil
+    @lf.should_not be_valid
+    @lf.created_by_staff_id = @staff_member.id
+    @lf.should be_valid
+  end
 
-  it "should have a user that created the loan file and the timestamp of creation"
 
-  it "should have a loan file identifier that adheres to a specific mnemonic format"
+  it "should have a user that created the loan file and the timestamp of creation" do
+    @lf.created_by = nil
+    @lf.should_not be_valid
+    @lf.created_by = 1
+    @lf.should be_valid
+    @lf.created_at = nil
+    @lf.should_not be_valid
+    @lf.created_at = DateTime.now
+    @lf.should be_valid
+  end
+
+  it "should have a loan file identifier that adheres to a specific mnemonic format" do
+    @lf.loan_file_identifier.should == "#{@lf.at_branch_id}_#{@lf.at_center_id}_#{@lf.created_on.strftime('%d-%m-%Y')}"
+    @lf.loan_file_identifier = nil
+    @lf.should_not be_valid
+  end
 
   it "should return correct loan files for a particular branch or center" do
     loan_files = LoanFile.locate_loan_files_at_center_at_branch_for_cycle(@lf.at_branch_id, @lf.at_center_id, @lf.for_cycle_number)
