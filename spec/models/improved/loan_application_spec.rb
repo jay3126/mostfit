@@ -164,16 +164,18 @@ describe LoanApplication do
     client = @lap.create_client
     client.should be_valid
     client.saved?.should be_true
+    @lap.reload
+    @lap.client_id.should == client.id
     client.destroy
   end
 
   it "should not create a client if a client already has been created for that loan application" do
-    client = @lap.create_client
-    client.should be_valid
-    client.saved?.should be_true
-    client = @lap.create_client
-    client.nil?.should be_true
-    client.destroy
+    client1 = @lap.create_client
+    client1.should be_valid
+    client1.saved?.should be_true
+    client2 = @lap.create_client
+    client2.nil?.should be_true
+    client1.destroy
   end
 
 end
