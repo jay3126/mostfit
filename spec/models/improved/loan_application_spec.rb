@@ -4,9 +4,11 @@ describe LoanApplication do
 
   before(:all) do
     @staff_member = Factory(:staff_member)
-    @user = Factory(:user)
-    @center = Factory(:center)
-    @branch = Factory(:branch)
+    @user         = Factory(:user)
+    @center       = Factory(:center)
+    @branch       = Factory(:branch)
+    @loan         = Factory(:loan)
+    @loan_product = Factory(:loan_product)
   end
 
   before(:each) do
@@ -176,6 +178,27 @@ describe LoanApplication do
     client2 = @lap.create_client
     client2.nil?.should be_true
     client1.destroy
+  end
+  
+  it "should not create a loan while a client has not been created" do
+    attributes = @loan.attributes
+    attributes.delete(:id)
+    loan = @lap.create_loan(attributes)
+    loan.should be_nil
+  end
+  
+  it "should create a loan" do
+    client = @lap.create_client
+    client.should be_valid
+    client.saved?.should be_true
+    attributes = @loan.attributes
+    attributes.delete(:id)
+    loan = @lap.create_loan(attributes)
+    loan.interest_rate = 20
+    loan.should be_valid
+    loan.saved?.should be_true
+    loan.destroy
+    client.destroy
   end
 
 end

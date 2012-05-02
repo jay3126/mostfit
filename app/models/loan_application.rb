@@ -132,6 +132,20 @@ class LoanApplication
     client
   end
 
+  
+  def create_loan(loan_params = {})
+    raise ArgumentError if loan_params.blank? and !(loan_params.is_a?(Hash))
+    loan_params.merge!(:client_id => self.client_id)
+    loan = nil
+    return loan if (self.client_id.nil? || !(self.loan.nil?))
+    Loan.transaction do |t|
+      loan = Loan.create(loan_params)
+      self.loan = loan
+      t.rollback unless loan.saved? and self.save
+    end
+    loan
+  end
+
   def is_unique_for_center_cycle?
     unless client_id.nil? or self.saved?
       client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
