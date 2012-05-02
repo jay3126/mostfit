@@ -51,7 +51,7 @@ class LoanApplication
   property :created_by_staff_id,  Integer,  :nullable => false
   property :created_by_user_id,   Integer,  :nullable => false
   property :created_at,           DateTime, :nullable => false, :default => DateTime.now
-  property :updated_at,           DateTime, :default => DateTime.now
+  property :updated_at,           DateTime, :nullable => false, :default => DateTime.now
   property :created_on,           Date,     :nullable => false
   property :amount,               Float,    :nullable => false
   property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH
@@ -359,7 +359,7 @@ class LoanApplication
   end
 
   def self.completed_authorization(search_options = {})
-    search_options.merge!(:status => AUTHORIZATION_STATUSES)
+    search_options.merge!(:status => AUTHORIZATION_STATUSES, :order => [:updated_at.desc])
     loan_applications = all(search_options)
     loan_applications.collect {|lap| lap.to_info}
   end

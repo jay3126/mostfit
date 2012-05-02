@@ -26,6 +26,7 @@ class LoanAuthorization
   property :performed_on,    Date, :nullable => false
   property :created_by,      Integer, :nullable => false
   property :created_at,      DateTime, :nullable => false, :default => DateTime.now
+  property :updated_at,      DateTime, :nullable => false, :default => DateTime.now
 
   belongs_to :loan_application
 
