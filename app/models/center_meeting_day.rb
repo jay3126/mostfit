@@ -34,7 +34,7 @@ class CenterMeetingDay
 
   #WARNING: currently DOES NOT WORK for biweekly and monthly
   def to_meeting_schedule
-    return nil if self.meeting_day == :none
+    #return nil if self.meeting_day == :none
     return nil unless self.center
 
 =begin
@@ -52,14 +52,6 @@ what value of 1 is :day
 new_what is null
 
 =end
-
-    adjusted_schedule_begins_on = self.valid_from
-    meeting_day_from_center = self.center ? self.center.meeting_day : nil
-    meeting_weekday = self.meeting_day == :none ? meeting_day_from_center : self.meeting_day
-    if (meeting_weekday and (not (meeting_weekday == :none)))
-      adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
-    end
-
     meeting_frequency = MarkerInterfaces::Recurrence::WEEKLY
     if period == :week
       if of_every == 2
@@ -68,6 +60,22 @@ new_what is null
     elsif period == :month
       meeting_frequency = MarkerInterfaces::Recurrence::MONTHLY
     end
+
+    adjusted_schedule_begins_on = self.valid_from
+    meeting_day_from_center = self.center ? self.center.meeting_day : nil
+    meeting_weekday = self.meeting_day == :none ? meeting_day_from_center : self.meeting_day
+    if (meeting_weekday and (not (meeting_weekday == :none)))
+      if meeting_frequency == :weekly
+        adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
+      elsif meeting_frequency == :biweekly
+        meeting_weekday = self.what == :day ? self.meeting_day : self.what
+        adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
+      elsif meeting_frequency == :monthly
+        adjusted_schedule_begins_on == self.valid_from
+      end
+    end
+
+    
 
     # If a weekday is specified, then use the weekday to determine the schedule begin date
 

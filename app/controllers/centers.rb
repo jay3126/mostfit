@@ -187,6 +187,7 @@ class Centers < Application
     raise NotFound unless @center
     mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
     @meeting_schedule_infos = mf.get_meeting_schedules(@center)
+    @meeting_schedule = MeetingSchedule.new
     partial "meeting_schedules/list", {:add_new => true}
   end
 

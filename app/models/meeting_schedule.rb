@@ -128,7 +128,7 @@ class MeetingSchedule
     most_recent_schedule = existing_meeting_schedules.sort.first
     most_recent_schedule_date = most_recent_schedule.schedule_begins_on
     most_recent_schedule_date < meeting_schedule_info.schedule_begins_on ? true :
-       [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location}"]
+       [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location.name}"]
   end
 
   def to_info

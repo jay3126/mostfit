@@ -10,9 +10,9 @@
         %td
           Meeting Date
         %td
-          Meeting Status
-        %td
           Meeting Weekday
+        %td
+          Meeting Status
         %td
           Meeting Time
         %td
@@ -22,9 +22,9 @@
         %td
           = md.on_date
         %td
-          = md.meeting_status
+          = Constants::Time.get_week_day(md.on_date)
         %td
-          = md.on_date.weekday.to_s
+          = md.meeting_status
         %td
           = md.meeting_begins_at
         %td
