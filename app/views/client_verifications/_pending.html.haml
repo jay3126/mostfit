@@ -53,13 +53,17 @@
                   -# CPV1 can be recorded only if CPV1 is not already done.
                   - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
                     %td
-                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                      - selected_approved_cpv1 = params[:verification_status] && params[:verification_status][:cpv1]["#{l.id}"] == Constants::Verification::VERIFIED_ACCEPTED ? "checked" : nil
+                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :checked => selected_approved_cpv1}
                     %td
-                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                      - selected_rejected_cpv1 = params[:verification_status] && params[:verification_status][:cpv1]["#{l.id}"] == Constants::Verification::VERIFIED_REJECTED ? "checked" : nil
+                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :checked => selected_rejected_cpv1}
                     %td
-                      = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
+                      - selected_verified_date_cpv1 = params[:verified_on_date] ? params[:verified_on_date][:cpv1]["#{l.id}"] : Date.today
+                      = date_select("[verified_on_date][cpv1][#{l.id}]", selected_verified_date_cpv1, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+                      - selected_staff_id_cpv1 =  params[:verified_by_staff_id] ? params[:verified_by_staff_id][:cpv1]["#{l.id}"]: nil
+                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member", :selected => selected_staff_id
                   - else
                     %td{:colspan => 2,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
@@ -69,13 +73,17 @@
                       = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
                   - if ClientVerification.is_CPV1_verified?(l.id)
                     %td
-                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                      - selected_approved_cpv2 = params[:verification_status] && params[:verification_status][:cpv2]["#{l.id}"] == Constants::Verification::VERIFIED_ACCEPTED ? "checked" : nil
+                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :checked => selected_approved_cpv2}
                     %td
-                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                      - selected_rejected_cpv2 = params[:verification_status] && params[:verification_status][:cpv2]["#{l.id}"] == Constants::Verification::VERIFIED_REJECTED ? "checked" : nil
+                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED , :checked => selected_rejected_cpv2}
                     %td
-                      = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
+                      - selected_verified_date_cpv2 = params[:verified_on_date] ? params[:verified_on_date][:cpv2]["#{l.id}"] : Date.today
+                      = date_select("[verified_on_date][cpv2][#{l.id}]", selected_verified_date_cpv2, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+                      - selected_staff_id_cpv2 =  params[:verified_by_staff_id] ? params[:verified_by_staff_id][:cpv2]["#{l.id}"]: nil
+                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member", :selected => selected_staff_id_cpv2
                   - else
                     %td{:colspan => 4, :style => center_text}
                       %i
