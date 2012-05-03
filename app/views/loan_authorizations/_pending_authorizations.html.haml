@@ -44,13 +44,16 @@
                   = lpa.credit_bureau_status
                   %input{:type => :hidden, :value => lpa.credit_bureau_status, :name => 'credit_bureau_status'}
                 %td
-                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED}
+                  - selected_approved = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_APPROVED ? "checked" : nil
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED, :checked => selected_approved}
                   Approved
                 %td
-                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_REJECTED}
+                  - selected_rejected = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_REJECTED ? "checked" : nil
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_REJECTED, :checked => selected_rejected}
                   Rejected
                 %td
-                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS.map {|reason| [reason.to_s, reason]}
+                  - selected_reason = params[:override_reason]? params[:override_reason]["#{lpa.loan_application_id}"] : nil
+                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS.map {|reason| [reason.to_s, reason]}, :selected => selected_reason
           %tfoot
             %tr{:style=>"text-align : right"}
               %td
