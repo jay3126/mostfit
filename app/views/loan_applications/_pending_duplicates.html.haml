@@ -29,10 +29,12 @@
                 %td
                   = loan_application.client_address
                 %td
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'clear'}
+                  - selected_clear =   !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "clear" ? "checked" : nil
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'clear', :checked => selected_clear }
                   Clear
                 %td
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm'}
+                  - selected_confirm = !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "confirm" ? "checked" : nil
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm }
                   Confirm
         %table.narrow.form
           %tfoot
