@@ -33,11 +33,40 @@ class LoanFiles < Application
     @loan_file = LoanFile.get(id)
     raise NotFound unless @loan_file
     @center = Center.get(@loan_file.at_center_id)
-    @clients = @loan_file.loan_applications.collect {|l| Client.get(l.client_id) if not l.client_id.nil?}  
-    if @clients.include?(nil)
-      redirect resource(@loan_file), :message => {:error => 'Cannot generate loans for this loan file because clients have not been created for certain loan applications'} 
+    @clients = @loan_file.loan_applications.collect{|l| Client.get(l.client_id) if (l.loan.nil? && !(l.client_id.nil?))}.compact
+    sc = params[:clients].map{|k,v| k if v[:chosen]}.compact if params[:clients]   # nice to be able to say "if @selected_clients" 
+    @selected_clients = sc.blank? ? nil : sc                                       # instead of "unless @selected_clients.blank?"
+    if params[:loan]
+      if @selected_clients
+        # ok, we have enough to start making the loans
+        @loans = []
+        message = nil
+        @selected_clients.each do |client_id|
+          params[:clients][client_id].delete(:chosen)
+          lap = @loan_file.loan_applications(:client_id => client_id).first
+          l = lap.create_loan(params[:loan].merge(params[:clients][client_id]).merge(:client_id => client_id))
+          l.set_loan_product_parameters
+          @loans.push(l)
+        end
+        Loan.transaction do |t|
+          r = @loans.map{|l| l.saved?}
+          if r.include?(false)
+            t.rollback 
+            message = {:error => "Loans cannot be saved"}
+          else
+            @loan_file.update(:health_check_status => Constants::Status::READY_FOR_DISBURSEMENT)
+            loan_ids = @loans.map{|x| x.id}
+            message = {:notice => "Successfully added loans with ids #{loan_ids.to_json}"}
+          end
+        end
+        redirect resource(@loan_file), :message => message
+      end
     else
-      display([@center, @clients], "data_entry/loans/bulk_form")
+      if @clients.include?(nil)
+        redirect resource(@loan_file), :message => {:error => 'Cannot generate loans for this loan file because clients have not been created for certain loan applications'} 
+      else
+        display([@center, @clients], "loan_files/generate_loans")
+      end
     end
   end
 
@@ -132,7 +161,7 @@ class LoanFiles < Application
     raise NotFound unless loan_file
     file = loan_file.loan_file_generate_disbursement_pdf
     if file
-      send_data(file.to_s, :filename => "lon_file_disbursement_sheet_#{loan_file.id}.pdf")
+      send_data(file.to_s, :filename => "loan_file_disbursement_sheet_#{loan_file.id}.pdf")
     else
       redirect :back
     end
