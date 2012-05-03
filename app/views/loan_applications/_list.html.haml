@@ -53,7 +53,7 @@
             %tr
               %td{:colspan => 3}
                 %b
-                  Loan Applications created by
+                  Created by
                 = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
               %td{:colspan => 2}
                 %b
@@ -66,5 +66,6 @@
                 = hidden_field :name => :center_id, :value => @center.id
                 = hidden_field :name => :center_cycle_number, :value => center_cycle_number
                 = submit 'Submit'
+                %input{:value => "Reset all", :type => "reset"}
     - else
       %h3 No clients at this center
