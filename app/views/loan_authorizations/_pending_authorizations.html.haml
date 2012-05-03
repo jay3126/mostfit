@@ -54,17 +54,16 @@
                 %td
                   - selected_reason = params[:override_reason]? params[:override_reason]["#{lpa.loan_application_id}"] : nil
                   = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS.map {|reason| [reason.to_s, reason]}, :selected => selected_reason
+        %table.narrow.form{:style => "width:100%;"}
           %tfoot
-            %tr{:style=>"text-align : right"}
+            %tr
               %td
-                By
-              %td{:colspan => 3}
+                %b By
                 = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
               %td
-                On
-              %td{:colspan => 2}
+                %b On
                 = date_select("performed_on", Date.today, :id => "performed_on", :size => 8)
-              %td{:colspan => 2}
+              %td
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "reset"}
       %i
