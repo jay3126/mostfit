@@ -73,9 +73,6 @@ new_what is null
       adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
     end
     # If a weekday is specified, then use the weekday to determine the schedule begin date
-    if self.center_id == 608
-      debugger
-    end
     meeting_time_begins_hours = self.center.meeting_time_hours || 0
     meeting_time_begins_minutes = self.center.meeting_time_minutes || 0
 
