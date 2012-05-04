@@ -1,3 +1,11 @@
+:javascript
+  function reset_all_fields(){
+    jQuery("form input[type='radio']").attr('checked',false);
+    // jQuery("form select option[value='Not overriden']").attr("selected",true);
+    jQuery("form select").removeAttr('selected').find(':first').attr('selected','selected');
+  }
+
+
 #pending_list
   .shaded
     %h2
@@ -65,8 +73,8 @@
                 = date_select("performed_on", Date.today, :id => "performed_on", :size => 8)
               %td
                 = submit "Save all"
-                //  %input{:value => "Reset all", :type => "reset"}
-                = link_to "reset", url(:controller => "loan_authorizations", :action => "pending_authorizations", :branch_id => @branch_id, :center_id => @center_id), :class=> "greenButton"
+                %input{:value => "Reset all", :type => "button", :id => "reset_all_radio", :onclick => "reset_all_fields();"}
+                =# link_to "reset", url(:controller => "loan_authorizations", :action => "pending_authorizations", :branch_id => @branch_id, :center_id => @center_id), :class=> "greenButton"
       %i
         Note: Override reason will be ignored if authorization is not an override.
     - else
