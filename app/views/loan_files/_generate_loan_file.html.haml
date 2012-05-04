@@ -33,7 +33,8 @@
           - @loan_applications_pending_loan_file_generation.each do |lap|
             %tr
               %td{:width => '5%'}
-                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select'
+                - checked_value = params[:selected] && params[:selected]["#{lap.loan_application_id}"] == "#{lap.loan_application_id}" ? "on" : nil
+                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select', :checked => checked_value
               %td
                 = lap.loan_application_id
               %td
