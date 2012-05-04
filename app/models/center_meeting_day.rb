@@ -64,13 +64,18 @@ new_what is null
     adjusted_schedule_begins_on = self.valid_from
     meeting_day_from_center = self.center ? self.center.meeting_day : nil
     meeting_weekday = self.meeting_day == :none ? meeting_day_from_center : self.meeting_day
-    meeting_weekday = self.what == :day ? meeting_weekday : self.what
+    
+    if meeting_frequency == :biweekly
+      meeting_weekday = self.what == :day || self.what.blank? ? meeting_weekday : self.what
+    end
 
     if (meeting_weekday and (not (meeting_weekday == :none)))
       adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
     end
     # If a weekday is specified, then use the weekday to determine the schedule begin date
-
+    if self.center_id == 608
+      debugger
+    end
     meeting_time_begins_hours = self.center.meeting_time_hours || 0
     meeting_time_begins_minutes = self.center.meeting_time_minutes || 0
 
