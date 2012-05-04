@@ -1,3 +1,8 @@
+:javascript
+  function reset_all_fields(){
+    jQuery("form input[type='radio']").attr('checked',false);
+  }
+
 #pending_list
   .shaded
     %h2 Suspected duplicate loan applications
@@ -47,6 +52,6 @@
                 = date_select :created_on, Date.today
               %td
                 = submit "Save all"
-                %input{:value => "Reset all", :type => "reset"}
+                %input{:value => "Reset all", :type => "button", :onclick => "reset_all_fields();"}
     - else
       %h3 No suspected duplicate loan applicantion
