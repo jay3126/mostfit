@@ -1,58 +1,60 @@
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 %h2
   = "Center Cycle Number: #{center_cycle_number}"
-%table.form.shaded
-  %thead
-    %tr
-      %th Applicant Name
-      %th Guarantor Name
-      %th Relationship
-      %th Applicant Birth Date
-      %th Ration Card No.
-      %th Voter Card No.
-      %th Applied for amount
-      %th Address
-      %th Location
-      %th Pincode
-  %tbody
-    %tr
-      %td
-        = text_field :name => "loan_application[client_name]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_name]))
-      %td
-        = text_field :name => "loan_application[client_guarantor_name]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_name]))
-      %td
-        = select :name => "loan_application[client_guarantor_relationship]", :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_relationship])), :prompt => 'Select'
-      %td
-        = date_select :client_dob, (@errors.nil? ? nil : params[:client_dob]), :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
-      %td
-        = text_field :name => "loan_application[client_reference1]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference1]))
-        = hidden_field :name => "loan_application[client_reference1_type]", :value => "Ration Card"
-      %td
-        = text_field :name => "loan_application[client_reference2]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference2]))
-        = hidden_field :name => "loan_application[client_reference2_type]", :value => "Voter ID"
-      %td
-        = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:amount])), :prompt => 'Select'
-      %td
-        = text_field :name =>"loan_application[client_address]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_address]))
-      %td
-        = select :name => "loan_application[client_state]", :collection => Constants::Masters::STATES.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_state]))
-      %td
-        = text_field :name => "loan_application[client_pincode]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_pincode]))
-        = hidden_field :center_id, :value => @center.nil? ? params[:center_id] : @center.id
-        = hidden_field :branch_id, :value => @branch.nil? ? params[:branch_id] : @branch.id
-        = hidden_field :center_cycle_number, :value => center_cycle_number
-        = hidden_field :name => "loan_application[at_center_id]", :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
-        = hidden_field :name => "loan_application[at_branch_id]", :value => @branch.nil? ? (params[:loan_application] and params[:loan_application][:at_branch_id]) : @branch.id
-  %tfoot
-    %tr
-      %td{:colspan => 3}
-        %b Loan Applications created by
-        = select :name => "loan_application[created_by_staff_id]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member", :selected => (params[:loan_application] and params[:loan_application][:created_by_staff_id])
-      %td{:colspan => 2}
-        %b Created on
-        = date_select :created_on, (params[:created_on] || Date.today)
-      %td{:colspan => 3}
-        = submit 'Create and Continue'
-      %td{:colspan => 3}
-        %input{:type => 'reset', :class => 'greenButton'}
-          
+- unless @center.nil?
+  %table.form.shaded
+    %thead
+      %tr
+        %th Applicant Name
+        %th Guarantor Name
+        %th Relationship
+        %th Applicant Birth Date
+        %th Ration Card No.
+        %th Voter Card No.
+        %th Applied for amount
+        %th Address
+        %th Location
+        %th Pincode
+    %tbody
+      %tr
+        %td
+          = text_field :name => "loan_application[client_name]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_name]))
+        %td
+          = text_field :name => "loan_application[client_guarantor_name]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_name]))
+        %td
+          = select :name => "loan_application[client_guarantor_relationship]", :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_guarantor_relationship])), :prompt => 'Select'
+        %td
+          = date_select :client_dob, (@errors.nil? ? nil : params[:client_dob]), :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
+        %td
+          = text_field :name => "loan_application[client_reference1]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference1]))
+          = hidden_field :name => "loan_application[client_reference1_type]", :value => "Ration Card"
+        %td
+          = text_field :name => "loan_application[client_reference2]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_reference2]))
+          = hidden_field :name => "loan_application[client_reference2_type]", :value => "Voter ID"
+        %td
+          = select :name => "loan_application[amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:amount])), :prompt => 'Select'
+        %td
+          = text_field :name =>"loan_application[client_address]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_address]))
+        %td
+          = select :name => "loan_application[client_state]", :collection => Constants::Masters::STATES.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_state]))
+        %td
+          = text_field :name => "loan_application[client_pincode]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_pincode]))
+          = hidden_field :center_id, :value => @center.nil? ? params[:center_id] : @center.id
+          = hidden_field :branch_id, :value => @branch.nil? ? params[:branch_id] : @branch.id
+          = hidden_field :center_cycle_number, :value => center_cycle_number
+          = hidden_field :name => "loan_application[at_center_id]", :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
+          = hidden_field :name => "loan_application[at_branch_id]", :value => @branch.nil? ? (params[:loan_application] and params[:loan_application][:at_branch_id]) : @branch.id
+    %tfoot
+      %tr
+        %td{:colspan => 3}
+          %b Loan Applications created by
+          = select :name => "loan_application[created_by_staff_id]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member", :selected => (params[:loan_application] and params[:loan_application][:created_by_staff_id])
+        %td{:colspan => 2}
+          %b Created on
+          = date_select :created_on, (params[:created_on] || Date.today)
+        %td{:colspan => 3}
+          = submit 'Create and Continue'
+        %td{:colspan => 3}
+          %input{:type => 'reset', :class => 'greenButton'}
+- else
+  %h3 Select branch and center to create new loan application for new loan applicant
