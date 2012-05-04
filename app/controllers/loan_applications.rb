@@ -15,17 +15,19 @@ class LoanApplications < Application
     if request.method == :post
       created_on = Date.parse(params[:created_on])
       center_cycle = CenterCycle.get_cycle(@center.id, params[:center_cycle_number].to_i)
-      client_ids = params[:clients].keys
-      if params[:staff_member_id].empty? or params[:created_on].empty?
-        @errors = []
-        @errors << "Please select a Staff Member" if params[:staff_member_id].empty?
-        @errors << "Please select a created on date" if params[:created_on].empty?
-      else 
-        client_ids.each do |client_id|
-          client = Client.get(client_id)
-          loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, params[:at_branch_id].to_i, params[:at_center_id].to_i, center_cycle.id, params[:staff_member_id].to_i, created_on) if params[:clients][client_id][:selected] == "on"
-          save_status = loan_application.save if loan_application
-          @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
+      if params[:clients]
+        client_ids = params[:clients].keys
+        if params[:staff_member_id].empty? or params[:created_on].empty?
+          @errors = []
+          @errors << "Please select a Staff Member" if params[:staff_member_id].empty?
+          @errors << "Please select a created on date" if params[:created_on].empty?
+        else
+          client_ids.each do |client_id|
+            client = Client.get(client_id)
+            loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, params[:at_branch_id].to_i, params[:at_center_id].to_i, center_cycle.id, params[:staff_member_id].to_i, created_on) if params[:clients][client_id][:selected] == "on"
+            save_status = loan_application.save if loan_application
+            @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
+          end
         end
       end
       client_ids_from_center = @center.clients.aggregate(:id) if @center
