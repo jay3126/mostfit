@@ -4,6 +4,10 @@
 %p{:style => "margin-left: 15px;"}
   %b Select center meeting day: &nbsp;
   = paginate_on_weekdays(@branch, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
+%p{:style =>"text-align: right; margin-top: -19px; margin-right: 80px;"}
+  = link_to "Today | " , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
+  = link_to "Previous | " , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"
+  = link_to "Next" , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => @date.nil? ? Date.today + 7 : @date + 7), :id => "centers_list", :class => "_remote_", :title => "Next Week Meeting Centers"
 - if @centers.blank? || @meeting_dates.blank?
   - if @branch.centers.count==0
     %p
@@ -12,7 +16,7 @@
     %p
       %i No centers meet on this day.    
 - else
-  %table.narrow.floating_header
+  %table{:style => "text-align:left", :class => "narrow floating_header"}
     %tr.header
       %th{:style => "width: 5%"} ID
       %th Name

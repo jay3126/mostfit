@@ -529,12 +529,12 @@ module Merb
     end
 
     def paginate_on_weekdays(branch, selected=Date.today.weekday)
-      days = Constants::Time.get_current_week_dates(Date.today)
+      days = Constants::Time.get_current_week_dates(Date.parse(selected.to_s))
       days.map{|day|
         if day.to_s == selected.to_s
           "<strong>#{day.weekday.to_s.capitalize}</strong>"
         else
-          link_to(day.weekday.to_s.capitalize, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => day), :id => "centers_list", :class => "_remote_")
+          link_to(day.weekday.to_s.capitalize, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => day), :id => "centers_list", :class => "_remote_", :title => day)
         end
       }.join(' | ')
     end
