@@ -63,7 +63,7 @@
                       = date_select("[verified_on_date][cpv1][#{l.id}]", selected_verified_date_cpv1, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                     %td
                       - selected_staff_id_cpv1 =  params[:verified_by_staff_id] ? params[:verified_by_staff_id][:cpv1]["#{l.id}"]: nil
-                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member", :selected => selected_staff_id
+                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member", :selected => selected_staff_id_cpv1
                   - else
                     %td{:colspan => 2,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
