@@ -35,6 +35,7 @@ class LoanAuthorization
   end
 
   validates_with_method :override_includes_reason?
+  validates_is_unique   :loan_application_id
 
   # No override reason needed if not overridden
   # Override reason is a must when overridden
