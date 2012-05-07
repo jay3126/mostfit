@@ -14,41 +14,44 @@ class OverlapReportResponses < Application
     @errors['File'] = "Invalid file selection" if params[:file][:content_type] && params[:file][:content_type] != "text/xml"
     if @errors.blank?
       if params[:file][:tempfile]
-        message = {}
-        responses = []
-        folder = File.join(Merb.root, "docs","highmark","responses")
-        filename = params[:file][:filename]
-        #filename = "highmark-response-#{DateTime.now.strftime('%Y-%m-%d-%H-%M-%s')}.xml"
-        FileUtils.mkdir_p(folder)
-        filepath = File.join(folder, filename)
-        FileUtils.mv(params[:file][:tempfile].path, filepath)
-        message[:notice] = "File uploaded successfully"
-        @responses = nil
+        begin
+          message = {}
+          responses = []
+          folder = File.join(Merb.root, "docs","highmark","responses")
+          filename = params[:file][:filename]
+          #filename = "highmark-response-#{DateTime.now.strftime('%Y-%m-%d-%H-%M-%s')}.xml"
+          FileUtils.mkdir_p(folder)
+          filepath = File.join(folder, filename)
+          FileUtils.mv(params[:file][:tempfile].path, filepath)
+          message[:notice] = "File uploaded successfully"
+          @responses = nil
 
-        @data = Crack::XML.parse(File.read(filepath))
-        reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
-        OverlapReportResponse.transaction do |t|
-          results = reports.map do |ol|
-            loan_application_id = ol["REQUEST"]["MBR_ID"]
-            loan_application =  LoanApplication.get(loan_application_id)
-            next if loan_application.nil?
-            response = OverlapReportResponse.new()
-            response.loan_application_id = loan_application.id
-            response.created_by_user_id = session.user.id
-            response.response_text = ol.to_json
-            responses << response
-            response.process_response
-          end
+          @data = Crack::XML.parse(File.read(filepath))
+          reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
+          OverlapReportResponse.transaction do |t|
+            results = reports.map do |ol|
+              loan_application_id = ol["REQUEST"]["MBR_ID"]
+              loan_application =  LoanApplication.get(loan_application_id)
+              next if loan_application.nil?
+              response = OverlapReportResponse.new()
+              response.loan_application_id = loan_application.id
+              response.created_by_user_id = session.user.id
+              response.response_text = ol.to_json
+              responses << response
+              response.process_response
+            end
         
-          if results.include?(false)
-            t.rollback
-            message[:error] = "The responses were NOT recorded successfully"
-          else
-            @responses = responses
-            message[:success] = "The responses have been successfully recorded"
+            if results.include?(false)
+              t.rollback
+              message[:error] = "The responses were NOT recorded successfully"
+            else
+              @responses = responses
+              message[:success] = "The responses have been successfully recorded"
+            end
           end
+        rescue => ex
+          @errors['File'] = "There is some problem in file: #{ex.message}"
         end
-
       end
     end
     render :index, :message => message
