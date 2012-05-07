@@ -226,7 +226,6 @@ class LoanApplication
     return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CONFIRMED_DUPLICATE_STATUS
     return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV1_REJECTED_STATUS
     return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV2_REJECTED_STATUS
-    
     self.update(:status => new_status)
   end
 
@@ -244,8 +243,8 @@ class LoanApplication
   def record_credit_bureau_response(credit_bureau_status)
     status = nil
     LoanApplication.transaction do |t|
-      self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
       status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
+      self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
       t.rollback unless status == true
     end
     return status
