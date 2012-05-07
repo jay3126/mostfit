@@ -189,7 +189,7 @@ class MeetingSchedule
 
   # Given a date, this checks whether it falls on a meeting day
   def occurs_on_meeting_frequency?(on_date)
-    return (on_date.day == self.schedule_begins_on.day) if self.meeting_frequency == MONTHLY
+    return (on_date.day == self.schedule_begins_on.day) if self.meeting_frequency == MarkerInterfaces::Recurrence::MONTHLY
     date_difference = on_date - self.schedule_begins_on
     return (date_difference % frequency_in_days == 0)
   end
