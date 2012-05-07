@@ -23,7 +23,6 @@ class LoanAuthorizations < Application
   def record_authorizations
     # INITIALIZING VARIABLES USED THROUGHOUT
 
-    result = true
     get_branch_and_center(params)
     facade = LoanApplicationsFacade.new(session.user)
 
@@ -42,25 +41,30 @@ class LoanAuthorizations < Application
 
     if @errors.blank?
       params[:status].keys.each do |lap|
+        begin
         authorization_status = params[:status][lap]
         override_reason = params[:override_reason][lap]
         final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
 
         if final_status == Constants::Status::APPLICATION_APPROVED
-          result = facade.authorize_approve(lap, by_staff, on_date)
+          facade.authorize_approve(lap, by_staff, on_date)
 
         elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
-          result = facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
+          raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+          facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
         elsif final_status == Constants::Status::APPLICATION_REJECTED
-          result = facade.authorize_reject(lap, by_staff, on_date)
+          facade.authorize_reject(lap, by_staff, on_date)
 
         else
-          result = facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
+          raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+          facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
+        end
+        rescue => ex
+          @errors << "An error has occured: #{ex.message}"
         end
       end
     end
-    @errors << "Please provide reason" if result == false
 
     # POPULATING RESPONSE AND OTHER VARIABLES
     
