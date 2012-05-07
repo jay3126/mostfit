@@ -38,7 +38,7 @@
         %td
           = select :name => "loan_application[client_state]", :collection => Constants::Masters::STATES.each{|x| [x.to_s, x]}, :selected => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_state]))
         %td
-          = text_field :name => "loan_application[client_pincode]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_pincode]))
+          = text_field :name => "loan_application[client_pincode]", :value => (@errors.nil? ? nil : (params[:loan_application] and params[:loan_application][:client_pincode])), :size => 6, :maxlength => 6
           = hidden_field :center_id, :value => @center.nil? ? params[:center_id] : @center.id
           = hidden_field :branch_id, :value => @branch.nil? ? params[:branch_id] : @branch.id
           = hidden_field :center_cycle_number, :value => center_cycle_number
