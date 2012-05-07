@@ -1,16 +1,14 @@
 class CenterCycles < Application
 
   provides :xml, :yaml, :js, :html
-  
+
   def create
-    center =  Center.get(params[:center_id])
-    center_cycle  = center.center_cycles.new(:initiated_on => params[:initiated_date], :created_by => session.user.id,
-      :initiated_by_staff_id => center.manager.id, :created_at => Date.today, :cycle_number => 1,
-      :status => 'open_center_cycle_status')
+    center = Center.get(params[:center_id])
+    center_cycle = center.center_cycles.new(:initiated_on => params[:initiated_date], :created_by => session.user.id, :initiated_by_staff_id => center.manager.id, :created_at => Date.today)
     if center_cycle.save
-      redirect resource(center.branch, center) ,:message => {:notice => "Save Successfully"}
+      redirect resource(center.branch, center), :message => {:notice => "Save Successfully"}
     else
-      redirect resource(center.branch, center) ,:message => {:error => "Cannot save..."}
+      redirect resource(center.branch, center), :message => {:error => center_cycle.errors.to_a.to_json}
     end
   end
 
@@ -31,7 +29,7 @@ class CenterCycles < Application
     if center_cycle.errors.blank? && error.blank?
       redirect resource(center.branch, center), :message => {:notice => "Save Successfully"}
     else
-      redirect resource(center.branch, center), :message => {:error => "Cannot update.."}
+      redirect resource(center.branch, center), :message => {:error => center_cycle.errors.to_a.to_json}
     end
   end
 

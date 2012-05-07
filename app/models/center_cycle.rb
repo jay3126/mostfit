@@ -8,10 +8,9 @@ class CenterCycle
   # The cycle has a cycle number that identifies it
   # Cycle numbers are monotonically increasing integers starting at 1,
   # and bumped up by one, each time a new cycle is begun at a center
-  before :create, :is_cycle_incremented?
   
   property :id,                    Serial
-  property :cycle_number,          Integer, :nullable => false, :min => 1
+  property :cycle_number,          Integer, :nullable => false, :min => 1, :default => lambda{ |obj, p| (CenterCycle.get_current_center_cycle(obj.center_id) + 1)}
   property :initiated_by_staff_id, Integer, :nullable => false
   property :initiated_on,          Date, :nullable => false
   property :closed_by_staff_id,    Integer, :nullable => true
@@ -54,6 +53,9 @@ class CenterCycle
   
   has n, :loan_applications
 
+  validates_with_method :cycle_number, :method => :is_cycle_incremented?
+  validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
+
   def schedule_CGT(cgt_dates, performed_by, scheduled_by_staff, scheduled_by_user)
     raise ArgumentError, "Three different dates for CGT must be supplied. Dates supplied were: #{cgt_dates}" unless ((cgt_dates.uniq).length == 3)
     sorted_dates = cgt_dates.sort
@@ -74,10 +76,19 @@ class CenterCycle
   end
 
   # The cycle number can only be incremented by one each time
-  def is_cycle_incremented?
+  def is_cycle_incremented?    
     latest_cycle_number = CenterCycle.get_current_center_cycle(self.center_id)
-    ((self.cycle_number.to_i - latest_cycle_number) == 1) ? true :
-      [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"]
+    previous_center_cycle = CenterCycle.get_cycle(self.center_id, latest_cycle_number)
+    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
+    return [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"] if ((self.cycle_number - latest_cycle_number) != 1)
+    return true
+  end
+
+  def initiated_on_should_be_later_than_the_last_closed_on
+    previous_center_cycle = CenterCycle.get_cycle(self.center_id, CenterCycle.get_current_center_cycle(self.center_id))
+    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
+    return [false, "The current center cycle cannot be initiated before the last center cycle was closed"] if (previous_center_cycle && (self.initiated_on < previous_center_cycle.closed_on))
+    return true
   end
 
   # Returns the current center cycle number for a center
