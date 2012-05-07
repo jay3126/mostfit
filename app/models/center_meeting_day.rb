@@ -11,15 +11,15 @@ class CenterMeetingDay
   property :meeting_day, Enum.send('[]', *DAYS), :nullable => false, :default => :none, :index => true
   property :valid_from,  Date, :nullable => false
   property :valid_upto,  Date, :nullable => true # we do not really need valid upto.  CMDs are valid up to the next center meeting days start from
-  
+
   property :deleted_at,  ParanoidDateTime
-  
+
   # define some properties using which we can construct a DateVector of meeting dates
   # see lib/date_vector.rb for details but in short one can say things like
   # :every => [2,4], :what => :thursday, :of_every => 2, :period => :month to mean "every 2nd and 4th thursday of every 2nd month"
   # this is the kind of feature that sets Mostfit miles apart from the rest of the pack!
 
-  property :every, CommaSeparatedList 
+  property :every, CommaSeparatedList
   property :what, Enum.send('[]',*([:day] + DAYS[1..-1]))
   property :of_every, Integer
   property :period, Enum[nil,:week, :month], :nullable => true
@@ -27,7 +27,7 @@ class CenterMeetingDay
   property :new_what, String
 
   validates_with_method :either_meeting_day_or_date_vector
-  
+
   belongs_to :center
 
   before :valid?, :convert_blank_to_nil
@@ -64,13 +64,30 @@ new_what is null
     adjusted_schedule_begins_on = self.valid_from
     meeting_day_from_center = self.center ? self.center.meeting_day : nil
     meeting_weekday = self.meeting_day == :none ? meeting_day_from_center : self.meeting_day
-    
+
     if meeting_frequency == :biweekly
       meeting_weekday = self.what == :day || self.what.blank? ? meeting_weekday : self.what
     end
 
     if (meeting_weekday and (not (meeting_weekday == :none)))
       adjusted_schedule_begins_on = Constants::Time.get_next_date_for_day(meeting_weekday, self.valid_from)
+    end
+
+    if meeting_frequency == :monthly
+      day = self.every.first == nil ? 1 : self.every.first.to_i
+      last_day_of_month = self.valid_from.last_day_of_month
+      if (self.valid_from.day..last_day_of_month.day).include?(day)
+        adjusted_schedule_begins_on = Date.new(self.valid_from.year, self.valid_from.month, day)
+      elsif(1..(last_day_of_month+1).last_day_of_month.day).include?(day)
+        next_month = last_day_of_month + 1
+        adjusted_schedule_begins_on = Date.new(next_month.year, next_month.month, day)
+      elsif(1..((last_day_of_month+1).last_day_of_month + 1).day).include?(day)
+        next_month = (last_day_of_month+1).last_day_of_month + 1
+        adjusted_schedule_begins_on = Date.new(next_month.year, next_month.month, day)
+      else
+        next_month = last_day_of_month + 1
+        adjusted_schedule_begins_on = Date.new(next_month.year, next_month.month, 1)
+      end
     end
     # If a weekday is specified, then use the weekday to determine the schedule begin date
     meeting_time_begins_hours = self.center.meeting_time_hours || 0
@@ -85,7 +102,7 @@ new_what is null
     meeting_schedule_info[:center_id] = self.center_id
     meeting_schedule_info
   end
-  
+
   def either_meeting_day_or_date_vector
     date_vector_valid = every and (not every.blank?) and what and (not what.blank?) and of_every and (not of_every.blank?) and period and (not period.blank?)
     return true if meeting_day or date_vector_valid
@@ -109,7 +126,7 @@ new_what is null
     return [false,"cannot delete the last center meeting date"] if (self.center.center_meeting_days.count == 1 and (self.center.meeting_day == :none or (not self.center.meeting_day)))
     return true
   end
-  
+
   def last_date
     valid_upto || Date.new(2100,12,31)
   end
@@ -149,7 +166,7 @@ new_what is null
     "from #{valid_from} to #{valid_upto} : #{meeting_day_string}"
   end
 
-  
+
   def valid_from_is_lesser_than_valid_upto
     self.valid_from = Date.parse(self.valid_from) unless self.valid_from.is_a? Date
     self.valid_upto = (self.valid_upto.blank? ? Date.new(2100,12,31) : Date.parse(self.valid_upto))     if self.valid_upto.class == String
@@ -157,7 +174,7 @@ new_what is null
     if self.valid_from and self.valid_upto
       return [false, "Valid from date cannot be before than valid upto date"] if self.valid_from > self.valid_upto
     end
-    return true    
+    return true
 
   end
 
@@ -168,11 +185,11 @@ new_what is null
     cmds = self.center.center_meeting_days
     return true if cmds.count == 0
     return true if cmds.count == 1 and cmds.first.id == self.id
-    bad_ones = center.center_meeting_days.map do |cmd| 
+    bad_ones = center.center_meeting_days.map do |cmd|
       if cmd.id == id
         true
       else
-        if cmd.valid_upto and cmd.valid_upto != Date.new(2100,12,31) # an end date is specified for the other cmd 
+        if cmd.valid_upto and cmd.valid_upto != Date.new(2100,12,31) # an end date is specified for the other cmd
           if valid_upto  and valid_upto != Date.new(2100,12,31)          # and for ourselves
             cmd.valid_from > valid_upto or cmd.valid_upto < valid_from # either we end before the other one starts or start after the other one ends
           else            # but not for ourselves
@@ -205,7 +222,7 @@ new_what is null
     cmds = CenterMeetingDay.all(:order => [:valid_from], :center_id => self.center_id)
     cmds.each_with_index{|cmd, idx|
       cmd.valid_upto=Date.new(2100, 12, 31) if cmds.length - 1 == idx
-      
+
       if idx==0
         if cmd.valid_from>cmd.center.creation_date
           cmd.valid_from=cmd.center.creation_date

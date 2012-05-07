@@ -536,7 +536,7 @@ module Merb
         else
           link_to(day.weekday.to_s.capitalize, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => day), :id => "centers_list", :class => "_remote_", :title => day)
         end
-      }.join(' | ')
+      }.join(' | ') +" <b>( From "+ days.first.to_s + " To " + days.last.to_s + ")</b>"
     end
 
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})

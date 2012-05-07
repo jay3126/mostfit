@@ -51,7 +51,7 @@ USAGE_TEXT
 
         centers_left_out.each { |cid|
           center = Center.get(cid)
-          if (center)
+          if (center && center.meeting_day != :none)
             meeting_day = center.meeting_day
             center_created_on = center.created_at
             defaulted_schedule_begins_on = Date.new(center_created_on.year, center_created_on.mon, center_created_on.day)
