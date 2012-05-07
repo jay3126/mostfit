@@ -158,7 +158,7 @@
     %th
       Pincode:
     %td
-      = text_field :pincode
+      = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
   %tr
     %th
       Telephone number:

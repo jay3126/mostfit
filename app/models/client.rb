@@ -28,8 +28,8 @@ class Client
   property :telephone_number, String, :nullable => true
   property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Untagged"
   property :state,           Enum.send('[]', *([nil] + STATES)), :nullable => true
-  property :pincode,         Integer
-  property :income,          Integer 
+  property :pincode,         Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
+  property :income,          Integer
   property :family_income,   Integer
   property :seating,         Integer
   property :earning_members, Integer
