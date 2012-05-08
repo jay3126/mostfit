@@ -13,7 +13,13 @@ class Exceptions < Merb::Controller
   end
 
   def argument_error
-    redirect request.referer, :message => {:error => "Argument Error"}
+    if request.exceptions.blank?
+      error_message = "Argument Error" 
+    else
+      error_message = "ERRORS\n"
+      request.exceptions.each_with_index{|exception, index| error_message += "#{index+1}. #{exception.to_s}\n"}
+    end
+    redirect request.referer, :message => {:error => error_message}
   end
 
   # handle NotAcceptable exceptions (400)
