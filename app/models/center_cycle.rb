@@ -87,6 +87,7 @@ class CenterCycle
   def initiated_on_should_be_later_than_the_last_closed_on
     previous_center_cycle = CenterCycle.get_cycle(self.center_id, CenterCycle.get_current_center_cycle(self.center_id))
     return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
+    return [false, "The previous center cycle has not been closed"] if (previous_center_cycle && previous_center_cycle.closed_on.nil?)
     return [false, "The current center cycle cannot be initiated before the last center cycle was closed"] if (previous_center_cycle && (self.initiated_on < previous_center_cycle.closed_on))
     return true
   end
