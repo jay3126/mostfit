@@ -1,7 +1,0 @@
-%h1
-  == Editing Center Meeting Day #{@meeting_schedule.id} for center: #{@center.name}
-
-= error_messages_for @meeting_schedule
-= form_for(@meeting_schedule, :action => resource(@meeting_schedule, :center_id => @center.id), :class => "tall shaded", :method => "PUT") do
-  = partial :fields
-  = submit 'Update Meeting Date'

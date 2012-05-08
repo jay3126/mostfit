@@ -1,19 +1,9 @@
 class MeetingSchedules < Application
 
   def index
-    @center = Center.get params[:center_id]
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_schedule_infos = mf.get_meeting_schedules(@center)
-    @meeting_schedule = MeetingSchedule.new
-    display @meeting_schedules
   end
 
   def new
-    @center = Center.get params[:center_id]
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE,session.user)
-    @meeting_schedule_infos = mf.get_meeting_schedules(@center)
-    @meeting_schedule = MeetingSchedule.new
-    display @meeting_schedule
   end
 
   def create
@@ -52,11 +42,7 @@ class MeetingSchedules < Application
     end
 
     #REDIRECT/RENDER
-    if message[:error].blank?
-      redirect resource(@center), :message => message
-    else
-      redirect request.referer, :message => message
-    end
+    redirect resource(@center), :message => message
   end
 
   def edit
