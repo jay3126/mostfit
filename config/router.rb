@@ -28,6 +28,7 @@ Merb::Router.prepare do
       resources :account_balances
     end
   end
+  resources :location_levels
   resources :rules, :id => %r(\d+)
   resources :bookmarks
   resources :audit_items

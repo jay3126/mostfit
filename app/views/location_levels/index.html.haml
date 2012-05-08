@@ -1,0 +1,30 @@
+%h1
+  Location Level
+- unless @location_levels.count == 0
+  %table.narrow
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Level
+        %th
+          Name
+        %th
+          Created At
+    %tr
+      - for area in @location_levels
+        %tr
+          %td
+            = location_level.id
+          %td
+            = location_level.level
+          %td
+            = location_level.name
+          %td
+            = location_level.created_at
+= link_to 'Add New Location Level', '#', :class => 'add grey_button'
+= form_for(@location_level, :action => url(:location_levels) ) do
+  = partial :fields
+  = submit 'Save'
+  = submit 'Cancle'

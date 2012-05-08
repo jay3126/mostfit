@@ -8,4 +8,8 @@ class LocationLevel
 
   has n, :biz_locations
 
+  def self.location_level_for_new
+    LocationLevel.all.blank? ? 0 : LocationLevel.last.level + 1
+  end
+
 end

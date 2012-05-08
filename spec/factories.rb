@@ -7,6 +7,8 @@ FACTORY_OCCUPATIONS = %w[Carpenter Astrologer Engineer Teller Cook Butcher Actua
 FACTORY_PROVINCES   = ['Maharashtra', 'Andra Pradesh', 'Madhya Pradesh', 'Kerala', 'Tamil Nadu'].freeze
 FACTORY_PURPOSES    = ['Buying a boat', 'Christmas presents', 'Wife\'s birthday'].freeze
 FACTORY_ASSETS      = ['Laptop charger', 'Laser printer', 'Mobile phone', 'Airconditioner'].freeze
+FACTORY_LOCATION_NAMES = %w[Center, Branch, Area, Region, State, Zone, Country].freeze
+
 
 FactoryGirl.define do
 
@@ -15,6 +17,8 @@ FactoryGirl.define do
   sequence(:email)              { |n| [FACTORY_NAMES[n%FACTORY_NAMES.length], n.to_s, '@', FACTORY_PLACES[n%FACTORY_PLACES.length], '.in'].join.downcase }
   sequence(:city)               { |n| [FACTORY_PLACES[n%FACTORY_PLACES.length], "center", n.to_s].join(' ') }
   sequence(:province)           { |n| [FACTORY_PROVINCES[n%FACTORY_PROVINCES.length], n.to_s].join(' ') }
+  sequence(:location_name)      { |n| [FACTORY_LOCATION_NAMES[n%FACTORY_LOCATION_NAMES.length], n.to_s].join(' ')}
+  sequence(:location_level)     { |n| n}
   # User related sequences
   sequence(:user_login)         { |n| "user_#{n}" }
   # Branch sequences
@@ -644,6 +648,26 @@ FactoryGirl.define do
     status                'Passed'
 
     association           :client_group
+  end
+
+  factory :location_level do
+    level { Factory.next(:location_level) }
+    name  { Factory.next(:location_name) }
+  end
+
+  factory :biz_location do
+    name       { Factory.next(:province) }
+    created_at { Date.today }
+
+    association :location_level
+  end
+
+  factory :location_link do
+    effective_on  { Date.today + 1}
+    created_at    { Date.today }
+    parent_id     { Factory(:biz_location).id }
+    child_id      { Factory(:biz_location).id }
+
   end
 
 end
