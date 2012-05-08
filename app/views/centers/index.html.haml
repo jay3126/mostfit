@@ -10,12 +10,8 @@
           = link_to_with_rights 'edit branch details ', resource(@branch, :edit), :class => "edit grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 20px;"
           &nbsp;
         %td
-          = link_to_with_rights 'loan applications for existing clients', url(:controller => :loan_applications, :action => :bulk_new, :branch_id => @branch.id), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 30px;"
-        %td
           = link_to_with_rights 'new center', resource(@branch, :centers, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        %td
-          = link_to_with_rights 'new loan applicants', url(:controller => :loan_applications, :action => :bulk_create, :branch_id => @branch.id), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
     %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
       %tr.odd
         %th.odd Name
@@ -55,21 +51,6 @@
           %td
             = (Attendance.count("client.center.branch_id" => @branch.id, :status => "present") * 100.0 / total_attendance_at_branch).round(2)
             = "%"
-      %tr.odd
-        %th.odd Loan Applications Pending for verification
-        %td
-          = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :branch_id => @branch.id)
-      %tr.even
-        %th.even New Loan Authorizations
-        %td
-          = link_to "Loan Authorizations", url(:controller => :loan_authorizations, :action => :pending_authorizations, :branch_id => @branch.id)
-      %tr.odd
-        %th.odd
-          Loan File
-        %td
-          = link_to "Generation", url(:controller => :loan_files, :action => :loan_file_generation, :branch_id => @branch.id)
-          = " | "
-          = link_to "Health Check", url(:controller => :loan_files, :action => :loan_files_for_health_checkup, :branch_id => @branch.id)
   %div.tab_container.shaded
     %ul.tabs
       %li#centers
