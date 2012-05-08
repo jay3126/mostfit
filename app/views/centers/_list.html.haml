@@ -48,9 +48,6 @@
           = (loans_count.key?(center.id) ? loans_count[center.id] : 0)
         %td
           = link_to 'edit', resource(@branch, center, :edit)
-          - if @branch 
-            &nbsp;|&nbsp;
-            = link_to 'new client', resource(@branch, center, :clients, :new)
 
     %tfoot
       %tr
