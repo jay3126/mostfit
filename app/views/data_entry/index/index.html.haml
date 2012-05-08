@@ -7,7 +7,7 @@
 - @i = 1
 %table#data_entry_index
   -user = session.user
-  - [:branch, :center, :group, :client, :loan, :payment].each do |thing|
+  - [:center, :group, :loan, :payment].each do |thing|
     - plural = thing.to_s.pluralize
     - if (@i-1) % 3 == 0
       %tr
@@ -35,27 +35,9 @@
           = link_to_with_rights "Edit a #{thing.to_s}", url("enter_#{plural}".to_sym, :action => 'edit'), :class => 'edit_small'
         - if thing == :loan
           %br
-          = link_to_with_rights("Bulk entry of loans", url(:enter_loans, :action => :bulk_form), :class => 'add_small')
-          %br
           -# - fl = Loan.all(:funding_line => nil).count
-          = link_to_with_rights("Bulk Edit Funding Lines", url(:enter_loans, :action => :bulk_update_funding_line), :class => 'edit_small')
+          = link_to_with_rights("Bulk Edit Funding Lines", url("data_entry/index/#"), :class => 'edit_small')
           -# %span{:class => "number-hint"} #{fl}
-          %br
-          -# pa = get_loans(:approved_on => nil, :rejected_on => nil).count
-          = link_to_with_rights("Approve Loans", url(:loan_actions,:action => 'approve'), :class => 'edit_small')
-          %span.number-hint 
-            -# = pa
-          -# nd = get_loans(:disbursal_date => nil, :scheduled_disbursal_date.lte => Date.today, :approved_on.not => nil, :rejected_on => nil).count
-        
-          %br
-          = link_to_with_rights("Disburse Loans", url(:loan_actions, :action => 'disburse'), :class => 'edit_small')
-          %span.number-hint 
-            -# = nd
-          %br
-          -# sg = Loan.all(:write_off_rejected_on => nil, :written_off_on => nil, :suggested_written_off_on.lte => Date.today).count
-          = link_to_with_rights("Write Off Loans", url(:loan_actions, :action => 'write_off_suggested'), :class => 'edit_small')
-          %span.number-hint
-            -# = sg
           %br
           = link_to_with_rights "Weekly requirement of funds", url(:show_report, 'ProjectedReport', {:projected_report => {:from_date => Date.today+1, :branch_id => session[:branch_id], :center_id => session[:center_id]}, :submit => "GO"}), :class => 'edit_small'
           
@@ -63,14 +45,3 @@
           = link_to_with_rights("Disbursement Sheet", url(:enter_loans,:action => 'staff_disbursement_sheet'), :class => 'edit_small')
         - @i += 1
       
-        - if thing == :client
-          %br
-          = link_to "Bulk add clients", url(:controller => :clients, :action => :bulk_entry), :class => 'add_small'
-          %br
-          - cl = Client.all(:active => false).aggregate(:id.count)
-          = link_to_with_rights("Inactive Clients", url(:controller => :clients, :action => :inactive_client_count), :class => 'edit_small')
-          %span.number-hint
-            = cl
-        - if thing == :center
-          %br
-          = link_to_with_rights("Loan Utilization", url(:enter_loans,:action => 'make_loan_utilization'), :class => 'edit_small') if ((user.role == :admin) or (user.role == :mis_manager))
