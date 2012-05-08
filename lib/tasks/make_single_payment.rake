@@ -110,40 +110,42 @@ USAGE_TEXT
             common_payment_params[:c_branch_id] = branch_id
             common_payment_params[:c_center_id] = center_id
 
-            principal_receipt = loan.amount - pos
-            principal_payment_was_recorded = false
+            loan_payment = Payment.all(:loan_id => loan.id, :received_on => as_on_date)
+            if loan_payment.empty?
+              principal_receipt = loan.amount - pos
+              principal_payment_was_recorded = false
 
-            if (principal_receipt > 0 and not (record_interest_only))
-              principal_payment_params = common_payment_params.merge(:type => :principal, :amount => principal_receipt)
-              principal_repayment = Payment.create(principal_payment_params)
+              if (principal_receipt > 0 and not (record_interest_only))
+                principal_payment_params = common_payment_params.merge(:type => :principal, :amount => principal_receipt)
+                principal_repayment = Payment.create(principal_payment_params)
 
-              if (principal_repayment and principal_repayment.valid?)
-                principal_payment_was_recorded = true
-                loan.update_history
-                loan_ids_updated << [loan.id, "Principal repayment #{principal_receipt} were recorded to match POS"]
-              else
-                errors << [loan.id, "Principal repayment not saved"]
-              end
-            end
-
-            if record_interest_only
-              #lh_rows = loan.loan_history(:date => as_on_date)
-              #only_row = lh_rows[0] if lh_rows
-              interest_owed = loan.total_interest_to_be_received - int_os  
-              #interest_owed = only_row ? only_row.interest_due : 0
-              if (interest_owed and (interest_owed > 0))
-                interest_payment_params = common_payment_params.merge(:type => :interest, :amount => interest_owed)
-                interest_payment = Payment.create(interest_payment_params)
-
-                if (interest_payment and interest_payment.valid?)
+                if (principal_repayment and principal_repayment.valid?)
+                  principal_payment_was_recorded = true
                   loan.update_history
-                  loan_ids_updated << [loan.id, "Interest payment #{interest_owed} was recorded to match POS"]
+                  loan_ids_updated << [loan.id, "Principal repayment #{principal_receipt} were recorded to match POS"]
                 else
-                  errors << [loan.id, "Interest payment not saved"]
+                  errors << [loan.id, "Principal repayment not saved"]
+                end
+              end
+
+              if record_interest_only
+                #lh_rows = loan.loan_history(:date => as_on_date)
+                #only_row = lh_rows[0] if lh_rows
+                interest_owed = loan.total_interest_to_be_received - int_os  
+                #interest_owed = only_row ? only_row.interest_due : 0
+                if (interest_owed and (interest_owed > 0))
+                  interest_payment_params = common_payment_params.merge(:type => :interest, :amount => interest_owed)
+                  interest_payment = Payment.create(interest_payment_params)
+
+                  if (interest_payment and interest_payment.valid?)
+                    loan.update_history
+                    loan_ids_updated << [loan.id, "Interest payment #{interest_owed} was recorded to match POS"]
+                  else
+                    errors << [loan.id, "Interest payment not saved"]
+                  end
                 end
               end
             end
-
           end
 
           unless errors.empty?
