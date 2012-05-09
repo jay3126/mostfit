@@ -1,7 +1,7 @@
 = partial :form
 - unless @data.blank?
   %br
-  %table
+  %table{:class => "report nojs"}
     %tr
       %th
         Branch
@@ -15,13 +15,13 @@
       - value1.each do |center, value2|
         - value2.each do |status, value3|
           %tr
-            %td
+            %td{:style => "text-align:center"}
               = branch
-            %td
+            %td{:style => "text-align:center"}
               = center
-            %td
+            %td{:style => "text-align:center"}
               = status.humanize
-            %td
+            %td{:style => "text-align:center"}
               = value3
 - else
   %h3 No records found
