@@ -1,0 +1,64 @@
+= partial :form
+- on_date = @data[:effective_on]
+- raw_vouchers = @data[:vouchers]
+- vouchers = Voucher.sort_by_cost_center(raw_vouchers)
+- unless vouchers.empty?
+  %table.report.nojs
+    %thead
+      %tr
+        %th{:colspan => 6}
+          = on_date
+      %tr
+        %th{:rowspan => 2}
+          Narration
+        %th{:rowspan => 2}
+          Cost center
+        %th{:colspan => 2}
+          Dr.
+        %th{:colspan => 2}
+          Cr.
+      %tr
+        %th
+          Ledger
+        %th
+          Amount
+        %th
+          Ledger
+        %th
+          Amount
+    %tbody
+      - vouchers.each do |voucher|
+        - count = 0
+        - narration = voucher.narration
+        - postings = voucher.ledger_postings
+        - row_height = postings.count
+        - postings.each do |post|
+          - posting_balance = post.to_balance
+          - ledger_name = post.ledger.name
+          - debit_balance = posting_balance.get_debit_balance
+          - credit_balance = posting_balance.get_credit_balance
+          - unless count > 0
+            %tr
+              %td{:rowspan => row_height}
+                = narration
+              %td{:rowspan => row_height}
+                = voucher.cost_center.name if voucher.cost_center
+              %td
+                = ledger_name if debit_balance
+              %td
+                = debit_balance
+              %td
+              %td
+              - count += 1
+          - else
+            %tr
+              %td
+              %td
+              %td
+                = ledger_name if credit_balance
+              %td
+                = credit_balance
+              - count += 1
+- else
+  %h3
+    = "No journals recorded on #{on_date}"    

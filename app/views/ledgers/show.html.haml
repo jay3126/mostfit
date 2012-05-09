@@ -1,0 +1,26 @@
+.shaded
+  %h1 Ledger
+  %table.tall.shaded
+    %tr
+      %th
+        Name
+      %td
+        = @ledger.name
+    %tr
+      %th
+        Type
+      %td
+        = @ledger.account_type
+    - opening_balance, open_date = @ledger.opening_balance_and_date
+    %tr
+      %th
+        Open on
+      %td
+        = open_date
+    %tr
+      %th
+        Opening balance
+      %td
+        = opening_balance    
+
+        

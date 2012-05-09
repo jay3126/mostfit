@@ -1,0 +1,80 @@
+- processed_summaries = @transaction_summaries.select{|ts| ts.was_processed == true}
+- to_be_processed = @transaction_summaries - processed_summaries
+- table_width = '70%'
+- no_of_cols = 3;
+-#get transaction summary by status by date by branch 
+%table.tall.form{:width => table_width}
+  %thead
+    %tr
+      %td{:colspan => no_of_cols}
+        To be processed
+  -unless (to_be_processed and to_be_processed.empty?)
+    %tbody
+      - tbp_by_date = to_be_processed.group_by{|tp| tp.effective_on}
+      - dates = tbp_by_date.keys.sort
+      - dates.each do |on_date|
+        - tbp_on_date = tbp_by_date[on_date]
+        %tr
+          %th{:colspan => 3}(style="text-align:left")
+            = on_date 
+        - tbp_by_branch = tbp_on_date.group_by {|b| b.branch_name}
+        - branches = tbp_by_branch.keys.sort
+        - branches.each do |b|
+          %tr
+            %th{:colspan => 3}(style="text-align:left")
+              = b
+            %tr
+              %th(style="text-align:left")
+                Category
+              %th(style="text-align:left")
+                Amount
+              - tbp_for_branch = tbp_by_branch[b]
+              - tbp_for_branch.each do |summary|
+                %tr(style="text-align:left")
+                  %td
+                    = summary.money_category if (summary.money_category and summary.money_category.description)
+                  %td
+                    = summary.amount 
+  -else
+    %tbody
+      %tr
+        %td
+          = "None to be processed for #{@for_branch_name} on #{@for_date}."
+
+%table.tall.form{:width =>table_width}        
+  %thead
+    %tr
+      %td{:colspan => 3}
+        Processed
+  -unless (processed_summaries and processed_summaries.empty?)
+    %tbody
+    - tp_by_date = processed_summaries.group_by{|tp| tp.effective_on}
+    - dates = tp_by_date.keys.sort
+    - dates.each do |on_date|
+      - tp_on_date = tp_by_date[on_date]
+      %tr
+        %th{:colspan => 3}(style="text-align:left")
+          = on_date 
+      - tp_by_branch = tp_on_date.group_by {|b| b.branch_name}
+      - branches = tp_by_branch.keys.sort
+      - branches.each do |b|
+        %tr
+          %th{:colspan => 3}(style="text-align:left")
+            = b
+        %tr
+          %th(style="text-align:left")
+            Category
+          %th(style="text-align:left")
+            Amount
+            - tp_for_branch = tp_by_branch[b]
+            - tp_for_branch.each do |summary|
+              %tr(style="text-align:left")
+                %td
+                  = summary.money_category if (summary.money_category and summary.money_category.description)
+                %td
+                  = summary.amount
+  -else
+    %tbody
+      %tr
+        %td
+          = "None were processed for #{@for_branch_name} on #{@for_date.to_s}"

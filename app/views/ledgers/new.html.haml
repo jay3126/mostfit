@@ -1,0 +1,27 @@
+= error_messages_for @ledger
+%h1 New ledger
+= form_for(@ledger, :action => url(:ledgers), :class => 'form') do
+  %table
+    %tr
+      %th
+        Name
+      %td{:colspan => 2}
+        = text_field :name
+    %tr
+      %th
+        Type
+      %td{:colspan => 2}
+        = select :account_type, :collection => Constants::Accounting::ACCOUNT_TYPES_MENU_CHOICES
+    %tr
+      %th
+        Opening balance
+      %td
+        = text_field :opening_balance_amount
+      %td
+        = select :opening_balance_effect, :collection => Constants::Accounting::ACCOUNTING_EFFECTS_MENU_CHOICES
+    %tr
+      %th
+        Open on
+      %td
+        = date_select_for @ledger, :open_on
+  = submit "Create ledger" 

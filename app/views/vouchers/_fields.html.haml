@@ -1,0 +1,25 @@
+%table
+  %tr
+    %td
+      Date
+    %td
+      = text_field
+      /= date_select_for @voucher, :date
+  %tr
+    %td
+      Narration
+    %td
+      = text_area :narration
+  - if params[:debit_accounts]
+    - params[:debit_accounts].each_with_index do |ca, idx|
+      = partial "vouchers/account_amount", :account => ca, :account_type => :debit_accounts, :last_account => (params[:debit_accounts].length == idx + 1 ? true : false)
+  - else
+    = partial "vouchers/account_amount", :account => {}, :account_type => :debit_accounts, :last_account => true
+  - if params[:credit_accounts]
+    - params[:credit_accounts].each_with_index do |ca, idx|
+      = partial "vouchers/account_amount", :account => ca, :account_type => :credit_accounts, :last_account => (params[:debit_accounts].length == idx + 1 ? true : false)
+  - else
+    = partial "vouchers/account_amount", :account => {}, :account_type => :credit_accounts, :last_account => true
+
+-# %p
+-#   = submit "Create"

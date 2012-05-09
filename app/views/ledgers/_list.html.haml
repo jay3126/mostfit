@@ -1,0 +1,20 @@
+%table{:width => '100%'}
+  %tr
+    - ledgers_by_type = @ledgers.group_by {|l| l.account_type}
+    - for account_type in Constants::Accounting::ACCOUNT_TYPES
+      - ledgers = ledgers_by_type[account_type]
+      %td
+        %table.tall
+          %tr
+            %th{:style => "text-align: left;"}
+              %h1
+                = account_type.to_s
+          - if ledgers
+            - ledgers.each do |ledger|
+              %tr
+                %td
+                  = link_to ledger.name, resource(ledger) 
+          - else
+            %tr
+              %td
+                = "No ledgers for #{account_type}"

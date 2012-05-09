@@ -1,0 +1,46 @@
+= partial :form
+- on_date = @data[:on_date]
+- asset_balances = @data[Constants::Accounting::ASSETS]
+- liability_balances = @data[Constants::Accounting::LIABILITIES]
+%table.report.nojs
+  %thead
+    %tr
+      %th{:colspan => 2}
+        = "As on #{on_date}"
+    %tr
+      %th{:colspan => 2}
+        Equity and Liabilities
+  %tbody
+    - total_liability_balance = LedgerBalance.zero_credit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+    - liability_balances.each do |liability, balance|
+      - total_liability_balance += balance
+      %tr
+        %td
+          = liability.name
+        %td
+          = balance
+    %thead        
+      %tr
+        %td
+          Total Liabilities
+        %td
+          = total_liability_balance
+  %thead
+    %tr
+      %th{:colspan => 2}
+        Assets      
+    - total_asset_balance = LedgerBalance.zero_debit_balance(Constants::Accounting::DEFAULT_CURRENCY)      
+    - asset_balances.each do |asset, balance|
+      - total_asset_balance += balance
+      %tbody
+        %tr
+          %td
+            = asset.name
+          %td
+            = balance
+      %thead
+        %tr
+          %td
+            Total Assets
+          %td
+            = total_asset_balance            

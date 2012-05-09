@@ -1,0 +1,11 @@
+.shaded
+  %div#voucher_entry{:style => "display: block; padding-left: 25px;"}
+    %h2 Voucher entry
+    = error_messages_for @voucher
+    - if session.user.role == :admin || session.user.role == :accountant
+      = form_for(@voucher, :action => url(:vouchers) ) do
+        = partial :fields
+        %p
+          = submit "Create"
+          = submit "Create and Continue"
+      = link_to 'Back', url(:vouchers)

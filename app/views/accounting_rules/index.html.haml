@@ -1,0 +1,13 @@
+%h1
+  Accounting Categories and Rules
+%table.shaded
+  - @accounting_rules.each do |rule|
+    %tr
+      %td
+        %h3
+          = rule.money_category.to_s
+    - posting_rules = rule.posting_rules
+    - posting_rules.each do |post|
+      %tr
+        %td
+          = post.to_s

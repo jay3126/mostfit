@@ -1,0 +1,17 @@
+---
+open_on: 2011-04-01
+chart:
+  assets:
+    - Cash
+    - Bank account
+    - Loans made
+    - Debtors
+  liabilities:
+    - Loans taken
+  incomes:
+    - Interest income
+    - Fee income
+  expenses:
+    - Salaries
+    - Rent
+    - Interest expense

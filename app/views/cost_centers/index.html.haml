@@ -1,0 +1,16 @@
+%div#container_cost_centers
+  %h1
+    Cost Centers 
+
+  %table.tall
+    %thead
+      %tr
+        %th Name
+    %tbody
+      - @cost_centers.sort!
+      - @cost_centers.each do |cost_center|
+        %tr
+          %td
+            = cost_center.name
+        
+-# = link_to 'New', url(:new_cost_center)

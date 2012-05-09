@@ -1,0 +1,45 @@
+---
+loan_disbursement:
+  debits:
+    ledger: Loans made
+    percentage: 100
+  credits:
+    ledger: Cash
+    percentage: 100
+principal_repaid_received_on_loans_made:
+  debits:
+    ledger: Cash
+    percentage: 100
+  credits:
+    ledger: Loans made
+    percentage: 100
+interest_received_on_loans_made:
+  debits:
+    ledger: Cash
+    percentage: 100
+  credits:
+    ledger: Interest income
+    percentage: 100
+other_fee_received_specific:
+  specific_income_type_id: 1
+  debits:
+    ledger: Cash
+    percentage: 100
+  credits:
+    ledger: Fee income
+    percentage: 100
+accrue_regular_principal_repayments_on_loans:
+  debits:
+    ledger: Debtors
+    percentage: 100
+  credits:
+    ledger: Loans made
+    percentage: 100
+accrue_regular_interest_receipts_on_loans:
+  debits:
+    ledger: Debtors
+    percentage: 100
+  credits:
+    ledger: Interest income
+    percentage: 100
+...    

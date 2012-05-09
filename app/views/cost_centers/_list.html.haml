@@ -1,0 +1,6 @@
+- cost_centers = @cost_centers.sort
+%ul
+  - @cost_centers.each do |cost_center|
+    %li
+      %h3
+        = cost_center.name

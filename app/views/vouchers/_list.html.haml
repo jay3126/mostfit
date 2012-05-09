@@ -1,0 +1,53 @@
+- vouchers = Voucher.sort_chronologically(@vouchers)
+%table.report.nojs
+  %thead
+    %tr
+      %th
+        ID
+      %th
+        Created at
+      %th
+        Effective Date
+      %th
+        Narration
+      %th
+        Cost Center
+      %th
+        Account
+      %th
+        Debit
+      %th
+        Credit
+  %tbody
+    - vouchers.each do |voucher|
+      - count = 0
+      - postings_count = voucher.ledger_postings.count
+      - voucher.ledger_postings.each do |p|
+        - unless count > 0
+          %tr
+            %td{:rowspan => postings_count}
+              = voucher.id
+            %td{:rowspan => postings_count}
+              = voucher.created_at.strftime(Mfi.first.date_format + " at %H:%m") if voucher.created_at and count == 0
+            %td{:rowspan => postings_count}
+              = voucher.effective_on if voucher.effective_on and count == 0
+            %td{:rowspan => postings_count}
+              = voucher.narration
+            %td{:rowspan => postings_count}
+              = voucher.cost_center.name
+            %td
+              = p.ledger.name unless p.ledger.nil?
+            %td
+              = p.to_balance if p.effect == :debit
+            %td
+              = p.to_balance if p.effect == :credit
+            - count += 1
+        - else
+          %tr
+            %td
+              = p.ledger.name unless p.ledger.nil?
+            %td
+              = p.to_balance if p.effect == :debit
+            %td
+              = p.to_balance if p.effect == :credit
+            - count += 1

@@ -1,0 +1,32 @@
+-# an option for listing all branches
+- branch_list = select_branch + [['0','All Branches']]
+
+%div#container_transaction_summaries
+	= form_for(:controller => :transaction_summaries, :action => 'index') do
+		%table
+			%tr
+				%td
+					Date
+				%td
+					- if @for_date
+						= date_select("for_date", @for_date)
+					- else
+						= date_select("for_date")
+				%td
+					Branch
+				%td
+					- if @for_branch_id.nil?
+						= select :name => :for_branch_id, :collection => branch_list
+					- else
+						= select :name => :for_branch_id, :collection => branch_list, :selected => @for_branch_id.to_s
+				
+				%td{:colspan => 4}(style="text-align:center")
+					= submit('Filter Transactions',:name => "submit_button")
+- unless (@transaction_summaries.empty?)
+	= partial :list_by_status
+- else
+	%h3
+		- if (@for_branch_name)
+			= "No transaction summaries found for #{@for_branch_name} on #{@for_date}!"
+		- else
+			= "No transaction summaries found for #{@for_date}!"

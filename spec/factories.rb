@@ -10,6 +10,12 @@ FACTORY_ASSETS      = ['Laptop charger', 'Laser printer', 'Mobile phone', 'Airco
 FACTORY_LOCATION_NAMES = %w[Center, Branch, Area, Region, State, Zone, Country].freeze
 
 
+FACTORY_ACCOUNTS_ASSETS      = ['Cash', 'Bank', 'Loans made'].freeze
+FACTORY_ACCOUNTS_LIABILITIES = ['Deposits', 'Loans taken'].freeze
+FACTORY_ACCOUNTS_EXPENSES    = ['Rent', 'Electricity', 'Salaries'].freeze
+FACTORY_ACCOUNTS_INCOMES     = ['Interest Income', 'Fee Income', 'Other Income'].freeze
+ACCOUNTING_DATE_BEGINS       = Date.parse("2011-04-01")
+
 FactoryGirl.define do
 
   # General sequences
@@ -45,6 +51,9 @@ FactoryGirl.define do
   sequence(:occupation_code)    { |n| "OCC#{n}" }
   # Assets
   sequence(:asset_type)         { |n| [FACTORY_ASSETS[n%FACTORY_ASSETS.length], n.to_s].join(' ') }
+  #Account types
+  sequence(:account_type)       { |n| Constants::Accounting::ACCOUNT_TYPES[n%Constants::Accounting::ACCOUNT_TYPES.length] }
+  sequence(:asset_ledger_name)  { |n| FACTORY_ACCOUNTS_ASSETS[n % FACTORY_ACCOUNTS_ASSETS.length] }
 
   #
   # Organizations, Domains, MFIs
@@ -667,7 +676,34 @@ FactoryGirl.define do
     created_at    { Date.today }
     parent_id     { Factory(:biz_location).id }
     child_id      { Factory(:biz_location).id }
+  end
 
+  factory :cost_center do
+    name            { self.branch.name }
+    association           :branch
+  end
+
+  factory :account_group do
+    name            { Factory.next(:name) }
+    account_type    { Factory.next(:account_type) }
+  end
+
+  factory :bank_account_ledger do
+    name                     'Bank 1'
+    account_type             Constants::Accounting::ASSETS
+    open_on                  ACCOUNTING_DATE_BEGINS
+    opening_balance_amount   0
+    opening_balance_currency Constants::Accounting::DEFAULT_CURRENCY
+    opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
+  end
+
+  factory :ledger do
+    name                     { Factory.next(:asset_ledger_name) }
+    account_type             Constants::Accounting::ASSETS
+    open_on                  ACCOUNTING_DATE_BEGINS
+    opening_balance_amount   0
+    opening_balance_currency Constants::Accounting::DEFAULT_CURRENCY
+    opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
   end
 
 end

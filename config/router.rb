@@ -1,5 +1,16 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+
+  #book-keeping from bk begins
+  resources :ledgers
+  resources :bank_account_ledgers
+  resources :accounting_rules
+  resources :book_keeping
+  resources :vouchers
+  resources :cost_centers
+  resources :transaction_summaries
+  #book-keeping from bk ends
+
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers

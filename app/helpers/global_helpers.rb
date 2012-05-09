@@ -20,6 +20,14 @@ module Merb
       "#{staff_or_funder} logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) | #{link_to 'log out', url(:logout)}"
     end
 
+    #returns a hash with all the branches with the branch ids as keys
+    #can be used with a select helper in form. 
+    def select_branch
+        @branches_and_names = [] 
+        Branch.all.each {|br| @branches_and_names.push([br.id,br.name])}
+        @branches_and_names
+    end
+
     def link_to_with_class(name, url)
       link_to_with_rights(name, url, :class => ((request.uri==(url) or request.uri.index(url)==0) ? "selected" : ""))
     end

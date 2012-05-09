@@ -238,6 +238,11 @@ class String
   def camelcase(str='')
     self.split('_').map{|x| x.capitalize}.join(str)
   end
+  
+  def sentencecase
+    self.join_snake(" ").camelcase
+  end
+
 end
 
 

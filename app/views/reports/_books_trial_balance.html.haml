@@ -1,0 +1,38 @@
+= partial :form
+- accounts_and_balances = @data
+- accounts_by_type = accounts_and_balances.keys.group_by {|acc| acc.account_type}
+- total_debit_balance = LedgerBalance.zero_debit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+- total_credit_balance = LedgerBalance.zero_credit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+%table.report.nojs
+  %thead
+    - accounts_by_type.each do |type, accounts|
+      %tr
+        %th
+          Account
+        %th
+          Dr.
+        %th
+          Cr.
+      %tr
+        %th{:colspan =>3}
+          = type    
+      - accounts.each do |acc|
+        - balance = accounts_and_balances[acc]
+        - debit_balance = balance.effect == Constants::Accounting::DEBIT_EFFECT ? balance : nil
+        - credit_balance = balance.effect == Constants::Accounting::CREDIT_EFFECT ? balance : nil
+        - total_debit_balance += debit_balance if debit_balance
+        - total_credit_balance += credit_balance if credit_balance
+        %tr
+          %td
+            = acc.name
+          %td
+            = debit_balance if debit_balance
+          %td
+            = credit_balance if credit_balance
+    %tr
+      %th
+        Totals
+      %th
+        = total_debit_balance
+      %th
+        = total_credit_balance
