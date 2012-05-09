@@ -122,7 +122,7 @@ USAGE_TEXT
                 if (principal_repayment and principal_repayment.valid?)
                   principal_payment_was_recorded = true
                   loan.update_history
-                  loan_ids_updated << [loan.id, loan.reference, #{principal_receipt}, "Principal repayment #{principal_receipt} were recorded to match POS"]
+                  loan_ids_updated << [loan.id, loan.reference, "#{principal_receipt}", "Principal repayment #{principal_receipt} were recorded to match POS"]
                 else
                   errors << [loan.id, loan.reference, "Principal repayment not saved"]
                 end
@@ -142,7 +142,7 @@ USAGE_TEXT
 
                   if (interest_payment and interest_payment.valid?)
                     loan.update_history
-                    loan_ids_updated << [loan.id, loan.reference, #{interest_owed}, "Interest payment #{interest_owed} was recorded to match POS"]
+                    loan_ids_updated << [loan.id, loan.reference, "#{interest_owed}", "Interest payment #{interest_owed} was recorded to match POS"]
                   else
                     errors << [loan.id, loan.reference, "Interest payment not saved"]
                   end
