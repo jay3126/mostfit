@@ -1,6 +1,6 @@
 class AccountingRule
   include DataMapper::Resource
-  include PostingValidator
+  include PostingValidator, Constants::Accounting
   
   property :id,         Serial
   property :name,       String, :nullable => false, :unique => true
