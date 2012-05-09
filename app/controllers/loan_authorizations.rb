@@ -30,7 +30,7 @@ class LoanAuthorizations < Application
 
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
-    credit_bureau_status = params[:credit_bureau_status]
+    
 
     # VALIDATIONS
 
@@ -42,24 +42,27 @@ class LoanAuthorizations < Application
     if @errors.blank?
       params[:status].keys.each do |lap|
         begin
-        authorization_status = params[:status][lap]
-        override_reason = params[:override_reason][lap]
-        final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
+          authorization_status = params[:status][lap]
+          override_reason = params[:override_reason][lap]
+          loan_application = LoanApplication.get(lap)
+          debugger
+          credit_bureau_status = loan_application.credit_bureau_status
+          final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
 
-        if final_status == Constants::Status::APPLICATION_APPROVED
-          facade.authorize_approve(lap, by_staff, on_date)
+          if final_status == Constants::Status::APPLICATION_APPROVED
+            facade.authorize_approve(lap, by_staff, on_date)
 
-        elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
-          raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
-          facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
+          elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
+            raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+            facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
-        elsif final_status == Constants::Status::APPLICATION_REJECTED
-          facade.authorize_reject(lap, by_staff, on_date)
+          elsif final_status == Constants::Status::APPLICATION_REJECTED
+            facade.authorize_reject(lap, by_staff, on_date)
 
-        else
-          raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
-          facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
-        end
+          else
+            raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+            facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
+          end
         rescue => ex
           @errors << "An error has occured: #{ex.message}"
         end
