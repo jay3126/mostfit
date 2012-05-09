@@ -110,8 +110,8 @@ USAGE_TEXT
             common_payment_params[:c_branch_id] = branch_id
             common_payment_params[:c_center_id] = center_id
 
-            loan_payment = Payment.all(:loan_id => loan.id, :received_on => as_on_date)
-            if loan_payment.empty?
+            loan_principal_payment = Payment.all(:loan_id => loan.id, :received_on => as_on_date, :type => :principal)
+            if loan_principal_payment.empty?
               principal_receipt = loan.amount - pos
               principal_payment_was_recorded = false
 
@@ -127,8 +127,11 @@ USAGE_TEXT
                   errors << [loan.id, "Principal repayment not saved"]
                 end
               end
+            end
 
-              if record_interest_only
+            if record_interest_only
+              loan_interest_payment = Payment.all(:loan_id => loan.id, :received_on => as_on_date, :type => :interest)
+              if loan_interest_payment.empty?
                 #lh_rows = loan.loan_history(:date => as_on_date)
                 #only_row = lh_rows[0] if lh_rows
                 interest_owed = loan.total_interest_to_be_received - int_os  
