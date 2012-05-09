@@ -1,7 +1,5 @@
 %h1
   Vouchers
-.menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-  = link_to 'new voucher', url(:new_voucher), :class => "add"    
 = form_for(:controller => :vouchers, :action => :index) do
   - today = Date.today
   = date_select :on_date, (params[:on_date] || @on_date || today), :min_date => Date.min_date, :max_date => Date.today
