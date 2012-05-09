@@ -1,0 +1,11 @@
+%table.form
+  %tr
+    %th
+      Location Level
+    %td
+      = select :location_level, :collection =>  @location_levels.map{|l| [l.id, "#{l.level}-#{l.name}"]}, :prompt => "Please Select Location Level", :class => "chosen"
+    %th
+      Name
+    %th
+      = text_field :name
+

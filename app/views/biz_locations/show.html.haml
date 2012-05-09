@@ -1,0 +1,22 @@
+= partial :list
+%br
+%h1
+  Assign Biz-Location
+.menu-strip{:style => "width : auto"}
+  = form_for(:biz_locations, :action => url('biz_locations/map_locations')) do
+    %table.form
+      %tr
+        %th
+          Parent Location
+        %td
+          = select :name => "parent_location", :collection => @parent_locations.map{|l| [l.id, l.name]}, :selected => @biz_location.id.to_s, :prompt => "Please Select Parent Biz-Location", :class => "chosen"
+        %th
+          Child Location
+        %td
+          = select :name => "child_location", :collection => @child_locations.map{|l| [l.id, l.name]}, :prompt => "Please Select Child Biz-Location", :class => "chosen"
+        %th
+          Date
+        %th
+          = date_select "begin_date"
+    = submit 'Save'
+    = link_to 'Cancel', url(params[:return]), :class => "grey_button"

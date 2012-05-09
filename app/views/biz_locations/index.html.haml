@@ -1,0 +1,6 @@
+= partial :list
+.menu-strip{:style => "width : 1160px"}
+  = form_for(@biz_location, :action => url(:biz_locations) ) do
+    = partial :fields
+    = submit 'Save'
+    = link_to 'Cancel', url(params[:return]), :class => "grey_button"

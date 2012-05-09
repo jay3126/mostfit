@@ -6,6 +6,8 @@ class LocationLevel
   property :name,       String, :nullable => false
   property :created_at, DateTime, :nullable => false, :default => DateTime.now
 
+  validates_is_unique :name
+
   has n, :biz_locations
 
   def self.location_level_for_new
