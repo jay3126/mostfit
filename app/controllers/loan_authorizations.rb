@@ -45,7 +45,6 @@ class LoanAuthorizations < Application
           authorization_status = params[:status][lap]
           override_reason = params[:override_reason][lap]
           loan_application = LoanApplication.get(lap)
-          debugger
           credit_bureau_status = loan_application.credit_bureau_status
           final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
 
