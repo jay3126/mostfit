@@ -60,4 +60,4 @@
         Loan File
       = link_to "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
       %br
-      = link_to "Health check on loan files", url(:controller => :loan_files, :action => :loan_files_for_health_checkup), :class => 'edit_small'
+      = link_to "Health check on loan files", url(:controller => :loan_files, :action => :record_health_check_status, :flag => 'true'), :class => 'edit_small'
