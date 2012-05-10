@@ -7,11 +7,11 @@
 #client_list
   .shaded
     - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-    %h2
-      Add new loan applications
+
     - if center_cycle_number == 0
-      %h3 Center not open for new loan applications. Please create a fresh center cycle for this center.
+      %h3 No Center cycle currently exists for this center. Please create one from the center show page
     - elsif @clients and @clients != [] 
+      %h2 Add new loan applications
       %h3
         = "Center Cycle Number #{center_cycle_number}"
       %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
@@ -68,4 +68,5 @@
                 = submit 'Submit'
                 %input{:value => "Reset all", :type => "reset"}
     - else
+      %h2 Add new loan applications
       %h3 No clients at this center

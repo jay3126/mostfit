@@ -73,8 +73,6 @@ class LoanApplications < Application
           client_ids_from_existing_loan_applications = laf.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
           final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
           @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
-        else
-          @errors << "No center cycles exist at the center"
         end
       rescue => ex
         @errors << "An error has occurred: #{ex.message}"
