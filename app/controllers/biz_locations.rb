@@ -17,7 +17,7 @@ class BizLocations < Application
 
     # GATE-KEEPING
 
-    b_level = params[:biz_location][:location_level].to_i
+    b_level = params[:biz_location][:location_level]
     b_name = params[:biz_location][:name]
 
     # VALIDATIONS
