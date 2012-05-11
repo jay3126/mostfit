@@ -4,7 +4,7 @@ Merb::Router.prepare do
   resources :priority_sector_lists
   resources :districts
   resources :loan_files,               :id => %r(\d+)
-  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get]}
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post]}
   resources :overlap_report_responses, :id => %r(\d+)
   resources :staff_member_attendances
   resources :report_formats

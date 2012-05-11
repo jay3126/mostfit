@@ -49,13 +49,14 @@
                 %td
                   - if (is_eligible)
                     = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}
+        %table.narrow.form{:style => "width:100%;"}
           %tfoot
             %tr
-              %td{:colspan => 3}
+              %td
                 %b
                   Created by
                 = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-              %td{:colspan => 2}
+              %td
                 %b
                   Created on
                 = date_select :created_on, Date.today

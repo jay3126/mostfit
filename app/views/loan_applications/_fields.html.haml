@@ -1,9 +1,3 @@
-:javascript
-  function reset_all_fields(){
-    jQuery("form.bulk_create_form input[type='text']").val('');
-    jQuery("form.bulk_create_form select").removeAttr('selected').find(':first').attr('selected','selected');
-  }
-
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - if @center.nil?
   %h3 Select branch and center to create new loan application for new loan applicant
@@ -12,7 +6,7 @@
 - else
   %h2
     = "Center Cycle Number: #{center_cycle_number}"
-  %form{:action => url(:controller => :loan_applications, :action => :bulk_create), :method => :post, :class => "bulk_create_form"}
+  %form{:action => url(:controller => :loan_applications, :action => :bulk_create_loan_applicant), :method => :post}
     %table.form.shaded
       %thead
         %tr
@@ -55,15 +49,16 @@
             = hidden_field :center_cycle_number, :value => center_cycle_number
             = hidden_field :name => "loan_application[at_center_id]", :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
             = hidden_field :name => "loan_application[at_branch_id]", :value => @branch.nil? ? (params[:loan_application] and params[:loan_application][:at_branch_id]) : @branch.id
+    %table.narrow.form{:style => "width:100%;"}
       %tfoot
         %tr
-          %td{:colspan => 3}
+          %td
             %b Loan Applications created by
             = select :name => "loan_application[created_by_staff_id]", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member", :selected => (params[:loan_application] and params[:loan_application][:created_by_staff_id])
-          %td{:colspan => 2}
+          %td
             %b Created on
             = date_select :created_on, (params[:created_on] || Date.today)
-          %td{:colspan => 3}
+          %td
             = submit 'Create and Continue'
-          %td{:colspan => 3}
-            %input{:value => "Reset", :type => 'button', :class => 'greenButton', :onclick => "reset_all_fields();"}
+          %td
+            %input{:value => "Reset", :type => 'reset', :class => 'greenButton'}
