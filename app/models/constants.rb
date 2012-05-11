@@ -146,16 +146,6 @@ module Constants
 
   end
 
-  module Locations
-
-    CENTER = :center
-    MODELS_AND_LOCATIONS = { "Center" => CENTER }
-    LOCATIONS = [CENTER]
-
-    LOCATION_LEVELS = [1, 2, 3, 4]
-
-  end
-
   module Status
 
     LOAN_APPLIED_STATUS = :loan_applied; LOAN_APPROVED_STATUS = :loan_approved
@@ -168,39 +158,6 @@ module Constants
     CLIENT = :client
     MODELS_AND_CLIENTS = { "Client" => CLIENT }
     CLIENTS = [CLIENT]
-  end
-
-  module Products
-
-    LOAN = :loan
-    MODELS_AND_PRODUCTS = { "Loan" => LOAN }
-    PRODUCTS = [LOAN]
-
-  end
-
-  module Money
-
-    INR = :INR; INR_MULTIPLIER = 100
-    DEFAULT_CURRENCY = INR
-    CURRENCIES = [INR]
-    CURRENCIES_LEAST_UNITS_MULTIPLIERS = { INR => INR_MULTIPLIER }
-
-    PAYMENT = :payment; RECEIPT = :receipt
-    RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
-
-    LOAN = :loan
-    TRANSACTED_PRODUCTS = [LOAN]
-
-    CLIENT = :client
-    COUNTERPARTIES = [CLIENT]
-
-    TRANSACTION_AT_CENTER = :center
-    TRANSACTION_LOCATIONS = [TRANSACTION_AT_CENTER]
-
-    PRINCIPAL_DISBURSED = :principal_disbursed
-    PRINCIPAL_REPAID = :principal_repaid; INTEREST_RECEIVED = :interest_received; FEE_INCOME = :fee_income; ADVANCE_RECEIPT = :advance_receipt
-    ALLOCATIONS = [PRINCIPAL_DISBURSED, PRINCIPAL_REPAID, INTEREST_RECEIVED, FEE_INCOME, ADVANCE_RECEIPT]
-
   end
 
 end
