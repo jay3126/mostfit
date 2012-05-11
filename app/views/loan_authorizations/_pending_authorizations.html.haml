@@ -70,10 +70,9 @@
               %td
                 %b On
                 = date_select("performed_on", Date.today, :id => "performed_on", :size => 8)
-              %td
+              %td{:style => "text-align:right;"}
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "button", :onclick => "reset_all_fields();"}
-                =# link_to "reset", url(:controller => "loan_authorizations", :action => "pending_authorizations", :branch_id => @branch_id, :center_id => @center_id), :class=> "greenButton"
       %i
         Note: Override reason will be ignored if authorization is not an override.
     - else
