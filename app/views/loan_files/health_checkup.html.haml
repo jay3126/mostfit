@@ -55,9 +55,10 @@
                   Pending
                 %td
                   = text_field :name => "[loan_files][#{lf.id}][health_status_remark]", :value => lf.health_status_remark
+      %table.narrow.form{:style => "width:100%;"}
         %tfoot
           %tr
-            %td{:colspan => 8, :style=>"text-align : center" }
+            %td{:style=>"text-align : right"}
               = submit "Save all"
               %input{:value => "Reset all", :type => "reset"}
   - else
