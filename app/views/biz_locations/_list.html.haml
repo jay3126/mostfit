@@ -1,6 +1,9 @@
 %h1
-  Biz-Location
-- unless @biz_locations.count == 0
+  = "Biz-Location :-  #{@biz_location.name}"
+- if @biz_locations.count == 0
+  %p
+    %i No Location Mapping have been created yet.
+- else
   %table.narrow
     %thead
       %tr
@@ -10,16 +13,30 @@
           Name
         %th
           Location Level
+        - unless @biz_location.new?
+          %th
+            Effective On
         %th
           Created At
     %tr
-      - for biz_location in @biz_locations
+      - for biz_location_level in @biz_locations
         %tr
-          %td
-            = biz_location.id
-          %td
-            = link_to biz_location.name, resource(biz_location)
-          %td
-            = biz_location.level_name
-          %td
-            = biz_location.created_at.strftime("%Y-%m-%d")
+          %td{:style => "background-color:gray; text-align:center", :colspan => 5}
+            %b= "#{biz_location_level.first}-Level"
+        - for biz_location_link in biz_location_level.last
+          - biz_location = biz_location_link.class == BizLocation ? biz_location_link : biz_location_link.child
+          %tr
+            %td
+              = biz_location.id
+            %td
+              - if biz_location_level.first == 0
+                = biz_location.name
+              - else
+                = link_to biz_location.name, resource(biz_location)
+            %td
+              = biz_location.level_name
+            - unless biz_location_link.class == BizLocation
+              %td
+                = biz_location_link.effective_on.strftime("%Y-%m-%d")
+            %td
+              = biz_location.created_at.strftime("%Y-%m-%d")

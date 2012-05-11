@@ -2,7 +2,7 @@ class BizLocations < Application
 
   def index
     @location_levels = LocationLevel.all
-    @biz_locations = BizLocation.all
+    @biz_locations = BizLocation.all.group_by{|c| c.location_level.level}
     @biz_location = BizLocation.new()
     display @location_levels
   end
@@ -47,11 +47,12 @@ class BizLocations < Application
 
   def show
     @biz_location = BizLocation.get params[:id]
-    @biz_locations = LocationLink.get_children(@biz_location)
+    @biz_locations = LocationLink.all(:parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
     location_level = LocationLevel.first(:level => (@biz_location.location_level.level - 1))
     @parent_locations = BizLocation.all_locations_at(@biz_location.location_level)
     assign_locations = LocationLink.all.aggregate(:child_id)
     @child_locations = location_level.blank? ? [] : BizLocation.all_locations_at(location_level)
+    @min_assign_date = LocationLink.max(:effective_on, :child_id => @child_locations.map(&:id))
     @child_locations = @child_locations.select{|s| assign_locations.include?(s.id) == false}
     display @biz_location
   end
