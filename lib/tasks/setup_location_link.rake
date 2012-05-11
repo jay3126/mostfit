@@ -32,7 +32,7 @@ USAGE_TEXT
             childrens.each do |child|
               biz_parent = parent_location_level.biz_locations(:name => parent.name).first
               biz_child = child_location_level.biz_locations(:name => child.name).first
-              LocationLink.assign(biz_child, biz_parent)
+              LocationLink.assign(biz_child, biz_parent, biz_child.creation_date)
             end
           end
         end

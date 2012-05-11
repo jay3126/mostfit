@@ -17,7 +17,7 @@
           %th
             Effective On
         %th
-          Created At
+          Created On
     %tr
       - for biz_location_level in @biz_locations
         %tr
@@ -39,4 +39,4 @@
               %td
                 = biz_location_link.effective_on.strftime("%Y-%m-%d")
             %td
-              = biz_location.created_at.strftime("%Y-%m-%d")
+              = biz_location_link.creation_date.strftime("%Y-%m-%d")

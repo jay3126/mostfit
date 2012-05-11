@@ -25,12 +25,14 @@ USAGE_TEXT
         LOCATION_NAME = [Center, Branch, Area, Region]
         level_no = 0
         LOCATION_NAME.each do |level|
-          location_level = LocationLevel.create(:name => level.to_s, :level => level_no)
           locations = level.all
+          level_creation_date = locations.map(&:creation_date).compact.blank? ? Date.today : locations.map(&:creation_date).compact.min
+          location_level = LocationLevel.create(:name => level.to_s, :level => level_no, :creation_date => level_creation_date)
           level_no = level_no + 1
 
           locations.each do |location|
-            BizLocation.create(:name => location.name.to_s, :location_level_id => location_level.id)
+            creation_date = location.creation_date.blank? ? Date.today : location.creation_date
+            location_level.biz_locations.create(:name => location.name.to_s, :creation_date => creation_date)
           end
         end
 

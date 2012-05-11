@@ -5,6 +5,8 @@ class LocationLevel
   property :level,      Integer, :nullable => false, :unique => true, :min => 0
   property :name,       String, :nullable => false
   property :created_at, DateTime, :nullable => false, :default => DateTime.now
+  property :creation_date, Date, :nullable => false, :default => Date.today
+  property :deleted_at, ParanoidDateTime
 
   validates_is_unique :name
 

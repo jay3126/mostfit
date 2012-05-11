@@ -4,8 +4,10 @@ class LocationLink
   property :id,           Serial
   property :effective_on, Date, :nullable => false
   property :created_at,   DateTime, :nullable => false, :default => DateTime.now
+  property :creation_date, Date, :nullable => false, :default => Date.today
   property :parent_id,    Integer, :nullable => false
   property :child_id,     Integer, :nullable => false
+  property :deleted_at, ParanoidDateTime
 
   validates_with_method :linked_locations_are_not_peers?
 
