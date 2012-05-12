@@ -1,0 +1,7 @@
+%h1 Payment Transcation
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
+= form_for(@payment_transaction, :action => url(@payment_transaction , :action => :create), :class => "shaded") do
+  = partial :fields
+  = submit 'Save'

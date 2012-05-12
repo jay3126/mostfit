@@ -1,0 +1,55 @@
+%table.form
+  %tr
+    %td
+      Amount
+    %td
+      = text_field :amount
+    %td
+      Currency
+    %td
+      = select :currency, :collection => ['INR'], :style => "width:180px;"
+  %tr
+    %td
+      Counterparty Type
+    %td
+      = select :by_counterparty_type, :collection => Constants::Transaction::COUNTERPARTIES.collect{|s| s.to_s}, :style => "width:180px;"
+    %td
+      Counterparty Id
+    %td
+      = text_field :by_counterparty_id
+  %tr
+    %td
+      Product Type
+    %td
+      = select :on_product_type, :collection => Constants::Transaction::TRANSACTED_PRODUCTS.collect{|s| s.to_s}, :style => "width:180px;"
+    %td
+      Product Id
+    %td
+      = text_field :on_product_id
+  %tr
+    %td
+      Performed At
+    %td
+      = text_field :performed_at
+    %td
+      Accounted At
+    %td
+      = text_field :accounted_at
+  %tr
+    %td
+      Performed By
+    %td
+      = select :performed_by, :collection => StaffMember.all.collect{|c| [c.id, c.name]}, :style => "width:180px;"
+    %td
+      Recorded By
+    %td
+      = text_field :recorded_by
+  %tr
+    %td
+      Receipt
+    %td
+      = select :receipt_type, :collection => Constants::Transaction::RECEIVED_OR_PAID.collect{|s| s.to_s}, :style => "width:180px;"
+    %td
+      Effective On
+    %td
+      = date_select_for @payment_transaction, :effective_on

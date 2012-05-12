@@ -1,0 +1,45 @@
+%table.narrow
+  %thead
+    %tr{:style => 'text-align:left'}
+      %th
+        Amount
+      %th
+        Receipt Type
+      %th
+        Product Type
+      %th
+        Product Id
+      %th
+        Performed At
+      %th
+        Accounted At
+      %th
+        Performed By
+      %th
+        Recorded By
+      %th
+        By Client
+      %th
+        Effective On
+  - @payment_transactions.each do |pt|
+    %tr
+      %td
+        = pt.amount
+      %td
+        = pt.receipt_type
+      %td
+        = pt.on_product_type
+      %td
+        = pt.on_product_id
+      %td
+        = pt.performed_at
+      %td
+        = pt.accounted_at
+      %td
+        = pt.performed_by
+      %td
+        = pt.recorded_by
+      %td
+        = pt.by_counterparty_id
+      %td
+        = pt.effective_on

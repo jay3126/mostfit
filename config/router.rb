@@ -41,6 +41,7 @@ Merb::Router.prepare do
   end
   resources :location_levels
   resources :biz_locations, :collection => {:map_locations => [:get]}
+  resources :payment_transactions
   resources :rules, :id => %r(\d+)
   resources :bookmarks
   resources :audit_items
