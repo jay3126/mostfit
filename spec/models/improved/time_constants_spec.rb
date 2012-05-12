@@ -101,4 +101,49 @@ describe Constants::Time do
     Constants::Time.get_next_month_date(fifteenth_april).should == Date.parse('2012-05-15')
   end
 
+  it "should return the immediately earlier date as expected" do
+    test_date_strings = %w[2012-01-03 2012-01-07 2012-01-11 2012-01-23
+2012-05-31]
+    test_dates = test_date_strings.collect {|str| Date.parse(str)}
+
+    second = Date.parse('2012-01-02')
+    Constants::Time.get_immediately_earlier_date(second,
+                                                 *test_dates).should == nil
+
+    fourth = Date.parse('2012-01-04')
+    Constants::Time.get_immediately_earlier_date(fourth,
+                                                 *test_dates).should == Date.parse('2012-01-03')
+
+    seventh = Date.parse('2012-01-07')
+    Constants::Time.get_immediately_earlier_date(seventh,
+                                                 *test_dates).should == seventh
+
+    much_later = Date.parse('2013-01-01')
+    Constants::Time.get_immediately_earlier_date(much_later,
+                                                 *test_dates) == test_dates.sort.last
+
+  end
+
+  it "should return the immediately next date as expected" do
+    test_date_strings = %w[2012-01-03 2012-01-07 2012-01-11 2012-01-23
+2012-05-31]
+    test_dates = test_date_strings.collect {|str| Date.parse(str)}
+
+    second = Date.parse('2012-01-02')
+    Constants::Time.get_immediately_next_date(second, *test_dates).should ==
+        Date.parse('2012-01-03')
+
+    fourth = Date.parse('2012-01-04')
+    Constants::Time.get_immediately_next_date(fourth, *test_dates).should ==
+        Date.parse('2012-01-07')
+
+    seventh = Date.parse('2012-01-07')
+    Constants::Time.get_immediately_next_date(seventh, *test_dates).should ==
+        seventh
+
+    much_later = Date.parse('2013-01-01')
+    Constants::Time.get_immediately_next_date(much_later, *test_dates) == nil
+
+  end
+
 end
