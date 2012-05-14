@@ -3,14 +3,14 @@ require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 describe Money do
 
   before(:all) do
-    @supported_currencies = Constants::MoneyConstants::CURRENCIES
-    @default_currency = Constants::MoneyConstants::DEFAULT_CURRENCY
-    @currency_multipliers = Constants::MoneyConstants::CURRENCIES_LEAST_UNITS_MULTIPLIERS
+    @supported_currencies = Constants::Money::CURRENCIES
+    @default_currency = Constants::Money::DEFAULT_CURRENCY
+    @currency_multipliers = Constants::Money::CURRENCIES_LEAST_UNITS_MULTIPLIERS
     @ikkis = Money.new(21, @default_currency)
     @ek_sau_ek = Money.new(101, @default_currency)
-    @INR = Constants::MoneyConstants::INR
-    @USD = Constants::MoneyConstants::USD
-    @YEN = Constants::MoneyConstants::YEN
+    @INR = Constants::Money::INR
+    @USD = Constants::Money::USD
+    @YEN = Constants::Money::YEN
   end
 
   it "should not accept a currency that is not supported" do

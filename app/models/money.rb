@@ -1,5 +1,5 @@
 class Money
-  include Constants::MoneyConstants
+  include Constants::Money
 
   attr_reader :amount, :currency
 
