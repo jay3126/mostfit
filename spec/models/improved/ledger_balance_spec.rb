@@ -233,5 +233,16 @@ describe LedgerBalance do
     LedgerBalance.are_balanced?(credit_ten).should == false
     LedgerBalance.are_balanced?(debit_thirty, credit_five, credit_thirty_five, credit_ten).should == false
   end
+
+  it "tests a balance that is a zero balance as expected" do
+    zero_debit_balance = LedgerBalance.zero_debit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+    LedgerBalance.is_zero_balance?(zero_debit_balance).should be_true
+
+    zero_credit_balance = LedgerBalance.zero_credit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+    LedgerBalance.is_zero_balance?(zero_credit_balance).should be_true
+
+    debit_ten = LedgerBalance.new(10, :INR, :debit)
+    LedgerBalance.is_zero_balance?(debit_ten).should be_false
+  end
  
 end

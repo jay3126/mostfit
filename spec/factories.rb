@@ -718,6 +718,11 @@ FactoryGirl.define do
     association            :lending_product
   end
 
+  factory(:accounts_chart) do
+    name                   "Financial Accounting"
+    chart_type             Constants::Accounting::FINANCIAL_ACCOUNTING
+  end
+
   factory :cost_center do
     name            { self.branch.name }
     association           :branch
@@ -744,6 +749,7 @@ FactoryGirl.define do
     opening_balance_amount   0
     opening_balance_currency Constants::Accounting::DEFAULT_CURRENCY
     opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
+    association              :accounts_chart
   end
 
 end

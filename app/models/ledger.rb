@@ -22,6 +22,7 @@ class Ledger
   has n, :ledger_postings
   has n, :posting_rules
   belongs_to :account_group, :nullable => true
+  belongs_to :accounts_chart
 
   validates_present :name, :account_type, :open_on, :opening_balance_amount, :opening_balance_currency, :opening_balance_effect
 

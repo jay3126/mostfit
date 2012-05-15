@@ -68,5 +68,7 @@ module Constants
     ACCRUE_BROKEN_PERIOD_INTEREST_RECEIPTS_ON_LOANS = :accrue_broken_period_interest_receipts_on_loans 
     ACCRUE_NEW_PERIOD_REVERSALS_OF_BROKEN_PERIOD_INTEREST_RECEIPTS = :accrue_new_period_reversals_of_broken_period_interest_receipts
 
+    PRODUCT_ACCOUNTING = :product_accounting; FINANCIAL_ACCOUNTING = :financial_accounting
+    ACCOUNTS_CHART_TYPES = [PRODUCT_ACCOUNTING, FINANCIAL_ACCOUNTING]
   end
 end

@@ -31,6 +31,12 @@ class LedgerBalance
   def self.zero_balance(currency, effect)
     to_balance_obj(0, currency, effect)
   end
+
+  # Tests a balance to verify whether it is a zero balance (irrespective of the balance 'effect')
+  def self.is_zero_balance?(some_balance)
+    raise ArgumentError, "#{some_balance} is not a ledger balance" unless some_balance.is_a?(LedgerBalance)
+    some_balance.amount == 0
+  end
   
   def self.zero_debit_balance(currency); zero_balance(currency, DEBIT_EFFECT); end
   def self.zero_credit_balance(currency); zero_balance(currency, CREDIT_EFFECT); end  

@@ -3,12 +3,14 @@ module Constants
 
     MEDIUM_STRING_LENGTH = 255
     NOT_NULL          = { :nullable => false }
+    UNIQUE            = { :unique => true }
 
     INTEGER_NOT_NULL  = [ Integer, NOT_NULL ]
     FLOAT_NOT_NULL    = [ Float, NOT_NULL ]
     DATE_NOT_NULL     = [ Date, NOT_NULL ]
 
     NAME              = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL) ]
+    UNIQUE_NAME       = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL).merge(UNIQUE) ]
     FREQUENCY         = [ DataMapper::Types::Enum.send('[]', *MarkerInterfaces::Recurrence::FREQUENCIES), NOT_NULL ]
     TENURE            = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
     COUNTER           = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
@@ -20,7 +22,7 @@ module Constants
     CURRENCY          = [ DataMapper::Types::Enum.send('[]', *Constants::Money::CURRENCIES), NOT_NULL ]
 
     UNIQUE_ID_STRING_LENGTH = 40
-    UNIQUE_ID         = [ String, { :length => UNIQUE_ID_STRING_LENGTH, :default => lambda {|obj, p| UUID.generate} }.merge(NOT_NULL) ]
+    UNIQUE_ID         = [ String, { :length => UNIQUE_ID_STRING_LENGTH, :default => lambda {|obj, p| UUID.generate} }.merge(NOT_NULL).merge(UNIQUE) ]
 
     TIMESTAMP         = { :default => DateTime.now }
     CREATED_AT        = [ DateTime, TIMESTAMP.merge(NOT_NULL) ]
