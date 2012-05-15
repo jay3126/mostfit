@@ -11,6 +11,8 @@ class LendingProduct
   property :tenure,              *TENURE
   property :created_at,          *CREATED_AT
 
+  def money_amounts; [:amount]; end
+
   has 1, :loan_schedule_template
   has n, :lendings
 

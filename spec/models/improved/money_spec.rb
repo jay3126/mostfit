@@ -127,4 +127,15 @@ describe Money do
     zero_usd.amount.should == 0; zero_usd.currency.should == @USD
   end
 
+  it "given a hash of money amounts, the from_money method should return a hash with just amounts and a currency" do
+    principal_amount = 2000; interest_amount = 1000
+    currency = Constants::Money::DEFAULT_CURRENCY
+    money_amounts_hash = {:principal_amount => Money.new(principal_amount, currency), :interest_amount => Money.new(interest_amount, currency)}
+    result_hash = Money.from_money(money_amounts_hash)
+    result_hash[:principal_amount].should == principal_amount
+    result_hash[:interest_amount].should == interest_amount
+    result_hash[:currency].should == currency
+    result_hash.keys.length.should == 3
+  end
+
 end

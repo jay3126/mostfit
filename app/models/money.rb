@@ -82,6 +82,20 @@ class Money
     (whole_number_str + decimal_number_correct_places).to_i
   end
 
+  # Given a hash that has keys as symbols for the amounts and values as instances of Money,
+  # this returns a hash with keys and numeric amounts with an added key and value for currency, and
+  # aids construction of new instances of models that store amounts
+  def self.from_money(money_hash)
+    amounts_hash = {}
+    money_hash.each { |key, value|
+      raise ArgumentError, "#{value} is not a money amount" unless value.is_a?(Money)
+      amounts_hash[key] = value.amount
+    }
+    currency = money_hash.values.first.currency
+    amounts_hash[:currency] = currency
+    amounts_hash
+  end
+
   private
 
   # Formats the money amount in least units for the given locale

@@ -692,6 +692,7 @@ FactoryGirl.define do
   end
 
   factory :lending do
+    lan                            "Loan at #{DateTime.now}"
     applied_amount                 1000000
     currency                       Constants::Money::DEFAULT_CURRENCY
     for_borrower_id                { Factory(:customer).id }
@@ -714,6 +715,7 @@ FactoryGirl.define do
     currency               :INR
     num_of_installments    52
     repayment_frequency    MarkerInterfaces::Recurrence::WEEKLY
+    association            :lending_product
   end
 
   factory :cost_center do

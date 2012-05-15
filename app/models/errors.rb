@@ -5,5 +5,8 @@ module Errors
 
   # Raised when there is a business validation that is violated
   class BusinessValidationError < StandardError; end
+
+  # Raised when an instance does not support a particular operation
+  class OperationNotSupportedError < StandardError; end
     
 end

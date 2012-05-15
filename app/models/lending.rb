@@ -23,6 +23,8 @@ class Lending
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
 
+  def money_amounts; [:applied_amount, :approved_amount]; end
+
   belongs_to :lending_product
   has 1, :loan_base_schedule
   has n, :loan_allocations
