@@ -24,10 +24,15 @@ namespace :mostfit do
 
     date = Date.new(2012, 03, 31)
 
+    #following are the various dates on which monthly cash flows is being calculated.
+    from_dates = [Date.new(2012, 03, 01), Date.new(2012, 04, 01), Date.new(2012, 05, 01), Date.new(2012, 06, 01), Date.new(2012, 07, 01), Date.new(2012, 8, 01), Date.new(2012, 9, 01), Date.new(2012, 10, 01), Date.new(2012, 11, 01), Date.new(2012, 12, 01), Date.new(2013, 01, 01), Date.new(2013, 02, 01), Date.new(2013, 03, 01), Date.new(2013, 04, 01), Date.new(2013, 05, 01), Date.new(2013, 06, 01), Date.new(2013, 07, 01), Date.new(2013, 8, 01), Date.new(2013, 9, 01), Date.new(2013, 10, 01), Date.new(2013, 11, 01), Date.new(2013, 12, 01), Date.new(2014, 01, 01), Date.new(2014, 02, 01), Date.new(2014, 03, 01), Date.new(2014, 04, 01), Date.new(2014, 05, 01), Date.new(2014, 06, 01), Date.new(2014, 07, 01), Date.new(2014, 8, 01)]
+
+    to_dates = [Date.new(2012, 03, 31), Date.new(2012, 04, 30), Date.new(2012, 05, 31), Date.new(2012, 06, 30), Date.new(2012, 07, 31), Date.new(2012, 8, 31), Date.new(2012, 9, 30), Date.new(2012, 10, 31), Date.new(2012, 11, 30), Date.new(2012, 12, 31), Date.new(2013, 01, 31), Date.new(2013, 02, 28), Date.new(2013, 03, 31), Date.new(2013, 04, 30), Date.new(2013, 05, 31), Date.new(2013, 06, 30), Date.new(2013, 07, 31), Date.new(2013, 8, 31), Date.new(2013, 9, 30), Date.new(2013, 10, 31), Date.new(2013, 11, 30), Date.new(2013, 12, 31), Date.new(2014, 01, 01), Date.new(2014, 02, 28), Date.new(2014, 03, 31), Date.new(2014, 04, 30), Date.new(2014, 05, 31), Date.new(2014, 06, 30), Date.new(2014, 07, 31), Date.new(2014, 8, 31)]
+
     sl_no = 0
 
     f = File.open("tmp/mas_financials_#{DateTime.now.to_s}.csv", "w")
-    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Date of Birth\", \"Caste\", \"Residence Address\", \"Residence Pin Code\", \"State\", \"Residence Phone Number\", \"Name of Assets\", \"Gross Income\", \"Gender\", \"Name of Marketing Executive\", \"Loan Id\", \"Purpose of Loans\", \"Category of Loanee\", \"Cycle Number\", \"Date of Disbursement\", \"Disbursement Mode\", \"Disbursement Cheque Number\", \"First Installment Date\", \"Last Installment Date\", \"Scheme IRR (%)\", \"Amount Financed\", \"Upfront Fees Amount in Rs.\", \"Insurance Charges\", \"Any Other Charges\", \"Installment Amount\", \"Tenure in Weeks\", \"Advance EMI\", \"No. Of Installment\", \"EMI Frequency\", \"Seasoning\", \"OD. Inst.\", \"Od. Amt. Rs.\", \"SD Amt. Rs.\", \"SD. Refund / Scheme Refund\", \"Mode of Repayment\", \"KYC Detail\", \"Future Capital O/S Amt. Rs.\", \"Future O/S Installment\", \"Future Receivable Amt. Rs.\"")
+    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Date of Birth\", \"Caste\", \"Residence Address\", \"Residence Pin Code\", \"State\", \"Residence Phone Number\", \"Name of Assets\", \"Gross Income\", \"Gender\", \"Name of Marketing Executive\", \"Loan Id\", \"Purpose of Loans\", \"Category of Loanee\", \"Cycle Number\", \"Date of Disbursement\", \"Disbursement Mode\", \"Disbursement Cheque Number\", \"First Installment Date\", \"Last Installment Date\", \"Scheme IRR (%)\", \"Amount Financed\", \"Upfront Fees Amount in Rs.\", \"Insurance Charges\", \"Any Other Charges\", \"Installment Amount\", \"Tenure in Weeks\", \"Advance EMI\", \"No. Of Installment\", \"EMI Frequency\", \"Seasoning\", \"OD. Inst.\", \"Od. Amt. Rs.\", \"SD Amt. Rs.\", \"SD. Refund / Scheme Refund\", \"Mode of Repayment\", \"KYC Detail\", \"Future Capital O/S Amt. Rs.\", \"Future O/S Installment\", \"Future Receivable Amt. Rs.\", \"Cash Flow in March 2012\", \"Cash Flow in April 2012\", \"Cash Flow in May 2012\", \"Cash Flow in June 2012\", \"Cash Flow in July 2012\", \"Cash Flow in August 2012\", Cash Flow in September 2012, \"Cash Flow in October 2012\", \"Cash Flow in November 2012\", \"Cash Flow in December 2012\", \"Cash Flow in January 2013\", \"Cash Flow in February 2013\", \"Cash Flow in March 2013\", \"Cash Flow in April 2013\", \"Cash Flow in May 2013\", \"Cash Flow in June 2013\", \"Cash Flow in July 2013\", \"Cash Flow in August 2013\", \"Cash Flow in September 2013\", \"Cash Flow in October 2013\", \"Cash Flow in November 2013\", \"Cash Flow in December 2013\", \"Cash Flow in January 2014\", \"Cash Flow in February 2014\", \"Cash Flow in March 2014\", \"Cash Flow in April 2014\", \"Cash Flow in May 2014\", \"Cash Flow in June 2014\", \"Cash Flow in July 2014\", \"Cash Flow in August 2014\"")
 
     Loan.all(:id => loan_ids, :client_id => client_ids, :disbursal_date => disbursal_dates).each do |loan|
 
@@ -71,7 +76,7 @@ namespace :mostfit do
       end
       loan_first_installment_date = loan.scheduled_first_payment_date
       loan_last_installment_date = loan.loan_history.max(:date, :conditions => ['principal_due_today != ?', 0.0], :conditions => ['interest_due_today != ?', 0.0])
-      loan_scheme_irr = (loan.irr(true) * 100)
+      loan_scheme_irr = (loan.irr * 100)
       loan_product_name = loan.loan_product.name
       loan_amount_financed = loan.amount
       loan_upfront_fees = loan.applicable_fees[0].amount
@@ -92,8 +97,45 @@ namespace :mostfit do
       loan_future_outstanding_amount = loan.scheduled_outstanding_total_on(date)
       loan_future_outstanding_installment = (loan.number_of_installments - loan.number_of_installments_before(date))
       loan_future_receivable_amount = (loan.total_to_be_received - loan.total_received_up_to(date))
+
+      if (loan.scheduled_first_payment_date >= from_dates[0] and loan.scheduled_first_payment_date <= to_dates[0])
+        monthly_cash_flow_march_2012 = (loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1))
+      else
+        monthly_cash_flow_march_2012 = 0
+      end
+      monthly_cash_flow_april_2012 = (loan.scheduled_outstanding_total_on(from_dates[1]) - loan.scheduled_outstanding_total_on(to_dates[1]))
+      monthly_cash_flow_may_2012 = (loan.scheduled_outstanding_total_on(from_dates[2]) - loan.scheduled_outstanding_total_on(to_dates[2]))
+      monthly_cash_flow_june_2012 = (loan.scheduled_outstanding_total_on(from_dates[3]) - loan.scheduled_outstanding_total_on(to_dates[3]))
+      monthly_cash_flow_july_2012 = (loan.scheduled_outstanding_total_on(from_dates[4]) - loan.scheduled_outstanding_total_on(to_dates[4]))
+      monthly_cash_flow_august_2012 = (loan.scheduled_outstanding_total_on(from_dates[5]) - loan.scheduled_outstanding_total_on(to_dates[5]))
+      monthly_cash_flow_september_2012 = (loan.scheduled_outstanding_total_on(from_dates[6]) - loan.scheduled_outstanding_total_on(to_dates[6]))
+      monthly_cash_flow_october_2012 = (loan.scheduled_outstanding_total_on(from_dates[7]) - loan.scheduled_outstanding_total_on(to_dates[7]))
+      monthly_cash_flow_november_2012 = (loan.scheduled_outstanding_total_on(from_dates[8]) - loan.scheduled_outstanding_total_on(to_dates[8]))
+      monthly_cash_flow_december_2012 = (loan.scheduled_outstanding_total_on(from_dates[9]) - loan.scheduled_outstanding_total_on(to_dates[9]))
+
+      monthly_cash_flow_january_2013 = (loan.scheduled_outstanding_total_on(from_dates[10]) - loan.scheduled_outstanding_total_on(to_dates[10]))
+      monthly_cash_flow_february_2013 = (loan.scheduled_outstanding_total_on(from_dates[11]) - loan.scheduled_outstanding_total_on(to_dates[11]))
+      monthly_cash_flow_march_2013 = (loan.scheduled_outstanding_total_on(from_dates[12]) - loan.scheduled_outstanding_total_on(to_dates[12]))
+      monthly_cash_flow_april_2013 = (loan.scheduled_outstanding_total_on(from_dates[13]) - loan.scheduled_outstanding_total_on(to_dates[13]))
+      monthly_cash_flow_may_2013 = (loan.scheduled_outstanding_total_on(from_dates[14]) - loan.scheduled_outstanding_total_on(to_dates[14]))
+      monthly_cash_flow_june_2013 = (loan.scheduled_outstanding_total_on(from_dates[15]) - loan.scheduled_outstanding_total_on(to_dates[15]))
+      monthly_cash_flow_july_2013 = (loan.scheduled_outstanding_total_on(from_dates[16]) - loan.scheduled_outstanding_total_on(to_dates[16]))
+      monthly_cash_flow_august_2013 = (loan.scheduled_outstanding_total_on(from_dates[17]) - loan.scheduled_outstanding_total_on(to_dates[17]))
+      monthly_cash_flow_september_2013 = (loan.scheduled_outstanding_total_on(from_dates[18]) - loan.scheduled_outstanding_total_on(to_dates[18]))
+      monthly_cash_flow_october_2013 = (loan.scheduled_outstanding_total_on(from_dates[19]) - loan.scheduled_outstanding_total_on(to_dates[19]))
+      monthly_cash_flow_november_2013 = (loan.scheduled_outstanding_total_on(from_dates[20]) - loan.scheduled_outstanding_total_on(to_dates[20]))
+      monthly_cash_flow_december_2013 = (loan.scheduled_outstanding_total_on(from_dates[21]) - loan.scheduled_outstanding_total_on(to_dates[21]))
+
+      monthly_cash_flow_january_2014 = (loan.scheduled_outstanding_total_on(from_dates[22]) - loan.scheduled_outstanding_total_on(to_dates[22]))
+      monthly_cash_flow_february_2014 = (loan.scheduled_outstanding_total_on(from_dates[23]) - loan.scheduled_outstanding_total_on(to_dates[23]))
+      monthly_cash_flow_march_2014 = (loan.scheduled_outstanding_total_on(from_dates[24]) - loan.scheduled_outstanding_total_on(to_dates[24]))
+      monthly_cash_flow_april_2014 = (loan.scheduled_outstanding_total_on(from_dates[25]) - loan.scheduled_outstanding_total_on(to_dates[25]))
+      monthly_cash_flow_may_2014 = (loan.scheduled_outstanding_total_on(from_dates[26]) - loan.scheduled_outstanding_total_on(to_dates[26]))
+      monthly_cash_flow_june_2014 = (loan.scheduled_outstanding_total_on(from_dates[27]) - loan.scheduled_outstanding_total_on(to_dates[27]))
+      monthly_cash_flow_july_2014 = (loan.scheduled_outstanding_total_on(from_dates[28]) - loan.scheduled_outstanding_total_on(to_dates[28]))
+      monthly_cash_flow_august_2014 = (loan.scheduled_outstanding_total_on(from_dates[29]) - loan.scheduled_outstanding_total_on(to_dates[29]))
       
-      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", #{client_date_of_birth}, \"#{client_caste}\", \"#{client_address}\", #{client_address_pin_code}, \"#{client_state}\", #{client_phone_number}, \"#{client_name_of_assets}\", #{client_gross_income}, \"#{client_gender}\", \"#{client_marketing_executive}\", #{loan_id}, \"#{loan_purpose}\", \"#{loan_category}\", #{loan_cycle_number}, #{loan_disbursal_date}, \"#{loan_disbursement_mode}\", \"#{loan_disbursement_cheque_number}\", #{loan_first_installment_date}, #{loan_last_installment_date}, \"#{loan_scheme_irr}\", #{loan_amount_financed}, #{loan_upfront_fees}, #{loan_insurance_charges}, #{loan_any_other_charges}, #{loan_installment_amount}, #{loan_tenure}, #{loan_advance_emi}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_seasoning}\", #{loan_overdue_installment}, #{loan_overdue_amount}, \"#{loan_sd_amount}\", \"#{loan_sd_refund}\", \"#{loan_mode_of_repayment}\", \"#{loan_kyc_details}\", #{loan_future_outstanding_amount}, #{loan_future_outstanding_installment}, #{loan_future_receivable_amount}")
+      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", #{client_date_of_birth}, \"#{client_caste}\", \"#{client_address}\", #{client_address_pin_code}, \"#{client_state}\", #{client_phone_number}, \"#{client_name_of_assets}\", #{client_gross_income}, \"#{client_gender}\", \"#{client_marketing_executive}\", #{loan_id}, \"#{loan_purpose}\", \"#{loan_category}\", #{loan_cycle_number}, #{loan_disbursal_date}, \"#{loan_disbursement_mode}\", \"#{loan_disbursement_cheque_number}\", #{loan_first_installment_date}, #{loan_last_installment_date}, \"#{loan_scheme_irr}\", #{loan_amount_financed}, #{loan_upfront_fees}, #{loan_insurance_charges}, #{loan_any_other_charges}, #{loan_installment_amount}, #{loan_tenure}, #{loan_advance_emi}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_seasoning}\", #{loan_overdue_installment}, #{loan_overdue_amount}, \"#{loan_sd_amount}\", \"#{loan_sd_refund}\", \"#{loan_mode_of_repayment}\", \"#{loan_kyc_details}\", #{loan_future_outstanding_amount}, #{loan_future_outstanding_installment}, #{loan_future_receivable_amount}, #{monthly_cash_flow_march_2012}, #{monthly_cash_flow_april_2012}, #{monthly_cash_flow_may_2012}, #{monthly_cash_flow_june_2012}, #{monthly_cash_flow_july_2012}, #{monthly_cash_flow_august_2012}, #{monthly_cash_flow_september_2012}, #{monthly_cash_flow_october_2012}, #{monthly_cash_flow_november_2012}, #{monthly_cash_flow_december_2012}, #{monthly_cash_flow_january_2013}, #{monthly_cash_flow_february_2013}, #{monthly_cash_flow_march_2013}, #{monthly_cash_flow_april_2013}, #{monthly_cash_flow_may_2013}, #{monthly_cash_flow_june_2013}, #{monthly_cash_flow_july_2013}, #{monthly_cash_flow_august_2013}, #{monthly_cash_flow_september_2013}, #{monthly_cash_flow_october_2013}, #{monthly_cash_flow_november_2013}, #{monthly_cash_flow_december_2013}, #{monthly_cash_flow_january_2014}, #{monthly_cash_flow_february_2014}, #{monthly_cash_flow_march_2014}, #{monthly_cash_flow_april_2014}, #{monthly_cash_flow_may_2014}, #{monthly_cash_flow_june_2014}, #{monthly_cash_flow_july_2014}, #{monthly_cash_flow_august_2014}")
 
     end
     f.close
