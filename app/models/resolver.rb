@@ -1,30 +1,22 @@
 module Resolver
 
-  def self.resolve_product(for_product)
-    resolve_any(for_product, :products)
-  end
-
+  # To be obsoleted, and is just returning center for now
   def self.resolve_location(for_location)
-    resolve_any(for_location, :locations)
+    [:center, for_location.id]
   end
 
-  def self.resolve_client(for_client)
-    resolve_any(for_client, :counter_parties)
+  def self.fetch_counterparty(by_type, for_id)
+    Validators::Arguments.not_nil?(by_type, for_id)
+    klass = Constants::Transaction::COUNTERPARTIES_AND_MODELS[by_type]
+    raise ArgumentError, "Unable to recognize a model that corresponds to the counterparty: #{by_type}" if klass.nil?
+    klass.get(for_id)
   end
 
-  MODEL_MAP = {
-    :products => Constants::Products::MODELS_AND_PRODUCTS,
-    :locations => Constants::Locations::MODELS_AND_LOCATIONS,
-    :counter_parties => Constants::Clients::MODELS_AND_CLIENTS
-  }
-  
-  private
-
-  def self.resolve_any(obj, by_type)
-    klass_name = obj.class.name
-    type_string = MODEL_MAP[by_type][klass_name]
-    raise ArgumentError, "no type resolved for #{obj}" unless type_string
-    [type_string, obj.id]
+  def self.fetch_product_instance(by_type, for_id)
+    Validators::Arguments.not_nil?(by_type, for_id)
+    klass = Constants::Products::PRODUCTS_AND_MODELS[by_type]
+    raise ArgumentError, "Unable to recognize a model that corresponds to the financial product: #{by_type}" if klass.nil?
+    klass.get(for_id)
   end
 
 end

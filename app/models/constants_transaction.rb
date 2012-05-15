@@ -1,16 +1,16 @@
 module Constants
   module Transaction
 
-    CLIENT = :client
-    COUNTERPARTIES = [CLIENT]
+    CUSTOMER = :customer
+    COUNTERPARTIES = [CUSTOMER]
+    COUNTERPARTIES_AND_MODELS = { CUSTOMER => Customer }
 
     RECEIPT = :receipt; PAYMENT = :payment
     RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
 
-    LOAN_PRODUCT = :loan_product
-    TRANSACTED_PRODUCTS = [ LOAN_PRODUCT ]
+    TRANSACTED_PRODUCTS = Constants::Products::PRODUCTS
 
-    PRINCIPAL_AMOUNT = :principal_amount; INTEREST = :interest_amount
+    PRINCIPAL_AMOUNT = :principal_amount; INTEREST_AMOUNT = :interest_amount
     TOTAL_PRINCIPAL_AMOUNT = :total_principal_amount; TOTAL_INTEREST_AMOUNT = :total_interest_amount
 
     PRINCIPAL_BALANCE_BEFORE = :principal_balance_before; INTEREST_BALANCE_BEFORE = :interest_balance_before

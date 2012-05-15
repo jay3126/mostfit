@@ -88,11 +88,4 @@ module Constants
 
   end
 
-  module Clients
-
-    CLIENT = :client
-    MODELS_AND_CLIENTS = { "Client" => CLIENT }
-    CLIENTS = [CLIENT]
-  end
-
 end

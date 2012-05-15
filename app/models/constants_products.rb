@@ -1,9 +1,9 @@
 module Constants
   module Products
 
-    LOAN = :loan
-    MODELS_AND_PRODUCTS = { "Loan" => LOAN }
-    PRODUCTS = [LOAN]
+    LENDING = :lending
+    PRODUCTS = [LENDING]
+    PRODUCTS_AND_MODELS = { LENDING => Lending }
 
   end
 end

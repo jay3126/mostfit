@@ -7,8 +7,7 @@ FACTORY_OCCUPATIONS = %w[Carpenter Astrologer Engineer Teller Cook Butcher Actua
 FACTORY_PROVINCES   = ['Maharashtra', 'Andra Pradesh', 'Madhya Pradesh', 'Kerala', 'Tamil Nadu'].freeze
 FACTORY_PURPOSES    = ['Buying a boat', 'Christmas presents', 'Wife\'s birthday'].freeze
 FACTORY_ASSETS      = ['Laptop charger', 'Laser printer', 'Mobile phone', 'Airconditioner'].freeze
-FACTORY_LOCATION_NAMES = %w[Center, Branch, Area, Region, State, Zone, Country].freeze
-
+FACTORY_LOCATION_NAMES = %w[Center Branch Area Region State Zone Country].freeze
 
 FACTORY_ACCOUNTS_ASSETS      = ['Cash', 'Bank', 'Loans made'].freeze
 FACTORY_ACCOUNTS_LIABILITIES = ['Deposits', 'Loans taken'].freeze
@@ -666,16 +665,55 @@ FactoryGirl.define do
 
   factory :biz_location do
     name       { Factory.next(:province) }
-    created_at { Date.today }
-
     association :location_level
   end
 
   factory :location_link do
     effective_on  { Date.today + 1}
-    created_at    { Date.today }
     parent_id     { Factory(:biz_location).id }
     child_id      { Factory(:biz_location).id }
+  end
+
+  factory :staff do
+    name          { Factory.next(:name) }
+  end
+
+  factory :customer do
+    name          { Factory.next(:name) }
+  end
+
+  factory :lending_product do
+    name                { Factory.next(:name) }
+    amount              1000000
+    currency            Constants::Money::DEFAULT_CURRENCY
+    interest_rate       25.99
+    repayment_frequency MarkerInterfaces::Recurrence::WEEKLY
+    tenure              52
+  end
+
+  factory :lending do
+    applied_amount                 1000000
+    currency                       Constants::Money::DEFAULT_CURRENCY
+    for_borrower_id                { Factory(:customer).id }
+    applied_on_date                Date.parse('2012-05-01')
+    scheduled_disbursal_date       (Date.parse('2012-05-01') + 7)
+    scheduled_first_repayment_date (Date.parse('2012-05-01') + 14)
+    repayment_frequency            MarkerInterfaces::Recurrence::WEEKLY
+    tenure                         52
+    administered_at_origin         { Factory(:biz_location).id }
+    accounted_at_origin            { Factory(:biz_location).id }
+    applied_by_staff               { Factory(:staff).id }
+    recorded_by_user               { Factory(:user).id }
+    association                    :lending_product
+  end
+
+  factory(:loan_schedule_template) do
+    name                   { Factory.next(:name) }
+    total_principal_amount 1000000
+    total_interest_amount  250000
+    currency               :INR
+    num_of_installments    52
+    repayment_frequency    MarkerInterfaces::Recurrence::WEEKLY
   end
 
   factory :cost_center do

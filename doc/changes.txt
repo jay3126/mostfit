@@ -1,0 +1,79 @@
+Changes for the improvements made to Mostfit in the summer of 2012 are listed below:
+
+New models:
+
+Meetings
+# MeetingSchedule
+# MeetingCalendar
+# MeetingManager
+
+Locations
+# BizLocation
+# LocationLevel
+# LocationLink
+# Address
+
+Transactions
+# Money
+# PaymentTransaction
+
+Loans
+# Lending
+# LoanAllocation
+# LoanDueStatus
+# LendingProduct
+# LoanScheduleTemplate
+# LoanBaseSchedule
+
+Accounting
+# AccountGroup
+# AccountingRule
+# CostCenter
+# Ledger
+# LedgerBalance
+# LedgerPosting
+# BankAccountLedger
+# Posting
+# PostingRule
+# MoneyCategory
+# TransactionSummary
+
+Basic changes to be made to all models:
+# timestamps to be added for creation and updates
+# inclusion of location, staff, user, and effective date in standard fashion
+# explicit inclusion in audit
+
+Facades:
+# ConfigurationFacade
+# MeetingFacade
+# LocationFacade
+Except for ConfigurationFacade (which is a singleton), other facades extend StandardFacade and are located using the FacadeFactory
+
+'Manager' classes:
+# MeetingManager
+# LocationManager
+
+Modules added (including namespaces for constants):
+Constants::Time
+Constants::Space
+Constants::Loan
+Constants::Location
+Constants::Accounting
+BookKeeper
+PostingValidator
+Allocation
+IsMeeting
+
+Configuration files added:
+config/accounting_rules.yml
+config/account_groups.yml
+config/accounts.yml
+
+Rake tasks added:
+# for meeting calendars
+# for accounting setup
+# for accruals
+
+Spec tests added for models:
+(to be listed from spec/models/improved)
+

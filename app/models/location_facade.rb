@@ -5,14 +5,19 @@ class LocationFacade < StandardFacade
 
   # Returns a map of all the different kinds of locations that can have meetings
   def all_locations_that_can_meet
-    locations = {}
-    MEETINGS_SUPPORTED_AT.each { |location_type|
-      klass = Constants::Space.to_klass(location_type)
-      next unless klass
-      all_instances = klass.all
-      locations[location_type] = all_instances
-    }
-    locations
+    LocationManager.all_locations_that_can_meet
+  end
+
+  def assign(child, to_parent, on_date = Date.today)
+    LocationLink.assign(child, to_parent, on_date)
+  end
+
+  def get_parent(for_location, on_date = Date.today)
+    LocationLink.get_parent(for_location, on_date)
+  end
+
+  def get_children(for_location, on_date = Date.today)
+    LocationLink.get_children(for_location, on_date)
   end
 
 end
