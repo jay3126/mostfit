@@ -14,6 +14,8 @@ class PaymentTransactions < Application
     # INITIALIZING VARIABLES USED THROUGHTOUT
 
     @message = {}
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user)
+
 
     # GATE-KEEPING
 
@@ -32,31 +34,32 @@ class PaymentTransactions < Application
 
     # VALIDATIONS
 
-    @message[:error] = "Please select Location Level !" if amount.blank?
-    @message[:error] = "Name cannot be blank !" if product_id.blank?
+    #@message[:error] = "Amount cannot be blank" if amount.blank?
+    #@message[:error] = "Product cannot be blank" if product_id.blank?
 
     # OPERATIONS PERFORMED
     if @message[:error].blank?
       begin
-        @payment_transaction = PaymentTransaction.new(:amount => amount, :currency => currency, 
+        @payment_transaction = PaymentTransaction.new(:amount => amount, :currency => currency,
           :on_product_type => product_type, :on_product_id => product_id,
           :performed_at => performed_at, :accounted_at => accounted_at,
           :performed_by => performed_by, :recorded_by => recorded_by,
           :by_counterparty_type => cp_type, :by_counterparty_id => cp_id,
           :receipt_type => receipt, :effective_on => effective_on)
-        if @payment_transaction.save
-          @message = {:notice => " Location successfully created"}
+        money_amount = MoneyManager.get_money_instance_least_terms(amount.to_i)
+        @copy_payment_transaction = mf.record_payment(money_amount, receipt, product_type, product_id, cp_type, cp_id, performed_at, accounted_at, performed_by, effective_on, nil)
+
+        if @copy_payment_transaction.saved?
+          @message = {:notice => "Payment Transaction successfully created"}
         else
-          @message = {:error => @payment_transaction.errors.collect{|error| error}.flatten.join(', ')}
+          @message = {:error => @copy_payment_transaction.errors.collect{|error| error}.flatten.join(', ')}
         end
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}
       end
     end
-
     #REDIRECT/RENDER
     if @message[:error].blank?
-      debugger
       redirect resource(:payment_transactions), :message => @message
     else
       render :new
