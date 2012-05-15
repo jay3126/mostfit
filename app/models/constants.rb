@@ -15,7 +15,7 @@ module Constants
   # points in space
   module Space
 
-    REGION = :region; AREA = :area; BRANCH = :branch; CENTER = :center
+    REGION = :region; AREA = :area; BRANCH = :branch; CENTER = :center; BIZLOCATION = :biz_location
 
     LOCATIONS = [REGION, AREA, BRANCH, CENTER]
     LOCATION_IMMEDIATE_ANCESTOR = { CENTER => BRANCH, BRANCH => AREA, AREA => REGION }
@@ -26,7 +26,7 @@ module Constants
     PROPOSED_MEETING_STATUS = 'proposed'; CONFIRMED_MEETING_STATUS = 'confirmed'; RESCHEDULED_MEETING_STATUS = 'rescheduled'
     MEETING_SCHEDULE_STATUSES = [PROPOSED_MEETING_STATUS, CONFIRMED_MEETING_STATUS, RESCHEDULED_MEETING_STATUS]
 
-    MEETINGS_SUPPORTED_AT = [ CENTER ]
+    MEETINGS_SUPPORTED_AT = [CENTER]
 
     def self.all_ancestors_for_type(location_type)
       ancestors = []

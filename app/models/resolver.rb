@@ -1,10 +1,5 @@
 module Resolver
 
-  # To be obsoleted, and is just returning center for now
-  def self.resolve_location(for_location)
-    [:center, for_location.id]
-  end
-
   def self.fetch_counterparty(by_type, for_id)
     Validators::Arguments.not_nil?(by_type, for_id)
     klass = Constants::Transaction::COUNTERPARTIES_AND_MODELS[by_type]

@@ -42,15 +42,13 @@ class MeetingScheduleManager
   
   # Gets all meeting schedules in effect on a given date
   def self.get_all_meeting_schedules_on_date(on_date, for_locations)
-    current_meeting_schedules = {}
-    for_locations.each { |location_type, location_instances|
-      location_ids_and_schedules = {}
-      location_instances.each { |location|
-        schedule_effective = location.meeting_schedule_effective(on_date)
-        location_ids_and_schedules[location.id] = schedule_effective if schedule_effective
-      }
-      current_meeting_schedules[location_type] = location_ids_and_schedules
-    }
+    current_meeting_schedules = []
+    for_locations.each do |location|
+      schedule_effective = location.meeting_schedule_effective(on_date)
+      if schedule_effective
+        current_meeting_schedules << [location.id, schedule_effective]
+      end
+    end
     current_meeting_schedules
   end
 
@@ -116,7 +114,8 @@ class MeetingSchedule
   property :meeting_time_begins_hours,  Integer, :min => EARLIEST_MEETING_HOURS_ALLOWED, :max => LATEST_MEETING_HOURS_ALLOWED
   property :meeting_time_begins_minutes,Integer, :min => EARLIEST_MEETING_MINUTES_ALLOWED, :max => LATEST_MEETING_MINUTES_ALLOWED
 
-  has n, :centers, :through => Resource
+  # Mapping with Meeting Schedule to Biz-Location
+  has n, :biz_locations, :through => Resource
   
   # getters added for conventional access
   def from_date; self.schedule_begins_on; end
@@ -128,7 +127,7 @@ class MeetingSchedule
     most_recent_schedule = existing_meeting_schedules.sort.first
     most_recent_schedule_date = most_recent_schedule.schedule_begins_on
     most_recent_schedule_date < meeting_schedule_info.schedule_begins_on ? true :
-       [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location.name}"]
+      [false, "A new meeting schedule can only begin after #{most_recent_schedule_date} for the specified location #{for_location.name}"]
   end
 
   def to_info
