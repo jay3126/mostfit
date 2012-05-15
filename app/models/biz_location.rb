@@ -8,8 +8,6 @@ class BizLocation
   property :creation_date, Date, :nullable => false, :default => Date.today
   property :deleted_at, ParanoidDateTime
 
-  # Mapping with Biz-Location to Meeting Schedule
-  has n, :meeting_schedules, :through => Resource
   belongs_to :location_level
 
   # Returns all locations that are belong to LocationLevel
@@ -28,11 +26,4 @@ class BizLocation
     "#{self.level_name ? self.level_name + " " : ""}#{self.name_and_id}"
   end
 
-  def meeting_schedule_effective(on_date)
-    query = {}
-    query[:schedule_begins_on.lte] = on_date
-    query[:order] = [:schedule_begins_on.desc]
-    self.meeting_schedules.first(query)
-  end
-  
 end

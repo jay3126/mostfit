@@ -79,7 +79,8 @@ class LocationHoliday
 
   # Returns a hash with query parameters for a location
   def self.predicates_for_location(location)
-    {:location_id => location.location_id}
+    location_type_string, location_id = Resolver.resolve_location(location)
+    {:location_type => location_type_string, :location_id => location_id}
   end
 
   # Returns a hash with query parameters that match the holiday date

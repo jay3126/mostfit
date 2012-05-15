@@ -56,6 +56,7 @@ class PaymentTransactions < Application
 
     #REDIRECT/RENDER
     if @message[:error].blank?
+      debugger
       redirect resource(:payment_transactions), :message => @message
     else
       render :new

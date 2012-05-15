@@ -2,8 +2,7 @@ module Constants
   module Locations
 
     CENTER = :center
-    BIZLOCATION = :biz_location
-    MODELS_AND_LOCATIONS = { "Center" => CENTER , 'BizLocation' => BIZLOCATION}
+    MODELS_AND_LOCATIONS = { "Center" => CENTER }
     LOCATIONS = [CENTER]
 
     LOCATION_LEVELS = [1, 2, 3, 4]
