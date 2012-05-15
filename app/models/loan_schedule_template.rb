@@ -18,10 +18,31 @@ class LoanScheduleTemplate
 
   def money_amounts; [:total_principal_amount, :total_interest_amount]; end
 
+  # Implements MarkerInterfaces::Recurrence#frequency
   def frequency; self.repayment_frequency; end
+
+  def self.create_schedule_template(name, total_principal_money_amount, total_interest_money_amount, num_of_installments, repayment_frequency, lending_product, principal_and_interest_amounts)
+    schedule_template = to_schedule_template(name, total_principal_money_amount, total_interest_money_amount, num_of_installments, repayment_frequency, lending_product)
+    ScheduleTemplateLineItem.create_schedule_line_items(schedule_template, principal_and_interest_amounts)
+  end
 
   def get_amortization
     #TBD
+  end
+
+  private
+
+  def self.to_schedule_template(name, total_principal_money_amount, total_interest_money_amount, num_of_installments, repayment_frequency, lending_product)
+    Validators::Arguments.not_nil?(name, total_principal_money_amount, total_interest_money_amount, num_of_installments, repayment_frequency)
+    schedule_template = {}
+    schedule_template[:name] = name
+    schedule_template[:total_principal_amount] = total_principal_money_amount.amount
+    schedule_template[:total_interest_amount] = total_interest_money_amount.amount
+    schedule_template[:currency] = total_principal_money_amount.currency
+    schedule_template[:num_of_installments] = num_of_installments
+    schedule_template[:repayment_frequency] = repayment_frequency
+    schedule_template[:lending_product] = lending_product
+    new(schedule_template)
   end
 
 end
@@ -53,11 +74,9 @@ class ScheduleTemplateLineItem
     schedule_line_items = []
 
     total_principal_amount = schedule_template.total_principal_amount
-    total_interest_amount = schedule_template.total_interest_amount
     currency = schedule_template.currency
-    num_of_installments = schedule_template.num_of_installments
 
-    disbursement = to_line_item(0, DISBURSEMENT, total_principal_amount, total_interest_amount, currency)
+    disbursement = to_line_item(0, DISBURSEMENT, total_principal_amount, 0, currency)
     schedule_line_items << disbursement
 
     installments = principal_and_interest_amounts.keys
@@ -73,6 +92,8 @@ class ScheduleTemplateLineItem
 
     schedule_template.schedule_template_line_items = schedule_line_items.sort
     schedule_template.save
+    raise Errors::DataError, schedule_template.errors.first.first unless schedule_template.saved?
+    schedule_template
   end
 
   def self.to_line_item(installment, payment_type, principal_amount, interest_amount, currency)
