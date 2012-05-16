@@ -22,7 +22,7 @@ namespace :mostfit do
       sl_no = 0
 
       f = File.open("tmp/pos_per_loan_#{DateTime.now.to_s}.csv", "w")
-      f.puts("\"Branch Name\", \"Center Name\", \"Client Name\", \"Loan System Id\", \"Loan Reference Number\", \"POS as on 29th Feb 2012\", \"POS as on 31st March 2012\", \"POS as on 29th Feb 2012 (without rounding)\", \"POS as on 31st March 2012 (without rounding)\"")
+      f.puts("\"Sl. No.\", \"Branch Name\", \"Center Name\", \"Client Name\", \"Loan System Id\", \"Loan Reference Number\", \"POS as on 29th Feb 2012\", \"POS as on 31st March 2012\", \"POS as on 29th Feb 2012 (without rounding)\", \"POS as on 31st March 2012 (without rounding)\"")
 
       loan_ids.each do |l|
         loan = Loan.get(l)
@@ -46,7 +46,7 @@ namespace :mostfit do
       end
       f.close
       t2 = Time.now
-      puts "Time taken: ", (t2-t1)
+      puts "Time taken: #{t2-t1} seconds"
       puts "The file is saved in tmp directory with the filename pos_per_loan"
     end
   end
