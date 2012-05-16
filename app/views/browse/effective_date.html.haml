@@ -1,0 +1,3 @@
+= form_for(:browse, :action => url(:controller => :browse,:action => :set_effective_date), :method => "POST", :class => "tall shaded") do
+  = date_select 'effective_date'
+  = submit "Update"

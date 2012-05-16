@@ -143,6 +143,15 @@ class Application < Merb::Controller
     end    
   end
 
+  def get_session_effective_date
+      session[:effective_date] || Date.today
+  end
+
+  def set_session_effective_date(date)
+    session.merge!(:effective_date => date)
+    session[:effective_date] == date
+  end
+
   private 
   def layout?
     return(request.xhr? ? false : :application)

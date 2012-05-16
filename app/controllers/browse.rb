@@ -164,6 +164,22 @@ class Browse < Application
     render
   end
 
+  def effective_date
+    @date = get_session_effective_date
+    display @date
+  end
+
+  def set_effective_date
+    message = {}
+    date = Date.parse(params[:effective_date])
+    if set_session_effective_date(date)
+      message[:notice] = "Effective date update successfully"
+    else
+      message[:error] = "Effective date cannot updated"
+    end
+    redirect url(:browse), :message => message
+  end
+
   private
   def get_centers_and_template
     if session.user.staff_member
