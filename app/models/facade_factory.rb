@@ -8,7 +8,8 @@ class FacadeFactory
   MEETING_FACADE = :meeting
   LOAN_FACADE = :loan
   LOCATION_FACADE = :location
-  FACADE_TYPES = { MEETING_FACADE => MeetingFacade, LOAN_FACADE => LoanFacade, LOCATION_FACADE => LocationFacade }
+  PAYMENT_FACADE = :payment
+  FACADE_TYPES = { MEETING_FACADE => MeetingFacade, LOAN_FACADE => LoanFacade, LOCATION_FACADE => LocationFacade, PAYMENT_FACADE => PaymentFacade }
 
   def initialize
     @created_at = DateTime.now
