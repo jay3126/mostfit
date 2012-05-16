@@ -56,8 +56,8 @@ class Ledger
     account_types_and_ledgers = {}
     opening_balance_amount, opening_balance_currency = 0, DEFAULT_CURRENCY
 
-    chart_name = chart_hash['name']
-    chart_type = chart_hash['chart_type']
+    chart_name = chart_hash['chart']['name']
+    chart_type = chart_hash['chart']['chart_type']
     chart = AccountsChart.first_or_create(:name => chart_name, :chart_type => chart_type)
 
     ACCOUNT_TYPES.each { |type|
