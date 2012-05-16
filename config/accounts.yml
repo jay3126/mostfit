@@ -1,6 +1,8 @@
 ---
 open_on: 2011-04-01
 chart:
+  name: Financial Accounting
+  chart_type: financial_accounting
   assets:
     - Cash
     - Bank account

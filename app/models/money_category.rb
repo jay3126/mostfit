@@ -39,6 +39,8 @@ class MoneyCategory
     ACCRUE_NEW_PERIOD_REVERSALS_OF_BROKEN_PERIOD_INTEREST_RECEIPTS => { :transacted_category => ACCRUAL, :receivable_category => TO_RECEIVE, :income_category => INTEREST_INCOME_FROM_LOANS, :owned_category => OWNED, :is_reversed => NOT_REVERSED }
   }
 
+  def key; self.description.to_sym; end
+
   def account_type_category_was_set?
     account_type_category ? true : [false, "no account type category was set"]
   end

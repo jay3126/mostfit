@@ -56,6 +56,10 @@ class Ledger
     account_types_and_ledgers = {}
     opening_balance_amount, opening_balance_currency = 0, DEFAULT_CURRENCY
 
+    chart_name = chart_hash['name']
+    chart_type = chart_hash['chart_type']
+    chart = AccountsChart.first_or_create(:name => chart_name, :chart_type => chart_type)
+
     ACCOUNT_TYPES.each { |type|
       ledgers = chart_hash['chart'][type.to_s]
       account_types_and_ledgers[type] = ledgers
@@ -67,7 +71,7 @@ class Ledger
       opening_balance_effect = DEFAULT_EFFECTS_BY_TYPE[type_sym]
       ledgers.each { |account_name|
         Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, 
-          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect)
+          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart)
       }
     }
   end

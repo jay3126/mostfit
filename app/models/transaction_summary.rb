@@ -1,11 +1,12 @@
 class TransactionSummary
   include DataMapper::Resource
-  include Constants::Accounting
+  include Constants::Properties, Constants::Accounting
   
   property :id,              Serial
   property :amount,          Float, :nullable => false
   property :currency,        Enum.send('[]', *CURRENCIES), :nullable => false, :default => DEFAULT_CURRENCY
-  property :effective_on,    Date, :nullable => false  
+  property :effective_on,    Date, :nullable => false
+  property :loan_id,         *INTEGER_NOT_NULL
   property :branch_id,       Integer, :nullable => false
   property :branch_name,     String, :nullable => false
   property :loan_product_id, Integer, :nullable => true
@@ -18,11 +19,11 @@ class TransactionSummary
   belongs_to :money_category
 
   def to_info
-    TransactionSummaryInfo.new(amount, currency, effective_on, branch_id, branch_name, loan_product_id, fee_type_id, money_category)
+    TransactionSummaryInfo.new(amount, currency, effective_on, loan_id, branch_id, branch_name, loan_product_id, fee_type_id, money_category)
   end
 
   def self.from_info(ts_info)
-    with_values = populate_values(ts_info.amount, ts_info.currency, ts_info.effective_on, ts_info.branch_id, ts_info.branch_name, ts_info.loan_product_id, ts_info.fee_type_id, ts_info.money_category)
+    with_values = populate_values(ts_info.amount, ts_info.currency, ts_info.effective_on, ts_info.loan_id,  ts_info.branch_id, ts_info.branch_name, ts_info.loan_product_id, ts_info.fee_type_id, ts_info.money_category)
     new(with_values)
   end
 
@@ -52,7 +53,7 @@ class TransactionSummary
     ACCRUE_REGULAR_INTEREST_RECEIPTS_ON_LOANS => { MODEL_TO_QUERY => LoanHistory, AMOUNT_FIELD => :scheduled_interest_due, DATE_COMPARISON => :date, GROUP_BY_FIELD => :branch_id }
   }
 
-  def self.get_transactions_grouped(money_category, on_date)
+  def self.get_raw_transactions(money_category, on_date)
     money_category_key = get_money_category_key(money_category)
     values_hash = INFO_MAPPING[money_category_key]
     raise StandardError, "no mapping found for transactions for money_category: #{money_category_key}" unless values_hash
@@ -62,9 +63,12 @@ class TransactionSummary
     amount_field = values_hash[AMOUNT_FIELD]
     group_by_field = values_hash[GROUP_BY_FIELD]
     fee_type_id = money_category.specific_income_type_id == NOT_A_VALID_INCOME_TYPE_ID ? nil : money_category.specific_income_type_id
-    
-    transaction_rows = get_transaction_rows(on_date, model_to_query, date_comparison, field_matches, fee_type_id)
 
+    get_transaction_rows(on_date, model_to_query, date_comparison, field_matches, fee_type_id)
+  end
+
+  def self.get_transactions_grouped(money_category, on_date)
+    transaction_rows = get_raw_transactions(money_category, on_date)
     group_transactions_and_add_amounts(transaction_rows, group_by_field, amount_field)
   end
 
@@ -108,6 +112,19 @@ class TransactionSummary
     summary_info
   end
 
+  def self.generate_raw_summary_info(money_category, on_date = Date.today)
+    raw_transaction_rows = get_raw_transactions(money_category, on_date)
+    raw_summary_info = []
+    branches_and_names = TransactionSummary.get_branches_and_names
+    amount_field = INFO_MAPPING[money_category.key][AMOUNT_FIELD]
+    raw_transaction_rows.each { |ts|
+      amount = ts.method(amount_field).call
+      txn_summary_info = TransactionSummaryInfo.new(amount, DEFAULT_CURRENCY, on_date, ts.loan.id, ts.branch.id, branches_and_names[ts.branch.id], nil, money_category.specific_income_type_id, money_category)
+      raw_summary_info.push(txn_summary_info)
+    }
+    raw_summary_info
+  end
+
   def self.get_accrual_categories
     category_descriptions = [SCHEDULED_DISBURSEMENTS_OF_LOANS, ACCRUE_REGULAR_PRINCIPAL_REPAYMENTS_ON_LOANS, ACCRUE_REGULAR_INTEREST_RECEIPTS_ON_LOANS].collect {|desc| desc.to_s}
     MoneyCategory.all(:description => category_descriptions)
@@ -126,7 +143,7 @@ class TransactionSummary
   def self.generate_accrual_summary_info(on_date = Date.today)
     summaries = []
     get_accrual_categories.each { |category|
-      summaries.push(generate_summary_info(category, on_date))
+      summaries.push(generate_raw_summary_info(category, on_date))
     }
     summaries.flatten
   end
@@ -187,11 +204,12 @@ class TransactionSummary
     create(with_values)
   end
 
-  def self.populate_values(amount, currency, effective_on, branch_id, branch_name, loan_product_id = nil, fee_type_id = nil, money_category = nil)
+  def self.populate_values(amount, currency, effective_on, loan_id, branch_id, branch_name, loan_product_id = nil, fee_type_id = nil, money_category = nil)
   	values = {}
   	values[:amount] = amount
     values[:currency] = currency
   	values[:effective_on] = effective_on
+    values[:loan_id] = loan_id
   	values[:branch_id] = branch_id
   	values[:branch_name] = branch_name
   	values[:loan_product_id] = loan_product_id || NOT_A_VALID_ASSET_TYPE_ID
@@ -205,10 +223,11 @@ end
 class TransactionSummaryInfo
   include Constants::Accounting
 
-  attr_reader :amount, :currency, :effective_on, :branch_id, :branch_name, :loan_product_id, :fee_type_id, :money_category
+  attr_reader :amount, :currency, :effective_on, :loan_id, :branch_id, :branch_name, :loan_product_id, :fee_type_id, :money_category
 
-  def initialize(amount, currency, effective_on, branch_id, branch_name, loan_product_id = nil, fee_type_id = nil, money_category = nil)
-    @amount = amount; @currency = currency; @effective_on = effective_on; @branch_id = branch_id; @branch_name = branch_name
+  def initialize(amount, currency, effective_on, loan_id, branch_id, branch_name, loan_product_id = nil, fee_type_id = nil, money_category = nil)
+    @amount = amount; @currency = currency; @effective_on = effective_on; @loan_id = loan_id
+    @branch_id = branch_id; @branch_name = branch_name
     @loan_product_id = loan_product_id || NOT_A_VALID_ASSET_TYPE_ID; @fee_type_id = fee_type_id || NOT_A_VALID_INCOME_TYPE_ID
     @money_category = money_category if money_category
   end
