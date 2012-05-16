@@ -32,6 +32,7 @@ module DataEntry
 
       unless @center.nil?
         @branch = @center.branch
+        @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@center.id, @date)
         @clients = Client.all(:center_id => @center.id, :fields => [:id, :name, :center_id, :client_group_id])
         @loans   = Loan.all(:c_center_id => @center.id, :rejected_on => nil)
         @disbursed_loans = @loans.all(:disbursal_date.not => nil)

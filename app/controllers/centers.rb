@@ -24,8 +24,9 @@ class Centers < Application
     @option = params[:option] if params[:option]
     @center = Center.get(id)
     raise NotFound unless @center
-    @branch  =  @center.branch if not @branch
-    @clients =  grouped_clients
+    @branch    =  @center.branch if not @branch
+    @weeksheet =  CollectionsFacade.new(session.user.id).get_collection_sheet(@center.id, @date)
+    @clients   =  grouped_clients
     if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
       display [@center, @clients, @date]
     else

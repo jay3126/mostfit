@@ -1,33 +1,26 @@
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
-  =form_for(@staff_member, :action => url(:day_sheet, @staff_member), :method => :get) do
+  = form_for(@staff_member, :action => url(:day_sheet, @staff_member), :method => :get) do
     Change date
     = date_select "date", @date
-    =submit "Go"
+    = submit "Go"
     - all_centers = @staff_member.centers
-    -if all_centers.length>0
+    - if all_centers.length>0
       = link_to 'previous day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.lt => @date).max(:date))
       = link_to 'next day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.gt => @date).min(:date)), :style => "padding-left: 120px;"
-%h1 
-  Daily Collection Sheet for 
-  = @staff_member.name
-  for 
-  = @date
+%h1
+  = "Daily Collection Sheet for #{@staff_member.name} for #{@date}"
 %p
   - if @centers.count > 0
     = link_to "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
   - else
-    %b
-      This Staff Manager has no collection today.
+    %b This Staff Manager has no collection today.
 %br
 %br
-- @centers.sort_by{|x| (x.meeting_time_hours || 0)*60 + (x.meeting_time_minutes || 0)}.each do |center|
+- @weeksheets.each do |@weeksheet|
+  - center = Center.get @weeksheet.at_center_id
   %h2
-    = center.name
-    (
-    = center.code
-    ) at 
-    = "#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
-  = partial "centers/payments", {:clients => center.clients, :branch => center.branch, :center => center, :date => @date, :loans => center.loans}
+    = "#{center.name} ( #{center.code} ) at #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
+  = partial "centers/payments"
   - clients = center.clients
   - loans_to_disburse = clients.loans(:scheduled_disbursal_date => @date)
   - if clients.count > 0 and loans_to_disburse.count > 0
@@ -40,16 +33,16 @@
       - loans_to_disburse.each do |loan|
         - tot_disbursement += loan.amount
         %tr
-          %td 
+          %td
             = loan.client.name
-          %td 
+          %td
             = loan.amount
       %tr{ :style => 'border-bottom: 2px solid;font-weight: bold;border-top: solid 1px #aaa;' }
         %td
           Total Disbursement
         %td
           = tot_disbursement
-      %tfoot    
+      %tfoot
         %tr
           %td{ :colspan => 12 }
   - else

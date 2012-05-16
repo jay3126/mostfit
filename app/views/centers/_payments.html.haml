@@ -4,34 +4,27 @@
     %th{:rowspan => "2"}=I18n.t "center.payment.table.loan_id", :default => "loan id"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.amount", :default => "amount"
     %th{:rowspan => "2"}=I18n.t "center.payment.table.outstanding", :default => "outstanding"
-    %th{:rowspan => "2"}=I18n.t "center.payment.table.disbursed_on", :default => "disbursed on" 
-    %th{:rowspan => "2"}=I18n.t "center.payment.table.installment", :default => "installment" 
+    %th{:rowspan => "2"}=I18n.t "center.payment.table.disbursed_on", :default => "disbursed on"
+    %th{:rowspan => "2"}=I18n.t "center.payment.table.installment", :default => "installment"
     %th{:colspan => 2, :style => "border: solid black 1px"}=I18n.t "center.payment.table.principal", :default => "principal"
     %th{:colspan => 2, :style => "border: solid black 1px"}=I18n.t "center.payment.table.interest", :default => "intrest"
     %th{:colspan => 2, :style => "border: solid black 1px;"}=I18n.t "center.payment.table.fee", :default => "fee"
     %th{:colspan => 2, :style => "border: solid black 1px;"}=I18n.t "center.payment.table.total", :default => "total"
   %tr{:style => "border: solid 1px black;"}
     %th.due.left-numeric=I18n.t "center.payment.table.due", :default => "due"
-    %th.paid.right-numeric=I18n.t "center.payment.table.paid", :default => "paid" 
+    %th.paid.right-numeric=I18n.t "center.payment.table.paid", :default => "paid"
     %th.due.left-numeric=I18n.t "center.payment.table.due", :default => "due"
     %th.paid.right-numeric=I18n.t "center.payment.table.paid", :default => "paid"
-    %th.due.left-numeric=I18n.t "center.payment.table.due", :default => "due" 
+    %th.due.left-numeric=I18n.t "center.payment.table.due", :default => "due"
     %th.paid.right-numeric=I18n.t "center.payment.table.paid", :default => "paid"
     %th.due.left-numeric=I18n.t "center.payment.table.due", :default => "due"
     %th.paid.right-numeric=I18n.t "center.payment.table.paid", :default => "paid"
   %tbody
-    - lids = loans.map{|x| x.id}
-    - histories = LoanHistory.all(:loan_id => lids, :date => @date, :status => [:outstanding, :disbursed])
-    - histories += (lids - histories.map{|lh| lh.loan_id}).map{|lid| Loan.get(lid).loan_history(:date.lt => @date).last}.compact.select{|lh| [:disbursed, :outstanding].include?(lh.status) }
-    - fees_applicable = Fee.due(loans.map{|x| x.id}, {:date => @date})
-    - fees_paid       = {}
-    - Payment.all(:received_on => @date, :type => :fees, :loan_id => loans.map{|x| x.id}, :fields => [:id, :amount]).map{|p| fees_paid[p.loan_id]||=0; fees_paid[p.loan_id] +=  p.amount}
-    - tot_amount, tot_outstanding, tot_installments, tot_principal_due, tot_principal_paid, tot_interest_due, tot_interest_paid, tot_fee_due, tot_fee_paid, tot_total_due, tot_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     - num_loans_to_pay = num_fees_to_pay = 0
-    - clients.group_by{|x| x.client_group}.sort_by{|x| x[0] ? x[0].name : "none"}.each do |group, client_grouped|
+    - @weeksheet.groups.each do |group|
       %tr.group{:style => 'font-weight: bold; text-align: center; background: #cfcfcf'}
         %td{:colspan => 6}
-          =group ? group.name : "none"
+          = group ? group[1] : "none"
         %td.left-numeric.due
         %td.right-numeric.paid
         %td.left-numeric.due
@@ -40,88 +33,63 @@
         %td.right-numeric.paid
         %td.left-numeric.due
         %td.right-numeric.paid
+      - loan_row_count = 0
+      - center = Center.get @weeksheet.at_center_id
+      - collection_sheets = @weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
       - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      - client_grouped.sort_by{|x| x.name}.each do |client| 
-        - loan_row_count = 0
-        - loans.find_all{|x| x.client_id==client.id and (x.approved_on || x.disbursal_date)}.each do |loan|
-          - lh = histories.find_all{|x| x.loan_id==loan.id}.sort_by{|x| x.created_at}[-1]
-          - next if not lh
-          - next if lh and LOANS_NOT_PAYABLE.include?(lh.status) and not (lh.principal_paid>0 or lh.interest_paid>0)
-          - next unless loan.respond_to?(:approved_on) and loan.approved_on <= @date
-          - if lh and lh.total_principal_due and lh.total_principal_due > 0
-            - pdue = lh.total_principal_due - lh.total_principal_paid
-            - idue = lh.total_interest_due - lh.total_interest_paid
-          - else
-            - pdue = [(lh ? lh.principal_due : 0), 0].max
-            - idue = [(lh ? lh.interest_due : 0), 0].max
-          - ppaid = (lh ? lh.principal_paid : 0)
-          - ipaid = [(lh ? lh.interest_paid : 0), 0].max
-          - fee_due = loan.total_fees_payable_on(@date) #fees_applicable[loan.id] ? fees_applicable[loan.id].due : 0
-          - fee_paid = fees_paid[loan.id] || 0
-          - #next if (pdue + ppaid + idue + ipaid + fee_due + fee_paid == 0)
-          - loan_row_count += 1
-          %tr{ :class => cycle('odd','even') }
-            - fee = 0
-            %td
-              %input{:type => "checkbox",:name => "#{loan.id}"}
-              %b= link_to client.name, resource(branch, center, client)            
-            %td
-              = link_to loan.id, url(:quick_link, "loans", loan.id)
-            %td
-              - i = loan.amount
-              %b= i.to_currency
-              - tot_amount += i
-              - grp_amount += i
-            %td
-              - i = lh ? lh.actual_outstanding_principal : 0
-              %b= i.to_currency
-              - tot_outstanding += i
-              - grp_outstanding += i
-            %td
-              = loan.disbursal_date.to_s
-            %td
-              - i = loan.number_of_installments_before(date)
-              = i
-              - tot_installments += i
-              - grp_installments += i
-            %td.left-numeric.due
-              = pdue.to_currency
-              - tot_principal_due += pdue
-              - grp_principal_due += pdue
-              - num_loans_to_pay += 1 if pdue > 0
-            %td.right-numeric.paid
-              = ppaid.to_currency
-              - tot_principal_paid += ppaid
-              - grp_principal_paid += ppaid
-            %td.left-numeric.due
-              = idue.to_currency
-              - tot_interest_due += idue
-              - grp_interest_due += idue
-            %td.right-numeric.paid
-              = ipaid.to_currency
-              - tot_interest_paid += ipaid
-              - grp_interest_paid += ipaid
-            %td.left-numeric.due
-              = fee_due.to_currency
-              - tot_fee_due += fee_due
-              - grp_fee_due += fee_due
-              - num_fees_to_pay += 1 if fee_due > 0
-            %td.right-numeric.paid
-              = fee_paid.to_currency
-              - tot_fee_paid += fee_paid
-              - grp_fee_paid += fee_paid
-            %td.left-numeric.due
-              = (pdue + idue + fee_due).to_currency
-              - tot_total_due += (pdue + idue + fee_due)
-              - grp_total_due += (pdue + idue + fee_due)
-            %td.right-numeric.paid
-              = (ppaid + ipaid + fee_paid).to_currency
-              - tot_total_paid += (ppaid + ipaid + fee_paid)
-              - grp_total_paid += (ppaid + ipaid + fee_paid)
+      - collection_sheets.each do |ws|
+        - loan_row_count += 1
+        %tr{ :class => cycle('odd','even') }
+          - fee = 0
+          - client = Client.get ws.borrower_id
+          %td
+            %b= link_to ws.borrower_name, resource(center.branch, center, client)
+          %td
+            = link_to ws.loan_id, url(:quick_link, "loans", ws.loan_id)
+          %td
+            - i = ws.loan_disbursed_amount
+            %b= i.to_currency
+            - grp_amount += i
+          %td
+            - i = ws.loan_outstanding
+            %b= i.to_currency
+            - grp_outstanding += i
+          %td
+            = ws.loan_disbursed_date
+          %td
+            - i = ws.loan_installment_number
+            = i
+            - grp_installments += i
+          %td.left-numeric.due
+            = ws.principal_due_today.to_currency
+            - grp_principal_due += ws.principal_due_today
+            - num_loans_to_pay += 1 if ws.principal_due_today > 0
+          %td.right-numeric.paid
+            = ws.principal_paid_today.to_currency
+            - grp_principal_paid += ws.principal_paid_today
+          %td.left-numeric.due
+            = ws.interest_due_today.to_currency
+            - grp_interest_due += ws.interest_due_today
+          %td.right-numeric.paid
+            = ws.interest_paid_today.to_currency
+            - grp_interest_paid += ws.interest_paid_today
+          %td.left-numeric.due
+            = ws.fee_due_today.to_currency
+            - grp_fee_due += ws.fee_due_today
+            - num_fees_to_pay += 1 if ws.fee_due_today > 0
+          %td.right-numeric.paid
+            = ws.fee_paid_today.to_currency
+            - grp_fee_paid += ws.fee_paid_today
+          %td.left-numeric.due
+            = ws.total_due.to_currency
+            - grp_total_due += ws.total_due
+          %td.right-numeric.paid
+            = ws.total_paid.to_currency
+            - grp_total_paid += ws.total_paid
         - if loan_row_count == 0 and not params[:filter]
           %tr{ :class => cycle('odd','even') }
             %td
-              %b= link_to client.name, resource(branch, center, client)
+              %b= link_to client.name, resource(center.branch, center, client)
             %td{ :colspan => 5, :style => "text-align: center;" }
               %i nothing outstanding
             %td.left-numeric.due
@@ -132,7 +100,7 @@
             %td.right-numeric.paid
             %td.left-numeric.due
             %td.right-numeric.paid
-      %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }  
+      %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }
         %td{:colspan => 2}
         %td.numeric
           %b= grp_amount.to_currency
@@ -155,11 +123,9 @@
           %b= grp_total_due.to_currency
         %td.right-numeric.paid
           %b= grp_total_paid.to_currency
-    %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }  
+    %tr{:style => 'border-bottom: 2px solid; border-top: 1px solid;' }
     %tr
       %td
-        %button{:onclick => 'javascript: a = []; $(":checked").each(function(){a.push(this.name)});alert(a);document.location = "/loans/bulk_reallocate?style=prorata&ids=" + a.join("_");'}
-          Bulk Reallocate
       %td
       %td.numeric
       %td.numeric
@@ -175,7 +141,7 @@
       %td.numeric
       %td.numeric
       %td.numeric
-      
-  %tfoot    
+
+  %tfoot
     %tr
-      %td{ :colspan => 15}  
+      %td{ :colspan => 15}

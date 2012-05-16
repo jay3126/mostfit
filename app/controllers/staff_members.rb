@@ -75,10 +75,11 @@ class StaffMembers < Application
   def day_sheet(id)
     @staff_member = StaffMember.get(id)
     raise NotFound unless @staff_member
-    @date      = params[:date] ? parse_date(params[:date]) : Date.today
-    @date      = @date.holiday_bump
-    center_ids = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
-    @centers   = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
+    @date       = params[:date] ? parse_date(params[:date]) : Date.today
+    @date       = @date.holiday_bump
+    center_ids  = LoanHistory.all(:date => [@date, @date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
+    @weeksheets = CollectionsFacade.new(@staff_member.id).get_collection_sheet_for_staff(@date)
+    @centers    = @staff_member.centers(:id => center_ids).sort_by{|x| x.name}
     if params[:format] == "pdf"
       file = @staff_member.generate_collection_pdf(@date)
       filename   = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, "collection_sheets", "collection_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
