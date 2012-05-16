@@ -20,6 +20,8 @@ class LoanBaseSchedule
   property :num_of_installments,    *TENURE
   property :created_at,             *CREATED_AT
 
+  def money_amounts; [:total_principal_amount, :total_interest_amount]; end
+
   # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency; self.repayment_frequency; end
 
@@ -46,6 +48,11 @@ class LoanBaseSchedule
     schedule_date ? get_schedule_line_item(schedule_date) : nil
   end
 
+  def self.create_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending, principal_and_interest_amounts)
+    base_schedule = to_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending)
+    BaseScheduleLineItem.create_schedule_line_items(base_schedule, principal_and_interest_amounts)
+  end
+
   # Fetches a list of schedule dates ordered chronologically
   def get_schedule_dates
     self.base_schedule_line_items.sort.collect {|line_item| line_item.on_date}
@@ -58,6 +65,21 @@ class LoanBaseSchedule
   # @param [Date] on_date
   def get_schedule_line_item(on_date)
     self.base_schedule_line_items.first(:on_date => on_date)
+  end
+
+  def self.to_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending)
+    Validators::Arguments.not_nil?(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, lending,num_of_installments)
+    base_schedule = {}
+    base_schedule[:total_principal_amount] = total_principal_money_amount.amount
+    base_schedule[:total_interest_amount] = total_interest_money_amount.amount
+    base_schedule[:currency] = total_principal_money_amount.currency
+    base_schedule[:first_disbursed_on] = first_disbursed_on
+    base_schedule[:first_receipt_on] = first_receipt_on
+    base_schedule[:repayment_frequency] = repayment_frequency
+    base_schedule[:tenure] = tenure
+    base_schedule[:num_of_installments] = num_of_installments
+    base_schedule[:lending] = lending
+    new(base_schedule)
   end
 
 end
@@ -81,6 +103,11 @@ class BaseScheduleLineItem
   property :interest_balance_after,   *MONEY_AMOUNT
   property :currency,                 *CURRENCY
   property :created_at,               *CREATED_AT
+
+  def money_amounts
+    [ :principal_balance_before, :principal_amount_due, :principal_balance_after,
+      :interest_balance_before, :interest_amount_due, :interest_balance_after ]
+  end
 
   # Order chronologically by on_date
   def <=>(other)
@@ -107,8 +134,8 @@ class BaseScheduleLineItem
     installments.each { |num|
       next unless num > 0
       principal_and_interest = principal_and_interest_amounts[num]
-      principal_amount_due = principal_and_interest[PRINCIPAL_AMOUNT]
-      interest_amount_due = principal_and_interest[INTEREST_AMOUNT]
+      principal_amount_due = principal_and_interest[PRINCIPAL_AMOUNT].amount
+      interest_amount_due = principal_and_interest[INTEREST_AMOUNT].amount
 
       repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency)
 
@@ -120,36 +147,38 @@ class BaseScheduleLineItem
     }
 
     base_schedule.base_schedule_line_items = schedule_line_items
-    base_schedule.save
+    was_saved = base_schedule.save
+    raise Errors::DataError, base_schedule.errors.first.first unless was_saved
+    base_schedule
   end
 
   # Constructs an instance of this class
   def self.get_instance(installment, on_date, payment_type, principal_balance_before, principal_amount_due, interest_balance_before, interest_amount_due, currency, principal_balance_after = nil, interest_balance_after = nil)
     Validators::Amounts.is_positive?(principal_balance_before, principal_amount_due, interest_balance_before, interest_amount_due)
     Validators::Amounts.is_positive?(principal_balance_after, interest_balance_after) if payment_type == DISBURSEMENT
-    construction = {}
-    construction[:installment] = installment
-    construction[:on_date] = on_date
-    construction[:payment_type] = payment_type
+    line_item = {}
+    line_item[:installment] = installment
+    line_item[:on_date] = on_date
+    line_item[:payment_type] = payment_type
 
     if (payment_type == DISBURSEMENT)
-      construction[:principal_balance_before] = 0
-      construction[:principal_amount_due] = 0
-      construction[:principal_balance_after] = principal_balance_after
-      construction[:interest_balance_before] = 0
-      construction[:interest_amount_due] = 0
-      construction[:interest_balance_after] = interest_balance_after
+      line_item[:principal_balance_before] = 0
+      line_item[:principal_amount_due] = 0
+      line_item[:principal_balance_after] = principal_balance_after
+      line_item[:interest_balance_before] = 0
+      line_item[:interest_amount_due] = 0
+      line_item[:interest_balance_after] = interest_balance_after
     else
-      construction[:principal_balance_before] = principal_balance_before
-      construction[:principal_amount_due] = principal_amount_due
-      construction[:principal_balance_after] = principal_balance_before - principal_amount_due
-      construction[:interest_balance_before] = interest_balance_before
-      construction[:interest_amount_due] = interest_amount_due
-      construction[:interest_balance_after] = interest_balance_before - interest_amount_due
+      line_item[:principal_balance_before] = principal_balance_before
+      line_item[:principal_amount_due] = principal_amount_due
+      line_item[:principal_balance_after] = principal_balance_before - principal_amount_due
+      line_item[:interest_balance_before] = interest_balance_before
+      line_item[:interest_amount_due] = interest_amount_due
+      line_item[:interest_balance_after] = interest_balance_before - interest_amount_due
     end
 
-    construction[:currency] = currency
-    new(construction)
+    line_item[:currency] = currency
+    new(line_item)
   end
 
 end
