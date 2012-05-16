@@ -520,6 +520,12 @@ class Loans < Application
     end
   end
 
+  def transaction_summaries
+    @loan = Loan.get(params[:id])
+    @transaction_summaries = TransactionSummary.all(:loan_id => @loan.id)
+    partial 'loans/transaction_summaries', :layout => layout?
+  end
+
   private
   def get_context
     if params[:id]

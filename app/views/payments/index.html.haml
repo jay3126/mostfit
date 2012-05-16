@@ -182,6 +182,7 @@
       %li#misc Miscellaneous
       %li#history History
       %li#deleted Deleted Payments
+      %li#transaction_summaries Transaction Summaries
       
     %div.tab
       %h2 
@@ -278,3 +279,5 @@
         %h3 No deleted payments
       - else
         = partial "payments/deleted_payments", {:pmts => deleted_payments, :context => :deleted}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :loans, :action => 'transaction_summaries', :id => @loan.id)}
