@@ -40,7 +40,8 @@
                   - s_no += 1
                   = s_no
                 %td
-                  = lpa.loan_application_id
+                  =# link_to lpa.loan_application_id, "/loan_applications/#{lpa.loan_application_id}"
+                  = link_to lpa.loan_application_id, url(:controller => :loan_applications, :action => :show, :id => lpa.loan_application_id)
                 %td
                   = lpa.client_name
                 %td

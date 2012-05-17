@@ -7,6 +7,12 @@ class LoanApplications < Application
     display @loan_applications
   end
 
+  def show(id)
+    @loan_app = LoanApplication.get(id)
+    raise NotFound unless @loan_app
+    display @loan_app
+  end
+  
   # this controller is responsible for the bulk addition of clients to loan applications
   def bulk_new
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
