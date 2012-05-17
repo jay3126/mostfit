@@ -180,6 +180,7 @@ class Centers < Application
   def weeksheet
     @clients_grouped = grouped_clients
     @clients = @center.clients
+    @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@center.id, @date)
     partial "centers/weeksheet"
   end
   
