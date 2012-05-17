@@ -14,10 +14,11 @@ module Merb
 
     def current_user_info
       staff_or_funder = ""
-      staff_or_funder = "#{session.user.staff_member.name}" if session.user.staff_member 
+      staff_or_funder = session.user.staff_member.blank? ? "#{session.user.name}" : "#{session.user.staff_member.name}"
       f = Funder.first(:user_id => session.user.id)
       staff_or_funder += " #{f.name}" if f
-      "#{staff_or_funder} logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) | #{link_to 'log out', url(:logout)}"
+      effective_date = session[:effective_date].blank? ? Date.today : session[:effective_date]
+      "#{staff_or_funder} Logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) #{link_to effective_date, url(:controller => :browse, :action => :effective_date)} | #{link_to 'log out', url(:logout)}"
     end
 
     #returns a hash with all the branches with the branch ids as keys

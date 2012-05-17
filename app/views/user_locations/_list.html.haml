@@ -1,0 +1,34 @@
+%br
+- if @location_levels.count == 0
+  %p
+    %i No Location Mapping have been created yet.
+- else
+  %table.narrow
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Name
+        %th
+          Location Level
+        %th
+          No. Of Location
+        %th
+          Created On
+    %tr
+      - for location_level in @location_levels
+        %tr
+          %td
+            = location_level.id
+          %td
+            = link_to location_level.name, "#", :onclick => "jQuery(this).next().toggle(); return false;"
+            - @biz_locations = location_level.biz_locations
+            #location{:style => "display : none"}
+              = partial 'user_locations/location_list'
+          %td
+            = location_level.level
+          %td
+            = location_level.biz_locations.count
+          %td
+            = location_level.creation_date.strftime("%Y-%m-%d")

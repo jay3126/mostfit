@@ -1,0 +1,23 @@
+%br
+- if @biz_locations.count == 0
+  %p
+    %i No Location Mapping have been created yet.
+- else
+  %table{:class => 'narrow'}
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Name
+        %th
+          Created On
+    %tr
+      - for location in @biz_locations
+        %tr
+          %td
+            = location.id
+          %td
+            = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
+          %td
+            = location.creation_date.strftime("%Y-%m-%d")

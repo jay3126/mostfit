@@ -1,0 +1,39 @@
+%h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.odd
+    %th.odd Reports to
+    %td
+      %b= @biz_location.name
+  %tr.even
+    %th.even Formation
+    %td
+      = "#{@biz_location.creation_date}( #{@biz_location.creation_date.strftime('%A')} )"
+  %tr.odd
+    %th.odd Manager By
+    %td= link_to @biz_location.name, '#', :target => "_blank"
+ 
+%div.tab_container.shaded
+  %ul.tabs
+    %li#Location
+      = @location_level.name
+    %li#Staff
+      Staff
+    %li#Customers
+      Customers
+    %li#Loans
+      Loans
+    %li#History
+      History
+  %div.tab
+    %div#location_list
+      =partial "user_locations/location_list"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}

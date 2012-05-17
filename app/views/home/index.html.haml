@@ -1,14 +1,7 @@
-%h1
-  = link_to @staff.name, resource(@staff)
-  Logged in as
-  = link_to @user.name, resource(@user)
-  = "( Relationship officer)"
-  = link_to @effective_date, url(:controller => :browse, :action => :effective_date)
-%hr
 %div.tab_container.shaded
   %ul.tabs
     %li#Locations
-      Locationss
+      Locations
     %li#Loans
       Loans
     %li#Collections
@@ -22,7 +15,7 @@
 
   %div.tab
     %div#location_list
-      =#partial "centers/list"
+      =partial "user_locations/list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}
   %div.tab

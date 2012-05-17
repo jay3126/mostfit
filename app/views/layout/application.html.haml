@@ -1,10 +1,10 @@
 !!! Strict
 %html{ "xml:lang" => "en", :lang => "en", :xmlns => "http://www.w3.org/1999/xhtml" }
   %head
-    %meta{ :content => "text/html; charset=utf-8", "http-equiv" => "content-type" }/
+    %meta{ :content => "text/html; charset=utf-8", "http-equiv" => "content-type" }
     %title
       = page_title_str = page_title
-    %link{ :rel => "icon", :type => "image/ico", :href => "/favicon.ico" }/
+    %link{ :rel => "icon", :type => "image/ico", :href => "/favicon.ico" }
     = css_include_tag :screen, :media => "screen, projection"
     = css_include_tag :print, :media => "print"
     /= css_include_tag :style, :media => "screen, projection"
@@ -54,22 +54,16 @@
       = breadcrumbs
       #login
         - if session.authenticated?
-          =link_to 'change password', url(:change_password)
-          |
           = current_user_info
         - else
           existing users can
           %b= link_to 'login', url(:login)
           to proceed
-        - if count = DirtyLoan.pending.count and count > 0
-          %i
-            == (#{count} loans in queue)
-
     #content
       .container
         %p
         - if message
-          #flash-messages.span-17.prefix-5.suffix-5.last            
+          #flash-messages.span-17.prefix-5.suffix-5.last
             - message.each do |key, value|
               .flash{ :class => key.to_s }
                 %p= value.gsub("\n", "<br/>")
