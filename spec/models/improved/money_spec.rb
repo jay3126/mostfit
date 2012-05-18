@@ -6,7 +6,9 @@ describe Money do
     @supported_currencies = Constants::Money::CURRENCIES
     @default_currency = Constants::Money::DEFAULT_CURRENCY
     @currency_multipliers = Constants::Money::CURRENCIES_LEAST_UNITS_MULTIPLIERS
+    @gyarah = Money.new(11, @default_currency)
     @ikkis = Money.new(21, @default_currency)
+    @ikyavan = Money.new(51, @default_currency)
     @ek_sau_ek = Money.new(101, @default_currency)
     @INR = Constants::Money::INR
     @USD = Constants::Money::USD
@@ -136,6 +138,17 @@ describe Money do
     result_hash[:interest_amount].should == interest_amount
     result_hash[:currency].should == currency
     result_hash.keys.length.should == 3
+  end
+
+  it "money is compared by amount when in the same currency" do
+
+    (@ikkis < @ek_sau_ek).should be_true
+    (@ikkis > @gyarah).should be_false
+    [@ek_sau_ek, @gyarah, @ikkis, @ikyavan].sort.should == [@gyarah, @ikkis, @ikyavan, @ek_sau_ek]
+
+    quid = Money.new(20, :USD)
+    (@ikkis < quid).should be_nil
+
   end
 
 end

@@ -1,5 +1,6 @@
 class Money
   include Constants::Money
+  include Comparable
 
   attr_reader :amount, :currency
 
@@ -31,6 +32,11 @@ class Money
   end
 
   alias eql? ==
+
+  # Money amounts in the same currency compare by amount
+  def <=>(other)
+    other.is_a?(Money) ? (other.currency == self.currency ? self.amount <=> other.amount : nil) : nil
+  end
 
   # Two money instances can only be added together if they are the same currency
   # They are added by taking the simple arithmetic sum of their amounts and preserving the currency
