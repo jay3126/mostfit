@@ -17,7 +17,7 @@
           - cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
             %tr
               %td
-                = loan_application.id
+                = link_to loan_application.id, url(:controller => :loan_applications, :action => :show, :id => loan_application.id)
               %td
                 = loan_application.client_name
               %td
