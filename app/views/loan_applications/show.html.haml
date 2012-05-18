@@ -26,7 +26,7 @@
       %td
         = loan_application.status
       %td
-        = link_to "Edit", url(:controller => :loan_applications, :action => :edit, :id => loan_application.id)
+        =# link_to "Edit", url(:controller => :loan_applications, :action => :edit, :id => loan_application.id)
         =# link_to "Edit", "/loan_applications/#{loan_application.id}"
 
 = link_to '<< Back', request.env['HTTP_REFERER']
