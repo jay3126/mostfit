@@ -1,0 +1,39 @@
+.menu-strip
+  = link_to 'Add Meeting Schedule', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+#meeting_div(style = "display : none")
+  = form_for(@meeting_schedule, :action => url(:controller => :meeting_schedules,:action => :create, :biz_location_id => @biz_location.id), :method => "POST", :class => "tall shaded") do
+    = partial 'meeting_schedules/fields'
+    = submit 'Create Meeting Schedule', :class => "greenButton"
+%br
+%table.narrow.form{ :width => '80%' }
+  %thead
+    %tr
+      %td
+      %td
+      %td
+        Begin On
+      %td
+        Weekday
+      %td
+        Frequency
+      %td
+        Meeting Time
+      %td
+        Description
+  - @meeting_schedule_infos.sort.each do |msi|
+    %tr{ :class => cycle('odd','')}
+      %td
+      %td
+      %td
+        = msi.schedule_begins_on
+      %td
+        = Constants::Time.get_week_day(msi.schedule_begins_on)
+      %td
+        = msi.meeting_frequency
+      %td
+        = msi.meeting_begins_at
+      %td
+        = msi.to_s
+  %tfoot
+    %tr
+      %td{ :colspan => 7 }

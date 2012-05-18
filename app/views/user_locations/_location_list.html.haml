@@ -18,6 +18,9 @@
           %td
             = location.id
           %td
-            = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
+            - if location.location_level.level == 0
+              = link_to location.name, url(:controller => :user_locations, :action => :meeting_schedule, :id => location.id)
+            -else
+              = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
           %td
             = location.creation_date.strftime("%Y-%m-%d")

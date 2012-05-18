@@ -1,0 +1,27 @@
+%div.tab_container.shaded
+  %ul.tabs
+    %li#MeetingSchedule
+      Meeting Schedule
+    %li#Meeting
+      Meeting
+    %li#Collections
+      Collections
+    %li#Customers
+      Customers
+    %li#Loan
+      Loans
+    %li#History
+      History
+  %div.tab
+    %div#location_list
+      =partial "user_locations/meeting_schedule_list"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => '#'}

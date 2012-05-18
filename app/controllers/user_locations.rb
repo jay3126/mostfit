@@ -18,4 +18,13 @@ class UserLocations < Application
     display @biz_locations
   end
 
+  def meeting_schedule
+    @biz_location = BizLocation.get params[:id]
+    raise NotFound unless @biz_location
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
+    @meeting_schedule_infos = mf.get_meeting_schedules(@biz_location) rescue []
+    @meeting_schedule = MeetingSchedule.new
+    display @meeting_schedule_infos
+  end
+
 end
