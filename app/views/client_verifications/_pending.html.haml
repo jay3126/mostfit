@@ -45,7 +45,7 @@
               - @loan_applications_pending_verification.each do |l|
                 %tr
                   %td
-                    = l.id
+                    = link_to l.id, "/loan_applications/#{l.id}"
                   %td
                     = l.client_name
                   %td

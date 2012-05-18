@@ -47,7 +47,7 @@
         - @loan_file.loan_applications.each do |lap|
           %tr
             %td
-              = lap.id
+              = link_to lap.id, "/loan_applications/#{lap.id}"
             %td
               = lap.client_name
             %td

@@ -32,7 +32,7 @@
           - loan_application = LoanApplication.get(response.loan_application_id)
           %tr
             %td
-              = loan_application.id
+              = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
             %td
               = loan_application.client_name
             %td

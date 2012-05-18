@@ -14,7 +14,6 @@
       %th Address
       %th State
       %th pincode
-      %th Action
   %tbody
     - loan_application = @loan_app
     %tr
@@ -40,9 +39,6 @@
         = loan_application.client_state.humanize
       %td
         = loan_application.client_pincode
-      %td
-        = link_to "Edit", url(:controller => :loan_applications, :action => :edit, :id => loan_application.id)
-        =# link_to "Edit", "/loan_applications/#{loan_application.id}"
 %br
 
-= link_to '<< Back', request.env['HTTP_REFERER']
+=# link_to '<< Back', request.env['HTTP_REFERER']

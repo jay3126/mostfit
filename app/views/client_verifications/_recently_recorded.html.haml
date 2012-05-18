@@ -41,7 +41,7 @@
         - loan_applications_recently_recorded_sorted.each do |l|
           %tr
             %td
-              = l.loan_application_id
+              = link_to l.loan_application_id, "/loan_applications/#{l.loan_application_id}"
             %td
               = l.client_name
             %td
