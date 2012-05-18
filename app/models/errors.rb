@@ -8,5 +8,8 @@ module Errors
 
   # Raised when an instance does not support a particular operation
   class OperationNotSupportedError < StandardError; end
+
+  # Raised when there is an issue due to a temporary or permanent problem with expected configuration
+  class InvalidConfigurationError < StandardError; end
     
 end

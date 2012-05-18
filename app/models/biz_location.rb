@@ -10,10 +10,24 @@ class BizLocation
 
   belongs_to :location_level
 
-  # Returns all locations that are belong to LocationLevel
-  def self.all_locations_at(location_level)
-    raise ArgumentError, "Please supply an instance of LocationLevel" unless location_level.is_a?(LocationLevel)
-    all(:location_level => location_level)
+  # Returns all locations that belong to LocationLevel
+  def self.all_locations_at_level(by_level_number)
+    level = LocationLevel.get_level_by_number(by_level_number)
+    all(:location_level => level)
+  end
+
+  # Create a new location by specifying the name, the creation date, and the level number (not the level)
+  def self.create_new_location(by_name, on_creation_date, at_level_number)
+    raise ArgumentError, "Level numbers begin with zero" if (at_level_number < 0)
+    level = LocationLevel.get_level_by_number(at_level_number)
+    raise Errors::InvalidConfigurationError, "No level was located for the level number: #{at_level_number}" unless level
+    location = {}
+    location[:name] = by_name
+    location[:creation_date] = on_creation_date
+    location[:location_level] = level
+    new_location = create(location)
+    raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
+    new_location
   end
 
   # Gets the name of the LocationLevel that this location belongs to
