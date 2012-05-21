@@ -12,4 +12,13 @@ class LoanDueStatus
 
   belongs_to :lending
 
+  def self.most_recent_status_record
+    first(:order => [:on_date.desc, :created_at.desc])
+  end
+
+  def self.most_recent_status_and_date
+    status_record = most_recent_status_record
+    [ status_record.lending_id, status_record.due_status, status_record.on_date ]
+  end
+
 end
