@@ -56,6 +56,7 @@ Merb::Router.prepare do
   resources :insurance_companies
   resources :occupations
   resources :loan_purposes
+  resources :lending_products
   resources :regions do
     resources :areas do
       resources :branches

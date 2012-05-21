@@ -25,4 +25,7 @@ class LoanFacade < StandardFacade
     #TBD
   end
 
+  def get_money_instance(*regular_amount_str)
+    MoneyManager.get_money_instance(*regular_amount_str)
+  end
 end

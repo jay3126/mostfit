@@ -1,0 +1,33 @@
+%h1 Lending Products
+
+- unless @lending_products.blank?
+  %table.form{:style => "width:100%; border:1px;"}
+    %thead
+      %tr
+        %td
+          Name
+        %td
+          Amount
+        %td
+          Interest rate
+        %td
+          Repayment frequency
+        %td
+          Currency
+        %td
+          Tenure
+    %tbody.form
+      - @lending_products.each do |lp|
+        %tr
+          %td
+            = lp.name
+          %td
+            = lp.amount
+          %td
+            = lp.interest_rate
+          %td
+            = lp.repayment_frequency
+          %td
+            = lp.currency
+          %td
+            = lp.tenure

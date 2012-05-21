@@ -1,0 +1,35 @@
+%table.shaded
+  %tr
+    %th
+      Name
+    %td{:colspan => 4}
+      = text_field :name
+  %tr
+    %th
+      Amount
+    %td
+      %span.greytext
+      = text_field :amount, :size => 7
+  %tr
+    %th
+      Interest rate
+    %td
+      %span.greytext
+      = text_field :interest_rate, :size => 7
+  %tr
+    %th
+      Repayment frequency
+    %td
+      %span.greytext
+      = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|frequency| [frequency.to_s]}
+  %tr
+    %th
+      Currency
+    %td
+      %span.greytext
+      = select :name => "lending_product[currency]", :collection => Constants::Money::CURRENCIES.map {|currency| [currency]}
+  %tr
+    %th
+      Tenure
+    %td
+      = text_field :tenure, :size => 7
