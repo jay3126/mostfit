@@ -31,6 +31,8 @@ class Lending
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
 
+  def counterparty; Client.get(self.for_borrower_id); end
+
   belongs_to :lending_product
   has 1, :loan_base_schedule
   has n, :loan_allocations

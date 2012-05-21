@@ -10,82 +10,59 @@ class CollectionsFacade
   # This returns instances of CollectionSheet which represent
   # the collection sheet at a center location on a given date
   #following function will generte the weeksheet for center.
-  def get_collection_sheet(at_center, on_date)
+  def get_collection_sheet(at_biz_location, on_date)
     collection_sheet_line = []
 
-    center = Center.get(at_center)
-    center_manager = center.manager # Use this center_manager for staff ID, staff name
+    biz_location = BizLocation.get(at_biz_location)
+    center_manager = Staff.first # Use this center_manager for staff ID, staff name
 
 
-    loans = center.loans
-    lids = loans.map{|l| l.id}
+    loans = biz_location.landings
+    return [] if loans.blank?
 
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
+    meeting_dates = mf.get_meeting_calendar(biz_location)
+    meeting_schedule = biz_location.meeting_schedules.first
+    clients = biz_location.clients
 
-    # Find all Loan Histories on center
-    histories = LoanHistory.all(:loan_id => lids, :date => on_date, :status => [:outstanding, :disbursed])
-    fees_paid = {}
+    return [] if clients.blank?
 
-    # Find Paid Fee on Loans
-    Payment.all(:received_on => on_date, :type => :fees, :loan_id => lids, :fields => [:id, :amount]).map{|p| fees_paid[p.loan_id]||=0; fees_paid[p.loan_id] +=  p.amount}
+    loans.each do |client_loan|
+      client = loans.counterparty
+      unless client.blank?
+        client_name                        = client.name
+        client_id                          = client.id
+        client_group_id                    = client.client_group.id
+        client_group_name                  = (client.client_group ? client.client_group.name : "Not attached to any group")
+        loan_id                            = client_loan.id
+        loan_amount                        = client_loan.disbursed_amount
+        loan_principal_outstanding_on_date = 0
+        loan_disbursal_date                = client_loan.disbursal_date
+        loan_status                        = client_loan.status
 
-    # Find all clients of Center
-    clients = Client.all(:center_id => at_center, :active => true, :date_joined.lte => on_date, :fields => [:id, :name, :client_group_id, :center_id])
+        loan_base_schedule                 = client_loan.loan_base_schedule
+        loan_schedule_item                 = loan_base_schedule.get_previous_and_current_amortization_items(on_date)
+        loan_installments_paid_till_date   = loan_schedule_item.first.first.first
+        schedule_principal_due             = loan_schedule_item.first.last[:scheduled_principal_due]
+        schedule_principal_paid            = loan_schedule_item.first.last[:scheduled_principal_outstanding]
+        schedule_interest_due              = loan_schedule_item.first.last[:scheduled_interest_due]
+        schedule_interest_paid             = loan_schedule_item.first.last[:scheduled_interest_outstanding]
+        schedule_fees_due                  = 0
+        schedule_fees_paid                 = 0
+        total_due                          = (schedule_principal_due + schedule_interest_due + schedule_fees_due)
+        total_paid                         = (schedule_principal_paid + schedule_interest_paid+ schedule_fees_paid)
 
-    clients.each do |client|
-
-      loans.find_all{|x| x.client_id==client.id and (x.approved_on || x.disbursal_date)}.each do |loan|
-
-        # Find latest loan history on particular loan
-        lh = histories.find_all{|x| x.loan_id==loan.id}.sort_by{|x| x.created_at}[-1]
-
-        next if not lh
-        next if lh and LOANS_NOT_PAYABLE.include?(lh.status) and not (lh.principal_paid>0 or lh.interest_paid>0)
-        next unless loan.respond_to?(:approved_on) and loan.approved_on <= on_date
-
-        if lh and lh.total_principal_due and lh.total_principal_due > 0
-          pdue = lh.total_principal_due - lh.total_principal_paid
-          idue = lh.total_interest_due - lh.total_interest_paid
-        else
-          pdue = [(lh ? lh.principal_due : 0), 0].max
-          idue = [(lh ? lh.interest_due : 0), 0].max
-        end
-
-        ppaid = (lh ? lh.principal_paid : 0)
-        ipaid = [(lh ? lh.interest_paid : 0), 0].max
-        fee_due = loan.total_fees_payable_on(on_date)
-        fee_paid = fees_paid[loan.id] || 0
-
-        #following are the fields for display on view side.
-        client_name = client.name
-        client_id = client.id
-        client_group_id = client.client_group.id
-        client_group_name = (client.client_group ? client.client_group.name : "Not attached to any group")
-        loan_id = loan.id
-        loan_amount = loan.amount
-        loan_outstanding_principal = lh ? lh.actual_outstanding_principal : 0
-        loan_disbursal_date = loan.disbursal_date
-        loan_installments_paid_till_date = loan.number_of_installments_before(on_date)
-        principal_due = pdue
-        principal_paid = ppaid
-        interest_due = idue
-        interest_paid = ipaid
-        fees_due = fee_due
-        fees_paid = fee_paid
-        total_due = (pdue + idue + fee_due)
-        total_paid = (ppaid + ipaid + fee_paid)
-
-        loan_status = lh.status
-
-        collection_sheet_line << CollectionSheetLineItem.new(at_center, center.name, on_date, client_id, client_name, client_group_id,
+        collection_sheet_line << CollectionSheetLineItem.new(at_biz_location, biz_location.name, on_date, client_id, client_name, client_group_id,
                                                              client_group_name, loan_id, loan_amount,
-                                                             loan_outstanding_principal, loan_disbursal_date,
-                                                             loan_installments_paid_till_date, principal_due,
-                                                             principal_paid, interest_due, interest_paid,
-                                                             fees_due, fees_paid, total_due, total_paid, loan_status)
+                                                             loan_principal_outstanding_on_date, loan_disbursal_date,
+                                                             loan_installments_paid_till_date, schedule_principal_due,
+                                                             schedule_principal_paid, schedule_interest_due, schedule_interest_paid,
+                                                             schedule_fees_due, schedule_fees_paid, total_due, total_paid, loan_status)
       end
     end
+
     groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
-    CollectionSheet.new(center.id, center.name, on_date, center.meeting_time_hours, center.meeting_time_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
+    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_schedule.meeting_time_begins_hours, meeting_schedule.meeting_time_begins_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
   end
 
   #following function will generate the daily collection sheet for staff_member.
@@ -99,7 +76,7 @@ class CollectionsFacade
     centers.each do |center|
       collection_sheet << self.get_collection_sheet(center.id, on_date )
     end
-    
+
     collection_sheet
   end
 end
