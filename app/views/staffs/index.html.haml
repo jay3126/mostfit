@@ -1,0 +1,10 @@
+%h1
+  Staff Users
+.menu-strip{:style => "margin-bottom: 0.5em;"}
+  = link_to 'Create Staff', '#', :class => "add", :onclick => "jQuery(this).next().toggle(); return false;"
+  #staff{:style => "display : none"}
+    = form_for(@staff, :action => url(:staffs) ) do
+      = partial :fields
+      = submit 'Save'
+      = link_to 'Cancel', url(params[:return]), :class => "grey_button"
+= partial 'list'

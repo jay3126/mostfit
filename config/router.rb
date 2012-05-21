@@ -43,6 +43,7 @@ Merb::Router.prepare do
   resources :location_levels
   resources :biz_locations, :collection => {:map_locations => [:get]}
   resources :payment_transactions
+  resources :staffs
   resources :rules, :id => %r(\d+)
   resources :bookmarks
   resources :audit_items
