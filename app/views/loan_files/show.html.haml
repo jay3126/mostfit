@@ -1,0 +1,83 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+%h1
+  = "Loan File #{@loan_file.id}"
+.menu-strip
+  %h3
+    = "Branch: #{Branch.get(@loan_file.at_branch_id).name}"
+    |
+    = "Center: #{Center.get(@loan_file.at_center_id).name}"
+    - unless @loan_file.health_check_status.blank?
+      |
+      = "Status: #{@loan_file.health_check_status}"
+    |
+    = "Center Cycle Number: #{center_cycle_number}"
+
+%br
+%hr
+
+.shaded
+  %h2 Loan Applications
+  - unless @loan_file.loan_applications.blank?
+    %table.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "ID"
+          %th
+            = "Name"
+          %th
+            = "Guarantor Name"
+          %th
+            = "Applicant Birth Date"
+          %th
+            = "Ration Card No."
+          %th
+            = "Voter Card No."
+          %th
+            = "Amount"
+          %th
+            = "Address"
+          %th
+            = "State"
+          %th
+            = "Pincode"
+          %th
+            = "Status"
+      %tbody
+        - @loan_file.loan_applications.each do |lap|
+          %tr
+            %td
+              = link_to lap.id, "/loan_applications/#{lap.id}"
+            %td
+              = lap.client_name
+            %td
+              = lap.client_guarantor_name
+            %td
+              = lap.client_dob
+            %td
+              = lap.client_reference1
+            %td
+              = lap.client_reference2
+            %td
+              = lap.amount
+            %td
+              = lap.client_address
+            %td
+              = lap.client_state.humanize
+            %td
+              = lap.client_pincode
+            %td
+              = lap.status.humanize rescue nil
+  - else
+    %h3 No loan applications
+%br
+%hr
+
+.shaded
+  %h2
+    = "Actions"
+  - if @loan_file.loan_applications.count > 0 && (@loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil)) && @loan_file.loan_applications.collect{|x| x.loan.nil?}.include?(true)
+    = link_to "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
+  - if @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT
+    = link_to "Download Labels", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button'
+    = link_to "Download Disbursement", url(:controller => :loan_files, :action => :generate_disbursement_sheet, :id => params[:id], :format => "pdf"), :class => 'grey_button'

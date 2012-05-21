@@ -3,35 +3,52 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
   include FeesContainer
-  include Constants::Client
+  include ClientValidations
+  include Constants::Masters
 
   FLAGS = [:insincere]
-  GENDER = ['', 'male', 'female']
-  MARITAL_STATUS = ['', 'married', 'single', 'divorced', 'widow']
-  RELATIONSHIP = ['', 'spouse', 'brother', 'sister', 'father', 'mother', 'son', 'daughter']
-  PREMIUM_PAYMENT_FREQUENCY = ['','monthly', 'quarterly', 'half_yearly', 'annually']
-  CLIENT_ASSETS = ['television', 'telephone', 'motorcycle', 'cycle', 'waterpump', 'computer']
 
   before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
   before :valid?, :add_created_by_staff_member
   after  :save,   :check_client_deceased
   after  :save,   :levy_fees
-  
+  after  :save,   :update_loan_cache
+
   property :id,              Serial
-  property :as_of,           Date
+
+  # # basic properties custom only to suryoday
+  property :next_to_kin,     String
+  property :next_to_kin_relationship, Enum.send('[]', *["Husband", "Father"]), :default => "Husband"
+  property :guarantor_name,  String
+  property :guarantor_dob,   Date, :index => true, :lazy => true
+  property :guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :default => 'Other'
+  property :telephone_number, String, :nullable => true
+  property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Untagged"
+  property :state,           Enum.send('[]', *([nil] + STATES)), :nullable => true
+  property :pincode,         Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
+  property :income,          Integer
+  property :family_income,   Integer
+  property :seating,         Integer
+  property :earning_members, Integer
+  property :cb_approval_number, String
+  property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true, :default => 'not_applicable'
+
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :date_of_birth,   Date,   :index => true, :lazy => true
+  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => 'female'
+  property :marital_status,  Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
+  property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
+  property :reference2,      String
+  property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
+  property :name,            String, :length => 100, :nullable => false, :index => true
+  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
-  property :fathers_name,    String, :length => 100, :lazy => true
-  property :address,         Text,   :lazy => true
-  property :phone_number,    String, :length => 12,  :index => true, :lazy => true
-  property :marital_status,  Enum.send('[]', *MARITAL_STATUS), :nullable => true, :index => true
-  property :caste, Enum.send('[]', *CASTES), :nullable => true
-  property :place_of_birth,  String, :length => 100, :index => true, :lazy => true
-  property :nationality,     String, :length => 100, :index => true, :lazy => true
-  property :kyc_documents,   Flag.send('[]',*KYC_DOCUMENTS)
+  property :date_of_birth,   Date,   :index => true, :lazy => true
+  property :spouse_date_of_birth, Date, :index => true, :lazy => true
+  property :address,         Text, :lazy => true
+  property :pincode,         Integer
+  property :state,           Enum.send('[]', *STATES), :nullable => true
   property :active,          Boolean, :default => true, :nullable => false, :index => true
   property :inactive_reason, Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :index => true, :default => ''
   property :date_joined,     Date,    :index => true
@@ -42,158 +59,102 @@ class Client
   property :deleted_at,      ParanoidDateTime
   property :updated_at,      DateTime
   property :deceased_on,     Date, :lazy => true
+  # property :client_type,     Enum["standard", "takeover"], :default => "standard"
   property :created_by_user_id,  Integer, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
   property :verified_by_user_id, Integer, :nullable => true, :index => true
   property :tags, Flag.send("[]", *FLAGS)
-  
-  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
-  property :family_1_name, String, :lazy => true, :nullable => true
-  property :family_1_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_1_age, Integer, :lazy => true, :nullable => true
-  property :family_1_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_1_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_1_occupation, String, :lazy => true, :nullable => true
-  property :family_1_education, String, :lazy => true, :nullable => true
-  property :family_1_nrega, String, :lazy => true, :nullable => true
-  property :family_1_source_of_income, String, :lazy => true, :nullable => true
-  property :family_1_monthly_income, Integer, :lazy => true, :nullable => true
-  property :family_2_name, String, :lazy => true, :nullable => true
-  property :family_2_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_2_age, Integer, :lazy => true, :nullable => true
-  property :family_2_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_2_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_2_occupation, String, :lazy => true, :nullable => true
-  property :family_2_education, String, :lazy => true, :nullable => true
-  property :family_2_nrega, String, :lazy => true, :nullable => true
-  property :family_2_source_of_income, String, :lazy => true, :nullable => true
-  property :family_2_monthly_income, Integer, :lazy => true, :nullable => true
-  property :family_3_name, String, :lazy => true, :nullable => true
-  property :family_3_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_3_age, Integer, :lazy => true, :nullable => true
-  property :family_3_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_3_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_3_occupation, String, :lazy => true, :nullable => true
-  property :family_3_education, String, :lazy => true, :nullable => true
-  property :family_3_nrega, String, :lazy => true, :nullable => true
-  property :family_3_source_of_income, String, :lazy => true, :nullable => true
-  property :family_3_monthly_income, Integer, :lazy => true, :nullable => true
-  property :family_4_name, String, :lazy => true, :nullable => true
-  property :family_4_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_4_age, Integer, :lazy => true, :nullable => true
-  property :family_4_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_4_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_4_occupation, String, :lazy => true, :nullable => true
-  property :family_4_education, String, :lazy => true, :nullable => true
-  property :family_4_nrega, String, :lazy => true, :nullable => true
-  property :family_4_source_of_income, String, :lazy => true, :nullable => true
-  property :family_4_monthly_income, Integer, :lazy => true, :nullable => true
 
-  property :family_5_name, String, :lazy => true, :nullable => true
-  property :family_5_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_5_age, Integer, :lazy => true, :nullable => true
-  property :family_5_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_5_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_5_occupation, String, :lazy => true, :nullable => true
-  property :family_5_education, String, :lazy => true, :nullable => true
-  property :family_5_nrega, String, :lazy => true, :nullable => true
-  property :family_5_source_of_income, String, :lazy => true, :nullable => true
-  property :family_5_monthly_income, Integer, :lazy => true, :nullable => true
-
-  property :family_6_name, String, :lazy => true, :nullable => true
-  property :family_6_gender, Enum.send('[]', *GENDER), :lazy => true, :nullable => true
-  property :family_6_age, Integer, :lazy => true, :nullable => true
-  property :family_6_relationship, Enum.send('[]', *RELATIONSHIP), :lazy => true, :nullable => true
-  property :family_6_marital_status,  Enum.send('[]', *MARITAL_STATUS), :lazy => true, :nullable => true
-  property :family_6_occupation, String, :lazy => true, :nullable => true
-  property :family_6_education, String, :lazy => true, :nullable => true
-  property :family_6_nrega, String, :lazy => true, :nullable => true
-  property :family_6_source_of_income, String, :lazy => true, :nullable => true
-  property :family_6_monthly_income, Integer, :lazy => true, :nullable => true
-
-  property :total_monthly_income, Integer, :lazy => true
-  property :total_annual_income, Integer, :lazy => true
-
-  property :monthly_expenditure, Text, :lazy => true
-  property :total_monthly_expenditure, Integer, :lazy => true
-  property :total_annual_expenditure, Integer, :lazy => true
-  property :total_monthly_savings, Integer, :lazy => true
-  property :total_annual_savings, Integer, :lazy => true
-  property :other_loan_details, Text, :lazy => true
-
-  property :residence_survey_date, Date, :lazy => true
-  property :residing_since_date, Date, :lazy => true
-  property :residence_size, Enum.send('[]', *['', 'small', 'medium', 'large']) , :lazy => true, :default => ''
-  property :residence_ownership, Enum.send('[]', *['', 'own', 'inherited', 'rented_or_state_owned']) , :lazy => true, :default => ''
-  property :roof_construction, Enum.send('[]', *['', 'cement', 'tiled', 'tin']) , :lazy => true, :default => ''
-  property :walls_construction, Enum.send('[]', *['', 'cement', 'brick', 'mud']) , :lazy => true, :default => ''
-  property :power_connection, Boolean, :default => false, :lazy => true
-  property :cooking_gas_connection, Boolean, :default => false, :lazy => true
-  property :independent_toilet, Boolean, :default => false, :lazy => true
-  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :school_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :vet_care_centre_distance, Integer, :nullable => true, :lazy => true
-  property :number_of_cattle, Integer, :lazy => true
-  property :number_of_buffaloes, Integer, :lazy => true
-  property :number_of_goats, Integer, :lazy => true
-  property :number_of_bullocks, Integer, :lazy => true
-  property :number_of_sheep, Integer, :lazy => true
-  property :number_of_other_livestock, Integer, :lazy => true
-  property :assets, Flag.send('[]', *CLIENT_ASSETS), :lazy => true
-  property :other_assets, String, :lazy => true
-
-  property :irrigated_land_own_fertile, Integer, :lazy => true
-  property :irrigated_land_leased_fertile, Integer, :lazy => true
-  property :irrigated_land_shared_fertile, Integer, :lazy => true
-  property :irrigated_land_own_semifertile, Integer, :lazy => true
-  property :irrigated_land_leased_semifertile, Integer, :lazy => true
-  property :irrigated_land_shared_semifertile, Integer, :lazy => true
-  property :irrigated_land_own_wasteland, Integer, :lazy => true
-  property :irrigated_land_leased_wasteland, Integer, :lazy => true
-  property :irrigated_land_shared_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_own_fertile, Integer, :lazy => true
-  property :not_irrigated_land_leased_fertile, Integer, :lazy => true
-  property :not_irrigated_land_shared_fertile, Integer, :lazy => true
-  property :not_irrigated_land_own_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_leased_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_shared_semifertile, Integer, :lazy => true
-  property :not_irrigated_land_own_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_leased_wasteland, Integer, :lazy => true
-  property :not_irrigated_land_shared_wasteland, Integer, :lazy => true
-
-  property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
-  property :bank_branch,    String, :length => 20, :nullable => true, :lazy => true
   property :account_number, String, :length => 20, :nullable => true, :lazy => true
-
-  property :insured_value, Integer, :nullable => true, :lazy => true
-  property :insurer, String, :nullable => true, :lazy => true
-  property :insurance_premium, Integer, :nullable => true, :lazy => true
-  property :premium_payment_frequency, Enum.send('[]', *PREMIUM_PAYMENT_FREQUENCY), :lazy => true, :nullable => true
-
-  property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
-  property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
-
-  # fields before May 2011, preserved for backward compatibility and data on old clients
-  property :religion, Enum.send('[]', *RELIGIONS), :nullable => true
   property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
+  property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
+  property :bank_branch,         String, :length => 20, :nullable => true, :lazy => true
   property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
+  #  property :client_type,    Enum[:default], :default => :default
+  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
+  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
   property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :other_productive_asset, String, :length => 30, :nullable => true, :lazy => true
   property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
   property :pr_loan_amount, Integer, :length => 10, :nullable => true, :lazy => true
+  property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
+  property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
-  property :children_girls_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_girls_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_girls_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_under_5_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_5_to_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :children_sons_over_15_years, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_working_girls, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_bonded_girls, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_working_sons, Integer, :length => 10, :default => 0, :lazy => true
-  property :not_in_school_bonded_sons, Integer, :length => 10, :default => 0, :lazy => true
+  property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
+  property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
+  property :highmark_done, Boolean, :nullable => true
+  property :priority_sector_list_id, Integer, :nullable => true
+  property :psl_sub_category_id, Integer, :nullable => true
+
+
+  # suryoday specific fields
+  # CGT on the client is probably a good idea
+  property :cgt1, Date
+  property :cgt2, Date
+  property :cgt3, Date
+
+  # CPV means contact point verification and is the date of the CPV.
+  property :cpv1, Date
+  property :cpv2, Date
+
+
+  # Public: setter for all the centers this client has belonged to
+  #
+  # hash: a Hash of {:Date => {:center_id}...}
+
+  property :center_history, Text # marshal.dump of past centers in format{date_upto => center_id}
+
+
+  def past_centers=(hash)
+    self.center_history = hash.to_json
+  end
+
+  # Public: getter for all the centers this client has belonged to
+  def past_centers
+    return @pcs if @pcs
+    @pcs = self.center_history ? JSON::parse(self.center_history).map{|k,v| [Date.parse(k),v]}.to_hash : {}
+  end
+
+  # Public: all the centers that are fit to be known
+  # preload these to prevent making repeated calls to the database each time
+  #
+  # called with no arguments
+  def relevant_centers
+    return @rcs if @rcs
+    @rcs = Center.all(:id => past_centers.values + [center_id]).map{|c| [c.id, c]}.to_hash
+  end
+
+  def past_branches
+    # later this must support movement of centers between branches as as well
+    return @pbs if @pbs
+    bs = Center.all(:id => past_centers.values).aggregate(:id, :branch_id).to_hash
+    @pbs = past_centers.map{|k,v| [k, bs[v]]}.to_hash
+  end
+
+
+  def move_to_center(center, as_of_date)
+    center = center.class == Center ? center : Center.get(center_id)
+    pcs = self.past_centers || {}
+    pcs[as_of_date - 1] = self.center.id
+    self.center = center
+    self.past_centers = pcs
+    self.client_group = nil
+    self.save!
+    self.loans.each{|l| l.update_history}
+    return true
+  end
+
+  def center_for_date(date)
+    return center_id if past_centers.blank?
+    return center_id if self.past_centers.keys.max < date
+    self.past_centers[self.past_centers.select{|k,v| k >= date}.to_hash.keys.sort[0]]
+  end
+
+  def branch_for_date(date)
+    return center.branch_id if past_centers.blank? or self.past_centers.keys.max < date
+    self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
+  end
 
   validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
@@ -201,7 +162,7 @@ class Client
 
   belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false
   property   :parent_org_guid, String, :nullable => true
-  
+
   belongs_to :domain, :parent_key => [:domain_guid], :child_key => [:parent_domain_guid], :required => false
   property   :parent_domain_guid, String, :nullable => true
   property   :client_type_id,     Integer, :default => 1
@@ -211,43 +172,53 @@ class Client
   has n, :attendances
   has n, :claims
   has n, :guarantors
+  has n, :loan_applications
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
 
   belongs_to :center
   belongs_to :client_group
-  belongs_to :occupation, :nullable => true
+  belongs_to :occupation,           :nullable => true
+  belongs_to :priority_sector_list, :nullable => true
+  belongs_to :psl_sub_category,     :nullable => true
   belongs_to :client_type
   belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'
 
-  is :versioned, :on => :as_of
-
   has_attached_file :picture,
-    :styles => {:medium => "300x300>", :thumb => "60x60#"},
-    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :default_url => "/images/no_photo.jpg"
+  :styles => {:medium => "300x300>", :thumb => "60x60#"},
+  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :default_url => "/images/no_photo.jpg"
 
   has_attached_file :application_form,
-    :styles => {:medium => "300x300>", :thumb => "60x60#"},
-    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
+  :styles => {:medium => "300x300>", :thumb => "60x60#"},
+  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
 
   has_attached_file :fingerprint,
-    :url => "/uploads/:class/:id/:basename.:extension",
-    :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
+  :url => "/uploads/:class/:id/:basename.:extension",
+  :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
   validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
+  validates_is_unique :reference2
   validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
-
-#  validates_with_method :date_joined, :method => :dates_make_sense
+  validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
+
+  def update_loan_cache
+    loans.each{|l| l.update_loan_cache(true); l.save}
+  end
+
+  # returns the age of the client as calculated from her year of birth
+  def age
+    (date_of_birth.nil? ? nil : (Date.today.year - date_of_birth.year))
+  end
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
@@ -257,7 +228,7 @@ class Client
         center   = Center.get(center_attr)
       end
     end
-    raise ArgumentError("No center with code/id #{center_attr}") unless center
+    raise ArgumentError.new("No center with code/id #{center_attr}") unless center
     branch         = center.branch
     #creating group either on group ccode(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
@@ -268,16 +239,16 @@ class Client
     else
       client_group  = nil
     end
-    client_type     = ClientType.first||ClientType.create(:type => "Standard")
+    # client_type     = ClientType.first||ClientType.create(:type => "Standard")
     grt_date        = row[headers[:grt_date]] ? Date.parse(row[headers[:grt_date]]) : nil
     keys = [:reference, :name, :spouse_name, :date_of_birth, :address, :date_joined, :center, :grt_date, :created_by_staff, :group]
     missing_keys = keys - headers.keys
     raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
     hash = {:reference => row[headers[:reference]], :name => row[headers[:name]], :spouse_name => row[headers[:spouse_name]],
-      :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]], 
+      :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]],
       :date_joined => row[headers[:date_joined]], :center => center, :grt_pass_date => grt_date, :created_by => User.first,
       :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :client_group => client_group, :client_type => client_type, :upload_id => row[headers[:upload_id]]}
+      :client_group => client_group, :upload_id => row[headers[:upload_id]]}
     obj             = new(hash)
     [obj.save!, obj]
   end
@@ -290,7 +261,6 @@ class Client
     end
   end
 
-
   def pay_fees(amount, date, received_by, created_by)
     @errors = []
     fp = fees_payable_on(date)
@@ -298,7 +268,7 @@ class Client
     pay_order.each do |k|
       if fees_payable_on(date).has_key?(k)
         pay = Payment.new(:amount => [fp[k], amount].min, :type => :fees, :received_on => date, :comment => k.name, :fee => k,
-                          :received_by => received_by, :created_by => created_by, :client => self)        
+                          :received_by => received_by, :created_by => created_by, :client => self)
         if pay.save_self
           amount -= pay.amount
           fp[k] -= pay.amount
@@ -308,6 +278,23 @@ class Client
       end
     end
     @errors.blank? ? true : @errors
+  end
+
+  def to_loan_application
+    _to_loan_application = {
+      :client_id              => id,
+      :client_name            => name,
+      :client_dob             => date_of_birth,
+      :client_address         => address,
+      :client_state           => state,
+      :client_pincode         => pincode,
+      :client_reference1      => reference,
+      :client_reference1_type => reference_type,
+      :client_reference2      => reference2,
+      :client_reference2_type => reference2_type,
+      :client_guarantor_name  => guarantor_name,
+      :client_guarantor_relationship => guarantor_relationship
+    }
   end
 
   def self.flags
@@ -331,7 +318,7 @@ class Client
           if claim.stop_further_installments
             last_payment_date = loan.payments.aggregate(:received_on.max)
             #set date of stopping payments/claim settlement one ahead of date of last payment
-            if last_payment_date and (last_payment_date > claim.date_of_death) 
+            if last_payment_date and (last_payment_date > claim.date_of_death)
               loan.under_claim_settlement = last_payment_date + 1
             elsif claim.date_of_death
               loan.under_claim_settlement = claim.date_of_death
@@ -343,10 +330,6 @@ class Client
         end
       end
     end
-  end
-
-  def kyc_documents_supplied
-    not self.kyc_documents.empty?
   end
 
   private
@@ -368,7 +351,7 @@ class Client
   end
 
   def dates_make_sense
-    return true if not grt_pass_date or not date_joined 
+    return true if not grt_pass_date or not date_joined
     return [false, "Client cannot join this center before the center was created"] if center and center.creation_date and center.creation_date > date_joined
     return [false, "GRT Pass Date cannot be before Date Joined"]  if grt_pass_date < date_joined
     return [false, "Client cannot die before he became a client"] if deceased_on and (deceased_on < date_joined or deceased_on < grt_pass_date)
@@ -382,26 +365,26 @@ class Client
   end
 
   def self.death_cases(obj, from_date, to_date)
-     d2 = to_date.strftime('%Y-%m-%d')
-    if obj.class == Branch 
+    d2 = to_date.strftime('%Y-%m-%d')
+    if obj.class == Branch
       from  = "branches b, centers c, clients cl, claims cm"
       where = %Q{
-                cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.branch_id = b.id  AND b.id = #{obj.id}   
+                cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.branch_id = b.id  AND b.id = #{obj.id}
                 };
-      
+
     elsif obj.class == Center
-      from  = "centers c, clients cl, claims cm"     
+      from  = "centers c, clients cl, claims cm"
       where = %Q{
-               cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.id = #{obj.id}   
+               cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.id = #{obj.id}
                 };
-      
+
     elsif obj.class == StaffMember
       # created_by_staff_member_id
-      from =  "clients cl, claims cm, staff_members sm"      
+      from =  "clients cl, claims cm, staff_members sm"
       where = %Q{
-                cl.active = false AND cl.inactive_reason IN (2,3)  AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id}    
+                cl.active = false AND cl.inactive_reason IN (2,3)  AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id}
                 };
-      
+
     end
     repository.adapter.query(%Q{
                              SELECT COUNT(cl.id)
@@ -409,40 +392,40 @@ class Client
                              WHERE #{where}
                            })
   end
-  
-   def self.pending_death_cases(obj,from_date, to_date) 
-     if obj.class == Branch
-       repository.adapter.query(%Q{
+
+  def self.pending_death_cases(obj,from_date, to_date)
+    if obj.class == Branch
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
                                 FROM branches b, centers c, clients cl, claims cm
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
-                                AND cl.center_id = c.id AND c.branch_id = b.id 
-                                AND b.id = #{obj.id} AND cl.id NOT IN (SELECT client_id FROM claims)     
+                                AND cl.center_id = c.id AND c.branch_id = b.id
+                                AND b.id = #{obj.id} AND cl.id NOT IN (SELECT client_id FROM claims)
                                })
-       
-     elsif obj.class == Center      
-       repository.adapter.query(%Q{
+
+    elsif obj.class == Center
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
-                                FROM centers c, clients cl, claims cm 
+                                FROM centers c, clients cl, claims cm
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.center_id = c.id AND c.id = #{obj.id} AND cl.id
-                                NOT IN (SELECT client_id FROM claims )   
+                                NOT IN (SELECT client_id FROM claims )
                               })
 
-     elsif obj.class == StaffMember
-       repository.adapter.query(%Q{
+    elsif obj.class == StaffMember
+      repository.adapter.query(%Q{
                                 SELECT COUNT(cl.id)
-                                FROM clients cl, claims cm, staff_members sm 
+                                FROM clients cl, claims cm, staff_members sm
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id} AND cl.id
                                 NOT IN (SELECT client_id FROM claims )
                                 })
-     end
-   end
-   
-   def cannot_have_inactive_reason_if_active
-     return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
-     return true
-   end
+    end
+  end
 
- end
+  def cannot_have_inactive_reason_if_active
+    return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
+    return true
+  end
+
+end

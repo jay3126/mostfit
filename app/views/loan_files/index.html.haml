@@ -1,0 +1,44 @@
+%h1
+  = "Loan Files"
+.shaded
+  - if @loan_files && !@loan_files.empty?
+    %table.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "ID"
+          %th
+            = "Loan file Identifier"
+          %th
+            = "Branch name"
+          %th
+            = "Center name"
+          %th
+            = "Number of applications"
+          %th
+            = "Health check status"
+          %th
+            = "Remark"
+      %tbody
+        - @loan_files.each do |lf|
+          - unless lf.health_check_status == "pending"
+            %tr
+              %td
+                = lf.id
+              %td
+                = link_to lf.loan_file_identifier, resource(lf)
+              %td
+                = Branch.get(lf.at_branch_id).name
+              %td
+                = Center.get(lf.at_center_id).name
+              %td
+                = lf.loan_applications.count
+              %td
+                = lf.health_check_status
+              %td
+                = lf.health_status_remark
+    
+  - else
+    No Loan Files found.
+
+%br

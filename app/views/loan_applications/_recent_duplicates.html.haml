@@ -1,0 +1,34 @@
+#pending_list
+  .shaded
+    %h2 Recently recorded
+    - if @cleared_or_confirmed_diplicate_loan_files && !@cleared_or_confirmed_diplicate_loan_files.empty?
+      - cleared_or_confirmed_diplicate_loan_files = @cleared_or_confirmed_diplicate_loan_files.sort_by {|lap| lap.updated_at}.reverse
+      %table.narrow.form{:width => "100%"}
+        %thead
+          %tr
+            %th ID
+            %th Name
+            %th Guarantor Name
+            %th Relationship
+            %th DOB
+            %th Address
+            %th Status
+        %tbody
+          - cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
+            %tr
+              %td
+                = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
+              %td
+                = loan_application.client_name
+              %td
+                = loan_application.client_guarantor_name
+              %td
+                = loan_application.client_guarantor_relationship
+              %td
+                = loan_application.client_dob
+              %td
+                = loan_application.client_address
+              %td
+                = loan_application.status.humanize
+    - else
+      %h3 No recenlty recorded loan application

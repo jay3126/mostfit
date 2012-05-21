@@ -2,13 +2,17 @@ class StaffMember
   include DataMapper::Resource
   include Identified
   include Pdf::DaySheet if PDF_WRITER
-  
+
   property :id,      Serial
   property :name,    String, :length => 100, :nullable => false
   property :mobile_number,  String, :length => 12,  :nullable => true
   property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
-  property :active,  Boolean, :default => true, :nullable => false  
-  property :user_id,  Integer,  :nullable => true  
+  property :address, Text, :lazy => true
+  property :father_name,  String, :length => 100, :nullable => true
+  property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
+  property :active,  Boolean, :default => true, :nullable => false
+  property :user_id,  Integer,  :nullable => true
+  #  property :gender, Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
   # no designations, they are derived from the relations it has
 
   has n, :branches,          :child_key => [:manager_staff_id]
@@ -42,15 +46,19 @@ class StaffMember
       all(:conditions => ["name like ?", q+'%'], :limit => per_page)
     end
   end
-    
+
   def self.from_csv(row, headers)
     user = nil
     if headers[:name] and row[headers[:name]] and headers[:password] and row[headers[:password]]
       user = User.new(:login => row[headers[:name]], :role => :staff_member,
-                      :password => row[headers[:password]], :password_confirmation => row[headers[:password]])    
+                      :password => row[headers[:password]], :password_confirmation => row[headers[:password]])
       user.save
     end
-    
+
+    keys = [:name, :gender]
+    missing_keys = keys - headers.keys
+    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
     obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,
@@ -70,8 +78,8 @@ class StaffMember
 
   def loans(hash={}, owner_type = :created)
     if owner_type == :created
-      Loan.all(hash + {:applied_by_staff_id => self.id}) + 
-        Loan.all(hash + {:approved_by_staff_id => self.id}) + 
+      Loan.all(hash + {:applied_by_staff_id => self.id}) +
+        Loan.all(hash + {:approved_by_staff_id => self.id}) +
         Loan.all(hash + {:disbursed_by_staff_id => self.id})
     else
       hash["client.center.manager_staff_id"] = self.id
@@ -83,7 +91,7 @@ class StaffMember
     if owner_type == :created
       hash[:created_by_staff_member_id] = self.id
     else
-      hash["center.manager_staff_id"] = self.id      
+      hash["center.manager_staff_id"] = self.id
     end
     ClientGroup.all(hash)
   end
@@ -95,9 +103,9 @@ class StaffMember
   def related_centers
     [self.centers, self.branches.centers, self.areas.branches.centers, self.regions.areas.branches.centers].flatten
   end
-  
+
   def self.related_to(obj)
-    staff_members = []    
+    staff_members = []
     [:applied_by_staff_id, :approved_by_staff_id, :rejected_by_staff_id, :disbursed_by_staff_id, :written_off_by_staff_id, :suggested_written_off_by_staff_id].each{|type|
       staff_members << if obj.class==Branch
                          repository.adapter.query(%Q{SELECT distinct(#{type}) FROM branches b, centers c, clients cl, loans l
@@ -108,7 +116,7 @@ class StaffMember
                        elsif obj.class==Client
                          repository.adapter.query(%Q{SELECT distinct(#{type}) FROM centers c, clients cl, loans l
                                                     WHERE cl.id=#{obj.id} and l.client_id=cl.id})
-                       end 
+                       end
     }
     staff_members = staff_members.flatten.uniq.compact
     staff_members.delete(0)

@@ -10,6 +10,9 @@ Merb::Router.prepare do
   resources :vouchers
   resources :cost_centers
   resources :transaction_summaries
+  resources :loan_files,               :id => %r(\d+)
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post]}
+  resources :overlap_report_responses, :id => %r(\d+)
   #book-keeping from bk ends
 
   resources :staff_member_attendances

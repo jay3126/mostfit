@@ -1,0 +1,19 @@
+%h1 Add new loan applications for new loan applicants
+- unless @errors.blank?
+  - @errors.keys.each do |key|
+    .error
+      = "#{@errors[key]}"
+      %br
+
+
+%form{:action => url(:controller => :loan_applications, :action => :bulk_create), :method => :get}
+  = partial 'lib/branch_center_selector'      
+
+%br
+%hr
+
+= partial :fields
+  
+%br
+%hr
+  = partial :recent_list 

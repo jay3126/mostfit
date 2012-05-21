@@ -1,0 +1,43 @@
+.shaded
+  %h2
+    Loan applications added recently
+
+  - if @loan_applications and  not @loan_applications.empty?
+    %table.form{:width => "100%"}
+      %thead
+        %tr
+          %th ID
+          %th Client ID
+          %th Name
+          %th Age
+          %th Address
+          %th Loan Amount
+          %th Created at
+          %th Staff Member
+          %th Created on
+      %tbody
+        - @loan_applications.sort.reverse.each do |loan_application|
+          %tr
+            %td
+              = loan_application.id
+            %td
+              = loan_application.client_id
+            %td
+              = loan_application.client_name
+            %td
+              = loan_application.client_dob.nil? ? "Unknown" : Date.today.year - loan_application.client_dob.year
+            %td
+              = loan_application.client_address
+            %td
+              = loan_application.amount
+            %td
+              = loan_application.created_at.ctime
+            %td
+              = link_to loan_application.staff_member.name, resource(loan_application.staff_member)
+            %td
+              = loan_application.created_on
+            
+  - else
+    %h3
+      No loan applications added recently for this center
+

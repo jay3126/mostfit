@@ -1,0 +1,23 @@
+%h1 Credit Bureau Requests
+
+.shaded
+  - if @files.empty?
+    %h3 No files generated yet
+  - else
+    %h2 Download Credit Bureau Request
+    %table.form{:width => "100%"}
+      %thead
+        %th Serial No.
+        %th Filename
+        %th Created at
+      %tbody
+        - @files.sort.reverse.each_with_index do |file, idx|
+          - fname = file.split("/")[-1].chomp
+          %tr
+            %td
+              = idx + 1
+            %td
+              = link_to fname, url(:controller => :overlap_report_requests, :action => :send_csv, :filename => file)
+            %td
+              = File.mtime(file)
+            

@@ -1,0 +1,26 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    .error
+      - @errors.keys.each do |lap_id|
+        - if @errors[lap_id]
+          = "#{@errors[lap_id]}"
+          %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+%h1
+  = "Credit Officer authorizes new loan applications"
+= partial :filter_form
+
+%br
+%hr
+= partial :pending_authorizations
+
+%br
+%hr
+= partial :recent_authorizations
+
+%br
+%br

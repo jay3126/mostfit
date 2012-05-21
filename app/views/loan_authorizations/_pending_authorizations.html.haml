@@ -1,0 +1,79 @@
+:javascript
+  function reset_all_fields(){
+    jQuery("form.pending_auth input[type='radio']").attr('checked',false);
+    // jQuery("form select option[value='Not overriden']").attr("selected",true);
+    jQuery("form.pending_auth select").removeAttr('selected').find(':first').attr('selected','selected');
+  }
+
+#pending_list
+  .shaded
+    %h2
+      = "Credit officer authorizes loan application"
+    - if @pending_authorizations && !@pending_authorizations.empty?
+      = form(:action => url(:controller => 'loan_authorizations', :action => 'record_authorizations'), :method => :post, :class => "pending_auth") do
+        %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
+        %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
+        %table.form{:style => "width:100%; border:1px;"}
+          %thead
+            %tr
+              %td
+                = "Sl."
+              %td
+                = "Application ID"
+              %td
+                = "Name"
+              %td
+                = "D.O.B."
+              %td
+                = "Address"
+              %td
+                = "Rating"
+              %td{:colspan => 2, :align => "center"}
+                = "Loan Authorization"
+              %td{:colspan => 2}
+                = "Override reason"
+          %tbody.form
+            - s_no = 0
+            - @pending_authorizations.each do |lpa|
+              %tr
+                %td
+                  - s_no += 1
+                  = s_no
+                %td
+                  = link_to lpa.loan_application_id, "/loan_applications/#{lpa.loan_application_id}"
+                %td
+                  = lpa.client_name
+                %td
+                  = lpa.client_dob
+                %td
+                  = lpa.client_address
+                %td
+                  = lpa.credit_bureau_status
+                  %input{:type => :hidden, :value => lpa.credit_bureau_status, :name => 'credit_bureau_status'}
+                %td
+                  - selected_approved = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_APPROVED ? "checked" : nil
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED, :checked => selected_approved}
+                  Approved
+                %td
+                  - selected_rejected = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_REJECTED ? "checked" : nil
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_REJECTED, :checked => selected_rejected}
+                  Rejected
+                %td
+                  - selected_reason = params[:override_reason]? params[:override_reason]["#{lpa.loan_application_id}"] : nil
+                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS.map {|reason| [reason.to_s, reason]}, :selected => selected_reason
+        %table.narrow.form{:style => "width:100%;"}
+          %tfoot
+            %tr
+              %td
+                %b By
+                = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+              %td
+                %b On
+                = date_select("performed_on", Date.today, :id => "performed_on", :size => 8)
+              %td{:style => "text-align:right;"}
+                = submit "Save all"
+                %input{:value => "Reset all", :type => "button", :onclick => "reset_all_fields();"}
+      %i
+        Note: Override reason will be ignored if authorization is not an override.
+    - else
+      %h3 No loan application pending for authorization

@@ -1,0 +1,34 @@
+.shaded
+  %h2 Recently recorded loan files for health check
+  - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
+  - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && status_map.include?(Constants::Status::HEALTH_CHECK_APPROVED)
+    %table.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "ID"
+          %th
+            = "Loan file Identifier"
+          %th
+            = "Number of applications"
+          %th
+            = "Status"
+          %th
+            = "Remark"
+      %tbody
+        - @loan_files_at_center_at_branch_for_cycle.each do |lf|
+          - if lf.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
+            %tr
+              %td
+                = lf.id
+              %td
+                = link_to lf.loan_file_identifier, resource(lf)
+              %td
+                = lf.loan_applications.count
+              %td
+                = lf.health_check_status
+              %td
+                = lf.health_status_remark
+  - else
+    %h3 No health checked Loan Files found
+%br

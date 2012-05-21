@@ -1,0 +1,44 @@
+%h1
+  Loan application detail
+%table.narrow.form{:width => "100%"}
+  %thead
+    %tr
+      %th ID
+      %th Name
+      %th Guarantor name
+      %th Guarantor relationship
+      %th DOB
+      %th Ration Card
+      %th Voter ID
+      %th Amount
+      %th Address
+      %th State
+      %th pincode
+  %tbody
+    - loan_application = @loan_app
+    %tr
+      %td
+        = loan_application.id
+      %td
+        = loan_application.client_name
+      %td
+        = loan_application.client_guarantor_name
+      %td
+        = loan_application.client_guarantor_relationship
+      %td
+        = loan_application.client_dob
+      %td
+        = loan_application.client_reference1_type == 'Ration Card' ? loan_application.client_reference1 : 'NA'
+      %td
+        = loan_application.client_reference2_type == 'Voter ID' ? loan_application.client_reference2 : 'NA'
+      %td
+        = loan_application.amount
+      %td
+        = loan_application.client_address
+      %td
+        = loan_application.client_state.humanize
+      %td
+        = loan_application.client_pincode
+%br
+
+=# link_to '<< Back', request.env['HTTP_REFERER']
