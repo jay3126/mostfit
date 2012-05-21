@@ -22,6 +22,13 @@ function addFloater(link, form){
 				});
     }
 }
+
+function dataTables(){
+    $('table.dataTable').dataTable({
+	"sPaginationType": "full_numbers"
+    });
+}
+
 function spitLogs(){
     $.get("/logs/"+$("div.log_box").attr("id"), function(data){
 	      lines = data.split("\n");
@@ -727,6 +734,7 @@ function portfolioCalculations(){
 						      });
 }
 $(document).ready(function(){
+                      dataTables();  
 		      create_remotes();
 		      attachFormRemote();
                       fillCenters();
@@ -825,7 +833,7 @@ $(document).ready(function(){
 						    });
 			  $("table.report tr td a").click(function(){
 							      action=$(this).attr("class");
-							      child_type=$(this).attr("id");
+							      child_type=$(this).attr("id")
 							      child_type_total=child_type+"_total";
 							      parent_type = $(this).parent().parent().attr("class");
 							      parent_type_total=parent_type+"_total";

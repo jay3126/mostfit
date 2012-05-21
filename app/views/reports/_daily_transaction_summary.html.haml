@@ -1,12 +1,5 @@
-:javascript
-  $(document).ready(function(){
-    $('table.report').dataTable({
-    "sPaginationType": "full_numbers"
-    });
-  });
-
 = partial :form
-%table.report
+%table.report.dataTable
   %thead
     %tr
       %th
