@@ -688,6 +688,7 @@ FactoryGirl.define do
     currency            Constants::Money::DEFAULT_CURRENCY
     interest_rate       25.99
     repayment_frequency MarkerInterfaces::Recurrence::WEEKLY
+    repayment_allocation_strategy Constants::LoanAmounts::EARLIEST_INTEREST_FIRST_THEN_EARLIEST_PRINCIPAL_ALLOCATION
     tenure              52
   end
 
@@ -705,6 +706,7 @@ FactoryGirl.define do
     accounted_at_origin            { Factory(:biz_location).id }
     applied_by_staff               { Factory(:staff).id }
     recorded_by_user               { Factory(:user).id }
+    repayment_allocation_strategy  Constants::LoanAmounts::EARLIEST_INTEREST_FIRST_THEN_EARLIEST_PRINCIPAL_ALLOCATION
     association                    :lending_product
   end
 

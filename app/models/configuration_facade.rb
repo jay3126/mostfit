@@ -38,4 +38,12 @@ class ConfigurationFacade
     business_days.include?(weekday)
   end
 
+  def default_currency
+    Constants::Money::DEFAULT_CURRENCY
+  end
+
+  def default_locale
+    Constants::Money::DEFAULT_LOCALE
+  end
+
 end

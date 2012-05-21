@@ -14,7 +14,14 @@ module DataMapper
         money_values_hash[money_amount_sym] = money
       }
       money_values_hash
-    end    
+    end
+
+    # Uses the currency on the instance to return an instance of Money for any amount (usually one of the properties on the model)
+    def to_money_amount(amount_in_least_terms_only)
+      raise Errors::OperationNotSupportedError, "Does not have a value for currency" unless ((self.respond_to?(:currency)) and
+          (self.currency))
+      Money.new(amount_in_least_terms_only.to_i, self.currency)
+    end
 
   end
 end

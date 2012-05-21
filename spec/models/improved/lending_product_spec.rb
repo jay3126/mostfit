@@ -9,7 +9,8 @@ describe LendingProduct do
       :currency            => Constants::Money::INR,
       :interest_rate       => 25.99,
       :repayment_frequency => MarkerInterfaces::Recurrence::WEEKLY,
-      :tenure              => 46
+      :tenure              => 46,
+      :repayment_allocation_strategy => Constants::LoanAmounts::EARLIEST_INTEREST_FIRST_THEN_EARLIEST_PRINCIPAL_ALLOCATION
     )
   end
 

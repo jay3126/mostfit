@@ -26,8 +26,16 @@ class LoanScheduleTemplate
     ScheduleTemplateLineItem.create_schedule_line_items(schedule_template, principal_and_interest_amounts)
   end
 
-  def get_amortization
-    #TBD
+  def amortization
+    amortization = {}
+    self.schedule_template_line_items.sort.each { |line_item|
+      amortization.merge!(line_item.installment => line_item.to_money)
+    }
+    amortization
+  end
+
+  def total_interest_money_amount
+    to_money[:total_interest_amount]
   end
 
   private

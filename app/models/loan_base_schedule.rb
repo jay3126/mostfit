@@ -1,6 +1,7 @@
 class LoanBaseSchedule
   include DataMapper::Resource
-  include Constants::Money, Constants::Loan, MarkerInterfaces::Recurrence, Constants::Transaction, Constants::Properties
+  include Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Transaction, Constants::Properties
+  include MarkerInterfaces::Recurrence
 
   # The loan base schedule is created once and is immutable
   # (unless re-scheduled, which is not currently supported)
@@ -9,56 +10,96 @@ class LoanBaseSchedule
   belongs_to :lending
   has n, :base_schedule_line_items
 
-  property :id,                     Serial
-  property :total_principal_amount, *MONEY_AMOUNT
-  property :total_interest_amount,  *MONEY_AMOUNT
-  property :currency,               *CURRENCY
-  property :first_disbursed_on,     *DATE_NOT_NULL
-  property :first_receipt_on,       *DATE_NOT_NULL
-  property :repayment_frequency,    *FREQUENCY
-  property :tenure,                 *TENURE
-  property :num_of_installments,    *TENURE
-  property :created_at,             *CREATED_AT
+  property :id,                       Serial
+  property TOTAL_LOAN_DISBURSED,      *MONEY_AMOUNT
+  property TOTAL_INTEREST_APPLICABLE, *MONEY_AMOUNT
+  property :currency,                 *CURRENCY
+  property :first_disbursed_on,       *DATE_NOT_NULL
+  property :first_receipt_on,         *DATE_NOT_NULL
+  property :repayment_frequency,      *FREQUENCY
+  property :num_of_installments,      *TENURE
+  property :created_at,               *CREATED_AT
 
-  def money_amounts; [:total_principal_amount, :total_interest_amount]; end
+  def money_amounts
+    [TOTAL_LOAN_DISBURSED, TOTAL_INTEREST_APPLICABLE]
+  end
 
   # Implementing MarkerInterfaces::Recurrence#frequency
-  def frequency; self.repayment_frequency; end
-
-  # Get the base schedule balances on the specified date
-  # If the date specified is before the disbursement date, this returns the schedule balances on disbursement date
-  # if the date specified is on or after the last scheduled repayment date, this returns the schedule balances on
-  # the last scheduled repayment date
-  # In general, this returns the schedule balances on the date or the next date immediately following it
-  # However, by specifying true for the last argument, it can return the balances from the previous date immediately
-  # preceding the specified date
-  # @param [Date] on_date (defaults to Date.today)
-  # @param [TrueClass] get_earlier_date (defaults to false)
-  def get_schedule_balances(on_date = Date.today, get_earlier_date = false)
-    return get_schedule_line_item(self.first_disbursed_on) if on_date <= self.first_disbursed_on
-
-    all_schedule_dates = get_schedule_dates
-
-    last_schedule_date = all_schedule_dates.last
-    return get_schedule_line_item(last_schedule_date) if on_date >= last_schedule_date
-
-    schedule_date = get_earlier_date ? Constants::Time.get_immediately_earlier_date(on_date, *all_schedule_dates) :
-        Constants::Time.get_immediately_next_date(on_date, *all_schedule_dates)
-
-    schedule_date ? get_schedule_line_item(schedule_date) : nil
+  def frequency
+    self.repayment_frequency
   end
 
-  def self.create_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending, principal_and_interest_amounts)
-    base_schedule = to_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending)
-    BaseScheduleLineItem.create_schedule_line_items(base_schedule, principal_and_interest_amounts)
-  end
+  #######################
+  # LOAN SCHEDULE DATES # begins
+  #######################
 
   # Fetches a list of schedule dates ordered chronologically
   def get_schedule_dates
-    self.base_schedule_line_items.sort.collect {|line_item| line_item.on_date}
+    self.base_schedule_line_items.sort.collect { |line_item| line_item.on_date }
+  end
+
+  def get_schedule_date_range
+    get_schedule_dates.first..get_schedule_dates.last
+  end
+
+  # Tests whether the specified date is a schedule date on the amortization
+  def is_schedule_date?(on_date)
+    get_schedule_dates.include?(on_date)
+  end
+
+  # Gets the immediately previous and current schedule dates
+  def get_previous_and_current_schedule_dates(on_date = Date.today)
+    return on_date if is_schedule_date?(on_date)
+
+    return [nil, self.first_disbursed_on] if on_date <= self.first_disbursed_on
+
+    all_schedule_dates = get_schedule_dates
+    last_schedule_date = get_schedule_dates.sort.last
+    return [last_schedule_date, nil] if on_date > last_schedule_date
+
+    return [Constants::Time.get_immediately_earlier_date(on_date, *all_schedule_dates),
+            Constants::Time.get_immediately_next_date(on_date, *all_schedule_dates)]
+  end
+
+  #######################
+  # LOAN SCHEDULE DATES # ends
+  #######################
+
+  ###########################
+  # LOAN AMORTIZATION queries # begins
+  ###########################
+
+  # Get the previous and current amortization items on the specified date
+  # If the date specified is on or before the disbursement date, this returns [nil, amortization on disbursement date]
+  # If the date specified is after the last scheduled repayment date, this returns [amortization on last scheduled repayment date, nil]
+  # If the date specified is a schedule date, this returns [amortization on previous scheduled repayment date, amortization on the date]
+  # If the date specified falls between schedule dates, this returns [amortization on previous scheduled repayment date, amortization on next scheduled repayment date]
+  # @param [Date] on_date (defaults to Date.today)
+  def get_previous_and_current_amortization_items(on_date = Date.today)
+    nearest_schedule_dates_val = get_previous_and_current_schedule_dates(on_date)
+
+    if nearest_schedule_dates_val.is_a?(Array)
+      return nearest_schedule_dates_val.collect { |date_val| date_val.nil? ? nil : get_amortization(date_val)}
+    else
+      return get_amortization(nearest_schedule_dates_val)
+    end
+  end
+
+  ###########################
+  # LOAN AMORTIZATION queries # ends
+  ###########################
+
+  def self.create_base_schedule(total_loan_disbursed, total_interest_applicable, first_disbursed_on, first_receipt_on, repayment_frequency, num_of_installments, lending, amortization)
+    base_schedule = to_base_schedule(total_loan_disbursed, total_interest_applicable, first_disbursed_on, first_receipt_on, repayment_frequency, num_of_installments, lending)
+    BaseScheduleLineItem.create_schedule_line_items(base_schedule, amortization)
   end
 
   private
+
+  # Fetches the amortization on date
+  def get_amortization(on_date)
+    get_schedule_line_item(on_date).to_amortization
+  end
 
   # Only fetches the schedule line item for the specified date,
   #if there is a schedule line item
@@ -67,18 +108,17 @@ class LoanBaseSchedule
     self.base_schedule_line_items.first(:on_date => on_date)
   end
 
-  def self.to_base_schedule(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, num_of_installments, lending)
-    Validators::Arguments.not_nil?(total_principal_money_amount, total_interest_money_amount, first_disbursed_on, first_receipt_on, repayment_frequency, tenure, lending,num_of_installments)
-    base_schedule = {}
-    base_schedule[:total_principal_amount] = total_principal_money_amount.amount
-    base_schedule[:total_interest_amount] = total_interest_money_amount.amount
-    base_schedule[:currency] = total_principal_money_amount.currency
-    base_schedule[:first_disbursed_on] = first_disbursed_on
-    base_schedule[:first_receipt_on] = first_receipt_on
-    base_schedule[:repayment_frequency] = repayment_frequency
-    base_schedule[:tenure] = tenure
-    base_schedule[:num_of_installments] = num_of_installments
-    base_schedule[:lending] = lending
+  def self.to_base_schedule(total_loan_disbursed, total_interest_applicable, first_disbursed_on, first_receipt_on, repayment_frequency, num_of_installments, lending)
+    Validators::Arguments.not_nil?(total_loan_disbursed, total_interest_applicable, first_disbursed_on, first_receipt_on, repayment_frequency, lending, num_of_installments)
+    base_schedule                            = { }
+    base_schedule[TOTAL_LOAN_DISBURSED]      = total_loan_disbursed.amount
+    base_schedule[TOTAL_INTEREST_APPLICABLE] = total_interest_applicable.amount
+    base_schedule[:currency]                 = total_loan_disbursed.currency
+    base_schedule[:first_disbursed_on]       = first_disbursed_on
+    base_schedule[:first_receipt_on]         = first_receipt_on
+    base_schedule[:repayment_frequency]      = repayment_frequency
+    base_schedule[:num_of_installments]      = num_of_installments
+    base_schedule[:lending]                  = lending
     new(base_schedule)
   end
 
@@ -86,27 +126,34 @@ end
 
 class BaseScheduleLineItem
   include DataMapper::Resource
-  include Constants::Properties, Constants::Money, Constants::Loan, Validators::Amounts, Constants::Transaction
+  include Constants::Properties, Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Transaction
+  include Validators::Amounts
   include Comparable
 
   belongs_to :loan_base_schedule
 
-  property :id,                       Serial
-  property :installment,              *INSTALLMENT
-  property :on_date,                  *DATE_NOT_NULL
-  property :payment_type,             Enum.send('[]', *LOAN_PAYMENT_TYPES), :nullable => false
-  property :principal_balance_before, *MONEY_AMOUNT
-  property :principal_amount_due,     *MONEY_AMOUNT
-  property :principal_balance_after,  *MONEY_AMOUNT
-  property :interest_balance_before,  *MONEY_AMOUNT
-  property :interest_amount_due,      *MONEY_AMOUNT
-  property :interest_balance_after,   *MONEY_AMOUNT
-  property :currency,                 *CURRENCY
-  property :created_at,               *CREATED_AT
+  property :id,                             Serial
+  property :installment,                    *INSTALLMENT
+  property :on_date,                        *DATE_NOT_NULL
+  property :payment_type,                   Enum.send('[]', *LOAN_PAYMENT_TYPES), :nullable => false
+  property SCHEDULED_PRINCIPAL_OUTSTANDING, *MONEY_AMOUNT
+  property SCHEDULED_PRINCIPAL_DUE,         *MONEY_AMOUNT
+  property SCHEDULED_INTEREST_OUTSTANDING,  *MONEY_AMOUNT
+  property SCHEDULED_INTEREST_DUE,          *MONEY_AMOUNT
+  property :currency,                       *CURRENCY
+  property :created_at,                     *CREATED_AT
+
+  # Returns a data structure as follows:
+  # Hash with
+  # Array as key: [installment, date]
+  # Values: { :scheduled_principal_outstanding => money_amount, etc. }
+  def to_amortization
+    {[installment, on_date] => to_money}
+  end
 
   def money_amounts
-    [ :principal_balance_before, :principal_amount_due, :principal_balance_after,
-      :interest_balance_before, :interest_amount_due, :interest_balance_after ]
+    [ SCHEDULED_PRINCIPAL_OUTSTANDING, SCHEDULED_PRINCIPAL_DUE,
+      SCHEDULED_INTEREST_OUTSTANDING, SCHEDULED_INTEREST_DUE ]
   end
 
   # Order chronologically by on_date
@@ -115,69 +162,59 @@ class BaseScheduleLineItem
   end
 
   # Given a loan base schedule, create the loan schedule line items
-  def self.create_schedule_line_items(base_schedule, principal_and_interest_amounts)
+  def self.create_schedule_line_items(base_schedule, amortization)
     schedule_line_items = []
 
-    total_principal_amount = base_schedule.total_principal_amount
-    total_interest_amount = base_schedule.total_interest_amount
-    currency = base_schedule.currency
-    first_disbursed_on = base_schedule.first_disbursed_on
-    repayment_frequency = base_schedule.frequency
+    total_loan_disbursed      = base_schedule.total_loan_disbursed
+    total_interest_applicable = base_schedule.total_interest_applicable
+    currency                  = base_schedule.currency
+    first_disbursed_on        = base_schedule.first_disbursed_on
+    repayment_frequency       = base_schedule.frequency
 
-    disbursement = get_instance(0, first_disbursed_on, DISBURSEMENT, 0, 0, 0, 0, currency, total_principal_amount, total_interest_amount)
+    disbursement = get_instance(0, first_disbursed_on, DISBURSEMENT, 0, 0, 0, 0, currency)
     schedule_line_items << disbursement
 
-    repayment_on = base_schedule.first_receipt_on
-    principal_balance_before = total_principal_amount; interest_balance_before = total_interest_amount
-    installments = principal_and_interest_amounts.keys
+    repayment_on                    = base_schedule.first_receipt_on
+    scheduled_principal_outstanding = total_loan_disbursed
+    scheduled_interest_outstanding  = total_interest_applicable
+    installments                    = amortization.keys.sort
 
     installments.each { |num|
       next unless num > 0
-      principal_and_interest = principal_and_interest_amounts[num]
-      principal_amount_due = principal_and_interest[PRINCIPAL_AMOUNT].amount
-      interest_amount_due = principal_and_interest[INTEREST_AMOUNT].amount
+      principal_and_interest_installment = amortization[num]
+      scheduled_principal_due            = principal_and_interest_installment[PRINCIPAL_AMOUNT].amount
+      scheduled_interest_due             = principal_and_interest_installment[INTEREST_AMOUNT].amount
 
       repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency)
 
-      repayment = get_instance(num, repayment_on, REPAYMENT, principal_balance_before, principal_amount_due, interest_balance_before, interest_amount_due, currency)
+      repayment = get_instance(num, repayment_on, REPAYMENT, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
       schedule_line_items << repayment
 
-      principal_balance_before -= principal_amount_due
-      interest_balance_before -= interest_amount_due
+      scheduled_principal_outstanding -= scheduled_principal_due
+      raise Errors::BusinessValidationError, "Scheduled principal due: #{scheduled_principal_due} exceeds scheduled principal outstanding: #{scheduled_principal_outstanding}" if scheduled_principal_outstanding < 0
+
+      scheduled_interest_outstanding  -= scheduled_interest_due
+      raise Errors::BusinessValidationError, "Scheduled interest due: #{scheduled_interest_due} exceeds scheduled interest outstanding #{scheduled_interest_outstanding}" if scheduled_interest_outstanding < 0
     }
 
-    base_schedule.base_schedule_line_items = schedule_line_items
-    was_saved = base_schedule.save
+    base_schedule.base_schedule_line_items = schedule_line_items.sort
+    was_saved                              = base_schedule.save
     raise Errors::DataError, base_schedule.errors.first.first unless was_saved
     base_schedule
   end
 
   # Constructs an instance of this class
-  def self.get_instance(installment, on_date, payment_type, principal_balance_before, principal_amount_due, interest_balance_before, interest_amount_due, currency, principal_balance_after = nil, interest_balance_after = nil)
-    Validators::Amounts.is_positive?(principal_balance_before, principal_amount_due, interest_balance_before, interest_amount_due)
-    Validators::Amounts.is_positive?(principal_balance_after, interest_balance_after) if payment_type == DISBURSEMENT
-    line_item = {}
-    line_item[:installment] = installment
-    line_item[:on_date] = on_date
-    line_item[:payment_type] = payment_type
-
-    if (payment_type == DISBURSEMENT)
-      line_item[:principal_balance_before] = 0
-      line_item[:principal_amount_due] = 0
-      line_item[:principal_balance_after] = principal_balance_after
-      line_item[:interest_balance_before] = 0
-      line_item[:interest_amount_due] = 0
-      line_item[:interest_balance_after] = interest_balance_after
-    else
-      line_item[:principal_balance_before] = principal_balance_before
-      line_item[:principal_amount_due] = principal_amount_due
-      line_item[:principal_balance_after] = principal_balance_before - principal_amount_due
-      line_item[:interest_balance_before] = interest_balance_before
-      line_item[:interest_amount_due] = interest_amount_due
-      line_item[:interest_balance_after] = interest_balance_before - interest_amount_due
-    end
-
-    line_item[:currency] = currency
+  def self.get_instance(installment, on_date, payment_type, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
+    Validators::Amounts.is_positive?(scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due)
+    line_item                                  = { }
+    line_item[:installment]                    = installment
+    line_item[:on_date]                        = on_date
+    line_item[:payment_type]                   = payment_type
+    line_item[SCHEDULED_PRINCIPAL_OUTSTANDING] = scheduled_principal_outstanding
+    line_item[SCHEDULED_PRINCIPAL_DUE]         = scheduled_principal_due
+    line_item[SCHEDULED_INTEREST_OUTSTANDING]  = scheduled_interest_outstanding
+    line_item[SCHEDULED_INTEREST_DUE]          = scheduled_interest_due
+    line_item[:currency]                       = currency
     new(line_item)
   end
 

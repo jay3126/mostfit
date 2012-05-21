@@ -65,6 +65,7 @@ module Constants
 
     # Finds the date from the series of dates that immediately precedes the
     # specified date
+    # If this date is on the series of dates, it returns the same date and not an earlier date
     # @param [Date] for_date
     # @param [Array] from_dates
     def self.get_immediately_earlier_date(for_date, *from_dates)
@@ -83,6 +84,7 @@ module Constants
 
     # Finds the date from the series of dates that immediately follows the
     # specified date
+    # If this date is on the series of dates, it returns the same date and not a later date
     def self.get_immediately_next_date(for_date, *from_dates)
       return for_date if from_dates.include?(for_date)
 

@@ -7,6 +7,7 @@ module Constants
 
     INTEGER_NOT_NULL  = [ Integer, NOT_NULL ]
     FLOAT_NOT_NULL    = [ Float, NOT_NULL ]
+    DATE              = [ Date ]
     DATE_NOT_NULL     = [ Date, NOT_NULL ]
 
     NAME              = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL) ]

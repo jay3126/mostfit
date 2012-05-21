@@ -29,12 +29,15 @@ describe LoanScheduleTemplate do
     }
 
     @name = 'test template 1'
+
+    @lst = LoanScheduleTemplate.create_schedule_template(@name, @total_principal_money_amount, @total_interest_money_amount, @principal_money_amounts.length, MarkerInterfaces::Recurrence::WEEKLY, @lp, @principal_and_interest_amounts)
   end
 
   context "when created" do
 
     it "should create a number of schedule line items as expected" do
       lst = LoanScheduleTemplate.create_schedule_template(@name, @total_principal_money_amount, @total_interest_money_amount, @principal_money_amounts.length, MarkerInterfaces::Recurrence::WEEKLY, @lp, @principal_and_interest_amounts)
+      lst.saved?.should be_true
       schedule_line_items = lst.schedule_template_line_items
       schedule_line_items.sort.each_with_index { |li, idx|
         if idx == 0
@@ -50,6 +53,27 @@ describe LoanScheduleTemplate do
         li.currency.should == Constants::Money::DEFAULT_CURRENCY
         li.installment.should == idx
       }
+    end
+
+    it "should give an amortization schedule as expected" do
+      amortization = @lst.amortization
+      amortization.keys.sort.each { |installment|
+        principal_money_amount = amortization[installment][:principal_amount]
+        interest_money_amount = amortization[installment][:interest_amount]
+
+        if installment == 0
+          principal_money_amount.should == @total_principal_money_amount
+          interest_money_amount.should == Money.zero_money_amount(Constants::Money::DEFAULT_CURRENCY)
+          next
+        end
+
+        principal_money_amount.should == @principal_money_amounts[installment - 1]
+        interest_money_amount.should == @interest_money_amounts[installment - 1]
+      }
+    end
+
+    it "should give a total interest money amount as expected" do
+      @lst.total_interest_money_amount.should == @total_interest_money_amount
     end
 
     it "the number of schedule line items must match the number of installments

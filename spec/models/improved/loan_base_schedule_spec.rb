@@ -5,7 +5,7 @@ describe LoanBaseSchedule do
   before(:all) do
     @loan = Factory(:lending)
 
-    @principal_and_interest_amounts = {}
+    @amortization = {}
 
     @principal_amounts            = [170.18, 171.03, 171.88, 172.74, 173.60, 174.46, 175.33, 176.21, 177.08, 177.97, 178.85, 179.74, 180.64, 181.54, 182.44, 183.35, 184.27, 185.18, 186.11, 187.03, 187.97, 188.90, 189.84, 190.79, 191.74, 192.69, 193.65, 194.62, 195.59, 196.56, 197.54, 198.53, 199.52, 200.51, 201.51, 202.51, 203.52, 204.53, 205.55, 206.58, 207.61, 208.64, 209.68, 210.73, 211.77, 212.83, 213.89, 214.96, 216.03, 217.10, 218.18, 146.30]
     @principal_money_amounts      = MoneyManager.get_money_instance(*@principal_amounts)
@@ -21,10 +21,10 @@ describe LoanBaseSchedule do
       principal_and_interest                                           = { }
       principal_and_interest[Constants::Transaction::PRINCIPAL_AMOUNT] = @principal_money_amounts[num - 1]
       principal_and_interest[Constants::Transaction::INTEREST_AMOUNT]  = @interest_money_amounts[num - 1]
-      @principal_and_interest_amounts[num]                             = principal_and_interest
+      @amortization[num]                                               = principal_and_interest
     }
 
-    @principal_and_interest_amounts[0] = {
+    @amortization[0] = {
         Constants::Transaction::PRINCIPAL_AMOUNT => @total_principal_money_amount,
         Constants::Transaction::INTEREST_AMOUNT  => @total_interest_money_amount
     }
@@ -35,11 +35,10 @@ describe LoanBaseSchedule do
     disbursal_date = Date.parse('2012-04-01')
     first_repayment_date = disbursal_date + 7
     repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
-    tenure = 52
     num_of_installments = 52
     lending = @loan
 
-    base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, disbursal_date, first_repayment_date, repayment_frequency, tenure, num_of_installments, lending, @principal_and_interest_amounts)
+    base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, disbursal_date, first_repayment_date, repayment_frequency, num_of_installments, lending, @amortization)
     base_schedule.saved?.should be_true
   end
 
