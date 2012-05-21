@@ -36,7 +36,7 @@ class Center
   has n, :loan_history
   has n, :center_meeting_days
   has n, :weeksheets
-  has n, :meeting_schedules, :through => Resource
+  #has n, :meeting_schedules, :through => Resource
   
   validates_is_unique   :code, :scope => :branch_id
   validates_length      :code, :min => 1, :max => 12

@@ -3,17 +3,17 @@ class MeetingInfo
 
   # Is a light-weight read-only object that provides meeting information
 
-  attr_reader :location_type, :location_id, :on_date, :meeting_status, :meeting_time_begins_hours, :meeting_time_begins_minutes
+  attr_reader :location_id, :on_date, :meeting_status, :meeting_time_begins_hours, :meeting_time_begins_minutes
 
-  def initialize(location_type, location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
-    @location_type = location_type; @location_id = location_id
+  def initialize(location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
+    @location_id = location_id
     @on_date = on_date
     @meeting_status = meeting_status
     @meeting_time_begins_hours = meeting_time_begins_hours; @meeting_time_begins_minutes = meeting_time_begins_minutes
   end
 
   def to_s
-    "Meeting at #{location_type} (#{location_id}) on #{on_date} at #{meeting_begins_at}"
+    "Meeting at Location Id (#{location_id}) on #{on_date} at #{meeting_begins_at}"
   end
 
 end
@@ -31,7 +31,6 @@ class MeetingCalendar
   # All locations that meet merely consult the meeting calendar for the proposed and the actual calendar
 
   property :id,                         Serial
-  property :location_type,              Enum.send('[]', *MEETINGS_SUPPORTED_AT), :nullable => false
   property :location_id,                Integer, :nullable => false
   property :on_date,                    Date, :nullable => false
   property :meeting_status,             Enum.send('[]', *MEETING_SCHEDULE_STATUSES), :nullable => false, :default => PROPOSED_MEETING_STATUS
@@ -40,7 +39,7 @@ class MeetingCalendar
 
   # Returns an instance of MeetingInfo
   def to_info
-    MeetingInfo.new(location_type, location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
+    MeetingInfo.new(location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
   end
 
   # Creates a meeting for the specified location and date
@@ -103,14 +102,7 @@ class MeetingCalendar
   # When invoked, consults a location facade for meeting schedules,
   # then creates meetings for any locations on the date
   def self.setup_calendar(on_date, for_locations_and_schedules)
-    locations_and_meetings = {}
-    for_locations_and_schedules.each { |location_type, schedule_map|
-      meeting_map = {}
-      schedule_map.each { |id, meeting_schedule|
-        meeting_map[id] = meeting_schedule if meeting_schedule.is_proposed_scheduled_on_date?(on_date)
-      }
-      locations_and_meetings[location_type] = meeting_map
-    }
+    locations_and_meetings = for_locations_and_schedules.select{|schedule| schedule.last.is_proposed_scheduled_on_date?(on_date) == true}
     setup(locations_and_meetings, on_date)
   end
 
@@ -129,17 +121,14 @@ class MeetingCalendar
   # Given a map of location types and meetings for the locations at those location types,
   # creates meetings in the meeting calendar
   def self.setup(locations_and_meetings, on_date)
-    locations_and_meetings.each { |location_type, meeting_map|
-      meeting_map.each { |location_id, meeting| 
-        first_or_create(
-          :on_date => on_date,
-          :location_type => location_type,
-          :location_id => location_id,
-          :meeting_status => PROPOSED_MEETING_STATUS,
-          :meeting_time_begins_hours => meeting.meeting_time_begins_hours,
-          :meeting_time_begins_minutes => meeting.meeting_time_begins_minutes
-        )
-      }
+    locations_and_meetings.each { |meeting| 
+      first_or_create(
+        :on_date => on_date,
+        :location_id => meeting.first,
+        :meeting_status => PROPOSED_MEETING_STATUS,
+        :meeting_time_begins_hours => meeting.last.meeting_time_begins_hours,
+        :meeting_time_begins_minutes => meeting.last.meeting_time_begins_minutes
+      )
     }
   end
 
@@ -160,11 +149,9 @@ class MeetingCalendar
   end
 
   def self.predicates_for_location(location)
-    location_type_string, location_id = Resolver.resolve_location(location)
-    raise ArgumentError, "meetings are not supported at #{location_type_string}" unless
-    (location_type_string and Constants::Space::MEETINGS_SUPPORTED_AT.include?(location_type_string))
-    raise ArgumentError, "a location id was not specified" unless location_id
-    {:location_type => location_type_string, :location_id => location_id }
+    location_type_string = location.location_level.name.downcase.to_sym
+    raise ArgumentError, "meetings are not supported at #{location_type_string}" unless Constants::Space::MEETINGS_SUPPORTED_AT.include?(location_type_string)
+    {:location_id => location.id }
   end
 
   # Returns a hash with query parameters that restrict the search on meetings to the date range specified
@@ -175,4 +162,4 @@ class MeetingCalendar
     {:on_date.gte => from_date, :on_date.lt => to_date, :order => [:on_date.asc]}
   end
 
- end
+end

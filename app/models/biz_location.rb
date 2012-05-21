@@ -9,6 +9,7 @@ class BizLocation
   property :deleted_at, ParanoidDateTime
 
   belongs_to :location_level
+  has n, :meeting_schedules, :through => Resource
 
   # Returns all locations that belong to LocationLevel
   def self.all_locations_at_level(by_level_number)
@@ -40,4 +41,11 @@ class BizLocation
     "#{self.level_name ? self.level_name + " " : ""}#{self.name_and_id}"
   end
 
+  def meeting_schedule_effective(on_date)
+    query = {}
+    query[:schedule_begins_on.lte] = on_date
+    query[:order] = [:schedule_begins_on.desc]
+    self.meeting_schedules.first(query)
+  end
+  
 end

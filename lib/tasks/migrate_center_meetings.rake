@@ -31,17 +31,20 @@ USAGE_TEXT
           centers_included_from_cmd.push(cmd.center.id) if (cmd.center and cmd.center.id)
         }
 
+        location_level = LocationLevel.first(:level => 0)
         centers_included_from_cmd.uniq!
         p "Centers left out number: #{centers_included_from_cmd.length}"
+
 
         centers_and_schedules.each { |schedule_info|
           center_id = schedule_info.delete(:center_id)
           center = Center.get(center_id)
+          biz_location = location_level.biz_locations.first(:name => center.name)
 
           ms = MeetingSchedule.first_or_create(schedule_info)
-          center.meeting_schedules << ms
-          unless center.save
-            unsave_centers << [center.id, false, center.errors.first.first]
+          biz_location.meeting_schedules << ms
+          unless biz_location.save
+            unsave_centers << [biz_location.id, false, biz_location.errors.first.first]
           end
         }
 
@@ -52,6 +55,7 @@ USAGE_TEXT
         centers_left_out.each { |cid|
           center = Center.get(cid)
           if (center && center.meeting_day != :none)
+            biz_location = location_level.biz_locations.first(:name => center.name)
             meeting_day = center.meeting_day
             center_created_on = center.created_at
             defaulted_schedule_begins_on = Date.new(center_created_on.year, center_created_on.mon, center_created_on.day)
@@ -61,9 +65,9 @@ USAGE_TEXT
 
             msi = MeetingScheduleInfo.new(MarkerInterfaces::Recurrence::WEEKLY, adjusted_schedule_begins_on, meeting_time_begins_hours, meeting_time_begins_minutes)
             ms = MeetingSchedule.from_info(msi)
-            center.meeting_schedules << ms
-            unless center.save
-              unsave_centers << [center.id, false, center.errors.first.first]
+            biz_location.meeting_schedules << ms
+            unless biz_location.save
+              unsave_centers << [biz_location.id, false, biz_location.errors.first.first]
             end
           end
         }

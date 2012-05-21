@@ -19,7 +19,7 @@ class MeetingSchedules < Application
     meeting_begin_on = Date.parse params[:meeting_schedule][:schedule_begins_on]
     meeting_time_begins_hours = params[:meeting_schedule][:meeting_time_begins_hours].to_i
     meeting_time_begins_minutes = params[:meeting_schedule][:meeting_time_begins_minutes].to_i
-    @center = Center.get params[:center_id]
+    @biz_location = BizLocation.get params[:biz_location_id]
 
     # VALIDATIONS
 
@@ -31,7 +31,7 @@ class MeetingSchedules < Application
     if message[:error].blank?
       begin
         msi = MeetingScheduleInfo.new(meeting_schedule, meeting_begin_on, meeting_time_begins_hours, meeting_time_begins_minutes)  
-        if mf.setup_meeting_schedule @center, msi
+        if mf.setup_meeting_schedule @biz_location, msi
           message = {:notice => "Center Meeing Schedule successfully created"}
         else
           message = {:error => "Center Meeting Schedule creation fail"}
@@ -42,7 +42,7 @@ class MeetingSchedules < Application
     end
 
     #REDIRECT/RENDER
-    redirect resource(@center), :message => message
+    redirect request.referer, :message => message
   end
 
   def edit

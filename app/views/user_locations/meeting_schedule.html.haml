@@ -16,9 +16,9 @@
     %div#location_list
       =partial "user_locations/meeting_schedule_list"
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_calendar, :id => @biz_location.id)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :weeksheet_collection, :date => Date.today)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}
   %div.tab

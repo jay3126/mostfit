@@ -17,7 +17,6 @@
         %th
           Date
         %th
-          - min_date = [Date.today, @min_assign_date].max
-          = date_select "begin_date", min_date, :min_date => min_date
+          = date_select "begin_date", Date.today
     = submit 'Save'
     = link_to 'Cancel', url(params[:return]), :class => "grey_button"

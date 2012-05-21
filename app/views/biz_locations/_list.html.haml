@@ -19,7 +19,7 @@
         %th
           Created On
     %tr
-      - for biz_location_level in @biz_locations
+      - for biz_location_level in @biz_locations.sort_by{|x| x.first}
         %tr
           %td{:style => "background-color:gray; text-align:center", :colspan => 5}
             %b= "#{biz_location_level.first}-Level"
