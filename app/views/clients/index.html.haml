@@ -1,10 +1,7 @@
 .shaded{:style => "padding: 5px; margin-bottom: 10px;"}
   .graph
     = ofc2(530, 300, url(:graph_data, :action => 'center', :id => @center.id, :scope_unit => 'months', :scope_size => 3) )
-  - if (@center.center_category.nil? or @center.center_category.empty?)
-    %h1== Center: <i>#{@center.name}</i> (#{@clients.count} clients)
-  - else
-    %h1== Center: <i>#{@center.name}</i> (#{@center.center_category}) (#{@clients.count} clients)
+  %h1== Center: <i>#{@center.name}</i> (#{@clients.count} clients)
   .menu-strip
     = link_to 'edit center', resource(@branch, @center, :edit), :class => "edit grey_button"
     = link_to 'new client', resource(@branch, @center, :clients, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
@@ -73,10 +70,8 @@
         Data Entry
       %li#history
         History
-      %li#calendar
-        Calendar
-      %li#meeting_schedule
-        Meeting Schedule
+      %li#miscellaneous
+        Miscellaneous
       - if Mfi.first.map_enabled
         %li#map
           Map
@@ -88,8 +83,7 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@center.id}?for=center"}
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:weeksheet, :center_id => @center.id, :branch_id => @branch.id, :date => @date)}
-      /=partial "centers/weeksheet"
+      = partial "centers/weeksheet"
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => resource(:documents, :parent_id => @center.id, :parent_model => Center)}
     %div.tab
@@ -104,9 +98,7 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :action => :meeting_calendar, :id => @center.id)}
-    %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :action => :meeting_schedule, :id => @center.id)}
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :centers, :id => @center.id, :action => :misc)}
     - if Mfi.first.map_enabled
       %div.tab
         = js_include_tag :map

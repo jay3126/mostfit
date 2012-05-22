@@ -24,9 +24,9 @@ module Merb
     #returns a hash with all the branches with the branch ids as keys
     #can be used with a select helper in form. 
     def select_branch
-        @branches_and_names = [] 
-        Branch.all.each {|br| @branches_and_names.push([br.id,br.name])}
-        @branches_and_names
+      @branches_and_names = []
+      Branch.all.each {|br| @branches_and_names.push([br.id,br.name])}
+      @branches_and_names
     end
 
     def link_to_with_class(name, url)
@@ -37,9 +37,9 @@ module Merb
       uri = URI.parse(path)
       method = method.to_s.upcase || "GET"
       request = Merb::Request.new(
-                                  Merb::Const::REQUEST_PATH => uri.path,
-                                  Merb::Const::REQUEST_METHOD => method,
-                                  Merb::Const::QUERY_STRING => uri.query)
+        Merb::Const::REQUEST_PATH => uri.path,
+        Merb::Const::REQUEST_METHOD => method,
+        Merb::Const::QUERY_STRING => uri.query)
       route = Merb::Router.match(request)[1] rescue nil
       return link_to(text,path,params) if session.user.can_access?(route, params)
     end
@@ -48,13 +48,13 @@ module Merb
       # this is to generate links to loans, as the resouce method doesn't work for descendant classes of Loan
       # it expects the whole context (@branch, @center, @client) to exist
       base = if @branch and @center and @client
-               url(:branch_center_client, @branch.id, @center.id, @client.id)
-             elsif @client
-               url(:branch_center_client, @client.center.branch_id, @client.center_id, @client.id)
-             else
-               client = loan.client
-               url(:branch_center_client, client.center.branch_id, client.center_id, client.id)
-             end
+        url(:branch_center_client, @branch.id, @center.id, @client.id)
+      elsif @client
+        url(:branch_center_client, @client.center.branch_id, @client.center_id, @client.id)
+      else
+        client = loan.client
+        url(:branch_center_client, client.center.branch_id, client.center_id, client.id)
+      end
       base + "/loans/#{loan.id}/" + action.to_s + (opts.length>0 ? "?#{opts.inject([]){|s,x| s << "#{x[0]}=#{x[1]}"}.join("&")}" : '')
     end
 
@@ -69,10 +69,10 @@ module Merb
       end
       
       select(col,
-             :collection   => staff_members_collection(allow_unassigned, allow_inactive),
-             :name         => "#{obj.class.to_s.snake_case}[#{id_col}]",
-             :id           => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
-             :selected     => selected)
+        :collection   => staff_members_collection(allow_unassigned, allow_inactive),
+        :name         => "#{obj.class.to_s.snake_case}[#{id_col}]",
+        :id           => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
+        :selected     => selected)
     end
 
     def select_center_for(obj, col, attrs = {})
@@ -145,7 +145,7 @@ module Merb
         attrs.merge!(:max_date => attrs[:max_date]||Date.max_date)
       end
       date_select_html(attrs, obj, col)
-#       errorify_field(attrs, col)
+      #       errorify_field(attrs, col)
     end
 
     def date_select_html (attrs, obj = nil, col = nil)      
@@ -154,18 +154,18 @@ module Merb
         <script type="text/javascript">
           $(function(){
             var holidays= #{$holidays_list.to_json};
-              function nonWorkingDays(date) {
-                for (var j = 0; j < holidays.length; j++) {
-                  if (date.getMonth() == holidays[j][1] - 1 && date.getDate() == holidays[j][0] && date.getYear() - 100 == holidays[j][2]) {
-                    return [true, 'holiday_indicator'];
-                  }
-                }
-                return [true, ''];
-              }
-            $("##{attrs[:id]}").datepicker('destroy').datepicker({beforeShowDay: nonWorkingDays, altField: '##{attrs[:id]}', buttonImage: "/images/calendar.png", changeYear: true, buttonImageOnly: true,
-                                            yearRange: '#{attrs[:min_date].year}:#{attrs[:max_date].year}',
-                                            dateFormat: '#{datepicker_dateformat}', altFormat: '#{datepicker_dateformat}', minDate: '#{attrs[:min_date]}',
-                                            maxDate: '#{attrs[:max_date]}', showOn: 'both', setDate: "#{attrs[:date]}" })
+      function nonWorkingDays(date) {
+      for (var j = 0; j < holidays.length; j++) {
+      if (date.getMonth() == holidays[j][1] - 1 && date.getDate() == holidays[j][0] && date.getYear() - 100 == holidays[j][2]) {
+      return [true, 'holiday_indicator'];
+      }
+      }
+      return [true, ''];
+      }
+      $("##{attrs[:id]}").datepicker('destroy').datepicker({beforeShowDay: nonWorkingDays, altField: '##{attrs[:id]}', buttonImage: "/images/calendar.png", changeYear: true, buttonImageOnly: true,
+      yearRange: '#{attrs[:min_date].year}:#{attrs[:max_date].year}',
+      dateFormat: '#{datepicker_dateformat}', altFormat: '#{datepicker_dateformat}', minDate: '#{attrs[:min_date]}',
+      maxDate: '#{attrs[:max_date]}', showOn: 'both', setDate: "#{attrs[:date]}" })
           });
 
        </script>
@@ -259,14 +259,14 @@ module Merb
 
     def plurial_nouns(freq)
       case freq.to_sym
-        when :daily
-          'days'
-        when :weekly
-          'weeks'
-        when :monthly
-          'months'
-        else
-          '????'
+      when :daily
+        'days'
+      when :weekly
+        'weeks'
+      when :monthly
+        'months'
+      else
+        '????'
       end
     end
 
@@ -357,42 +357,42 @@ module Merb
           if relations.key?(k)
             str = "<tr><td>#{relations[k].first.to_s.humanize}</td><td>"
             str += (if action==:update and v.class==Array
-                      str = "changed from "
-                      if v.first and relations[k] and obj=relations[k].last.get(v.first)
-                        str += obj.name
-                      else
-                        str += "nil"
-                      end
-                      str += "</td><td>to "
+                str = "changed from "
+                if v.first and relations[k] and obj=relations[k].last.get(v.first)
+                  str += obj.name
+                else
+                  str += "nil"
+                end
+                str += "</td><td>to "
 
-                      if v.last and relations[k] and obj=relations[k].last.get(v.last)
-                        str += obj.name
-                      else
-                        str += "nil"
-                      end
-                      str
-                    elsif action==:create and v.class==Array
-                      child_obj = relations[k].last.get(v.last)
-                      ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
-                    elsif action==:create
-                      child_obj = relations[k].last.get(v)
-                      ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
-                    else
-                      "#{v}"
-                    end)||""
+                if v.last and relations[k] and obj=relations[k].last.get(v.last)
+                  str += obj.name
+                else
+                  str += "nil"
+                end
+                str
+              elsif action==:create and v.class==Array
+                child_obj = relations[k].last.get(v.last)
+                ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
+              elsif action==:create
+                child_obj = relations[k].last.get(v)
+                ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
+              else
+                "#{v}"
+              end)||""
           else
             str="<tr><td>#{k.humanize}</td><td>"
             str+=if action==:update and v.class==Array
-                   if model.properties.find{|x| x.name == k}.type.respond_to?(:flag_map)
-                     "changed from #{model.properties.find{|x| x.name == k}.type.flag_map[v.first]}</td><td>to #{v.last}"                     
-                   else
-                     "changed from #{v.first}</td><td>to #{v.last}"
-                   end
-                 elsif action==:create and v.class==Array
-                   "#{v}"
-                 else
-                   "#{v}"
-                 end
+              if model.properties.find{|x| x.name == k}.type.respond_to?(:flag_map)
+                "changed from #{model.properties.find{|x| x.name == k}.type.flag_map[v.first]}</td><td>to #{v.last}"
+              else
+                "changed from #{v.first}</td><td>to #{v.last}"
+              end
+            elsif action==:create and v.class==Array
+              "#{v}"
+            else
+              "#{v}"
+            end
           end
           str+="</td></tr>"
         }
@@ -441,46 +441,46 @@ module Merb
     
     def get_accessible_centers(branch_id, staff=nil)
       centers = if staff or session.user.staff_member
-                  Center.all(:branch => get_accessible_branches, :order => [:name])
-                elsif branch_id and not branch_id.blank?
-                  Center.all(:branch_id => branch_id, :order => [:name])
-                else 
-                  []
-                end      
+        Center.all(:branch => get_accessible_branches, :order => [:name])
+      elsif branch_id and not branch_id.blank?
+        Center.all(:branch_id => branch_id, :order => [:name])
+      else
+        []
+      end
       centers.map{|x| [x.id, "#{x.name}"]}
     end
 
     def get_accessible_staff_members(staff=nil)
       staff_members   =  if staff or staff = session.user.staff_member
-                           if branches = staff.branches and branches.length>0
-                             [staff] + branches.centers.managers(:order => [:name])
-                           elsif centers = staff.centers and centers.length>0
-                             [staff] + centers.managers(:order => [:name])
-                           else
-                             [staff] + [staff]
-                           end
-                         else
-                           StaffMember.all(:order => [:name])
-                         end      
+        if branches = staff.branches and branches.length>0
+          [staff] + branches.centers.managers(:order => [:name])
+        elsif centers = staff.centers and centers.length>0
+          [staff] + centers.managers(:order => [:name])
+        else
+          [staff] + [staff]
+        end
+      else
+        StaffMember.all(:order => [:name])
+      end
       staff_members.map{|x| [x.id, x.name]}
     end
 
     def get_accessible_funders(user=nil)
       (if session.user.role == :funder
-        Funder.all(:user => user)
-      else
-        Funder.all
-      end).map{|x| [x.id, "#{x.name}"]}
+          Funder.all(:user => user)
+        else
+          Funder.all
+        end).map{|x| [x.id, "#{x.name}"]}
     end
 
     def get_accessible_funding_lines(funder_id, user = nil)
       fl = if user or session.user.role == :funder
-             FundingLine.all(:funder => get_accessible_funders)
-           elsif funder_id and not funder_id.blank?
-             FundingLine.all(:funder_id => funder_id)
-           else
-             []
-           end
+        FundingLine.all(:funder => get_accessible_funders)
+      elsif funder_id and not funder_id.blank?
+        FundingLine.all(:funder_id => funder_id)
+      else
+        []
+      end
       fl.map{|x| [x.id, "#{x.name}"]}
     end
 
@@ -488,39 +488,39 @@ module Merb
     #otherwise nothing is displayed.
     def get_accessible_combo_branches(area_id)
       br = if area_id and not area_id.blank?
-             Branch.all(:area_id => @area_id, :order => [:name])
-           else
-             []
-           end
+        Branch.all(:area_id => @area_id, :order => [:name])
+      else
+        []
+      end
       br.map{|x| [x.id, "#{x.name}"]}
     end
 
     #this function is for getting the list of accounts whose account_category is Cash and belongs to a particular branch.
     def get_accessible_cash_accounts(branch_id)
       acc = if branch_id and not branch_id.blank?
-              Account.all(:branch_id => @branch_id, :account_category => "Cash", :order => [:name])
-            else
-              []
-            end
+        Account.all(:branch_id => @branch_id, :account_category => "Cash", :order => [:name])
+      else
+        []
+      end
       acc.map{|x| [x.id, "#{x.name}"]}
     end
 
     #this function is for getting the list of accounts whose account_category is Bank and belongs to a particular branch.
     def get_accessible_bank_accounts(branch_id)
       acc = if branch_id and not branch_id.blank?
-              Account.all(:branch_id => @branch_id, :account_category => "Bank", :order => [:name])
-            else
-              []
-            end
+        Account.all(:branch_id => @branch_id, :account_category => "Bank", :order => [:name])
+      else
+        []
+      end
       acc.map{|x| [x.id, "#{x.name}"]}
     end
     
     def get_accessible_accounts(branch_id)
       accounts = if branch_id and not branch_id.blank?
-                   Account.all(:branch_id => @branch_id, :order => [:name])
-                 else
-                   Account.all(:branch_id => nil, :order => [:name])
-                 end
+        Account.all(:branch_id => @branch_id, :order => [:name])
+      else
+        Account.all(:branch_id => nil, :order => [:name])
+      end
       accounts.map{|x| [x.id, "#{x.name}"]}
     end
 
@@ -531,21 +531,21 @@ module Merb
         MASS_ENTRY_FIELDS[model].sort_by{|x| x.to_s}.each{|k| collection << ["#{model}[#{k.to_s}]", "!!!!!!#{k.to_s.camelcase(' ')}"] }
       end
       select(
-             :collection   => collection,
-             :name         => "#{attrs[:name]}",
-             :id           => "#{attrs[:id]||'select_mass_entry'}",
-             :prompt       => (attrs[:prompt] or "&lt;select a field&gt;")).gsub("!!!", "&nbsp;")
+        :collection   => collection,
+        :name         => "#{attrs[:name]}",
+        :id           => "#{attrs[:id]||'select_mass_entry'}",
+        :prompt       => (attrs[:prompt] or "&lt;select a field&gt;")).gsub("!!!", "&nbsp;")
     end
 
     def paginate_on_weekdays(branch, selected=Date.today.weekday)
-      days = Constants::Time.get_current_week_dates(Date.parse(selected.to_s))
-      days.map{|day|
-        if day.to_s == selected.to_s
-          "<strong>#{day.weekday.to_s.capitalize}</strong>"
+      (Center::DAYS + [:monthly]).map{|wday|
+        weekday = (wday==:none ? "Not defined" : wday.to_s)
+        if selected==wday
+          "<strong>#{weekday}</strong>"
         else
-          link_to(day.weekday.to_s.capitalize, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => day), :id => "centers_list", :class => "_remote_", :title => day)
+          link_to(weekday, url(:controller => "centers", :action => "list", :branch_id => branch, :meeting_day => wday.to_s), :id => "centers_list", :class => "_remote_")
         end
-      }.join(' | ') +" <b>( From "+ days.first.to_s + " To " + days.last.to_s + ")</b>"
+      }.join(' | ')
     end
 
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})

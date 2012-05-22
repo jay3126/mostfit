@@ -13,10 +13,7 @@ class Centers < Application
   end
 
   def list
-    @centers = @branch.centers
-    @date = Date.parse params[:meeting_day] || Date.today
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_dates = mf.get_meetings_for_loncations_on_date(@centers, @date)
+    @centers = @centers ? @centers.all(:meeting_day => params[:meeting_day]||Date.today) : @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
     partial "centers/list", :layout => layout?
   end
 

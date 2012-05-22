@@ -17,9 +17,7 @@ class Branches < Application
     @meeting_dates = []
     raise NotFound unless @branch
     if @branch.centers.count > 0
-      @centers = @branch.centers
-      mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@centers, Date.today)
+      @centers = @branch.centers_with_paginate({:meeting_day => params[:meeting_day]}, session.user)
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display [@branch, @centers]
       else

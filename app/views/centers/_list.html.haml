@@ -1,22 +1,18 @@
 %h2
-  Centers meeting on 
-  = @date.nil? ? Date.today.weekday : @date.weekday
+  Centers meeting on
+  = params[:meeting_day]||Date.today.weekday
 %p{:style => "margin-left: 15px;"}
   %b Select center meeting day: &nbsp;
-  = paginate_on_weekdays(@branch, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
-%p{:style =>"text-align: right; margin-top: -19px; margin-right: 80px;"}
-  = link_to "Today | " , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
-  = link_to "Previous | " , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"
-  = link_to "Next" , url(:controller => "centers", :action => "list", :branch_id => @branch.id, :meeting_day => @date.nil? ? Date.today + 7 : @date + 7), :id => "centers_list", :class => "_remote_", :title => "Next Week Meeting Centers"
-- if @centers.blank? || @meeting_dates.blank?
+  = paginate_on_weekdays(@branch, (params.key?(:meeting_day) ? params[:meeting_day].to_sym : Date.today.weekday))
+- if @centers.blank?
   - if @branch.centers.count==0
     %p
       %i No centers have been created yet.
   - else
     %p
-      %i No centers meet on this day.    
+      %i No centers meet on this day.
 - else
-  %table{:style => "text-align:left", :class => "narrow floating_header"}
+  %table.narrow.floating_header
     %tr.header
       %th{:style => "width: 5%"} ID
       %th Name
@@ -27,26 +23,22 @@
     %tbody
     - clients_count = Client.all(:center => @centers).aggregate(:center_id, :id.count).to_hash
     - today = Date.today.weekday
-    - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
-      - center = @centers.find{|x| x.id == meeting_date.location_id}
+    - @centers.sort_by{|c| c.id}.each do |center|
       %tr{:class => cycle('odd','')}
         %td
           = center.id
         %td.text
-          - if center.center_category.nil? or center.center_category.empty?
-            %b= link_to center.name, resource(@branch, center )
-          - else
-            %b= link_to "#{center.name} (#{center.center_category})", resource(@branch, center )
+          %b= link_to center.name, resource(@branch, center )
         %td.text
           = link_to center.manager.name, resource(center.manager)
         %td
           %span
-            = meeting_date.meeting_begins_at
+            == #{center.meeting_day_for(Date.today).to_s.capitalize}#{(center.meeting_time_hours and center.meeting_time_minutes) ? ", #{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}" : ''}
         %td
           = clients_count[center.id] if clients_count.key?(center.id)
         %td
           = link_to 'edit', resource(@branch, center, :edit)
-          - if @branch 
+          - if @branch
             &nbsp;|&nbsp;
             = link_to 'new client', resource(@branch, center, :clients, :new)
 
