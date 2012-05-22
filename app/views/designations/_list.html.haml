@@ -1,0 +1,35 @@
+- if @designations.empty?
+  #container_form
+    .notice{:style => "background: none; text-align: center;"}
+      No designation
+- else
+  %table.narrow
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Name
+        %th
+          Location Level
+        %th
+          User Role
+        %th
+          Created On
+        %th
+          Actions
+    %tr
+    - for designation in @designations
+      %tr{:class => cycle('odd','even')}
+        %td
+          = designation.id
+        %td
+          = designation.name
+        %td
+          = designation.location_level.name
+        %td
+          = designation.user_roles.aggregate(:name).join(", ")
+        %td
+          = designation.created_at
+        %td
+          = link_to 'Assign Staff' ,'#'

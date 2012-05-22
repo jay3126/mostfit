@@ -42,10 +42,19 @@ class Staffs < Application
   end
 
   def edit
-
   end
 
   def update
-    
+  end
+
+  def assign_biz_location
+    @staff = Staff.get params[:id]
+    @designations = Designation.all
+    @staffs = Staff.all
+    @staff_assignment = StaffAssignment.new(:staff_id => @staff.id)
+  end
+
+  def set_assignment_of_biz_location
+
   end
 end

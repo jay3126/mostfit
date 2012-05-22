@@ -1,10 +1,11 @@
 class Designation
   include DataMapper::Resource
+  include Constants::Properties
   
   property :id,         Serial
-  property :name,       String, :nullable => false
-  property :created_at, DateTime, :nullable => false, :default => DateTime.now
-  property :deleted_at, ParanoidDateTime, :default => DateTime.now
+  property :name,       String, :nullable => false, :unique => true
+  property :created_at, *CREATED_AT
+  property :deleted_at, *DELETED_AT
 
   belongs_to :location_level
 

@@ -1,0 +1,15 @@
+%tr
+  %th
+    Name
+  %td
+    = text_field :name
+%tr
+  %td
+    Designation
+  %td
+    = select :designation, :collection => Designation.all.collect{|x| [x.id, x.name]}
+%tr
+  %td
+    Role Class
+  %td
+    = select :role_class, :collection => Constants::User::ROLE_CLASSES.collect{|x| x.to_s}

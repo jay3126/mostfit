@@ -1,5 +1,6 @@
 class User
   include DataMapper::Resource
+  include Constants::Properties
 
   before :destroy, :prevent_destroying_admin
   after  :save,    :set_staff_member
@@ -11,6 +12,7 @@ class User
   property :password_changed_at, DateTime, :default => Time.now, :nullable => false
   property :active,       Boolean, :default => true, :nullable => false
   property :preferred_locale,        String
+  property :created_by, *INTEGER_NOT_NULL
 
   # permissions
   # to add to this, only add at the back of the array
@@ -19,7 +21,7 @@ class User
   ALLOWED_ROLES = ROLES - PROHIBITED_ROLES
   ROLES_TO_S = Hash.new{ |hash, role| hash[role] = role.to_s.split('_').join(' ').capitalize }
 
-  property :role, Enum.send('[]', *ROLES), :nullable => false
+  property :role, Enum.send('[]', *ROLES)
 
   # it gets                                   
   #   - :password and :password_confirmation accessors
@@ -32,6 +34,10 @@ class User
   validates_length :password, :min => 6, :if => Proc.new{|u| not u.password.nil?}
   has 1, :staff_member
   has 1, :funder
+
+  # add new model staff
+  belongs_to :staff
+
 
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
