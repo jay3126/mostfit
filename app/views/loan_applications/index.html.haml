@@ -1,3 +1,4 @@
+
 %table#data_entry_index
   %tr
   %tr
@@ -10,6 +11,15 @@
       = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true'), :class => 'add_small'
       %br
       = link_to "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
+    %td{:style => "padding: 15px;"}
+    %td
+      %h1
+        Reports
+      = link_to "Loan Application Report", "/reports/LoanApplicationsReport"
+      %br
+      = link_to "Credit Bureau Report", "/reports/CreditBureauReport"
+      %br
+      = link_to "Loan File Report", "/reports/LoanFilesReport"
   %tr
     %td
       %br
