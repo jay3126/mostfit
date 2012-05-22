@@ -36,21 +36,11 @@ namespace :mostfit do
         center_name = client.center.name
         branch_name = client.center.branch.name
 
-        if loan.scheduled_first_payment_date <= date1
-          pos_as_on_29th_feb_2012 = loan.actual_outstanding_principal_on(date1).round(2)
-          pos_as_on_29th_feb_2012_without_rounding = loan.actual_outstanding_principal_on(date1)
-        else
-          pos_as_on_29th_feb_2012 = 0
-          pos_as_on_29th_feb_2012_without_rounding = 0
-        end
+        pos_as_on_29th_feb_2012 = loan.actual_outstanding_principal_on(date1).round(2)
+        pos_as_on_29th_feb_2012_without_rounding = loan.actual_outstanding_principal_on(date1)
 
-        if loan.scheduled_first_payment_date <= date2
-          pos_as_on_31st_march_2012 = loan.actual_outstanding_principal_on(date2).round(2)
-          pos_as_on_31st_march_2012_without_rounding = loan.actual_outstanding_principal_on(date2)
-        else
-          pos_as_on_31st_march_2012 = 0
-          pos_as_on_31st_march_2012_without_rounding = 0
-        end
+        pos_as_on_31st_march_2012 = loan.actual_outstanding_principal_on(date2).round(2)
+        pos_as_on_31st_march_2012_without_rounding = loan.actual_outstanding_principal_on(date2)
 
         f.puts("#{sl_no}, \"#{branch_name}\", \"#{center_name}\", \"#{client_name}\", #{loan_id}, \"#{loan_reference_number}\", #{pos_as_on_29th_feb_2012}, #{pos_as_on_31st_march_2012}, #{pos_as_on_29th_feb_2012_without_rounding}, #{pos_as_on_31st_march_2012_without_rounding}")
       end
