@@ -58,6 +58,10 @@ class Mfi
   property :system_state, Enum.send('[]', *SYSTEM_STATES), :default => :running
 
   property :main_text, Text, :nullable => true, :lazy => true
+
+  property :set_default_funding_line, Boolean, :default => false, :index => true
+  property :funding_line_id, Integer, :nullable => true
+  
   validates_length :name, :min => 0, :max => 20
   before :valid?, :save_image
   
