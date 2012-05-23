@@ -12,11 +12,56 @@ class LoanFacade < StandardFacade
     loan_frequencies.uniq
   end
 
-  # Obtain the loan balances for the loan as on a specified date
-  # @param [Lending] on_loan
-  # @param [Date] on_date
-  def get_loan_balances(on_loan, on_date = Date.today)
-    #TBD
+  def scheduled_principal_and_interest_due(on_loan_id, on_date = Date.today)
+    @loan_manager.scheduled_principal_and_interest_due(on_loan_id, on_date)
+  end
+
+  ################
+  # ALL RECEIPTS # on a specific loan begins
+  ################
+
+  def amounts_received_on_date(on_loan_id, on_date = Date.today)
+    @loan_manager.amounts_received_on_date(on_loan_id, on_date)
+  end
+
+  def principal_received_on_date(on_loan_id, on_date = Date.today)
+    @loan_manager.principal_received_on_date(on_loan_id, on_date)
+  end
+
+  def interest_received_on_date(on_loan_id, on_date = Date.today)
+    @loan_manager.interest_received_on_date(on_loan_id, on_date)
+  end
+
+  def advance_received_on_date(on_loan_id, on_date = Date.today)
+    @loan_manager.advance_received_on_date(on_loan_id, on_date)
+  end
+
+  def amounts_received_till_date(on_loan_id, on_or_before_date = Date.today)
+    @loan_manager.amounts_received_till_date(on_loan_id, on_or_before_date)
+  end
+
+  def principal_received_till_date(on_loan_id, on_or_before_date = Date.today)
+    @loan_manager.principal_received_till_date(on_loan_id, on_or_before_date)
+  end
+
+  def interest_received_till_date(on_loan_id, on_or_before_date = Date.today)
+    @loan_manager.interest_received_till_date(on_loan_id, on_or_before_date)
+  end
+
+  def advance_received_till_date(on_loan_id, on_or_before_date = Date.today)
+    @loan_manager.advance_received_till_date(on_loan_id, on_or_before_date)
+  end
+
+  ################
+  # ALL RECEIPTS # on a specific loan ends
+  ################
+
+  def get_loans_administered(at_location, on_date = Date.today)
+    #TODO
+  end
+
+  def get_loans_accounted(at_location, on_date = Date.today)
+    #TODO
   end
 
   # UPDATES
@@ -25,7 +70,9 @@ class LoanFacade < StandardFacade
     #TBD
   end
 
-  def get_money_instance(*regular_amount_str)
-    MoneyManager.get_money_instance(*regular_amount_str)
-  end
+  private
+
+  # LoanManager instance
+  def loan_manager; @loan_manager ||= LoanManager.new; end
+
 end

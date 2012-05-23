@@ -1,6 +1,6 @@
 class Lending
   include DataMapper::Resource
-  include Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Properties
+  include Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Properties, Constants::Transaction
   include Validators::Arguments
   include MarkerInterfaces::Recurrence, MarkerInterfaces::LoanAmountsImpl
 
@@ -35,7 +35,7 @@ class Lending
 
   belongs_to :lending_product
   has 1, :loan_base_schedule
-  has n, :loan_allocations
+  has n, :loan_receipts
   has n, :loan_due_statuses
 
   def self.create_new_loan(for_amount, repayment_frequency, tenure, from_lending_product, for_borrower_id,
@@ -47,7 +47,7 @@ class Lending
     total_interest_money_amount = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
     principal_and_interest_amounts = from_lending_product.amortization
-    loan_base_schedule = LoanBaseSchedule.create_base_schedule(for_amount, total_interest_money_amount, scheduled_disbursal_date, scheduled_first_repayment_date, repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
+    self.loan_base_schedule = LoanBaseSchedule.create_base_schedule(for_amount, total_interest_money_amount, scheduled_disbursal_date, scheduled_first_repayment_date, repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
     was_saved = new_loan.save
     raise Errors::DataError, new_loan.errors.first.first unless was_saved
     new_loan
@@ -92,12 +92,72 @@ class Lending
   #########################
 
   def scheduled_principal_and_interest_due(on_date)
-    #TODO
+    self.loan_base_schedule.get_previous_and_current_amortization_items(on_date)
   end
 
   #########################
   # LOAN BALANCES QUERIES # ends
   #########################
+
+  ################################################
+  # LOAN PAYMENTS, RECEIPTS, ALLOCATION  QUERIES # begins
+  ################################################
+
+  def total_advance_adjusted
+    #TODO
+  end
+
+  def amounts_received_on_date(on_date = Date.today)
+    self.loan_receipts.sum_on_date(on_date)
+  end
+
+  def amounts_received_till_date(on_or_before_date = Date.today)
+    self.loan_receipts.sum_till_date(on_or_before_date)
+  end
+
+  def total_received_on_date(on_date = Date.today)
+    principal_received_on_date(on_date) + interest_received_on_date(on_date) + advance_received_on_date(on_date)
+  end
+
+  def principal_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[PRINCIPAL_RECEIVED]; end
+  def interest_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[INTEREST_RECEIVED]; end
+  def advance_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[ADVANCE_RECEIVED]; end
+
+  def total_received_till_date(on_or_before_date = Date.today)
+    principal_received_till_date(on_or_before_date) + interest_received_till_date(on_or_before_date) + advance_received_till_date(on_or_before_date)
+  end
+
+  def principal_received_till_date(on_or_before_date = Date.today); amounts_received_till_date(on_or_before_date)[PRINCIPAL_RECEIVED]; end
+  def interest_received_till_date(on_or_before_date = Date.today); amounts_received_till_date(on_or_before_date)[INTEREST_RECEIVED]; end
+  def advance_received_till_date(on_or_before_date = Date.today); amounts_received_till_date(on_or_before_date)[ADVANCE_RECEIVED]; end
+
+  #######################
+  # LOAN STATUS QUERIES # begins
+  #######################
+
+  # Obtain the current loan status
+  def get_current_status; self.status; end
+
+  # Obtain the loan status as on a particular date
+  def get_loan_status(on_date)
+    #TODO
+  end
+
+  #######################
+  # LOAN STATUS QUERIES # ends
+  #######################
+
+  #########################
+  # LOAN DUE STATUS QUERIES # begins
+  #########################
+
+  def current_due_status
+    #TODO
+  end
+
+  def due_status(on_date)
+    #TODO
+  end
 
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # begins
@@ -135,40 +195,9 @@ class Lending
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
 
-  def total_repaid(on_date = nil)
-    total_principal_repaid(on_date) + total_interest_received(on_date)
-  end
-
-  # Total principal repaid till date
-  def total_principal_repaid(on_or_before_date = nil)
-    sum_of_principal = 0
-    if on_or_before_date
-      date_conditions = [ 'on_date <= ?', on_or_before_date ]
-      sum_of_principal = self.loan_allocations.sum(:principal, :conditions => date_conditions) || 0
-    else
-      sum_of_principal = self.loan_allocations.sum(:principal) || 0
-    end
-    Money.new(sum_of_principal, self.currency)
-  end
-
-  # Total interest received till date
-  def total_interest_received(on_or_before_date = nil)
-    sum_of_interest = 0
-    if on_or_before_date
-      date_conditions = [ 'on_date <= ?', on_or_before_date ]
-      sum_of_interest = self.loan_allocations.sum(:interest, :conditions => date_conditions) || 0
-    else
-      sum_of_interest = self.loan_allocations.sum(:interest) || 0
-    end
-    Money.new(sum_of_interest, self.currency)
-  end
-
   #
   # ALL AT CURRENT POINT IN TIME begins
   #
-
-  # Obtain the current loan status
-  def get_current_status; self.status; end
 
   def get_current_due_status
     return NOT_DUE if Date.today < self.scheduled_first_repayment_date
@@ -186,13 +215,7 @@ class Lending
       return recent_loan_due_status if (recent_loan_due_status == OVERDUE)
     end
 
-    get_current_due_status_from_receipts
-  end
-
-  def get_current_due_status_from_receipts
-    previous_and_current_schedule_dates = self.loan_base_schedule.get_previous_and_current_schedule_dates
-    previous_schedule_date = previous_and_current_schedule_dates.is_a?(Array) ? previous_and_current_schedule_dates.first : previous_and_current_schedule_dates
-    get_due_status_from_receipts(previous_schedule_date)
+    get_due_status_from_receipts
   end
 
   #
@@ -231,14 +254,17 @@ class Lending
   ###########
 
   # Set the loan status
-  def set_status(new_loan_status)
-    raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if self.status == new_loan_status
+  def set_status(new_loan_status, effective_on = Date.today)
+    current_status = self.status
+    raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
     self.status = new_loan_status
-    save
+    raise Errors::DataError, errors.first.first unless save
+    LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
 
   # All actions required to update the loan for the payment
   def update_for_payment(on_date, payment_transaction)
+    #TODO
     #make the allocation
     #record the allocation
     #respond with the allocation
@@ -246,6 +272,7 @@ class Lending
 
   # Record an allocation on the loan for the given total amount
   def make_allocation(total_amount, on_date = Date.today)
+    #TODO
 =begin
     if schedule_date?(on_date)
       #allocate to scheduled principal, interest
@@ -262,7 +289,7 @@ class Lending
   # UPDATES # ends
   ###########
 
-  def get_due_status_from_receipts(on_date)
+  def get_due_status_from_receipts
     #TODO
   end
 

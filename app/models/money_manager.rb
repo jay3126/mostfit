@@ -14,10 +14,17 @@ class MoneyManager
     Money.new(amount_in_least_terms_int, get_default_currency)
   end
 
+  # Get a zero money_amount
+  def self.default_zero_money
+    @zero_money ||= Money.zero_money_amount(get_default_currency)
+  end
+
+  # Get the default currency
   def self.get_default_currency
     ConfigurationFacade.instance.default_currency
   end
 
+  # Get the default locale
   def self.get_default_locale
     ConfigurationFacade.instance.default_locale
   end

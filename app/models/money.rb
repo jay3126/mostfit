@@ -102,6 +102,16 @@ class Money
     amounts_hash
   end
 
+  # Given a hash with amounts (in least terms) and a currency,
+  # it returns a hash with the same keys and values now replaced
+  def self.money_amounts_hash_to_money(money_amounts_hash, currency)
+    money_hash = {}
+    money_amounts_hash.each { |key, money_amount|
+      money_hash[key] = Money.new(money_amount.to_i, currency) if money_amount
+    }
+    money_hash
+  end
+
   private
 
   # Formats the money amount in least units for the given locale
@@ -114,7 +124,6 @@ class Money
     raise StandardError, "decimal separator not found for #{currency}" unless decimal_separator
 
     return amount_in_least_units.to_s if (decimal_separator.empty? or (decimal_exponent == 0))
-
     separator_at_position = -(decimal_exponent + 1)
     amount_in_least_units.to_s.insert(separator_at_position, decimal_separator)
   end

@@ -141,14 +141,21 @@ describe Money do
   end
 
   it "money is compared by amount when in the same currency" do
-
     (@ikkis < @ek_sau_ek).should be_true
-    (@ikkis > @gyarah).should be_false
+    (@ikkis > @gyarah).should be_true
     [@ek_sau_ek, @gyarah, @ikkis, @ikyavan].sort.should == [@gyarah, @ikkis, @ikyavan, @ek_sau_ek]
 
     quid = Money.new(20, :USD)
-    (@ikkis < quid).should be_nil
-
+    lambda { @ikkis < quid }.should raise_error
   end
+
+  it "produces a hash of money amounts given a hash of numeric amounts as expected" do
+    money_amounts_hash = {:foo => 10000, :bar => 1200}
+    money_hash = Money.money_amounts_hash_to_money(money_amounts_hash, :INR)
+    money_hash[:foo].should == Money.new(10000, :INR)
+    money_hash[:bar].should == Money.new(1200, :INR)
+    money_hash.keys.length.should == 2
+  end
+
 
 end
