@@ -1,0 +1,27 @@
+extensions, etc.
+
+Controllers:
+
+app/controllers/application.rb
+
+Helpers:
+
+link_to_with_class :- used for using ACL for displaying the tabs in the application
+link_to_with_rights :- used to using ACL for displaying various links
+
+select_staff_member_for
+select_center_for
+select_funding_line_for
+....
+
+#following functions are used to restrict the drop downs.
+get_accessible_staff_members
+get_accessible_areas
+get_accessible_branches
+get_accessible_centers
+get_accessible_funders
+get_accessible_funding_lines
+
+....
+
+Data structures:
