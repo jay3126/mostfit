@@ -7,6 +7,6 @@ class Staff
   property :created_at, *CREATED_AT
   property :deleted_at, *DELETED_AT
 
-  has 1, :user
+ # has 1, :user
 
 end

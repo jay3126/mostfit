@@ -36,7 +36,7 @@ class User
   has 1, :funder
 
   # add new model staff
-  belongs_to :staff
+  # belongs_to :staff
 
 
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
