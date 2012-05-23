@@ -45,7 +45,7 @@ USAGE_TEXT
           FileUtils.mkdir_p(folder)
           filename = File.join(folder, "ifmr_report_from_#{begin_date}_to_#{end_date}_generated_at_#{DateTime.now.ctime.gsub(" ", "_")}.csv")
           FasterCSV.open(filename, "w") do |fastercsv|
-            fastercsv << ["Month", "Principal", "Interest", "No of Loans"]
+            fastercsv << ["Month", "Principal Preclosed", "Interest Preclosed", "No of Loans(Preclosure)", "Partial Principal Prepayment", "Partial Interest Prepayment", "No of Loans (Partial Prepayment)"]
           end
           dates = []
           next_month_date = begin_date
@@ -57,9 +57,18 @@ USAGE_TEXT
           dates.uniq!
           dates.each_with_index do |date, idx|
             unless (dates.count == (idx + 1)) 
-              row = LoanHistory.all(:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :preclosed, :last_status => :outstanding).aggregate(:principal_paid.sum, :interest_paid.sum, :loan_id.count) 
+              row_preclosed = LoanHistory.all(:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :preclosed, :last_status => :outstanding).aggregate(:advance_principal_paid_today.sum, :advance_interest_paid_today.sum, :loan_id.count)
+              row_repaid = LoanHistory.all(:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :repaid, :last_status => :outstanding, :scheduled_outstanding_principal.not => 0, :actual_outstanding_principal => 0).aggregate(:advance_principal_paid_today.sum, :advance_interest_paid_today.sum, :loan_id.count)
+              row_prepayment = LoanHistory.all(:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :outstanding, :total_advance_paid_today.not => 0).aggregate(:advance_principal_paid_today.sum, :advance_interest_paid_today.sum, :loan_id.count)
+              row_preclosed.map!{|x| x = (x.nil? ? 0 : x)}
+              row_repaid.map!{|x| x = (x.nil? ? 0 : x)}
+              row_prepayment.map!{|x| x = (x.nil? ? 0 : x)}
+              row = []
+              row << row_preclosed[0] + row_repaid[0]
+              row << row_preclosed[1] + row_repaid[1]
+              row << row_preclosed[2] + row_repaid[2]
+              row += row_prepayment
               row.unshift("#{date.month}/#{date.year}")
-              row.map!{|x| x = (x.nil? ? 0 : x)}
               FasterCSV.open(filename, "a") do |fastercsv|
                 fastercsv << row
               end
