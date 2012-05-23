@@ -11,6 +11,14 @@ class LoanAdministration
   property :recorded_by,     *INTEGER_NOT_NULL
   property :created_at,      *CREATED_AT
 
+  validates_with_method :unique_assignment_on_date?
+
+  # Validates that assignment of a loan is unique on any given date
+  def unique_assignment_on_date?
+    any_other_administration_on_date = LoanAdministration.all(:effective_on => self.effective_on, :loan_id => self.loan_id)
+    any_other_administration_on_date.empty? ? true : [false, "A loan can only be assigned a single set of administered and accounted locations on any given date"]
+  end
+
   def loan; Lending.get(self.loan_id); end
   def administered_at_location; BizLocation.get(self.administered_at); end
   def accounted_at_location; BizLocation.get(self.accounted_at); end
@@ -36,19 +44,19 @@ class LoanAdministration
   # Gets the location the loan was administered at as on the specified date
   def self.get_administered_at(loan_id, on_date = Date.today)
     locations = get_locations(loan_id, on_date)
-    locations ? locations[ADMINISTERED_AT_LOCATION] : nil
+    locations ? locations[ADMINISTERED_AT] : nil
   end
 
   # Gets the location that the loan was accounted at as on the specified date
   def self.get_accounted_at(loan_id, on_date = Date.today)
     locations = get_locations(loan_id, on_date)
-    locations ? locations[ACCOUNTED_AT_LOCATION] : nil
+    locations ? locations[ACCOUNTED_AT] : nil
   end
 
   # Produces a map with the administered and accounted locations
   def to_location_map
-    { ADMINISTERED_AT_LOCATION => administered_at_location,
-      ACCOUNTED_AT_LOCATION => accounted_at_location }
+    { ADMINISTERED_AT => administered_at_location,
+      ACCOUNTED_AT => accounted_at_location }
   end
 
   # Retrieves the administered_at and accounted_at locations for a given loan on the specified date
@@ -59,6 +67,40 @@ class LoanAdministration
     locations[:order]            = [:effective_on.desc]
     recent_assignment            = first(locations)
     recent_assignment ? recent_assignment.to_location_map : nil
+  end
+
+  # Returns an (empty) list of loans administered at a location
+  def self.get_loans_administered(at_location_id, on_date = Date.today)
+    get_loans_at_location(ADMINISTERED_AT, at_location_id, on_date)
+  end
+
+  # Returns an (empty) list of loans accounted at a location
+  def self.get_loans_accounted(at_location_id, on_date = Date.today)
+    get_loans_at_location(ACCOUNTED_AT, at_location_id, on_date)
+  end
+
+  private
+
+  # Returns the locations (per administered/accounted choice) at the given location (by id) as on the specified date
+  def self.get_loans_at_location(administered_or_accounted_choice, given_location_id, on_date = Date.today)
+    loans                                       = []
+    locations                                   = { }
+    locations[administered_or_accounted_choice] = given_location_id
+    locations[:effective_on.lte]                = on_date
+    administration                              = all(locations)
+    given_location                              = BizLocation.get(given_location_id)
+    administration.each { |each_admin|
+      loan_id                  = each_admin.loan_id
+
+      if administered_or_accounted_choice == ADMINISTERED_AT
+        loans.push(loan_id) if (given_location == each_admin.administered_at_location)
+      end
+
+      if administered_or_accounted_choice == ACCOUNTED_AT
+        loans.push(loan_id) if (given_location == each_admin.accounted_at_location)
+      end
+    }
+    loans.uniq
   end
 
 end

@@ -20,8 +20,8 @@ module Constants
       REPAID => []
     }
 
-    ADMINISTERED_AT_LOCATION = :administered_at_location
-    ACCOUNTED_AT_LOCATION    = :accounted_at_location
+    ADMINISTERED_AT = :administered_at
+    ACCOUNTED_AT    = :accounted_at
 
     INTEREST_RATE_PRECISION = 65
     INTEREST_RATE_SCALE = 2

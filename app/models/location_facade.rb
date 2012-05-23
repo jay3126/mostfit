@@ -43,6 +43,22 @@ class LocationFacade < StandardFacade
   end
 
   ###########
+  # QUERIES # on loans at location begins
+  ###########
+
+  def get_loans_administered(at_location_id, on_date = Date.today)
+    LoanAdministration.get_loans_administered(at_location_id, on_date)
+  end
+
+  def get_loans_accounted(at_location_id, on_date = Date.today)
+    LoanAdministration.get_loans_accounted(at_location_id, on_date)
+  end
+
+  ###########
+  # QUERIES # on loans at location ends
+  ###########
+
+  ###########
   # UPDATES #
   ###########
 
@@ -59,6 +75,11 @@ class LocationFacade < StandardFacade
   # Create a new location by specifying the name, the creation date, and the level number (not the level)
   def create_new_location(by_name, on_creation_date, at_level_number)
     BizLocation.create_new_location(by_name, on_creation_date, at_level_number)
+  end
+
+  # Assign administered_at and accounted_at locations to loan
+  def assign_locations_to_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)
+    LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
 
 end
