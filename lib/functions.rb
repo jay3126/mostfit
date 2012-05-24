@@ -398,6 +398,10 @@ def get_where_from_hash(hash)
       operator = ">"
     elsif fn == "gte"
       operator = ">="
+    elsif fn == "lt"
+      operator = "<"
+    elsif fn == "lte"
+      operator = "<="
     else
       operator = {Array => "IN", Range => "BETWEEN"}[v.class] || "="
     end
