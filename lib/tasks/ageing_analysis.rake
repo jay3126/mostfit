@@ -38,20 +38,36 @@ USAGE_TEXT
           FileUtils.mkdir_p(folder)
           filename = File.join(folder, "ageing_analysis_as_on_#{date_as_on}_generated_at_#{DateTime.now.ctime.gsub(" ", "_")}.csv")
           FasterCSV.open(filename, "w") do |fastercsv|
-            fastercsv << ["Quarter", "No of Loans", "Total Principal Outstanding", "Total Interest Outstanding", "Total Amount Outstanding", "Principal without Overdues"]
+            fastercsv << ["Quarter", "No of Loans", "Total Principal Outstanding", "Total Interest Outstanding", "Total Amount Outstanding", "No of Loans not Overdue", "Principal outstanding of loans not overdue"]
           end
           dates = []
           next_quarter_date = date_as_on
+          # generating an array of dates spaced apart quarterly beginning from the given date
           while (next_quarter_date < (date_as_on + 365)) do
             dates << next_quarter_date
-            next_quarter_date = (next_quarter_date + 28)
+            next_quarter_date = (next_quarter_date + 28) #calculating the date of the next quarter
           end
           
           dates.each_with_index do |date, idx|
-            loan_ids = LoanHistory.all(:date.gte => dates[idx], :date.lte => dates[idx+1], :status => :outstanding).aggregate(:loan_id)
+            row = []
+            if (idx == 0) # for the first quarter
+              row << "till #{dates[idx+1]}"
+              query = {:date.lt => dates[idx+1], :status => :outstanding}
+            elsif (idx == (dates.count - 1)) # for the last quarter
+              row << "#{dates[idx]} onwards"
+              query = {:date.gte => dates[idx], :status => :outstanding}
+            else
+              row << "#{dates[idx]} to #{dates[idx+1]}" # for all the inbetween quarters
+              query = {:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :outstanding} 
+            end
+            loan_ids = LoanHistory.all(query).aggregate(:loan_id)
+            query_next = query
+            status_hash = STATUSES.each_with_index.map{|x, idx| [x,idx+1]}.to_hash
+            query_next[:status] = status_hash[query[:status]]
+            not_overdue_loan_ids = LoanHistory.loan_ids_not_overdue(query_next)
             unless loan_ids.blank?
-              row = LoanHistory.latest({:loan_id => loan_ids}, dates[idx+1]).aggregate(:loan_id.count, :actual_outstanding_principal.sum, :actual_outstanding_interest.sum, :actual_outstanding_total.sum)
-              row.unshift("#{dates[idx]} to #{dates[idx+1]}")
+              row += LoanHistory.latest({:loan_id => loan_ids}, dates[idx]).aggregate(:loan_id.count, :actual_outstanding_principal.sum, :actual_outstanding_interest.sum, :actual_outstanding_total.sum)
+              row += LoanHistory.latest({:loan_id => not_overdue_loan_ids}, dates[idx]).aggregate(:loan_id.count, :actual_outstanding_principal.sum) unless not_overdue_loan_ids.blank?
               FasterCSV.open(filename, "a") do |fastercsv|
                 fastercsv << row
               end

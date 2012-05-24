@@ -225,6 +225,26 @@ class LoanHistory
      :scheduled_principal_due, :scheduled_interest_due, :advance_principal_adjusted, :advance_interest_adjusted]
   end
 
+  def self.loan_ids_overdue(hash = {})
+    q(%Q{
+          SELECT loan_id
+          FROM   loan_history 
+          WHERE  #{(get_where_from_hash(hash) + " AND ") unless hash.blank?} 
+                 actual_outstanding_total > scheduled_outstanding_total
+          GROUP BY loan_id
+        })
+  end
+
+  def self.loan_ids_not_overdue(hash = {})
+    q(%Q{
+          SELECT loan_id
+          FROM   loan_history 
+          WHERE  #{(get_where_from_hash(hash) + " AND ") unless hash.blank?} 
+                 actual_outstanding_total <= scheduled_outstanding_total
+          GROUP BY loan_id
+        })
+  end
+
   ######################## END NICE NEW FUNCTIONS ####################################
 
 
