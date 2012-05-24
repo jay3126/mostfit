@@ -11,18 +11,18 @@ module ClientValidations
   # Checks the age of the client against the permissible age for credit
   # If an age is not available on the client, it returns true
   def permissible_age_for_credit?
-    recorded_dob = nil
-    recorded_dob = date_of_birth if (respond_to?(:date_of_birth) and date_of_birth)
-    return true unless recorded_dob
+    age = nil
+    age = person_age if (respond_to?(:person_age) and person_age)
+    return false unless age
 
     lower_limit, upper_limit = ConfigurationFacade.instance.get_age_limit_for_credit
-    today = Date.today
+    # today = Date.today
     # active_support dates does not seem to work properly
     # oldest_dob = upper_limit.years.ago(today); youngest_dob = lower_limit.years.ago(today)
     # using an approximation for now, this will err on the younger side for both old and young,
     # but more for the older
-    oldest_dob, youngest_dob = today - (upper_limit * 365), today - (lower_limit * 365)
-    (recorded_dob >= oldest_dob) and (recorded_dob <= youngest_dob)
+
+    age <= upper_limit && age >= lower_limit ? true : [false, "Age should be greator than 18 and less than 55"]
   end
 
   # Iterates through loans and returns true if any are outstanding
@@ -32,6 +32,19 @@ module ClientValidations
       return true if any_oustanding
     end
     false
+  end
+
+end
+
+module PeopleValidations
+  #Any object or model that is a 'human' can mix this in
+
+  def person_age
+    recorded_dob = nil
+    recorded_dob = client_dob if (respond_to?(:client_dob) and client_dob and client_dob.is_a?(Date))
+    return nil unless recorded_dob
+
+    Date.today.year - recorded_dob.year
   end
 
 end

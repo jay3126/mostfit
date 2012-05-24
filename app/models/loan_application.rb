@@ -43,6 +43,8 @@ class LoanApplication
   include Constants::Space
   include Constants::CreditBureau
   include LoanApplicationWorkflow
+  include ClientValidations
+  include PeopleValidations
 
   property :id,                   Serial
   property :status,               Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -83,6 +85,7 @@ class LoanApplication
   has 1, :loan
 
   validates_present   :client_dob
+  validates_with_method :client_dob, :method => :permissible_age_for_credit?
   # this validation should be skip when client_id exist.
   # validates_is_unique :client_reference1, :scope => :center_cycle_id
   # validates_is_unique :client_reference2, :scope => :center_cycle_id
