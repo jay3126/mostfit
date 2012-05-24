@@ -9,7 +9,8 @@
           %th Relationship
           %th Applicant Birth Date
           %th Ration Card No.
-          %th Voter Card No.
+          %th Reference 2 Type
+          %th Reference 2 No.
           %th Applied for amount
           %th Address
           %th Location
@@ -26,9 +27,11 @@
             %td
               = loan_application.client_dob
             %td
-              = loan_application.client_reference1_type == 'Ration Card' ? loan_application.client_reference1 : 'NA'
+              = loan_application.client_reference1
             %td
-              = loan_application.client_reference2_type == 'Voter ID' ? loan_application.client_reference2 : 'NA'
+              = loan_application.client_reference2_type.humanize
+            %td
+              = loan_application.client_reference2
             %td
               = loan_application.amount
             %td

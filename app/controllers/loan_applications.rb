@@ -99,7 +99,6 @@ class LoanApplications < Application
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
-    debugger
     @errors = {}
     unless params[:flag] == 'true'
       if params[:branch_id].blank?

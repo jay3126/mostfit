@@ -82,8 +82,15 @@ module Constants
 
   module Masters
 
-    REFERENCE_TYPES = ["Passport", "Voter ID", "UID", "Others", "Ration Card", "Driving Licence No", "Pan"]
-    REFERENCE_TYPES_ID_PROOF = ["Passport", "Voter ID", "UID", "Others", "Driving Licence No", "Pan"]
+    PASSPORT = :passport; VOTER_ID = :voter_id; UID = :uid; RATION_CARD = :ration_card; DRIVING_LICENCE = :driving_licence_no; PAN = :pan
+    ALL_REFERENCE_TYPES = [PASSPORT, VOTER_ID, UID, RATION_CARD, DRIVING_LICENCE, PAN]
+    REFERENCE_TYPES_ALLOWED = [RATION_CARD]
+    REFERENCE2_TYPES_ALLOWED = ALL_REFERENCE_TYPES - REFERENCE_TYPES_ALLOWED
+
+    DEFAULT_REFERENCE_TYPE = RATION_CARD
+    DEFAULT_REFERENCE2_TYPE = VOTER_ID
+
+    REFERENCE_TYPES = [PASSPORT, VOTER_ID, UID, RATION_CARD, DRIVING_LICENCE, PAN]
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
     LOAN_AMOUNTS = [10000, 12000, 15000]
     STATES = [
