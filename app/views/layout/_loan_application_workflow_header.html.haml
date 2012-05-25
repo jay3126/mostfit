@@ -1,3 +1,15 @@
+:javascript
+  $(document).ready(function() {
+    jQuery("#reports_links").hide();
+    jQuery("div#report_tab").mouseover(function() {
+      jQuery("#reports_links").show();
+    });
+    jQuery("div#report_tab").mouseout(function() {
+      jQuery("#reports_links").hide();
+    });
+  });
+
+
 %table.form{:style => "width:90%; height:5%; margin:5px 5px 5px 60px; background-color:ActiveCaption; font-size:11px;"}
   %tr
     %td
@@ -20,6 +32,12 @@
       = link_to "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation)
     %td
       = link_to "Health check on loan files", url(:controller => :loan_files, :action => :record_health_check_status, :flag => 'true')
-    =# link_to "Loan Application Report", "/reports/LoanApplicationsReport", :class => "edit_small"
-    =# link_to "Credit Bureau Report", "/reports/CreditBureauReport", :class => "edit_small"
-    =# link_to "Loan File Report", "/reports/LoanFilesReport", :class => "edit_small"
+    %td
+      %div#report_tab
+        = "Reports"
+        %div#reports_links
+          = link_to "Loan Application Report", "/reports/LoanApplicationsReport"
+          %br
+          = link_to "Credit Bureau Report", "/reports/CreditBureauReport"
+          %br
+          = link_to "Loan File Report", "/reports/LoanFilesReport"
