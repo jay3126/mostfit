@@ -1,9 +1,13 @@
 module Constants
   module Transaction
 
-    CUSTOMER = :customer
-    COUNTERPARTIES = [CUSTOMER]
-    COUNTERPARTIES_AND_MODELS = { CUSTOMER => Customer }
+    CLIENT = :client; CUSTOMER = :customer
+    COUNTERPARTIES = [CLIENT, CUSTOMER]
+    COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client', CUSTOMER => 'Customer' }
+    MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT, 'Customer' => CUSTOMER }
+
+    COUNTERPARTY_ADMINISTERED_AT = :administered_at
+    COUNTERPARTY_REGISTERED_AT   = :registered_at
 
     RECEIPT = :receipt; PAYMENT = :payment
     RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
