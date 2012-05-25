@@ -137,6 +137,8 @@ class LoanApplications < Application
     pincode = params[:loan_application][:client_pincode]
     created_by = params[:loan_application][:created_by_staff_id]
     created_on = params[:created_on]
+    center_cycle_number = params[:center_cycle_number].to_i
+    center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
 
     # VALIDATIONS
     @errors << "Applicant name must not be blank" if name.blank?
@@ -152,25 +154,12 @@ class LoanApplications < Application
     @errors << "Created by name must not be blank" if created_by.blank?
     @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
+    # OPERATIONS-PERFORMED
     if @errors.blank?
       if request.method == :post
-        loan_application = params[:loan_application]
-        client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].blank?
-        created_on = Date.parse(params[:created_on])
-        center_cycle_number = params[:center_cycle_number].to_i
-        center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-        new_application_info = {}
-        loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
-        new_application_info.delete(:amount)
-        new_application_info.delete(:at_branch_id)
-        new_application_info.delete(:at_center_id)
-        new_application_info.delete(:created_by_staff_id)
-        new_application_info += {:client_dob => client_dob}
-        @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
+        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_user_id => created_by}
+        @loan_application = LoanApplication.new(params[:loan_application])
         if @loan_application.save
-          params.delete(:client_dob)
-          params.delete(:created_on)
-          params.delete(:loan_application)
           message[:notice] = "The Loan Application has been successfully saved"
         else
           message[:error] = @loan_application.errors.to_a.flatten.join(', ')
@@ -179,8 +168,13 @@ class LoanApplications < Application
     else
       message[:error] = @errors.flatten.join(', ')
     end
+        
+    # POPULATING RESPONSE AND OTHER VARIABLES
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
+
+    # RENDER/RE-DIRECT
     redirect resource(:loan_applications, :bulk_create, :branch_id => @branch.id, :center_id => @center.id ), :message => message
+    
   end
 
   def suspected_duplicates

@@ -21,19 +21,6 @@ class LoanApplicationsFacade
     loan_application = LoanApplication.new(hash)
   end
 
-  def create_for_new_applicant(new_application_info, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
-    hash = new_application_info + {
-      :amount              => loan_amount,
-      :at_branch_id        => at_branch,
-      :at_center_id        => at_center,
-      :center_cycle_id     => for_cycle,
-      :created_by_staff_id => by_staff,
-      :created_on          => on_date,
-      :created_by_user_id  => @user.id
-    }
-    loan_application = LoanApplication.new(hash)
-  end
-
   # General information
   def get_loan_application_status(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
