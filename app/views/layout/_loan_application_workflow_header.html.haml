@@ -1,0 +1,25 @@
+%table.form{:style => "width:90%; height:5%; margin:5px 5px 5px 60px; background-color:ActiveCaption; font-size:11px;"}
+  %tr
+    %td
+      = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true')
+    %td
+      = link_to "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new)
+    %td
+      = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates)
+    %td
+      = link_to "Download request files", url(:controller => :overlap_report_requests, :action => :index)
+    %td
+      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index)
+    %td
+      = link_to "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true')
+    %td
+      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true')
+    %td
+      = link_to "Record CGT, GRT", '#'
+    %td
+      = link_to "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation)
+    %td
+      = link_to "Health check on loan files", url(:controller => :loan_files, :action => :record_health_check_status, :flag => 'true')
+    =# link_to "Loan Application Report", "/reports/LoanApplicationsReport", :class => "edit_small"
+    =# link_to "Credit Bureau Report", "/reports/CreditBureauReport", :class => "edit_small"
+    =# link_to "Loan File Report", "/reports/LoanFilesReport", :class => "edit_small"
