@@ -29,10 +29,6 @@ class Client
   property :pincode,         Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
   property :income,          Integer
   property :family_income,   Integer
-  property :seating,         Integer
-  property :earning_members, Integer
-  property :cb_approval_number, String
-  property :ews,             Enum.send('[]', *EWS_LIST), :nullable => true, :default => 'not_applicable'
 
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
@@ -41,7 +37,6 @@ class Client
   property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
   property :reference2,      String
   property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
-  property :name,            String, :length => 100, :nullable => false, :index => true
   property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
@@ -59,62 +54,16 @@ class Client
   property :deleted_at,      ParanoidDateTime
   property :updated_at,      DateTime
   property :deceased_on,     Date, :lazy => true
-  # property :client_type,     Enum["standard", "takeover"], :default => "standard"
   property :created_by_user_id,  Integer, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
   property :verified_by_user_id, Integer, :nullable => true, :index => true
   property :tags, Flag.send("[]", *FLAGS)
 
-  property :account_number, String, :length => 20, :nullable => true, :lazy => true
-  property :type_of_account, Enum.send('[]', *['', 'savings', 'current', 'no_frill', 'fixed_deposit', 'loan', 'other']), :lazy => true
-  property :bank_name,      String, :length => 20, :nullable => true, :lazy => true
-  property :bank_branch,         String, :length => 20, :nullable => true, :lazy => true
-  property :join_holder,    String, :length => 20, :nullable => true, :lazy => true
-  #  property :client_type,    Enum[:default], :default => :default
-  property :number_of_family_members, Integer, :length => 10, :nullable => true, :lazy => true
-  property :phc_distance, Integer, :length => 10, :nullable => true, :lazy => true
-  property :member_literate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :husband_litrate, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :income_regular, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :client_migration, Enum.send('[]', *['', 'no', 'yes']), :default => '', :nullable => true, :lazy => true
-  property :pr_loan_amount, Integer, :length => 10, :nullable => true, :lazy => true
   property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
   property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
   property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
-  property :highmark_done, Boolean, :nullable => true
-  property :priority_sector_list_id, Integer, :nullable => true
-  property :psl_sub_category_id, Integer, :nullable => true
-
-
-  # suryoday specific fields
-  # CGT on the client is probably a good idea
-  property :cgt1, Date
-  property :cgt2, Date
-  property :cgt3, Date
-
-  # CPV means contact point verification and is the date of the CPV.
-  property :cpv1, Date
-  property :cpv2, Date
-
-
-  # Public: setter for all the centers this client has belonged to
-  #
-  # hash: a Hash of {:Date => {:center_id}...}
-
-  property :center_history, Text # marshal.dump of past centers in format{date_upto => center_id}
-
-
-  def past_centers=(hash)
-    self.center_history = hash.to_json
-  end
-
-  # Public: getter for all the centers this client has belonged to
-  def past_centers
-    return @pcs if @pcs
-    @pcs = self.center_history ? JSON::parse(self.center_history).map{|k,v| [Date.parse(k),v]}.to_hash : {}
-  end
 
   # Public: all the centers that are fit to be known
   # preload these to prevent making repeated calls to the database each time
@@ -187,19 +136,19 @@ class Client
   belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'
 
   has_attached_file :picture,
-  :styles => {:medium => "300x300>", :thumb => "60x60#"},
-  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
-  :default_url => "/images/no_photo.jpg"
+    :styles => {:medium => "300x300>", :thumb => "60x60#"},
+    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension",
+    :default_url => "/images/no_photo.jpg"
 
   has_attached_file :application_form,
-  :styles => {:medium => "300x300>", :thumb => "60x60#"},
-  :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
-  :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
+    :styles => {:medium => "300x300>", :thumb => "60x60#"},
+    :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
+    :path => "#{Merb.root}/public/uploads/:class/:id/:attachment/:style/:basename.:extension"
 
   has_attached_file :fingerprint,
-  :url => "/uploads/:class/:id/:basename.:extension",
-  :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
+    :url => "/uploads/:class/:id/:basename.:extension",
+    :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
   validates_present   :center
@@ -268,7 +217,7 @@ class Client
     pay_order.each do |k|
       if fees_payable_on(date).has_key?(k)
         pay = Payment.new(:amount => [fp[k], amount].min, :type => :fees, :received_on => date, :comment => k.name, :fee => k,
-                          :received_by => received_by, :created_by => created_by, :client => self)
+          :received_by => received_by, :created_by => created_by, :client => self)
         if pay.save_self
           amount -= pay.amount
           fp[k] -= pay.amount
@@ -370,27 +319,27 @@ class Client
       from  = "branches b, centers c, clients cl, claims cm"
       where = %Q{
                 cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.branch_id = b.id  AND b.id = #{obj.id}
-                };
+      };
 
     elsif obj.class == Center
       from  = "centers c, clients cl, claims cm"
       where = %Q{
                cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.id = #{obj.id}
-                };
+      };
 
     elsif obj.class == StaffMember
       # created_by_staff_member_id
       from =  "clients cl, claims cm, staff_members sm"
       where = %Q{
                 cl.active = false AND cl.inactive_reason IN (2,3)  AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id}
-                };
+      };
 
     end
     repository.adapter.query(%Q{
                              SELECT COUNT(cl.id)
                              FROM #{from}
                              WHERE #{where}
-                           })
+      })
   end
 
   def self.pending_death_cases(obj,from_date, to_date)
@@ -401,7 +350,7 @@ class Client
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.center_id = c.id AND c.branch_id = b.id
                                 AND b.id = #{obj.id} AND cl.id NOT IN (SELECT client_id FROM claims)
-                               })
+        })
 
     elsif obj.class == Center
       repository.adapter.query(%Q{
@@ -410,7 +359,7 @@ class Client
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.center_id = c.id AND c.id = #{obj.id} AND cl.id
                                 NOT IN (SELECT client_id FROM claims )
-                              })
+        })
 
     elsif obj.class == StaffMember
       repository.adapter.query(%Q{
@@ -419,7 +368,7 @@ class Client
                                 WHERE cl.active = false AND cl.inactive_reason IN (2,3)
                                 AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id} AND cl.id
                                 NOT IN (SELECT client_id FROM claims )
-                                })
+        })
     end
   end
 
