@@ -138,7 +138,7 @@ class LoanFacade < StandardFacade
     #TBD
   end
 
-  def assign_locations_for_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_clon = Date.today)
+  def assign_locations_for_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
 
