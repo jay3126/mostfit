@@ -65,21 +65,25 @@ class Lending
 
   # Gets the list of schedule dates
   def schedule_dates
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.get_schedule_dates
   end
 
   # Gets a Range that begins with the first schedule date (disbursement) and ends with the last schedule date
   def schedule_date_range
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.get_schedule_date_range
   end
 
   # Tests the specified date for whether it is a schedule date
   def schedule_date?(on_date)
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.is_schedule_date?(on_date)
   end
 
   # Gets the immediately previous and current (or next) schedule dates
   def previous_and_current_schedule_dates(for_date)
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.get_previous_and_current_schedule_dates(for_date)
   end
 
@@ -92,6 +96,7 @@ class Lending
   #########################
 
   def scheduled_principal_and_interest_due(on_date)
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.get_previous_and_current_amortization_items(on_date)
   end
 
@@ -136,10 +141,10 @@ class Lending
   #######################
 
   # Obtain the current loan status
-  def get_current_status; self.status; end
+  def current_loan_status; self.status; end
 
   # Obtain the loan status as on a particular date
-  def get_loan_status(on_date)
+  def loan_status_on_date(on_date)
     #TODO
   end
 
@@ -155,7 +160,15 @@ class Lending
     #TODO
   end
 
-  def due_status(on_date)
+  def due_status_on_date(on_date)
+    #TODO
+  end
+
+  def days_past_due
+    #TODO
+  end
+
+  def days_past_due_on_date(on_date)
     #TODO
   end
 
@@ -210,8 +223,8 @@ class Lending
       #The most recent loan due status is indeed the current status if it was recorded today
       return recent_loan_due_status if (loan_due_status_recorded_on_date == Date.today)
 
-      #The most recent loan due status implies that there has not been any intervening repayments
-      #If the loan was already overdue, there is no possibility that it has now improved to due because there are no intervening repayments
+      #The most recent loan due status implies there have not been any intervening repayments
+      #If the loan was already overdue, there is no possibility that it has improved to due, because there are no intervening repayments
       return recent_loan_due_status if (recent_loan_due_status == OVERDUE)
     end
 

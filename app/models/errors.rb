@@ -15,6 +15,9 @@ module Errors
   # Raised when there is an issue due to a temporary or permanent problem with expected configuration
   class InvalidConfigurationError < StandardError; end
 
+  # Raised when the object is not completely initialised yet, such as a loan that does not yet have a loan schedule
+  class InitialisationNotCompleteError < StandardError; end
+
   # Raised when an attempt is made to set the state on an object to one that is not permitted
   class InvalidStateChangeError < StandardError; end
     
