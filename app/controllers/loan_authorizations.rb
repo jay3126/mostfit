@@ -30,12 +30,12 @@ class LoanAuthorizations < Application
 
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
-    
 
     # VALIDATIONS
 
     @errors << "Staff member is not selected " if by_staff.blank?
-    @errors << "Please select authorization status " if params[:status].blank?
+    @errors << "Please select loan authorization status for atleast one loan application" if params[:status].blank?
+    @errors << "Created on date must not be future date" if Date.parse(on_date) > Date.today
 
     # OPERATIONS PERFORMED
 

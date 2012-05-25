@@ -83,12 +83,16 @@ class LoanFiles < Application
   def record_loan_file
     @errors = []
     laf = LoanApplicationsFacade.new(session.user)
-    created_on = params['created_on']
-    scheduled_disbursal_date = params['scheduled_disbursal_date']
-    scheduled_first_payment_date = params['scheduled_first_payment_date']
-    created_by_staff_id = params['created_by_staff_id']
-    @errors << "No staff member selected " if created_by_staff_id.blank?
-    @errors << "No loan application selected" unless params.key?('selected')
+    created_on = params[:created_on]
+    scheduled_disbursal_date = params[:scheduled_disbursal_date]
+    scheduled_first_payment_date = params[:scheduled_first_payment_date]
+    created_by_staff_id = params[:created_by_staff_id]
+    @errors << "Staff member must not be blank" if created_by_staff_id.blank?
+    @errors << "Please select atleast one loan application" unless params.key?('selected')
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+    @errors << "Scheduled disbursal date must not be past date" if Date.parse(scheduled_disbursal_date) < Date.today
+    @errors << "Scheduled First Payment date must not be past date" if Date.parse(scheduled_first_payment_date) < Date.today
+
     #record the loan file first
     #was any data actually sent ?
     if @errors.blank?

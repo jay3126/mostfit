@@ -11,7 +11,7 @@ Merb::Router.prepare do
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)
-  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post]}
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post]}
   resources :overlap_report_responses, :id => %r(\d+)
   #book-keeping from bk ends
 
