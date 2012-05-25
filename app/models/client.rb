@@ -5,6 +5,7 @@ class Client
   include FeesContainer
   include ClientValidations
   include Constants::Masters
+  include PeopleValidations
 
   FLAGS = [:insincere]
 

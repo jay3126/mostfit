@@ -40,10 +40,9 @@ module PeopleValidations
   #Any object or model that is a 'human' can mix this in
 
   def person_age
-    recorded_dob = nil
-    recorded_dob = client_dob if (respond_to?(:client_dob) and client_dob and client_dob.is_a?(Date))
-    return nil unless recorded_dob
-
+    raise Errors::OperationNotSupportedError, "The instance does not have a value for age" unless (respond_to?(:date_of_birth) and date_of_birth.is_a?(Date))
+    recorded_dob = date_of_birth
+    raise StandardError, "There was no value available for date of birth" unless recorded_dob
     Date.today.year - recorded_dob.year
   end
 
