@@ -116,32 +116,68 @@ class LoanApplications < Application
   end
 
   def bulk_create_loan_applicant
+
+    # INITIALIZING VARIABLES USED THROUGHTOUT
     message = {}
+    @errors = []
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
-    @center = Center.get(params["center_id"]) if params["center_id"]
-    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
-    if request.method == :post
-      loan_application = params[:loan_application]
-      client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].empty?
-      created_on = Date.parse(params[:created_on])
-      center_cycle_number = params[:center_cycle_number].to_i
-      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-      new_application_info = {}
-      loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
-      new_application_info.delete(:amount)
-      new_application_info.delete(:at_branch_id)
-      new_application_info.delete(:at_center_id)
-      new_application_info.delete(:created_by_staff_id)
-      new_application_info += {:client_dob => client_dob}
-      @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
-      if @loan_application.save
-        params.delete(:client_dob)
-        params.delete(:created_on)
-        params.delete(:loan_application)
-        message[:notice] = "The Loan Application has been successfully saved"
-      else
-        message[:error] = @loan_application.errors.to_a.flatten.join(', ')
+    @center = Center.get(params[:center_id]) if params[:center_id]
+    @branch = Branch.get(params[:branch_id]) if params[:branch_id]
+    
+    # GATE-KEEPING
+    name = params[:loan_application][:client_name]
+    guarantor_name = params[:loan_application][:client_guarantor_name]
+    guarantor_relationship = params[:loan_application][:client_guarantor_relationship]
+    dob = params[:client_dob]
+    reference1 = params[:loan_application][:client_reference1]
+    reference2 = params[:loan_application][:client_reference2]
+    amount = params[:loan_application][:amount]
+    address = params[:loan_application][:client_address]
+    state = params[:loan_application][:client_state]
+    pincode = params[:loan_application][:client_pincode]
+    created_by = params[:loan_application][:created_by_staff_id]
+    created_on = params[:created_on]
+
+    # VALIDATIONS
+    @errors << "Applicant name must not be blank" if name.blank?
+    @errors << "Guarantor name must not be blank" if guarantor_name.blank?
+    @errors << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
+    @errors << "DOB name must not be blank" if dob.blank?
+    @errors << "Ration card must not be blank" if reference1.blank?
+    @errors << "Reference 2 ID must not be blank" if reference2.blank?
+    @errors << "Applied for amount name must not be blank" if amount.blank?
+    @errors << "Address name must not be blank" if address.blank?
+    @errors << "State name must not be blank" if state.blank?
+    @errors << "Pincode name must not be blank" if pincode.blank?
+    @errors << "Created by name must not be blank" if created_by.blank?
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+
+    if @errors.blank?
+      if request.method == :post
+        loan_application = params[:loan_application]
+        client_dob = Date.parse(params[:client_dob]) unless params[:client_dob].blank?
+        created_on = Date.parse(params[:created_on])
+        center_cycle_number = params[:center_cycle_number].to_i
+        center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+        new_application_info = {}
+        loan_application.keys.each{|x| new_application_info[x.to_sym] = loan_application[x]}
+        new_application_info.delete(:amount)
+        new_application_info.delete(:at_branch_id)
+        new_application_info.delete(:at_center_id)
+        new_application_info.delete(:created_by_staff_id)
+        new_application_info += {:client_dob => client_dob}
+        @loan_application = loan_applications_facade.create_for_new_applicant(new_application_info, loan_application[:amount], loan_application[:at_branch_id], loan_application[:at_center_id], center_cycle.id, loan_application[:created_by_staff_id], (created_on || Date.today))
+        if @loan_application.save
+          params.delete(:client_dob)
+          params.delete(:created_on)
+          params.delete(:loan_application)
+          message[:notice] = "The Loan Application has been successfully saved"
+        else
+          message[:error] = @loan_application.errors.to_a.flatten.join(', ')
+        end
       end
+    else
+      message[:error] = @errors.flatten.join(', ')
     end
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
     redirect resource(:loan_applications, :bulk_create, :branch_id => @branch.id, :center_id => @center.id ), :message => message
@@ -157,17 +193,19 @@ class LoanApplications < Application
     # INITIALIZING VARIABLES USED THROUGHOUT
 
     @errors = []
+    facade = LoanApplicationsFacade.new(session.user)
 
     # GATE-KEEPING
 
     staff_member_id = get_param_value(:staff_member_id)
     clear_or_confirm_duplicate = get_param_value(:clear_or_confirm_duplicate)
-    facade = LoanApplicationsFacade.new(session.user)
+    created_on = params[:created_on]
 
     # VALIDATIONS
     
     @errors << 'Please select Staff member' unless staff_member_id
     @errors <<  'Please select Action either Cleared not duplicate or Confirm duplicate' unless clear_or_confirm_duplicate
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
     # POPULATING RESPONSE AND OTHER VARIABLES
 

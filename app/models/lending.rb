@@ -31,7 +31,7 @@ class Lending
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
 
-  def counterparty; Client.get(self.for_borrower_id); end
+  #def counterparty; Client.get(self.for_borrower_id); end
 
   belongs_to :lending_product
   has 1, :loan_base_schedule
@@ -47,8 +47,8 @@ class Lending
     total_interest_money_amount = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
     principal_and_interest_amounts = from_lending_product.amortization
-    self.loan_base_schedule = LoanBaseSchedule.create_base_schedule(for_amount, total_interest_money_amount, scheduled_disbursal_date, scheduled_first_repayment_date, repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
     was_saved = new_loan.save
+    self.loan_base_schedule = LoanBaseSchedule.create_base_schedule(for_amount, total_interest_money_amount, scheduled_disbursal_date, scheduled_first_repayment_date, repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
     raise Errors::DataError, new_loan.errors.first.first unless was_saved
     new_loan
   end
