@@ -100,23 +100,23 @@ describe LoanAdministration do
       (d0...d1).each { |on_date|
         accounted_d0_b1 = LoanAdministration.get_loans_accounted(@branch_location_one.id, on_date)
         accounted_d0_b1.length.should == 3
-        accounted_d0_b1.include?(@loan_one.id).should == true
-        accounted_d0_b1.include?(@loan_two.id).should == true
-        accounted_d0_b1.include?(@loan_three.id).should == true
+        accounted_d0_b1.include?(@loan_one).should == true
+        accounted_d0_b1.include?(@loan_two).should == true
+        accounted_d0_b1.include?(@loan_three).should == true
 
         administered_d0_c1 = LoanAdministration.get_loans_administered(@center_one.id, on_date)
         administered_d0_c1.length.should == 2
-        administered_d0_c1.include?(@loan_one.id).should == true
-        administered_d0_c1.include?(@loan_two.id).should == true
+        administered_d0_c1.include?(@loan_one).should == true
+        administered_d0_c1.include?(@loan_two).should == true
 
         administered_d0_c2 = LoanAdministration.get_loans_administered(@center_two.id, on_date)
         administered_d0_c2.length.should == 1
-        administered_d0_c2.include?(@loan_three.id).should == true
+        administered_d0_c2.include?(@loan_three).should == true
       }
 
       accounted_d1_b2 = LoanAdministration.get_loans_accounted(@branch_location_two.id, (d1 + 1))
       accounted_d1_b2.length.should == 1
-      accounted_d1_b2.include?(@loan_one.id).should == true
+      accounted_d1_b2.include?(@loan_one).should == true
 
       administered_d1_c1 = LoanAdministration.get_loans_administered(@center_one.id, d1)
       (administered_d1_c1.sort).should == (administered_d0_c1.sort)

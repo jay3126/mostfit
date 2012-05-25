@@ -90,14 +90,14 @@ class LoanAdministration
     administration                              = all(locations)
     given_location                              = BizLocation.get(given_location_id)
     administration.each { |each_admin|
-      loan_id                  = each_admin.loan_id
+      loan = each_admin.loan
 
       if administered_or_accounted_choice == ADMINISTERED_AT
-        loans.push(loan_id) if (given_location == each_admin.administered_at_location)
+        loans.push(loan) if (given_location == each_admin.administered_at_location)
       end
 
       if administered_or_accounted_choice == ACCOUNTED_AT
-        loans.push(loan_id) if (given_location == each_admin.accounted_at_location)
+        loans.push(loan) if (given_location == each_admin.accounted_at_location)
       end
     }
     loans.uniq
