@@ -54,6 +54,11 @@ class Money
     Money.new((self.amount - other.amount).abs, self.currency)
   end
 
+  def *(other)
+    raise ArgumentError, "The multiplicand for money must be numeric" unless other.is_a?(Numeric)
+    Money.new((amount * other).to_i, currency)
+  end
+
   # The string representation of Money as an amount in regular units and the currency
   def to_s
     "#{Money.format_decimal_places(@amount, @currency)} #{@currency}"
@@ -125,7 +130,14 @@ class Money
 
     return amount_in_least_units.to_s if (decimal_separator.empty? or (decimal_exponent == 0))
     separator_at_position = -(decimal_exponent + 1)
-    amount_in_least_units.to_s.insert(separator_at_position, decimal_separator)
+
+    if amount_in_least_units < 10
+      return '0' + amount_in_least_units.to_s.rjust(2, '0').insert(0, decimal_separator)
+    elsif amount_in_least_units < 100
+      return '0' + amount_in_least_units.to_s.insert(0, decimal_separator)
+    else
+      return amount_in_least_units.to_s.insert(separator_at_position, decimal_separator)
+    end
   end
 
 end

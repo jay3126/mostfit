@@ -10,6 +10,11 @@ describe MoneyManager do
       amounts[idx].amount.should == amounts_hash[amt_str] 
       amounts[idx].currency.should == Constants::Money::DEFAULT_CURRENCY
     }
+
+    single_amount_string = '123.45'
+    single_money = MoneyManager.get_money_instance(*single_amount_string)
+    single_money.amount.should == 12345
+    single_money.currency.should == Constants::Money::DEFAULT_CURRENCY
   end
 
   it "should return an instance of money in the default currency given an amount in least terms" do

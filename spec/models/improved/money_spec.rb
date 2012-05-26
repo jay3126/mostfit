@@ -63,12 +63,42 @@ describe Money do
     amount_in_paise = 7103
     m1 = Money.new(amount_in_paise, @INR)
     m1.to_s.should == "71.03 INR"
+
+    amount_in_paise = 103
+    m1 = Money.new(amount_in_paise, @INR)
+    m1.to_s.should == "1.03 INR"
+
+    amount_in_paise = 23
+    Money.new(amount_in_paise, @INR).to_s.should == "0.23 INR"
+
+    amount_in_paise = 7
+    Money.new(amount_in_paise, @INR).to_s.should == "0.07 INR"
+
+    amount_in_paise = 0
+    Money.new(amount_in_paise, @INR).to_s.should == "0.00 INR"
   end
 
   it "should format the amount for Japanese Yen without decimal separators" do
     amount_in_yen = 2351
     m1 = Money.new(amount_in_yen, @YEN)
     m1.to_s.should == amount_in_yen.to_s + " JPY"
+
+    amount_in_yen = 351
+    Money.new(amount_in_yen, @YEN).to_s.should == "351 JPY"
+
+    amount_in_yen = 51
+    Money.new(amount_in_yen, @YEN).to_s.should == "51 JPY"
+
+    amount_in_yen = 1
+    Money.new(amount_in_yen, @YEN).to_s.should == "1 JPY"
+  end
+
+  it "should multiply a money amount as expected" do
+    tenner = Money.new(1000, :INR)
+    (tenner * 12).should == Money.new((1000 * 12), :INR)
+
+    (tenner * 0.12).should == Money.new((1000 * 0.12).to_i, :INR)
+    #TODO must be enhanced for the multiplication of fractional amounts and for division
   end
 
   it "should convert the regular amount to an amount in least units by dividing the same by the multiplier for a currency with hundreds in least terms" do

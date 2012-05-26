@@ -4,9 +4,10 @@ class MoneyManager
   # The application uses this factory to create instances of money that are all the same currency
   # defaulted from configuration
   def self.get_money_instance(*regular_amount_str)
-    regular_amount_str.collect { |amount_str|
+    money_instances = regular_amount_str.collect { |amount_str|
       Money.parse(get_default_currency, get_default_locale, amount_str)
     }
+    money_instances.length == 1 ? money_instances.first : money_instances
   end
 
   # Use this factory to get an instance of money in the default currency for an amount of money that is in least terms
