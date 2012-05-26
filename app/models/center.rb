@@ -35,6 +35,7 @@ class Center
   has n, :client_groups
   has n, :loan_history
   has n, :center_meeting_days
+  has n, :center_cycles
   has n, :weeksheets
   #has n, :meeting_schedules, :through => Resource
   
@@ -56,8 +57,8 @@ class Center
 
     creation_date = ((headers[:creation_date] and row[headers[:creation_date]]) ? row[headers[:creation_date]] : Date.today)
     obj = new(:name => row[headers[:center_name]], :meeting_day => row[headers[:meeting_day]].downcase.to_s.to_sym, :code => row[headers[:code]],
-              :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
-              :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
+      :meeting_time_hours => hour, :meeting_time_minutes => minute, :branch_id => branch.id, :manager_staff_id => staff_member.id,
+      :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end
 
