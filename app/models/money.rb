@@ -131,10 +131,8 @@ class Money
     return amount_in_least_units.to_s if (decimal_separator.empty? or (decimal_exponent == 0))
     separator_at_position = -(decimal_exponent + 1)
 
-    if amount_in_least_units < 10
+    if amount_in_least_units < 100
       return '0' + amount_in_least_units.to_s.rjust(2, '0').insert(0, decimal_separator)
-    elsif amount_in_least_units < 100
-      return '0' + amount_in_least_units.to_s.insert(0, decimal_separator)
     else
       return amount_in_least_units.to_s.insert(separator_at_position, decimal_separator)
     end
