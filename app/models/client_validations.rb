@@ -13,6 +13,7 @@ module ClientValidations
   def permissible_age_for_credit?
     age = nil
     age = person_age if (respond_to?(:person_age) and person_age)
+    age = client_age if (respond_to?(:client_age) and client_age)
     return false unless age
 
     lower_limit, upper_limit = ConfigurationFacade.instance.get_age_limit_for_credit
@@ -42,6 +43,18 @@ module PeopleValidations
   def person_age
     raise Errors::OperationNotSupportedError, "The instance does not have a value for age" unless (respond_to?(:date_of_birth) and date_of_birth.is_a?(Date))
     recorded_dob = date_of_birth
+    raise StandardError, "There was no value available for date of birth" unless recorded_dob
+    Date.today.year - recorded_dob.year
+  end
+
+end
+
+module ClientAgeValidations
+  #Any object or model that is a 'human' can mix this in
+
+  def client_age
+    raise Errors::OperationNotSupportedError, "The instance does not have a value for age" unless (respond_to?(:client_dob) and client_dob.is_a?(Date))
+    recorded_dob = client_dob
     raise StandardError, "There was no value available for date of birth" unless recorded_dob
     Date.today.year - recorded_dob.year
   end

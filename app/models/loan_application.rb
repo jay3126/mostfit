@@ -44,7 +44,7 @@ class LoanApplication
   include Constants::CreditBureau
   include LoanApplicationWorkflow
   include ClientValidations
-  include PeopleValidations
+  include ClientAgeValidations
 
   property :id,                   Serial
   property :status,               Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
