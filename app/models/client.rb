@@ -6,6 +6,7 @@ class Client
   include ClientValidations
   include Constants::Masters
   include PeopleValidations
+  include ClientValidations
 
   FLAGS = [:insincere]
 
