@@ -106,7 +106,6 @@ class Client
     self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
   end
 
-  validates_length :number_of_family_members, :max => 20
   validates_length :school_distance, :max => 200
   validates_length :phc_distance, :max => 500
 
@@ -289,9 +288,7 @@ class Client
         self.send("#{k}=", nil)
       end
     }
-    self.type_of_account = 0 if self.type_of_account == nil
     self.occupation = nil if self.occupation.blank?
-    self.type_of_account = '' if self.type_of_account.nil? or self.type_of_account=="0"
   end
 
   def add_created_by_staff_member

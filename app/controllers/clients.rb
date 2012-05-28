@@ -1,11 +1,9 @@
 class Clients < Application
+
   before :get_context, :exclude => ['redirect_to_show', 'bulk_entry']
   provides :xml, :yaml, :js
-  before :do_params, :only => [:create, :update]
 
   def index
-#    @clients = @center.clients
-#    display @clients
     if request.xhr?
       @clients = @center.clients
       @loans   = @clients.loans
@@ -47,7 +45,6 @@ class Clients < Application
     model_name = (params[:client_type])
     model = Kernel.const_get(model_name)
     client = params[:client].merge(params[model_name.snake_case])
-    client['number_of_family_members'] = client['number_of_family_members'].to_i
     @client = model.new(client)
     @client.center = @center if @center# set direct context
     @client.created_by_user_id = session.user.id
@@ -75,12 +72,10 @@ class Clients < Application
   end
 
   def update(id, client)
-    debugger
     @client = Client.get(id)
     raise NotFound unless @client
     disallow_updation_of_verified_clients
     client = params[:client].merge(params[@client.class.to_s.snake_case])
-    client['number_of_family_members'] = client['number_of_family_members'].to_i
 
     @client.update_attributes(client)      
     if @client.errors.blank?
@@ -180,8 +175,8 @@ class Clients < Application
           if v.values.join.length > 0 # if it isn't one of the blank rows
             # create the client
             c = Client.new(v.merge({:center_id => params[:center_id], 
-                                     :created_by_staff_member_id => @center.manager, 
-                                     :created_by_user_id => session.user.id}))
+                  :created_by_staff_member_id => @center.manager,
+                  :created_by_user_id => session.user.id}))
             if c.save
               params[:clients].delete(k) 
             else
@@ -202,11 +197,6 @@ class Clients < Application
   
 
   private
-  
-  def do_params
-    params[:client][:monthly_expenditure] = Marshal.dump(params[:client][:monthly_expenditure])
-    params[:client][:other_loan_details] = Marshal.dump(params[:client][:other_loan_details])
-  end
 
   def get_context
     if params[:branch_id] and params[:center_id] 
@@ -215,6 +205,7 @@ class Clients < Application
       raise NotFound unless @branch and @center
     end
   end
+
   def disallow_updation_of_verified_clients
     raise NotPrivileged if @client.verified_by_user_id and not session.user.admin?
   end
