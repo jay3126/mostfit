@@ -99,27 +99,24 @@ class LoanApplications < Application
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
-    @errors = {}
+    @message = {:error => []}
     unless params[:flag] == 'true'
       if params[:branch_id].blank?
-        @errors['search'] = "No branch selected"
+        @message[:error] << "No branch selected"
       elsif params[:center_id].blank?
-        @errors['search'] = "No center selected"
+        @message[:error] << "No center selected"
       end
     end
     @center = Center.get(params["center_id"]) if params["center_id"]
     @branch = Branch.get(params["branch_id"]) if params["branch_id"]
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
-
     render :bulk_create
   end
 
   def bulk_create_loan_applicant
-
     # INITIALIZING VARIABLES USED THROUGHTOUT
-    message = {}
-    @errors = []
+    @message = {:error => [], :notice => []}
     loan_applications_facade = LoanApplicationsFacade.new(session.user)
     @center = Center.get(params[:center_id]) if params[:center_id]
     @branch = Branch.get(params[:branch_id]) if params[:branch_id]
@@ -141,40 +138,44 @@ class LoanApplications < Application
     center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
 
     # VALIDATIONS
-    @errors << "Applicant name must not be blank" if name.blank?
-    @errors << "Guarantor name must not be blank" if guarantor_name.blank?
-    @errors << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
-    @errors << "DOB name must not be blank" if dob.blank?
-    @errors << "Ration card must not be blank" if reference1.blank?
-    @errors << "Reference 2 ID must not be blank" if reference2.blank?
-    @errors << "Applied for amount name must not be blank" if amount.blank?
-    @errors << "Address name must not be blank" if address.blank?
-    @errors << "State name must not be blank" if state.blank?
-    @errors << "Pincode name must not be blank" if pincode.blank?
-    @errors << "Created by name must not be blank" if created_by.blank?
-    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+    @message[:error] << "Applicant name must not be blank" if name.blank?
+    @message[:error] << "Guarantor name must not be blank" if guarantor_name.blank?
+    @message[:error] << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
+    @message[:error] << "DOB name must not be blank" if dob.blank?
+    @message[:error] << "Ration card must not be blank" if reference1.blank?
+    @message[:error] << "Reference 2 ID must not be blank" if reference2.blank?
+    @message[:error] << "Applied for amount name must not be blank" if amount.blank?
+    @message[:error] << "Address name must not be blank" if address.blank?
+    @message[:error] << "State name must not be blank" if state.blank?
+    @message[:error] << "Pincode name must not be blank" if pincode.blank?
+    @message[:error] << "Created by name must not be blank" if created_by.blank?
+    @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
     # OPERATIONS-PERFORMED
-    if @errors.blank?
+    if @message[:error].blank?
       if request.method == :post
         params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_user_id => created_by}
         @loan_application = LoanApplication.new(params[:loan_application])
         if @loan_application.save
-          message[:notice] = "The Loan Application has been successfully saved"
+          @message[:notice] = "The Loan Application has been successfully saved"
         else
-          message[:error] = @loan_application.errors.to_a.flatten.join(', ')
+          @message[:error] = @loan_application.errors.to_a.flatten.join(', ')
         end
       end
     else
-      message[:error] = @errors.flatten.join(', ')
+      @message[:error] = @message[:error].flatten.join(', ')
     end
         
     # POPULATING RESPONSE AND OTHER VARIABLES
+    @loan_application = LoanApplication.new(params[:loan_application])
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
 
     # RENDER/RE-DIRECT
-    redirect resource(:loan_applications, :bulk_create, :branch_id => @branch.id, :center_id => @center.id ), :message => message
-    
+    if @message[:error].blank?
+      redirect resource(:loan_applications, :bulk_create, :branch_id => @branch.id, :center_id => @center.id ), :message => {:notice => @message[:notice].to_s}
+    else
+      render :template => 'loan_applications/bulk_create'
+    end
   end
 
   def suspected_duplicates
@@ -185,8 +186,9 @@ class LoanApplications < Application
   def record_suspected_duplicates
     
     # INITIALIZING VARIABLES USED THROUGHOUT
-
+    message = {}
     @errors = []
+    result = false
     facade = LoanApplicationsFacade.new(session.user)
 
     # GATE-KEEPING
@@ -212,19 +214,25 @@ class LoanApplications < Application
 
         begin
           if  clear_or_confirm_duplicate[lap_id].include?('clear')
-            facade.set_cleared_not_duplicate(lap_id)
+            result = facade.set_cleared_not_duplicate(lap_id)
           elsif clear_or_confirm_duplicate[lap_id].include?('confirm')
-            facade.set_confirm_duplicate(lap_id)
+            result = facade.set_confirm_duplicate(lap_id)
           end
         rescue => ex
           @errors << "An error has occurred: #{ex.message}"
         end
-
+        if result
+          message[:notice] = "Loan application has been saved successfully"
+        else
+          message[:error] = @errors.flatten.join(', ')
+        end
       end
+      # RENDER/RE-DIRECT
+      redirect resource(:loan_applications, :suspected_duplicates), :message => message
+    else
+      render :suspected_duplicates
     end
-
-    # RENDER/RE-DIRECT
-    render :suspected_duplicates
+    
   end
 
   private
