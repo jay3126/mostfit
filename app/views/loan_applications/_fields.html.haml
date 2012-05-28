@@ -31,16 +31,17 @@
           %td
             = select :client_guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :prompt => 'Select'
           %td
-            = date_select :client_dob, (@errors.nil? ? nil : params[:client_dob]), :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
+            = date_select :client_dob, params[:client_dob], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
           %td
             = text_field :client_reference1
             = hidden_field :client_reference1_type, :value => Constants::Masters::RATION_CARD
           %td
-            = select :client_reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES_ALLOWED.map{|x| [x.to_s, x.to_s.humanize]}, :selected => Constants::Masters::VOTER_ID.to_s
+            = select :client_reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES_ALLOWED.map{|x| [x.to_s, x.to_s.humanize]}, :selected => params[:loan_application] ? params[:loan_application][:client_reference2_type] : Constants::Masters::VOTER_ID.to_s
           %td
             = text_field :client_reference2
           %td
-            = select :amount, :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :prompt => 'Select'
+            - selected_amount = params[:loan_application] ? params[:loan_application][:amount] : nil
+            = select :amount, :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}, :selected => selected_amount, :prompt => 'Select'
           %td
             = text_field :client_address
           %td
