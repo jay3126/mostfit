@@ -38,7 +38,7 @@ USAGE_TEXT
           FileUtils.mkdir_p(folder)
           filename = File.join(folder, "ageing_analysis_as_on_#{date_as_on}_generated_at_#{DateTime.now.ctime.gsub(" ", "_")}.csv")
           FasterCSV.open(filename, "w") do |fastercsv|
-            fastercsv << ["Quarter", "No of Loans", "Total Principal Outstanding", "Total Interest Outstanding", "Total Amount Outstanding", "No of Loans not Overdue", "Principal outstanding of loans not overdue"]
+            fastercsv << ["Balance tenure", "No of Loans", "Total Principal Outstanding", "Expected Principal Collections", "No of Loans not Overdue", "Principal outstanding of loans not overdue", "Expected principal collections of loans not overdue"]
           end
           dates = []
           next_quarter_date = date_as_on
@@ -49,28 +49,46 @@ USAGE_TEXT
           end
           
           dates.each_with_index do |date, idx|
-            row = []
+            row = []            
             if (idx == 0) # for the first quarter
-              row << "till #{dates[idx+1]}"
+              row << "till #{dates[idx+1] - 1}"
               query = {:date.lt => dates[idx+1], :status => :outstanding}
             elsif (idx == (dates.count - 1)) # for the last quarter
               row << "#{dates[idx]} onwards"
               query = {:date.gte => dates[idx], :status => :outstanding}
             else
-              row << "#{dates[idx]} to #{dates[idx+1]}" # for all the inbetween quarters
+              row << "#{dates[idx]} to #{dates[idx+1] - 1}" # for all the inbetween quarters
               query = {:date.gte => dates[idx], :date.lt => dates[idx+1], :status => :outstanding} 
             end
-            loan_ids = LoanHistory.all(query).aggregate(:loan_id)
+            loan_ids_outstanding_for_a_period = LoanHistory.all(query).aggregate(:loan_id)
+            loan_ids_disbursed_after_as_on_date = Loan.all(:disbursal_date.gte => date_as_on).aggregate(:id)
+            loan_ids = loan_ids_outstanding_for_a_period - loan_ids_disbursed_after_as_on_date
             query_next = query
-            status_hash = STATUSES.each_with_index.map{|x, idx| [x,idx+1]}.to_hash
+            status_hash = STATUSES.each_with_index.map{|x, index| [x,index+1]}.to_hash
             query_next[:status] = status_hash[query[:status]]
-            not_overdue_loan_ids = LoanHistory.loan_ids_not_overdue(query_next)
+            not_overdue_loan_ids_for_a_period = LoanHistory.loan_ids_not_overdue(query_next)
+            not_overdue_loan_ids = not_overdue_loan_ids_for_a_period - loan_ids_disbursed_after_as_on_date
+
             unless loan_ids.blank?
-              row += LoanHistory.latest({:loan_id => loan_ids}, dates[idx]).aggregate(:loan_id.count, :actual_outstanding_principal.sum, :actual_outstanding_interest.sum, :actual_outstanding_total.sum)
-              row += LoanHistory.latest({:loan_id => not_overdue_loan_ids}, dates[idx]).aggregate(:loan_id.count, :actual_outstanding_principal.sum) unless not_overdue_loan_ids.blank?
-              FasterCSV.open(filename, "a") do |fastercsv|
-                fastercsv << row
-              end
+              entry = []
+              entry += LoanHistory.latest({:loan_id => loan_ids}, dates[idx]).aggregate(:loan_id.count, :scheduled_outstanding_principal.sum)
+              entry << LoanHistory.all(:loan_id => loan_ids, :date.gte => dates[idx], :date.lt => dates[idx+1]).aggregate(:scheduled_principal_due.sum)
+              row += entry
+            else 
+              row += [0,0,0]
+            end
+
+            unless not_overdue_loan_ids.blank?
+              entry = []
+              entry += LoanHistory.latest({:loan_id => not_overdue_loan_ids}, dates[idx]).aggregate(:loan_id.count, :scheduled_outstanding_principal.sum)
+              entry << LoanHistory.all(:loan_id => not_overdue_loan_ids, :date.gte => dates[idx], :date.lt => dates[idx+1]).aggregate(:scheduled_principal_due.sum)
+              row += entry
+            else
+              row += [0,0,0]
+            end
+
+            FasterCSV.open(filename, "a") do |fastercsv|
+              fastercsv << row
             end
           end
         end
