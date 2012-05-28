@@ -22,7 +22,7 @@ end
 
 describe DataMapper::Resource do
 
-  it "model that stores money amounts should return a hash with the amounts when to_money is called" do
+  it "model instance that stores money amounts should return a hash with the amounts when to_money is called" do
     foo_amount = 100; bar_amount = 1200; currency = Constants::Money::DEFAULT_CURRENCY
     money_model_instance = MoneyAmountsModel.new(:foo_money_amount => foo_amount, :bar_money_amount => bar_amount, :currency => currency)
 
@@ -41,8 +41,23 @@ describe DataMapper::Resource do
     lst.to_money.should be_an_instance_of Hash
   end
 
-  it "model that does not store money amounts raises an error when to_money is called" do
+  it "model instance that does not store money amounts raises an error when to_money is called" do
     lambda {NotMoneyAmountModel.new.to_money}.should raise_error
+  end
+
+  it "returns a money amount for the value of a property when to_money_amount is called" do
+    foo_amount = 100; bar_amount = 1200; currency = Constants::Money::DEFAULT_CURRENCY
+    money_model_instance = MoneyAmountsModel.new(:foo_money_amount => foo_amount, :bar_money_amount => bar_amount, :currency => currency)
+
+    fm = money_model_instance.to_money_amount(:foo_money_amount)
+    fm.currency.should == currency; fm.amount.should == foo_amount
+  end
+
+  it "raises an error when to_money_amount is called for a property that is not defined on the instance" do
+    foo_amount = 100; bar_amount = 1200; currency = Constants::Money::DEFAULT_CURRENCY
+    money_model_instance = MoneyAmountsModel.new(:foo_money_amount => foo_amount, :bar_money_amount => bar_amount, :currency => currency)
+
+    lambda {fm = money_model_instance.to_money_amount(:non_existent_money_amount)}.should raise_error
   end
 
 end

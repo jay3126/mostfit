@@ -16,11 +16,13 @@ module DataMapper
       money_values_hash
     end
 
-    # Uses the currency on the instance to return an instance of Money for any amount (usually one of the properties on the model)
-    def to_money_amount(amount_in_least_terms_only)
+    # Uses the currency on the instance to return an instance of Money for the specified money property on the model
+    def to_money_amount(amount_property_name_sym)
       raise Errors::OperationNotSupportedError, "Does not have a value for currency" unless ((self.respond_to?(:currency)) and
           (self.currency))
-      Money.new(amount_in_least_terms_only.to_i, self.currency)
+      raise Errors::OperationNotSupportedError, "Does not have a property by the name #{amount_property_name_sym}" unless (self.respond_to?(amount_property_name_sym))
+      amount_val = self.send(amount_property_name_sym)
+      amount_val ? Money.new(amount_val.to_i, self.currency) : nil
     end
 
   end
