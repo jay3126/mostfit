@@ -154,7 +154,7 @@ class LoanApplications < Application
     # OPERATIONS-PERFORMED
     if @message[:error].blank?
       if request.method == :post
-        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_user_id => created_by}
+        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_staff_id => created_by, :created_by_user_id => session.user.id}
         @loan_application = LoanApplication.new(params[:loan_application])
         if @loan_application.save
           @message[:notice] = "The Loan Application has been successfully saved"
