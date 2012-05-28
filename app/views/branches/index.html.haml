@@ -24,9 +24,9 @@
         %td
           = branch.id
         %td
-          %b= link_to branch.name, resource(branch), :target => "_blank"
+          %b= link_to branch.name, resource(branch)
         %td
-          = link_to branch.manager.name, resource(branch.manager), :target => "_blank"
+          = link_to branch.manager.name, resource(branch.manager)
         %td
           = link_to branch.area.name, resource(branch.area) if branch.area
         %td
