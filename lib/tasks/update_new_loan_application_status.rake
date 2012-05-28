@@ -31,12 +31,14 @@ namespace :mostfit do
         #checking for duplications start here inside the loop.rake mostfit:update_loan_application_status
       elsif (applicant.client_reference1 and applicant.client_reference1.length>0)
         same_reference_clients = total_loan_applications.select{|la| la.client_reference1_type == applicant.client_reference1_type and la.client_reference1 == applicant.client_reference1}
-        loan_applicant_duplicate = true unless same_reference_clients.blank?
+        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference == applicant.client_reference1) || (c.reference2_type == applicant.client_reference1_type and c.reference2 == applicant.client_reference1) }
+        loan_applicant_duplicate = true unless same_reference_clients.blank? && same_client_reference.blank?
       end
 
       if (applicant.client_reference2 and applicant.client_reference2.length>0)
         same_reference_clients = total_loan_applications.select{|la| la.client_reference2_type == applicant.client_reference2_type and la.client_reference2 == applicant.client_reference2}
-        loan_applicant_duplicate = true unless same_reference_clients.blank?
+        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference == applicant.client_reference2) || (c.reference2_type == applicant.client_reference2_type and c.reference2 == applicant.client_reference2) }
+        loan_applicant_duplicate = true unless same_reference_clients.blank? && same_client_reference.blank?
       end
 
       #Update loan application status suspected_duplicate or not_duplicate
