@@ -25,5 +25,13 @@ module DataMapper
       amount_val ? Money.new(amount_val.to_i, self.currency) : nil
     end
 
+    # Returns a money amount of zero value for the currency on model instances that store money amounts
+    def zero_money_amount
+      raise Errors::OperationNotSupportedError, "Does not have a value for currency" unless ((self.respond_to?(:currency)) and
+          (self.currency))
+      cache = @zero_money_cache ||= {}
+      cache[self.currency] ||= Money.zero_money_amount(self.currency)
+    end
+
   end
 end

@@ -41,6 +41,18 @@ describe DataMapper::Resource do
     lst.to_money.should be_an_instance_of Hash
   end
 
+  it "returns a zero money amount as expected" do
+    foo_amount = 100; bar_amount = 1200; currency = Constants::Money::DEFAULT_CURRENCY
+    money_model_instance = MoneyAmountsModel.new(:foo_money_amount => foo_amount, :bar_money_amount => bar_amount, :currency => currency)
+
+    money_model_instance.zero_money_amount.currency.should == currency
+    money_model_instance.zero_money_amount.amount.should == 0
+
+    another_money_model_instance = MoneyAmountsModel.new(:foo_money_amount => 1235, :bar_money_amount => 7099, :currency => Constants::Money::USD)
+    another_money_model_instance.zero_money_amount.currency.should == Constants::Money::USD
+    another_money_model_instance.zero_money_amount.amount.should == 0
+  end
+
   it "model instance that does not store money amounts raises an error when to_money is called" do
     lambda {NotMoneyAmountModel.new.to_money}.should raise_error
   end
