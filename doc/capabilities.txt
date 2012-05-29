@@ -12,6 +12,7 @@ Assign locations in a hierarchy
 Assign staff to locations
 Accept loan applications
 Process loan applications in a workflow
+De-dupe on loan applications
 Create clients
 Optionally, organise clients into groups
 Request credit bureau check for indebtedness
