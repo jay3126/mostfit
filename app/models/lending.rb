@@ -330,6 +330,7 @@ class Lending
     Validators::Arguments.not_nil?(approved_amount, approved_on_date, approved_by)
     raise Errors::BusinessValidationError, "approved amount #{approved_amount} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount
     raise Errors::BusinessValidationError, "approved on date: #{approved_on_date} cannot precede the applied on date #{applied_on_date}" if approved_on_date < applied_on_date
+    raise Errors::InvalidStateChangeError, "Only a new loan can be approved" unless current_loan_status == NEW_LOAN_STATUS
 
     self.approved_amount   = approved_amount.amount
     self.approved_on_date  = approved_on_date

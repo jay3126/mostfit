@@ -127,11 +127,18 @@ describe Lending do
       approved_amount = @total_principal_money_amount
       approved_on_date = @loan.applied_on_date + 1
       some_staff = 12
+
+      # Can only approve a loan that has NEW_LOAN_STATUS
+      @loan.current_loan_status.should == Constants::Loan::NEW_LOAN_STATUS
       @loan.approve(approved_amount, approved_on_date, some_staff)
-      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
       @loan.approved_amount.should == approved_amount.amount
       @loan.approved_on_date.should == approved_on_date
       @loan.approved_by_staff.should == some_staff
+
+      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+
+      # Cannot approve a loan that is already approved
+      lambda {@loan.approve(approved_amount, approved_on_date, some_staff)}.should raise_error
     end
 
   end
