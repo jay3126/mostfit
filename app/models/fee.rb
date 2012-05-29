@@ -57,9 +57,10 @@ class Fee
   has n, :audit_trails, :auditable_type => "Fee", :child_key => ["auditable_id"]
 
   validates_is_unique   :name  
-  validates_with_method :amount_is_okay
+  #validates_with_method :amount_is_okay
   validates_with_method :min_lte_max
   validates_with_method :is_payable_on_compatible_with_fee_metric?
+  validates_with_method :fee_definition_correct?
   
   # This function checks if the fee metric is compatible with the the type payable on
   # e.g. for fees that are payable on client type we cannot have a percentage
@@ -68,12 +69,20 @@ class Fee
     return true
   end
 
-  def amount_is_okay
-    a = amount.to_f
-    a = a == 0 ? nil : a
-    p = percentage.to_f; p = p == 0 ? nil : p
-    return [false, "Either an amount or a percentage must be specified"] if (a == nil and p == nil)
-    return [false, "Both amount and percentage cannot be specified"] if (a != nil and p != nil)
+  # def amount_is_okay
+  #   a = amount.to_f
+  #   a = a == 0 ? nil : a
+  #   p = percentage.to_f; p = p == 0 ? nil : p
+  #   #return [false, "Either an amount or a percentage must be specified"] if (a == nil and p == nil)
+  #   return [false, "Both amount and percentage cannot be specified"] if (a != nil and p != nil)
+  #   return true
+  # end
+
+  def fee_definition_correct?
+    return [false, "Either amount or percentage or minimum and maximum payable should be provided"] if (amount == nil and percentage == nil and (min_amount == nil and max_amount == nil))
+    return [false, "Both amount and percentage cannot be specified"] if (amount and percentage)
+    return [false, "Either amount or minimum and maximum payable should be entered"] if (amount and min_amount and max_amount)
+    return [false, "Either percentage or minimum and maximum payable should be entered"] if (percentage and min_amount and max_amount)
     return true
   end
 
@@ -109,15 +118,22 @@ class Fee
   # Calculate the amount to be levied depending on the object type
   def amount_for(obj, date=Date.today)
     return amount if amount and amount > 0
+
     if obj.class == Loan or obj.class.superclass == Loan or obj.class.superclass.superclass == Loan and obj.loan_product and obj.loan_product.fees.include?(self)
-      if self.percentage_of == :amount
-        fee_amt = obj.amount
-      else
-        fee_amt = obj.info(date).send(percentage_of)
+      if self.percentage_of == :amount and self.percentage
+        fee_amt = (percentage * obj.amount).round_to_nearest(round_to, rounding_style)
+      # else
+      #   _fee_amt = obj.info(date).send(percentage_of)
+      #   fee_amt = (percentage * _fee_amt)
       end
-      return [[min_amount || 0 , (percentage ? percentage * fee_amt : 0)].max, max_amount || (1.0/0)].min.round_to_nearest(round_to, rounding_style)
+      if obj.loan_product.linked_to_insurance? and self.min_amount and self.max_amount and obj.insurance_policy != nil
+        fee_amt = obj.insurance_policy.premium.to_f.round_to_nearest(round_to, rounding_style)
+      end
+      return fee_amt
+
     elsif obj.class == Client and obj.client_type and obj.client_type.fees.include?(self)
       return self.client_types.include?(obj.client_type) ? [min_amount, max_amount].max : nil
+
     elsif obj.class == InsurancePolicy
       return obj.premium
     end

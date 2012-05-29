@@ -108,6 +108,13 @@ class Loans < Application
     redirect url_for_loan(@loan) + "#misc", :message => {:notice => 'Fees levied'}
   end
 
+  def re_apply_fees(id)
+    @loan = Loan.get(id)
+    raise NotFound unless @loan
+    @loan.levy_fees(false)
+    redirect url_for_loan(@loan) + "#misc", :message => {:notice => 'Fees have been re-applied'}
+  end
+
   def bulk_restore_payments(id)
   end
 

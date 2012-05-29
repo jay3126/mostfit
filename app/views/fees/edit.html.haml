@@ -7,7 +7,11 @@
 = form_for(@fee, :action => url(:fee, @fee)) do
   = partial :fields
   = submit "Update"
-
-= link_to 'Show', url(:fee, @fee)
-|
-= link_to 'Back', url(:fees)
+  &nbsp;&nbsp;
+  %b Or
+  &nbsp;&nbsp;
+  = link_to 'Show', url(:fee, @fee), :class => 'grey_button'
+  &nbsp;&nbsp;
+  |
+  &nbsp;&nbsp;
+  = link_to 'Back', url(:fees), :class => 'grey_button'
