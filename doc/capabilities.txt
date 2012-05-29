@@ -1,0 +1,60 @@
+Key capabilities:
+
+Create users
+Assign roles to users
+Create staff
+Assign users to staff
+Create loan products and amortization schedules
+Create fees
+Create other configuration
+Create locations
+Assign locations in a hierarchy
+Assign staff to locations
+Accept loan applications
+Process loan applications in a workflow
+Create clients
+Optionally, organise clients into groups
+Request credit bureau check for indebtedness
+Report loans made to credit bureaus
+Give loans to clients
+Give insurance policies to clients
+Collect fees on clients and loans
+Collect insurance premia
+Approve loans
+Disburse loans
+Accept repayments on loans
+Report due status and days past due on loans
+Pre-close loans
+Death-claim settlement on loans
+Accrue interest on loans
+Tag loans for write-off
+Write-off loans
+Schedule meetings at locations
+Reschedule meetings for holidays
+Print collection sheets
+Account for transactions
+Report balances on ledgers
+Record vouchers
+Securitise loans
+Mark loans encumbered
+Generate reports
+Generate financial statements
+Export accounting information
+Attach documents
+Maintain asset register
+
+Non-functional:
+Navigation
+Search
+Authentication
+Audit trail
+Data upload
+
+Enforce invariants on:
+staff
+locations
+loans
+payments
+dates (on which actions are permitted or forbidden)
+clients
+fees
