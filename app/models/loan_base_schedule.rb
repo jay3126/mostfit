@@ -24,10 +24,26 @@ class LoanBaseSchedule
     [TOTAL_LOAN_DISBURSED, TOTAL_INTEREST_APPLICABLE]
   end
 
+  ##########################
+  # LOAN SCHEDULE PROPERTIES # begins
+  ##########################
+
+  def total_loan_disbursed_money_amount
+    to_money_amount(TOTAL_LOAN_DISBURSED)
+  end
+
+  def total_interest_applicable_money_amount
+    to_money_amount(TOTAL_INTEREST_APPLICABLE)
+  end
+
   # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency
     self.repayment_frequency
   end
+
+  ##########################
+  # LOAN SCHEDULE PROPERTIES # ends
+  ##########################
 
   #######################
   # LOAN SCHEDULE DATES # begins
@@ -85,6 +101,12 @@ class LoanBaseSchedule
     end
   end
 
+  def get_all_amortization_items_till_date(date = Date.today)
+    later_date = get_previous_and_current_schedule_dates(date)
+    later_date = later_date.compact.max if later_date.is_a?(Array)
+    get_all_previous_amortization(later_date)
+  end
+
   ###########################
   # LOAN AMORTIZATION queries # ends
   ###########################
@@ -98,7 +120,12 @@ class LoanBaseSchedule
 
   # Fetches the amortization on date
   def get_amortization(on_date)
-    get_schedule_line_item(on_date).to_amortization
+    schedule_line_item = get_schedule_line_item(on_date)
+    schedule_line_item ? schedule_line_item.to_amortization : nil
+  end
+
+  def get_all_previous_amortization(on_or_before_date)
+    get_schedule_line_items_until(on_or_before_date).collect {|line_item| line_item.to_amortization}
   end
 
   # Only fetches the schedule line item for the specified date,
@@ -106,6 +133,10 @@ class LoanBaseSchedule
   # @param [Date] on_date
   def get_schedule_line_item(on_date)
     self.base_schedule_line_items.first(:on_date => on_date)
+  end
+
+  def get_schedule_line_items_until(date)
+    self.base_schedule_line_items.all(:on_date.lte => date)
   end
 
   def self.to_base_schedule(total_loan_disbursed, total_interest_applicable, first_disbursed_on, first_receipt_on, repayment_frequency, num_of_installments, lending)
@@ -185,7 +216,7 @@ class BaseScheduleLineItem
       scheduled_principal_due            = principal_and_interest_installment[PRINCIPAL_AMOUNT].amount
       scheduled_interest_due             = principal_and_interest_installment[INTEREST_AMOUNT].amount
 
-      repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency)
+      repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency) if (num > 1)
 
       repayment = get_instance(num, repayment_on, REPAYMENT, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
       schedule_line_items << repayment
@@ -217,5 +248,10 @@ class BaseScheduleLineItem
     line_item[:currency]                       = currency
     new(line_item)
   end
+
+end
+
+class Amortization < Hash
+  include Constants::LoanAmounts
 
 end

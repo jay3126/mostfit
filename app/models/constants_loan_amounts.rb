@@ -7,6 +7,7 @@ module Constants
     # After the end of the conventional schedule: Unless the loan is repaid in full, it is OVERDUE
 
 =begin
+    LOAN_DISBURSED                                             = "A loan disbursement amount"
     TOTAL_LOAN_DISBURSED                                       = "The total loan amount disbursed"
     TOTAL_INTEREST_APPLICABLE                                  = "The total interest amount that was calculated to be applicable at the time the loan was made"
     TOTAL_ADVANCE_ACCUMULATED                                  = "The total advance accumulated against the loan"
@@ -48,6 +49,7 @@ module Constants
     INTEREST_RECEIVED_TILL_DATE (upto and including a particular date)
 =end
 
+    LOAN_DISBURSED                                             = :loan_disbursed
     TOTAL_LOAN_DISBURSED                                       = :total_loan_disbursed
     TOTAL_INTEREST_APPLICABLE                                  = :total_interest_applicable
     TOTAL_ADVANCE_ACCUMULATED                                  = :total_advance_accumulated

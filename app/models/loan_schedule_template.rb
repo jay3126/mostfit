@@ -9,8 +9,8 @@ class LoanScheduleTemplate
 
   property :id,                     Serial
   property :name,                   *NAME
-  property :total_principal_amount, *MONEY_AMOUNT
-  property :total_interest_amount,  *MONEY_AMOUNT
+  property :total_principal_amount, *MONEY_AMOUNT #TODO change this amount to TOTAL_LOAN_DISBURSED
+  property :total_interest_amount,  *MONEY_AMOUNT #TODO change this amount to TOTAL_INTEREST_APPLICABLE
   property :currency,               *CURRENCY
   property :num_of_installments,    *TENURE
   property :repayment_frequency,    *FREQUENCY
@@ -34,6 +34,7 @@ class LoanScheduleTemplate
     amortization
   end
 
+  #TODO change this amount to TOTAL_INTEREST_APPLICABLE
   def total_interest_money_amount
     to_money[:total_interest_amount]
   end

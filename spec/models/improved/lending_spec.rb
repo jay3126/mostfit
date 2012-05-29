@@ -4,18 +4,18 @@ describe Lending do
 
   before(:all) do
     @from_lending_product = Factory(:lending_product)
+    @zero_money_amount = Money.zero_money_amount(@from_lending_product.currency)
 
     @principal_and_interest_amounts = {}
 
     @principal_amounts            = [170.18, 171.03, 171.88, 172.74, 173.60, 174.46, 175.33, 176.21, 177.08, 177.97, 178.85, 179.74, 180.64, 181.54, 182.44, 183.35, 184.27, 185.18, 186.11, 187.03, 187.97, 188.90, 189.84, 190.79, 191.74, 192.69, 193.65, 194.62, 195.59, 196.56, 197.54, 198.53, 199.52, 200.51, 201.51, 202.51, 203.52, 204.53, 205.55, 206.58, 207.61, 208.64, 209.68, 210.73, 211.77, 212.83, 213.89, 214.96, 216.03, 217.10, 218.18, 146.30]
     @principal_money_amounts      = MoneyManager.get_money_instance(*@principal_amounts)
-    zero_money_amount             = Money.zero_money_amount(Constants::Money::DEFAULT_CURRENCY)
-    @total_principal_money_amount = @principal_money_amounts.inject(zero_money_amount) { |sum, money_amt| sum + money_amt }
+
+    @total_principal_money_amount = @principal_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
 
     @interest_amounts            = [49.82, 48.97, 48.12, 47.26, 46.40, 45.54, 44.67, 43.79, 42.92, 42.03, 41.15, 40.26, 39.36, 38.46, 37.56, 36.65, 35.73, 34.82, 33.89, 32.97, 32.03, 31.10, 30.16, 29.21, 28.26, 27.31, 26.35, 25.38, 24.41, 23.44, 22.46, 21.47, 20.48, 19.49, 18.49, 17.49, 16.48, 15.47, 14.45, 13.42, 12.39, 11.36, 10.32, 9.27, 8.23, 7.17, 6.11, 5.04, 3.97, 2.90, 1.82, 0.73]
     @interest_money_amounts      = MoneyManager.get_money_instance(*@interest_amounts)
-    zero_money_amount            = Money.zero_money_amount(Constants::Money::DEFAULT_CURRENCY)
-    @total_interest_money_amount = @interest_money_amounts.inject(zero_money_amount) { |sum, money_amt| sum + money_amt }
+    @total_interest_money_amount = @interest_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
 
     1.upto(@principal_amounts.length) { |num|
       principal_and_interest                                           = { }
@@ -52,13 +52,13 @@ describe Lending do
 
   it "should have a status of new" do
     new_loan = Lending.new
-    loan_status = new_loan.get_current_status
-    loan_status.should == Constants::Loan::NEW
+    loan_status = new_loan.current_loan_status
+    loan_status.should == Constants::Loan::STATUS_NOT_SPECIFIED
   end
 
   it "should create a new loan as expected" do
     lan = "my_unique_lan #{DateTime.now}"
-    for_amount = Money.new(1000000, :INR)
+    applied_amount = Money.new(1000000, :INR)
     for_borrower_id = 123
     applied_on_date = Date.parse('2012-05-01')
     scheduled_disbursal_date = applied_on_date + 7
@@ -70,11 +70,11 @@ describe Lending do
     applied_by_staff = 21
     recorded_by_user = 23
 
-    new_loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
+    new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
 
     new_loan.lan.should                    == lan
-    new_loan.applied_amount.should         == for_amount.amount
-    new_loan.currency.should               == for_amount.currency
+    new_loan.applied_amount.should         == applied_amount.amount
+    new_loan.currency.should               == applied_amount.currency
     new_loan.for_borrower_id.should        == for_borrower_id
     new_loan.applied_on_date.should        == applied_on_date
     new_loan.approved_amount.should        == nil
@@ -84,7 +84,7 @@ describe Lending do
     new_loan.accounted_at_origin.should    == accounted_at_origin
     new_loan.applied_by_staff.should       == applied_by_staff
     new_loan.recorded_by_user.should       == recorded_by_user
-    new_loan.status.should                 == Constants::Loan::NEW
+    new_loan.status.should                 == Constants::Loan::NEW_LOAN_STATUS
     new_loan.lending_product.should        == @from_lending_product
 
     new_loan.scheduled_disbursal_date.should       == scheduled_disbursal_date
@@ -94,14 +94,114 @@ describe Lending do
   context "when no repayments have been made on the loan" do
 
     it "total principal repaid till date should be zero" do
-      @loan.total_principal_repaid.should == Money.zero_money_amount(Constants::Money::DEFAULT_CURRENCY)
+      @loan.principal_received_till_date.should == @zero_money_amount
     end
 
     it "total interest received till date should be zero" do
-      @loan.total_interest_received.should == Money.zero_money_amount(Constants::Money::DEFAULT_CURRENCY)
+      @loan.interest_received_till_date.should == @zero_money_amount
+    end
+
+    it "total received till date should be zero" do
+      @loan.total_received_till_date.should == @zero_money_amount
     end
 
   end
+
+  context "when a loan is approved" do
+
+    it "should raise an error if the approved amount exceeds the applied amount" do
+      approved_amount_exceeding_applied = @total_principal_money_amount + Money.new(1, @loan.currency)
+      approved_on_date = @loan.applied_on_date + 7
+      some_staff = 12
+      lambda {@loan.approve(approved_amount_exceeding_applied, approved_on_date, some_staff)}.should raise_error
+    end
+
+    it "should raise an error if the approved date precedes the applied date" do
+      approved_amount = @total_principal_money_amount
+      approved_on_date = @loan.applied_on_date - 1
+      some_staff = 12
+      lambda {@loan.approve(approved_amount, approved_on_date, some_staff)}.should raise_error
+    end
+
+    it "should be marked as approved and have the information about approval as expected" do
+      approved_amount = @total_principal_money_amount
+      approved_on_date = @loan.applied_on_date + 1
+      some_staff = 12
+      @loan.approve(approved_amount, approved_on_date, some_staff)
+      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+      @loan.approved_amount.should == approved_amount.amount
+      @loan.approved_on_date.should == approved_on_date
+      @loan.approved_by_staff.should == some_staff
+    end
+
+  end
+
+  context "when a loan is disbursed" do
+
+    it "should raise an error if the date of disbursement precedes the date of approval" do
+      approved_amount = @loan.to_money_amount(:applied_amount)
+      approved_on_date = @loan.applied_on_date + 1
+      approved_by_staff = 12
+      @loan.approve(approved_amount, approved_on_date, approved_by_staff)
+      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+
+      incorrect_disbursed_on_date = @loan.approved_on_date - 1
+      scheduled_first_repayment_date = @loan.scheduled_first_repayment_date
+      disbursed_by_staff = 11
+      pseudo_disbursement_transaction = @loan.to_money_amount(:applied_amount)
+
+      lambda {@loan.disburse(incorrect_disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)}.should raise_error
+    end
+
+    it "should be marked as disbursed and have the information about disbursement as expected" do
+      disbursed_on_date = @loan.applied_on_date + 7
+      scheduled_first_repayment_date = disbursed_on_date + 7
+      disbursed_by_staff = 7
+      pseudo_disbursement_transaction = @loan.to_money_amount(:applied_amount)
+      @loan.total_loan_disbursed.should == @zero_money_amount
+
+      @loan.disburse(disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)
+
+      @loan.current_loan_status.should == Constants::Loan::DISBURSED_LOAN_STATUS
+      @loan.disbursal_date.should == disbursed_on_date
+      @loan.to_money_amount(:disbursed_amount).should == pseudo_disbursement_transaction
+      @loan.disbursed_by_staff.should == disbursed_by_staff
+
+      @loan.total_loan_disbursed.should == pseudo_disbursement_transaction
+    end
+
+  end
+
+  context "when a repayment is made on a loan" do
+
+    it "should make an allocation as expected"
+
+=begin
+    it "should make an allocation as expected" do
+      approved_amount = @loan.to_money_amount(:applied_amount)
+      approved_on_date = @loan.applied_on_date + 1
+      approved_by_staff = 12
+      @loan.approve(approved_amount, approved_on_date, approved_by_staff)
+      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+
+      disbursed_on_date = @loan.scheduled_disbursal_date
+      scheduled_first_repayment_date = @loan.scheduled_first_repayment_date
+      disbursed_by_staff = 7
+      pseudo_disbursement_transaction = @loan.to_money_amount(:approved_amount)
+
+      @loan.disburse(disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)
+      @loan.total_loan_disbursed.should == pseudo_disbursement_transaction
+
+      pseudo_repayment_transaction = Money.new(21500, @loan.currency)
+      @loan.repay(pseudo_repayment_transaction, @loan.scheduled_first_repayment_date)
+
+      #TODO to be completed
+    end
+=end
+
+  end
+
+
 
 =begin
   context "the date is the first scheduled repayment date on the loan" do

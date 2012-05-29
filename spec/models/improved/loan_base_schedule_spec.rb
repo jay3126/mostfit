@@ -29,17 +29,50 @@ describe LoanBaseSchedule do
         Constants::Transaction::INTEREST_AMOUNT  => @total_interest_money_amount
     }
 
+    @disbursal_date = Date.parse('2012-04-01')
+    @first_repayment_date = @disbursal_date + 7
+    @repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    @num_of_installments = 52
+
+    @spd = Constants::LoanAmounts::SCHEDULED_PRINCIPAL_DUE
+    @spo = Constants::LoanAmounts::SCHEDULED_PRINCIPAL_OUTSTANDING
+    @slid = Constants::LoanAmounts::SCHEDULED_INTEREST_DUE
+    @slio = Constants::LoanAmounts::SCHEDULED_INTEREST_OUTSTANDING
   end
 
   it "should create a number of schedule line items as expected" do
-    disbursal_date = Date.parse('2012-04-01')
-    first_repayment_date = disbursal_date + 7
-    repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
-    num_of_installments = 52
-    lending = @loan
-
-    base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, disbursal_date, first_repayment_date, repayment_frequency, num_of_installments, lending, @amortization)
+    base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, @disbursal_date, @first_repayment_date, @repayment_frequency, @num_of_installments, @loan, @amortization)
+    debugger
     base_schedule.saved?.should be_true
   end
+
+  it "should return the current and previous amortization items as expected" do
+        third_installment = {
+            [3, Date.parse('2012-04-22')] =>
+                { @spd => MoneyManager.get_money_instance(171.88), @slid => MoneyManager.get_money_instance(48.12),
+                  @spo => MoneyManager.get_money_instance(9658.79), @slio => MoneyManager.get_money_instance(1268.24)
+                }
+        }
+
+        fourth_installment = {
+            [4, Date.parse('2012-04-29')] =>
+                { @spd => MoneyManager.get_money_instance(172.74), @slid => MoneyManager.get_money_instance(47.26),
+                  @spo => MoneyManager.get_money_instance(9658.79 - 171.88), @slio => MoneyManager.get_money_instance(1268.24 - 48.12)
+                }
+        }
+
+    base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, @disbursal_date, @first_repayment_date, @repayment_frequency, @num_of_installments, @loan, @amortization)
+
+    twenty_second = Date.parse('2012-04-22')
+    twenty_fourth = Date.parse('2012-04-24'); twenty_sixth = Date.parse('2012-04-26')
+    twenty_ninth = Date.parse('2012-04-29')
+
+    base_schedule.get_previous_and_current_amortization_items(twenty_second).should == third_installment
+    base_schedule.get_previous_and_current_amortization_items(twenty_fourth).should == [third_installment, fourth_installment]
+    base_schedule.get_previous_and_current_amortization_items(twenty_sixth).should == [third_installment, fourth_installment]
+    base_schedule.get_previous_and_current_amortization_items(twenty_ninth).should == fourth_installment
+  end
+
+  it "should return the amortization items till date as expected"
 
 end

@@ -697,9 +697,9 @@ FactoryGirl.define do
     applied_amount                 1000000
     currency                       Constants::Money::DEFAULT_CURRENCY
     for_borrower_id                { Factory(:customer).id }
-    applied_on_date                Date.parse('2012-05-01')
-    scheduled_disbursal_date       (Date.parse('2012-05-01') + 7)
-    scheduled_first_repayment_date (Date.parse('2012-05-01') + 14)
+    applied_on_date                Date.parse('2012-03-25')
+    scheduled_disbursal_date       (Date.parse('2012-03-25') + 7)
+    scheduled_first_repayment_date (Date.parse('2012-03-25') + 14)
     repayment_frequency            MarkerInterfaces::Recurrence::WEEKLY
     tenure                         52
     administered_at_origin         { Factory(:biz_location).id }

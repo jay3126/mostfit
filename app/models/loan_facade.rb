@@ -40,20 +40,28 @@ class LoanFacade < StandardFacade
     loan_manager.get_loan(loan_id)
   end
 
+  def get_total_loan_disbursed_on_loan(loan_id)
+    loan_manager.get_total_loan_disbursed(loan_id)
+  end
+
+  def get_total_interest_applicable_on_loan(loan_id)
+    loan_manager.get_total_interest_applicable(loan_id)
+  end
+
   def get_current_loan_status(for_loan_id)
     loan_manager.get_current_loan_status(for_loan_id)
   end
 
-  def get_loan_status_on_date(for_loan_id, on_date)
-    loan_manager.get_loan_status_on_date(for_loan_id, on_date)
+  def get_historical_loan_status_on_date(for_loan_id, on_date)
+    loan_manager.get_historical_loan_status_on_date(for_loan_id, on_date)
   end
 
   def get_current_loan_due_status(for_loan_id)
     loan_manager.get_current_loan_due_status(for_loan_id)
   end
 
-  def get_loan_due_status_on_date(for_loan_id, on_date)
-    loan_manager.get_loan_due_status_on_date(for_loan_id, on_date)
+  def get_historical_loan_due_status_on_date(for_loan_id, on_date)
+    loan_manager.get_historical_loan_due_status_on_date(for_loan_id, on_date)
   end
 
   def get_current_days_past_due(for_loan_id)
@@ -112,20 +120,24 @@ class LoanFacade < StandardFacade
     loan_manager.advance_received_on_date(on_loan_id, on_date)
   end
 
-  def amounts_received_till_date(on_loan_id, on_or_before_date = Date.today)
-    loan_manager.amounts_received_till_date(on_loan_id, on_or_before_date)
+  def amounts_received_till_date(on_loan_id)
+    loan_manager.amounts_received_till_date(on_loan_id)
   end
 
-  def principal_received_till_date(on_loan_id, on_or_before_date = Date.today)
-    loan_manager.principal_received_till_date(on_loan_id, on_or_before_date)
+  def historical_amounts_received_till_date(on_loan_id, on_or_before_date)
+    loan_manager.historical_amounts_received_till_date(on_loan_id, on_or_before_date)
   end
 
-  def interest_received_till_date(on_loan_id, on_or_before_date = Date.today)
-    loan_manager.interest_received_till_date(on_loan_id, on_or_before_date)
+  def principal_received_till_date(on_loan_id)
+    loan_manager.principal_received_till_date(on_loan_id)
   end
 
-  def advance_received_till_date(on_loan_id, on_or_before_date = Date.today)
-    loan_manager.advance_received_till_date(on_loan_id, on_or_before_date)
+  def interest_received_till_date(on_loan_id)
+    loan_manager.interest_received_till_date(on_loan_id)
+  end
+
+  def advance_received_till_date(on_loan_id)
+    loan_manager.advance_received_till_date(on_loan_id)
   end
 
   ################

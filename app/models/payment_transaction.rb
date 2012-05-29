@@ -18,6 +18,9 @@ class PaymentTransaction
   property :effective_on,         *DATE_NOT_NULL
   property :created_at,           *CREATED_AT
 
+  def money_amounts; [ :amount ]; end
+  def payment_money_amount; to_money_amount(:amount); end
+
   def on_product_instance; Resolver.fetch_product_instance(self.on_product_type, self.on_product_id); end
   def by_counterparty; Resolver.fetch_counterparty(self.by_counterparty_type, self.by_counterparty_id); end
   def performed_at_location; BizLocation.get(self.performed_at); end
