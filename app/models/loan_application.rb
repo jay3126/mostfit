@@ -448,6 +448,7 @@ class LoanApplication
     raise NotFound if loan_application.nil?
     is_saved = loan_application.set_status(CLEARED_NOT_DUPLICATE_STATUS)
     raise ArgumentError, "Client ID #{loan_application.client_id} : #{loan_application.errors.to_a}" unless is_saved
+    return true if is_saved
   end
 
   # set loan application status as confirm_duplicate
@@ -456,6 +457,7 @@ class LoanApplication
     raise NotFound if loan_application.nil?
     is_saved = loan_application.set_status(CONFIRMED_DUPLICATE_STATUS)
     raise ArgumentError, "Client ID #{loan_application.client_id} : #{loan_application.errors.to_a}" unless is_saved
+    return true if is_saved
   end
 
   #returns an object containing all information about a Loan Application

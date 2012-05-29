@@ -186,9 +186,9 @@ class LoanApplications < Application
   def record_suspected_duplicates
     
     # INITIALIZING VARIABLES USED THROUGHOUT
+    result = nil
     message = {}
     @errors = []
-    result = false
     facade = LoanApplicationsFacade.new(session.user)
 
     # GATE-KEEPING
@@ -211,21 +211,21 @@ class LoanApplications < Application
 
     if @errors.empty?
       clear_or_confirm_duplicate.keys.each do |lap_id|
-
         begin
           if  clear_or_confirm_duplicate[lap_id].include?('clear')
             result = facade.set_cleared_not_duplicate(lap_id)
           elsif clear_or_confirm_duplicate[lap_id].include?('confirm')
             result = facade.set_confirm_duplicate(lap_id)
           end
+          if result
+            message[:notice] = "Loan application has been updated successfully"
+          else
+            message[:error] = @errors.flatten.join(', ')
+          end
         rescue => ex
           @errors << "An error has occurred: #{ex.message}"
         end
-        if result
-          message[:notice] = "Loan application has been saved successfully"
-        else
-          message[:error] = @errors.flatten.join(', ')
-        end
+ 
       end
       # RENDER/RE-DIRECT
       redirect resource(:loan_applications, :suspected_duplicates), :message => message
