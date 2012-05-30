@@ -76,7 +76,7 @@
     %tr
       %th Created by staff member
       %td
-        = StaffMember.get(loan_application.created_by_staff_id).name
+        = StaffMember.get(loan_application.created_by_staff_id).name rescue nil
 
     %tr
       %th Created on
