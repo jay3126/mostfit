@@ -60,11 +60,11 @@ USAGE_TEXT
 
         applied_on_date = beginning_applied_on_date
 
-        clients.each_with_index do |client, idx|
+        clients.each do |client|
           lan                            = "#{DateTime.now}_#{client.id}"
           for_amount                     = @total_principal_money_amount
           for_borrower_id                = client.id
-          applied_on_date                += idx
+          applied_on_date                += 1
           scheduled_disbursal_date       = applied_on_date + 7
           scheduled_first_repayment_date = scheduled_disbursal_date + 7
           repayment_frequency            = MarkerInterfaces::Recurrence::WEEKLY
