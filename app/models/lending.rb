@@ -1,5 +1,6 @@
 class Lending
   include DataMapper::Resource
+  include LoanLifeCycle
   include Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Properties, Constants::Transaction
   include Validators::Arguments
   include MarkerInterfaces::Recurrence
@@ -8,7 +9,7 @@ class Lending
   property :lan,                            *UNIQUE_ID
   property :applied_amount,                 *MONEY_AMOUNT
   property :currency,                       *CURRENCY
-  property :for_borrower_id,                *INTEGER_NOT_NULL
+  property :for_borrower_id,                *INTEGER_NOT_NULL #TODO add borrower type and ID
   property :applied_on_date,                *DATE_NOT_NULL
   property :approved_amount,                *MONEY_AMOUNT_NULL
   property :disbursed_amount,               *MONEY_AMOUNT_NULL
@@ -30,15 +31,15 @@ class Lending
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
 
+  # Lists the properties that are money amounts
   def money_amounts
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
 
+  # TODO to be deprecated
   def disbursal_date_value
     self.disbursal_date ? self.disbursal_date : self.scheduled_disbursal_date
   end
-
-  #def counterparty; Client.get(self.for_borrower_id); end
 
   belongs_to :lending_product
   has 1, :loan_base_schedule
@@ -46,6 +47,7 @@ class Lending
   has n, :loan_receipts
   has n, :loan_due_statuses
 
+  # Creates a new loan
   def self.create_new_loan(
       applied_amount,
           repayment_frequency,
@@ -136,7 +138,7 @@ class Lending
 
   # The total loan amount disbursed
   def total_loan_disbursed
-    self.loan_payments.sum_till_date || Money.zero_money_amount(self.currency)
+    self.loan_payments.sum_till_date || zero_money_amount
   end
 
   # The total interest applicable as computed at the time that the loan was disbursed
@@ -154,84 +156,87 @@ class Lending
   #########################
 
   def scheduled_principal_and_interest_due(on_date)
-    if on_date >= scheduled_first_repayment_date
-      {SCHEDULED_PRINCIPAL_DUE => scheduled_principal_due(on_date), SCHEDULED_INTEREST_DUE => scheduled_interest_due(on_date)}
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    {SCHEDULED_PRINCIPAL_DUE => scheduled_principal_due(on_date), SCHEDULED_INTEREST_DUE => scheduled_interest_due(on_date)}
   end
 
   def scheduled_principal_due(on_date)
-    if on_date >= scheduled_first_repayment_date
-      amortization = get_scheduled_amortization(on_date)
-      amortization.values.first[SCHEDULED_PRINCIPAL_DUE] if amortization
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    amortization = get_scheduled_amortization(on_date)
+    amortization.values.first[SCHEDULED_PRINCIPAL_DUE] if amortization
   end
 
   def scheduled_principal_outstanding(on_date)
-    if on_date >= scheduled_first_repayment_date
-      amortization = get_scheduled_amortization(on_date)
-      amortization.values.first[SCHEDULED_PRINCIPAL_OUTSTANDING] if amortization
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    amortization = get_scheduled_amortization(on_date)
+    amortization.values.first[SCHEDULED_PRINCIPAL_OUTSTANDING] if amortization
   end
 
   def actual_principal_outstanding
+    return zero_money_amount unless is_disbursed?
+
     # TODO Handle the case where principal receipts exceed loan disbursed amount (possible?)
-    if Date.today >= disbursal_date_value
-      total_loan_disbursed - principal_received_till_date
-    end
+    total_loan_disbursed - principal_received_till_date
   end
 
   def actual_principal_due(on_date)
-    if on_date >= scheduled_first_repayment_date
-      scheduled_principal_due(on_date) + (actual_principal_outstanding - scheduled_principal_outstanding(on_date))
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    scheduled_principal_due(on_date) + (actual_principal_outstanding - scheduled_principal_outstanding(on_date))
   end
 
   def scheduled_interest_due(on_date)
-    if on_date >= scheduled_first_repayment_date
-      amortization = get_scheduled_amortization(on_date)
-      amortization.values.first[SCHEDULED_INTEREST_DUE] if amortization
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    amortization = get_scheduled_amortization(on_date)
+    amortization.values.first[SCHEDULED_INTEREST_DUE] if amortization
   end
 
   def scheduled_interest_outstanding(on_date)
-    if on_date >= scheduled_first_repayment_date
-      amortization = get_scheduled_amortization(on_date)
-      amortization.values.first[SCHEDULED_INTEREST_OUTSTANDING] if amortization
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    amortization = get_scheduled_amortization(on_date)
+    amortization.values.first[SCHEDULED_INTEREST_OUTSTANDING] if amortization
   end
 
   def actual_interest_outstanding
+    return zero_money_amount unless is_disbursed?
+
     # TODO Handle the case where the interest receipts exceed interest applicable (possible?)
-    if Date.today >= disbursal_date_value
-      total_interest_applicable - interest_received_till_date
-    end
+    total_interest_applicable - interest_received_till_date
   end
 
   def actual_interest_due(on_date)
-    if on_date >= scheduled_first_repayment_date
-      scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
   end
 
   def scheduled_total_outstanding(on_date)
-    if on_date >= scheduled_first_repayment_date
-      scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
-    end
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+
+    scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
   end
 
   def actual_total_outstanding
-    if Date.today >= disbursal_date_value
-      actual_principal_outstanding + actual_interest_outstanding
-    end
+    return zero_money_amount unless is_disbursed?
+
+    actual_principal_outstanding + actual_interest_outstanding
   end
 
   def get_scheduled_amortization(on_date)
-    if on_date >= scheduled_first_repayment_date
-      previous_and_current_amortization_items_val = self.loan_base_schedule.get_previous_and_current_amortization_items(on_date)
-      earlier_amortization_item = previous_and_current_amortization_items_val.is_a?(Array) ? previous_and_current_amortization_items_val.first :
-          previous_and_current_amortization_items_val
-      return earlier_amortization_item
-    end
+    #TODO determine what is to be done before the scheduled first repayment date for amortization
+    return nil if on_date < scheduled_first_repayment_date
+
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan" unless self.loan_base_schedule
+    previous_and_current_amortization_items_val = self.loan_base_schedule.get_previous_and_current_amortization_items(on_date)
+    earlier_amortization_item = previous_and_current_amortization_items_val.is_a?(Array) ? previous_and_current_amortization_items_val.first :
+        previous_and_current_amortization_items_val
+
+    earlier_amortization_item
   end
 
   #########################
@@ -247,7 +252,8 @@ class Lending
   end
 
   def historical_advance_available(on_date)
-    Money.zero_money_amount(currency)
+    # TODO implement using accounting facade
+    zero_money_amount
   end
 
   def amounts_received_on_date(on_date = Date.today)
@@ -286,9 +292,6 @@ class Lending
   # LOAN STATUS QUERIES # begins
   #######################
 
-  # Obtain the current loan status
-  def current_loan_status; self.status; end
-
   # Obtain the loan status as on a particular date
   def historical_loan_status_on_date(on_date)
     #TODO
@@ -304,10 +307,9 @@ class Lending
 
   def current_due_status
     on_date = Date.today
-    if on_date >= disbursal_date_value
-      return NOT_DUE if on_date < scheduled_first_repayment_date
-      actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
-    end
+    return NOT_DUE if on_date < scheduled_first_repayment_date
+
+    actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
   end
 
   def historical_due_status_on_date(on_date)
@@ -342,24 +344,26 @@ class Lending
     #TODO
   end
 
-  def disburse(on_disbursal_date, with_scheduled_first_repayment_date, by_disbursement_transaction, disbursed_by)
-    Validators::Arguments.not_nil?(on_disbursal_date, with_scheduled_first_repayment_date, by_disbursement_transaction, disbursed_by)
+  def disburse(by_disbursement_transaction)
+    Validators::Arguments.not_nil?(by_disbursement_transaction)
+    on_disbursal_date = by_disbursement_transaction.effective_on
     raise Errors::BusinessValidationError, "disbursal date: #{on_disbursal_date} cannot precede approval date: #{approved_on_date}" if on_disbursal_date < self.approved_on_date
     raise Errors::InvalidStateChangeError, "Only a loan that is approved can be disbursed" unless current_loan_status == APPROVED_LOAN_STATUS
 
     #TODO validate and respond to any changes in the scheduled_first_repayment_date
     self.disbursed_amount   = by_disbursement_transaction.amount
     self.disbursal_date     = on_disbursal_date
-    self.disbursed_by_staff = disbursed_by
+    self.disbursed_by_staff = by_disbursement_transaction.performed_by
     set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
-    LoanPayment.record_loan_payment(by_disbursement_transaction, self, on_disbursal_date)
+    disbursement_money_amount = by_disbursement_transaction.payment_money_amount
+    LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
   end
 
   def cancel
     #TODO
   end
 
-  def repay(by_receipt, on_date)
+  def repay(by_receipt)
     update_for_payment(by_receipt)
   end
 
@@ -440,7 +444,8 @@ class Lending
     effective_on = payment_transaction.effective_on
     allocation = make_allocation(payment_amount, effective_on)
 
-    #record loan receipt
+    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(allocation, self, effective_on)
+    loan_receipt.to_money
     #record loan due status
     #respond with the allocation
   end
@@ -461,10 +466,9 @@ class Lending
     advance_to_allocate = (total_amount > allocate_to_principal_and_interest) ?
         (total_amount - allocate_to_principal_and_interest) : zero_money_amount
 
-    received_till_date = self.amounts_received_till_date
     allocation = {}
-    allocation[:principal] = received_till_date[PRINCIPAL_RECEIVED]
-    allocation[:interest] = received_till_date[INTEREST_RECEIVED]
+    allocation[:principal] = principal_received_till_date
+    allocation[:interest]  = interest_received_till_date
 
     allocator = Constants::LoanAmounts.get_allocator(self.repayment_allocation_strategy, payment_currency)
 
@@ -496,6 +500,7 @@ class Lending
   end
 
   def get_all_balances(on_date)
+    #TODO
     # schedule_balances = get_schedule_balances(on_date)
     # also get advances and amounts paid till date
   end

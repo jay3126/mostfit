@@ -1,5 +1,19 @@
 require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 
+class MockPayment
+  attr_reader :payment_money_amount, :effective_on, :performed_by
+
+  def initialize(payment, on_date, performed_by)
+    @payment_money_amount = payment
+    @effective_on = on_date
+    @performed_by = performed_by
+  end
+
+  def amount; @payment_money_amount.amount; end
+  def currency; @payment_money_amount.currency; end
+
+end
+
 describe Lending do
 
   before(:all) do
@@ -53,7 +67,7 @@ describe Lending do
   it "should have a status of new" do
     new_loan = Lending.new
     loan_status = new_loan.current_loan_status
-    loan_status.should == Constants::Loan::STATUS_NOT_SPECIFIED
+    loan_status.should == LoanLifeCycle::STATUS_NOT_SPECIFIED
   end
 
   it "should create a new loan as expected" do
@@ -84,7 +98,7 @@ describe Lending do
     new_loan.accounted_at_origin.should    == accounted_at_origin
     new_loan.applied_by_staff.should       == applied_by_staff
     new_loan.recorded_by_user.should       == recorded_by_user
-    new_loan.status.should                 == Constants::Loan::NEW_LOAN_STATUS
+    new_loan.status.should                 == LoanLifeCycle::NEW_LOAN_STATUS
     new_loan.lending_product.should        == @from_lending_product
 
     new_loan.scheduled_disbursal_date.should       == scheduled_disbursal_date
@@ -129,13 +143,15 @@ describe Lending do
       some_staff = 12
 
       # Can only approve a loan that has NEW_LOAN_STATUS
-      @loan.current_loan_status.should == Constants::Loan::NEW_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::NEW_LOAN_STATUS
+      @loan.is_disbursed?.should be_false
       @loan.approve(approved_amount, approved_on_date, some_staff)
       @loan.approved_amount.should == approved_amount.amount
       @loan.approved_on_date.should == approved_on_date
       @loan.approved_by_staff.should == some_staff
 
-      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+      @loan.is_disbursed?.should be_false
 
       # Cannot approve a loan that is already approved
       lambda {@loan.approve(approved_amount, approved_on_date, some_staff)}.should raise_error
@@ -150,61 +166,61 @@ describe Lending do
       approved_on_date = @loan.applied_on_date + 1
       approved_by_staff = 12
       @loan.approve(approved_amount, approved_on_date, approved_by_staff)
-      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+      @loan.is_disbursed?.should be_false
 
       incorrect_disbursed_on_date = @loan.approved_on_date - 1
-      scheduled_first_repayment_date = @loan.scheduled_first_repayment_date
       disbursed_by_staff = 11
-      pseudo_disbursement_transaction = @loan.to_money_amount(:applied_amount)
+      mock_disbursement = MockPayment.new(@loan.to_money_amount(:applied_amount), incorrect_disbursed_on_date, disbursed_by_staff)
 
-      lambda {@loan.disburse(incorrect_disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)}.should raise_error
+      lambda {@loan.disburse(mock_disbursement)}.should raise_error
+      @loan.is_disbursed?.should be_false
     end
 
     it "should be marked as disbursed and have the information about disbursement as expected" do
       disbursed_on_date = @loan.applied_on_date + 7
-      scheduled_first_repayment_date = disbursed_on_date + 7
       disbursed_by_staff = 7
-      pseudo_disbursement_transaction = @loan.to_money_amount(:applied_amount)
+      mock_disbursement = MockPayment.new(@loan.to_money_amount(:applied_amount), disbursed_on_date, disbursed_by_staff)
+
       @loan.total_loan_disbursed.should == @zero_money_amount
 
-      @loan.disburse(disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)
+      @loan.disburse(mock_disbursement)
 
-      @loan.current_loan_status.should == Constants::Loan::DISBURSED_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS
+      @loan.is_disbursed?.should be_true
+
       @loan.disbursal_date.should == disbursed_on_date
-      @loan.to_money_amount(:disbursed_amount).should == pseudo_disbursement_transaction
-      @loan.disbursed_by_staff.should == disbursed_by_staff
 
-      @loan.total_loan_disbursed.should == pseudo_disbursement_transaction
+      @loan.to_money_amount(:disbursed_amount).should == mock_disbursement.payment_money_amount
+      @loan.total_loan_disbursed.should == mock_disbursement.payment_money_amount
+
+      @loan.disbursed_by_staff.should == disbursed_by_staff
     end
 
   end
 
   context "when a repayment is made on a loan" do
 
-    it "should make an allocation as expected"
-
-=begin
     it "should make an allocation as expected" do
       approved_amount = @loan.to_money_amount(:applied_amount)
       approved_on_date = @loan.applied_on_date + 1
       approved_by_staff = 12
       @loan.approve(approved_amount, approved_on_date, approved_by_staff)
-      @loan.current_loan_status.should == Constants::Loan::APPROVED_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
 
       disbursed_on_date = @loan.scheduled_disbursal_date
-      scheduled_first_repayment_date = @loan.scheduled_first_repayment_date
       disbursed_by_staff = 7
-      pseudo_disbursement_transaction = @loan.to_money_amount(:approved_amount)
+      mock_disbursement = MockPayment.new(@loan.to_money_amount(:approved_amount), disbursed_on_date, disbursed_by_staff)
 
-      @loan.disburse(disbursed_on_date, scheduled_first_repayment_date, pseudo_disbursement_transaction, disbursed_by_staff)
-      @loan.total_loan_disbursed.should == pseudo_disbursement_transaction
+      @loan.disburse(mock_disbursement)
+      @loan.total_loan_disbursed.should == mock_disbursement.payment_money_amount
 
-      pseudo_repayment_transaction = Money.new(21500, @loan.currency)
-      @loan.repay(pseudo_repayment_transaction, @loan.scheduled_first_repayment_date)
+      repayment = MockPayment.new(Money.new(20000, @loan.currency), @loan.scheduled_first_repayment_date + 2, disbursed_by_staff)
+      @loan.repay(repayment)
 
+      @loan.total_received_till_date.should == repayment.payment_money_amount
       #TODO to be completed
     end
-=end
 
   end
 

@@ -1,6 +1,7 @@
 class LoanStatusChange
   include DataMapper::Resource
-  include Constants::Properties, Constants::Loan
+  include LoanLifeCycle
+  include Constants::Properties
 
   # All status change transitions are recorded here as a trail
 
@@ -23,7 +24,7 @@ class LoanStatusChange
     status_change                = {}
     status_change[:loan_id]      = loan.id
     status_change[:from_status]  = old_status
-    status_change[:to_status]   = new_status
+    status_change[:to_status]    = new_status
     status_change[:effective_on] = effective_on
     status_change_record = create(status_change)
     raise Errors::DataError, status_change_record.errors.first.first unless status_change_record.saved?
