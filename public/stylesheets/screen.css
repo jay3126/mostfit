@@ -1,11 +1,11 @@
 /* -----------------------------------------------------------------------
 
    BlueTripCSS Framework
-   
+
    Mike Crittenden
    mike@capsizedesigns.com
    Copyright 2008 Mike Crittenden
-   
+
    License - MIT or GPL (whichever suits you better)
 
 ----------------------------------------------------------------------- */
@@ -273,7 +273,7 @@ hr.space {background:#fff;color:#fff;}
 .container div.error {background:#FBE3E4;color:#8a1f11;border-color:#FBC2C4;}
 input.error, textarea.error, select.error {background:#FBE3E4;}
 .container div.notice {background:#FFF6BF;color:#514721;border-color:#FFD324;  background: url(/images/tick.png) no-repeat;
-  background-position: 10px 10px;
+                       background-position: 10px 10px;
 }
 .container div.success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
 .container .error a {color:#8a1f11; background:none; padding:0; margin:0; }
@@ -281,3 +281,11 @@ input.error, textarea.error, select.error {background:#FBE3E4;}
 .container .success a {color:#264409; background:none; padding:0; margin:0; }
 .container .center {text-align: center;}
 .holiday_indicator, .ui-datepicker .holiday_indicator a { background-color:red;color:red }
+.lap_header_tab  a {
+  background-color: #CFCFCF;
+  color: black;
+  font-family: small-caption;
+  margin: 87px -43px 0 45px;
+  padding: 2px 15px 5px 8px;
+  text-decoration: underline;
+}
