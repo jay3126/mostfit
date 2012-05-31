@@ -4,7 +4,7 @@ class Centers < Application
   provides :xml, :yaml, :js
 
   def index    
-    redirect resource(@branch) if @branch
+    redirect resource(@branch) if @branch 
     hash = {:order => [:meeting_day, :meeting_time_hours]}
     hash[:manager] = session.user.staff_member if session.user.role == :staff_member
     hash[:branch] = @branch if @branch
@@ -95,17 +95,17 @@ class Centers < Application
   end
 
   def create(center)
-    @center_meeting_day = CenterMeetingDay.new()
-    @center_meeting_day.valid_from = center[:creation_date]
-    @center_meeting_day.valid_upto = Date.new(2100,12,31)
+    #@center_meeting_day = CenterMeetingDay.new()
+    #@center_meeting_day.valid_from = center[:creation_date]
+    #@center_meeting_day.valid_upto = Date.new(2100,12,31)
     @center = Center.new(center)
-    @center.center_meeting_days << @center_meeting_day
+    #@center.center_meeting_days << @center_meeting_day
     if @branch
       @center.branch = @branch  # set direct context
     end
     if @center.save
-      @center_meeting_day.center_id = @center.id
-      @center_meeting_day.save
+     # @center_meeting_day.center_id = @center.id
+      #@center_meeting_day.save
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display @center
       else
