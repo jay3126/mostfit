@@ -235,6 +235,22 @@ class LoanApplications < Application
     
   end
 
+  def edit
+    @loan_application = LoanApplication.get(params[:id])
+    raise NotFound unless @loan_application
+    display @loan_application
+  end
+
+  def update
+    @loan_application = LoanApplication.get(params[:id])
+    loan_application = @loan_application.update(params[:loan_application])
+    if loan_application
+      redirect resource(@loan_application), :message => {:notice => "Loan application updated succesfully"}
+    else
+      display @loan_application, :edit
+    end
+  end
+
   private
 
   def get_param_value(param_name_sym)

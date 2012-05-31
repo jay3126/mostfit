@@ -1,0 +1,61 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+= error_messages_for @loan_application
+%table.shaded{:style => "width:100%;text-align:left;"}
+  %h1 Edit loan application
+  = form_for(@loan_application, :action => url(:loan_application, @loan_application) ) do
+    %tr
+      %th Applicant Name
+      %td
+        = text_field :client_name
+    %tr
+      %th Guarantor Name
+      %td
+        = text_field :client_guarantor_name
+    %tr
+      %th Relationship
+      %td
+        = select :client_guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :prompt => 'Select'
+    %tr
+      %th Applicant Birth Date
+      %td
+        = date_select_for @loan_application, :client_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
+    %tr
+      %th Ration Card No.
+      %td
+        = text_field :client_reference1
+        = hidden_field :client_reference1_type, :value => Constants::Masters::RATION_CARD
+    %tr
+      %th Reference 2 Type
+      %td
+        = select :client_reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES_ALLOWED.map{|x| [x.to_s, x.to_s.humanize]}, :selected => params[:loan_application] ? params[:loan_application][:client_reference2_type] : Constants::Masters::VOTER_ID.to_s
+    %tr
+      %th Reference 2 No.
+      %td
+        = text_field :client_reference2
+    %tr
+      %th Applied for amount
+      %td
+        = select :amount, :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x.to_f]}, :prompt => 'Select'
+    %tr
+      %th Address
+      %td
+        = text_field :client_address
+    %tr
+      %th Location
+      %td
+        = select :client_state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
+    %tr
+      %th Pincode
+      %td
+        = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
+        = hidden_field :name => 'center_cycle_number', :value => center_cycle_number
+    %table.narrow.form{:style => "width:100%;"}
+      %tfoot
+        %tr
+          %td
+            %b Loan Application created by
+            = select :created_by_staff_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+          %td
+            = submit 'Update', :class => "grey_button"
+          %td
+            = link_to 'Cancel',"/loan_applications/#{@loan_application.id}", :class => "grey_button"

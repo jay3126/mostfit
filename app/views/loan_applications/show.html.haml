@@ -1,5 +1,9 @@
 - loan_application = @loan_app
+
 .shaded
+  %div{:style => "text-align:right;"}
+    = link_to "Edit Loan Application", resource(loan_application, :edit), :class => 'edit'
+
   %table{:style => "text-align:left;"}
     %h2 Loan application details:
     %tr
