@@ -28,8 +28,12 @@ USAGE_TEXT
         accounted_at    = Factory(:biz_location)
 
         client_count = 20
-        clients = 1.upto(client_count).collect {|n| Factory(:client)}
+        performed_by = 21
+        recorded_by = 23
         beginning_applied_on_date = Date.parse('2012-04-01')
+        clients = 1.upto(client_count).collect {|n| Factory(:client)}
+        clients.each{|client| ClientAdministration.assign(administered_at,accounted_at,client,performed_by, recorded_by, beginning_applied_on_date)}
+        
 
         @from_lending_product = Factory(:lending_product)
 
@@ -71,11 +75,11 @@ USAGE_TEXT
           tenure                         = 52
           administered_at_origin         = administered_at.id
           accounted_at_origin            = accounted_at.id
-          applied_by_staff               = 21
-          recorded_by_user               = 23
+          applied_by_staff               = performed_by
+          recorded_by_user               = recorded_by
 
           loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
-
+          LoanAdministration.assign(administered_at, accounted_at, loan, performed_by, recorded_by, beginning_applied_on_date)
         end
       rescue => ex
         puts "An error occurred: #{ex.message}"
