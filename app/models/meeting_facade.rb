@@ -71,8 +71,7 @@ class MeetingFacade < StandardFacade
   end
 
   def get_accomodated_frequencies(at_location, on_date)
-    loan_facade = FacadeFactory.instance.get_other_facade(FacadeFactory::LOAN_FACADE, self)
-    all_loan_frequencies = loan_facade.get_loan_frequencies_at_location(at_location, on_date)
+    all_loan_frequencies = MarkerInterfaces::Recurrence::FREQUENCIES
     MarkerInterfaces::Recurrence.accomodated_frequencies(all_loan_frequencies)
   end
 

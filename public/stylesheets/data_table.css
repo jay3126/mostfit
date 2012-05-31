@@ -574,3 +574,11 @@ th:active {
 /* 	border: 1px solid #8080FF; */
 /* 	background-color: #E5E5FF; */
 /* } */
+
+table.weeksheet th{
+    border: 1px solid black;
+    text-align: center;
+    font-size: 0.95em;
+    padding-left: 2px;
+    padding-right: 2px;
+}

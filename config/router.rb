@@ -45,7 +45,7 @@ Merb::Router.prepare do
   end
   resources :location_levels
   resources :biz_locations, :collection => {:map_locations => [:get]}
-  resources :payment_transactions
+  resources :payment_transactions, :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get]}
   resources :staffs
   resources :designations
   resources :user_roles

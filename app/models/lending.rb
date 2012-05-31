@@ -124,6 +124,10 @@ class Lending
     self.loan_base_schedule.get_previous_and_current_schedule_dates(for_date)
   end
 
+  def previous_and_current_amortization_items(for_date)
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
+    self.loan_base_schedule.get_previous_and_current_amortization_items(for_date)
+  end
   #######################
   # LOAN SCHEDULE DATES # ends
   #######################

@@ -47,7 +47,7 @@ class LoanManager
   def get_current_days_past_due(for_loan_id)
     loan = Lending.get(for_loan_id)
     raise Errors::DataMissingError, "Unable to locate loan with id: #{for_loan_id}" unless loan
-     loan.days_past_due
+    loan.days_past_due
   end
 
   def get_days_past_due_on_date(for_loan_id, on_date)
@@ -66,6 +66,12 @@ class LoanManager
     loan = Lending.get(on_loan_id)
     raise Errors::DataMissingError, "Unable to locate loan with id: #{on_loan_id}" unless loan
     loan.scheduled_principal_and_interest_due(on_date)
+  end
+
+  def previous_and_current_amortization_items(on_loan_id, on_date)
+    loan = Lending.get(on_loan_id)
+    raise Errors::DataMissingError, "Unable to locate loan with id: #{on_loan_id}" unless loan
+    loan.previous_and_current_amortization_items(on_date)
   end
 
   def amounts_received_on_date(on_loan_id, on_date)

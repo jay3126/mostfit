@@ -1,0 +1,155 @@
+%h1 Weeksheet Payments
+- total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0
+- total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
+= form_for(:payment_transactions ,:action => url(:controller => :payment_transactions, :action => :create_group_payments)) do
+  %table.weeksheet.dataTable.report
+    %thead
+      %tr
+        %th
+          Client
+        %th{:colspan => 8}
+          Loan
+        %th{:colspan => 3}
+          Principal Schedule
+        %th{:colspan => 2}
+          Interest Schedule
+        %th
+          Advance
+        %th{:colspan =>3}
+          Due
+      %tr
+        %th
+          Client Name
+        %th
+          Loan Id
+        %th
+          Loan Status
+        %th
+          Amount
+        %th
+          Disbursed On Date
+        %th
+          Due Status
+        %th
+          Installment No.
+        %th
+          Installment Date
+        %th
+          Days Past Due
+        %th
+          Schedule Principal Due
+        %th
+          Principal Due
+        %th
+          Schedule Principal Outstanding
+        %th
+          Schedule Interest Due
+        %th
+          Schedule Interest Outstanding
+        %th
+          Advance Amount Balance
+        %th
+          Due Principal
+        %th
+          Due Interest
+        %th
+          Total
+    - @weeksheet.groups.each do |group|
+      = hidden_field :name => "payment_transactions[performed_at]", :value => @center.id
+      = hidden_field :name => "payment_transactions[accounted_at]", :value => @branch.id
+      = hidden_field :name => "payment_transactions[performed_by]", :value => @staff.id
+      = hidden_field :name => "payment_transactions[recorded_by]", :value => @user.id
+      = hidden_field :name => "payment_transactions[product_type]", :value => 'lending'
+      = hidden_field :name => "payment_transactions[currency]", :value => 'INR'
+      = hidden_field :name => "payment_transactions[receipt_type]", :value => 'receipt'
+      = hidden_field :name => "payment_transactions[effective_on]", :value => Date.today
+      - loan_row_count = 0
+      - biz_location = BizLocation.get @weeksheet.at_biz_location_id
+      - collection_sheets = @weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
+      - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      - collection_sheets.each do |ws|
+        %tr
+          %td
+            = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_type]", :value => 'client'
+            = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_id]", :value => ws.borrower_id
+            = ws.borrower_name
+          %td
+            = ws.loan_id
+            = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_type]", :value => 'lending'
+            = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_id]", :value => ws.loan_id
+          %td
+            = ws.loan_status
+          %td
+            = ws.loan_disbursed_amount
+            - total_disbursed_amount = total_disbursed_amount + ws.loan_disbursed_amount unless ws.loan_disbursed_amount.blank?
+          %td
+            = ws.loan_disbursed_date
+          %td
+            = ws.loan_due_status
+          %td
+            = ws.loan_installment_number
+          %td
+            = ws.loan_schedule_date
+          %td
+            = ws.loan_days_past_due
+          %td
+            = ws.loan_schedule_principal_due.to_s
+            - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount unless ws.loan_schedule_principal_due.blank?
+          %td
+            = ws.loan_principal_due.to_s
+            - total_due_principal = total_due_principal + ws.loan_principal_due.amount unless ws.loan_principal_due.blank?
+          %td
+            = ws.loan_schedule_principal_outstanding.to_s
+            - total_schedule_principal_outstanding = total_schedule_principal_outstanding + ws.loan_schedule_principal_outstanding.amount unless ws.loan_schedule_principal_outstanding.blank?
+          %td
+            = ws.loan_schedule_interest_due.to_s
+            - total_schedule_interest_due = total_schedule_interest_due + ws.loan_schedule_interest_due.amount unless ws.loan_schedule_interest_due.blank?
+          %td
+            = ws.loan_schedule_interest_outstanding.to_s
+            - total_schedule_interest_outstanding = total_schedule_interest_outstanding + ws.loan_schedule_interest_outstanding.amount unless ws.loan_schedule_interest_outstanding.blank?
+          %td
+            = ws.loan_advance_amount.to_s
+            - total_advance_amount = total_advance_amount + ws.loan_advance_amount.amount unless ws.loan_advance_amount.blank?
+          %td
+            = ws.loan_total_principal_due.to_s
+            - total_principal_due = total_principal_due + ws.loan_total_principal_due.amount unless ws.loan_total_principal_due.blank?
+          %td
+            = ws.loan_total_interest_due.to_s
+            - total_interest_due = total_interest_due + ws.loan_total_interest_due.amount unless ws.loan_total_interest_due.blank?
+          %td
+            = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.total_paid.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount();"
+            - total_amount = total_amount + ws.total_paid.amount unless ws.total_paid.blank?
+          - loan_row_count = loan_row_count + 1
+    %tfoot
+      %tr.org_total
+        %td
+          Total
+        %td
+        %td
+        %td
+        %td
+          = Money.new(total_disbursed_amount,:INR).to_s
+        %td
+        %td
+        %td
+        %td
+        %td
+          = Money.new(total_schedule_principal_due,:INR).to_s
+        %td
+          = Money.new(total_due_principal,:INR).to_s
+        %td
+          = Money.new(total_schedule_principal_outstanding,:INR).to_s
+        %td
+          = Money.new(total_schedule_interest_due,:INR).to_s
+        %td
+          = Money.new(total_schedule_interest_outstanding,:INR).to_s
+        %td
+          = Money.new(total_advance_amount,:INR).to_s
+        %td
+          = Money.new(total_principal_due,:INR).to_s
+        %td
+          = Money.new(total_interest_due,:INR).to_s
+        %td
+          #weeksheet_total_amount
+            = Money.new(total_amount,:INR).to_s
+  = submit 'Save Payment'

@@ -743,6 +743,7 @@ h3.blocked{
 }
 div.tab_container{
     border: 1px solid #CDD3FE;
+    padding-bottom: 24px;
 }
 div.tab_container ul.tabs{
     margin-left: 0px;
