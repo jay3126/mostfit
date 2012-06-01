@@ -5,14 +5,18 @@ class FacadeFactory
 
   attr :created_at
 
-  MEETING_FACADE  = :meeting
-  LOAN_FACADE     = :loan
-  LOCATION_FACADE = :location
-  PAYMENT_FACADE  = :payment
-  USER_FACADE     = :user
-  FACADE_TYPES    = { MEETING_FACADE  => MeetingFacade, LOAN_FACADE => LoanFacade,
-                      LOCATION_FACADE => LocationFacade, PAYMENT_FACADE => PaymentFacade,
-                      USER_FACADE     => UserFacade }
+  MEETING_FACADE    = :meeting_facade
+  LOAN_FACADE       = :loan_facade
+  LOCATION_FACADE   = :location_facade
+  PAYMENT_FACADE    = :payment_facade
+  USER_FACADE       = :user_facade
+  ACCOUNTING_FACADE = :accounting_facade
+  FACADE_TYPES      = {
+      MEETING_FACADE    => MeetingFacade, LOAN_FACADE => LoanFacade,
+      LOCATION_FACADE   => LocationFacade, PAYMENT_FACADE => PaymentFacade,
+      USER_FACADE       => UserFacade,
+      ACCOUNTING_FACADE => AccountingFacade
+  }
 
   def initialize
     @created_at = DateTime.now

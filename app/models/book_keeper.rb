@@ -23,6 +23,30 @@ module BookKeeper
     transaction_summary.set_processed
   end
 
+  def get_primary_chart_of_accounts
+    AccountsChart.first
+  end
+
+  def get_ledger(by_ledger_id)
+    Ledger.get(by_ledger_id)
+  end
+
+  def get_ledger_opening_balance_and_date(by_ledger_id)
+    ledger = get_ledger(by_ledger_id)
+    raise Errors::DataMissingError, "Unable to locate ledger by ID: #{by_ledger_id}" unless ledger
+    ledger.opening_balance_and_date
+  end
+
+  def get_current_ledger_balance(by_ledger_id)
+    get_historical_ledger_balance(by_ledger_id, Date.today)
+  end
+
+  def get_historical_ledger_balance(by_ledger_id, on_date)
+    ledger = get_ledger(by_ledger_id)
+    raise Errors::DataMissingError, "Unable to locate ledger by ID: #{by_ledger_id}" unless ledger
+    ledger.balance(on_date)
+  end
+
 end
 
 class MyBookKeeper
@@ -35,4 +59,5 @@ class MyBookKeeper
   def to_s 
     "#{self.class} created at #{@created_at}"
   end
+
 end
