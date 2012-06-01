@@ -4,16 +4,17 @@ describe PostingRule do
 
   before(:each) do
   	@open_on = Date.parse("2012-01-01")
+    @accounts_chart = Factory(:accounts_chart)
 
   	MoneyCategory.create_default_money_categories
   	@loan_disbursement_category = MoneyCategory.resolve_money_category(Constants::Accounting::LOAN_DISBURSEMENT)
   	@loan_disbursement_category.should be_valid
 
-  	@cash = Ledger.new(:name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, 
-  	  :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT
+  	@cash = Ledger.new(:accounts_chart => @accounts_chart, :name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on,
+  	  :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT
   	)
-    @loans_made = Ledger.new(:name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on,
-      :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT
+    @loans_made = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on,
+      :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT
     )
 
     @loan_disbursement_rule = AccountingRule.new(:name => "Loan disbursement", :money_category => @loan_disbursement_category)  	
@@ -33,7 +34,7 @@ describe PostingRule do
 
   it "given a money amount, it should return the correct posting information" do
     amount = 73
-    currency = Constants::Accounting::DEFAULT_CURRENCY
+    currency = Constants::Money::DEFAULT_CURRENCY
     percentage = @debit_rule.percentage
     expected_posting_amount = (amount * percentage)/100
     effect = @debit_rule.effect

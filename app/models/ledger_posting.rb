@@ -1,6 +1,6 @@
 class LedgerPosting
   include DataMapper::Resource
-  include Constants::Accounting
+  include Constants::Accounting, Constants::Money
 
   property :id,           Serial
   property :effective_on, Date, :nullable => false

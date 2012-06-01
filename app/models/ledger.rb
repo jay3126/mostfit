@@ -1,6 +1,6 @@
 class Ledger
   include DataMapper::Resource
-  include Constants::Accounting
+  include Constants::Accounting, Constants::Money
 
 # Ledger represents an account, and is a basic building-block for book-keeping
 # Ledgers are classified into one of four 'account types': Assets, Liabilities, Incomes, and Expenses

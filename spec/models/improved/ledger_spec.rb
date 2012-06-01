@@ -46,7 +46,7 @@ describe Ledger do
   it "should return an opening balance and date" do
     open_date = Date.today
     opening_balance_amount, opening_balance_currency, opening_balance_effect = 100, :INR, :debit
-    test_ledger = Ledger.new(:name => "Test", :account_type => :assets, :open_on => open_date, :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => @accounts_chart)
+    test_ledger = Ledger.new(:accounts_chart => @accounts_chart, :name => "Test", :account_type => :assets, :open_on => open_date, :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => @accounts_chart)
     test_ledger.should be_valid
  
     opening_balance_and_date = test_ledger.opening_balance_and_date
@@ -56,16 +56,16 @@ describe Ledger do
   end
 
   it "the balance on a ledger for no cost center is the cumulative effect of postings to the ledger from vouchers that have no cost center" do
-    @test_asset_account = Ledger.create(:name => "Test asset account #{DateTime.now}", :account_type => Constants::Accounting::ASSETS, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT, :accounts_chart => @accounts_chart)
+    @test_asset_account = Ledger.create(:accounts_chart => @accounts_chart, :name => "Test asset account #{DateTime.now}", :account_type => Constants::Accounting::ASSETS, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT, :accounts_chart => @accounts_chart)
     @test_asset_account.saved?.should be_true
 
-    @test_liability_account = Ledger.create(:name => "Test liability account #{DateTime.now}", :account_type => Constants::Accounting::LIABILITIES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT, :accounts_chart => @accounts_chart)
+    @test_liability_account = Ledger.create(:accounts_chart => @accounts_chart, :name => "Test liability account #{DateTime.now}", :account_type => Constants::Accounting::LIABILITIES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT, :accounts_chart => @accounts_chart)
     @test_liability_account.saved?.should be_true
 
-    @test_income_account = Ledger.create(:name => "Test income account #{DateTime.now}", :account_type => Constants::Accounting::INCOMES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT, :accounts_chart => @accounts_chart)
+    @test_income_account = Ledger.create(:accounts_chart => @accounts_chart, :name => "Test income account #{DateTime.now}", :account_type => Constants::Accounting::INCOMES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT, :accounts_chart => @accounts_chart)
     @test_income_account.saved?.should be_true
 
-    @test_expense_account = Ledger.create(:name => "Test expense account #{DateTime.now}", :account_type => Constants::Accounting::EXPENSES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Accounting::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT, :accounts_chart => @accounts_chart)
+    @test_expense_account = Ledger.create(:accounts_chart => @accounts_chart, :name => "Test expense account #{DateTime.now}", :account_type => Constants::Accounting::EXPENSES, :open_on => @open_date, :opening_balance_amount => 0, :opening_balance_currency => Constants::Money::DEFAULT_CURRENCY, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT, :accounts_chart => @accounts_chart)
     @test_expense_account.saved?.should be_true
   end
 

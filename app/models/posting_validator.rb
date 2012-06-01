@@ -1,5 +1,5 @@
 module PostingValidator
-  include Constants::Accounting
+  include Constants::Accounting, Constants::Money
 
   def has_both_debits_and_credits?(postings)
   	effects = (postings.collect {|p| p.effect}).uniq

@@ -4,13 +4,14 @@ describe LedgerPosting do
 
   before(:all) do
     @voucher = Voucher.new(:total_amount => 100, :effective_on => Date.today)
+    @accounts_chart = Factory(:accounts_chart)
   end
 
   before(:each) do 
-    @cash = Ledger.new(:name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => Date.today, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @cash = Ledger.new(:accounts_chart => @accounts_chart, :name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => Date.today, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
     @cash.should be_valid
 
-    @loans_made = Ledger.new(:name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => Date.today, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @loans_made = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => Date.today, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
     @loans_made.should be_valid
 
     @credit_posting = LedgerPosting.new(:voucher => @voucher, :ledger => @cash, :amount => 100, :effect => Constants::Accounting::CREDIT_EFFECT, :effective_on => @voucher.effective_on)

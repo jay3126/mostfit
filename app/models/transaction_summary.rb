@@ -1,6 +1,6 @@
 class TransactionSummary
   include DataMapper::Resource
-  include Constants::Properties, Constants::Accounting
+  include Constants::Properties, Constants::Accounting, Constants::Money
   
   property :id,              Serial
   property :amount,          Float, :nullable => false

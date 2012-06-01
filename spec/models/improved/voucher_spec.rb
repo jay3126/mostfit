@@ -4,21 +4,22 @@ describe Voucher do
 
   before(:all) do
     @open_on = ACCOUNTING_DATE_BEGINS
+    @accounts_chart = Factory(:accounts_chart)
     
     #ASSETS
-    @cash = Ledger.new(:name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
-    @loans_made = Ledger.new(:name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
-    @bank_account = Ledger.new(:name => "Bank Account", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)    
+    @cash = Ledger.new(:accounts_chart => @accounts_chart, :name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @loans_made = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @bank_account = Ledger.new(:accounts_chart => @accounts_chart, :name => "Bank Account", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
 
     #INCOMES
-    @interest_income = Ledger.new(:name => "Interest income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
-    @fee_income = Ledger.new(:name => "Fee income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
+    @interest_income = Ledger.new(:accounts_chart => @accounts_chart, :name => "Interest income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
+    @fee_income = Ledger.new(:accounts_chart => @accounts_chart, :name => "Fee income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
 
     #EXPENSES
-    @salaries = Ledger.new(:name => "Salaries", :account_type => Constants::Accounting::EXPENSES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @salaries = Ledger.new(:accounts_chart => @accounts_chart, :name => "Salaries", :account_type => Constants::Accounting::EXPENSES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
     
     #LIABILITIES
-    @loans_taken = Ledger.new(:name => "Loans taken", :account_type => Constants::Accounting::LIABILITIES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)    
+    @loans_taken = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans taken", :account_type => Constants::Accounting::LIABILITIES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
   end
 
   before(:each) do
@@ -85,7 +86,7 @@ describe Voucher do
   end
 
   it "should not be valid unless all postings post to accounts on the same chart of accounts" do
-    new_cash = Ledger.new(:name => "New cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    new_cash = Ledger.new(:accounts_chart => @accounts_chart, :name => "New cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
     voucher = Voucher.new(:total_amount => 100, :currency => :INR, :effective_on => @open_on)
     mismatched_cash_debit = LedgerPosting.new(:voucher => voucher, :effective_on => voucher.effective_on, :ledger => new_cash, :amount => 100, :currency => :INR, :effect => Constants::Accounting::DEBIT_EFFECT)
     loans_made_credit = LedgerPosting.new(:voucher => voucher, :effective_on => voucher.effective_on, :ledger => @loans_made, :amount => 100, :currency => :INR, :effect => Constants::Accounting::CREDIT_EFFECT)

@@ -235,10 +235,10 @@ describe LedgerBalance do
   end
 
   it "tests a balance that is a zero balance as expected" do
-    zero_debit_balance = LedgerBalance.zero_debit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+    zero_debit_balance = LedgerBalance.zero_debit_balance(Constants::Money::DEFAULT_CURRENCY)
     LedgerBalance.is_zero_balance?(zero_debit_balance).should be_true
 
-    zero_credit_balance = LedgerBalance.zero_credit_balance(Constants::Accounting::DEFAULT_CURRENCY)
+    zero_credit_balance = LedgerBalance.zero_credit_balance(Constants::Money::DEFAULT_CURRENCY)
     LedgerBalance.is_zero_balance?(zero_credit_balance).should be_true
 
     debit_ten = LedgerBalance.new(10, :INR, :debit)

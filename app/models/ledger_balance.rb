@@ -1,5 +1,5 @@
 class LedgerBalance
-  include Constants::Accounting
+  include Constants::Accounting, Constants::Money
 
   attr_reader :amount, :currency, :effect
 

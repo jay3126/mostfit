@@ -736,11 +736,12 @@ FactoryGirl.define do
   end
 
   factory :bank_account_ledger do
+    association              :accounts_chart
     name                     'Bank 1'
     account_type             Constants::Accounting::ASSETS
     open_on                  ACCOUNTING_DATE_BEGINS
     opening_balance_amount   0
-    opening_balance_currency Constants::Accounting::DEFAULT_CURRENCY
+    opening_balance_currency Constants::Money::DEFAULT_CURRENCY
     opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
   end
 
@@ -749,7 +750,7 @@ FactoryGirl.define do
     account_type             Constants::Accounting::ASSETS
     open_on                  ACCOUNTING_DATE_BEGINS
     opening_balance_amount   0
-    opening_balance_currency Constants::Accounting::DEFAULT_CURRENCY
+    opening_balance_currency Constants::Money::DEFAULT_CURRENCY
     opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
     association              :accounts_chart
   end

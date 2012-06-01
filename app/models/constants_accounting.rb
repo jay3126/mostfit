@@ -1,11 +1,6 @@
 module Constants
   module Accounting
 
-    INR = :INR; USD = :USD
-    DEFAULT_CURRENCY = INR
-    PLACEHOLDER_FOR_CURRENCY = :placeholder_for_currency
-    CURRENCIES = [PLACEHOLDER_FOR_CURRENCY, INR, USD]
-
     ASSETS = :assets
     LIABILITIES = :liabilities
     INCOMES = :incomes
