@@ -50,10 +50,6 @@ Merb::BootLoader.before_app_loads do
   require 'lib/datevector.rb'
   require 'gettext'
   require 'haml_gettext'
-  
-  #csv generation
-  # require 'csv'
-  # require 'lib/csv/common_data_csv.rb'
 
   #initialize i18n
   require 'i18n'
@@ -89,9 +85,9 @@ Merb::BootLoader.before_app_loads do
 
   Merb::Plugins.config[:exceptions] = {
     :email_addresses => ['support@mostfit.org'],
-    :app_name        => "Intellecash",
+    :app_name        => "BCAsia Demo instance",
     :environments    => ['production'],
-    :email_from      => "production@mostfit.org",
+    :email_from      => "errors@mostfit.org",
     :mailer_config => {
       :host   => 'smtp.gmail.com',
       :port   => '587',
@@ -182,7 +178,7 @@ Merb::BootLoader.after_app_loads do
     Merb.logger.info("Couldn't create the 'INR' currency, Possibly unable to access the database.")
   end
   
-  VOUCHERS = ['Payment', 'Receipt']
+  VOUCHERS = ['Payment', 'Receipt', 'Journal']
   
   begin 
     if JournalType.all.empty?

@@ -1,0 +1,103 @@
+%h1
+	= "Social and Economic Details"
+
+%table.tall.shaded{:border=>1}
+	%tr
+		%th 
+			= "House"
+		%td{:colspan=>5}
+			= select (:house_type, :collection => HOUSE_TYPES, :prompt => 'Select House type')
+	%tr
+		%th 
+			= "Properties"
+		%td
+			= check_box :have_other_valuable_property, :label => "Have other valuable properties ?"
+			
+		%td{:colspan=>2}
+			= check_box :name => :productive_land, :label => "Productive Land ?"
+	%tr
+		%th 
+			= "Vehicles owned"
+		%td 
+			= check_box :name => :own_four_wheeler, :label => "Four wheelers"
+		%td
+			= check_box :name => :own_two_wheeler, :label => "Two wheelers"
+		%td{:colspan=>2}
+			= check_box :name => :own_a_cycle, :label => "Cycle"
+	%tr
+		%th
+			= "Basic necessities"
+		%th
+			= "Drinking water"
+		%td
+			= select :name => :drinking_water_provision, :collection => DRINKING_WATER_PROVISION, :prompt => "Select drinking water"
+		%th
+			= "Sanitation"
+		%td
+			= select :name => :sanitation_facilities, :collection => SANITATION_PROVISION, :prompt => "Select sanitation type"
+	%tr
+		%th
+			= "Health"
+		%td
+			= check_box :name => :in_good_health, :label => "Are you in good health ?"
+		%td
+			= check_box :name => :any_illness_for_a_long_time, :label => "Any illness for a long time"
+		%td
+			= text_field :name => :expense_on_healthcare, :label => "Specify expenditure on healthcare"
+		%td
+			= "What healthcare is being provided?"
+			= text_field :name => :healthcare_being_provided
+	%tr
+		%th
+			= "Invalids (Orphans ?)"
+		%td
+			= "If yes, provide details."
+	%tr
+		%th
+			= "Means of information"
+		%td
+			= "Newspaper" 
+			= check_box :name => :get_newspaper
+		%td
+			= "Radio"
+			= check_box :name => :listen_radio	
+		%td
+			=  "TV"
+			= check_box :name => :watch_tv
+		%td{:colspan=>2}
+			= "Computer & Internet"
+			= check_box :name => :have_computer_and_internet
+	%tr
+		%th
+			= "Electricity & telephones"
+		%td
+			= "Electricity"
+			= check_box :name => :have_electricity
+		%td
+			= "Landline"
+			= check_box :name => :have_landline
+		%td{:colspan => 3}
+			= "Mobile"
+			= check_box :name => :have_cellphone
+	%tr
+		%th
+			= "Monthly family income and sources"
+		%td
+			= select :name => :monthly_family_income_and_sources, :prompt => "Total Monthly Income", :collection => TOTAL_MONTHLY_INCOME
+	%tr
+		%th
+			= "Caste"
+		%td
+			= select :name => :caste, :prompt => "Caste", :collection => CASTES
+	%tr	
+		%th
+			= "Identification documents"
+		%td 
+			= "Ration Card"
+			= check_box :name => :have_ration_card
+		%td
+			= "Election Card"
+			= check_box :name => :have_election_card
+		%td	
+			= "Pensioner's id card"
+			= check_box :name => :have_election_card

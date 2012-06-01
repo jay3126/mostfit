@@ -1,11 +1,20 @@
 %div.tab_container
   %ul.tabs
-    %li#basic_info Basic info
+    %li#basic_info Basic Information
     %li#family_details Family Details
     %li#income_information Income Information
+    %li#poverty_overview Poverty Overview
+    %li#demographic_data Demographic Data
+    %li#socio_economic_details Social and Economic Details
   %div.tab
     = partial 'clients/basic_info'
   %div.tab
     = partial 'clients/family_details'
   %div.tab
     = partial 'clients/income_information'
+  %div.tab
+    = partial 'clients/poverty_overview'
+  %div.tab
+    = partial 'clients/demographic_data'
+  %div.tab 
+    = partial 'clients/socio_economic_details'

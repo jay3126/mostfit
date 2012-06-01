@@ -1,198 +1,147 @@
+- data_not_recorded = '';
+- gender_prompt = 'Choose'
+- gender_choice = [['', gender_prompt], [:female, 'Female'], [:male, 'Male']]
+- relationship_prompt = 'Choose'
+- relationships = [[data_not_recorded, relationship_prompt], [:spouse, 'Spouse'], [:brother, 'Brother'], [:sister, 'Sister'], [:father, 'Father'], [:mother, 'Mother'], [:son, 'Son'], [:daughter, 'Daughter']]
+
 %table
   %tr
+    %td{:colspan => '2'}
+      %h1==Family details
+  %tr
     %td
-      Number of family members:
+      = "Have physically handicapped people at home ?"
+    %td
+      = check_box :name => :have_physically_handicapped_family_members
+  %tr
+    %td
+      = "Number of family members:"
     %td
       = text_field(:number_of_family_members, :size => 10)
-  %tr
-    %th
-      Family members
-  %tr
-    %td
-      %table{:width =>'100%' }
-      %tr
-        %td
-          Name
-        %td
-          Age
-        %td
-          Relationship with member
-        %td
-          Occupation/Education (with standard)
-        %td
-          Monthly income
-      %tr
-        %td
-          = text_field(:family_member_1_name, :size => 30)
-        %td
-          = text_field(:family_member_1_age, :size => 5)
-        %td
-          = select(:family_member_1_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_1_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_1_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_2_name, :size => 30)
-        %td
-          = text_field(:family_member_2_age, :size => 5)
-        %td
-          = select(:family_member_2_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_2_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_2_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_3_name, :size => 30)
-        %td
-          = text_field(:family_member_3_age, :size => 5)
-        %td
-          = select(:family_member_3_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_3_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_3_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_4_name, :size => 30)
-        %td
-          = text_field(:family_member_4_age, :size => 5)
-        %td
-          = select(:family_member_4_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_4_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_4_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_5_name, :size => 30)
-        %td
-          = text_field(:family_member_5_age, :size => 5)
-        %td
-          = select(:family_member_5_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_5_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_5_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_6_name, :size => 30)
-        %td
-          = text_field(:family_member_6_age, :size => 5)
-        %td
-          = select(:family_member_6_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_6_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_6_monthly_income, :size => 10)
-      %tr
-        %td
-          = text_field(:family_member_7_name, :size => 30)
-        %td
-          = text_field(:family_member_7_age, :size => 5)
-        %td
-          = select(:family_member_7_relationship, :collection => [[:mother, "Mother"], [:sister, "Sister"], [:brother, "Brother"], [:son, "Son"], [:daughter, "Daughter"], [:other, "Other"]] , :prompt => "Choose relationship")
-        %td
-          = text_field(:family_member_7_occupation_or_education, :size => 30)
-        %td
-          = text_field(:family_member_7_monthly_income, :size => 10)
-      %br/
-  %tr
-    %td
-      %h3==Summary
-  %tr
-    %td
-      Children:
-    %td
-      %table{:width => '100%'}
-      %tr
-        %td
-          Girls under 5 years
-        %td
-          Girls 5 to 15 years
-        %td
-          Girls over 15 years
-      %tr
-        %td
-          = text_field(:children_girls_under_5_years, :size => 10)
-        %td
-          = text_field(:children_girls_5_to_15_years, :size => 10)
-        %td
-          = text_field(:children_girls_over_15_years, :size => 10)
-      %tr
-        %td
-          Boys under 5 years
-        %td
-          Boys 5 to 15 years
-        %td
-          Boys over 15 years
-      %tr
-        %td
-          = text_field(:children_sons_under_5_years, :size => 10)
-        %td
-          = text_field(:children_sons_5_to_15_years, :size => 10)
-        %td
-          = text_field(:children_sons_over_15_years, :size => 10)
-      %br/
-  %tr
-    %td
-      Not in school:
-    %td
-      %table{:width => '100%'}
-      %tr
-        %td
-          Working girls
-        %td
-          Bonded girls
-      %tr
-        %td
-          = text_field(:not_in_school_working_girls, :size => 10)
-        %td
-          = text_field(:not_in_school_bonded_girls, :size => 10)
-      %tr
-        %td
-          Working boys
-        %td
-          Bonded boys
-      %tr
-        %td
-          = text_field(:not_in_school_working_sons, :size => 10)
-        %td
-          = text_field(:not_in_school_bonded_sons, :size => 10)
-      %br/
-  %tr
-    %td
-      School distance:
-    %td
-      = text_field(:school_distance, :size => 10)
-    %td
-      PHC distance:
-    %td
-      = text_field(:phc_distance, :size => 10)
-      %br/
-  %tr
-    %td
-      Has electricity connection?:
-    %td
-      = select(:has_electricity_connection, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has electricity?")
-    %td
-      Cooking equipment:
-    %td
-      = select(:cooking_equipment, :collection => [[:wood_and_gobar, "Wood, gobar"], [:kerosene_stove, "Kerosene stove"], [:gas, "Gas"]] , :prompt => "Choose one")
-  %tr
-    %td
-      Has bank account?:
-    %td
-      = select(:has_bank_account, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has bank account?")
-  %tr
-    %td
-      Has PAN Card?:
-    %td
-      = select(:has_PAN_card, :collection => [[:yes, "Yes"], [:no, "No"]] , :prompt => "Has PAN Card?")
-    %td
-      PAN Number (if present):
-    %td
-      = text_field(:PAN_number, :size => 20)
+-#family information table
+%table
+  %thead
+    %tr
+      %td
+        Sr.No.
+      %td
+        Name
+      %td
+        Gender
+      %td
+        Age
+      %td
+        Relationship
+      %td
+        Vocation
+      %td
+        Monthly income
+  %tbody
+    %tr
+      %td
+        1
+      %td
+        = text_field :family_1_name, :size => 10 
+      %td
+        = select :family_1_gender, :collection => gender_choice      
+      %td
+        = text_field :family_1_age, :size => 3
+      %td
+        = select :family_1_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_1_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_1_monthly_income, :size => 6, :class => "income"
+    %tr
+      %td
+        2
+      %td
+        = text_field :family_2_name, :size => 10 
+      %td
+        = select :family_2_gender, :collection => gender_choice      
+      %td
+        = text_field :family_2_age, :size => 3
+      %td
+        = select :family_2_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_2_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_2_monthly_income, :size => 6, :class => "income"
 
+    %tr
+      %td
+        3
+      %td
+        = text_field :family_3_name, :size => 10 
+      %td
+        = select :family_3_gender, :collection => gender_choice      
+      %td
+        = text_field :family_3_age, :size => 3
+      %td
+        = select :family_3_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_3_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_3_monthly_income, :size => 6, :class => "income"
+
+    %tr
+      %td
+        4
+      %td
+        = text_field :family_4_name, :size => 10 
+      %td
+        = select :family_4_gender, :collection => gender_choice      
+      %td
+        = text_field :family_4_age, :size => 3
+      %td
+        = select :family_4_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_4_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_4_monthly_income, :size => 6, :class => "income"
+
+    %tr
+      %td
+        5
+      %td
+        = text_field :family_5_name, :size => 10 
+      %td
+        = select :family_5_gender, :collection => gender_choice      
+      %td
+        = text_field :family_5_age, :size => 3
+      %td
+        = select :family_5_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_5_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_5_monthly_income, :size => 6, :class => "income"
+    %tr
+      %td
+        6
+      %td
+        = text_field :family_6_name, :size => 10 
+      %td
+        = select :family_6_gender, :collection => gender_choice      
+      %td
+        = text_field :family_6_age, :size => 3
+      %td
+        = select :family_6_relationship, :collection => relationships        
+      -# shouldn't this be actually a dropdown of the occupations we defined in mostfit ?
+      %td
+        = select :family_6_occupation, :collection => Occupation.all, :value_method => :id, :text_method => :name, :prompt => "---"      
+      %td
+        = text_field :family_6_monthly_income, :size => 6, :class => "income"
+
+  %tfoot
+    %td{:colspan => '6'}
+      Total Monthly Income
+    %td
+      = text_field :total_monthly_income, :size => 6
+%tr
+  %td{:colspan => '2'}
+    %hr

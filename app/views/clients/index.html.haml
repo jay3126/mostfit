@@ -17,6 +17,13 @@
           %b= @center.name
           == (code: #{@center.code}, id: #{@center.id})
       %tr
+        %td Creation Date
+        %td
+          = @center.creation_date
+          (
+          = @center.creation_date.strftime('%A')
+          )
+      %tr.odd
         %td Manager
         %td= link_to @center.manager.name, resource(@center.manager)
       %tr
@@ -39,10 +46,6 @@
       %tr
         %td Landmark
         %td=@center.landmark
-      %tr
-        %td Center leader
-        - leader = @center.leader
-        %td=leader.client.name if leader
       - if total_attendance_at_branch = Attendance.count("client.center_id" => @center.id) and total_attendance_at_branch > 0
         %tr.odd
           %td
@@ -73,14 +76,15 @@
         %li#map
           Map
     %div.tab    
-      =partial "clients/list", :center_leader => leader
+      = partial "clients/list", :center_leader => @clients.first
       %p.menu-strip 
         = link_to 'Create new client', resource(@branch, @center, :clients, :new), :class => "add grey_button"
         = link_to "Bulk entry of loans", url(:enter_loans, :action => :bulk_form, :query => @center), :class => "edit grey_button"
     %div.tab    
       %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@center.id}?for=center"}
     %div.tab
-      = partial "centers/weeksheet"
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:weeksheet, :center_id => @center.id, :branch_id => @branch.id, :date => @date)}
+      /=partial "centers/weeksheet"
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => resource(:documents, :parent_id => @center.id, :parent_model => Center)}
     %div.tab

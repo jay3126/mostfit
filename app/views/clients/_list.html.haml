@@ -24,7 +24,7 @@
         %th
     %tbody
     - group=-1
-    - @clients.sort_by{|x| [x.client_group.id, x.id]}.each do |client|
+    - @clients.sort_by{|x| x.client_group.id}.each do |client|
       - if group!=client.client_group_id
         - group = client.client_group_id 
         %tr.group
@@ -33,17 +33,15 @@
               %b
                 = link_to client.client_group.name, resource(client.client_group)
                 (
-                = link_to('edit', resource(@branch, @center, client.client_group, :edit))
+                =link_to('edit', resource(@branch, @center, client.client_group, :edit))
                 )
-            - else
+            -else
               Not attached to any group
             
       %tr{ :class => cycle('odd','')}
         %td &nbsp;
         %td
           = client.id
-          - if center_leader and center_leader.client_id == client.id
-            =image_tag("elements/tick.gif", :title => "Center leader", :height => "23px", :style => "float: right;")
           - unless client.active
             %i{:style => "background-color : #{client.active ? '#fff' : '#fdd'}; padding: 3px;" }
               inactive 
@@ -53,7 +51,7 @@
           %ul.inline
             - client.loans.each do |l|
               %li
-                = (link_to l.short_tag, url_for_loan(l), :class => (l.info ? l.info[:status] : l.get_status)) rescue "#{l.id}: please check center meeting schedule"
+                = link_to l.short_tag, url_for_loan(l), :class => l.info[:status] if l.info
         %td
           = link_to 'edit', resource(@branch, @center, client, :edit)
           &nbsp;|&nbsp;
@@ -64,9 +62,10 @@
           %b
             = link_to client_group.name, resource(client_group)
             (
-            = link_to('edit', resource(@branch, @center, client_group, :edit))
+            =link_to('edit', resource(@branch, @center, client_group, :edit))
             )
       %tr
+
         %td{:colspan => 5}
           %i No clients yet in this group
     %tfoot

@@ -4,6 +4,11 @@
       %h1==Poverty overview
   %tr
     %td
+      Do you fall below the Poverty Line ?
+    %td 
+      = check_box :below_poverty_line
+  %tr
+    %td
       Total income:
     %td
       = text_field(:total_income, :size => 10)
@@ -15,20 +20,5 @@
       = text_field(:poverty_status, :size => 10)
       %br/
   %tr
-    %td
-      %table{:width => '100%'}
-      %tr
-        %td
-          Land for farming:
-        %td
-          Total
-        %td
-          Irrigated
-      %tr
-        %td
-          Area (in acres)
-        %td
-          = text_field(:total_land_farming, :size => 10)
-        %td
-          = text_field(:total_land_farming_irrigated, :size => 10)
-      %br/
+    %td{:colspan => '2'}
+      %hr

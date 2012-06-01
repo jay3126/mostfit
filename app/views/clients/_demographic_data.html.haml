@@ -4,28 +4,16 @@
       %h1==Demographic data
   %tr
     %td
-      Religion:
+      How many years have you been residing permanently at the current location ? 
     %td
-      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddha, "Buddha"], [:christian, "Christian"]] , :prompt => "Select religion")
-      %br/
+      = text_field :years_of_residing_at_current_location, :size => 3
   %tr
     %td
-      Caste:
+      Do you have your own house ?
     %td
-      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select caste")
-      %br/
+      = check_box :own_house
   %tr
     %td
-      Member literate:
+      Does your family own land ?
     %td
-      = select(:member_literate, :collection => [[:no, "No"], [:yes, "Yes"]] , :prompt => "is this member litrate?")
-      %br/
-  %tr
-    %td
-      Husband litrate:
-    %td
-      = select(:husband_litrate, :collection => [[:no, "No"], [:yes, "Yes"]] , :prompt => "is spouse litrate?")
-      %br/
-  %tr
-    %td{:colspan => '2'}
-      %hr
+      = check_box :family_owns_land 

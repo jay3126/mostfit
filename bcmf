@@ -1,0 +1,5 @@
+<VirtualHost *:80>
+  ServerName bcmf.mostfit.in
+  ServerAlias www.bcmf.mostfit.in
+  DocumentRoot /home/svs/mostfit_installations/bcmf/public
+</VirtualHost>

@@ -10,7 +10,7 @@ function addFloater(link, form){
 	if((window.document.height > form.offset().top + form.height()) && !$(".floatingBox").hasClass("shiftUp")){
 	    var top = link.offset().top + link.height();
 	}else{
-	    var top = link.offset().top;
+	    var top = link.offset().top - form.height();
 	}
 	$(form).offset({top: top, left: left});
     }
@@ -188,52 +188,51 @@ function dateFromAge(ageYear, ageMonth, ageDay){
     return birthDate;
 }
 function attachFormRemote(){
-  $("form._remote_").live('submit', function(f){
-			    form=$(f.currentTarget);
-			    $(form).find("input[type='submit']").attr("disabled", true);
-			    $(form).after("<img id='spinner' src='/images/spinner.gif' />");
-			    $(".floatingBox").remove();
-			    $.ajax({
-			      type: form.attr("method"),
-			      url: form.attr("action"),
-			      data: form.serialize(),
-			      success: function(data, status, xmlObj){
-				if(data.redirect){
-				  window.location.href = data.redirect;
-				}else if(form.find("input[name='_target_']").length>0){
-				  id=form.find("input[name='_target_']").attr("value");
-				  if($("#"+id).length>0){
-				    $("#" + id).html(data);
-				  }
-				  else if($("#append_"+id).length>0){
-				    $(data).appendTo($("#append_"+id));
-				  }
-				}else if(form.find("table").length>0){
-				  form.find("table").html(data);
-				}else if(form.find("div").length>0){
-				  form.find("div").html(data);
-				}
-				if($(".floatingBox").length>0)
-				  addFloater($(form), $($(".floatingBox")[0]));
-				$(form).find("input[type='submit']").attr("disabled", "");
-				$("#spinner").remove();
-			      },
-			      error: function(xhr, text, errorThrown){
-				if(xhr.status=="302"){
-				  window.location.href = text;
-				}else{
-				  $("div.error").remove();
-				  txt = "<div class='error'>"+xhr.responseText+"</div>";
-				  form.before(txt);
-				  $(form).find("input[type='submit']").attr("disabled", "");
-				}
-				$("#spinner").remove();
-			      }
+    $("form._remote_").live('submit', function(f){
+				form=$(f.currentTarget);
+				$(form).find("input[type='submit']").attr("disabled", true);
+				$(form).after("<img id='spinner' src='/images/spinner.gif' />");
+				$(".floatingBox").remove();
+				$.ajax({
+					   type: form.attr("method"),
+					   url: form.attr("action"),
+					   data: form.serialize(),
+					   success: function(data, status, xmlObj){
+					       if(data.redirect){
+						   window.location.href = data.redirect;
+					       }else if(form.find("input[name='_target_']").length>0){
+						   id=form.find("input[name='_target_']").attr("value");
+						   if($("#"+id).length>0){
+						       $("#" + id).html(data);
+						   }
+						   else if($("#append_"+id).length>0){
+						       $(data).appendTo($("#append_"+id));
+						   }
+					       }else if(form.find("table").length>0){
+						   form.find("table").html(data);
+					       }else if(form.find("div").length>0){
+						   form.find("div").html(data);
+					       }
+					       if($(".floatingBox").length>0)
+						   addFloater($(form), $($(".floatingBox")[0]));
+					       $(form).find("input[type='submit']").attr("disabled", "");
+					       $("#spinner").remove();
+					   },
+					   error: function(xhr, text, errorThrown){
+					       if(xhr.status=="302"){
+						   window.location.href = text;
+					       }else{
+						   $("div.error").remove();
+						   txt = "<div class='error'>"+xhr.responseText+"</div>";
+						   form.before(txt);
+						   $(form).find("input[type='submit']").attr("disabled", "");
+					       }
+					       $("#spinner").remove();
+					   }
+				       });
+				return(false);
 			    });
-			    return(false);
-  });
 }
-
 function create_remotes(){
     $("a._remote_").live('click', function(){
 			     href=$(this).attr("href");
@@ -568,39 +567,11 @@ function confirm_for(things) {
 	    errors.push(thing);
 	}
     }
-
     if (errors.length > 0) {
 	return confirm(errors.join(",") + " are not the standard value. Proceed?");
     } else {
 	return true;
     }
-}
-
-var uniqueID = (function() {
-	var id = 0; // This is the private persistent value
-	return function() { return id++; };  // Return and increment
-    })();
-
-//This function is used to calculate net surplus value for intellecash
-function calculateSum(toField, addTheseFields) {
-    var sum = 0, net = 0, net1 = 0;
-    status = uniqueID();
-    $.each(addTheseFields, function(idx,ele){
-	    if($("#"+ele).val()!=""){
-		sum = sum + parseInt($("#"+ele).val());
-            }
-	});
-     $("#"+toField).val(sum);
-     if(toField == "client_total_income"){
-	     net = net + sum;
-	     val1 = net;
-     }
-     else if(toField == "client_total_expenses"){
-	     net1 = net1 + sum;
-     }
-     if(status){
-	 $("#client_net_surplus").val((val1 - net1));
-     }
 }
 
 function fillCenters(){
@@ -755,7 +726,6 @@ function portfolioCalculations(){
 							  $($("tr.org_total:first td")[6]).html("<b>" + org_current + "</b>");
 						      });
 }
-
 $(document).ready(function(){
 		      create_remotes();
 		      attachFormRemote();
@@ -763,21 +733,6 @@ $(document).ready(function(){
                       fillComboBranches();
 		      fillAccounts();
 		      fillFundingLines();
-		      //function for Intellecash Income calculation in Client Form.
-		      income_arr = ["client_income_own", "client_income_spouse", "client_income_other"];
-		      $.each(income_arr, function(){
-			      $("#"+this).change(function(){
-				      calculateSum("client_total_income", income_arr);
-				  });
-			  });
-
-		      expense_arr = ["client_expense_food", "client_expense_health", "client_expense_education", "client_loan_repayments", "client_expense_phone_bills", "client_expense_insurance", "client_expense_other"];
-		      $.each(expense_arr, function(){
-			      $("#"+this).change(function(){
-				      calculateSum("client_total_expenses", expense_arr);
-				  });
-			  });
-
 		      fillCashAccounts();
 		      fillBankAccounts();
 		    $('.chosen').chosen();
@@ -1015,7 +970,6 @@ $(document).ready(function(){
 		      }
 		      $("#account_account_type_id").live('change', sample);
 		      $("#account_branch_type_id").live('change', sample);*/
-
 		      $("#account_account_type_id").live('change', function(select){
 							     val=$("#account_branch_id").val();
 							     val1=$("#account_account_type_id").val();
@@ -1073,6 +1027,9 @@ $(document).ready(function(){
 
 		      $("#client_active").change(function(){
 						     $("#inactive_options").toggle();
+						 });
+			  $("#client_family_owns_land").change(function(){
+						     $("#inactive_land_options").toggle();
 						 });
 		      $("a.expand_collapsed").click(function(a){
 							id = $(a.currentTarget).attr("id");
