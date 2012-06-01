@@ -15,6 +15,9 @@ describe Lending do
     @total_principal_money_amount = @principal_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
 
     @interest_amounts            = [49.82, 48.97, 48.12, 47.26, 46.40, 45.54, 44.67, 43.79, 42.92, 42.03, 41.15, 40.26, 39.36, 38.46, 37.56, 36.65, 35.73, 34.82, 33.89, 32.97, 32.03, 31.10, 30.16, 29.21, 28.26, 27.31, 26.35, 25.38, 24.41, 23.44, 22.46, 21.47, 20.48, 19.49, 18.49, 17.49, 16.48, 15.47, 14.45, 13.42, 12.39, 11.36, 10.32, 9.27, 8.23, 7.17, 6.11, 5.04, 3.97, 2.90, 1.82, 0.73]
+
+    @equated_regular_installment = MoneyManager.get_money_instance(170.18 + 49.82)
+    @last_installment            = MoneyManager.get_money_instance(146.30 + 0.73)
     @interest_money_amounts      = MoneyManager.get_money_instance(*@interest_amounts)
     @total_interest_money_amount = @interest_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
 
@@ -37,7 +40,7 @@ describe Lending do
     lan = "#{DateTime.now}"
     for_amount = @total_principal_money_amount
     @for_borrower_id = Factory(:client).id
-    @applied_on_date = Date.parse('2012-05-01')
+    @applied_on_date = Date.parse('2011-05-01')
     @scheduled_disbursal_date = @applied_on_date + 7
     @scheduled_first_repayment_date = @scheduled_disbursal_date + 7
     @repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
@@ -210,7 +213,7 @@ describe Lending do
 
   end
 
-  context "when repayments are made on a loan" do
+  context "when all repayments are made on a loan" do
 
     it "should make allocations as per the repayment schedule" do
       approved_amount = @loan.to_money_amount(:applied_amount)
@@ -232,11 +235,40 @@ describe Lending do
       @loan.disburse(disbursement)
       @loan.total_loan_disbursed.should == disbursement.payment_money_amount
 
-=begin
-      #TODO record corresponding repayments on all schedule dates
-      @loan.repay(repayment)
-      @loan.total_received_till_date.should == repayment.payment_money_amount
-=end
+      factory_init_attributes = @common_transaction_attributes
+      factory_init_attributes.merge!( {:receipt_type => @receipt_type} )
+
+      repayment_on = nil; receipt_amount = nil
+      repayments = []
+      1.upto(@tenure).each { |installment|
+
+        if installment == 1
+          repayment_on = @scheduled_first_repayment_date
+        else
+          repayment_on = Constants::Time.get_next_date(repayment_on, @repayment_frequency)
+        end
+
+        if installment == @tenure
+          receipt_amount = @last_installment.amount
+        else
+          receipt_amount = @equated_regular_installment.amount
+        end
+
+        factory_init_attributes[:amount] = receipt_amount
+        factory_init_attributes[:effective_on] = repayment_on
+        repayment_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+        repayment = PaymentTransaction.create(repayment_attributes)
+        repayment.id.should_not be_nil
+        repayments << repayment
+
+        @loan.repay(repayment)
+        @loan.total_received_on_date(repayment_on).should == repayment.payment_money_amount
+      }
+
+      #TODO Failing spec needs to be checked for allocation
+      @loan.total_received_till_date.should == (@loan.total_loan_disbursed + @loan.total_interest_applicable)
+      @loan.principal_received_till_date.should == @loan.total_loan_disbursed
+      @loan.interest_received_till_date.should == @loan.total_interest_applicable
 
     end
 

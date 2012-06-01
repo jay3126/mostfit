@@ -8,7 +8,7 @@ module Allocation
     # All instances must respond_to :currency
 
     def netoff_allocation(allocation, against_due_amounts_val)
-      debugger
+
       raise TypeError, "A value of currency is needed for money calculations and is not available" unless (respond_to?(:currency) and currency)
       zero_money = Money.zero_money_amount(currency)
 
