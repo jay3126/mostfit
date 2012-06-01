@@ -117,7 +117,7 @@
             = ws.loan_total_interest_due.to_s
             - total_interest_due = total_interest_due + ws.loan_total_interest_due.amount unless ws.loan_total_interest_due.blank?
           %td
-            = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.total_paid.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount();"
+            = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.total_paid.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount(#{'INR'});"
             - total_amount = total_amount + ws.total_paid.amount unless ws.total_paid.blank?
           - loan_row_count = loan_row_count + 1
     %tfoot

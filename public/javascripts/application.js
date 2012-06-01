@@ -1155,7 +1155,7 @@ $(document).ready(function(){
   });
 });
 
-function update_total_amount(){
+function update_total_amount(currency){
   payments = jQuery('.weeksheet_total');
   total = 0.0
   jQuery.each(payments, function(index, payment) {
@@ -1166,5 +1166,5 @@ function update_total_amount(){
     }
     total = parseFloat(total) + f_value;
   });
-  jQuery('div#weeksheet_total_amount').html(total + ' INR');
+  jQuery('div#weeksheet_total_amount').html(total.toFixed(2) + ' ' + currency);
 }
