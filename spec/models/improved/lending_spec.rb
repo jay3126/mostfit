@@ -1,24 +1,11 @@
 require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 
-class MockPayment
-  attr_reader :payment_money_amount, :effective_on, :performed_by
-
-  def initialize(payment, on_date, performed_by)
-    @payment_money_amount = payment
-    @effective_on = on_date
-    @performed_by = performed_by
-  end
-
-  def amount; @payment_money_amount.amount; end
-  def currency; @payment_money_amount.currency; end
-
-end
-
 describe Lending do
 
   before(:all) do
     @from_lending_product = Factory(:lending_product)
-    @zero_money_amount = Money.zero_money_amount(@from_lending_product.currency)
+    @currency = @from_lending_product.currency
+    @zero_money_amount = Money.zero_money_amount(@currency)
 
     @principal_and_interest_amounts = {}
 
@@ -49,19 +36,35 @@ describe Lending do
 
     lan = "#{DateTime.now}"
     for_amount = @total_principal_money_amount
-    for_borrower_id = 123
-    applied_on_date = Date.parse('2012-05-01')
-    scheduled_disbursal_date = applied_on_date + 7
-    scheduled_first_repayment_date = scheduled_disbursal_date + 7
-    repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
-    tenure = 52
-    administered_at_origin = 768
-    accounted_at_origin = 1024
-    applied_by_staff = 21
-    recorded_by_user = 23
+    @for_borrower_id = Factory(:client).id
+    @applied_on_date = Date.parse('2012-05-01')
+    @scheduled_disbursal_date = @applied_on_date + 7
+    @scheduled_first_repayment_date = @scheduled_disbursal_date + 7
+    @repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    @tenure = 52
+    @administered_at_origin = Factory(:biz_location).id
+    @accounted_at_origin = Factory(:biz_location).id
+    @applied_by_staff = Factory(:staff).id
+    @recorded_by_user = Factory(:user).id
 
-    @loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
+    @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower_id, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
     @loan.saved?.should == true
+
+    # For payment transactions on the loan
+    @transaction_currency = @loan.currency
+    @payment_type = Constants::Transaction::PAYMENT
+    @receipt_type = Constants::Transaction::RECEIPT
+    @on_product_type = Constants::Products::LENDING
+    @on_product_id = @loan.id
+    @by_counterparty_type = Constants::Transaction::CLIENT
+    @by_counterparty_id = @for_borrower_id
+    @performed_at = @administered_at_origin
+    @accounted_at = @accounted_at_origin
+    @performed_by = @applied_by_staff
+    @recorded_by  = @recorded_by_user
+
+    @common_transaction_attributes = {:currency => @transaction_currency, :on_product_type => @on_product_type, :on_product_id => @on_product_id, :by_counterparty_type => @by_counterparty_type, :by_counterparty_id => @by_counterparty_id, :performed_at => @performed_at, :accounted_at => @accounted_at, :performed_by => @performed_by, :recorded_by => @recorded_by}
+
   end
 
   it "should have a status of new" do
@@ -170,8 +173,13 @@ describe Lending do
       @loan.is_disbursed?.should be_false
 
       incorrect_disbursed_on_date = @loan.approved_on_date - 1
-      disbursed_by_staff = 11
-      mock_disbursement = MockPayment.new(@loan.to_money_amount(:applied_amount), incorrect_disbursed_on_date, disbursed_by_staff)
+
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => approved_amount, :receipt_type => @payment_type, :effective_on => incorrect_disbursed_on_date} )
+
+      mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+
+      mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
 
       lambda {@loan.disburse(mock_disbursement)}.should raise_error
       @loan.is_disbursed?.should be_false
@@ -179,29 +187,32 @@ describe Lending do
 
     it "should be marked as disbursed and have the information about disbursement as expected" do
       disbursed_on_date = @loan.applied_on_date + 7
-      disbursed_by_staff = 7
-      mock_disbursement = MockPayment.new(@loan.to_money_amount(:applied_amount), disbursed_on_date, disbursed_by_staff)
+
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
+
+      disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+      disbursement = PaymentTransaction.create(disbursement_attributes)
+      disbursement.id.should_not be_nil
 
       @loan.total_loan_disbursed.should == @zero_money_amount
-
-      @loan.disburse(mock_disbursement)
+      @loan.disburse(disbursement)
 
       @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS
       @loan.is_disbursed?.should be_true
 
       @loan.disbursal_date.should == disbursed_on_date
+      @loan.to_money_amount(:disbursed_amount).should == disbursement.payment_money_amount
+      @loan.total_loan_disbursed.should == disbursement.payment_money_amount
 
-      @loan.to_money_amount(:disbursed_amount).should == mock_disbursement.payment_money_amount
-      @loan.total_loan_disbursed.should == mock_disbursement.payment_money_amount
-
-      @loan.disbursed_by_staff.should == disbursed_by_staff
+      @loan.disbursed_by_staff.should == disbursement.performed_by
     end
 
   end
 
-  context "when a repayment is made on a loan" do
+  context "when repayments are made on a loan" do
 
-    it "should make an allocation as expected" do
+    it "should make allocations as per the repayment schedule" do
       approved_amount = @loan.to_money_amount(:applied_amount)
       approved_on_date = @loan.applied_on_date + 1
       approved_by_staff = 12
@@ -209,17 +220,24 @@ describe Lending do
       @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
 
       disbursed_on_date = @loan.scheduled_disbursal_date
-      disbursed_by_staff = 7
-      mock_disbursement = MockPayment.new(@loan.to_money_amount(:approved_amount), disbursed_on_date, disbursed_by_staff)
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
 
-      @loan.disburse(mock_disbursement)
-      @loan.total_loan_disbursed.should == mock_disbursement.payment_money_amount
+      disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+      disbursement = PaymentTransaction.create(disbursement_attributes)
+      disbursement.id.should_not be_nil
 
-      repayment = MockPayment.new(Money.new(20000, @loan.currency), @loan.scheduled_first_repayment_date + 2, disbursed_by_staff)
+      @loan.total_loan_disbursed.should == @zero_money_amount
+
+      @loan.disburse(disbursement)
+      @loan.total_loan_disbursed.should == disbursement.payment_money_amount
+
+=begin
+      #TODO record corresponding repayments on all schedule dates
       @loan.repay(repayment)
-
       @loan.total_received_till_date.should == repayment.payment_money_amount
-      #TODO to be completed
+=end
+
     end
 
   end

@@ -682,6 +682,21 @@ FactoryGirl.define do
     name          { Factory.next(:name) }
   end
 
+  factory :payment_transaction do
+    amount                 10000
+    currency               MoneyManager.get_default_currency
+    receipt_type           Constants::Transaction::RECEIPT
+    on_product_type        Constants::Products::LENDING
+    on_product_id          { Factory(:lending).id }
+    by_counterparty_type   Constants::Transaction::CLIENT
+    by_counterparty_id     { Factory(:client).id }
+    performed_at           { Factory(:biz_location).id }
+    accounted_at           { Factory(:biz_location).id }
+    performed_by           { Factory(:staff).id }
+    recorded_by            { Factory(:user).id }
+    effective_on           { Date.parse('2012-05-01') }
+  end
+
   factory :lending_product do
     name                { Factory.next(:name) }
     amount              1000000
