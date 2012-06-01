@@ -18,8 +18,6 @@ class PaymentTransaction
   property :effective_on,         *DATE_NOT_NULL
   property :created_at,           *CREATED_AT
 
-  validates_with_method :amount, :method => :check_money_amount_value
-
   def money_amounts; [ :amount ]; end
   def payment_money_amount; to_money_amount(:amount); end
 
@@ -34,7 +32,7 @@ class PaymentTransaction
 
   def self.record_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     Validators::Arguments.not_nil?(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
-    payment = to_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by.id)
+    payment = to_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     recorded_payment = create(payment)
     raise Errors::DataError, recorded_payment.errors.first.first unless recorded_payment.saved?
     recorded_payment
@@ -72,10 +70,6 @@ class PaymentTransaction
     payment[:effective_on]  = effective_on
     payment[:recorded_by] = recorded_by
     payment
-  end
-
-  def check_money_amount_value
-    self.amount > 0 ? true : [false, "Enter valid value of Amount."]
   end
 
 end
