@@ -17,10 +17,9 @@ module BookKeeper
   	#any applicable cost centers are resolved
   	branch_id = transaction_summary.branch_id
     raise StandardError, "no branch ID was available for the transaction summary" unless branch_id
-   	cost_center = CostCenter.resolve_cost_center_by_branch(branch_id)
-    
+
     #record voucher
-  	Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation, cost_center)
+  	Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation)
     transaction_summary.set_processed
   end
 

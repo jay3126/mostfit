@@ -6,7 +6,6 @@ class CostCenter
   property :name,       String, :nullable => false, :unique => true
   property :created_at, DateTime, :nullable => false, :default => DateTime.now
 
-  has n, :vouchers
   belongs_to :branch, :nullable => true
 
   validates_present :name

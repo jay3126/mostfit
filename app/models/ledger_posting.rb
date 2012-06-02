@@ -24,11 +24,9 @@ class LedgerPosting
     LedgerBalance.valid_balance_obj?(self)
   end
   
-  def self.all_postings_on_ledger(ledger, cost_center = nil, to_date = Date.today, from_date = nil)
+  def self.all_postings_on_ledger(ledger, to_date = Date.today, from_date = nil)
     date_predicates = effective_on_date_predicates(to_date, from_date)
-    voucher_predicates = {:cost_center => cost_center}
-    voucher_predicates.merge!(date_predicates)
-    query_voucher_value = Voucher.all(voucher_predicates)
+    query_voucher_value = Voucher.all(date_predicates)
 
     predicates = {}
     predicates[:ledger] = ledger

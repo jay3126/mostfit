@@ -33,11 +33,12 @@ class Ledger
   
   # Returns the balance for the ledger on a specified date
   # If such date is before the date that the account is 'open', the balance is nil
-  def balance(on_date = Date.today, cost_center = nil)
+  def balance(on_date = Date.today)
     opening_balance, open_date = opening_balance_and_date
     return nil if on_date < open_date
     
-    postings = Voucher.get_postings(self, cost_center, on_date)
+    postings = Voucher.get_postings(self, on_date)
+    debugger
     LedgerBalance.add_balances(opening_balance, *postings)
   end
 
