@@ -24,7 +24,8 @@
       %thead{:onclick => "javascript:$('#t_#{center.id}').toggle()"}
         %tr{:style => "font-size: 0.85em;"}
           %th client
-          %th loan
+          %th loan id
+          %th loan reference
           %th principal due
           %th interest due
           %th fees due
@@ -59,6 +60,8 @@
                   %b= link_to client.name, resource(client)
                 %td.number
                   = link_to loan.id, url_for_loan(loan)
+                %td.text
+                  = (link_to loan.reference, url_for_loan(loan)) if loan.reference
                 %td.number
                   = p.round(2)
                   - tot_principal += p
@@ -82,13 +85,14 @@
               %tr{ :class => cycle('odd','') }
                 %td.text
                   %b= link_to client.name, resource(client)
-                %td{ :colspan => 9 }
+                %td{ :colspan => 10 }
                   %i nothing outstanding
                 %td
                   = select :name => "attendance[#{client.id}]", :collection => Attendance.attendancy_states, :value_method => :to_s, :selected => (@atts[client.id] || "present")
 
       %tfoot{:onclick => "javascript:$('#t_#{center.id}').toggle()"}    
         %tr.total
+          %td
           %td
           %td
           %td.numeric
@@ -112,7 +116,8 @@
     %thead
       %tr{:style => "font-size: 0.85em;"}
         %th client
-        %th loan
+        %th loan id
+        %th loan reference
         %th principal due
         %th interest due
         %th fees due
@@ -121,6 +126,7 @@
         %th repay type
         %th attendance
     %tr
+      %td
       %td
       %td
       %td.numeric
