@@ -31,6 +31,9 @@ class Lending
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
 
+  def administered_at_origin_location; BizLocation.get(self.administered_at_origin); end
+  def accounted_at_origin_location; BizLocation.get(self.accounted_at_origin); end
+
   # Lists the properties that are money amounts
   def money_amounts
     [:applied_amount, :approved_amount, :disbursed_amount]
@@ -93,6 +96,7 @@ class Lending
         num_of_installments,
         new_loan,
         principal_and_interest_amounts)
+    LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
     new_loan
   end
 

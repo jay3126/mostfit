@@ -85,13 +85,15 @@ describe Lending do
     scheduled_first_repayment_date = scheduled_disbursal_date + 7
     repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
     tenure = 52
-    administered_at_origin = 768
-    accounted_at_origin = 1024
+    administered_at_origin = @administered_at_origin
+    accounted_at_origin = @accounted_at_origin
     applied_by_staff = 21
     recorded_by_user = 23
 
     new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
 
+    LoanAdministration.get_administered_at(new_loan.id, applied_on_date).should == new_loan.administered_at_origin_location
+    LoanAdministration.get_accounted_at(new_loan.id, applied_on_date).should == new_loan.accounted_at_origin_location
     new_loan.lan.should                    == lan
     new_loan.applied_amount.should         == applied_amount.amount
     new_loan.currency.should               == applied_amount.currency
