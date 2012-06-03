@@ -1,0 +1,33 @@
+%h1
+  = "Biz-Location :-  #{@biz_location.name}"
+.menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
+  = link_to 'Add Client', resource(@biz_location, :new_clients, :new), :class => "add"
+- if @clients.count == 0
+  %p
+    %i No Client Mapping have been created yet.
+- else
+  %table.narrow
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Name
+        %th
+          Effective On
+        %th
+          Created On
+        %th
+          Action
+    - @clients.each do |client|
+      %tr
+        %td
+          = client.id
+        %td
+          = link_to client.name, resource(client)
+        %td
+          = client.date_joined.strftime("%Y-%m-%d")
+        %td
+          = client.created_at.strftime("%Y-%m-%d")
+        %td
+          = link_to "Apply Loan", "#"

@@ -1,0 +1,152 @@
+= hidden_field :created_by_staff, :value => @staff.id
+%table.tall.shaded
+  %tr
+    %th
+      Group name
+    %td
+      = select :client_group_id, :collection => nil, :value_method => :id, :text_method => :name, :id => "client_group_selector"
+  %tr
+    %th
+      Name:
+    %td
+      = text_field :name, :size => 40
+  %tr
+    %th
+      Gender
+    %td
+      = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select gender"
+  %tr
+    %th
+      Marital Status
+    %td
+      =  select :marital_status, :collection => MARITAL_STATUS, :prompt => "Select"
+  %tr
+    %th
+      Ration Card
+    %td
+      = text_field :reference, :size => 40
+      = hidden_field :reference_type, :value => Constants::Masters::REFERENCE_TYPES[4]
+  %tr
+    %th
+      ID Proof
+    %td
+      = text_field :reference2, :size => 40
+  %tr
+    %th
+      ID Proof Type
+    %td
+      = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES.map{|x| [x.to_s, x.to_s.humanize]}
+  %tr
+    %th
+      Date of birth:
+    %td
+      = date_select_for @client, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %th
+      Date joined
+    %td
+      = date_select_for @client, :date_joined, :max_date => Date.today
+  %tr
+    %th
+      Spouse name:
+    %td
+      = text_field :spouse_name, :size => 40
+  %tr
+    %th
+      Spouse Date of Birth:
+    %td
+      = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %th
+      Guarantor name:
+    %td
+      = text_field :guarantor_name, :size => 40
+  %tr
+    %th
+      Guarantor Date of Birth:
+    %td
+      = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000
+  %tr
+    %th
+      Guarantor relationship:
+    %td
+      = select :guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
+  %tr
+    %th
+      Address:
+    %td
+      = text_area :address, :rows => 6, :cols => 38
+  %tr
+    %th
+      State:
+    %td
+      = select :state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x]}, :prompt => "---"
+  %tr
+    %th
+      Pincode:
+    %td
+      = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
+  %tr
+    %th
+      Telephone number:
+    %td
+      = text_field :telephone_number
+  %tr
+    %th
+      Telephone Type
+    %td
+      = select :telephone_type, :collection => TELEPHONE_TYPES, :prompt => "Select"
+  %tr
+    %th
+      Income
+    %td
+      = text_field :income
+  %tr
+    %th
+      Family Income
+    %td
+      = text_field :family_income
+  %tr
+    %th
+      Occupation:
+    %td
+      = select :occupation_id, :collection => Occupation.all.collect{|occ| [occ.id, occ.name]}, :prompt => "Select"
+  %tr
+    %th
+      Priority Sector List (PSL)
+    %td
+      = select :priority_sector_list_id, :collection => PrioritySectorList.all.collect{|ps| [ps.id, ps.name]}, :prompt => "Select", :id => 'psl_selector'
+  %tr
+    %th
+      PSL Sub-category
+    %td
+      = select :psl_sub_category_id, :collection => nil, :value_method => :id, :text_method => :name, :prompt => "Select", :id => 'psl_sub_category_selector'
+  %tr
+    %th
+      Caste:
+    %td
+      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select")
+  %tr
+    %th
+      Religion:
+    %td
+      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddha, "Buddha"], [:christian, "Christian"]] , :prompt => "Select")
+  - if not @client.new?
+    %tr
+      %th
+        Active:
+      %td
+        = check_box :active
+        &nbsp;&nbsp;
+        %span.greytext inactive member are not counted for attendancy
+    %tr#inactive_options{:style => "#{@client.active ? 'display: none' : 'display: block'}"}
+      %th
+        Reason
+      %td
+        = select :inactive_reason, :collection => INACTIVE_REASONS.reject{|x| x.blank?}.map{|x| [x.to_s, x.to_s.camelcase(' ')]}, :prompt => "Select reason for being inactive"
+  %tr
+    %th
+      Photo
+    %td
+      = image_tag @client.picture.url(:medium)
+      = file_field :picture

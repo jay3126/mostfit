@@ -18,10 +18,12 @@
             Effective On
         %th
           Created On
+        %th
+          Action
     %tr
-      - for biz_location_level in @biz_locations.sort_by{|x| x.first}
+      - for biz_location_level in @biz_locations.sort_by{|x| x.first}.reverse
         %tr
-          %td{:style => "background-color:gray; text-align:center", :colspan => 5}
+          %td{:style => "background-color:gray; text-align:center", :colspan => 6}
             %b= "#{biz_location_level.first}-Level"
         - for biz_location_link in biz_location_level.last
           - biz_location = biz_location_link.class == BizLocation ? biz_location_link : biz_location_link.child
@@ -40,3 +42,10 @@
                 = biz_location_link.effective_on.strftime("%Y-%m-%d")
             %td
               = biz_location_link.creation_date.strftime("%Y-%m-%d")
+            %td
+              - if biz_location_level.first == 0
+                = link_to "Add Client", resource(biz_location,:new_clients,:new)
+                |
+                = link_to "Show Clients", resource(biz_location, :biz_location_clients)
+              - else
+                = link_to "Childrens", resource(biz_location)

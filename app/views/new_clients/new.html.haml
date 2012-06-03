@@ -1,0 +1,10 @@
+- @client = @client.blank? ? Client.new : @client
+- if @message
+  .error
+    = @message[:error]
+= form_for(@client, :action => url(:controller => :new_clients, :action=> :create), :multipart => true) do
+  = hidden_field :name => :client_type, :value => @client.class
+  = hidden_field :name => :biz_location, :value => @biz_location.id
+  = partial("new_clients/tabs")
+  = submit "Add client", :class => "grey_button"
+  = link_to 'Cancel', params[:return], :class => "grey_button"

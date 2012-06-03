@@ -91,6 +91,12 @@ class BizLocations < Application
     redirect request.referer, :message => message
   end
 
+  def biz_location_clients
+    @biz_location = BizLocation.get params[:id]
+    @clients = ClientAdministration.get_clients_administered(@biz_location.id, Date.today)
+    display @clients
+  end
+
   def update
   end
 
