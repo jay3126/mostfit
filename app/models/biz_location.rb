@@ -11,6 +11,8 @@ class BizLocation
   belongs_to :location_level
   has n, :meeting_schedules, :through => Resource
 
+  has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
+
   # Returns all locations that belong to LocationLevel
   def self.all_locations_at_level(by_level_number)
     level = LocationLevel.get_level_by_number(by_level_number)
