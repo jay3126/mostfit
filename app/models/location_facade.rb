@@ -24,12 +24,24 @@ class LocationFacade < StandardFacade
 
   # Get all location levels
   def all_location_levels
-    LocationLevel.all
+    location_manager.all_location_levels
   end
 
   # Returns a list of all the BizLocations at the specified location level
   def all_locations_at_level(by_level_number)
-    BizLocation.all_locations_at_level(by_level_number)
+    location_manager.all_locations_at_level(by_level_number)
+  end
+
+  # Old Mostfit has regions, areas, branches, and centers. So this returns a list of branches
+  # under whatever corresponds to a 'branch' under the new configurable hierarchy of location levels
+  def all_nominal_branches
+    location_manager.all_nominal_branches
+  end
+
+  # Old Mostfit has regions, areas, branches, and centers. So this returns a list of centers
+  # under whatever corresponds to a 'center' under the new configurable hierarchy of location levels
+  def all_nominal_centers
+    location_manager.all_nominal_centers
   end
 
   # Get the 'parent' BizLocation for the specified 'child' BizLocation on the given date, if one exists
@@ -80,6 +92,12 @@ class LocationFacade < StandardFacade
   # Assign administered_at and accounted_at locations to loan
   def assign_locations_to_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
+  end
+
+  private
+
+  def location_manager
+    @location_manager ||= LocationManager.new
   end
 
 end

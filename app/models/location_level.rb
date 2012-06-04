@@ -1,5 +1,8 @@
 class LocationLevel
   include DataMapper::Resource
+
+  NOMINAL_BRANCH_LEVEL = 1
+  NOMINAL_CENTER_LEVEL = 0
   
   property :id,            Serial
   property :level,         Integer,         :nullable => false, :unique => true, :min => 0

@@ -13,4 +13,20 @@ class LocationManager
     locations
   end
 
+  def all_location_levels
+    LocationLevel.all
+  end
+
+  def all_locations_at_level(by_level_number)
+    BizLocation.all_locations_at_level(by_level_number)
+  end
+
+  def all_nominal_branches
+    all_locations_at_level(LocationLevel::NOMINAL_BRANCH_LEVEL)
+  end
+
+  def all_nominal_centers
+    all_locations_at_level(LocationLevel::NOMINAL_CENTER_LEVEL)
+  end
+
 end
