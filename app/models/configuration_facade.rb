@@ -17,11 +17,6 @@ class ConfigurationFacade
     [18, 55]
   end
 
-  # Whether multiple lending is allowed
-  def allow_multiple_loans?
-    true
-  end
-
   # The days of the week that are not business days
   def non_working_days
     [SUNDAY]
@@ -50,6 +45,7 @@ class ConfigurationFacade
     [18, 55]
   end
 
+  # Whether multiple lending is allowed
   def allow_multiple_loans?
     false
   end
