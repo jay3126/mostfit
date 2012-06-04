@@ -23,7 +23,7 @@
     - num_loans_to_pay = num_fees_to_pay = 0
     - @weeksheet.groups.each do |group|
       %tr.group{:style => 'font-weight: bold; text-align: center; background: #cfcfcf'}
-        %td{:colspan => 6}
+        %%td{:colspan => 6}
           = group ? group[1] : "none"
         %td.left-numeric.due
         %td.right-numeric.paid

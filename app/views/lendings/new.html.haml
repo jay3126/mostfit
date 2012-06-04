@@ -1,0 +1,9 @@
+- @lending = @lending.blank? ? Lending.new : @lending
+%h1
+  New Lona
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
+= form_for(@lending, :action => url(@lending , :action => :create), :class => "shaded") do
+  = partial 'lendings/fields'
+  = submit 'Save'

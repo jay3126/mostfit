@@ -1,0 +1,49 @@
+%h3
+  = "This loan will be dispensed by loan product: #{@lending_product.name}"
+= hidden_field :for_borrower_id, :value => @client.id
+= hidden_field :name => 'lending_product_id', :value => @lending_product.id
+%table.tall.shaded{:style => "margin-left:3%"}
+  %tr
+    %th
+      Amount
+    %td
+      = @lending_product.amount.to_s
+  %tr
+    %th
+      Currency
+    %td
+      = @lending_product.currency
+  %tr
+    %th
+      Repayment Frequency
+    %td
+      = @lending_product.repayment_frequency
+  %tr
+    %th
+      Tenure
+    %td
+      = @lending_product.tenure
+  %tr
+    %th
+      Loan Id
+    %td
+      = text_field :lan
+  %tr
+    %th
+      Applied Date
+    %td
+      = date_select_for @lending, 'applied_on_date'
+    %th
+      by
+    %td
+      = select :applied_by_staff, :collection => StaffMember.all.collect{|staff| [staff.id, staff.name]}
+  %tr
+    %th
+      Schedule Disbursal Date
+    %td
+      = date_select_for @lending, 'scheduled_disbursal_date'
+  %tr
+    %th
+      Schedule First Repayment Date
+    %td
+      = date_select_for @lending, 'scheduled_first_repayment_date'
