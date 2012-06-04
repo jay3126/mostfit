@@ -1,16 +1,18 @@
 class LedgerPosting
   include DataMapper::Resource
-  include Constants::Accounting, Constants::Money
+  include Constants::Properties, Constants::Accounting, Constants::Money
 
   property :id,           Serial
-  property :effective_on, Date, :nullable => false
-  property :amount,       Float, :nullable => false
-  property :currency,     Enum.send('[]', *CURRENCIES), :nullable => false, :default => DEFAULT_CURRENCY
+  property :effective_on, *DATE_NOT_NULL
+  property :amount,       *MONEY_AMOUNT
+  property :currency,     *CURRENCY
   property :effect,       Enum.send('[]', *ACCOUNTING_EFFECTS), :nullable => false
-  property :created_at,   DateTime, :nullable => false, :default => DateTime.now
+  property :created_at,   *CREATED_AT
 
   belongs_to :voucher
   belongs_to :ledger
+
+  def money_amounts; [ :amount ]; end
 
   validates_present :effective_on, :amount, :currency, :effect, :voucher, :ledger
 

@@ -111,7 +111,7 @@ describe LedgerBalance do
     LedgerBalance.can_add_balances?(*@all_balances).first.should == false
   end
   
-  it "adding a zero balance, whether credit or debit to another balance should leave the other balanace unchanged" do
+  it "adding a zero balance, whether credit or debit to another balance should leave the other balance unchanged" do
     @all_inr_balances.each do |bal|
       amount, currency, effect = bal.amount, bal.currency, bal.effect
       add_zero_credit_balance = bal + @zero_inr_credit_balance
@@ -243,6 +243,21 @@ describe LedgerBalance do
 
     debit_ten = LedgerBalance.new(10, :INR, :debit)
     LedgerBalance.is_zero_balance?(debit_ten).should be_false
+  end
+
+  it "converts a money amount to a balance as expected" do
+    gyaarah = Money.new(1100, :INR)
+    gyaarah_debit = LedgerBalance.money_to_balance_obj(gyaarah, :debit)
+
+    gyaarah_debit.amount.should == gyaarah.amount
+    gyaarah_debit.currency.should == gyaarah.currency
+    gyaarah_debit.effect.should == :debit
+
+    ikyavan = Money.new(5100, :INR)
+    ikyavan_credit = LedgerBalance.money_to_balance_obj(ikyavan, :credit)
+    ikyavan_credit.amount.should == ikyavan.amount
+    ikyavan_credit.currency.should == ikyavan.currency
+    ikyavan_credit.effect.should == :credit
   end
  
 end

@@ -1,18 +1,17 @@
-class LedgerBalance
+class LedgerBalance < Money
   include Constants::Accounting, Constants::Money
 
-  attr_reader :amount, :currency, :effect
+  attr_reader :effect
 
   def initialize(amount, currency, effect)
     valid, message = LedgerBalance.valid_balance?(amount, currency, effect)
     raise ArgumentError, message unless valid
-    @amount = amount
-    @currency = currency
+    super(amount.to_i, currency)
     @effect = effect
   end
 
   def to_s
-    "#{@amount} #{@currency} #{@effect}"
+    "#{super.to_s} #{@effect}"
   end
   
   def ==(other)
@@ -26,6 +25,10 @@ class LedgerBalance
 
   def self.to_balance_obj(amount, currency, effect)
     new(amount, currency, effect)
+  end
+
+  def self.money_to_balance_obj(money_amount, effect)
+    to_balance_obj(money_amount.amount, money_amount.currency, effect)
   end
   
   def self.zero_balance(currency, effect)
@@ -69,8 +72,6 @@ class LedgerBalance
 
   def self.valid_balance?(amount, currency, effect)
     return [false, "amount, currency, and effect are all required"] unless (amount and currency and effect)
-    return [false, "does not accept negative amounts: #{amount}"] if (amount < 0)
-    return [false, "does not accept this currency: #{currency}"] unless CURRENCIES.include?(currency)
     return [false, "does not accept this effect: #{effect}"] unless ACCOUNTING_EFFECTS.include?(effect)
     true
   end

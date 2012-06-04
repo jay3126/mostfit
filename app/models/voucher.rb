@@ -1,17 +1,20 @@
 class Voucher
   include DataMapper::Resource
   include PostingValidator
+  include Constants::Properties
 
   property :id,             Serial
-  property :guid,           String, :length => 40, :nullable => false, :default => lambda {|obj, p| UUID.generate}
-  property :total_amount,   Float, :nullable => false
-  property :currency,       Enum.send('[]', *CURRENCIES), :nullable => false, :default => DEFAULT_CURRENCY
-  property :effective_on,   Date, :nullable => false
+  property :guid,           *UNIQUE_ID
+  property :total_amount,   *MONEY_AMOUNT
+  property :currency,       *CURRENCY
+  property :effective_on,   *DATE_NOT_NULL
   property :narration,      String, :length => 1024
   property :generated_mode, Enum.send('[]', *VOUCHER_MODES), :nullable => false
-  property :created_at,     DateTime, :default => DateTime.now, :nullable => false
+  property :created_at,     *CREATED_AT
 
   has n, :ledger_postings
+
+  def money_amounts; [ :total_amount ]; end
 
   validates_present :effective_on
   validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?, :validate_all_post_to_unique_accounts?

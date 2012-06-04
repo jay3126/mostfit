@@ -1,6 +1,6 @@
 class Ledger
   include DataMapper::Resource
-  include Constants::Accounting, Constants::Money
+  include Constants::Properties, Constants::Accounting, Constants::Money
 
 # Ledger represents an account, and is a basic building-block for book-keeping
 # Ledgers are classified into one of four 'account types': Assets, Liabilities, Incomes, and Expenses
@@ -12,17 +12,19 @@ class Ledger
   property :id,                       Serial
   property :name,                     String, :nullable => false
   property :account_type,             Enum.send('[]', *ACCOUNT_TYPES), :nullable => false
-  property :open_on,                  Date, :nullable => false
-  property :opening_balance_amount,   Float, :nullable => false, :default => 0
-  property :opening_balance_currency, Enum.send('[]', *CURRENCIES), :nullable => false, :default => DEFAULT_CURRENCY
+  property :open_on,                  *DATE_NOT_NULL
+  property :opening_balance_amount,   *MONEY_AMOUNT
+  property :opening_balance_currency, *CURRENCY
   property :opening_balance_effect,   Enum.send('[]', *ACCOUNTING_EFFECTS), :nullable => false
-  property :created_at,               DateTime, :nullable => false, :default => DateTime.now
+  property :created_at,               *CREATED_AT
   property :type,                     Discriminator
 
   has n, :ledger_postings
   has n, :posting_rules
   belongs_to :account_group, :nullable => true
   belongs_to :accounts_chart
+
+  def money_amounts; [ :opening_balance_amount ]; end
 
   validates_present :name, :account_type, :open_on, :opening_balance_amount, :opening_balance_currency, :opening_balance_effect
 
