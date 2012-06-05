@@ -3,7 +3,11 @@ class LendingProducts < Application
   def index
     @client = Client.get params[:client_id]
     @lending_products = LendingProduct.all
-    render
+    if @lending_products.blank?
+      redirect resource(:lending_products, :new)
+    else
+      display @lending_products
+    end
   end
 
   def new

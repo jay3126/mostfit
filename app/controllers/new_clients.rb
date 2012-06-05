@@ -4,7 +4,7 @@ class NewClients < Application
   end
 
   def new
-    @biz_location = BizLocation.get params[:biz_location]
+    @biz_location = BizLocation.get params[:biz_location_id]
     @client = Client.new
     display @client
   end

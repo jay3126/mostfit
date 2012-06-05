@@ -125,7 +125,7 @@ class Client
   has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
   validates_length :account_number, :max => 20
 
-  belongs_to :center
+  belongs_to :center,                 :nullable => true
   belongs_to :client_group
   belongs_to :occupation,           :nullable => true
   belongs_to :priority_sector_list, :nullable => true
@@ -151,7 +151,7 @@ class Client
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
-  validates_present   :center
+  #validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
   validates_is_unique :reference2
