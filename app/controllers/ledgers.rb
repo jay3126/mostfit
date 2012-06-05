@@ -7,8 +7,11 @@ class Ledgers < Application
   end
 
   def show(id)
-    @ledger = Ledger.get(id)
+    @accounting_facade = AccountingFacade.new(session.user)
+    @ledger = @accounting_facade.get_ledger(id)
     raise NotFound unless @ledger
+    @date = Date.today
+    @date = Date.parse(params[:date]) unless params[:date].blank?
     display @ledger
   end
 

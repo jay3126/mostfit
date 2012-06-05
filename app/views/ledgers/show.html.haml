@@ -11,7 +11,7 @@
         Type
       %td
         = @ledger.account_type
-    - opening_balance, open_date = @ledger.opening_balance_and_date
+    - opening_balance, open_date = @accounting_facade.get_ledger_opening_balance_and_date(@ledger.id)
     %tr
       %th
         Open on
@@ -21,8 +21,21 @@
       %th
         Opening balance
       %td
-        = opening_balance    
-
+        = opening_balance
+    %tr
+      %th
+        Current Balance
+      %td
+        = @accounting_facade.get_current_ledger_balance(@ledger.id)
+    %tr
+      %th
+        Balance as on
+      %td
+        = form :action => url(:controller => :ledgers, :action => :show, :id => @ledger.id) do 
+          = @accounting_facade.get_historical_ledger_balance(@ledger.id, @date)
+          as on
+          = date_select :date, @date, :min_date => @ledger.open_on, :max_date => Date.today
+          = submit "Go"
 %div.tab_container.shaded
   %ul.tabs
     %li#vouchers
