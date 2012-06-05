@@ -1,13 +1,39 @@
 class AccountsChart
   include DataMapper::Resource
-  include Constants::Properties, Constants::Accounting
+  include Constants::Properties, Constants::Accounting, Constants::Transaction
   
-  property :id,         Serial
-  property :name,       *UNIQUE_NAME
-  property :guid,       *UNIQUE_ID
-  property :chart_type, Enum.send('[]', *ACCOUNTS_CHART_TYPES), :nullable => false
+  property :id,                Serial
+  property :name,              *NAME
+  property :guid,              *UNIQUE_ID
+  property :chart_type,        Enum.send('[]', *ACCOUNTS_CHART_TYPES), :nullable => false
+  property :counterparty_type, Enum.send('[]', *COUNTERPARTIES), :nullable => true
+  property :counterparty_id,   Integer
+  property :created_at,        *CREATED_AT
 
   has n, :ledgers
+
+  # Fetch the accounts chart for a counterparty for product accounting
+  def self.get_counterparty_accounts_chart(for_counterparty)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    chart_for_counterparty = {}
+    chart_for_counterparty[:counterparty_type] = counterparty_type
+    chart_for_counterparty[:counterparty_id]   = counterparty_id
+    chart_for_counterparty[:chart_type]        = PRODUCT_ACCOUNTING
+    first(chart_for_counterparty)
+  end
+
+  # Setup the accounts chart for a counterparty for product accounting
+  def self.setup_counterparty_accounts_chart(for_counterparty)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    chart_for_counterparty = {}
+    chart_for_counterparty[:name]              = for_counterparty.name
+    chart_for_counterparty[:counterparty_type] = counterparty_type
+    chart_for_counterparty[:counterparty_id]   = counterparty_id
+    chart_for_counterparty[:chart_type]        = PRODUCT_ACCOUNTING
+    accounts_chart = first_or_create(chart_for_counterparty)
+    raise Errors::DataError, accounts_chart.errors.first.first unless accounts_chart.id
+    accounts_chart
+  end
 
   # Computes the sum of balances on all ledgers on this accounts chart as on_date
   def compute_sum_of_balances(on_date = Date.today)

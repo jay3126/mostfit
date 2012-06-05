@@ -4,7 +4,7 @@ describe Resolver do
 
   before(:all) do
     @loan = Factory(:lending)
-    @customer = Factory(:customer)
+    @client = Factory(:client)
   end
 
   it "should fetch product instance as expected" do
@@ -14,9 +14,9 @@ describe Resolver do
   end
 
   it "should fetch counterparty as expected" do
-    counterparty_type = Constants::Transaction::CUSTOMER
-    counterparty_id   = @customer.id
-    Resolver.fetch_counterparty(counterparty_type, counterparty_id).should == @customer
+    counterparty_type = Constants::Transaction::CLIENT
+    counterparty_id   = @client.id
+    Resolver.fetch_counterparty(counterparty_type, counterparty_id).should == @client
   end
 
   it "should verify counterparty instances as expected" do

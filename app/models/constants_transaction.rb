@@ -1,10 +1,10 @@
 module Constants
   module Transaction
 
-    CLIENT = :client; CUSTOMER = :customer
-    COUNTERPARTIES = [CLIENT, CUSTOMER]
-    COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client', CUSTOMER => 'Customer' }
-    MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT, 'Customer' => CUSTOMER }
+    CLIENT = :client
+    COUNTERPARTIES = [CLIENT]
+    COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client' }
+    MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT }
 
     COUNTERPARTY_ADMINISTERED_AT = :administered_at
     COUNTERPARTY_REGISTERED_AT   = :registered_at

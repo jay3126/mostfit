@@ -9,7 +9,7 @@ describe PaymentTransaction do
     @receipt_type = Constants::Transaction::RECEIPT
     @on_product_type = Constants::Products::LENDING
     @on_product_id = 12
-    @by_counterparty_type = Constants::Transaction::CUSTOMER
+    @by_counterparty_type = Constants::Transaction::CLIENT
     @by_counterparty_id = 13
     @performed_at = 14
     @accounted_at = 15

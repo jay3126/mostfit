@@ -103,6 +103,9 @@ FactoryGirl.define do
 
   factory :client do
     reference       { "XW000-2009.01.05.#{Time.new.usec}" }
+    reference_type  Constants::Masters::DEFAULT_REFERENCE_TYPE
+    reference2_type Constants::Masters::DEFAULT_REFERENCE2_TYPE
+    state           Constants::Masters::STATES.first
     name            { Factory.next(:name) }
     active          true
     gender          'male'
