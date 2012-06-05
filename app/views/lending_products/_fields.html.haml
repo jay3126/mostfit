@@ -9,19 +9,34 @@
       Amount
     %td
       %span.greytext
-      = text_field :amount, :size => 7
+      = text_field :amount
+  %tr
+    %th
+      Tenure
+    %td
+      = text_field :tenure
   %tr
     %th
       Interest rate
     %td
       %span.greytext
-      = text_field :interest_rate, :size => 7
+      = text_field :interest_rate
   %tr
     %th
-      Repayment frequency
+      Interest amount
     %td
       %span.greytext
-      = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|frequency| [frequency.to_s]}
+      = text_field :name => 'lending_product_template[interest_amount]'
+  %tr
+    %th
+      Principal Schedule
+    %td
+      = text_field :name =>'lending_product_template[principal_schedule]'
+  %tr
+    %th
+      Interest Schedule
+    %td
+      = text_field :name => 'lending_product_template[interest_schedule]'
   %tr
     %th
       Currency
@@ -30,6 +45,13 @@
       = select :name => "lending_product[currency]", :collection => Constants::Money::CURRENCIES.map {|currency| [currency]}
   %tr
     %th
-      Tenure
+      Repayment frequency
     %td
-      = text_field :tenure, :size => 7
+      %span.greytext
+      = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|frequency| [frequency.to_s]}
+  %tr
+    %th
+      Repayment Allocation Strategy
+    %td
+      = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las.to_s]}
+ 

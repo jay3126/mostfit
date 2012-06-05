@@ -16,13 +16,15 @@
           Currency
         %td
           Tenure
+        %td
+          Action
     %tbody.form
       - @lending_products.each do |lp|
         %tr
           %td
             = lp.name
           %td
-            = lp.amount
+            = Money.new(lp.amount.to_i, :INR).amount
           %td
             = lp.interest_rate
           %td
@@ -31,3 +33,7 @@
             = lp.currency
           %td
             = lp.tenure
+          %td
+            = link_to "Show Loans", resource(lp)
+            |
+            = link_to "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}")

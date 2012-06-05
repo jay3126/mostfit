@@ -30,4 +30,4 @@
         %td
           = client.created_at.strftime("%Y-%m-%d")
         %td
-          = link_to "Apply Loan", "#"
+          = link_to "Apply Loan", resource(:lending_products, :client_id => client.id)

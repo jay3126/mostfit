@@ -7,6 +7,8 @@ class Lendings < Application
   def new
     @lending_product = LendingProduct.get params[:lending_product_id]
     @client = Client.get params[:client_id]
+    @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
+    @clients = Client.all(:id => @counterparty_ids)
     @lending = @lending_product.lendings.new
     display @lending_product
   end
@@ -56,7 +58,7 @@ class Lendings < Application
 
     #REDIRECTION/RENDER
     if @message[:error].blank?
-      redirect resource(@lending_product)
+      redirect resource(:lending_products), :message => @message
     else
       render :new
     end

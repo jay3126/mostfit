@@ -1,15 +1,6 @@
-- unless @errors.blank?
-  - if @errors.is_a?(Hash)
-    .error
-      - @errors.keys.each do |lap_id|
-        - if @errors[lap_id]
-          = "#{@errors[lap_id]}"
-          %br
-  - else
-    - @errors.each do |error|
-      .error
-        = error
-        %br
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
 %h1 Lending Product
 
 = form_for(@lending_product, :action => :create) do

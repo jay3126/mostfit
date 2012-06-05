@@ -65,6 +65,7 @@ Merb::Router.prepare do
   resources :occupations
   resources :loan_purposes
   resources :lending_products
+  resources :lendings
   resources :regions do
     resources :areas do
       resources :branches
