@@ -27,7 +27,7 @@ class Client
   property :id,              Serial
   property :reference,       String, :length => 100, :nullable => false, :index => true
   property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,     Enum.send('[]', *GENDER), :nullable => true, :lazy => true
+  property :gender,     Enum.send('[]', *GENDER), :nullable => true, :lazy => true, :default => 'female'
   property :spouse_name,     String, :length => 100, :lazy => true
   property :date_of_birth,   Date,   :index => true, :lazy => true
   property :spouse_date_of_birth, Date, :index => true, :lazy => true
@@ -63,7 +63,7 @@ class Client
   property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
   property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
   
-  property :caste, Enum.send('[]', *CASTES), :default => '', :nullable => true, :lazy => true
+  property :caste, Enum.send('[]',*CASTES), :lazy => true, :nullable => false, :default => 'General'
     
   #how do I make the Spouse Name allowed (and compulsory) only if the Marital Status says Married (guessing we don't record for Seperated and Widow)
   property :marital_status, Enum.send('[]', *['','Married','Unmarried','Widow','Seperated']), :nullable => false, :lazy => true 
@@ -131,9 +131,9 @@ class Client
 
   property :have_physically_handicapped_family_members, Boolean, :default => false, :lazy => true, :nullable => false 
   ########socio-economic details#########
-  property :house_type, Enum.send('[]',*HOUSE_TYPES), :lazy => true, :nullable => false
+  property :house_type, Enum.send('[]',*HOUSE_TYPES), :lazy => true, :nullable => false, :default => 'Thatched'
   property :have_other_valuable_property, Boolean, :default => false, :lazy => true, :nullable => false
-  property :productive_land, Boolean, :lazy => true, :nullable => false
+  property :productive_land, Boolean, :lazy => true, :nullable => false, :default => true
 
   property :own_four_wheeler, Boolean, :lazy => true, :nullable => false, :default => false
 
@@ -143,9 +143,9 @@ class Client
   property :own_a_cycle, Boolean, :lazy => true, :nullable => false, :default => true
 
   #basic amenities 
-  property :drinking_water_provision, Enum.send('[]',*DRINKING_WATER_PROVISION), :lazy=> true, :nullable => false
+  property :drinking_water_provision, Enum.send('[]',*DRINKING_WATER_PROVISION), :lazy => true, :nullable => false, :default => 'Own well/pipe'
   
-  property :sanitation_facilities, Enum.send('[]',*SANITATION_PROVISION), :lazy => true, :nullable => false
+  property :sanitation_facilities, Enum.send('[]',*SANITATION_PROVISION), :lazy => true, :nullable => false, :default => 'Own toilet, septic tank'
 
   property :in_good_health, Boolean, :lazy => true, :nullable => false, :default => true
 
@@ -173,7 +173,7 @@ class Client
 
   property :have_cellphone, Boolean, :default => false, :nullable => false, :lazy => true
 
-  property :monthly_family_income_and_sources, Enum.send('[]',*TOTAL_MONTHLY_INCOME), :nullable => false, :lazy => true
+  property :monthly_family_income_and_sources, Enum.send('[]',*TOTAL_MONTHLY_INCOME), :nullable => false, :lazy => true, :default => 'Above 7000'
 
   #identification documents
   property :have_ration_card, Boolean, :default => false, :nullable => false, :lazy => true
