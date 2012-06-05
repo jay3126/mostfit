@@ -23,8 +23,20 @@ module BookKeeper
     transaction_summary.set_processed
   end
 
+  def account_for_payment_transaction(payment_transaction)
+    #TODO
+  end
+
   def get_primary_chart_of_accounts
     AccountsChart.first
+  end
+
+  def setup_counterparty_accounts_chart(for_counterparty)
+    AccountsChart.setup_counterparty_accounts_chart(for_counterparty)
+  end
+
+  def get_counterparty_accounts_chart(for_counterparty)
+    AccountsChart.get_counterparty_accounts_chart(for_counterparty)
   end
 
   def get_ledger(by_ledger_id)
