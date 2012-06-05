@@ -79,7 +79,6 @@ USAGE_TEXT
           recorded_by_user               = recorded_by
 
           loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
-          LoanAdministration.assign(administered_at, accounted_at, loan, performed_by, recorded_by, beginning_applied_on_date)
         end
       rescue => ex
         puts "An error occurred: #{ex.message}"
