@@ -12,7 +12,6 @@ module Constants
 
     NAME              = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL) ]
     UNIQUE_NAME       = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL).merge(UNIQUE) ]
-    FREQUENCY         = [ DataMapper::Types::Enum.send('[]', *MarkerInterfaces::Recurrence::FREQUENCIES), NOT_NULL ]
     TENURE            = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
     COUNTER           = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
     INSTALLMENT       = [ Integer, { :min => 0 }.merge(NOT_NULL) ]
@@ -20,8 +19,6 @@ module Constants
     MONEY_AMOUNT_PRECISION = 65; MONEY_AMOUNT_SCALE = 0; MONEY_AMOUNT_MINIMUM = 0
     MONEY_AMOUNT_NULL = [ BigDecimal, { :precision => MONEY_AMOUNT_PRECISION, :scale => MONEY_AMOUNT_SCALE, :min => MONEY_AMOUNT_MINIMUM } ]
     MONEY_AMOUNT      = [ BigDecimal, { :precision => MONEY_AMOUNT_PRECISION, :scale => MONEY_AMOUNT_SCALE, :min => MONEY_AMOUNT_MINIMUM }.merge(NOT_NULL) ]
-    CURRENCY          = [ DataMapper::Types::Enum.send('[]', *Constants::Money::CURRENCIES), NOT_NULL ]
-
     UNIQUE_ID_STRING_LENGTH = 40
     UNIQUE_ID         = [ String, { :length => UNIQUE_ID_STRING_LENGTH, :default => lambda {|obj, p| UUID.generate} }.merge(NOT_NULL).merge(UNIQUE) ]
 
@@ -30,5 +27,7 @@ module Constants
     UPDATED_AT        = CREATED_AT
     DELETED_AT        = [ DataMapper::Types::ParanoidDateTime ]
 
+    FREQUENCY         = [ DataMapper::Types::Enum.send('[]', *MarkerInterfaces::Recurrence::FREQUENCIES), NOT_NULL ]
+    CURRENCY          = [ DataMapper::Types::Enum.send('[]', *Constants::Money::CURRENCIES), NOT_NULL ]
   end
 end
