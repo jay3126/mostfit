@@ -1,17 +1,35 @@
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Name
+    %td= link_to @biz_location.name, '#', :target => "_blank"
   %tr.odd
     %th.odd Reports to
     %td
-      %b= @biz_location.name
+      %b= ''
   %tr.even
     %th.even Formation
     %td
       = "#{@biz_location.creation_date}( #{@biz_location.creation_date.strftime('%A')} )"
   %tr.odd
     %th.odd Manager By
-    %td= link_to @biz_location.name, '#', :target => "_blank"
- 
+    %td= ''
+  %tr.even
+    %th.even= "No. Of #{@location_level.name}"
+    %td= @biz_locations.count
+  %tr.odd
+    %th.odd Address
+    %td= ''
+  %tr.even
+    %th.even Contact Number
+    %td= ''
+  %tr.odd
+    %th.odd Landmark
+    %td= ''
+  %tr.even
+    %th.even Area
+    %td= ''
+
 %div.tab_container.shaded
   %ul.tabs
     %li#Location
@@ -25,14 +43,14 @@
     %li#History
       History
   %div.tab
-    %div#location_list
+    %div#container_centers_list
       =partial "user_locations/location_list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :loans_on_biz_location, :id => @biz_location.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}
   %div.tab

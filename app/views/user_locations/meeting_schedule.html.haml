@@ -1,3 +1,4 @@
+%h1== #{@biz_location.location_level.name}:- <i>#{@biz_location.name}</i>
 %div.tab_container.shaded
   %ul.tabs
     %li#MeetingSchedule
@@ -20,8 +21,8 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :weeksheet_collection, :date => Date.today)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => '#'}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :loans_on_biz_location, :id => @biz_location.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}

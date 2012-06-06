@@ -1,0 +1,23 @@
+%br
+- if @loans.count == 0
+  %p
+    %i No Loans Mapping have been created yet.
+- else
+  %table{:class => 'narrow'}
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Name
+        %th
+          Created On
+    %tr
+      - for loan in @loans
+        %tr
+          %td
+            = loan.id
+          %td
+            = link_to loan.lending_product.name, resource(loan)
+          %td
+            = loan.created_at.strftime("%Y-%m-%d")

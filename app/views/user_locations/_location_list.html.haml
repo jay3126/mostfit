@@ -1,26 +1,48 @@
-%br
-- if @biz_locations.count == 0
-  %p
-    %i No Location Mapping have been created yet.
+%h2
+  = "#{@location_level.name} meeting on"
+  = @date.nil? ? Date.today.weekday : @date.weekday
+%p{:style => "margin-left: 15px;"}
+  %b Select center meeting day: &nbsp;
+  = paginate_on_weekdays(@biz_location, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
+%p{:style =>"text-align: right; margin-top: -19px; margin-right: 80px;"}
+  = link_to "Today | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
+  = link_to "Previous | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"
+  = link_to "Next" , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today + 7 : @date + 7), :id => "centers_list", :class => "_remote_", :title => "Next Week Meeting Centers"
+- if @biz_location.blank? || @meeting_dates.blank?
+  - if @biz_locations.count==0
+    %p
+      %i No centers have been created yet.
+  - else
+    %p
+      %i No centers meet on this day.
 - else
-  %table{:class => 'narrow'}
-    %thead
+  %table{:style => "text-align:left", :class => "narrow floating_header"}
+    %tr.header
+      %th{:style => "width: 5%"} ID
+      %th Name
+      %th Manager
+      %th Meeting
+      %th Clients
+      %th Edit
+    %tbody
+      - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
+        - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
+        %tr{:class => cycle('odd','')}
+          %td
+            = biz_location.id
+          %td
+            - if @location_level.level == 0
+              = link_to biz_location.name, url(:controller => :user_locations, :action => :meeting_schedule, :id => biz_location.id)
+            - else
+              = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
+          %td
+            = ''
+          %td
+            = meeting_date.meeting_begins_at
+          %td
+            = ClientAdministration.get_clients_administered(biz_location.id, @date).count
+          %td
+            = link_to 'edit', resource(biz_location, :edit)
+    %tfoot
       %tr
-        %th
-          id
-        %th
-          Name
-        %th
-          Created On
-    %tr
-      - for location in @biz_locations
-        %tr
-          %td
-            = location.id
-          %td
-            - if location.location_level.level == 0
-              = link_to location.name, url(:controller => :user_locations, :action => :meeting_schedule, :id => location.id)
-            -else
-              = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
-          %td
-            = location.creation_date.strftime("%Y-%m-%d")
+        %td{ :colspan => 7 }

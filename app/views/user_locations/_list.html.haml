@@ -25,7 +25,7 @@
             = link_to location_level.name, "#", :onclick => "jQuery(this).next().toggle(); return false;"
             - @biz_locations = location_level.biz_locations
             #location{:style => "display : none"}
-              = partial 'user_locations/location_list'
+              = partial 'user_locations/child_locations'
           %td
             = location_level.level
           %td

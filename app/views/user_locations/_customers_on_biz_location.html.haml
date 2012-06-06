@@ -1,0 +1,23 @@
+%br
+- if @customers.count == 0
+  %p
+    %i No Customers Mapping have been created yet.
+- else
+  %table{:class => 'narrow'}
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Name
+        %th
+          Created On
+    %tr
+      - for customer in @customers
+        %tr
+          %td
+            = customer.id
+          %td
+            = link_to customer.name, resource(customer)
+          %td
+            = customer.created_at.strftime("%Y-%m-%d")
