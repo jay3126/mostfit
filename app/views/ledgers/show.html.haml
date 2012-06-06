@@ -43,7 +43,7 @@
     %li#ledger_postings
       Postings
   %div.tab
-    - @vouchers = Voucher.all(:id => (LedgerPosting.all(:ledger_id => @ledger.id).aggregate(:voucher_id)).compact.uniq)
+    - @vouchers = Voucher.all(:id => (LedgerPosting.all(:ledger_id => @ledger.id).aggregate(:voucher_id)).compact.uniq, :effective_on.lte => @date)
     = partial "vouchers/list", :vouchers => @vouchers  
   %div.tab
     -# %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :ledger_postings, :action => :list, :ledger_id => @ledger.id, :from_date => (params[:date] || (Date.today - 30)), :to_date => (params[:date] || Date.today) )}
