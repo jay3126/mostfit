@@ -8,7 +8,10 @@
   Today don't have any repayments
 - else
   %h1
-  WEEKSHEET
+    WEEKSHEET
+  - total_amount, total_schedule_principal_due, total_principal_due, total_schedule_principal_outstanding, total_schedule_interest_due = 0,0,0,0,0
+  - total_schedule_interest_outstanding, total_advance_amount_balance, total_receipt_principal, total_receipt_interest, total_receipt_advance = 0,0,0,0,0
+  - total_due_principal, total_due_interest, total = 0,0,0
   %table.dataTable.report.weeksheet
     %thead
       %tr
@@ -69,6 +72,7 @@
             = ws.loan_status
           %td
             = ws.loan_disbursed_amount
+            - total_amount = total_amount + ws.loan_disbursed_amount.amount.to_i unless ws.loan_disbursed_amount.blank?
           %td
             = ws.loan_disbursed_date
           %td
@@ -81,26 +85,81 @@
             = ws.loan_days_past_due
           %td
             = ws.loan_schedule_principal_due.to_s
+            - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount.to_i unless ws.loan_schedule_principal_due.blank?
           %td
             = ws.loan_principal_due.to_s
+            - total_principal_due = total_principal_due + ws.loan_principal_due.amount.to_i unless ws.loan_principal_due.blank?
           %td
             = ws.loan_schedule_principal_outstanding.to_s
+            - total_schedule_principal_outstanding = total_schedule_principal_outstanding + ws.loan_schedule_principal_outstanding.amount.to_i unless ws.loan_schedule_principal_outstanding.blank?
           %td
             = ws.loan_schedule_interest_due.to_s
+            - total_schedule_interest_due = total_schedule_interest_due + ws.loan_schedule_interest_due.amount.to_i unless ws.loan_schedule_interest_due.blank?
           %td
             = ws.loan_schedule_interest_outstanding.to_s
+            - total_schedule_interest_outstanding = total_schedule_interest_outstanding + ws.loan_schedule_interest_outstanding.amount.to_i unless ws.loan_schedule_interest_outstanding.blank?
           %td
             = ws.loan_advance_amount.to_s
+            - total_advance_amount_balance = total_advance_amount_balance + ws.loan_advance_amount.amount.to_i unless ws.loan_advance_amount.blank?
           %td
             = ws.loan_principal_receipts.to_s
+            - total_receipt_principal = total_receipt_principal + ws.loan_principal_receipts.amount.to_i unless ws.loan_principal_receipts.blank?
           %td
             = ws.loan_interest_receipts.to_s
+            - total_receipt_interest = total_receipt_interest + ws.loan_interest_receipts.amount.to_i unless ws.loan_interest_receipts.blank?
           %td
             = ws.loan_advance_receipts.to_s
+            - total_receipt_advance = total_receipt_advance + ws.loan_advance_receipts.amount.to_i unless ws.loan_advance_receipts.blank?
           %td
             = ws.loan_total_principal_due.to_s
+            - total_due_principal = total_due_principal + ws.loan_total_principal_due.amount.to_i unless ws.loan_total_principal_due.blank?
           %td
             = ws.loan_total_interest_due.to_s
+            - total_due_interest = total_due_interest + ws.loan_total_interest_due.amount.to_i unless ws.loan_total_interest_due.blank?
           %td
             = ws.total_paid.to_s
+            - total = total + ws.total_paid.amount.to_i unless ws.total_paid.blank?
+    %tfoot
+      %tr.org_total
+        %td
+          %b==Total
+        %td
+        %td
+        %td
+          = Money.new(total_amount,:INR).to_s
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+          = Money.new(total_schedule_principal_due,:INR).to_s
+        %td
+          = Money.new(total_principal_due,:INR).to_s
+        %td
+          = Money.new(total_schedule_principal_outstanding,:INR).to_s
+        %td
+          = Money.new(total_schedule_interest_due,:INR).to_s
+        %td
+          = Money.new(total_schedule_interest_outstanding,:INR).to_s
+        %td
+          = Money.new(total_advance_amount_balance,:INR).to_s
+        %td
+          = Money.new(total_receipt_principal,:INR).to_s
+        %td
+          = Money.new(total_receipt_interest,:INR).to_s
+        %td
+          = Money.new(total_receipt_advance,:INR).to_s
+        %td
+          = Money.new(total_due_principal,:INR).to_s
+        %td
+          = Money.new(total_due_interest,:INR).to_s
+        %td
+          = Money.new(total,:INR).to_s
+
+
+
+
+
+
 
