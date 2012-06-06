@@ -55,14 +55,14 @@
         %th
           Total
     - @weeksheet.groups.each do |group|
-      = hidden_field :name => "payment_transactions[performed_at]", :value => @center.id
-      = hidden_field :name => "payment_transactions[accounted_at]", :value => @branch.id
+      = hidden_field :name => "payment_transactions[performed_at]", :value => @biz_location.id
+      = hidden_field :name => "payment_transactions[accounted_at]", :value => @parent_biz_location.id
       = hidden_field :name => "payment_transactions[performed_by]", :value => @staff.id
       = hidden_field :name => "payment_transactions[recorded_by]", :value => @user.id
       = hidden_field :name => "payment_transactions[product_type]", :value => 'lending'
       = hidden_field :name => "payment_transactions[currency]", :value => 'INR'
       = hidden_field :name => "payment_transactions[receipt_type]", :value => 'receipt'
-      = hidden_field :name => "payment_transactions[effective_on]", :value => Date.today
+      = hidden_field :name => "payment_transactions[effective_on]", :value => @date
       - loan_row_count = 0
       - biz_location = BizLocation.get @weeksheet.at_biz_location_id
       - collection_sheets = @weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
@@ -117,7 +117,7 @@
             = ws.loan_total_interest_due.to_s
             - total_interest_due = total_interest_due + ws.loan_total_interest_due.amount unless ws.loan_total_interest_due.blank?
           %td
-            = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.total_paid.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount(#{'INR'});"
+            = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.total_paid.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
             - total_amount = total_amount + ws.total_paid.amount unless ws.total_paid.blank?
           - loan_row_count = loan_row_count + 1
     %tfoot

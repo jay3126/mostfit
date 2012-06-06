@@ -68,12 +68,12 @@ class PaymentTransactions < Application
   end
 
   def weeksheet_payments
-
-    @center = Center.get params[:center_id]
-    @branch = Branch.get params[:branch_id]
+    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+    @biz_location = BizLocation.get params[:biz_location_id]
+    @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     @user = session.user
     @staff = @user
-    @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(1280, Date.today)
+    @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
 
     display @weeksheet
 
@@ -136,6 +136,6 @@ class PaymentTransactions < Application
       end
     end
     #REDIRECT/RENDER
-    redirect resource(:payment_transactions, :weeksheet_payments, :center_id => performed_at, :branch_id => accounted_at), :message => @message
+    redirect resource(:payment_transactions), :message => @message
   end
 end
