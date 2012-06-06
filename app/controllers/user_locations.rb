@@ -15,7 +15,7 @@ class UserLocations < Application
       @location_level = LocationLevel.first(:level => level-1)
       @biz_locations = LocationLink.get_children(@biz_location, session[:effective_date])
       mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, session[:effective_date])
+      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, session[:effective_date]) if @location_level.has_meeting
     end
     display @biz_locations
   end

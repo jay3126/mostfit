@@ -44,7 +44,10 @@
       History
   %div.tab
     %div#container_centers_list
-      =partial "user_locations/location_list"
+      - if @location_level.has_meeting
+        = partial "user_locations/location_list"
+      - else
+        = partial "user_locations/child_locations"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => '#'}
   %div.tab

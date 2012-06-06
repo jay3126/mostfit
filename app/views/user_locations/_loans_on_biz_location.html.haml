@@ -12,6 +12,8 @@
           Name
         %th
           Created On
+        %th
+          Status
     %tr
       - for loan in @loans
         %tr
@@ -21,3 +23,5 @@
             = link_to loan.lending_product.name, resource(loan)
           %td
             = loan.created_at.strftime("%Y-%m-%d")
+          %td
+            = loan.status
