@@ -38,7 +38,7 @@ class UserLocations < Application
   end
 
   def weeksheet_collection
-    @date = params[:date].blank? ? Date.today : Date.parse(params[:date])
+    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
     @biz_location = BizLocation.get params[:id]
     @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
     partial "user_locations/weeksheet_collection"

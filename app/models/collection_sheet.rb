@@ -1,8 +1,8 @@
 # A simple representation of collection sheet
 class CollectionSheet
-  
-  attr_reader :at_center_id, 
-    :at_center_name,
+
+  attr_reader :at_biz_location_id,
+    :at_biz_location_name,
     :on_date,
     :at_meeting_time_begins_hours,
     :at_meeting_time_begins_minutes,
@@ -11,10 +11,10 @@ class CollectionSheet
     :collection_sheet_lines,
     :groups #An array of group IDs and names
 
-  def initialize(at_center_id, at_center_name, on_date, meeting_time_begins_hours, meeting_time_begins_minutes, by_staff_member_id, by_staff_member_name, collection_sheet_lines,groups)
+  def initialize(at_biz_location_id, at_biz_location_name, on_date, meeting_time_begins_hours, meeting_time_begins_minutes, by_staff_member_id, by_staff_member_name, collection_sheet_lines,groups)
 
-    @at_center_id                   =  at_center_id
-    @at_center_name                 =  at_center_name
+    @at_biz_location_id             =  at_biz_location_id
+    @at_biz_location_name           =  at_biz_location_name
     @on_date                        =  on_date
     @at_meeting_time_begins_hours   =  meeting_time_begins_hours
     @at_meeting_time_begins_minutes =  meeting_time_begins_minutes
@@ -31,31 +31,45 @@ end
 # Each such line item represents any payments due
 class CollectionSheetLineItem
 
-  attr_reader :at_center_id, :at_center_name, :on_date, :borrower_id, :borrower_name, :borrower_group_id, :borrower_group_name, :loan_id, :loan_disbursed_amount, :loan_disbursed_date, :loan_installment_number, :loan_outstanding, :fee_due_today, :fee_paid_today, :interest_due_today, :interest_paid_today, :principal_due_today, :principal_paid_today, :total_due, :total_paid, :loan_status
+  attr_reader :at_biz_location_id, :at_biz_location_name, :on_date, :borrower_id, :borrower_name, :borrower_group_id, :borrower_group_name,
+               :loan_id, :loan_disbursed_amount, :loan_status, :loan_disbursed_date, :loan_due_status, :loan_installment_number,
+               :loan_schedule_date, :loan_days_past_due, :loan_principal_due,:loan_schedule_principal_due, :loan_schedule_principal_outstanding,
+               :loan_schedule_interest_due, :loan_schedule_interest_outstanding, :loan_advance_amount, :loan_principal_receipts, :loan_interest_receipts,
+               :loan_advance_receipts, :loan_total_principal_due, :loan_total_interest_due, :total_paid
 
-  def initialize(at_center_id, at_center_name, on_date, borrower_id, borrower_name, borrower_group_id, borrower_group_name, loan_id, loan_disbursed_amount, loan_outstanding_principal, loan_disbursal_date, loan_installments_paid_till_date, principal_due, principal_paid, interest_due, interest_paid, fees_due, fees_paid, total_due, total_paid, loan_status)
+  def initialize(at_biz_location_id, at_biz_location_name, on_date, borrower_id, borrower_name, borrower_group_id, borrower_group_name,
+                  loan_id, loan_disbursed_amount,loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no,
+                  loan_schedule_date, loan_days_past_due, loan_principal_due,loan_schedule_principal_due, loan_schedule_principal_outstanding,
+                  loan_schedule_interest_due, loan_schedule_interest_outstanding,loan_advance_amount, loan_principal_receipts, loan_interest_receipts,
+                  loan_advance_receipts,loan_total_principal_due, loan_total_interest_due, total_paid)
 
-    @at_center_id            =  at_center_id
-    @at_center_name          =  at_center_name
-    @on_date                 =  on_date
-    @borrower_id             =  borrower_id
-    @borrower_name           =  borrower_name
-    @borrower_group_id       =  borrower_group_id
-    @borrower_group_name     =  borrower_group_name
-    @loan_id                 =  loan_id
-    @loan_disbursed_amount   =  loan_disbursed_amount
-    @loan_disbursed_date     =  loan_disbursal_date
-    @loan_installment_number =  loan_installments_paid_till_date
-    @loan_outstanding        =  loan_outstanding_principal
-    @fee_due_today           =  fees_due
-    @interest_due_today      =  interest_due
-    @principal_due_today     =  principal_due
-    @fee_paid_today          =  fees_paid
-    @interest_paid_today     =  interest_paid
-    @principal_paid_today    =  principal_paid
-    @total_due               =  total_due
-    @total_paid              =  total_paid
-    @loan_status             =  loan_status
+    @at_biz_location_id                  = at_biz_location_id
+    @at_biz_location_name                = at_biz_location_name
+    @on_date                             = on_date
+    @borrower_id                         = borrower_id
+    @borrower_name                       = borrower_name
+    @borrower_group_id                   = borrower_group_id
+    @borrower_group_name                 = borrower_group_name
+    @loan_id                             = loan_id
+    @loan_disbursed_amount               = loan_disbursed_amount
+    @loan_disbursed_date                 = loan_disbursal_date
+    @loan_status                         = loan_status
+    @loan_installment_number             = loan_schedule_installment_no
+    @loan_due_status                     = loan_due_status
+    @loan_schedule_date                  = loan_schedule_date
+    @loan_days_past_due                  = loan_days_past_due
+    @loan_principal_due                  = loan_principal_due
+    @loan_schedule_principal_due         = loan_schedule_principal_due
+    @loan_schedule_principal_outstanding = loan_schedule_principal_outstanding
+    @loan_schedule_interest_due          = loan_schedule_interest_due
+    @loan_schedule_interest_outstanding  = loan_schedule_interest_outstanding
+    @loan_advance_amount                 = loan_advance_amount
+    @loan_principal_receipts             = loan_principal_receipts
+    @loan_interest_receipts              = loan_interest_receipts
+    @loan_advance_receipts               = loan_advance_receipts
+    @loan_total_principal_due            = loan_total_principal_due
+    @loan_total_interest_due             = loan_total_interest_due
+    @total_paid                          = total_paid
 
   end
 
