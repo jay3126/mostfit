@@ -1,0 +1,42 @@
+%br
+%br
+- if @lending_schedules.blank?
+  Loan schedule does not exist.
+- else
+  %table{ :style => "width:98%; margin: auto"}
+    %thead
+      %tr{:style => "box-shadow: 0px 2px 2px #cfcfcf; -moz-box-shadow: 0px 2px 2px #cfcfcf;"}
+        %th
+        %th Installment Date
+        %th Installment
+        %th Principal Outstanding
+        %th Interest Outstanding
+        %th Principal Due
+        %th Interest Due
+        %th Currency
+        %th Payment Type
+    %tbody
+      - count = 0
+      - @lending_schedules.each do |l_schedule|
+        %tr{ :class => cycle('odd','even') }
+          %td{:class => 'default_class'}
+            = count = count + 1
+          %td
+            = l_schedule.on_date
+          %td
+            %b= l_schedule.installment
+          %td
+            %b= l_schedule.to_money[:scheduled_principal_outstanding].to_s
+          %td
+            %b= l_schedule.to_money[:scheduled_interest_outstanding].to_s
+          %td
+            %b= l_schedule.to_money[:scheduled_principal_due].to_s
+          %td
+            %b= l_schedule.to_money[:scheduled_interest_due].to_s
+          %td
+            %b= l_schedule.currency
+          %td
+            %b= l_schedule.payment_type
+    %tfoot
+      %tr
+        %td{ :colspan => 9 }

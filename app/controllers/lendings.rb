@@ -41,7 +41,7 @@ class Lendings < Application
     if @message[:error].blank?
       begin
         @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @client.id
-        money_amount = MoneyManager.get_money_instance_least_terms(@lending_product.amount.to_i)
+        money_amount = @lending_product.to_money[:amount]
         lending = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
           client_id, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
           schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id)
@@ -63,6 +63,13 @@ class Lendings < Application
       render :new
     end
     
+  end
+
+  def show
+    @lending = Lending.get params[:id]
+    @lending_product = @lending.lending_product
+    @lending_schedules = @lending.loan_base_schedule.base_schedule_line_items
+    display @lending
   end
 
 

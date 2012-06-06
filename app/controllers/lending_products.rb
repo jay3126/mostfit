@@ -45,10 +45,10 @@ class LendingProducts < Application
     # OPERATION-PERFORMED
     if @message[:error].blank?
       begin
-        money_amount = Money.new(amount.to_i, :INR)
-        money_interest_amount = Money.new(interest_amount.to_i, :INR)
-        money_principal_schedule_amount = principal_schedule.split(',').collect{|c| Money.new(c.to_i, :INR)}
-        money_interest_schedule_amount = interest_schedule.split(',').collect{|c| Money.new(c.to_i, :INR)}
+        money_amount = MoneyManager.get_money_instance(amount)
+        money_interest_amount = MoneyManager.get_money_instance(interest_amount)
+        money_principal_schedule_amount = MoneyManager.get_money_instance(*principal_schedule.split(','))
+        money_interest_schedule_amount = MoneyManager.get_money_instance(*interest_schedule.split(','))
        lending_product = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount)
 
         if lending_product.new?

@@ -49,7 +49,7 @@
       - @lendings.each do |lending|
         %tr
           %td
-            = lending.lan
+            = link_to lending.lan, resource(lending)
           %td
             = lending.applied_on_date
           %td

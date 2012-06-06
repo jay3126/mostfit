@@ -1,0 +1,44 @@
+%h1== Loan Name: <i>#{@lending_product.name}</i>
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Borrower
+    %td= link_to Client.get(@lending.for_borrower_id).name, '#', :target => "_blank"
+  %tr.odd
+    %th.odd Amount
+    %td
+      %b= @lending.to_money[:applied_amount].to_s
+  %tr.even
+    %th.even Loan Product
+    %td
+      = @lending_product.name
+  %tr.odd
+    %th.odd Disbursed On
+    %td= @lending.disbursal_date
+  %tr.even
+    %th.even Loan Status
+    %td= @lending.status
+  %tr.odd
+    %th.odd Loan outstanding Principal
+    %td= @lending.actual_principal_outstanding
+  %tr.even
+    %th.even Loan outstanding Interest
+    %td= @lending.actual_interest_outstanding
+  %tr.odd
+    %th.odd Scheduled First Repayment Date
+    %td= @lending.scheduled_first_repayment_date
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#Schedule
+      Schedule
+    %li#Transactions
+      Transactions
+    %li#Accruals
+      Accruals
+  %div.tab
+    %div#loan_schedules
+      =partial "lendings/lending_schedule"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => ''}
