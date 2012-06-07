@@ -2,7 +2,7 @@
   %h3
     No loan exists
 - else
-  = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_lending_new_to_approve)) do
+  = form_for(:lendings, :action => url(:controller => :lendings, :action => :payment_on_disburse_loan)) do
     %table.weeksheet.dataTable.report
       %thead
         %tr
@@ -26,15 +26,17 @@
           %th
             Accounted At
           %th
-            Status
+            Disbursed Amount
           %th
-            Created Date
+            Disbursed by
           %th
-            Approve
+            Disbursed Date
           %th
-            Approve By Staff
+            Payment
           %th
-            Approve Amount
+            Payment By Staff
+          %th
+            Payment Amount
       - loan_row_count = 1
       - lendings.each do |lending|
         %tr
@@ -45,7 +47,7 @@
           %td
             = lending.to_money[:applied_amount].to_s
           %td
-            = lending.for_borrower_id
+            = Client.get(lending.for_borrower_id).name rescue lending.for_borrower_id
           %td
             = lending.applied_on_date
           %td
@@ -55,21 +57,23 @@
           %td
             = lending.tenure
           %td
-            = lending.administered_at_origin
+            = BizLocation.get(lending.administered_at_origin).name rescue lending.administered_at_origin
           %td
-            = lending.accounted_at_origin
+            = BizLocation.get(lending.accounted_at_origin).name rescue lending.accounted_at_origin
           %td
-            = lending.status
+            = lending.to_money[:disbursed_amount].to_s
           %td
-            = lending.created_at.strftime('%Y-%m-%d')
+            = StaffMember.get(lending.disbursed_by_staff).name
+          %td
+            = lending.disbursal_date
           %td
             = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
-            = select :name => "lending[#{lending.id}][][approved_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}
+            = select :name => "lending[#{lending.id}][][payment_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
           %td
-            = text_field :name => "lending[#{lending.id}][][approved_amount]", :style => "width:70px;"
+            = text_field :name => "lending[#{lending.id}][][payment_amount]", :style => "width:70px;"
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
-          %td{:colspan => 15}
+          %td{:colspan => 16}
     = submit "Save"

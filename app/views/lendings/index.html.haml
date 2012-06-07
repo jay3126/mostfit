@@ -9,10 +9,12 @@
     %li#disbursed_loans
       Disbursed Loans
   %div.tab
-    %div#location_list
-      =partial "lendings/new_loans"
+    %div#new_loans
+      =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+    %div#approve_loans
+      =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+    %div#disburse_loans
+      =partial "lendings/disburse_loans", :lendings => @disburse_lendings
  

@@ -70,10 +70,10 @@
           %td
             = ws.loan_id
           %td
-            = ws.loan_status
+            = ws.loan_status.to_s.capitalize
           %td
-            = ws.loan_disbursed_amount
-            - total_amount = total_amount + ws.loan_disbursed_amount.amount.to_i unless ws.loan_disbursed_amount.blank?
+            = MoneyManager.get_money_instance(ws.loan_disbursed_amount) unless ws.loan_disbursed_amount.blank?
+            - total_amount = total_amount + ws.loan_disbursed_amount unless ws.loan_disbursed_amount.blank?
           %td
             = ws.loan_disbursed_date
           %td
@@ -127,36 +127,36 @@
         %td
         %td
         %td
-          = Money.new(total_amount,:INR).to_s
+          = MoneyManager.get_money_instance(total_amount).to_s
         %td
         %td
         %td
         %td
         %td
         %td
-          = Money.new(total_schedule_principal_due,:INR).to_s
+          = MoneyManager.get_money_instance(total_schedule_principal_due).to_s
         %td
-          = Money.new(total_principal_due,:INR).to_s
+          = MoneyManager.get_money_instance(total_principal_due).to_s
         %td
-          = Money.new(total_schedule_principal_outstanding,:INR).to_s
+          = MoneyManager.get_money_instance(total_schedule_principal_outstanding).to_s
         %td
-          = Money.new(total_schedule_interest_due,:INR).to_s
+          = MoneyManager.get_money_instance(total_schedule_interest_due).to_s
         %td
-          = Money.new(total_schedule_interest_outstanding,:INR).to_s
+          = MoneyManager.get_money_instance(total_schedule_interest_outstanding).to_s
         %td
-          = Money.new(total_advance_amount_balance,:INR).to_s
+          = MoneyManager.get_money_instance(total_advance_amount_balance).to_s
         %td
-          = Money.new(total_receipt_principal,:INR).to_s
+          = MoneyManager.get_money_instance(total_receipt_principal).to_s
         %td
-          = Money.new(total_receipt_interest,:INR).to_s
+          = MoneyManager.get_money_instance(total_receipt_interest).to_s
         %td
-          = Money.new(total_receipt_advance,:INR).to_s
+          = MoneyManager.get_money_instance(total_receipt_advance).to_s
         %td
-          = Money.new(total_due_principal,:INR).to_s
+          = MoneyManager.get_money_instance(total_due_principal).to_s
         %td
-          = Money.new(total_due_interest,:INR).to_s
+          = MoneyManager.get_money_instance(total_due_interest).to_s
         %td
-          = Money.new(total,:INR).to_s
+          = MoneyManager.get_money_instance(total).to_s
 
 
 
