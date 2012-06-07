@@ -1,7 +1,12 @@
 class Lendings < Application
 
   def index
-
+    @lendings = Lending.all
+    if @lendings.blank?
+      redirect resource(:lending_products)
+    else
+      display @lendings
+    end
   end
 
   def new
@@ -74,10 +79,42 @@ class Lendings < Application
 
 
   def edit
-
   end
 
   def update
-    
+  end
+
+  def update_lending_new_to_approve
+    @message = {}
+    lendings = []
+    lending_params = params[:lending]
+    begin
+      lending_params.each do |key, value|
+        if value.size == 2
+          lending = Lending.get key
+          approve_amount = MoneyManager.get_money_instance(value.last[:approved_amount])
+          lending.approved_amount = approve_amount.amount
+          lending.approved_by_staff = value.last[:approved_by_staff]
+          if lending.valid?
+            lendings << lending
+          else
+            @message = {:error => "#{lending.id}= #{lending.errors.first.join(', ')}"}
+          end
+        end
+      end
+      if @message[:error].blank?
+        lendings.each do |lending|
+          if lending.approve(lending.to_money[:approved_amount], Date.today, lending.approved_by_staff)
+            @message = {:notice => "Loans approved successfully."}
+          else
+            @message = {:error => "Loans approved fails."}
+          end
+        end
+      end
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+
+    redirect resource(:lendings) , :message => @message
   end
 end

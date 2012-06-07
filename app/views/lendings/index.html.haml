@@ -1,0 +1,18 @@
+%h1
+  Loans
+%div.tab_container.shaded
+  %ul.tabs
+    %li#new_loans
+      New Loans
+    %li#approved_Loans
+      Approve Loans
+    %li#disbursed_loans
+      Disbursed Loans
+  %div.tab
+    %div#location_list
+      =partial "lendings/new_loans"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+ 
