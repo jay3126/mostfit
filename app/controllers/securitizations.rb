@@ -5,28 +5,36 @@ class Securitizations < Application
 
 
   def index
-	@securitizations=Securitization.all
-  display @securitizations
+    @securitizations=Securitization.all
+    display @securitizations
   end
   
   def new
-	@securitization=Securitization.new
-	display @securitization
+    @securitization=Securitization.new
+    display @securitization
   end
   
   def create(securitization)
-  @securitization = Securitization.new(securitization)
-	if(Securitization.all(:name => @securitization.name).count==0)
-		if @securitization.save!
-			redirect("/securitizations", :message => {:notice => "Securitization '#{@securitization.name}' (Id:#{@securitization.id}) successfully created"})
-		else
-			message[:error] = "Securitization failed to be created"
-			render :new  # error messages will show
-		end
-	else
-		message[:error] = "Securitization with same name already exists !"
-		render :new  # error messages will show
-	end    
+    @securitization = Securitization.new(securitization)
+    @errors = []
+    @errors << "Securitization name must not be blank " if params[:securitization][:name].blank?
+    @errors << "Effective date must not be blank " if params[:securitization][:effective_on].blank?
+    if @errors.blank?
+      if(Securitization.all(:name => @securitization.name).count==0)
+        if @securitization.save!
+          redirect("/securitizations", :message => {:notice => "Securitization '#{@securitization.name}' (Id:#{@securitization.id}) successfully created"})
+        else
+          message[:error] = "Securitization failed to be created"
+          render :new  # error messages will show
+        end
+      else
+        message[:error] = "Securitization with same name already exists !"
+        render :new  # error messages will show
+      end
+    else
+      message[:error] = @errors.to_s
+      render :new
+    end
   end
 
 
