@@ -9,7 +9,7 @@ class Lendings < Application
 
   def new
     @lending_product = LendingProduct.get params[:lending_product_id]
-    @client = Client.get params[:client_id]
+    @loan_borrower = Client.get params[:client_id]
     @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
     @clients = Client.all(:id => @counterparty_ids)
     @lending = @lending_product.lendings.new
@@ -27,9 +27,10 @@ class Lendings < Application
     applied_by_staff              = params[:lending][:applied_by_staff]
     schedule_disbursal_date       = params[:lending][:scheduled_disbursal_date]
     schedule_first_repayment_date = params[:lending][:scheduled_first_repayment_date]
-    client_id                     = params[:lending][:for_borrower_id]
+    loan_borrower_id              = params[:loan_borrower]
     recorded_by_user              = session.user.id
-    @client                       = Client.get client_id unless client_id.blank?
+    
+    @loan_borrower                = Client.get loan_borrower_id unless loan_borrower_id.blank?
     @lending_product              = LendingProduct.get lending_product_id unless lending_product_id.blank?
 
     # VALIDATIONS
@@ -43,10 +44,10 @@ class Lendings < Application
     # PERFORM OPERATION
     if @message[:error].blank?
       begin
-        @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @client.id
+        @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
         money_amount = @lending_product.to_money[:amount]
         lending = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
-          client_id, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
+          @loan_borrower, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
           schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id)
 
         if lending.new?

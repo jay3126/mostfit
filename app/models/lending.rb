@@ -65,7 +65,6 @@ class Lending
           applied_by_staff,
           recorded_by_user,
           lan = nil)
-
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
 
     new_loan  = to_loan(
