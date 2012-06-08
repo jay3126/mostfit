@@ -20,6 +20,14 @@ module Resolver
     [loan_assignment_type, for_assignment.id]
   end
 
+  def self.fetch_assignment(by_assignment_type, for_assignment_id)
+    Validators::Arguments.not_nil?(by_assignment_type, for_assignment_id)
+    klass_name = Constants::LoanAssignment::ASSIGNMENT_AND_MODELS[by_assignment_type]
+    raise ArgumentError, "Unable to recognize a model that corresponds to the loan assignment: #{by_assignment_type}" unless klass_name
+    klass = Kernel.const_get(klass_name)
+    klass.get(for_assignment_id)
+  end
+
   # Verifies that the object is an instance of known counterparties
   def self.is_a_counterparty?(obj_to_test)
     Constants::Transaction::COUNTERPARTIES_AND_MODELS.values.include?(obj_to_test.class.name)

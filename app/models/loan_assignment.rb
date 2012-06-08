@@ -14,11 +14,19 @@ class LoanAssignment
   property :created_at,        *CREATED_AT
   property :deleted_at,        *DELETED_AT
 
-  validates_with_method :cannot_both_sell_and_encumber
+  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?
 
   def cannot_both_sell_and_encumber
     LoanAssignment.get_loan_assigned_to(self.loan_id, self.effective_on).nil? ? true :
       [false, "There is currently an assignment for the loan with ID #{self.loan_id} that is in effect on #{self.effective_on}"]
+  end
+
+  def loan_exists?
+    Loan.get(loan_id) ? true : [false, "There is no loan with ID: #{loan_id}"]
+  end
+
+  def loan_assignment_instance
+    Resolver.fetch_assignment(self.assignment_nature, self.assignment_id)
   end
   
   # Marks a loan as assigned to a securitization or encumberance instance effective_on the specified date, performed_by the staff member and recorded_by user
