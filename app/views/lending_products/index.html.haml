@@ -24,7 +24,7 @@
           %td
             = lp.name
           %td
-            = Money.new(lp.amount.to_i, :INR).amount
+            = lp.to_money[:amount]
           %td
             = lp.interest_rate
           %td
