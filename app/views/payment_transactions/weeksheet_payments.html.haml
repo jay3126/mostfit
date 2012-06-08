@@ -78,10 +78,10 @@
             = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_type]", :value => 'lending'
             = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_id]", :value => ws.loan_id
           %td
-            = ws.loan_status
+            = ws.loan_status.to_s.humanize
           %td
-            = ws.loan_disbursed_amount
-            - total_disbursed_amount = total_disbursed_amount + ws.loan_disbursed_amount unless ws.loan_disbursed_amount.blank?
+            = ws.loan_disbursed_amount.to_s
+            - total_disbursed_amount = total_disbursed_amount + ws.loan_disbursed_amount.amount unless ws.loan_disbursed_amount.blank?
           %td
             = ws.loan_disbursed_date
           %td

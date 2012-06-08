@@ -39,7 +39,7 @@ class CollectionsFacade
         client_group_id                    = client.client_group ? client.client_group.id : ''
         client_group_name                  = client.client_group ? client.client_group.name : "Not attached to any group"
         loan_id                            = client_loan.id
-        loan_amount                        = client_loan.disbursed_amount
+        loan_amount                        = client_loan.to_money[:disbursed_amount]
         loan_status                        = loan_facade.get_current_loan_status(client_loan.id)
         loan_disbursal_date                = client_loan.disbursal_date
         loan_due_status                    = loan_facade.get_historical_loan_status_on_date(client_loan.id, on_date) || :not_due
