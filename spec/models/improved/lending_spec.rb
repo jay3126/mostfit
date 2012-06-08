@@ -67,6 +67,7 @@ describe Lending do
 
     @common_transaction_attributes = {:currency => @transaction_currency, :on_product_type => @on_product_type, :on_product_id => @on_product_id, :by_counterparty_type => @by_counterparty_type, :by_counterparty_id => @by_counterparty_id, :performed_at => @performed_at, :accounted_at => @accounted_at, :performed_by => @performed_by, :recorded_by => @recorded_by}
 
+    @payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, @recorded_by_user)
   end
 
   it "should have a status of new" do
@@ -232,13 +233,24 @@ describe Lending do
       factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
 
       disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
-      disbursement = PaymentTransaction.create(disbursement_attributes)
-      disbursement.id.should_not be_nil
+
+      disbursement_money_amount = approved_amount
+      receipt_type    = disbursement_attributes[:receipt_type]
+      on_product_type = disbursement_attributes[:on_product_type]
+      on_product_id   = disbursement_attributes[:on_product_id]
+      by_counterparty_type = disbursement_attributes[:by_counterparty_type]
+      by_counterparty_id   = disbursement_attributes[:by_counterparty_id]
+      performed_at         = disbursement_attributes[:performed_at]
+      accounted_at         = disbursement_attributes[:accounted_at]
+      performed_by         = disbursement_attributes[:performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
 
       @loan.total_loan_disbursed.should == @zero_money_amount
 
-      @loan.disburse(disbursement)
-      @loan.total_loan_disbursed.should == disbursement.payment_money_amount
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+
+      @loan.total_loan_disbursed.should == disbursement_money_amount
 
       factory_init_attributes = @common_transaction_attributes
       factory_init_attributes.merge!( {:receipt_type => @receipt_type} )
@@ -262,15 +274,24 @@ describe Lending do
         factory_init_attributes[:amount] = receipt_amount
         factory_init_attributes[:effective_on] = repayment_on
         repayment_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
-        repayment = PaymentTransaction.create(repayment_attributes)
-        repayment.id.should_not be_nil
-        repayments << repayment
 
-        @loan.repay(repayment)
-        @loan.total_received_on_date(repayment_on).should == repayment.payment_money_amount
+        receipt_money_amount = Money.new(receipt_amount, @loan.currency)
+        receipt_type = repayment_attributes[:receipt_type]
+        on_product_type = repayment_attributes[:on_product_type]
+        on_product_id = repayment_attributes[:on_product_id]
+        by_counterparty_type = repayment_attributes[:by_counterparty_type]
+        by_counterparty_id   = repayment_attributes[:by_counterparty_id]
+        performed_at         = repayment_attributes[:performed_at]
+        accounted_at         = repayment_attributes[:accounted_at]
+        performed_by         = repayment_attributes[:performed_by]
+        effective_on         = repayment_attributes[:effective_on]
+        product_action       = Constants::Transaction::LOAN_REPAYMENT
+
+        @payment_facade.record_payment(receipt_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+
+        @loan.total_received_on_date(repayment_on).should == receipt_money_amount
       }
 
-      #TODO Failing spec needs to be checked for allocation
       @loan.total_received_till_date.should == (@loan.total_loan_disbursed + @loan.total_interest_applicable)
       @loan.principal_received_till_date.should == @loan.total_loan_disbursed
       @loan.interest_received_till_date.should == @loan.total_interest_applicable

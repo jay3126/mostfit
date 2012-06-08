@@ -349,6 +349,15 @@ class Lending
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################
 
+  def account_for_payment(payment_transaction, loan_action)
+    case loan_action
+      when LOAN_DISBURSEMENT then return disburse(payment_transaction)
+      when LOAN_REPAYMENT then return repay(payment_transaction)
+      else
+        raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
+    end
+  end
+
   def approve(approved_amount, approved_on_date, approved_by)
     Validators::Arguments.not_nil?(approved_amount, approved_on_date, approved_by)
     raise Errors::BusinessValidationError, "approved amount #{approved_amount.amount} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount

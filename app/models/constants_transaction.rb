@@ -12,6 +12,9 @@ module Constants
     RECEIPT = :receipt; PAYMENT = :payment
     RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
 
+    LOAN_DISBURSEMENT = :loan_disbursement; LOAN_REPAYMENT = :loan_repayment
+    PRODUCT_ACTIONS = [LOAN_DISBURSEMENT, LOAN_REPAYMENT]
+
     TRANSACTED_PRODUCTS = Constants::Products::PRODUCTS
 
     PRINCIPAL_AMOUNT = :principal_amount; INTEREST_AMOUNT = :interest_amount

@@ -15,7 +15,7 @@ class PaymentFacade < StandardFacade
   end
 
   def get_payments_performed_till_date(at_location, effective_on = Date.today, by_staff = nil)
-     PaymentTransaction.get_payments_performed_till_date(at_location, effective_on, by_staff)
+    PaymentTransaction.get_payments_performed_till_date(at_location, effective_on, by_staff)
   end
 
   # UPDATES
@@ -23,13 +23,16 @@ class PaymentFacade < StandardFacade
   def record_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
     payment_transaction = PaymentTransaction.record_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, for_user)
 
-=begin
-    product_type, product_id = Resolver.resolve_product(on_product)
-    product_facade = FacadeFactory.get_other_facade(product_type, self)
-    product_facade.account_for_payment(payment_transaction, product_id, product_action)
-=end
+    loan_facade.account_for_payment(payment_transaction, on_product_id, product_action)
+
     #book-keeping
     #book payment transaction on product account
+  end
+
+  private
+
+  def loan_facade
+    @loan_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOAN_FACADE, self)
   end
 
 end
