@@ -14,6 +14,8 @@ class LoanBorrower
 
   has 1, :lending
 
+  def counterparty; Resolver.fetch_counterparty(self.counterparty_type, self.counterparty_id); end
+
   # Creates a record for a loan applied for a counterparty
   def self.assign_loan_borrower(to_counterparty, applied_on_date, administered_at_origin, accounted_at_origin, performed_by, recorded_by)
     Validators::Arguments.not_nil?(to_counterparty, applied_on_date, administered_at_origin, accounted_at_origin, performed_by, recorded_by)

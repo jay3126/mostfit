@@ -89,7 +89,6 @@ describe Lending do
     applied_by_staff = 21
     recorded_by_user = 23
 
-    debugger
     new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
 
     LoanAdministration.get_administered_at(new_loan.id, applied_on_date).should == new_loan.administered_at_origin_location
@@ -100,6 +99,7 @@ describe Lending do
 
     # Ensure that a loan borrower is created for the counterparty and loan
     LoanBorrower.get_all_loans_for_counterparty(for_borrower).include?(new_loan).should be_true
+    new_loan.borrower.should               == for_borrower
 
     new_loan.applied_on_date.should        == applied_on_date
     new_loan.approved_amount.should        == nil

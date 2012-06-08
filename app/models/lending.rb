@@ -138,6 +138,17 @@ class Lending
   # LOAN SCHEDULE DATES # ends
   #######################
 
+  ############
+  # Borrower # begins
+  ############
+
+  # Gets the instance of borrower
+  def borrower; self.loan_borrower ? self.loan_borrower.counterparty : nil; end
+
+  ############
+  # Borrower # ends
+  ############
+
   ################
   # LOAN AMOUNTS # begins
   ################
