@@ -1,9 +1,15 @@
 class FacadeFactory
   include Singleton
 
+  # Factory that locates and returns instances of the requested facade that is_a
+  # StandardFacade
   # Use this factory to obtain instances of any facade
 
   attr :created_at
+
+  def initialize
+    @created_at = DateTime.now
+  end
 
   MEETING_FACADE    = :meeting_facade
   LOAN_FACADE       = :loan_facade
@@ -11,19 +17,18 @@ class FacadeFactory
   PAYMENT_FACADE    = :payment_facade
   USER_FACADE       = :user_facade
   ACCOUNTING_FACADE = :accounting_facade
+  REPORTING_FACADE  = :reporting_facade
+
   FACADE_TYPES      = {
-      MEETING_FACADE    => MeetingFacade, LOAN_FACADE => LoanFacade,
-      LOCATION_FACADE   => LocationFacade, PAYMENT_FACADE => PaymentFacade,
+      MEETING_FACADE    => MeetingFacade, 
+      LOAN_FACADE       => LoanFacade,
+      LOCATION_FACADE   => LocationFacade, 
+      PAYMENT_FACADE    => PaymentFacade,
       USER_FACADE       => UserFacade,
-      ACCOUNTING_FACADE => AccountingFacade
+      ACCOUNTING_FACADE => AccountingFacade,
+      REPORTING_FACADE  => ReportingFacade
   }
 
-  def initialize
-    @created_at = DateTime.now
-  end
-
-  # Factory that locates and returns instances of the requested facade that is_a
-  # StandardFacade
   def get_instance(of_facade_type, for_user, with_options = { })
     facade_klass = FACADE_TYPES[of_facade_type]
     raise ArgumentError, "No facade configured for requested facade type: #{of_facade_type}" unless facade_klass

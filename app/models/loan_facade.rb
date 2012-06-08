@@ -156,6 +156,22 @@ class LoanFacade < StandardFacade
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
 
+  #############
+  # Aggregation # begins
+  #############
+
+  def aggregate_loans_applied(aggregate_by, on_date)
+    LoanBorrower.aggregate_loans_applied(aggregate_by, on_date)
+  end
+
+  def aggregate_loans_scheduled_for_disbursement(aggregate_by, on_date)
+    #TODO
+  end
+
+  #############
+  # Aggregation # ends
+  #############
+
   private
 
   # LoanManager instance

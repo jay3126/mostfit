@@ -37,8 +37,26 @@ class LoanBorrower
     loans  = {}
     loans[:counterparty_type] = counterparty_type
     loans[:counterparty_id]   = counterparty_id
-    all_loans = all(loans)
-    all_loans.collect {|loan_borrower| loan_borrower.lending}
+    all_loan_borrowers = all(loans)
+    all_loan_borrowers.collect {|loan_borrower| loan_borrower.lending}
+  end
+
+  def self.aggregate_loans_applied(aggregate_by, on_date)
+    loans_applied = {}
+    loans_applied[:effective_on] = on_date
+    loan_borrowers = all(loans_applied)
+    loans = loan_borrowers.collect{|borrower| borrower.lending}
+    group_by_type = resolve_aggregate_by(aggregate_by)
+    loans.group_by {|loan| loan.send(group_by_type) if loan}
+  end
+
+  def self.resolve_aggregate_by(aggregate_by)
+    case aggregate_by
+      when ReportingFacade::AGGREGATE_BY_BRANCH then :accounted_at_origin
+      when ReportingFacade::AGGREGATE_BY_CENTER then :administered_at_origin
+      else
+        raise Errors::OperationNotSupportedError, "Does not support aggregation by #{aggregate_by}"
+    end
   end
 
 end
