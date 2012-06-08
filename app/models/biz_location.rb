@@ -49,5 +49,10 @@ class BizLocation
     query[:order] = [:schedule_begins_on.desc]
     self.meeting_schedules.first(query)
   end
+
+  def save_meeting_schedule(meeting_schedule)
+    self.meeting_schedules << meeting_schedule
+    save
+  end
   
 end

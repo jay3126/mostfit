@@ -29,7 +29,7 @@ class CollectionsFacade
     return [] if clients.blank?
 
     clients.each do |client|
-      client_loan = loans.select{|l| l.for_borrower_id == client.id}.first
+      client_loan = loans.select{|l| l.loan_borrower.counterparty == client}.first
       if client_loan.blank?
         client_non_loan << client.id
       else
