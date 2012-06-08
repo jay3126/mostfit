@@ -67,7 +67,7 @@ USAGE_TEXT
         clients.each do |client|
           lan                            = "#{DateTime.now}_#{client.id}"
           for_amount                     = @total_principal_money_amount
-          for_borrower_id                = client.id
+          for_borrower                   = client
           applied_on_date                += 1
           scheduled_disbursal_date       = applied_on_date + 7
           scheduled_first_repayment_date = scheduled_disbursal_date + 7
@@ -78,7 +78,7 @@ USAGE_TEXT
           applied_by_staff               = performed_by
           recorded_by_user               = recorded_by
 
-          loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
+          loan = Lending.create_new_loan(for_amount, repayment_frequency, tenure, @from_lending_product, for_borrower, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
         end
       rescue => ex
         puts "An error occurred: #{ex.message}"

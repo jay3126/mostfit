@@ -39,7 +39,7 @@ describe Lending do
 
     lan = "#{DateTime.now}"
     for_amount = @total_principal_money_amount
-    @for_borrower_id = Factory(:client).id
+    @for_borrower = Factory(:client)
     @applied_on_date = Date.parse('2011-05-01')
     @scheduled_disbursal_date = @applied_on_date + 7
     @scheduled_first_repayment_date = @scheduled_disbursal_date + 7
@@ -50,7 +50,7 @@ describe Lending do
     @applied_by_staff = Factory(:staff).id
     @recorded_by_user = Factory(:user).id
 
-    @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower_id, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
+    @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
     @loan.saved?.should == true
 
     # For payment transactions on the loan
@@ -59,8 +59,7 @@ describe Lending do
     @receipt_type = Constants::Transaction::RECEIPT
     @on_product_type = Constants::Products::LENDING
     @on_product_id = @loan.id
-    @by_counterparty_type = Constants::Transaction::CLIENT
-    @by_counterparty_id = @for_borrower_id
+    @by_counterparty_type, @by_counterparty_id = Resolver.resolve_counterparty(@for_borrower)
     @performed_at = @administered_at_origin
     @accounted_at = @accounted_at_origin
     @performed_by = @applied_by_staff
@@ -79,7 +78,7 @@ describe Lending do
   it "should create a new loan as expected" do
     lan = "my_unique_lan #{DateTime.now}"
     applied_amount = Money.new(1000000, :INR)
-    for_borrower_id = 123
+    for_borrower = @for_borrower
     applied_on_date = Date.parse('2012-05-01')
     scheduled_disbursal_date = applied_on_date + 7
     scheduled_first_repayment_date = scheduled_disbursal_date + 7
@@ -90,14 +89,18 @@ describe Lending do
     applied_by_staff = 21
     recorded_by_user = 23
 
-    new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower_id, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
+    debugger
+    new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
 
     LoanAdministration.get_administered_at(new_loan.id, applied_on_date).should == new_loan.administered_at_origin_location
     LoanAdministration.get_accounted_at(new_loan.id, applied_on_date).should == new_loan.accounted_at_origin_location
     new_loan.lan.should                    == lan
     new_loan.applied_amount.should         == applied_amount.amount
     new_loan.currency.should               == applied_amount.currency
-    new_loan.for_borrower_id.should        == for_borrower_id
+
+    # Ensure that a loan borrower is created for the counterparty and loan
+    LoanBorrower.get_all_loans_for_counterparty(for_borrower).include?(new_loan).should be_true
+
     new_loan.applied_on_date.should        == applied_on_date
     new_loan.approved_amount.should        == nil
     new_loan.repayment_frequency.should    == repayment_frequency
@@ -275,7 +278,6 @@ describe Lending do
     end
 
   end
-
 
 
 =begin

@@ -9,7 +9,6 @@ class Lending
   property :lan,                            *UNIQUE_ID
   property :applied_amount,                 *MONEY_AMOUNT
   property :currency,                       *CURRENCY
-  property :for_borrower_id,                *INTEGER_NOT_NULL #TODO add borrower type and ID
   property :applied_on_date,                *DATE_NOT_NULL
   property :approved_amount,                *MONEY_AMOUNT_NULL
   property :disbursed_amount,               *MONEY_AMOUNT_NULL
@@ -45,6 +44,7 @@ class Lending
   end
 
   belongs_to :lending_product
+  belongs_to :loan_borrower
   has 1, :loan_base_schedule
   has n, :loan_payments
   has n, :loan_receipts
@@ -56,7 +56,7 @@ class Lending
           repayment_frequency,
           tenure,
           from_lending_product,
-          for_borrower_id,
+          for_borrower,
           administered_at_origin,
           accounted_at_origin,
           applied_on_date,
@@ -66,12 +66,14 @@ class Lending
           recorded_by_user,
           lan = nil)
 
+    new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
+
     new_loan  = to_loan(
         applied_amount,
         repayment_frequency,
         tenure,
         from_lending_product,
-        for_borrower_id,
+        new_loan_borrower,
         administered_at_origin,
         accounted_at_origin,
         applied_on_date,
@@ -407,16 +409,16 @@ class Lending
 
   private
 
-  def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, for_borrower_id,
+  def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
       administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
       applied_by_staff, recorded_by_user, lan = nil)
-    Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, for_borrower_id,
+    Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
                                    administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date,
                                    scheduled_first_repayment_date, applied_by_staff, recorded_by_user)
     loan_hash                                  = { }
     loan_hash[:applied_amount]                 = for_amount.amount
     loan_hash[:currency]                       = for_amount.currency
-    loan_hash[:for_borrower_id]                = for_borrower_id
+    loan_hash[:loan_borrower]                  = new_loan_borrower
     loan_hash[:repayment_frequency]            = repayment_frequency
     loan_hash[:tenure]                         = tenure
     loan_hash[:lending_product]                = from_lending_product
@@ -429,7 +431,7 @@ class Lending
     loan_hash[:recorded_by_user]               = recorded_by_user
     loan_hash[:repayment_allocation_strategy]  = from_lending_product.repayment_allocation_strategy
     loan_hash[:status]                         = NEW_LOAN_STATUS
-    loan_hash[:lan] = lan if lan
+    loan_hash[:lan]                            = lan if lan
     Lending.new(loan_hash)
   end
 
