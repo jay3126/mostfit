@@ -14,7 +14,7 @@
     %th
       Amount
     %td
-      = @lending_product.amount.to_s
+      = @lending_product.to_money[:amount].to_s
   %tr
     %th
       Currency

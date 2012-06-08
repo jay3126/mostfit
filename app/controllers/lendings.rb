@@ -138,8 +138,8 @@ class Lendings < Application
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
-          payment_transaction = mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.for_borrower_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, nil)
-          if lending.disburse(payment_transaction)
+          payment_transaction = mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.for_borrower_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, 'loan_disbursement')
+          if payment_transaction.new?
             @message = {:notice => "Loans disbursed successfully."}
           else
             @message = {:error => "Loans desbursed fails."}
@@ -170,7 +170,7 @@ class Lendings < Application
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         payments.each do |payment|
           lending = payment[:lending]
-          payment_transaction = mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.for_borrower_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, nil)
+          payment_transaction = mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.for_borrower_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, 'loan_repayment')
           if payment_transaction.new?
             @message = {:error => "Loans payments fails."}
           else

@@ -2,7 +2,7 @@
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Borrower
-    %td= link_to Client.get(@lending.for_borrower_id).name, '#', :target => "_blank"
+    %td= link_to lending.loan_borrower.counterparty.name, '#', :target => "_blank"
   %tr.odd
     %th.odd Amount
     %td

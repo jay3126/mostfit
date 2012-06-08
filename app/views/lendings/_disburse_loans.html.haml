@@ -47,7 +47,7 @@
           %td
             = lending.to_money[:applied_amount].to_s
           %td
-            = Client.get(lending.for_borrower_id).name rescue lending.for_borrower_id
+            = lending.loan_borrower.counterparty.name
           %td
             = lending.applied_on_date
           %td
