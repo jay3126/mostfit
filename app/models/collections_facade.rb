@@ -16,7 +16,7 @@ class CollectionsFacade
     biz_location = BizLocation.get(at_biz_location)
     loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
     location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    center_manager = Staff.first # Use this center_manager for staff ID, staff name
+    center_manager = StaffMember.first # Use this center_manager for staff ID, staff name
 
     loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
     return [] if loans.blank?
@@ -77,7 +77,6 @@ class CollectionsFacade
           loan_total_principal_due, loan_total_interest_due, total_paid)
       end
     end
-
     groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
     CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_dates.meeting_time_begins_hours, meeting_dates.meeting_time_begins_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
   end
