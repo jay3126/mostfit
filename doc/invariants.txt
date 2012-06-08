@@ -1,0 +1,35 @@
+Loans:
+# Disbursed amount cannot exceed approved amount, and approved amount cannot exceed applied amount
+# Repayment date cannot precede disbursed date, disbursed date cannot precede approved date, approved date cannot precede applied date
+
+Loans and loan products:
+# The amortization on a loan is arrived at from the loan product
+
+Loans inherit the following from the loan product:
+# Loan amount
+# Tenure
+# Repayment frequency
+# Amortization
+# Allocation strategy
+# Fees
+# Insurance
+
+Loans and payment transactions:
+# All transactions (currently) on a loan are in the same currency, as are the amounts on the loan
+# (Currently) a single disbursement is made for the entire approved amount at the commencement of a loan
+# (Currently) repayments can only be accepted after the disbursement of the loan
+# Payments cannot be reversed in arbitrary manner
+
+Accepting repayments:
+# Do not accept a payment in excess of total actual outstanding
+# Do not accept a payment in excess of absolute amount that is the (total_loan_disbursed + total_interest_applicable)
+
+Users, roles, and staff members:
+# Every user must have an assigned role
+# Every user must have an assigned staff member
+
+Locations:
+# Every staff must be assigned a designation and a location. The location must be at a location level as applicable in the designation
+# (Currently) centers are at the lowest rung of the location level hierarchy and are assigned level with level number zero
+# (Currently) branches are at the next higher rung of the location level hierarchy and are assigned level with level number one
+# The loan disbursed to a client must be at the same set of locations (administered at and accounted at) for the loan as for the client (administered at and registered at)
