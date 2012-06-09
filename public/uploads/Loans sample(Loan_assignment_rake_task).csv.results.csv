@@ -1,0 +1,34 @@
+Loan ID,Status,Error
+2507,Failure,There is currently an assignment for the loan with ID 2507 that is in effect on 09-06-2012
+2508,Failure,There is currently an assignment for the loan with ID 2508 that is in effect on 09-06-2012
+2509,Failure,There is currently an assignment for the loan with ID 2509 that is in effect on 09-06-2012
+1,Failure,There is currently an assignment for the loan with ID 1 that is in effect on 09-06-2012
+56,Failure,There is currently an assignment for the loan with ID 56 that is in effect on 09-06-2012
+22,Failure,There is currently an assignment for the loan with ID 22 that is in effect on 09-06-2012
+34,Failure,There is currently an assignment for the loan with ID 34 that is in effect on 09-06-2012
+68,Failure,There is currently an assignment for the loan with ID 68 that is in effect on 09-06-2012
+22,Failure,There is currently an assignment for the loan with ID 22 that is in effect on 09-06-2012
+12,Failure,There is currently an assignment for the loan with ID 12 that is in effect on 09-06-2012
+0,Failure,There is no loan with ID: 0
+0,Failure,There is no loan with ID: 0
+32,Failure,There is currently an assignment for the loan with ID 32 that is in effect on 09-06-2012
+0,Failure,There is no loan with ID: 0
+3,Success,""
+6,Success,""
+9,Success,""
+7,Success,""
+0,Failure,There is no loan with ID: 0
+34,Failure,There is currently an assignment for the loan with ID 34 that is in effect on 09-06-2012
+78,Success,""
+29,Success,""
+98,Success,""
+346,Success,""
+987,Success,""
+235,Success,""
+845,Success,""
+729,Success,""
+239,Success,""
+11,Success,""
+1232,Success,""
+34546,Failure,There is no loan with ID: 34546
+33,Success,""
