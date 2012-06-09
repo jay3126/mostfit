@@ -26,16 +26,33 @@ class Encumberances < Application
   end
 
   def create(encumberance)
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+    @errors = []
+    facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
     @encumberance = Encumberance.new(encumberance)
-    @money=MoneyManager.get_money_instance(:assigned_value)
-    @encumberance.currency=@money.currency
-    #@encumberance.assigned_value=@money.amount
 
-    if @encumberance.save
-      #redirect resource(@encumberance), :message => {:notice => "Encumberance was successfully created"}
-      redirect resource(:encumberances), :message => {:notice => "Encumberance was successfully created"}
+    # GATE-KEEPING
+    name = params[:encumberance][:name]
+    amount = params[:encumberance][:assigned_value]
+    effective_on = params[:encumberance][:effective_on]
+
+    # VALIDATIONS
+    @errors << "Name cannot be blank" if name.blank?
+    @errors << "Amount cannot be blank" if amount.blank?
+    @errors << "Date of commencement cannot be blank" if effective_on.blank?
+
+    # OPERATIONS
+    if @errors.blank?
+      @money = MoneyManager.get_money_instance(amount)
+      encum = facade.create_encumberance(name, effective_on, @money)
+      if encum
+        redirect resource(:encumberances), :message => {:notice => "Encumberance was successfully created"}
+      else
+        message[:error] = "Encumberance failed to be created"
+        render :new
+      end
     else
-      message[:error] = "Encumberance failed to be created"
+      message[:error] = @errors.flatten.join(', ')
       render :new
     end
   end
@@ -44,7 +61,7 @@ class Encumberances < Application
     @encumberance = Encumberance.get(id)
     raise NotFound unless @encumberance
     if @encumberance.update(encumberance)
-       redirect resource(@encumberance)
+      redirect resource(@encumberance)
     else
       display @encumberance, :edit
     end

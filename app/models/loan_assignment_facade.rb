@@ -33,16 +33,16 @@ class LoanAssignmentFacade < StandardFacade
     #TODO
   end
 
-  def create_encumberance(by_name, effective_on, for_third_parties, assigned_value, performed_by, for_user)
-    #TODO
+  def create_encumberance(by_name, effective_on, assigned_value)
+    Encumberance.create_encumberance(by_name, effective_on, assigned_value)
   end
 
   def find_assignment_by_type_and_name(by_type, for_name)
     case by_type
-      when SECURITISED then return get_securitization(:name => for_name)
-      when ENCUMBERED  then return get_encumberance(:name => for_name)
-      else
-        raise ArgumentError, "The assignment type #{by_type} is not recognized"
+    when SECURITISED then return get_securitization(:name => for_name)
+    when ENCUMBERED  then return get_encumberance(:name => for_name)
+    else
+      raise ArgumentError, "The assignment type #{by_type} is not recognized"
     end
   end
 

@@ -21,4 +21,15 @@ class Encumberance
     "Encumberance: #{name} effective on #{effective_on}"
   end
 
+  def self.create_encumberance(name, effective_on, assigned_value_money_amount)
+    new_encumberance = {}
+    new_encumberance[:name] = name
+    new_encumberance[:effective_on] = effective_on
+    new_encumberance[:assigned_value] = assigned_value_money_amount.amount
+    new_encumberance[:currency]       = assigned_value_money_amount.currency
+    encumberance = create(new_encumberance)
+    raise Errors::DataError, encumberance.errors.first.first unless encumberance.saved?
+    encumberance
+  end
+
 end
