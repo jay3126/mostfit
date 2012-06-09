@@ -36,6 +36,16 @@ class MeetingFacade < StandardFacade
     MeetingCalendar.meeting_calendar(for_location, from_date, till_date)
   end
 
+  # Returns the next meeting for the location after the specified date, if one has been generated using the meeting calendar
+  def get_next_meeting(for_location, after_date)
+    MeetingCalendar.next_meeting_for_location(for_location, after_date)
+  end
+
+  # Returns the previous meeting for the location before the specified date, if one has been generated using the meeting calendar
+  def get_previous_meeting(for_location, before_date)
+    MeetingCalendar.previous_meeting_for_location(for_location, before_date)
+  end
+
   # Gets meeting schedules in effect for the given location
   def get_meeting_schedules(for_location)
     MeetingScheduleManager.get_all_meeting_schedule_infos(for_location)

@@ -84,6 +84,20 @@ class MeetingCalendar
     meetings_for_location(location, from_date, till_date)
   end
 
+  def self.previous_meeting_for_location(location, before_date)
+    earliest_date = before_date - DEFAULT_FUTURE_MAX_DURATION_IN_DAYS
+    all_meetings = meeting_calendar(location, earliest_date, before_date)
+    return nil if all_meetings.empty?
+    meetings_sorted_most_recent = all_meetings.sort.reverse
+    meetings_sorted_most_recent.each { |meeting_date| return meeting_date if meeting_date < before_date }
+  end
+
+  def self.next_meeting_for_location(location, after_date)
+    all_meetings = meeting_calendar(location, after_date)
+    return nil if all_meetings.empty?
+    all_meetings.sort.each { |meeting_date| return meeting_date if meeting_date > after_date }
+  end
+
   def self.all_locations_meeting_on_date(on_date = Date.today, meeting_status = nil)
     query = {:on_date => on_date}
     query.merge!(:meeting_status => meeting_status) if meeting_status
