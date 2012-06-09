@@ -124,12 +124,9 @@ class PaymentTransactions < Application
             @message[:error]= "#{@message[:error]}  #{product_type}(#{product_id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
           end
         end
-        # money_amount = MoneyManager.get_money_instance_least_terms(amount.to_i)
-        #@copy_payment_transaction = mf.record_payment(money_amount, receipt, product_type, product_id, cp_type, cp_id, performed_at, accounted_at, performed_by, effective_on, nil)
-
         @payment_transactions.each do |pt|
           money_amount = MoneyManager.get_money_instance(pt.amount.to_i)
-          mf.record_payment(money_amount, pt.receipt_type, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, :loan_repayment)
+          mf.record_payment(money_amount, pt.receipt_type, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
         end
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}

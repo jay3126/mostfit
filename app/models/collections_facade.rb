@@ -44,9 +44,9 @@ class CollectionsFacade
           loan_status                        = client_loan.current_loan_status
           loan_disbursal_date                = client_loan.disbursal_date
           loan_due_status                    = client_loan.current_due_status
-          loan_days_past_due                  = client_loan.days_past_due
+          loan_days_past_due                 = client_loan.days_past_due
           loan_schedule_status               = '' #TODO
-          #loan_days_past_due                 = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
+          #loan_days_past_due                = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
           loan_principal_due                 = ''
           loan_schedule_items                = loan_schedule_items.first if loan_schedule_items.class == Array && loan_schedule_items.compact.size == 1
           if loan_schedule_items.size > 1
@@ -79,10 +79,11 @@ class CollectionsFacade
 
           loan_total_interest_due             = ''
           loan_total_principal_due            = ''
+          
           if (loan_actual_principal_due + loan_actual_interest_due) >= loan_advance_amount
-            total_paid_amount = (loan_actual_principal_due + loan_actual_interest_due) - loan_advance_amount
+            total_amount_to_be_paid = (loan_actual_principal_due + loan_actual_interest_due) - loan_advance_amount
           else
-            total_paid_amount = 0
+            total_amount_to_be_paid = 0
           end
 
           collection_sheet_line << CollectionSheetLineItem.new(at_biz_location, biz_location.name, on_date, client_id, client_name, client_group_id,
@@ -92,7 +93,7 @@ class CollectionsFacade
             loan_advance_amount, loan_principal_receipts, loan_interest_receipts, loan_advance_receipts,
             loan_total_principal_due, loan_total_interest_due, 
             loan_actual_principal_due, loan_actual_interest_due,
-            loan_actual_principal_outstanding, loan_actual_interest_outstanding, total_paid_amount)
+            loan_actual_principal_outstanding, loan_actual_interest_outstanding, total_amount_to_be_paid)
         end
       end
     end
