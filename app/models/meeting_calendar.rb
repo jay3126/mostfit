@@ -23,6 +23,7 @@ class MeetingCalendar
   include Constants::Time
   include Constants::Space
   include IsMeeting
+  include Comparable
 
   # The meeting calendar consults meeting schedules for all locations that meet
   # It then periodically creates a 'proposed' meeting calendar based on such schedules
@@ -40,6 +41,11 @@ class MeetingCalendar
   # Returns an instance of MeetingInfo
   def to_info
     MeetingInfo.new(location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
+  end
+
+  # Compare on the basis of the date
+  def <=>(other)
+    other.respond_to?(:on_date) ? self.on_date <=> other.on_date : nil
   end
 
   # Creates a meeting for the specified location and date
@@ -87,15 +93,27 @@ class MeetingCalendar
   def self.previous_meeting_for_location(location, before_date)
     earliest_date = before_date - DEFAULT_FUTURE_MAX_DURATION_IN_DAYS
     all_meetings = meeting_calendar(location, earliest_date, before_date)
-    return nil if all_meetings.empty?
-    meetings_sorted_most_recent = all_meetings.sort.reverse
-    meetings_sorted_most_recent.each { |meeting_date| return meeting_date if meeting_date < before_date }
+    previous_meeting = nil
+    meetings_sorted_most_recent_first = all_meetings.sort.reverse
+    meetings_sorted_most_recent_first.each { |meeting|
+      if meeting.on_date < before_date
+        previous_meeting = meeting
+        break
+      end
+    }
+    previous_meeting
   end
 
   def self.next_meeting_for_location(location, after_date)
     all_meetings = meeting_calendar(location, after_date)
-    return nil if all_meetings.empty?
-    all_meetings.sort.each { |meeting_date| return meeting_date if meeting_date > after_date }
+    next_meeting = nil
+    all_meetings.sort.each { |meeting|
+      if meeting.on_date > after_date
+        next_meeting = meeting
+        break
+      end
+    }
+    next_meeting
   end
 
   def self.all_locations_meeting_on_date(on_date = Date.today, meeting_status = nil)
