@@ -18,6 +18,13 @@ class PaymentTransaction
   property :effective_on,         *DATE_NOT_NULL
   property :created_at,           *CREATED_AT
 
+  validates_with_method :disallow_future_dated_transactions
+
+  def disallow_future_dated_transactions
+    (self.effective_on and (self.effective_on > Date.today)) ? [false, "Future dated transactions are not permitted"] :
+        true
+  end
+
   def money_amounts; [ :amount ]; end
   def payment_money_amount; to_money_amount(:amount); end
 

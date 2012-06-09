@@ -33,6 +33,14 @@ describe PaymentTransaction do
     )
   end
 
+  it "should disallow a future-dated transaction" do 
+    @receipt.effective_on = (Date.today + 1)
+    @receipt.should_not be_valid
+   
+    @receipt.effective_on = (Date.today - 1)
+    @receipt.should be_valid
+  end
+
   it "should record a payment as expected" do
     payment = PaymentTransaction.record_payment(@money_amount, @receipt_type, @on_product_type, @on_product_id, @by_counterparty_type, @by_counterparty_id, @performed_at, @accounted_at, @performed_by, @effective_on, @recorded_by)
     payment.saved?.should be_true
