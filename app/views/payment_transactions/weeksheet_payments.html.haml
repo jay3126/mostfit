@@ -85,7 +85,7 @@
           %td
             = ws.loan_disbursed_date
           %td
-            = ws.loan_due_status
+            = ws.loan_due_status.to_s.humanize
           %td
             = ws.loan_installment_number
           %td

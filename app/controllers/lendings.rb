@@ -138,7 +138,7 @@ class Lendings < Application
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
-          payment_transaction = mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, :loan_disbursement)
+          mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, Constants::Transaction::LOAN_DISBURSEMENT)
           if lending.status == :disbursed_loan_status
             @message = {:notice => "Loans disbursed successfully."}
           else
@@ -171,7 +171,7 @@ class Lendings < Application
         payments.each do |payment|
           lending = payment[:lending]
           repayment_count = lending.loan_receipts.count
-          payment_transaction = mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, :loan_repayment)
+          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, Constants::Transaction::REPAYMENT)
           raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
           @message = {:notice => "Loans payments successfully."}
         end
@@ -189,4 +189,38 @@ class Lendings < Application
     partial 'lending_transactions'
   end
 
+  def create_repayment_on_lending
+
+    # INITIALIZING OF VARIABLES USED THROUGHTOUT
+    @message = {}
+
+    # GET-KEEPING
+    @lending         = Lending.get params[:id]
+    payment_amount   = params[:payment_amount]
+    payment_type     = params[:payment_type]
+    payment_date     = params[:payment_date]
+    payment_by_staff = params[:payment_by_staff]
+    mf               = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
+
+    #VALIDATION
+    @message[:error] = "Payment amount cannot be blank" if payment_amount.blank?
+    @message[:error] = "Please enter valid value of amount" if payment_amount.to_f <= 0
+
+    #OPREATION
+
+    if @message[:error].blank?
+      begin
+        repayment_count = @lending.loan_receipts.count
+        money_amount    = MoneyManager.get_money_instance(payment_amount)
+        mf.record_payment(money_amount, payment_type, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, Constants::Transaction::LOAN_REPAYMENT)
+        raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == @lending.loan_receipts.count
+        @message = {:notice => "Loan payment saved successfully."}
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
+      end
+    end
+    
+    #REDIRECT/RENDER
+    redirect resource(@lending), :message => @message
+  end
 end

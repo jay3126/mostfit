@@ -40,12 +40,13 @@ class CollectionsFacade
           client_group_id                    = client.client_group ? client.client_group.id : ''
           client_group_name                  = client.client_group ? client.client_group.name : "Not attached to any group"
           loan_id                            = client_loan.id
-          loan_amount                        = client_loan.to_money[:disbursed_amount]
-          loan_status                        = loan_facade.get_current_loan_status(client_loan.id)
+          loan_amount                        = client_loan.total_loan_disbursed
+          loan_status                        = client_loan.current_loan_status
           loan_disbursal_date                = client_loan.disbursal_date
-          loan_due_status                    = loan_facade.get_historical_loan_status_on_date(client_loan.id, on_date) || :not_due
-          loan_schedule_status               = ''
-          loan_days_past_due                 = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
+          loan_due_status                    = client_loan.current_due_status
+          loan_days_past_due                  = client_loan.days_past_due
+          loan_schedule_status               = '' #TODO
+          #loan_days_past_due                 = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
           loan_principal_due                 = ''
           loan_schedule_items                = loan_schedule_items.first if loan_schedule_items.class == Array && loan_schedule_items.compact.size == 1
           if loan_schedule_items.size > 1
@@ -57,26 +58,41 @@ class CollectionsFacade
           else
             loan_schedule_item = loan_schedule_items.first
           end
-          loan_schedule_installment_no        = loan_schedule_item.first.first
           loan_schedule_date                  = loan_schedule_item.first.last
+         
+          loan_schedule_installment_no        = loan_schedule_item.first.first
           loan_schedule_principal_due         = loan_schedule_item.last[:scheduled_principal_due]
+          loan_actual_principal_due           = client_loan.actual_principal_due(loan_schedule_date)
+          loan_actual_principal_outstanding   = client_loan.actual_principal_outstanding
           loan_schedule_principal_outstanding = loan_schedule_item.last[:scheduled_principal_outstanding]
+
           loan_schedule_interest_due          = loan_schedule_item.last[:scheduled_interest_due]
+          loan_actual_interest_due            = client_loan.actual_interest_due(loan_schedule_date)
+          loan_actual_interest_outstanding    = client_loan.actual_interest_outstanding
           loan_schedule_interest_outstanding  = loan_schedule_item.last[:scheduled_interest_outstanding]
-          loan_advance_amount                 = ''
+
+          loan_advance_amount                 = client_loan.current_advance_available
+
           loan_principal_receipts             = loan_facade.principal_received_on_date(client_loan.id, on_date)
           loan_interest_receipts              = loan_facade.interest_received_on_date(client_loan.id, on_date)
           loan_advance_receipts               = loan_facade.advance_received_on_date(client_loan.id, on_date)
+
           loan_total_interest_due             = ''
           loan_total_principal_due            = ''
-          total_paid                          = (loan_total_interest_due + loan_total_principal_due)
+          if (loan_actual_principal_due + loan_actual_interest_due) >= loan_advance_amount
+            total_paid_amount = (loan_actual_principal_due + loan_actual_interest_due) - loan_advance_amount
+          else
+            total_paid_amount = 0
+          end
 
           collection_sheet_line << CollectionSheetLineItem.new(at_biz_location, biz_location.name, on_date, client_id, client_name, client_group_id,
             client_group_name, loan_id, loan_amount,
             loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no, loan_schedule_date, loan_days_past_due, loan_principal_due,
             loan_schedule_principal_due, loan_schedule_principal_outstanding, loan_schedule_interest_due, loan_schedule_interest_outstanding,
             loan_advance_amount, loan_principal_receipts, loan_interest_receipts, loan_advance_receipts,
-            loan_total_principal_due, loan_total_interest_due, total_paid)
+            loan_total_principal_due, loan_total_interest_due, 
+            loan_actual_principal_due, loan_actual_interest_due,
+            loan_actual_principal_outstanding, loan_actual_interest_outstanding, total_paid_amount)
         end
       end
     end

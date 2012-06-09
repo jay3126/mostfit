@@ -38,9 +38,12 @@ class UserLocations < Application
   end
 
   def weeksheet_collection
+    @biz_location = BizLocation.get params[:id]
     set_session_effective_date(Date.today) if session[:effective_date].blank?
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-    @biz_location = BizLocation.get params[:id]
+    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
+    @next_meeting = mf.get_next_meeting(@biz_location, @date)
+    @previous_meeting = mf.get_previous_meeting(@biz_location, @date)
     @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
     display @weeksheet
   end

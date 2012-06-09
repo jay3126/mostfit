@@ -5,9 +5,15 @@
     %td
       = link_to "today", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
       &nbsp;|&nbsp;
-      = link_to "previous meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+      - if @previous_meeting.blank?
+        Pervious Meeting
+      - else
+        = link_to "previous meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @previous_meeting.on_date)
       &nbsp;|&nbsp;
-      = link_to "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+      - if @next_meeting.blank?
+        Next Meeting
+      - else
+        = link_to "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @next_meeting.on_date)
   %tr
     %td= "center manager"
     %td= link_to @biz_location.name, resource(@biz_location)

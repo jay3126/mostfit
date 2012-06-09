@@ -1,3 +1,32 @@
+.menu-strip
+  = link_to 'Make Repayment', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+  #meeting_div(style = "display : none")
+    - if @lending.status == :disbursed_loan_status
+      = form_for(@lending, :action => url(:controller => :lendings, :action => :create_repayment_on_lending, :id => @lending.id), :method => "POST", :class => "tall shaded") do
+        %table
+          %tr
+            %td
+              Payment Type
+            %td
+              = select :name => "payment_type", :collection => Constants::Transaction::RECEIVED_OR_PAID.collect{|s| s.to_s}
+          %tr
+            %td
+              Payment Date
+            %td
+              = date_select "payment_date", Date.today
+          %tr
+            %td
+              Payment Amount
+            %td
+              = text_field :name=> "payment_amount"
+          %tr
+            %td
+              Payment by Staff
+            %td
+              = select :name=> "payment_by_staff", :collection => StaffMember.all.collect{|s| [s.id, s.name]}
+        = submit 'Save Repayment', :class => "greenButton"
+    - else
+      This Action does not support in Loan
 - if @lending_transactions.blank?
   %h3
     No Loan Transactions exists

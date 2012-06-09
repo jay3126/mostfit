@@ -35,13 +35,15 @@ class CollectionSheetLineItem
                :loan_id, :loan_disbursed_amount, :loan_status, :loan_disbursed_date, :loan_due_status, :loan_installment_number,
                :loan_schedule_date, :loan_days_past_due, :loan_principal_due,:loan_schedule_principal_due, :loan_schedule_principal_outstanding,
                :loan_schedule_interest_due, :loan_schedule_interest_outstanding, :loan_advance_amount, :loan_principal_receipts, :loan_interest_receipts,
-               :loan_advance_receipts, :loan_total_principal_due, :loan_total_interest_due, :total_paid
+               :loan_advance_receipts, :loan_total_principal_due, :loan_total_interest_due, :loan_actual_principal_due, :loan_actual_interest_due,
+               :loan_actual_principal_outstanding, :loan_actual_interest_outstanding, :total_amount_paid
 
   def initialize(at_biz_location_id, at_biz_location_name, on_date, borrower_id, borrower_name, borrower_group_id, borrower_group_name,
                   loan_id, loan_disbursed_amount,loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no,
                   loan_schedule_date, loan_days_past_due, loan_principal_due,loan_schedule_principal_due, loan_schedule_principal_outstanding,
                   loan_schedule_interest_due, loan_schedule_interest_outstanding,loan_advance_amount, loan_principal_receipts, loan_interest_receipts,
-                  loan_advance_receipts,loan_total_principal_due, loan_total_interest_due, total_paid)
+                  loan_advance_receipts,loan_total_principal_due, loan_total_interest_due, loan_actual_principal_due, loan_actual_interest_due,
+                  loan_actual_principal_outstanding, loan_actual_interest_outstanding, total_amount_paid)
 
     @at_biz_location_id                  = at_biz_location_id
     @at_biz_location_name                = at_biz_location_name
@@ -69,7 +71,11 @@ class CollectionSheetLineItem
     @loan_advance_receipts               = loan_advance_receipts
     @loan_total_principal_due            = loan_total_principal_due
     @loan_total_interest_due             = loan_total_interest_due
-    @total_paid                          = total_paid
+    @loan_actual_principal_due           = loan_actual_principal_due
+    @loan_actual_interest_due            = loan_actual_interest_due
+    @loan_actual_principal_outstanding   = loan_actual_principal_outstanding
+    @loan_actual_interest_outstanding    = loan_actual_interest_outstanding
+    @total_amount_paid                   = total_amount_paid
 
   end
 
