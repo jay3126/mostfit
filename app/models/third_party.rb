@@ -8,15 +8,7 @@ class ThirdParty
   property :created_at,  *CREATED_AT
   
   has n, :securitizations, :through => Resource
-  has n, :encumberances, :through => Resource 
+  has n, :encumberances, :through => Resource
   
-  def save
-	return false
-  end
-  
-  def destroy  
-	return false
-  end 
-  
-    
+  validates_is_unique :name
 end

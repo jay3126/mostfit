@@ -16,5 +16,4 @@ class Tranch
     return false
   end
 
-
 end

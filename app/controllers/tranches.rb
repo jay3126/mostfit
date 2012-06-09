@@ -67,7 +67,7 @@ class Tranches < Application
         render :new  # error messages will show
       else
         # OPERATIONS PERFORMED
-        if @tranch.save!
+        if @tranch.save
           redirect("/tranches/list/#{@tranch.funding_line_id}", :message => {:notice => "Tranch '#{@tranch.name}' (Id:#{@tranch.id}) successfully created"})
         else
           message[:error] = "Tranch failed to be created"
@@ -75,12 +75,9 @@ class Tranches < Application
         end
       end
     else
-      message[:error] = @errors.to_s
+      message[:error] = @errors.flatten.join(', ')
       render :new  # error messages will show
     end
+  end
 
-    # POPULATING RESPONSE AND OTHER VARIABLES
-    
-    # RENDER/RE-DIRECT   
-  end  
 end
