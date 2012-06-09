@@ -3,7 +3,7 @@
     No loan exists
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_lending_approve_to_disburse)) do
-    %table.weeksheet.dataTable.report
+    %table.weeksheet.dataTable.report.nojs
       %thead
         %tr
           %th

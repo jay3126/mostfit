@@ -1,0 +1,61 @@
+- if @lending_transactions.blank?
+  %h3
+    No Loan Transactions exists
+- else
+  %table.weeksheet.dataTable.report.nojs
+    %thead
+      %tr
+        %th
+        %th
+          id
+        %th
+          Amount
+        %th
+          Currecny
+        %th
+          Payment Type
+        %th
+          Client
+        %th
+          Center
+        %th
+          Branch
+        %th
+          Performed By
+        %th
+          Recorded By
+        %th
+          Effective On
+        %th
+          Created At
+    - loan_row_count = 1
+    - @lending_transactions.each do |lt|
+      %tr
+        %td
+          = loan_row_count
+        %td
+          = lt.id
+        %td
+          = lt.to_money[:amount].to_s
+        %td
+          = lt.currency
+        %td
+          = lt.receipt_type
+        %td
+          = lt.by_counterparty.name
+        %td
+          = BizLocation.get(lt.performed_at).name
+        %td
+          = BizLocation.get(lt.accounted_at).name
+        %td
+          = StaffMember.get(lt.performed_by).name
+        %td
+          = User.get(lt.recorded_by).name
+        %td
+          = lt.effective_on
+        %td
+          = lt.created_at.strftime('%Y-%m-%d')
+        - loan_row_count = loan_row_count + 1
+  %tfoot
+    %tr.org_total
+      %td{:colspan => 11}

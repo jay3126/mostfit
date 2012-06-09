@@ -39,6 +39,5 @@
     %div#loan_schedules
       =partial "lendings/lending_schedule"
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => ''}
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_transactions, :id => @lending.id)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => ''}

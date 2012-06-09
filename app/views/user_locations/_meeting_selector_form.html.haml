@@ -1,0 +1,18 @@
+%table.narrow.form{ :style => "width: 100%;" }
+  %tr.odd
+    %td Meeting At
+    %td= MeetingCalendar.proposed_meeting_on_date?(@biz_location, @date) ? @date : 'No Meeting'
+    %td
+      = link_to "today", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+      &nbsp;|&nbsp;
+      = link_to "previous meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+      &nbsp;|&nbsp;
+      = link_to "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+  %tr
+    %td= "center manager"
+    %td= link_to @biz_location.name, resource(@biz_location)
+    %td
+      %form{ :action => url(:controller => :user_locations, :acition=> :weeksheet_collection, :id => @biz_location.id) + '#weeksheet', :method => 'GET', :style => 'margin: 0px; padding: 0px;'  }
+        = date_select 'date', @date
+        %br
+        = submit "Go!",  :style => 'margin: 0px; padding: 0px;'

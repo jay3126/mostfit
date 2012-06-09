@@ -26,7 +26,7 @@ class UserLocations < Application
     mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
     @meeting_schedule_infos = mf.get_meeting_schedules(@biz_location)
     @meeting_schedule = MeetingSchedule.new
-    display @meeting_schedule_infos
+    partial "user_locations/meeting_schedule_list"
   end
 
   def meeting_calendar
@@ -38,10 +38,11 @@ class UserLocations < Application
   end
 
   def weeksheet_collection
+    set_session_effective_date(Date.today) if session[:effective_date].blank?
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
     @biz_location = BizLocation.get params[:id]
     @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
-    partial "user_locations/weeksheet_collection"
+    display @weeksheet
   end
 
   def customers_on_biz_location
@@ -57,9 +58,9 @@ class UserLocations < Application
   def loans_on_biz_location
     @biz_location = BizLocation.get params[:id]
     if @biz_location.location_level.level == 0
-      @loans = LoanAdministration.get_loans_administered(@biz_location.id, session[:effective_date])
+      @lendings = LoanAdministration.get_loans_administered(@biz_location.id, session[:effective_date]).compact
     else
-      @loans = LoanAdministration.get_loans_accounted(@biz_location.id, session[:effective_date])
+      @lendings = LoanAdministration.get_loans_accounted(@biz_location.id, session[:effective_date]).compact
     end
     partial 'loans_on_biz_location'
   end

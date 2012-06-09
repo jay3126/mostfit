@@ -139,7 +139,7 @@ class Lendings < Application
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
           payment_transaction = mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, :loan_disbursement)
-          if payment_transaction.new?
+          if lending.status == :disbursed_loan_status
             @message = {:notice => "Loans disbursed successfully."}
           else
             @message = {:error => "Loans desbursed fails."}
@@ -170,12 +170,10 @@ class Lendings < Application
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         payments.each do |payment|
           lending = payment[:lending]
+          repayment_count = lending.loan_receipts.count
           payment_transaction = mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, :loan_repayment)
-          if payment_transaction.new?
-            @message = {:error => "Loans payments fails."}
-          else
-            @message = {:notice => "Loans payments successfully."}
-          end
+          raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
+          @message = {:notice => "Loans payments successfully."}
         end
       end
     rescue => ex
@@ -183,6 +181,12 @@ class Lendings < Application
     end
 
     redirect resource(:lendings) , :message => @message
+  end
+
+  def lending_transactions
+    @lending = Lending.get params[:id]
+    @lending_transactions =  PaymentTransaction.all(:on_product_type =>'lending' ,:on_product_id => @lending.id)
+    partial 'lending_transactions'
   end
 
 end
