@@ -19,10 +19,14 @@ class NewDailyReport < Report
 
     data = {}
 
+    #finding out a list of loan_ids at a particular biz_location and on a particular date
+    loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
+    loan_ids = loan_facade.get_loans_at_location(@biz_location_branch, @date)
+
     #loan amounts (applied, approved and disbursed)
-    loan_applied_amount = Lending.all(:applied_on_date => @date).aggregate(:applied_amount.sum)
-    loan_approved_amount = Lending.all(:approved_on_date => @date).aggregate(:approved_amount.sum)
-    loan_disbursed_amount = Lending.all(:disbursal_date => @date).aggregate(:disbursed_amount.sum)
+    loan_applied_amount = Lending.all(:id => loan_ids, :applied_on_date => @date).aggregate(:applied_amount.sum)
+    loan_approved_amount = Lending.all(:id => loan_ids, :approved_on_date => @date).aggregate(:approved_amount.sum)
+    loan_disbursed_amount = Lending.all(:id => loan_ids, :disbursal_date => @date).aggregate(:disbursed_amount.sum)
 
     
 =begin
