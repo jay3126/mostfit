@@ -1,7 +1,13 @@
 class PaymentTransactions < Application
 
   def index
-    @payment_transactions = PaymentTransaction.all
+    if params[:lending_ids]
+      @payment_transactions = PaymentTransaction.all(:on_product_id => params[:lending_ids], :on_product_type => :lending)
+    elsif params[:payment_ids]
+      @payment_transactions = PaymentTransaction.all(:id => params[:payment_ids])
+    else
+      @payment_transactions = PaymentTransaction.all
+    end
     display @payment_transactions
   end
 
@@ -60,7 +66,7 @@ class PaymentTransactions < Application
     end
     #REDIRECT/RENDER
     if @message[:error].blank?
-      redirect resource(:payment_transactions), :message => @message
+      redirect resource(:payment_transactions, :payment_ids => [@copy_payment_transactionons.id]), :message => @message
     else
       render :new
     end
@@ -72,7 +78,6 @@ class PaymentTransactions < Application
     @biz_location = BizLocation.get params[:biz_location_id]
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     @user = session.user
-    @staff = @user
     @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
 
     display @weeksheet
@@ -133,6 +138,10 @@ class PaymentTransactions < Application
       end
     end
     #REDIRECT/RENDER
-    redirect resource(:payment_transactions), :message => @message
+    if @message[:error].blank?
+      redirect resource(:payment_transactions, :lending_ids => @payment_transactions.map(&:on_product_id) ), :message => @message
+    else
+      redirect resource(:payment_transactions, :biz_location_id => performed_at, :date => effective_on)
+    end
   end
 end

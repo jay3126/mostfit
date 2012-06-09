@@ -4,6 +4,7 @@ class Browse < Application
   Line = Struct.new(:ip, :date_time, :method, :model, :url, :status, :response_time)
   
   def index
+    set_session_effective_date(Date.today) if session[:effective_date].blank?
     render
   end
 

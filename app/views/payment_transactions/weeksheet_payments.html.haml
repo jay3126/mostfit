@@ -56,7 +56,7 @@
     - @weeksheet.groups.each do |group|
       = hidden_field :name => "payment_transactions[performed_at]", :value => @biz_location.id
       = hidden_field :name => "payment_transactions[accounted_at]", :value => @parent_biz_location.id
-      = hidden_field :name => "payment_transactions[performed_by]", :value => @staff.id
+      = hidden_field :name => "payment_transactions[performed_by]", :value => @weeksheet.by_staff_member_id
       = hidden_field :name => "payment_transactions[recorded_by]", :value => @user.id
       = hidden_field :name => "payment_transactions[product_type]", :value => 'lending'
       = hidden_field :name => "payment_transactions[currency]", :value => 'INR'
@@ -73,7 +73,7 @@
             = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_id]", :value => ws.borrower_id
             = ws.borrower_name
           %td
-            = ws.loan_id
+            = link_to ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
             = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_type]", :value => 'lending'
             = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_id]", :value => ws.loan_id
           %td

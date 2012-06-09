@@ -171,7 +171,7 @@ class Lendings < Application
         payments.each do |payment|
           lending = payment[:lending]
           repayment_count = lending.loan_receipts.count
-          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, Constants::Transaction::REPAYMENT)
+          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, Constants::Transaction::LOAN_REPAYMENT)
           raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
           @message = {:notice => "Loans payments successfully."}
         end
@@ -180,7 +180,11 @@ class Lendings < Application
       @message = {:error => "An error has occured: #{ex.message}"}
     end
 
-    redirect resource(:lendings) , :message => @message
+    if @message[:error].blank?
+      redirect resource(:payment_transactions, :lending_ids => payments.collect{|p| p[:lending].id} ) , :message => @message
+    else
+      redirect resource(:lendings), :message => @message
+    end
   end
 
   def lending_transactions
@@ -221,6 +225,10 @@ class Lendings < Application
     end
     
     #REDIRECT/RENDER
-    redirect resource(@lending), :message => @message
+    if @message[:error].blank?
+      redirect resource(:payment_transactions, :lending_ids => [@lending.id]), :message => @message
+    else
+      redirect resource(@lending), :message => @message
+    end
   end
 end

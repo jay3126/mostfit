@@ -1,6 +1,8 @@
-%table.narrow
+%table.dataTable.reports{:style => "width:100%"}
   %thead
     %tr{:style => 'text-align:left'}
+      %th
+        Effective On
       %th
         Amount
       %th
@@ -19,10 +21,10 @@
         Recorded By
       %th
         By Client
-      %th
-        Effective On
   - @payment_transactions.each do |pt|
     %tr
+      %td
+        = pt.effective_on
       %td
         = pt.payment_money_amount
       %td
@@ -32,14 +34,13 @@
       %td
         = pt.on_product_id
       %td
-        = pt.performed_at
+        = BizLocation.get(pt.performed_at).name 
       %td
-        = pt.accounted_at
+        = BizLocation.get(pt.accounted_at).name 
       %td
-        = pt.performed_by
+        = StaffMember.get(pt.performed_by).name 
       %td
-        = pt.recorded_by
+        = User.get(pt.recorded_by).name
       %td
-        = pt.by_counterparty_id
-      %td
-        = pt.effective_on
+        = Client.get(pt.by_counterparty_id).name
+
