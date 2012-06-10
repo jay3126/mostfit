@@ -145,5 +145,5 @@
           = Money.new(total_advance_amount,:INR).to_s
         %td{:style => "text-align:right"}
           #weeksheet_total_amount
-            = Money.new(total_amount,:INR).to_s
+            = total_amount
   = submit 'Save Payment'

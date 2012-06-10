@@ -34,6 +34,8 @@
           %th
             Payment
           %th
+            Payment Date
+          %th
             Payment By Staff
           %th
             Payment Amount
@@ -43,7 +45,7 @@
           %td
             = loan_row_count
           %td
-            = lending.id
+            = link_to lending.id, resource(lending)
           %td
             = lending.to_money[:applied_amount].to_s
           %td
@@ -69,11 +71,13 @@
           %td
             = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
+            = date_select "lending[#{lending.id}][][payment_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10"}
+          %td
             = select :name => "lending[#{lending.id}][][payment_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
           %td
             = text_field :name => "lending[#{lending.id}][][payment_amount]", :style => "width:70px;"
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
-          %td{:colspan => 16}
+          %td{:colspan => 17}
     = submit "Save"

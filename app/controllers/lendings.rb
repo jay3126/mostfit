@@ -94,6 +94,7 @@ class Lendings < Application
           approve_amount = MoneyManager.get_money_instance(value.last[:approved_amount])
           lending.approved_amount = approve_amount.amount
           lending.approved_by_staff = value.last[:approved_by_staff]
+          lending.approved_on_date = value.last[:approved_on_date]
           if lending.valid?
             lendings << lending
           else
@@ -103,7 +104,7 @@ class Lendings < Application
       end
       if @message[:error].blank?
         lendings.each do |lending|
-          if lending.approve(lending.to_money[:approved_amount], Date.today, lending.approved_by_staff)
+          if lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
             @message = {:notice => "Loans approved successfully."}
           else
             @message = {:error => "Loans approved fails."}
@@ -128,6 +129,7 @@ class Lendings < Application
           disbursed_amount = MoneyManager.get_money_instance(value.last[:disbursed_amount])
           lending.disbursed_amount = disbursed_amount.amount
           lending.disbursed_by_staff = value.last[:disbursed_by_staff]
+          lending.disbursal_date  = value.last[:disbursal_date]
           if lending.valid?
             lendings << lending
           else
@@ -138,7 +140,7 @@ class Lendings < Application
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
-          mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, Date.today, Constants::Transaction::LOAN_DISBURSEMENT)
+          mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, lending.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
           if lending.status == :disbursed_loan_status
             @message = {:notice => "Loans disbursed successfully."}
           else
@@ -163,7 +165,8 @@ class Lendings < Application
           lending = Lending.get key
           payment_amount = MoneyManager.get_money_instance(value.last[:payment_amount])
           payment_by_staff = value.last[:payment_by_staff]
-          payments << {:lending => lending, :payment_amount => payment_amount, :payment_by_staff => payment_by_staff}
+          payment_on_date = value.last[:payment_on_date]
+          payments << {:lending => lending, :payment_amount => payment_amount, :payment_by_staff => payment_by_staff, :payment_on_date => payment_on_date }
         end
       end
       if @message[:error].blank?
@@ -171,7 +174,7 @@ class Lendings < Application
         payments.each do |payment|
           lending = payment[:lending]
           repayment_count = lending.loan_receipts.count
-          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], Date.today, Constants::Transaction::LOAN_REPAYMENT)
+          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], payment[:payment_on_date], Constants::Transaction::LOAN_REPAYMENT)
           raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
           @message = {:notice => "Loans payments successfully."}
         end

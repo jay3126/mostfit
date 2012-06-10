@@ -1,7 +1,7 @@
 %h1
   Payment Transactions
 .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-  = link_to 'Make Payment', resource(:payment_transactions, :new), :class => "add"
+  = link_to 'Make Payment', "#", :class => "add"
 - if @payment_transactions.count == 0
   .error
     No Payment Transaction History Available
