@@ -40,8 +40,6 @@
         %th
           Amount
         %th
-          Currecny
-        %th
           Payment Type
         %th
           Client
@@ -66,8 +64,6 @@
           = lt.id
         %td
           = lt.to_money[:amount].to_s
-        %td
-          = lt.currency
         %td
           = lt.receipt_type
         %td
