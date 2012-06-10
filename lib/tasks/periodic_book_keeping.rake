@@ -13,8 +13,10 @@ namespace :mostfit do
         #Setup money categories
         MoneyCategory.create_default_money_categories
 
-        #Setup cost centers
+        #Setup ledger classifications
+        LedgerClassification.create_default_ledger_classifications
 
+        #Setup cost centers
         CostCenter.setup_cost_centers
 
         #Setup chart of accounts
@@ -34,6 +36,12 @@ namespace :mostfit do
         rules_file = File.read(rules_file_name)
         rules = YAML.load(rules_file)
         AccountingRule.load_accounting_rules(rules)
+
+        #Setup product accounting rules
+        product_accounting_rules_file_name = File.join(Merb.root, 'config', 'product_accounting_rules.yml')
+        product_accounting_rules_file = File.read(product_accounting_rules_file_name)
+        product_accounting_rules = YAML.load(product_accounting_rules_file)
+        ProductAccountingRule.load_product_accounting_rules(product_accounting_rules)
 
       rescue => ex
         puts ex.message

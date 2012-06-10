@@ -11,6 +11,7 @@ class AccountsChart
   property :created_at,        *CREATED_AT
 
   has n, :ledgers
+  has n, :ledger_assignments
 
   # Fetch the accounts chart for a counterparty for product accounting
   def self.get_counterparty_accounts_chart(for_counterparty)

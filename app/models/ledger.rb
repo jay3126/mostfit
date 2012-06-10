@@ -23,6 +23,8 @@ class Ledger
   has n, :posting_rules
   belongs_to :account_group, :nullable => true
   belongs_to :accounts_chart
+  belongs_to :ledger_classification, :nullable => true
+  belongs_to :ledger_assignment, :nullable => true
 
   def money_amounts; [ :opening_balance_amount ]; end
 
