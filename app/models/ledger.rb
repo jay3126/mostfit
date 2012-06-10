@@ -10,7 +10,7 @@ class Ledger
 # Ledger also serves as the base class for certain 'special' kinds of accounts (such as BankAccountLedger)
 
   property :id,                       Serial
-  property :name,                     String, :nullable => false
+  property :name,                     String, :length => 1024, :nullable => false
   property :account_type,             Enum.send('[]', *ACCOUNT_TYPES), :nullable => false
   property :open_on,                  *DATE_NOT_NULL
   property :opening_balance_amount,   *MONEY_AMOUNT
@@ -42,7 +42,6 @@ class Ledger
     return nil if on_date < open_date
     
     postings = Voucher.get_postings(self, on_date)
-    debugger
     LedgerBalance.add_balances(opening_balance, *postings)
   end
 
@@ -79,6 +78,40 @@ class Ledger
           :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart)
       }
     }
+  end
+
+  def self.setup_product_ledgers(with_accounts_chart, currency, open_on_date, for_product_type = nil, for_product_id = nil)
+    all_product_ledgers = {}
+    PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
+      ledger_classification = LedgerClassification.resolve(product_ledger_type)
+      ledger_product_type, ledger_product_id = ledger_classification.is_product_specific ? [for_product_type, for_product_id] : 
+          [nil, nil]
+
+      ledger_assignment = LedgerAssignment.record_ledger_assignment(with_accounts_chart, ledger_classification, ledger_product_type, ledger_product_id)
+      ledger_name = name_for_product_ledger(with_accounts_chart.counterparty_type, with_accounts_chart.counterparty_id, ledger_classification, ledger_product_type, ledger_product_id)
+      account_type = ledger_classification.account_type
+      
+      ledger = {}
+      ledger[:name] = ledger_name
+      ledger[:account_type] = account_type
+      ledger[:open_on] = open_on_date
+      ledger[:opening_balance_amount] = 0
+      ledger[:opening_balance_currency] = currency
+      ledger[:opening_balance_effect] = DEFAULT_EFFECTS_BY_TYPE[account_type]
+      ledger[:accounts_chart] = with_accounts_chart
+      ledger[:ledger_classification] = ledger_classification
+      ledger[:ledger_assignment] = ledger_assignment
+      product_ledger = first_or_create(ledger)
+      raise Errors::DataError, product_ledger.errors.first.first if product_ledger.id.nil?
+      all_product_ledgers[ledger_classification.account_purpose] = product_ledger
+    }
+    all_product_ledgers
+  end
+
+  def self.name_for_product_ledger(counterparty_type, counterparty_id, ledger_classification, product_type = nil, product_id = nil)
+    name = "#{ledger_classification} #{counterparty_type}: #{counterparty_id}"
+    name += " for #{product_type}: #{product_id}" if (product_type and product_id)
+    name
   end
 
 end
