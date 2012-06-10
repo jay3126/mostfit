@@ -1,11 +1,11 @@
-%br
+%h1 LOAN SCHEDULES
 %br
 - if @lending_schedules.blank?
   Loan schedule does not exist.
 - else
-  %table{ :style => "width:98%; margin: auto"}
+  %table.weeksheet.dataTable.report.nojs
     %thead
-      %tr{:style => "box-shadow: 0px 2px 2px #cfcfcf; -moz-box-shadow: 0px 2px 2px #cfcfcf;"}
+      %tr
         %th
         %th Installment Date
         %th Installment

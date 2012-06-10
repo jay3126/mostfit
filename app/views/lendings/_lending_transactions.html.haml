@@ -1,3 +1,10 @@
+:javascript
+  $('table.payment').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+
+%h1 LOAN TRANSACTIONS
 .menu-strip
   = link_to 'Make Repayment', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
   #meeting_div(style = "display : none")
@@ -31,7 +38,7 @@
   %h3
     No Loan Transactions exists
 - else
-  %table.weeksheet.dataTable.report.nojs
+  %table.weeksheet.dataTable.report.nojs.payment
     %thead
       %tr
         %th
