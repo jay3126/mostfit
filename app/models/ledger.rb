@@ -1,6 +1,6 @@
 class Ledger
   include DataMapper::Resource
-  include Constants::Properties, Constants::Accounting, Constants::Money
+  include Constants::Properties, Constants::Accounting, Constants::Money, Identified
 
 # Ledger represents an account, and is a basic building-block for book-keeping
 # Ledgers are classified into one of four 'account types': Assets, Liabilities, Incomes, and Expenses
@@ -63,7 +63,6 @@ class Ledger
     chart_name = chart_hash['chart']['name']
     chart_type = chart_hash['chart']['chart_type']
     chart = AccountsChart.first_or_create(:name => chart_name, :chart_type => chart_type)
-
     ACCOUNT_TYPES.each { |type|
       ledgers = chart_hash['chart'][type.to_s]
       account_types_and_ledgers[type] = ledgers

@@ -1,0 +1,142 @@
+-unless @client.blank?
+  %table.tall.shaded
+    %tr
+      %th
+        Location Name
+      %td
+        = @biz_location.name
+    %tr
+      %th
+        Group name
+      %td
+        = ''
+    %tr
+      %th
+        Name
+      %td
+        = @client.name
+    %tr
+      %th
+        Gender
+      %td
+        = @client.gender
+    %tr
+      %th
+        Marital Status
+      %td
+        = @client.marital_status
+    %tr
+      %th
+        Ration Card
+      %td
+        = "#{@client.reference_type}-#{@client.reference}"
+    %tr
+      %th
+        ID Proof
+      %td
+        = "#{@client.reference2_type}-#{@client.reference2}"
+    %tr
+      %th
+        Date of birth
+      %td
+        = @client.date_of_birth
+    %tr
+      %th
+        Date joined
+      %td
+        = @client.date_joined
+    %tr
+      %th
+        Spouse name
+      %td
+        = @client.spouse_name
+    %tr
+      %th
+        Spouse Date of Birth
+      %td
+        = @client.spouse_date_of_birth
+    %tr
+      %th
+        Guarantor name
+      %td
+        = @client.guarantor_name
+    %tr
+      %th
+        Guarantor Date of Birth
+      %td
+        = @client.guarantor_dob
+    %tr
+      %th
+        Guarantor relationship
+      %td
+        = @client.guarantor_relationship
+    %tr
+      %th
+        Address
+      %td
+        = @client.address
+    %tr
+      %th
+        State
+      %td
+        = @client.state
+    %tr
+      %th
+        Pincode
+      %td
+        = @client.pincode
+    %tr
+      %th
+        Telephone number
+      %td
+        = @client.telephone_number
+    %tr
+      %th
+        Telephone Type
+      %td
+        = @client.telephone_type
+    %tr
+      %th
+        Income
+      %td
+        = @client.income
+    %tr
+      %th
+        Family Income
+      %td
+        = @client.family_income
+    %tr
+      %th
+        Occupation:
+      %td
+        = @client.occupation_id
+    %tr
+      %th
+        Priority Sector List (PSL)
+      %td
+        = @client.priority_sector_list_id
+    %tr
+      %th
+        PSL Sub-category
+      %td
+        =# @client.sl_sub_category_id
+    %tr
+      %th
+        Caste
+      %td
+        = @client.caste
+    %tr
+      %th
+        Religion
+      %td
+        = @client.religion
+    %tr
+      %th
+        Active
+      %td
+        = @client.active
+    %tr
+      %th
+        Photo
+      %td
+        =# image_tag @client.picture.url(:medium) unless @client.picture.blank?

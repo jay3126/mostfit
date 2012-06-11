@@ -92,6 +92,9 @@ module Constants
     NOT_APPLICABLE = :not_applicable
     LEDGER_ASSIGNMENT_PRODUCT_TYPES = ([NOT_APPLICABLE] + Constants::Transaction::TRANSACTED_PRODUCTS).flatten
 
+    NOT_SPECIFIED = :not_specified
+    ACCOUNTING_COUNTERPARTIES = ([NOT_SPECIFIED] + Constants::Transaction::COUNTERPARTIES).flatten
+
     PRODUCT_AMOUNTS = Constants::LoanAmounts::LOAN_PRODUCT_AMOUNTS
     PRODUCT_ACTIONS = Constants::Transaction::PRODUCT_ACTIONS
   end

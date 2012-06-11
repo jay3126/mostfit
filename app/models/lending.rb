@@ -43,6 +43,11 @@ class Lending
     self.disbursal_date ? self.disbursal_date : self.scheduled_disbursal_date
   end
 
+  # lending descriptions in one line
+  def to_s
+    "Loan for applied amount: #{to_money_amount(:applied_amount).to_s} applied on #{applied_on_date}"
+  end
+
   belongs_to :lending_product
   belongs_to :loan_borrower
   has 1, :loan_base_schedule
