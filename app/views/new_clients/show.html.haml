@@ -1,0 +1,15 @@
+%h1== #Client Name: <i>#{@client.name}</i>
+%div.tab_container.shaded
+  %ul.tabs
+    %li#Info
+      Basic Info
+    %li#loans
+      Loans
+    %li#account
+      Account
+  %div.tab
+    = partial "new_clients/basic_info"
+  %div.tab
+    = partial "user_locations/loans_on_biz_location"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :show_accounts, :id => @client.id)}

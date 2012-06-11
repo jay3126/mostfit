@@ -3,7 +3,7 @@
     %td
       Begin Date
     %td
-      = date_select_for @meeting_schedule, :schedule_begins_on, :min_date => Date.today ,:date => Date.today
+      = date_select_for @meeting_schedule, :schedule_begins_on ,:date => Date.today
   %tr
     %td
       Frequency

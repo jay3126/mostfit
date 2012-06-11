@@ -11,6 +11,8 @@
         %th
           Name
         %th
+          Description
+        %th
           Created On
         %th
           Status
@@ -22,6 +24,8 @@
           %td
             = link_to lending.lending_product.name, resource(lending)
           %td
+            = lending.to_s
+          %td
             = lending.created_at.strftime("%Y-%m-%d")
           %td
-            = lending.status
+            = lending.status.to_s.humanize

@@ -1,12 +1,12 @@
 class AccountsChart
   include DataMapper::Resource
-  include Constants::Properties, Constants::Accounting, Constants::Transaction
+  include Constants::Properties, Constants::Accounting
   
   property :id,                Serial
   property :name,              *NAME
   property :guid,              *UNIQUE_ID
   property :chart_type,        Enum.send('[]', *ACCOUNTS_CHART_TYPES), :nullable => false
-  property :counterparty_type, Enum.send('[]', *COUNTERPARTIES), :nullable => true
+  property :counterparty_type, Enum.send('[]', *ACCOUNTING_COUNTERPARTIES), :nullable => false, :default => NOT_SPECIFIED
   property :counterparty_id,   Integer
   property :created_at,        *CREATED_AT
 

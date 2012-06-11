@@ -1,0 +1,31 @@
+:javascript
+  $('table.account').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%h1 Accounting
+
+- unless @ledgers.blank?
+  - Constants::Accounting::ACCOUNT_TYPES.each do |key|
+    - if @ledgers.keys.include?(key)
+      - value = @ledgers[key]
+      %h2
+        = key.to_s
+        - row_count = 1
+      %table.report.account
+        %tr
+          %th
+            Name
+          %th
+            Balance
+          %th
+            On Date
+        - value.each do |ledger|
+          %tr{:style=>"text-align:center"}
+            %td
+              = link_to ledger.name, resource(ledger)
+            %td
+              = ledger.balance
+            %td
+              = Date.today
+    %hr

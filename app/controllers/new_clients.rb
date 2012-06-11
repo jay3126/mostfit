@@ -90,6 +90,26 @@ class NewClients < Application
 
   def show
     @client = Client.get params[:id]
+    @biz_location = ClientAdministration.get_administered_at(@client, session[:effective_date])
+    @lendings = LoanBorrower.get_all_loans_for_counterparty(@client)
     display @client
+  end
+
+  def show_accounts
+    @ledgers = []
+    @client = Client.get params[:id]
+    @lendings = LoanBorrower.get_all_loans_for_counterparty(@client)
+
+    @account_chart = AccountsChart.setup_counterparty_accounts_chart(@client)
+    if @lendings.blank?
+      @ledgers = [Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined)]
+    else
+      @lendings.each do |lending|
+        ledger_map = Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined, :lending, lending.id)
+        @ledgers << ledger_map.values
+      end
+    end
+    @ledgers = @ledgers.flatten.group_by{|l| l.account_type}
+    partial "new_clients/show_accounts"
   end
 end
