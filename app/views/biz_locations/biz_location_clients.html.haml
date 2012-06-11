@@ -24,7 +24,7 @@
         %td
           = client.id
         %td
-          = link_to client.name, resource(client)
+          = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
         %td
           = client.date_joined.strftime("%Y-%m-%d")
         %td
