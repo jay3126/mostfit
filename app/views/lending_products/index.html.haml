@@ -1,4 +1,6 @@
-%h1 Lending Products
+%h1 Loan Products
+
+= link_to "Add new Loan Product", url(:new_lending_product), :class => 'add grey_button'
 
 - unless @lending_products.blank?
   %table.form{:style => "width:100%; border:1px;"}
