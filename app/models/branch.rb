@@ -112,15 +112,13 @@ class Branch
       Branch.all("area.manager_id" => staff_member.id).aggregate(:id) + Branch.all("area.region.manager_id" => staff_member.id).aggregate(:id)
     Branch.all(:id => branches)
   end
-  
+
   def holidays
     # go up the chain and find the first calendar that applies.
-    hc = []
-    hc << HolidayCalendar.all(:branch_id => id)
-    hc << HolidayCalendar.all(:area_id => area_id) 
-    hc << HolidayCalendar.all(:region_id => area.region_id) 
-    hols = hc.map{|x| x.holidays_fors.holidays}
-    hols.flatten
+    hc = HolidayCalendar.all(:branch_id => id)
+    hc = HolidayCalendar.all(:area_id => area_id) if hc.blank?
+    hc = HolidayCalendar.all(:region_id => area.region_id) if (hc.blank? and area)
+    hc.holidays_fors.holidays
   end
 
   private
