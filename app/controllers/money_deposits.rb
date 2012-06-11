@@ -24,21 +24,23 @@ class MoneyDeposits < Application
 
     # OPERATIONS PERFORMED
     if @errors.blank?
-      @money = MoneyManager.get_money_instance(amount)
-      @money_deposit = MoneyDeposit.record_money_deposit(@money, @account.id, created_on, by_staff, session.user.id)
+      begin
+        @money = MoneyManager.get_money_instance(amount)
+        @money_deposit = MoneyDeposit.record_money_deposit(@money, @account.id, created_on, by_staff, session.user.id)
 
-      if @money_deposit
-        message = {:notice => "Save Successfully"}
-      else
-        message = {:error => "#{@money_deposit.errors.first.to_s}"}
+        if @money_deposit
+          message = {:notice => "Save Successfully"}
+        else
+          message = {:error => "#{@money_deposit.errors.first.to_s}"}
+        end
+      rescue => ex
+        message = {:error => ex.message }
       end
-    else
-      message = {:error => "No data passed."}
     end
     
     # REDIRECTIONS
     if params[:branch_id].blank?
-      redirect :index, :message => message
+      redirect "/money_deposits", :message => message
     else
       redirect url("branches/#{params[:branch_id]}#bank_deposits"), :message => message
     end
@@ -82,11 +84,11 @@ class MoneyDeposits < Application
     @errors << "Verification status must not be blank" if verification_status.blank?
     @errors << "Verified by staff member must not be blank" if verified_by.blank?
     @errors << "Verified on date must not be future date" if Date.parse(verified_on) > Date.today
+    @money_deposit = MoneyDeposit.get(id)
 
     # OPERATIONS-PERFORMED
     if @errors.blank?
       begin
-        @money_deposit = MoneyDeposit.get(id)
         is_saved = @money_deposit.update(:verification_status => params[:verification_status], :verified_on => params[:verified_on], :verified_by_staff_id => params[:verified_by] )
         if is_saved
           message = {:notice => "Verification status successfuly marked"}
@@ -96,10 +98,10 @@ class MoneyDeposits < Application
       rescue => ex
         @errors.push(ex.message)
       end
-      redirect "index", :message => message
+      redirect "/money_deposits", :message => message
     else
       # RENDER/RE-DIRECT
-      redirect "mark_verification", :message => {:error => @errors.to_a.flatten.join(', ')}
+      redirect url("money_deposits/mark_verification/#{id}"), :message => {:error => @errors.to_a.flatten.join(', ')}
     end
   end
 

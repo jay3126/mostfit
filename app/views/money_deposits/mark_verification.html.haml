@@ -2,12 +2,20 @@
   .error
     = @errors
 %h2
-  = "Mark verification"
-= form(:action => url(:controller => 'money_deposits', :action => 'record_verification'), :method => :post, :class => 'bank_deposites') do
+  = "Mark verification status"
+= form_for(@money_deposit, :action => url(:controller => 'money_deposits', :action => 'record_verification'), :method => :post, :class => 'bank_deposites') do
   %input{:type => :hidden, :value => params[:id], :name => 'money_deposit_id'}
   %table.form{:style => "width:100%;"}
     %thead
       %tr
+        %th
+          = "Bank"
+        %th
+          = "Branch"
+        %th
+          = "Accounts"
+        %th
+          = "Amount"
         %th
           = "Verification status"
         %th
@@ -17,6 +25,14 @@
     %tbody
       %tr
         %td
+          = @money_deposit.bank_account.bank_branch.bank.name
+        %td
+          = @money_deposit.bank_account.bank_branch.name
+        %td
+          = @money_deposit.bank_account.name
+        %td
+          = @money_deposit.deposit_money_amount.to_s
+        %td
           = select :name => "verification_status", :collection => Constants::MoneyDepositVerificationStatus::CHOOSE_VERIFICATION_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
         %td
           = select :name => "verified_by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => 'Select'
@@ -24,3 +40,4 @@
           = date_select :verified_on, Date.today
       %td{:colspan => 3}
         = submit "Submit"
+        = link_to "Cancel", "/money_deposits", :class => "greenButton"

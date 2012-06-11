@@ -8,31 +8,20 @@
         mygrid = new dhtmlXGridFromTable("dhtmlxtable");
 
         mygrid.setSkin("light");
-        mygrid.attachHeader("#text_filter,#select_filter,#select_filter");
+        mygrid.attachHeader("#text_filter,#select_filter,#text_filter,#select_filter");
         mygrid.enableAutoWidth(true);
         mygrid.enableAutoHeight(true);
         mygrid.setSizes();
 
-
-        //mygrid.init();
-          //mygrid.loadXML("/assets/sample_data.xml");
-
-
     }
-
 
     $(function () {
         doInitGrid();
 
-
     });
-
-
 
 = js_include_tag  "exclusions/dhtmlxcommon.js", "exclusions/dhtmlxgrid.js", "exclusions/dhtmlxgrid_filter.js", "exclusions/dhtmlxgrid_srnd.js", "exclusions/dhtmlxgrid_start.js",  "exclusions/dhtmlxgridcell.js"
 = css_include_tag "dhtmlxgrid.css"
-
-
 
 = form_for(@cheque_leaf, :action => "/cheque_leaves/create" ) do
     %input{:type => "hidden", :name => "account_id", :value=>@account_id}
@@ -54,6 +43,8 @@
         %td
             Valid
         %td
+
+        %td
             Used
 
     -@cheque_leaves.each do |leaf|
@@ -61,23 +52,18 @@
             %td
                 =leaf.serial_no
             %td
-                -#=leaf.valid
                 -if leaf.valid==true
                     Valid
                 - else
                     Invalid
-                -#%br
+            %td
                 -if leaf.valid==true && leaf.used==false
                     =link_to '(Mark Invalid)', "/cheque_leaves/mark_invalid/#{leaf.id}"
 
-
             %td
-                -#=leaf.used
                 -if leaf.used==false
                     Unused
                 - else
                     Used
-
-
 
 = link_to 'Back', url(:cheque_leaves)
