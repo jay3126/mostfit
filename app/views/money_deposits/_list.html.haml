@@ -44,8 +44,6 @@
     %thead
       %tr
         %th
-          = "S.No."
-        %th
           = "Bank"
         %th
           = "Branch"
@@ -63,8 +61,6 @@
       - s_no = 0
       - @money_deposits.each do |md|
         %tr
-          %td
-            = s_no = s_no + 1
           %td
             = md.bank_account.bank_branch.bank.name
           %td
