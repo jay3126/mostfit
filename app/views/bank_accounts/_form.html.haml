@@ -1,0 +1,7 @@
+#new_form{:style => "#{@bank_accounts.blank? ? 'display : true' : 'display : none'}"}
+  %form{:action => url(:controller => :bank_accounts, :action => :create, :branch_id => @bank_branch.id), :method => :post}
+    Account No.
+    = text_field :account_no
+    Name
+    = text_field :name
+    = submit "Save"

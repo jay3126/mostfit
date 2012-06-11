@@ -1,0 +1,13 @@
+%h1 BranchEodSummaries controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/branch_eod_summaries/new.html.erb
+
+= error_messages_for @branch_eod_summary
+
+= form_for(@branch_eod_summary, :action => url(:branch_eod_summaries) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:branch_eod_summaries)

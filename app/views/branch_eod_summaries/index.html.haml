@@ -1,0 +1,66 @@
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxcommon.js"}
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid.js"}
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_filter.js"}
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_srnd.js"}
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_start.js"}
+%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgridcell.js"}
+:javascript
+    var mygrid;
+    function doInitGrid() {
+        mygrid = new dhtmlXGridFromTable("dhtmlxtable");
+
+        mygrid.setSkin("light");
+        mygrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter,#text_filter");
+        mygrid.enableAutoWidth(true);
+        mygrid.enableAutoHeight(true);
+        mygrid.setSizes();
+
+
+        //mygrid.init();
+        //mygrid.loadXML("/assets/sample_data.xml");
+
+
+    }
+
+
+    $(function () {
+        doInitGrid();
+
+
+    });
+
+
+
+= js_include_tag  "exclusions/dhtmlxcommon.js", "exclusions/dhtmlxgrid.js", "exclusions/dhtmlxgrid_filter.js", "exclusions/dhtmlxgrid_srnd.js", "exclusions/dhtmlxgrid_start.js",  "exclusions/dhtmlxgridcell.js"
+= css_include_tag "dhtmlxgrid.css"
+%table{:class=>"dhtmlxGrid",:id=>"dhtmlxtable"}
+    %tr
+        %td
+            Branch name
+        %td
+            Account name
+        %td
+            Amount
+        %td
+            Date
+        %td
+            Money Deposited
+        %td
+            Created on
+
+    - for money_deposit in @money_deposits
+        %tr
+            %td
+
+                -# branch_id=BankAccount.get(money_deposit.bank_account_id).bank_branch_id
+                = BankBranch.get(BankAccount.get(money_deposit.bank_account_id).bank_branch_id).name
+            %td
+                = BankAccount.get(money_deposit.bank_account_id).name
+            %td
+                =money_deposit.amount
+            %td
+                =money_deposit.created_on
+            %td
+
+            %td
+

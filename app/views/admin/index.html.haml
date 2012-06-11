@@ -29,6 +29,8 @@
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links
       %li
+        = link_to_with_rights 'Cheque leaves', resource(:cheque_leaves), :class => 'loan icon'
+      %li
         = link_to_with_rights 'Funders and funding lines', resource(:funders), :class => 'funder icon'
       %li      
         = link_to_with_rights 'Manage Business Rules', resource(:rules), :class => 'rules icon'
@@ -36,6 +38,8 @@
         = link_to_with_rights 'Manage Targets', resource(:targets), :class => 'icon target'
       %li
         = link_to_with_rights 'Fees', resource(:fees), :class => 'icon coins'
+      %li
+        = link_to_with_rights 'Banks', resource(:banks), :class => 'funder icon'
       %li
         = link_to_with_rights 'Loan products', resource(:loan_products), :class => 'loan icon'
       %li

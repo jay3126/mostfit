@@ -1,0 +1,26 @@
+- unless @errors.blank?
+  .error
+    = @errors
+%h2
+  = "Mark verification"
+= form(:action => url(:controller => 'money_deposits', :action => 'record_verification'), :method => :post, :class => 'bank_deposites') do
+  %input{:type => :hidden, :value => params[:id], :name => 'money_deposit_id'}
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "Verification status"
+        %th
+          = "Verified by"
+        %th
+          = "Verified on"
+    %tbody
+      %tr
+        %td
+          = select :name => "verification_status", :collection => Constants::MoneyDepositVerificationStatus::CHOOSE_VERIFICATION_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
+        %td
+          = select :name => "verified_by_staff_id", :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => 'Select'
+        %td
+          = date_select :verified_on, Date.today
+      %td{:colspan => 3}
+        = submit "Submit"

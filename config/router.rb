@@ -15,10 +15,18 @@ Merb::Router.prepare do
   resources :overlap_report_responses, :id => %r(\d+)
   #book-keeping from bk ends
 
+  resources :branch_eod_summaries
+  resources :cheque_leaves
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
 
+  resources :banks do
+    resources :bank_branches do
+      resources :bank_accounts
+    end
+  end
+  resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
   resources :holiday_calendars
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
 
@@ -180,7 +188,8 @@ Merb::Router.prepare do
   # this uses the redirect_to_show methods on the controllers to redirect some models to their appropriate urls
   match('/documents/:action(/:id)').to(:controller => "documents").name(:documents_action_link)
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
-  match('/rules/get').to(:controller => 'rules', :action => 'get') 
+  match('/rules/get').to(:controller => 'rules', :action => 'get')
+  match('/cheque_leaves/mark_invalid/:id').to(:controller => 'cheque_leaves', :action => 'mark_invalid').name(:mark_invalid)
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)
