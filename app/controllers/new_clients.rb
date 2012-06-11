@@ -87,4 +87,9 @@ class NewClients < Application
 
   def distory
   end
+
+  def show
+    @client = Client.get params[:id]
+    display @client
+  end
 end
