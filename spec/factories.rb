@@ -710,11 +710,21 @@ FactoryGirl.define do
     tenure              52
   end
 
+  factory :loan_borrower do
+    counterparty_type        Constants::Transaction::CLIENT
+    counterparty_id          { Factory(:client).id }
+    effective_on             Date.parse('2012-01-01')
+    administered_at_origin   { Factory(:biz_location).id }
+    accounted_at_origin      { Factory(:biz_location).id }
+    performed_by             { Factory(:staff_member).id }
+    recorded_by              { Factory(:user).id }
+  end
+
   factory :lending do
     lan                            "Loan at #{DateTime.now}"
     applied_amount                 1000000
     currency                       Constants::Money::DEFAULT_CURRENCY
-    for_borrower_id                { Factory(:customer).id }
+    loan_borrower_id               { Factory(:loan_borrower).id }
     applied_on_date                Date.parse('2012-03-25')
     scheduled_disbursal_date       (Date.parse('2012-03-25') + 7)
     scheduled_first_repayment_date (Date.parse('2012-03-25') + 14)
