@@ -1,12 +1,16 @@
 %h1== Loan Name: <i>#{@lending_product.name}</i>
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
-  %tr.even
-    %th.even Borrower
-    %td= link_to @lending.loan_borrower.counterparty.name, '#', :target => "_blank"
   %tr.odd
-    %th.odd Amount
+    %th.odd Borrower
+    %td= link_to @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
+  %tr.even
+    %th.even Amount
     %td
       %b= @lending.to_money[:applied_amount].to_s
+  %tr.odd
+    %th.odd Frequency
+    %td
+      = @lending.repayment_frequency
   %tr.even
     %th.even Loan Product
     %td
