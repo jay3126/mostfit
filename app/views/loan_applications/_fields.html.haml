@@ -48,11 +48,11 @@
             = select :client_state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
           %td
             = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
-            = hidden_field :name => 'center_id', :value => @center.nil? ? params[:center_id] : @center.id
-            = hidden_field :name => 'branch_id', :value => @branch.nil? ? params[:branch_id] : @branch.id
+            = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id
+            = hidden_field :name => 'child_location_id', :value => @center.nil? ? params[:child_location_id] : @center.id
             = hidden_field :name => 'center_cycle_number', :value => center_cycle_number
-            = hidden_field :at_center_id, :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
             = hidden_field :at_branch_id, :value => @branch.nil? ? (params[:loan_application] and params[:loan_application][:at_branch_id]) : @branch.id
+            = hidden_field :at_center_id, :value => @center.nil? ? (params[:loan_application] and params[:loan_application][:at_center_id]) : @center.id
     %table.narrow.form{:style => "width:100%;"}
       %tfoot
         %tr

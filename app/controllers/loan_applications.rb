@@ -99,28 +99,32 @@ class LoanApplications < Application
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
   def bulk_create
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
     @message = {:error => []}
+
     unless params[:flag] == 'true'
-      if params[:branch_id].blank?
+      if branch_id.blank?
         @message[:error] << "No branch selected"
-      elsif params[:center_id].blank?
+      elsif center_id.blank?
         @message[:error] << "No center selected"
       end
     end
-    @center = Center.get(params["center_id"]) if params["center_id"]
-    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
-    loan_applications_facade = LoanApplicationsFacade.new(session.user)
-    @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
+    
+    @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => branch_id, :at_center_id => center_id})
     render :bulk_create
   end
 
   def bulk_create_loan_applicant
     # INITIALIZING VARIABLES USED THROUGHTOUT
     @message = {:error => [], :notice => []}
-    loan_applications_facade = LoanApplicationsFacade.new(session.user)
-    @center = Center.get(params[:center_id]) if params[:center_id]
-    @branch = Branch.get(params[:branch_id]) if params[:branch_id]
-    
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+
     # GATE-KEEPING
     name = params[:loan_application][:client_name]
     guarantor_name = params[:loan_application][:client_guarantor_name]
@@ -167,12 +171,11 @@ class LoanApplications < Application
     end
         
     # POPULATING RESPONSE AND OTHER VARIABLES
-    @loan_application = LoanApplication.new(params[:loan_application])
-    @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
+    @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => branch_id, :at_center_id => center_id}) if @center
 
     # RENDER/RE-DIRECT
     if @message[:error].blank?
-      redirect resource(:loan_applications, :bulk_create, :branch_id => @branch.id, :center_id => @center.id ), :message => {:notice => @message[:notice].to_s}
+      redirect resource(:loan_applications, :bulk_create, :parent_location_id => branch_id, :child_location_id => center_id ), :message => {:notice => @message[:notice].to_s}
     else
       render :template => 'loan_applications/bulk_create'
     end
@@ -264,6 +267,14 @@ class LoanApplications < Application
     facade = LoanApplicationsFacade.new(session.user)
     @suspected_duplicates = facade.suspected_duplicate
     @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_duplicate
+  end
+
+  def location_facade
+    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+  end
+
+  def loan_applications_facade
+    @loan_application_facade ||= LoanApplicationsFacade.new(session.user)
   end
 
 end # LoanApplications
