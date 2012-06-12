@@ -1,10 +1,3 @@
-.right
-  %form{:action => url(:controller => "data_entry", :action => :fixate), :method => :post}
-    %b Select branch
-    = select :branch_id, :collection => Branch.all(:order => [:name]).map{|x| [x.id, x.name]}, :selected => session[:branch_id], :prompt => "Select branch", :id => "branch_selector"
-    %b Select center
-    = select(:center_id, :collection => get_accessible_centers(session[:branch_id]), :include_blank => true, :selected => session[:center_id], :id => "center_selector")
-    = submit "Fixate"
 %h1 Data Entry
 %h3 Follow the links below to perform common actions quickly. 
 %h3{:style => "color: #6C8506;"}
@@ -14,7 +7,7 @@
 - @i = 1
 %table#data_entry_index
   -user = session.user
-  - [:center, :group, :loan, :payment].each do |thing|
+  - [:loan, :payment].each do |thing|
     - plural = thing.to_s.pluralize
     - if (@i-1) % 3 == 0
       %tr
