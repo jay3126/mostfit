@@ -33,7 +33,7 @@ class UserLocations < Application
     @biz_location = BizLocation.get params[:id]
     raise NotFound unless @biz_location
     mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_dates = mf.get_meeting_calendar(@biz_location, session[:effective_date])
+    @meeting_dates = mf.get_meeting_calendar(@biz_location, session[:effective_date] - Constants::Time::DEFAULT_PAST_MAX_DURATION_IN_DAYS )
     partial "user_locations/meeting_calendar"
   end
 
