@@ -748,6 +748,24 @@ function portfolioCalculations(){
     $($("tr.org_total:first td")[6]).html("<b>" + org_current + "</b>");
   });
 }
+
+function getAllNominalCenters() {
+  jQuery('#parent_selector').change(function() {
+    if (jQuery("#parent_selector").val() != '') {
+      jQuery.ajax({
+        type: "GET",
+        url: "/biz_locations/centers_for_selector/"+jQuery("#parent_selector").val(),
+        data: {
+          "effective_date" : jQuery("#effective_date_id").val()
+        },
+        success: function(data) {
+          jQuery("#child_selector").html(data);
+        }
+      });
+    }
+  });
+}
+
 $(document).ready(function(){
   dataTables();
   create_remotes();
@@ -758,6 +776,7 @@ $(document).ready(function(){
   fillFundingLines();
   fillCashAccounts();
   fillBankAccounts();
+  getAllNominalCenters();
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");

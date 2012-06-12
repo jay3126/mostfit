@@ -100,7 +100,7 @@ class Application < Merb::Controller
       error += "verified data cannot be deleted"
     end
 
-      # if flag is still set to true delete the object
+    # if flag is still set to true delete the object
     if flag == true and obj.destroy
       # delete all the loan history
       LoanHistory.all(:loan_id => obj.id).destroy if obj.is_a?(Loan)
@@ -144,7 +144,7 @@ class Application < Merb::Controller
   end
 
   def get_session_effective_date
-      session[:effective_date] || Date.today
+    session[:effective_date] || Date.today
   end
 
   def set_session_effective_date(date)

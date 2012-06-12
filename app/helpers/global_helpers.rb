@@ -676,5 +676,17 @@ module Merb
       select :name => name, :collection => repayment_style_choices
     end
 
+    # get all nominal branches
+    def get_all_nominal_branches
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+      location_facade.all_nominal_branches
+    end
+
+    # get all nominal centers
+    def get_all_nominal_centers(branch_id)
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+      location_facade.get_children branch_id
+    end
+
   end
 end
