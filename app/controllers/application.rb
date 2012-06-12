@@ -143,11 +143,15 @@ class Application < Merb::Controller
     end    
   end
 
-  def get_session_effective_date
-    session[:effective_date] || Date.today
+  def get_effective_date
+    if session[:effective_date].blank?
+      redirect url(:controller => :browse, :action => :effective_date)
+    else
+      session[:effective_date]
+    end
   end
 
-  def set_session_effective_date(date)
+  def set_effective_date(date)
     session.merge!(:effective_date => date)
     session[:effective_date] == date
   end

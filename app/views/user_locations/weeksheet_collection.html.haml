@@ -9,7 +9,8 @@
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name
-    %td= link_to @biz_location.name, '#', :target => "_blank"
+    %td
+      %b= @biz_location.name
   %tr.odd
     %th.odd Reports to
     %td

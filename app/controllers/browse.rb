@@ -4,7 +4,7 @@ class Browse < Application
   Line = Struct.new(:ip, :date_time, :method, :model, :url, :status, :response_time)
   
   def index
-    set_session_effective_date(Date.today) if session[:effective_date].blank?
+    set_effective_date(Date.today) if session[:effective_date].blank?
     render
   end
 
@@ -166,19 +166,19 @@ class Browse < Application
   end
 
   def effective_date
-    @date = get_session_effective_date
+    @date = get_effective_date
     display @date
   end
 
   def set_effective_date
     message = {}
     date = Date.parse(params[:effective_date])
-    if set_session_effective_date(date)
+    if set_effective_date(date)
       message[:notice] = "Effective date update successfully"
     else
       message[:error] = "Effective date cannot updated"
     end
-    redirect url(:browse), :message => message
+    redirect url(:home), :message => message
   end
 
   private
