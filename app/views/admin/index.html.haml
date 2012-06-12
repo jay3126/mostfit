@@ -28,7 +28,6 @@
           = link_to_with_rights 'User Roles', resource(:user_roles), :class => 'user icon'
         %li
           = link_to_with_rights 'Users', resource(:users), :class => 'user icon'
-
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links
@@ -75,8 +74,3 @@
     %ul.icon_links
       %li
         = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
-  .admin-box
-    %h2 API Use
-    %ul
-      %li 
-        = link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
