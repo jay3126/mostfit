@@ -2,14 +2,14 @@
   %h1 Administration
   %div.clearfix
     .admin-box
-      %h2 Manage organization profile and calendar
+      %h2 Manage organization profile
       %ul.icon_links
         %li
           = link_to_with_rights 'Profile and system-wide policies', url(:controller => "admin", :action => "edit"), :class => 'admin icon'
         %li
-          = link_to_with_rights 'Holidays', url(:controller => 'holidays', :action => "index"), :class => 'icon holiday'
+          //= link_to_with_rights 'Holidays', url(:controller => 'holidays', :action => "index"), :class => 'icon holiday'
         %li
-          = link_to_with_rights 'Holiday Calendars', url(:controller => 'holiday_calendars', :action => "index"), :class => 'icon holiday'
+          //= link_to_with_rights 'Holiday Calendars', url(:controller => 'holiday_calendars', :action => "index"), :class => 'icon holiday'
     .admin-box
       %h2 Manage geographical locations
       %ul.icon_links
@@ -18,12 +18,16 @@
         %li
           = link_to_with_rights 'Biz Location', resource(:biz_locations), :class => 'org icon'
     .admin-box
-      %h2 Manage staff, users, and roles
+      %h2 Manage staff, users and roles
       %ul.icon_links
+        %li
+          = link_to_with_rights 'Staff Designations', resource(:designations), :class => 'staff icon'
         %li
           = link_to_with_rights 'Staff Members', resource(:staff_members), :class => 'staff icon'
         %li
-          = link_to_with_rights 'Users and roles', resource(:users), :class => 'user icon'
+          = link_to_with_rights 'User Roles', resource(:user_roles), :class => 'user icon'
+        %li
+          = link_to_with_rights 'Users', resource(:users), :class => 'user icon'
 
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
@@ -71,17 +75,6 @@
     %ul.icon_links
       %li
         = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
-      %li 
-        = link_to_with_rights 'Caches', resource(:cachers), :class => 'icon zoom'
-      %li
-        = link_to_with_rights 'Loan update queue', url(:controller => 'admin', :action => "dirty_loans"), :class => 'edit'
-  .admin-box
-    %h2 Data
-    %ul.icon_links
-      %li
-        = link_to_with_rights 'Upload data', url(:controller => 'uploads'), :class => 'upload icon'
-      %li
-        = link_to_with_rights 'Download data', url(:controller => 'admin', :action => "download"), :class => 'download icon'
   .admin-box
     %h2 API Use
     %ul
