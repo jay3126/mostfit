@@ -11,20 +11,20 @@ class FacadeFactory
     @created_at = DateTime.now
   end
 
+  CLIENT_FACADE     = :client_facade
   MEETING_FACADE    = :meeting_facade
   LOAN_FACADE       = :loan_facade
   LOCATION_FACADE   = :location_facade
   PAYMENT_FACADE    = :payment_facade
-  USER_FACADE       = :user_facade
   ACCOUNTING_FACADE = :accounting_facade
   REPORTING_FACADE  = :reporting_facade
 
   FACADE_TYPES      = {
+      CLIENT_FACADE     => ClientFacade,
       MEETING_FACADE    => MeetingFacade, 
       LOAN_FACADE       => LoanFacade,
       LOCATION_FACADE   => LocationFacade, 
       PAYMENT_FACADE    => PaymentFacade,
-      USER_FACADE       => UserFacade,
       ACCOUNTING_FACADE => AccountingFacade,
       REPORTING_FACADE  => ReportingFacade
   }
