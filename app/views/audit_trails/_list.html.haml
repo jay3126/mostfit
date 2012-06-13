@@ -1,5 +1,3 @@
-- user_not_found = Constants::Change::AUDIT_TRAIL_USER_NOT_FOUND
-- user_role_not_found = Constants::Change::AUDIT_TRAIL_USER_ROLE_NOT_FOUND
 %table.report.nojs{:width => "100%"}
   %tr
     %th
@@ -12,8 +10,6 @@
       Date
     %th
       User
-    %th
-      Role
   -@trails.each do |trail|
     %tr
       %td
@@ -27,6 +23,4 @@
       %td
         = trail.created_at.strftime("%d-%m-%Y %H:%M")
       %td
-        = (trail.user and trail.user.login) ? trail.user.login : user_not_found
-      %td
-        = trail.user_role || user_role_not_found
+        = trail.user ? trail.user.login : "admin"
