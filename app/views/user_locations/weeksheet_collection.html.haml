@@ -32,8 +32,8 @@
     %th.even Landmark
     %td= ''
   %tr.odd
-    %th.odd Area
-    %td= ''
+    %th.odd= @parent_biz_location.location_level.name
+    %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
 
 %div.tab_container.shaded
   %ul.tabs
@@ -43,8 +43,8 @@
       Meeting Schedule
     %li#Meeting
       Meeting
-    %li#Customers
-      Customers
+    %li#client
+      Clients
     %li#Loan
       Loans
     %li#History
@@ -52,11 +52,14 @@
   %div.tab
     %div#location_list
       %h1 WEEKSHEET
-      = partial 'user_locations/meeting_selector_form'
-      - if @weeksheet.blank?
-        Today don't have any repayments
+      - if @meeting_schedule.blank?
+        Today don't have any Meeting Schedule
       - else
-        =partial "user_locations/weeksheet_collection_list"
+        = partial 'user_locations/meeting_selector_form'
+        - if @weeksheet.blank?
+          Today don't have any repayments
+        - else
+          =partial "user_locations/weeksheet_collection_list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
   %div.tab

@@ -1,15 +1,44 @@
 %h1== #Client Name: <i>#{@client.name}</i>
+
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Name
+    %td
+      = @client.name
+  %tr.odd
+    %th.odd Joining Date
+    %td
+      = @client.date_joined
+  %tr.even
+    %th.even Date of Birth
+    %td
+      = @client.date_of_birth
+  %tr.odd
+    %th.odd Spouse Name
+    %td= @client.spouse_name
+  %tr.even
+    %th.even Manager
+    %td= @client_admin.performed_by_staff
+  %tr.odd
+    %th.odd At Location
+    %td= @client_admin.administered_at_location.name
+  %tr.even
+    %th.even Group
+    %td= ''
+  %tr.odd
+    %th.odd Occupation
+    %td= @client.occupation_id
+
 %div.tab_container.shaded
   %ul.tabs
-    %li#Info
-      Basic Info
     %li#loans
       Loans
     %li#account
       Account
-  %div.tab
-    = partial "new_clients/basic_info"
+    %li#history
+      History
   %div.tab
     = partial "user_locations/loans_on_biz_location"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :show_accounts, :id => @client.id)}
+  %div.tab

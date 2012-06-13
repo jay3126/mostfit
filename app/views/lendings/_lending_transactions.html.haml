@@ -33,7 +33,7 @@
               = select :name=> "payment_by_staff", :collection => StaffMember.all.collect{|s| [s.id, s.name]}
         = submit 'Save Repayment', :class => "greenButton"
     - else
-      This Action does not support in Loan
+      This Action does support after loan's disbursement
 - if @lending_transactions.blank?
   %h3
     No Loan Transactions exists

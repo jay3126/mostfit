@@ -89,9 +89,10 @@ class NewClients < Application
   end
 
   def show
-    @client = Client.get params[:id]
+    @client       = Client.get params[:id]
     @biz_location = ClientAdministration.get_administered_at(@client, session[:effective_date])
-    @lendings = LoanBorrower.get_all_loans_for_counterparty(@client)
+    @client_admin = ClientAdministration.first(:counterparty_type => 'client', :counterparty_id => @client.id)
+    @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client)
     display @client
   end
 

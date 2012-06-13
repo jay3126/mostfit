@@ -2,35 +2,40 @@
   Lending Product :
   = @lending_product.name unless @lending_product.blank?
 - unless @lending_product.blank?
-  %table
-    %tr
-      %th
+  %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+    %tr.even
+      %th.even
         Name
       %td
         = @lending_product.name
-      %th
+    %tr.odd
+      %th.odd
         Amount
       %td
         = Money.new(@lending_product.amount.to_i,:INR).amount
-      %th
+    %tr.even
+      %th.even
         Interest rate
       %td
         = @lending_product.interest_rate
-    %tr
-      %th
+    %tr.odd
+      %th.odd
         Repayment Frequency
       %td
         = @lending_product.repayment_frequency
-      %th
+    %tr.even
+      %th.even
         Currency
       %td
         = @lending_product.currency
-      %th
+    %tr.odd
+      %th.odd
         Tenure
       %td
         = @lending_product.tenure
+
 - unless @lendings.blank?
-  %table.form{:style => "width:100%; border:1px;"}
+  %table.dataTable.weeksheet{:style => "width:100%"}
     %thead
       %tr
         %td
@@ -43,8 +48,6 @@
           Schedule First Repayment Date
         %td
           Staff
-        %td
-          Action
     %tbody.form
       - @lendings.each do |lending|
         %tr
@@ -57,8 +60,4 @@
           %td
             = lending.scheduled_first_repayment_date
           %td
-            = lending.applied_by_staff
-          %td
-            =# link_to "Show Loans", resource(:lendings, :lending_product_id => lp.id)
-            |
-            =# link_to "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}")
+            = StaffMember.get(lending.applied_by_staff).name

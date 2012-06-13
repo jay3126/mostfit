@@ -1,7 +1,9 @@
+.menu-strip
+  = link_to 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
 %br
 - if @customers.count == 0
   %p
-    %i No Customers Mapping have been created yet.
+    %i No Client Mapping have been created yet.
 - else
   %table{:class => 'narrow'}
     %thead
