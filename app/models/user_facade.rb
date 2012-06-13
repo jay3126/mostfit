@@ -1,4 +1,5 @@
-class UserFacade <StandardFacade
+class UserFacade
+  include Singleton
 
   ###########
   # QUERIES # on user begin
