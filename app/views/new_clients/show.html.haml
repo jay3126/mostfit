@@ -1,4 +1,4 @@
-%h1== #Client Name: <i>#{@client.name}</i>
+%h1== Client Name: <i>#{@client.name}</i>
 
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
@@ -33,8 +33,8 @@
   %ul.tabs
     %li#loans
       Loans
-    %li#account
-      Account
+    %li#accounting
+      Accounting
     %li#history
       History
   %div.tab
@@ -42,3 +42,4 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :show_accounts, :id => @client.id)}
   %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
