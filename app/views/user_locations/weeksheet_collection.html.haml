@@ -31,9 +31,10 @@
   %tr.even
     %th.even Landmark
     %td= ''
-  %tr.odd
-    %th.odd= @parent_biz_location.location_level.name
-    %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
+  - unless @parent_biz_location.blank?
+    %tr.odd
+      %th.odd= @parent_biz_location.location_level.name
+      %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
 
 %div.tab_container.shaded
   %ul.tabs

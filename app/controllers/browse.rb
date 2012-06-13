@@ -178,7 +178,7 @@ class Browse < Application
     else
       message[:error] = "Effective date cannot updated"
     end
-    redirect url(:home), :message => message
+    redirect url(:browse), :message => message
   end
 
   private

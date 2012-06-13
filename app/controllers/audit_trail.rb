@@ -3,7 +3,8 @@ class AuditTrails < Application
 
   def index
     raise NotFound if not params[:audit_for] 
-    model = params[:audit_for][:controller].singularize.camelcase
+    model = params[:audit_for][:controller] == 'new_clients' ? 'Client' :params[:audit_for][:controller].singularize.camelcase
+
     if params[:audit_for].key?(:id)
       id=params[:audit_for][:id]
     elsif params[:audit_for][:controller]=="loans" and params[:audit_for].key?(:client_id)
