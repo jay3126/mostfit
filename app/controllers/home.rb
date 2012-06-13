@@ -1,7 +1,7 @@
 class Home < Application
 
   def index
-    @location_levels = LocationLevel.all
+    @location_levels = LocationLevel.all(:level.not => 0)
     display @location_levels
   end
 

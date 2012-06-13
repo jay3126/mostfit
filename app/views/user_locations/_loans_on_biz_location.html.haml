@@ -5,7 +5,7 @@
   %p
     %i No Loans Mapping have been created yet.
 - else
-  %table{:class => 'narrow'}
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -18,16 +18,15 @@
           Created On
         %th
           Status
-    %tr
-      - for lending in @lendings
-        %tr
-          %td
-            = lending.id
-          %td
-            = link_to lending.lending_product.name, resource(lending)
-          %td
-            = lending.to_s
-          %td
-            = lending.created_at.strftime("%Y-%m-%d")
-          %td
-            = lending.status.to_s.humanize
+    - for lending in @lendings
+      %tr
+        %td
+          = lending.id
+        %td
+          = link_to lending.lending_product.name, resource(lending)
+        %td
+          = lending.to_s
+        %td
+          = lending.created_at.strftime("%Y-%m-%d")
+        %td
+          = lending.status.to_s.humanize

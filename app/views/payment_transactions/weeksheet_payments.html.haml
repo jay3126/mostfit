@@ -3,7 +3,7 @@
 - total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
 - total_actual_principal_due, total_actual_principal_outstanding, total_actual_interest_due, total_actual_interest_outstanding = 0, 0, 0, 0
 = form_for(:payment_transactions ,:action => url(:controller => :payment_transactions, :action => :create_group_payments)) do
-  %table.weeksheet.dataTable.report.nojs
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th

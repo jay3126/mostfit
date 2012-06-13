@@ -3,7 +3,7 @@
   %p
     %i No Location Mapping have been created yet.
 - else
-  %table.narrow
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -13,22 +13,20 @@
         %th
           Location Level
         %th
-          No. Of Location
+          Location No. Count
         %th
           Created On
-    %tr
-      - for location_level in @location_levels
+    - for location_level in @location_levels
+      - @biz_locations = location_level.biz_locations
+      - @biz_locations.each do |biz_location|
         %tr
           %td
-            = location_level.id
+            = biz_location.id
           %td
-            = link_to location_level.name, "#", :onclick => "jQuery(this).next().toggle(); return false;"
-            - @biz_locations = location_level.biz_locations
-            #location{:style => "display : none"}
-              = partial 'user_locations/child_locations'
+            = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
           %td
-            = location_level.level
+            = location_level.name
           %td
-            = location_level.biz_locations.count
+            = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE,session.user).get_children(biz_location, session[:effective_date]).count
           %td
             = location_level.creation_date.strftime("%Y-%m-%d")
