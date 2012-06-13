@@ -52,7 +52,7 @@ Merb::Router.prepare do
     end
   end
   resources :location_levels
-  resources :biz_locations, :collection => {:map_locations => [:get]}, :member => {:biz_location_clients => [:get], :centers_for_selector => [:get]} do
+  resources :biz_locations, :id => %r(\d+), :collection => {:map_locations => [:get]}, :member => {:biz_location_clients => [:get], :centers_for_selector => [:get]} do
     resources :new_clients
   end
   resources :payment_transactions, :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get]}

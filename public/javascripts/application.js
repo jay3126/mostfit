@@ -751,18 +751,16 @@ function portfolioCalculations(){
 
 function getAllNominalCenters() {
   jQuery('#parent_selector').change(function() {
-    if (jQuery("#parent_selector").val() != '') {
-      jQuery.ajax({
-        type: "GET",
-        url: "/biz_locations/centers_for_selector/"+jQuery("#parent_selector").val(),
-        data: {
-          "effective_date" : jQuery("#effective_date_id").val()
-        },
-        success: function(data) {
-          jQuery("#child_selector").html(data);
-        }
-      });
-    }
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/centers_for_selector/"+jQuery("#parent_selector").val(),
+      data: {
+        "effective_date" : jQuery("#effective_date_id").val()
+      },
+      success: function(data) {
+        jQuery("#child_selector").html(data);
+      }
+    });
   });
 }
 

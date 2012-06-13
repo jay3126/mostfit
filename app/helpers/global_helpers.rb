@@ -684,9 +684,13 @@ module Merb
 
     # get all nominal centers
     def get_all_nominal_centers(branch_id)
+      if branch_id
       biz_location = BizLocation.get branch_id
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
       location_facade.get_children biz_location
+      else
+        []
+      end
     end
 
   end
