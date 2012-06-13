@@ -18,6 +18,7 @@ class FacadeFactory
   PAYMENT_FACADE    = :payment_facade
   ACCOUNTING_FACADE = :accounting_facade
   REPORTING_FACADE  = :reporting_facade
+  LOAN_APPLICATIONS_FACADE = :loan_applications_facade
 
   FACADE_TYPES      = {
       CLIENT_FACADE     => ClientFacade,
@@ -26,7 +27,8 @@ class FacadeFactory
       LOCATION_FACADE   => LocationFacade, 
       PAYMENT_FACADE    => PaymentFacade,
       ACCOUNTING_FACADE => AccountingFacade,
-      REPORTING_FACADE  => ReportingFacade
+      REPORTING_FACADE  => ReportingFacade,
+      LOAN_APPLICATIONS_FACADE => LoanApplicationsFacade
   }
 
   def get_instance(of_facade_type, for_user, with_options = { })

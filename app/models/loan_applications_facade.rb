@@ -1,10 +1,5 @@
 # All operations on loan applications and underlying associations go through this facade
-class LoanApplicationsFacade
-
-  def initialize(user)
-    @user = user
-    @created_at = DateTime.now
-  end
+class LoanApplicationsFacade < StandardFacade
 
   # creation
 

@@ -15,85 +15,80 @@ class LoanApplications < Application
   
   # this controller is responsible for the bulk addition of clients to loan applications
   def bulk_new
-    loan_applications_facade = LoanApplicationsFacade.new(session.user)
     @errors = {}
-    @center = Center.get(params[:at_center_id].to_i) if params[:at_center_id]
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    by_staff = params[:staff_member_id]
+    center_cycle_number = params[:center_cycle_number].to_i
+
     if request.method == :post
       created_on = Date.parse(params[:created_on])
-      center_cycle = CenterCycle.get_cycle(@center.id, params[:center_cycle_number].to_i)
+      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
       if params[:clients]
         client_ids = params[:clients].keys
-        if params[:staff_member_id].empty? or params[:created_on].empty?
+        if by_staff.empty? or params[:created_on].empty?
           @errors = []
-          @errors << "Please select a Staff Member" if params[:staff_member_id].empty?
+          @errors << "Please select a Staff Member" if by_staff.empty?
           @errors << "Please select a created on date" if params[:created_on].empty?
         else
           client_ids.each do |client_id|
             client = Client.get(client_id)
-            loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, params[:at_branch_id].to_i, params[:at_center_id].to_i, center_cycle.id, params[:staff_member_id].to_i, created_on) if params[:clients][client_id][:selected] == "on"
+            loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if params[:clients][client_id][:selected] == "on"
             save_status = loan_application.save if loan_application
             @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
           end
         end
       end
-      client_ids_from_center = @center.clients.aggregate(:id) if @center
-      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => @center.id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
+      client_from_center = client_facade.get_clients_administered(center_id, Date.today) if @center
+      client_ids_from_center = client_from_center.collect{|client| client.id}
+      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
       final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
       @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
     end
-    @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_branch_id => @center.branch.id, :at_center_id => @center.id) if @center
+    @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_branch_id => branch_id, :at_center_id => center_id) if @center
     render
   end
 
 
   # this lists the clients in the center that has been selected
   def list
-    
     # INITIALIZING VARIABLES USED THROUGHOUT
-
     @errors = []
-    laf = LoanApplicationsFacade.new(session.user)
 
     # GATEKEEPING
-
-    branch_id = get_param_value(:branch_id)
-    center_id = get_param_value(:center_id)
+    branch_id = get_param_value(:parent_location_id)
+    center_id = get_param_value(:child_location_id)
+    @branch = branch_id ? location_facade.get_location(branch_id) : nil
+    @center = center_id ? location_facade.get_location(center_id) : nil
 
     # VALIDATION
-
     @errors << "No branch was selected" unless branch_id
     @errors << "No center was selected" unless center_id
-
-    @center = center_id ? Center.get(center_id) : nil
     @errors << "No center was located for center ID: #{center_id}" unless @center
 
     # OPERATIONS PERFORMED
-
     if @errors.empty?
-
       begin
-        center_cycle_number = laf.get_current_center_cycle_number(center_id)
+        center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
         if center_cycle_number > 0
-          center_cycle = laf.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
-          client_ids_from_center = @center.clients.aggregate(:id)
-          client_ids_from_existing_loan_applications = laf.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
+          center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
+          client_from_center = client_facade.get_clients_administered(center_id, Date.today)
+          client_ids_from_center = client_from_center.collect{|client| client.id}
+          client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
           final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
           @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
         end
       rescue => ex
         @errors << "An error has occurred: #{ex.message}"
       end
-
     end
 
     # POPULATING RESPONSE AND OTHER VARIABLES
-
-    if center_id
-      @loan_applications = laf.recently_added_applications_for_existing_clients(:at_center_id => center_id)
-    end
+    @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_center_id => center_id) if center_id
 
     # RENDER/RE-DIRECT
-
     render :bulk_new
   end
 
@@ -182,6 +177,14 @@ class LoanApplications < Application
   end
 
   def suspected_duplicates
+    @errors = []
+    unless params[:flag] == 'true'
+      if params[:branch_id].blank?
+        @errors << "No branch selected"
+      elsif params[:center_id].blank?
+        @errors << "No center selected"
+      end
+    end
     get_de_dupe_loan_applications
     render :suspected_duplicates
   end
@@ -226,12 +229,12 @@ class LoanApplications < Application
             message[:error] = @errors.flatten.join(', ')
           end
         rescue => ex
-          @errors << "An error has occurred: #{ex.message}"
+          @errors << "An error has occurred for Loan Application ID #{lap_id}: #{ex.message}"
         end
  
       end
       # RENDER/RE-DIRECT
-      redirect resource(:loan_applications, :suspected_duplicates), :message => message
+      redirect resource(:loan_applications, :suspected_duplicates, :branch_id => @branch.id, :center_id => @center.id), :message => message
     else
       render :suspected_duplicates
     end
@@ -254,6 +257,11 @@ class LoanApplications < Application
     end
   end
 
+  def loan_application_list
+    @loan_applications = LoanApplication.all(:at_branch_id => params[:at_branch_id], :at_center_id => params[:at_center_id], :status => params[:status])
+    render :loan_application_list
+  end
+  
   private
 
   def get_param_value(param_name_sym)
@@ -264,17 +272,23 @@ class LoanApplications < Application
 
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
   def get_de_dupe_loan_applications
+    @center = Center.get(params["center_id"]) if params["center_id"]
+    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
     facade = LoanApplicationsFacade.new(session.user)
-    @suspected_duplicates = facade.suspected_duplicate
-    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_duplicate
+    @suspected_duplicates = facade.suspected_duplicate({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
+    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_duplicate({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
   end
-
+  
   def location_facade
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
   end
 
   def loan_applications_facade
-    @loan_application_facade ||= LoanApplicationsFacade.new(session.user)
+    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
+  end
+
+  def client_facade
+    @client_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
   end
 
 end # LoanApplications
