@@ -23,8 +23,18 @@ module BookKeeper
     transaction_summary.set_processed
   end
 
-  def account_for_payment_transaction(payment_transaction)
-    #TODO
+  def account_for_payment_transaction(payment_transaction, payment_allocation)
+    # determine the product action
+    product_action = payment_transaction.product_action
+    raise Errors::InvalidConfigurationError, "Unable to determine the product action for the payment transaction" unless product_action
+
+    total_amount, currency, effective_on = payment_transaction.amount, payment_transaction.currency, payment_transaction.effective_on
+    notation = nil
+
+    product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+    postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
+
+    Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation)
   end
 
   def get_primary_chart_of_accounts

@@ -3,7 +3,7 @@ loan_disbursement:
   debit:
     loan_disbursed: customer_loan_disbursed
   credit:
-    loan_disbursed: customer_cash
+    total_paid: customer_cash
 loan_repayment:
   debit:
     total_received: customer_cash

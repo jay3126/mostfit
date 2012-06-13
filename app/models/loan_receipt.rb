@@ -21,26 +21,11 @@ class LoanReceipt
   # @param [Lending] on_loan
   # @param [Date] effective_on
   def self.record_allocation_as_loan_receipt(allocation_values, on_loan, effective_on)
-    receipt                     = { }
-    receipt_money_hash          = Money.from_money(allocation_values)
-    receipt[PRINCIPAL_RECEIVED] = receipt_money_hash[PRINCIPAL_TO_ALLOCATE]
-    receipt[INTEREST_RECEIVED]  = receipt_money_hash[INTEREST_TO_ALLOCATE]
-    receipt[ADVANCE_RECEIVED]   = receipt_money_hash[ADVANCE_TO_ALLOCATE]
-    receipt[:currency]          = receipt_money_hash[:currency]
+    receipt                     = Money.from_money(allocation_values)
+    receipt.delete(TOTAL_RECEIVED)
     receipt[:lending]           = on_loan
     receipt[:effective_on]      = effective_on
     loan_receipt                = create(receipt)
-    raise Errors::DataError, loan_receipt.errors.first.first unless loan_receipt.saved?
-    loan_receipt
-  end
-
-  def self.record_loan_receipt(receipt_values, on_loan, effective_on)
-    receipt_money_hash = Money.from_money(receipt_values)
-    receipt            = { }
-    receipt.merge!(receipt_money_hash)
-    receipt[:lending]      = on_loan
-    receipt[:effective_on] = effective_on
-    loan_receipt           = create(receipt)
     raise Errors::DataError, loan_receipt.errors.first.first unless loan_receipt.saved?
     loan_receipt
   end

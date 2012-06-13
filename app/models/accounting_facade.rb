@@ -32,8 +32,8 @@ class AccountingFacade < StandardFacade
     #TODO
   end
 
-  def account_for_payment_transaction(payment_transaction)
-    book_keeper.account_for_payment_transaction(payment_transaction)
+  def account_for_payment_transaction(payment_transaction, payment_allocation)
+    book_keeper.account_for_payment_transaction(payment_transaction, payment_allocation)
   end
 
   private

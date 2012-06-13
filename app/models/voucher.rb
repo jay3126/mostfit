@@ -5,7 +5,7 @@ class Voucher
 
   property :id,             Serial
   property :guid,           *UNIQUE_ID
-  property :total_amount,   *MONEY_AMOUNT
+  property :total_amount,   *MONEY_AMOUNT_NON_ZERO
   property :currency,       *CURRENCY
   property :effective_on,   *DATE_NOT_NULL
   property :narration,      String, :length => 1024

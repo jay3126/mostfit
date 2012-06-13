@@ -353,7 +353,7 @@ class Lending
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################
 
-  def account_for_payment(payment_transaction, loan_action)
+  def allocate_payment(payment_transaction, loan_action)
     case loan_action
       when LOAN_DISBURSEMENT then return disburse(payment_transaction)
       when LOAN_REPAYMENT then return repay(payment_transaction)
@@ -391,6 +391,9 @@ class Lending
     set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
     disbursement_money_amount = by_disbursement_transaction.payment_money_amount
     LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
+    disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
+    disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
+    disbursement_allocation
   end
 
   def cancel
@@ -476,12 +479,9 @@ class Lending
   def update_for_payment(payment_transaction)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
-    allocation = make_allocation(payment_amount, effective_on)
-
-    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(allocation, self, effective_on)
-    loan_receipt.to_money
-    #record loan due status
-    #respond with the allocation
+    payment_allocation = make_allocation(payment_amount, effective_on)
+    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, self, effective_on)
+    payment_allocation
   end
 
   # Record an allocation on the loan for the given total amount
@@ -491,7 +491,8 @@ class Lending
     resulting_allocation = Hash.new(zero_money_amount)
 
     if current_due_status == NOT_DUE
-      resulting_allocation[ADVANCE_TO_ALLOCATE] = total_amount
+      resulting_allocation[ADVANCE_RECEIVED] = total_amount
+      resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
     end
 
@@ -513,12 +514,14 @@ class Lending
     # Allocation to be done on the amount that is not advance
     allocation = allocator.allocate(allocate_to_principal_and_interest, unallocated_amortization_items)
 
-    resulting_allocation[PRINCIPAL_TO_ALLOCATE] = allocation[:principal]
-    resulting_allocation[INTEREST_TO_ALLOCATE] = allocation[:interest]
+    resulting_allocation[PRINCIPAL_RECEIVED] = allocation[:principal]
+    resulting_allocation[INTEREST_RECEIVED] = allocation[:interest]
     advance_to_allocate += resulting_allocation[:amount_not_allocated]
-    resulting_allocation[ADVANCE_TO_ALLOCATE] = advance_to_allocate
+    resulting_allocation[ADVANCE_RECEIVED] = advance_to_allocate
+    resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     resulting_allocation
   end
+
 
   ###########
   # UPDATES # ends

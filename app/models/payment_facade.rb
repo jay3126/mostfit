@@ -23,16 +23,19 @@ class PaymentFacade < StandardFacade
   def record_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
     payment_transaction = PaymentTransaction.record_payment(money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, for_user)
 
-    loan_facade.account_for_payment(payment_transaction, on_product_id, product_action)
+    payment_allocation = loan_facade.allocate_payment(payment_transaction, on_product_id, product_action)
 
-    #book-keeping
-    #book payment transaction on product account
+    accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
   end
 
   private
 
   def loan_facade
     @loan_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOAN_FACADE, self)
+  end
+
+  def accounting_facade
+    @accounting_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::ACCOUNTING_FACADE, self)
   end
 
 end
