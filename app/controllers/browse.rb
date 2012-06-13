@@ -170,7 +170,7 @@ class Browse < Application
     display @date
   end
 
-  def set_effective_date
+  def update_effective_date
     message = {}
     date = Date.parse(params[:effective_date])
     if set_effective_date(date)

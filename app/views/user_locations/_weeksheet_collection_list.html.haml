@@ -54,7 +54,7 @@
     - collection_sheets.each do |ws|
       %tr
         %td
-          = ws.borrower_name
+          = link_to ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
         %td
           = link_to ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
         %td

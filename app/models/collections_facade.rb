@@ -13,21 +13,23 @@ class CollectionsFacade
   def get_collection_sheet(at_biz_location, on_date)
     collection_sheet_line = []
     client_non_loan       = []
-    biz_location = BizLocation.get(at_biz_location)
-    loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
+    biz_location    = BizLocation.get(at_biz_location)
+    loan_facade     = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
     location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    center_manager = StaffMember.first # Use this center_manager for staff ID, staff name
+    center_manager  = StaffMember.first # Use this center_manager for staff ID, staff name
 
     loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
     return [] if loans.blank?
 
-    loans = loans.select{|loan| loan.status == :disbursed_loan_status}
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
-    #meeting_dates = mf.get_meeting_calendar(biz_location).first
-    meeting_dates = MeetingCalendar.first
-    clients = ClientAdministration.get_clients_administered(biz_location.id, on_date)
+    loans           = loans.select{|loan| loan.status == :disbursed_loan_status}
+    mf              = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
+    meeting_date    = mf.get_meeting_calendar(biz_location).first
+    meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
+    meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
+    clients         = ClientAdministration.get_clients_administered(biz_location.id, on_date)
 
     return [] if clients.blank?
+    
     clients.each do |client|
       client_loans = loans.select{|l| l.loan_borrower.counterparty == client}
       if client_loans.blank?
@@ -98,7 +100,7 @@ class CollectionsFacade
       end
     end
     groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
-    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_dates.meeting_time_begins_hours, meeting_dates.meeting_time_begins_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
+    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_hours, meeting_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
   end
 
   #following function will generate the daily collection sheet for staff_member.

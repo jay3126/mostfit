@@ -7,15 +7,16 @@ class UserLocations < Application
 
   def show
     @biz_location = BizLocation.get params[:id]
+    @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
     level = @biz_location.location_level.level
     if level == 0
       @location_level = LocationLevel.first(:level => level)
       @biz_locations = @location_level.biz_locations
     else
       @location_level = LocationLevel.first(:level => level-1)
-      @biz_locations = LocationLink.get_children(@biz_location, session[:effective_date])
+      @biz_locations = LocationLink.get_children(@biz_location, get_effective_date)
       mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, session[:effective_date]) if @location_level.has_meeting
+      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, get_effective_date) if @location_level.has_meeting
     end
     display @biz_locations
   end
@@ -39,12 +40,16 @@ class UserLocations < Application
 
   def weeksheet_collection
     @biz_location = BizLocation.get params[:id]
-    set_session_effective_date(Date.today) if session[:effective_date].blank?
+    @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
+    set_effective_date(Date.today) if session[:effective_date].blank?
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
     mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @next_meeting = mf.get_next_meeting(@biz_location, @date)
-    @previous_meeting = mf.get_previous_meeting(@biz_location, @date)
-    @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
+    @meeting_schedule = mf.get_meeting_schedules(@biz_location)
+    unless @meeting_schedule.blank?
+      @next_meeting = mf.get_next_meeting(@biz_location, @date)
+      @previous_meeting = mf.get_previous_meeting(@biz_location, @date)
+      @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
+    end
     display @weeksheet
   end
 

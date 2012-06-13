@@ -2,7 +2,7 @@
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name
-    %td= link_to @biz_location.name, '#', :target => "_blank"
+    %td= @biz_location.name
   %tr.odd
     %th.odd Reports to
     %td
@@ -26,17 +26,24 @@
   %tr.odd
     %th.odd Landmark
     %td= ''
-  %tr.even
-    %th.even Area
-    %td= ''
+  - unless @parent_biz_location.blank?
+    %tr.even
+      %th.even= @parent_biz_location.location_level.name
+      %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
 
 %div.tab_container.shaded
   %ul.tabs
     %li#Location
       = @location_level.name
+    %li#staff
+      Staff
+    %li#history
+      History
   %div.tab
     %div#container_centers_list
       - if @location_level.has_meeting
         = partial "user_locations/location_list"
       - else
         = partial "user_locations/child_locations"
+  %div.tab
+  %div.tab
