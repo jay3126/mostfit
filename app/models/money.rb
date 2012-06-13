@@ -117,6 +117,12 @@ class Money
     money_hash
   end
 
+  def self.add_total_to_map(money_amounts_map, by_key)
+    raise ArgumentError, "The map already contains the specified key: #{by_key}" if (money_amounts_map.keys.include?(by_key))
+    money_amounts_map[by_key] = money_amounts_map.values.inject {|sum, money_amount| sum + money_amount}
+    money_amounts_map
+  end
+
   private
 
   # Formats the money amount in least units for the given locale

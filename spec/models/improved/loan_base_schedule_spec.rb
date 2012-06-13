@@ -42,7 +42,6 @@ describe LoanBaseSchedule do
 
   it "should create a number of schedule line items as expected" do
     base_schedule = LoanBaseSchedule.create_base_schedule(@total_principal_money_amount, @total_interest_money_amount, @disbursal_date, @first_repayment_date, @repayment_frequency, @num_of_installments, @loan, @amortization)
-    debugger
     base_schedule.saved?.should be_true
   end
 

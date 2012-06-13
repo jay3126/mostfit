@@ -36,7 +36,8 @@ class LedgerAssignment
     locate_ledger[:ledger_classification] = ledger_classification
     locate_ledger[:product_type]          = product_type if product_type
     locate_ledger[:product_id]            = product_id if product_id
-    first(locate_ledger)
+    ledger_assignment = first(locate_ledger)
+    ledger_assignment ? ledger_assignment.ledger : nil
   end
 
 end

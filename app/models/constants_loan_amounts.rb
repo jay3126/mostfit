@@ -49,6 +49,7 @@ module Constants
     INTEREST_RECEIVED_TILL_DATE (upto and including a particular date)
 =end
 
+    TOTAL_PAID                                                 = :total_paid
     LOAN_DISBURSED                                             = :loan_disbursed
     TOTAL_LOAN_DISBURSED                                       = :total_loan_disbursed
     TOTAL_INTEREST_APPLICABLE                                  = :total_interest_applicable
@@ -71,7 +72,7 @@ module Constants
     ACTUAL_PRINCIPAL_OUTSTANDING                               = :actual_principal_outstanding
     ACTUAL_INTEREST_OUTSTANDING                                = :actual_interest_outstanding
 
-    LOAN_PRODUCT_AMOUNTS = [LOAN_DISBURSED, PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, TOTAL_RECEIVED]
+    LOAN_PRODUCT_AMOUNTS = [LOAN_DISBURSED, PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, TOTAL_RECEIVED, TOTAL_PAID]
 
     #PRINCIPAL_OUTSTANDING is ACTUAL_PRINCIPAL_OUTSTANDING when loan is NOT overdue
     #PRINCIPAL_AT_RISK is ACTUAL_PRINCIPAL_OUTSTANDING when loan is OVERDUE

@@ -19,6 +19,7 @@ module Constants
     MONEY_AMOUNT_PRECISION = 65; MONEY_AMOUNT_SCALE = 0; MONEY_AMOUNT_MINIMUM = 0
     MONEY_AMOUNT_NULL = [ BigDecimal, { :precision => MONEY_AMOUNT_PRECISION, :scale => MONEY_AMOUNT_SCALE, :min => MONEY_AMOUNT_MINIMUM } ]
     MONEY_AMOUNT      = [ BigDecimal, { :precision => MONEY_AMOUNT_PRECISION, :scale => MONEY_AMOUNT_SCALE, :min => MONEY_AMOUNT_MINIMUM }.merge(NOT_NULL) ]
+    MONEY_AMOUNT_NON_ZERO = [ BigDecimal, { :precision => MONEY_AMOUNT_PRECISION, :scale => MONEY_AMOUNT_SCALE, :min => 1 }.merge(NOT_NULL) ]
     UNIQUE_ID_STRING_LENGTH = 40
     UNIQUE_ID         = [ String, { :length => UNIQUE_ID_STRING_LENGTH, :default => lambda {|obj, p| UUID.generate} }.merge(NOT_NULL).merge(UNIQUE) ]
 

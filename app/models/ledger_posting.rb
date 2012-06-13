@@ -4,7 +4,7 @@ class LedgerPosting
 
   property :id,           Serial
   property :effective_on, *DATE_NOT_NULL
-  property :amount,       *MONEY_AMOUNT
+  property :amount,       *MONEY_AMOUNT_NON_ZERO
   property :currency,     *CURRENCY
   property :effect,       Enum.send('[]', *ACCOUNTING_EFFECTS), :nullable => false
   property :created_at,   *CREATED_AT

@@ -3,6 +3,17 @@ require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 describe Lending do
 
   before(:all) do
+
+    #Accounting setup
+    LedgerClassification.create_default_ledger_classifications
+
+    product_accounting_rules_file_name = File.join(Merb.root, 'config', 'product_accounting_rules.yml')
+    product_accounting_rules_file = File.read(product_accounting_rules_file_name)
+    product_accounting_rules = YAML.load(product_accounting_rules_file)
+    ProductAccountingRule.load_product_accounting_rules(product_accounting_rules)
+
+    #Accounting setup
+
     @from_lending_product = Factory(:lending_product)
     @currency = @from_lending_product.currency
     @zero_money_amount = Money.zero_money_amount(@currency)
@@ -40,6 +51,9 @@ describe Lending do
     lan = "#{DateTime.now}"
     for_amount = @total_principal_money_amount
     @for_borrower = Factory(:client)
+
+    @borrower_accounts_chart = AccountsChart.setup_counterparty_accounts_chart(@for_borrower)
+
     @applied_on_date = Date.parse('2011-05-01')
     @scheduled_disbursal_date = @applied_on_date + 7
     @scheduled_first_repayment_date = @scheduled_disbursal_date + 7
@@ -52,6 +66,9 @@ describe Lending do
 
     @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
     @loan.saved?.should == true
+    
+    for_product_type, for_product_id = Constants::Products::LENDING, @loan.id
+    Ledger.setup_product_ledgers(@borrower_accounts_chart, @currency, @applied_on_date, for_product_type, for_product_id)
 
     # For payment transactions on the loan
     @transaction_currency = @loan.currency
@@ -201,20 +218,30 @@ describe Lending do
       factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
 
       disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
-      disbursement = PaymentTransaction.create(disbursement_attributes)
-      disbursement.id.should_not be_nil
+
+      disbursement_money_amount = Money.new(@loan.approved_amount.to_i, @loan.currency)
+      receipt_type = disbursement_attributes[:receipt_type]
+      on_product_type = disbursement_attributes[:on_product_type]
+      on_product_id = disbursement_attributes[:on_product_id]
+      by_counterparty_type = disbursement_attributes[:by_counterparty_type]
+      by_counterparty_id   = disbursement_attributes[:by_counterparty_id]
+      performed_at         = disbursement_attributes[:performed_at]
+      accounted_at         = disbursement_attributes[:accounted_at]
+      performed_by         = disbursement_attributes[:performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
 
       @loan.total_loan_disbursed.should == @zero_money_amount
-      @loan.disburse(disbursement)
+      
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
 
-      @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS
+      @loan.reload
+      @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS    
       @loan.is_disbursed?.should be_true
-
       @loan.disbursal_date.should == disbursed_on_date
-      @loan.to_money_amount(:disbursed_amount).should == disbursement.payment_money_amount
-      @loan.total_loan_disbursed.should == disbursement.payment_money_amount
-
-      @loan.disbursed_by_staff.should == disbursement.performed_by
+      @loan.to_money_amount(:disbursed_amount).should == disbursement_money_amount
+      @loan.total_loan_disbursed.should == disbursement_money_amount
+      @loan.disbursed_by_staff.should == performed_by
     end
 
   end
@@ -295,7 +322,6 @@ describe Lending do
       @loan.total_received_till_date.should == (@loan.total_loan_disbursed + @loan.total_interest_applicable)
       @loan.principal_received_till_date.should == @loan.total_loan_disbursed
       @loan.interest_received_till_date.should == @loan.total_interest_applicable
-
     end
 
   end

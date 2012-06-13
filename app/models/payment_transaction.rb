@@ -1,6 +1,6 @@
 class PaymentTransaction
   include DataMapper::Resource
-  include Constants::Properties, Constants::Money, Constants::Transaction
+  include Constants::Properties, Constants::Money, Constants::Transaction, Constants::Accounting
   include Validators::Arguments
   
   property :id,                   Serial
@@ -34,6 +34,10 @@ class PaymentTransaction
   def accounted_at_location; BizLocation.get(self.accounted_at); end
   def performed_by_staff; Staff.get(self.performed_by); end
   def recorded_by_user; User.get(self.recorded_by); end
+
+  def product_action
+    PRODUCT_ACTIONS_FOR_TRANSACTIONS[self.on_product_type][self.receipt_type]
+  end
 
   # UPDATES
 

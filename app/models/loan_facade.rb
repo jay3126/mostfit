@@ -148,8 +148,8 @@ class LoanFacade < StandardFacade
 
   # UPDATES
 
-  def account_for_payment(payment_transaction, on_loan_id, with_loan_action)
-    loan_manager.account_for_payment(payment_transaction, on_loan_id, with_loan_action)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action)
+    loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action)
   end
 
   def assign_locations_for_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)

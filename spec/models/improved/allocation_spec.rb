@@ -36,7 +36,6 @@ describe Allocation do
   end
 
   it "should netoff the allocated amounts as expected" do
-    debugger
     first_installment = {
         [1, Date.parse('2012-04-08')] =>
             { @spd => MoneyManager.get_money_instance(170.18), @slid => MoneyManager.get_money_instance(49.82) }

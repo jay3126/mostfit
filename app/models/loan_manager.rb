@@ -88,8 +88,8 @@ class LoanManager
 
   # transactions
 
-  def account_for_payment(payment_transaction, on_loan_id, with_loan_action)
-    get_loan(on_loan_id).account_for_payment(payment_transaction, with_loan_action)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action)
+    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action)
   end
 
 end
