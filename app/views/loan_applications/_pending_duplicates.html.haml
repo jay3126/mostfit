@@ -5,12 +5,13 @@
 
 #pending_list
   .shaded
-    %h2 Suspected duplicate loan applications
+    %h2 Pending Suspected duplicate loan applications
     - if @suspected_duplicates && !@suspected_duplicates.empty?
       = form(:action => url(:controller => 'loan_applications', :action => 'record_suspected_duplicates'), :method => :post) do
         %table.narrow.form{:width => "100%"}
           %thead
             %tr
+              %th S.No.
               %th ID
               %th Name
               %th Guarantor Name
@@ -19,8 +20,11 @@
               %th Address
               %th{:colspan => 2, :style=>"text-align : center"} Actions
           %tbody
+            - s_no = 0
             - @suspected_duplicates.each do |loan_application|
               %tr
+                %td
+                  = s_no += 1
                 %td
                   = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
                 %td
@@ -41,6 +45,8 @@
                   - selected_confirm = !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "confirm" ? "checked" : nil
                   %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm }
                   Confirm
+                  = hidden_field :name => 'center_id', :value => @center.nil? ? params[:center_id] : @center.id
+                  = hidden_field :name => 'branch_id', :value => @branch.nil? ? params[:branch_id] : @branch.id
         %table.narrow.form
           %tfoot
             %tr

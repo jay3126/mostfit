@@ -6,6 +6,7 @@
       %table.narrow.form{:width => "100%"}
         %thead
           %tr
+            %th S.No.
             %th ID
             %th Name
             %th Guarantor Name
@@ -14,8 +15,11 @@
             %th Address
             %th Status
         %tbody
+          - s_no = 0
           - cleared_or_confirmed_diplicate_loan_files.each do |loan_application|
             %tr
+              %td
+                = s_no += 1
               %td
                 = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
               %td

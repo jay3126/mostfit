@@ -382,8 +382,8 @@ class LoanApplication
 
   #returns all loan applications that have been recently created
   def self.recently_created_new_loan_applicants(search_options = {})
-    search_options.merge!({:status => NEW_STATUS, :client_id => nil})
-    pending = all(search_options)
+    search_options.merge!({:client_id => nil})
+    all(search_options)
   end
 
   def self.recently_created_new_loan_applications_from_existing_clients(search_options = {})
@@ -393,7 +393,7 @@ class LoanApplication
 
   #returns all loan applications for which CPV was recently recorded
   def self.recently_recorded_client_verifications(search_options = {})
-    cpv_completed_statuses = [CPV1_APPROVED_STATUS, CPV2_APPROVED_STATUS]
+    cpv_completed_statuses = [CPV1_APPROVED_STATUS, CPV1_REJECTED_STATUS, CPV2_APPROVED_STATUS, CPV2_REJECTED_STATUS]
     search_options.merge!({:status => cpv_completed_statuses})
     recent = all(search_options)
     recent.collect{|lap| lap.to_info}
@@ -433,13 +433,15 @@ class LoanApplication
   end
 
   # returns all loan applications which has status suspected_duplicate
-  def self.suspected_duplicate
-    all(:status => SUSPECTED_DUPLICATE_STATUS)
+  def self.suspected_duplicate(search_options = {})
+    search_options.merge!(:status => SUSPECTED_DUPLICATE_STATUS)
+    all(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
-  def self.clear_or_confirm_duplicate
-    all(:status => [CONFIRMED_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS])
+  def self.clear_or_confirm_duplicate(search_options = {})
+    search_options.merge!(:status => [CONFIRMED_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS])
+    all(search_options)
   end
 
   # set loan application status as cleared_not_duplicate

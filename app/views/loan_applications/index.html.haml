@@ -27,7 +27,7 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-dupe
-      = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates), :class => 'edit_small'
+      = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true'), :class => 'edit_small'
   %tr
     %td
       %br

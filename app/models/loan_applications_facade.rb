@@ -171,13 +171,15 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # Return all loan applications which has status suspected_duplicate
-  def suspected_duplicate
-    LoanApplication.suspected_duplicate
+  def suspected_duplicate(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.suspected_duplicate(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
-  def clear_or_confirm_duplicate
-    LoanApplication.clear_or_confirm_duplicate
+  def clear_or_confirm_duplicate(search_options = {})
+    search_options.merge!({:created_by_user_id => @user.id})
+    LoanApplication.clear_or_confirm_duplicate(search_options)
   end
 
   # set loan application status as cleared_not_duplicate
