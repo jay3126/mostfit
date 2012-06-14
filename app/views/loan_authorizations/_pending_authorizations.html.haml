@@ -1,7 +1,6 @@
 :javascript
   function reset_all_fields(){
     jQuery("form.pending_auth input[type='radio']").attr('checked',false);
-    // jQuery("form select option[value='Not overriden']").attr("selected",true);
     jQuery("form.pending_auth select").removeAttr('selected').find(':first').attr('selected','selected');
   }
 
@@ -11,8 +10,8 @@
       = "Credit officer authorizes loan application"
     - if @pending_authorizations && !@pending_authorizations.empty?
       = form(:action => url(:controller => 'loan_authorizations', :action => 'record_authorizations'), :method => :post, :class => "pending_auth") do
-        %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
-        %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
+        %input{:type => :hidden, :value => @branch_id, :name => 'parent_location_id'}
+        %input{:type => :hidden, :value => @center_id, :name => 'child_location_id'}
         %table.form{:style => "width:100%; border:1px;"}
           %thead
             %tr

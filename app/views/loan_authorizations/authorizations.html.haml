@@ -12,7 +12,8 @@
         %br
 %h1
   = "Credit Officer authorizes new loan applications"
-= partial :filter_form
+%form{:action => url(:controller => :loan_authorizations, :action => :pending_authorizations), :method => :get}
+  = partial "lib/biz_location_selector"
 
 %br
 %hr

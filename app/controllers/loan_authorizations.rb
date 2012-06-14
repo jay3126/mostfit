@@ -24,7 +24,6 @@ class LoanAuthorizations < Application
     # INITIALIZING VARIABLES USED THROUGHOUT
 
     get_branch_and_center(params)
-    facade = LoanApplicationsFacade.new(session.user)
 
     # GATEKEEPING
 
@@ -46,21 +45,21 @@ class LoanAuthorizations < Application
           override_reason = params[:override_reason][lap]
           loan_application = LoanApplication.get(lap)
           credit_bureau_status = loan_application.credit_bureau_status
-          final_status = facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
+          final_status = loan_applications_facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
 
           if final_status == Constants::Status::APPLICATION_APPROVED
-            facade.authorize_approve(lap, by_staff, on_date)
+            loan_applications_facade.authorize_approve(lap, by_staff, on_date)
 
           elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
             raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
-            facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
+            loan_applications_facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
           elsif final_status == Constants::Status::APPLICATION_REJECTED
-            facade.authorize_reject(lap, by_staff, on_date)
+            loan_applications_facade.authorize_reject(lap, by_staff, on_date)
 
           else
             raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
-            facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
+            loan_applications_facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
           end
         rescue => ex
           @errors << "An error has occured for Loan Application ID #{lap}: #{ex.message}"
@@ -82,16 +81,16 @@ class LoanAuthorizations < Application
 
   def get_branch_and_center(params)
     @errors = []
-    @center_id = params[:center_id] && !params[:center_id].empty? ? params[:center_id] : nil
-    @branch_id = params[:branch_id] && !params[:branch_id].empty? ? params[:branch_id] : nil
-    @center = Center.get(@center_id)
+    @branch_id = params[:parent_location_id] && !params[:parent_location_id].empty? ? params[:parent_location_id] : nil
+    @center_id = params[:child_location_id] && !params[:child_location_id].empty? ? params[:child_location_id] : nil
+    @branch = location_facade.get_location(@branch_id) if @branch_id
+    @center = location_facade.get_location(@center_id) if @center_id
     @user_id = session.user.id
   end
 
   def get_pending_and_completed_auth(params)
-    facade = LoanApplicationsFacade.new(session.user)
-    @pending_authorizations = facade.pending_authorization(search_options(@branch_id, @center_id))
-    @completed_authorizations = facade.completed_authorization(search_options(@branch_id, @center_id))
+    @pending_authorizations = loan_applications_facade.pending_authorization(search_options(@branch_id, @center_id))
+    @completed_authorizations = loan_applications_facade.completed_authorization(search_options(@branch_id, @center_id))
   end
 
   def search_options(branch_id = nil, center_id = nil)
@@ -99,6 +98,14 @@ class LoanAuthorizations < Application
     options[:at_branch_id] = branch_id if branch_id
     options[:at_center_id] = center_id if center_id
     options
+  end
+
+  def location_facade
+    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+  end
+
+  def loan_applications_facade
+    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
   end
 
 end
