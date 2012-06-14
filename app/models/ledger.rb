@@ -16,6 +16,7 @@ class Ledger
   property :opening_balance_amount,   *MONEY_AMOUNT
   property :opening_balance_currency, *CURRENCY
   property :opening_balance_effect,   Enum.send('[]', *ACCOUNTING_EFFECTS), :nullable => false
+  property :manual_voucher_permitted, Boolean, :default => false
   property :created_at,               *CREATED_AT
   property :type,                     Discriminator
 
@@ -83,7 +84,13 @@ class Ledger
     all_product_ledgers = {}
     PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
       ledger_classification = LedgerClassification.resolve(product_ledger_type)
-      ledger_product_type, ledger_product_id = ledger_classification.is_product_specific ? [for_product_type, for_product_id] : 
+
+      ledger_is_product_specific = ledger_classification.is_product_specific?
+      if (for_product_type.nil? and for_product_id.nil?)
+        next if ledger_is_product_specific
+      end
+
+      ledger_product_type, ledger_product_id = ledger_is_product_specific ? [for_product_type, for_product_id] :
           [nil, nil]
 
       ledger_assignment = LedgerAssignment.record_ledger_assignment(with_accounts_chart, ledger_classification, ledger_product_type, ledger_product_id)
