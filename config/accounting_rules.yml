@@ -20,14 +20,6 @@ interest_received_on_loans_made:
   credits:
     ledger: Interest income
     percentage: 100
-other_fee_received_specific:
-  specific_income_type_id: 1
-  debits:
-    ledger: Cash
-    percentage: 100
-  credits:
-    ledger: Fee income
-    percentage: 100
 accrue_regular_principal_repayments_on_loans:
   debits:
     ledger: Debtors
