@@ -32,6 +32,10 @@ class AccountingFacade < StandardFacade
     #TODO
   end
 
+  def create_manual_voucher(total_money_amount, effective_on, postings, notation = nil)
+    Voucher.create_manual_voucher(total_money_amount, effective_on, postings, notation)
+  end
+
   def account_for_payment_transaction(payment_transaction, payment_allocation)
     book_keeper.account_for_payment_transaction(payment_transaction, payment_allocation)
   end

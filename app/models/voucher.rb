@@ -30,6 +30,10 @@ class Voucher
     create_voucher(total_amount, currency, effective_on, notation, postings, GENERATED_VOUCHER)
   end
 
+  def self.create_manual_voucher(total_money_amount, effective_on, postings, notation = nil)
+    create_voucher(total_money_amount.amount, total_money_amount.currency, effective_on, notation, postings, MANUAL_VOUCHER)
+  end
+
   def self.get_postings(ledger, cost_center = nil, to_date = Date.today, from_date = nil)
     LedgerPosting.all_postings_on_ledger(ledger, to_date, from_date)
   end
