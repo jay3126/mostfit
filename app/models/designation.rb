@@ -9,6 +9,6 @@ class Designation
 
   belongs_to :location_level
 
-  has n, :user_roles
+  has 1, :user_role
 
 end
