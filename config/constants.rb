@@ -123,7 +123,3 @@ TargetType  = [:relative, :absolute]
 CHUNK_SIZE = 2500
 
 EWS_LIST = ['small_marginal_farmers', 'sc_st', 'cottage_industry', 'not_applicable']
-TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
-
-# MARITAL_STATUS For client page
-MARITAL_STATUS= ["single", "married", "divorce", "widowed"]

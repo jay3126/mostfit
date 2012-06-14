@@ -108,13 +108,10 @@ FactoryGirl.define do
     state           Constants::Masters::STATES.first
     name            { Factory.next(:name) }
     active          true
-    gender          'male'
+    gender          Constants::Masters::DEFAULT_GENDER
     date_joined     { Date.parse('2000-01-01') }
 
-    association     :client_type
-    association     :center
     association     :created_by, :factory => :user
-    association     :created_by_staff, :factory => :staff_member
   end
 
   factory :client_type do
