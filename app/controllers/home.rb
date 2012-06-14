@@ -1,6 +1,7 @@
 class Home < Application
 
   def index
+    set_effective_date(Date.today)
     @location_levels = LocationLevel.all(:level.not => 0)
     display @location_levels
   end
