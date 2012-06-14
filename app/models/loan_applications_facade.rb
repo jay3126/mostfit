@@ -3,13 +3,13 @@ class LoanApplicationsFacade < StandardFacade
 
   def create_for_client(client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
     hash = client.to_loan_application + {
-      :amount              => loan_amount,  #params[:clients][client_id][:amount],
-      :created_by_staff_id => by_staff,     #params[:staff_member_id].to_i,
-      :at_branch_id        => at_branch,    #params[:at_branch_id].to_i,
-      :at_center_id        => at_center,    #params[:at_center_id].to_i,
-      :created_by_user_id  => user_id,      #session.user.id,
-      :center_cycle_id     => for_cycle, #center_cycle.id,
-      :created_on          => on_date       #created_on1
+      :amount              => loan_amount,
+      :created_by_staff_id => by_staff,
+      :at_branch_id        => at_branch,
+      :at_center_id        => at_center,
+      :created_by_user_id  => user_id,
+      :center_cycle_id     => for_cycle,
+      :created_on          => on_date
     }
     loan_application = LoanApplication.new(hash)
   end
@@ -40,7 +40,7 @@ class LoanApplicationsFacade < StandardFacade
     raise NotFound if loan_application.nil?
     loan_application.set_status(Constants::Status::NOT_DUPLICATE_STATUS)
   end
-  
+
   # Rate on credit bureau response
 
   def rate_by_credit_bureau_response(loan_application_id, rating)
@@ -121,7 +121,7 @@ class LoanApplicationsFacade < StandardFacade
     LoanFile.locate_loan_file(by_loan_file_identifier)
   end
 
-  #get a single loan file at a center, at a branch for a cycle number 
+  #get a single loan file at a center, at a branch for a cycle number
   def locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
     LoanFile.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
   end
@@ -129,7 +129,7 @@ class LoanApplicationsFacade < StandardFacade
   def get_loan_file_info(loan_file_identifier)
     LoanFile.get_loan_file_info(loan_file_identifier)
   end
-  
+
   #return all loan files at a center in a branch for cycle number
   def locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
     LoanFile.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
@@ -189,7 +189,7 @@ class LoanApplicationsFacade < StandardFacade
   def set_confirm_duplicate(lap_id)
     LoanApplication.set_confirm_duplicate(lap_id)
   end
-  
+
   def pending_credit_bureau_check(search_options = {})
     search_options.merge!(:created_by_user_id => user_id)
     LoanApplication.pending_overlap_report_request_generation(search_options)
@@ -209,7 +209,7 @@ class LoanApplicationsFacade < StandardFacade
     search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.recently_recorded_client_verifications(search_options)
   end
-  
+
   def pending_loan_file_generation(search_options = {})
     search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_loan_file_generation(search_options)
@@ -229,7 +229,7 @@ class LoanApplicationsFacade < StandardFacade
   def search(search_options = {})
     LoanApplication.search(search_options)
   end
-  
+
   def newly_created(search_options = {})
   end
 

@@ -176,11 +176,15 @@ class LoanApplications < Application
   end
 
   def suspected_duplicates
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
     @errors = []
     unless params[:flag] == 'true'
-      if params[:branch_id].blank?
+      if branch_id.blank?
         @errors << "No branch selected"
-      elsif params[:center_id].blank?
+      elsif center_id.blank?
         @errors << "No center selected"
       end
     end
@@ -189,38 +193,32 @@ class LoanApplications < Application
   end
 
   def record_suspected_duplicates
-    
     # INITIALIZING VARIABLES USED THROUGHOUT
     result = nil
     message = {}
     @errors = []
-    facade = LoanApplicationsFacade.new(session.user)
 
     # GATE-KEEPING
-
     staff_member_id = get_param_value(:staff_member_id)
     clear_or_confirm_duplicate = get_param_value(:clear_or_confirm_duplicate)
     created_on = params[:created_on]
 
     # VALIDATIONS
-    
     @errors << 'Please select Staff member' unless staff_member_id
     @errors <<  'Please select Action either Cleared not duplicate or Confirm duplicate' unless clear_or_confirm_duplicate
     @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
     # POPULATING RESPONSE AND OTHER VARIABLES
-
     get_de_dupe_loan_applications
 
     # OPERATIONS PERFORMED
-
     if @errors.empty?
       clear_or_confirm_duplicate.keys.each do |lap_id|
         begin
           if  clear_or_confirm_duplicate[lap_id].include?('clear')
-            result = facade.set_cleared_not_duplicate(lap_id)
+            result = loan_applications_facade.set_cleared_not_duplicate(lap_id)
           elsif clear_or_confirm_duplicate[lap_id].include?('confirm')
-            result = facade.set_confirm_duplicate(lap_id)
+            result = loan_applications_facade.set_confirm_duplicate(lap_id)
           end
           if result
             message[:notice] = "Loan application has been updated successfully"
@@ -233,7 +231,7 @@ class LoanApplications < Application
  
       end
       # RENDER/RE-DIRECT
-      redirect resource(:loan_applications, :suspected_duplicates, :branch_id => @branch.id, :center_id => @center.id), :message => message
+      redirect resource(:loan_applications, :suspected_duplicates, :parent_location_id => @branch.id, :child_location_id => @center.id), :message => message
     else
       render :suspected_duplicates
     end
@@ -271,11 +269,19 @@ class LoanApplications < Application
 
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
   def get_de_dupe_loan_applications
-    @center = Center.get(params["center_id"]) if params["center_id"]
-    @branch = Branch.get(params["branch_id"]) if params["branch_id"]
-    facade = LoanApplicationsFacade.new(session.user)
-    @suspected_duplicates = facade.suspected_duplicate({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
-    @cleared_or_confirmed_diplicate_loan_files = facade.clear_or_confirm_duplicate({:at_branch_id => @center.branch.id, :at_center_id => @center.id}) if @center
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    @suspected_duplicates = loan_applications_facade.suspected_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
+    @cleared_or_confirmed_diplicate_loan_files = loan_applications_facade.clear_or_confirm_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
+  end
+
+  def get_branch_and_center
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
   end
   
   def location_facade

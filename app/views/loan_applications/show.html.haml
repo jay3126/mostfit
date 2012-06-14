@@ -12,12 +12,12 @@
   %tr
     %th Branch
     %td
-      = Branch.get(loan_application.at_branch_id).name
+      = BizLocation.get(loan_application.at_branch_id).name
 
   %tr
     %th Center
     %td
-      = Center.get(loan_application.at_center_id).name
+      = BizLocation.get(loan_application.at_center_id).name
 
   %tr
     %th Applicant Name

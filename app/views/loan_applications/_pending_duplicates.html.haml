@@ -45,8 +45,8 @@
                   - selected_confirm = !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "confirm" ? "checked" : nil
                   %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm }
                   Confirm
-                  = hidden_field :name => 'center_id', :value => @center.nil? ? params[:center_id] : @center.id
-                  = hidden_field :name => 'branch_id', :value => @branch.nil? ? params[:branch_id] : @branch.id
+                  = hidden_field :name => 'parent_location_id', :value => @branch.id
+                  = hidden_field :name => 'child_location_id', :value => @center.id
         %table.narrow.form
           %tfoot
             %tr

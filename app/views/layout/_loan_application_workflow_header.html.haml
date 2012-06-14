@@ -1,18 +1,7 @@
-//:javascript
-//  $(document).ready(function() {
-//    jQuery("#reports_links").hide();
-//    jQuery("#report_tab").mouseover(function() {
-//      jQuery("#reports_links").show();
-//    });
-//    jQuery("#report_tab").mouseout(function() {
-//      jQuery("#reports_links").hide();
-//    });
-//  });
-
 .lap_header_tab
   = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true')
   = link_to "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new)
-  = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates)
+  = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true')
   = link_to "Download request files", url(:controller => :overlap_report_requests, :action => :index)
   = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index)
   = link_to "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true')
