@@ -179,7 +179,7 @@ class NewClients < Application
         @ledgers << ledger_map.values
       end
     end
-    @ledgers = @ledgers.flatten.group_by{|l| l.account_type}
+    @ledgers = @ledgers.flatten.uniq.group_by{|l| l.account_type}
     partial "new_clients/show_accounts"
   end
 end
