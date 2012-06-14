@@ -1,6 +1,6 @@
 class ClientGroup
   include DataMapper::Resource
-  before :valid?, :add_created_by_staff_member
+  #before :valid?, :add_created_by_staff_member
   after :save, :sync_clients
 
   property :id,                Serial
@@ -9,13 +9,13 @@ class ClientGroup
   property :code,              String, :length => 100, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
 
-  validates_is_unique   :code, :scope => :center_id
+  #validates_is_unique   :code, :scope => :center_id
   validates_length      :code, :min => 1, :max => 100
 
   has n, :clients
-  belongs_to :center, :nullable => false
+  belongs_to :center, :nullable => true
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
-  validates_is_unique :name, :scope => :center_id
+ # validates_is_unique :name, :scope => :center_id
   validates_with_method :client_should_be_migratable
 
   has n, :cgts

@@ -50,7 +50,7 @@ class ClientGroups < Application
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
         display @client_group
       else
-        request.xhr? ? display(@client_group) : redirect(url(:data_entry), :message => {:notice => "Group was successfully created"})
+        request.xhr? ? display(@client_group) : redirect( request.referer, :message => {:notice => "Group was successfully created"})
       end
     else
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
