@@ -18,6 +18,13 @@ class Voucher
 
   validates_present :effective_on
   validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?, :validate_all_post_to_unique_accounts?
+  validates_with_method :manual_voucher_permitted?
+  
+  def manual_voucher_permitted?
+    return true unless self.generated_mode == MANUAL_VOUCHER
+    self.ledger_postings.any? {|posting| (not (posting.ledger.manual_voucher_permitted?))} ? [false, "One or more ledgers do not permit manual vouchers"] :
+      true
+  end
 
   def self.create_generated_voucher(total_amount, currency, effective_on, postings, notation = nil)
     create_voucher(total_amount, currency, effective_on, notation, postings, GENERATED_VOUCHER)
