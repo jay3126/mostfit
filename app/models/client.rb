@@ -1,139 +1,63 @@
 class Client
   include Paperclip::Resource
-  include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include DataMapper::Resource
-  include FeesContainer
-  include ClientValidations
+  include DateParser  # mixin for the hook "before :valid?, :parse_dates"
+  include ClientValidations, PeopleValidations
   include Constants::Masters
-  include PeopleValidations
 
-  FLAGS = [:insincere]
-
-  before :valid?, :parse_dates
   before :valid?, :convert_blank_to_nil
-  before :valid?, :add_created_by_staff_member
-  after  :save,   :check_client_deceased
-  after  :save,   :levy_fees
-  after  :save,   :update_loan_cache
 
-  property :id,              Serial
+  property :id,                       Serial
+  property :guarantor_name,           String
+  property :guarantor_dob,            Date
+  property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), :default => OTHER_RELATIONSHIP
+  property :telephone_number,         String, :nullable => true
+  property :telephone_type,           Enum.send('[]', *TELEPHONE_TYPES), :default => DEFAULT_TELEPHONE_TYPE
+  property :state,                    Enum.send('[]', *STATES)
+  property :pincode,                  Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
+  property :income,                   Integer
+  property :family_income,            Integer
+  property :reference,                String, :length => 100, :nullable => false
+  property :name,                     String, :length => 100, :nullable => false
+  property :gender,                   Enum.send('[]', *GENDER_CHOICE), :nullable => true, :default => DEFAULT_GENDER
+  property :marital_status,           Enum.send('[]', *MARITAL_STATUS), :default => DEFAULT_MARRITAL_STATUS
+  property :reference_type,           Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE_TYPE
+  property :reference2,               String
+  property :reference2_type,          Enum.send('[]', *REFERENCE2_TYPES), :default => DEFAULT_REFERENCE2_TYPE
+  property :spouse_name,              String, :length => 100
+  property :date_of_birth,            Date
+  property :spouse_date_of_birth,     Date
+  property :address,                  Text
+  property :pincode,                  Integer
+  property :active,                   Boolean, :default => true, :nullable => false
+  property :inactive_reason,          Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :default => ''
+  property :date_joined,              Date
+  property :grt_pass_date,            Date, :nullable => true
+  property :center_id,                Integer, :nullable => true
+  property :created_at,               DateTime, :default => Time.now
+  property :deleted_at,               ParanoidDateTime
+  property :updated_at,               DateTime
+  property :deceased_on,              Date
+  property :created_by_user_id,       Integer, :nullable => false
+  property :other_income,             Integer, :length => 10, :nullable => true
+  property :total_income,             Integer, :length => 10, :nullable => true
+  property :poverty_status,           String, :length => 10, :nullable => true
+  property :caste,                    Enum.send('[]', *CASTE_CHOICE), :nullable => true, :default => CASTE_NOT_SPECIFIED
+  property :religion,                 Enum.send('[]', *RELIGION_CHOICE), :nullable => true, :default => DEFAULT_RELIGION
+  property :created_by_staff_member_id,  Integer, :nullable => false
 
-  # # basic properties custom only to suryoday
-  property :next_to_kin,     String
-  property :next_to_kin_relationship, Enum.send('[]', *["Husband", "Father"]), :default => "Husband"
-  property :guarantor_name,  String
-  property :guarantor_dob,   Date, :index => true, :lazy => true
-  property :guarantor_relationship, Enum.send('[]', *RELATIONSHIPS), :default => 'Other'
-  property :telephone_number, String, :nullable => true
-  property :telephone_type,  Enum.send('[]', *(TELEPHONE_TYPES)), :default => "Untagged"
-  property :state,           Enum.send('[]', *([nil] + STATES)), :nullable => true
-  property :pincode,         Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
-  property :income,          Integer
-  property :family_income,   Integer
-
-  property :reference,       String, :length => 100, :nullable => false, :index => true
-  property :name,            String, :length => 100, :nullable => false, :index => true
-  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => 'female'
-  property :marital_status,  Enum.send('[]', *(MARITAL_STATUS)), :default => "married"
-  property :reference_type,  Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
-  property :reference2,      String
-  property :reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => 'Others'
-  property :gender,          Enum.send('[]', *['', 'female', 'male']), :nullable => true, :lazy => true, :default => :female
-  property :spouse_name,     String, :length => 100, :lazy => true
-  property :date_of_birth,   Date,   :index => true, :lazy => true
-  property :spouse_date_of_birth, Date, :index => true, :lazy => true
-  property :address,         Text, :lazy => true
-  property :pincode,         Integer
-  property :state,           Enum.send('[]', *STATES), :nullable => true
-  property :active,          Boolean, :default => true, :nullable => false, :index => true
-  property :inactive_reason, Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :index => true, :default => ''
-  property :date_joined,     Date,    :index => true
-  property :grt_pass_date,   Date,    :index => true, :nullable => true
-  property :client_group_id, Integer, :index => true, :nullable => true
-  property :center_id,       Integer, :index => true, :nullable => true
-  property :created_at,      DateTime, :default => Time.now
-  property :deleted_at,      ParanoidDateTime
-  property :updated_at,      DateTime
-  property :deceased_on,     Date, :lazy => true
-  property :created_by_user_id,  Integer, :nullable => false, :index => true
-  property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
-  property :verified_by_user_id, Integer, :nullable => true, :index => true
-  property :tags, Flag.send("[]", *FLAGS)
-
-  property :other_income, Integer, :length => 10, :nullable => true, :lazy => true
-  property :total_income, Integer, :length => 10, :nullable => true, :lazy => true
-  property :poverty_status, String, :length => 10, :nullable => true, :lazy => true
-  property :caste, Enum.send('[]', *['', 'sc', 'st', 'obc', 'general']), :default => '', :nullable => true, :lazy => true
-  property :religion, Enum.send('[]', *['', 'hindu', 'muslim', 'sikh', 'jain', 'buddhist', 'christian']), :default => '', :nullable => true, :lazy => true
-
-  # Public: all the centers that are fit to be known
-  # preload these to prevent making repeated calls to the database each time
-  #
-  # called with no arguments
-  def relevant_centers
-    return @rcs if @rcs
-    @rcs = Center.all(:id => past_centers.values + [center_id]).map{|c| [c.id, c]}.to_hash
-  end
-
-  def past_branches
-    # later this must support movement of centers between branches as as well
-    return @pbs if @pbs
-    bs = Center.all(:id => past_centers.values).aggregate(:id, :branch_id).to_hash
-    @pbs = past_centers.map{|k,v| [k, bs[v]]}.to_hash
-  end
-
-
-  def move_to_center(center, as_of_date)
-    center = center.class == Center ? center : Center.get(center_id)
-    pcs = self.past_centers || {}
-    pcs[as_of_date - 1] = self.center.id
-    self.center = center
-    self.past_centers = pcs
-    self.client_group = nil
-    self.save!
-    self.loans.each{|l| l.update_history}
-    return true
-  end
-
-  def center_for_date(date)
-    return center_id if past_centers.blank?
-    return center_id if self.past_centers.keys.max < date
-    self.past_centers[self.past_centers.select{|k,v| k >= date}.to_hash.keys.sort[0]]
-  end
-
-  def branch_for_date(date)
-    return center.branch_id if past_centers.blank? or self.past_centers.keys.max < date
-    self.past_branches[self.past_branches.select{|k,v| k >= date}.to_hash.keys.sort[0]]
-  end
-
-  validates_length :school_distance, :max => 200
-  validates_length :phc_distance, :max => 500
-
-  belongs_to :organization, :parent_key => [:org_guid], :child_key => [:parent_org_guid], :required => false
-  property   :parent_org_guid, String, :nullable => true
-
-  belongs_to :domain, :parent_key => [:domain_guid], :child_key => [:parent_domain_guid], :required => false
-  property   :parent_domain_guid, String, :nullable => true
-  property   :client_type_id,     Integer, :default => 1
-  has n, :loans
-  has n, :payments
   has n, :insurance_policies
   has n, :attendances
   has n, :claims
-  has n, :guarantors
-  has n, :loan_applications
-  has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "Client"
-  validates_length :account_number, :max => 20
 
-  belongs_to :center,                 :nullable => true
-  belongs_to :client_group
+  has n, :loan_applications
+
+  belongs_to :client_group,         :nullable => true
   belongs_to :occupation,           :nullable => true
   belongs_to :priority_sector_list, :nullable => true
   belongs_to :psl_sub_category,     :nullable => true
-  belongs_to :client_type
-  belongs_to :created_by,        :child_key => [:created_by_user_id],         :model => 'User'
-  belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
-  belongs_to :verified_by,       :child_key => [:verified_by_user_id],        :model => 'User'
+  belongs_to :created_by_staff,     :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
+  belongs_to :created_by,           :child_key => [:created_by_user_id],    :model => 'User'
 
   has_attached_file :picture,
     :styles => {:medium => "300x300>", :thumb => "60x60#"},
@@ -151,23 +75,11 @@ class Client
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
   validates_length    :name, :min => 3
-  #validates_present   :center
   validates_present   :date_joined
   validates_is_unique :reference
   validates_is_unique :reference2
-  validates_with_method  :verified_by_user_id,          :method => :verified_cannot_be_deleted, :if => Proc.new{|x| x.deleted_at != nil}
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
-  validates_with_method :inactive_reason, :method => :cannot_have_inactive_reason_if_active
-
-  def update_loan_cache
-    loans.each{|l| l.update_loan_cache(true); l.save}
-  end
-
-  # returns the age of the client as calculated from her year of birth
-  def age
-    (date_of_birth.nil? ? nil : (Date.today.year - date_of_birth.year))
-  end
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
@@ -210,25 +122,6 @@ class Client
     end
   end
 
-  def pay_fees(amount, date, received_by, created_by)
-    @errors = []
-    fp = fees_payable_on(date)
-    pay_order = fee_schedule.keys.sort.map{|d| fee_schedule[d].keys}.flatten
-    pay_order.each do |k|
-      if fees_payable_on(date).has_key?(k)
-        pay = Payment.new(:amount => [fp[k], amount].min, :type => :fees, :received_on => date, :comment => k.name, :fee => k,
-          :received_by => received_by, :created_by => created_by, :client => self)
-        if pay.save_self
-          amount -= pay.amount
-          fp[k] -= pay.amount
-        else
-          @errors << pay.errors
-        end
-      end
-    end
-    @errors.blank? ? true : @errors
-  end
-
   def to_loan_application
     _to_loan_application = {
       :client_id              => id,
@@ -246,41 +139,6 @@ class Client
     }
   end
 
-  def self.flags
-    FLAGS
-  end
-
-  def make_center_leader
-    return "Already is center leader for #{center.name}" if CenterLeader.first(:client => self, :center => self.center)
-    CenterLeader.all(:center => center, :current => true).each{|cl|
-      cl.current = false
-      cl.date_deassigned = Date.today
-      cl.save
-    }
-    CenterLeader.create(:center => center, :client => self, :current => true, :date_assigned => Date.today)
-  end
-
-  def check_client_deceased
-    if not self.active and not self.inactive_reason.blank? and [:death_of_client, :death_of_spouse].include?(self.inactive_reason.to_sym)
-      loans.each do |loan|
-        if (loan.status==:outstanding or loan.status==:disbursed or loan.status==:claim_settlement) and self.claims.length>0 and claim=self.claims.last
-          if claim.stop_further_installments
-            last_payment_date = loan.payments.aggregate(:received_on.max)
-            #set date of stopping payments/claim settlement one ahead of date of last payment
-            if last_payment_date and (last_payment_date > claim.date_of_death)
-              loan.under_claim_settlement = last_payment_date + 1
-            elsif claim.date_of_death
-              loan.under_claim_settlement = claim.date_of_death
-            else
-              loan.under_claim_settlement = Date.today
-            end
-            loan.save
-          end
-        end
-      end
-    end
-  end
-
   private
   def convert_blank_to_nil
     self.attributes.each{|k, v|
@@ -291,88 +149,12 @@ class Client
     self.occupation = nil if self.occupation.blank?
   end
 
-  def add_created_by_staff_member
-    if self.center and self.new?
-      self.created_by_staff_member_id = self.center.manager_staff_id
-    end
-  end
-
   def dates_make_sense
     return true if not grt_pass_date or not date_joined
     return [false, "Client cannot join this center before the center was created"] if center and center.creation_date and center.creation_date > date_joined
     return [false, "GRT Pass Date cannot be before Date Joined"]  if grt_pass_date < date_joined
     return [false, "Client cannot die before he became a client"] if deceased_on and (deceased_on < date_joined or deceased_on < grt_pass_date)
     true
-  end
-
-  def verified_cannot_be_deleted
-    return true unless verified_by_user_id
-    throw :halt
-    [false, "Verified client. Cannot be deleted"]
-  end
-
-  def self.death_cases(obj, from_date, to_date)
-    d2 = to_date.strftime('%Y-%m-%d')
-    if obj.class == Branch
-      from  = "branches b, centers c, clients cl, claims cm"
-      where = %Q{
-                cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.branch_id = b.id  AND b.id = #{obj.id}
-      };
-
-    elsif obj.class == Center
-      from  = "centers c, clients cl, claims cm"
-      where = %Q{
-               cl.active = false AND cl.inactive_reason IN (2,3) AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.center_id = c.id AND c.id = #{obj.id}
-      };
-
-    elsif obj.class == StaffMember
-      # created_by_staff_member_id
-      from =  "clients cl, claims cm, staff_members sm"
-      where = %Q{
-                cl.active = false AND cl.inactive_reason IN (2,3)  AND cl.id = cm.client_id AND cm.claim_submission_date >= #{from_date.strftime('%Y-%m-%d')} AND cm.claim_submission_date <= 'd2' AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id}
-      };
-
-    end
-    repository.adapter.query(%Q{
-                             SELECT COUNT(cl.id)
-                             FROM #{from}
-                             WHERE #{where}
-      })
-  end
-
-  def self.pending_death_cases(obj,from_date, to_date)
-    if obj.class == Branch
-      repository.adapter.query(%Q{
-                                SELECT COUNT(cl.id)
-                                FROM branches b, centers c, clients cl, claims cm
-                                WHERE cl.active = false AND cl.inactive_reason IN (2,3)
-                                AND cl.center_id = c.id AND c.branch_id = b.id
-                                AND b.id = #{obj.id} AND cl.id NOT IN (SELECT client_id FROM claims)
-        })
-
-    elsif obj.class == Center
-      repository.adapter.query(%Q{
-                                SELECT COUNT(cl.id)
-                                FROM centers c, clients cl, claims cm
-                                WHERE cl.active = false AND cl.inactive_reason IN (2,3)
-                                AND cl.center_id = c.id AND c.id = #{obj.id} AND cl.id
-                                NOT IN (SELECT client_id FROM claims )
-        })
-
-    elsif obj.class == StaffMember
-      repository.adapter.query(%Q{
-                                SELECT COUNT(cl.id)
-                                FROM clients cl, claims cm, staff_members sm
-                                WHERE cl.active = false AND cl.inactive_reason IN (2,3)
-                                AND cl.created_by_staff_member_id = sm.id AND sm.id = #{obj.id} AND cl.id
-                                NOT IN (SELECT client_id FROM claims )
-        })
-    end
-  end
-
-  def cannot_have_inactive_reason_if_active
-    return [false, "cannot have a inactive reason if active"] if self.active and not inactive_reason.blank?
-    return true
   end
 
 end
