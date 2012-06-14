@@ -60,7 +60,6 @@ Merb::Router.prepare do
     resources :new_clients
   end
   resources :payment_transactions, :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get]}
-  resources :staffs
   resources :designations
   resources :user_roles
   resources :rules, :id => %r(\d+)
