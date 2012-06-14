@@ -61,8 +61,8 @@ class ClientVerifications < Application
   def get_data(params)
     # GATE-KEEPING
     @errors = {}
-    @branch_id = params[:branch_id]
-    @center_id = params[:center_id]
+    @branch_id = params[:parent_location_id]
+    @center_id = params[:child_location_id]
 
     # VALIDATIONS
     unless params[:flag] == 'true'
@@ -77,8 +77,8 @@ class ClientVerifications < Application
   def get_pending_and_recent_recorded_verification(params)
     # POPULATING RESPONSE AND OTHER VARIABLES
     facade = LoanApplicationsFacade.new(session.user)
-    @loan_applications_pending_verification = facade.pending_CPV({:at_branch_id => params[:branch_id], :at_center_id => params[:center_id]})
-    @loan_applications_recently_recorded = facade.recently_recorded_CPV({:at_branch_id => params[:branch_id], :at_center_id => params[:center_id]})
+    @loan_applications_pending_verification = facade.pending_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
+    @loan_applications_recently_recorded = facade.recently_recorded_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
   end
 
 end # ClientVerifications

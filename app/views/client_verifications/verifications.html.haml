@@ -8,7 +8,8 @@
 
 %h1
   = "Client Verifications"
-= partial :filter_form
+%form{:action => url(:controller => :client_verifications, :action => :pending_verifications), :method => :get}
+  = partial "lib/biz_location_selector"
 
 %br
 %hr

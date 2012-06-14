@@ -6,8 +6,8 @@
     %h2 Pending verifications
     - if @loan_applications_pending_verification and not @loan_applications_pending_verification.empty?
       = form(:action => url(:controller => 'client_verifications', :action => 'record_verifications'), :method => :post) do
-        %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
-        %input{:type => :hidden, :value => @center_id, :name => 'center_id'}
+        %input{:type => :hidden, :value => @branch_id, :name => 'parent_location_id'}
+        %input{:type => :hidden, :value => @center_id, :name => 'child_location_id'}
         %table.form{:style => "width:100%; border:1px;"}
           %thead
             %tr
