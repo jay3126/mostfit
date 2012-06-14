@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: iso-8859-1 -*-
 module Merb
   module GlobalHelpers
     CRUD_ACTIONS = ["list", "index", "show", "edit", "new"]
@@ -552,18 +552,17 @@ module Merb
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})
       branch ||= 0
       collection = []
-      @acc = Account.all(:branch_id => (branch.is_a?(Integer) ? branch : branch.id))
-      @acc = @acc.all(:account_category => ["Cash", "Bank"]) if journal_type == JournalType.get(4)
-      @acc.group_by{|a| a.account_type}.sort_by{|at, as| at.name}.each do |account_type, accounts|
-        collection << ['', "#{account_type.name}"]
+      @acc = Ledger.all(:manual_voucher_permitted => true)
+      @acc.group_by{|a| a.account_type}.sort_by{|at| at.length}.each do |account_type, accounts|
+        collection << ['', "#{account_type.to_s}"]
         accounts.sort_by{|a| a.name}.each{|a| collection << [a.id.to_s, "!!!!!!!!!#{a.name}"] }
       end
       html = select(
-        :collection   => collection,
-        :name         => name,
-        :id           => attrs[:id],
-        :selected     => attrs[:selected],
-        :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
+                    :collection   => collection,
+                    :name         => name,
+                    :id           => attrs[:id],
+                    :selected     => attrs[:selected],
+                    :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
       html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
     end
     
