@@ -1,0 +1,28 @@
+%h1 Overview of all third parties
+.menu-strip{:style => "margin: 10px;"}
+  = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add"
+
+- if @third_parties.blank?
+  %p
+    %i No third parties have been created yet.
+- else
+  %table.shaded{ :width => '100%' }
+    %thead
+      %tr
+        %th
+        %th ID
+        %th Name
+        %th
+    %tbody
+    - for third_party in @third_parties
+      %tr{ :class => cycle('odd','') }
+        %td &nbsp;
+        %td
+          = third_party.id
+        %td
+          %b= link_to third_party.name, resource(third_party)
+        
+    %tfoot
+      %tr
+        %td{ :colspan => 6 }
+

@@ -11,12 +11,16 @@ Merb::Router.prepare do
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)
-  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post]}
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get]}
   resources :overlap_report_responses, :id => %r(\d+)
   #book-keeping from bk ends
 
   resources :branch_eod_summaries
   resources :cheque_leaves
+  resources :securitizations
+  resources :encumberances
+  resources :third_parties
+  resources :tranches
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
@@ -190,6 +194,16 @@ Merb::Router.prepare do
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
   match('/rules/get').to(:controller => 'rules', :action => 'get')
   match('/cheque_leaves/mark_invalid/:id').to(:controller => 'cheque_leaves', :action => 'mark_invalid').name(:mark_invalid)
+  match('/securitizations/:action').to(:controller => 'securitizations').name(:securitization_actions)
+  match('/securitizations/upload_data/:id').to(:controller => 'securitizations', :action => "upload_data")
+  match('/securitizations/save_data').to(:controller => 'securitizations', :action => "save_data")
+  match('/encumberances/:action').to(:controller => 'encumberances').name(:encumberance_actions)
+  match('/encumberances/upload_data/:id').to(:controller => 'encumberances', :action => "upload_data")
+  match('/third_parties/:action').to(:controller => 'third_parties').name(:third_party_actions)
+  match('/third_parties/new').to(:controller => 'third_parties', :action => 'new')
+  match('/third_parties/:id').to(:controller => 'third_parties', :action => 'show')
+  match('/tranches/:action').to(:controller => 'tranches').name(:tranch_actions)
+  match('/tranches/new').to(:controller => 'tranch', :action => 'new')
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)
@@ -236,6 +250,9 @@ Merb::Router.prepare do
     match('/holidays.:format', :method => "get").to(:controller => 'holidays', :action =>'index')
     match('/handshake.:format', :method => "get").to(:controller => 'entrance', :action =>'handshake')
     match('/errors.:format', :method => "get").to(:controller => 'exceptions', :action =>'index')
+    match('/securitizations.:format', :method => "post").to(:controller => 'securitizations', :action => 'create')
+    match('/third_parties.:format', :method => "post").to(:controller => 'third_parties', :action => 'create')
+    match('/tranches.:format', :method => "post").to(:controller => 'tranches', :action => 'create')
   end
   match('/accounts/:account_id/accounting_periods/:accounting_period_id/account_balances/:id/verify').to(:controller => 'account_balances', :action => 'verify').name(:verify_account_balance)
   match('/accounting_periods/:id/close').to(:controller => 'accounting_periods', :action => 'close').name(:close_accounting_period)

@@ -1,0 +1,8 @@
+- form_url   =  resource(:securitizations, {:return => params[:return]})
+- cancel_url =  url(params[:return])
+= form_for (@securitization, :action => "create") do
+	%h1 New Securitization
+	= error_messages_for @securitization
+	%fieldset
+		= partial "fields" 
+		= submit "create"

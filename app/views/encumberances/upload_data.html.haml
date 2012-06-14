@@ -1,0 +1,4 @@
+= form_for(@upload, :action => "save_data", :multipart => true, :class => "bold") do
+  %input{:name => "file", :size => "80",  :type => "file"}
+    -# = link_to "Continue", url(:continue_upload, :id => uploads.id)
+    =submit "Upload"

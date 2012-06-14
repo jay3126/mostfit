@@ -1,0 +1,27 @@
+= partial "funding_line"
+%h2== Tranches for funding line
+%p== #{link_to_with_rights 'Create a new tranch',"/tranches/new/#{@funding_line.id}",:class=>"add"}
+- if @tranches.blank?
+  %p
+    %i No tranches have been created yet.
+- else
+  %table.narrow.form{ :width => '100%' }
+    %thead
+      %tr
+        %th
+        %th id
+        %th name
+        %th date of commencement
+    %tbody
+    - for tranch in @tranches
+      %tr{ :class => cycle('odd','') }
+        %td &nbsp;
+        %td
+          = tranch.id
+        %td
+          = tranch.name
+        %td
+          = tranch.date_of_commencement
+    %tfoot
+      %tr
+        %td{ :colspan => 9 }

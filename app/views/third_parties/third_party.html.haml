@@ -1,0 +1,34 @@
+%b You're in index of the ThirdParties controller. </ br>
+%h1 Overview of all third parties
+.menu-strip{:style => "margin: 10px;"}
+  = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add"
+
+- if @third_parties.blank?
+  %p
+    %i No third parties have been created yet.
+- else
+  %table.shaded{ :width => '100%' }
+    %thead
+      %tr
+        %th
+        %th ID
+        %th Name
+        %th Funding lines
+        %th
+    %tbody
+    - for third_party in @third_parties
+      %tr{ :class => cycle('odd','') }
+        %td &nbsp;
+        %td
+          = third_party.id
+        %td
+          %b= link_to third_party.name, resource(third_party)
+        %td
+          %b= third_party.funding_lines.size
+        %td
+          = link_to_with_rights 'new funding line', resource(third_party, :funding_lines, :new)
+
+    %tfoot
+      %tr
+        %td{ :colspan => 6 }
+

@@ -1,0 +1,26 @@
+%h2== Securitizations
+%p== #{link_to_with_rights 'Create a new securitization',"/Securitizations/new",:class=>"add"}
+- if @securitizations.blank?
+  %p
+    %i No securitizations have been created yet.
+- else
+  %table.narrow.form{ :width => '100%' }
+    %thead
+      %tr
+        %th
+        %th id
+        %th name
+        %th date of commencement
+    %tbody
+    - for securitization in @securitizations
+      %tr{ :class => cycle('odd','') }
+        %td &nbsp;
+        %td
+          = securitization.id
+        %td
+          = securitization.name
+        %td
+          = securitization.effective_on
+    %tfoot
+      %tr
+        %td{ :colspan => 9 }

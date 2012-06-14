@@ -35,6 +35,8 @@
         = link_to_with_rights 'Cheque leaves', resource(:cheque_leaves), :class => 'loan icon'
       %li
         = link_to_with_rights 'Funders and funding lines', resource(:funders), :class => 'funder icon'
+      %li
+        = link_to_with_rights 'Third parties', resource(:third_parties), :class => 'funder icon'
       %li      
         = link_to_with_rights 'Manage Business Rules', resource(:rules), :class => 'rules icon'
       %li
@@ -69,6 +71,15 @@
         = link_to_with_rights 'Stock Master', resource(:stock_registers), :class => 'report icon'
       %li
         = link_to_with_rights 'Asset Master', resource(:asset_registers), :class => 'report icon'
+
+    .admin_box
+      %h2 Securitisation
+      %ul.icon_links
+        %li
+          = link_to_with_rights 'Securitization', resource(:securitizations), :class => 'icon accept'
+          %li
+            = link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
+
   .admin-box
     %h2 Data Administration
     %ul.icon_links

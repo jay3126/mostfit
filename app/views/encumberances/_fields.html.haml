@@ -1,0 +1,16 @@
+%table
+  %tr
+    %th
+      Name
+    %td
+      = text_field :name
+  %tr
+    %th
+      Amount
+    %td
+      = text_field :assigned_value
+  %tr
+    %th
+      Effective on
+    %td
+      = date_select_for @encumberance, :effective_on

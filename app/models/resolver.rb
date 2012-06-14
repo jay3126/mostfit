@@ -13,6 +13,13 @@ module Resolver
     [counterparty_type, for_counterparty.id]
   end
 
+  def self.resolve_loan_assignment(for_assignment)
+    klass_name = for_assignment.class.name
+    loan_assignment_type = Constants::LoanAssignment::MODELS_AND_ASSIGNMENTS[klass_name]
+    raise ArgumentError, "Unable to recognize a loan assignment that corresponds to the instance #{for_assignment}" unless loan_assignment_type
+    [loan_assignment_type, for_assignment.id]
+  end
+
   # Verifies that the object is an instance of known counterparties
   def self.is_a_counterparty?(obj_to_test)
     Constants::Transaction::COUNTERPARTIES_AND_MODELS.values.include?(obj_to_test.class.name)

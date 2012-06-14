@@ -1,0 +1,29 @@
+%table.form
+  %tbody
+    %tr
+      %th{:align => "left"}
+        Funder
+      %td
+        %b=@funding_line.funder.name
+    %tr
+      %th{:align => "left"} amount
+      %td
+        %b= @funding_line.amount
+    %tr
+      %th{:align => "left"} interest
+      %td
+        %b
+          = @funding_line.interest_percentage
+          \%
+    %tr
+      %th{:align => "left"} disbursal
+      %td
+        = @funding_line.disbursal_date
+    %tr
+      %th{:align => "left"} first payment
+      %td
+        = @funding_line.first_payment_date
+    %tr
+      %th{:align => "left"} last payment
+      %td
+        = @funding_line.last_payment_date

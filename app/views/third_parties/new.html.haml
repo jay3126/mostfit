@@ -1,0 +1,8 @@
+- form_url   =  resource(:third_parties, {:return => params[:return]})
+- cancel_url =  url(params[:return])
+= form_for(@third_party, :action => "create") do
+		%h1 New Third Party	
+		= error_messages_for @third_party
+		%fieldset
+				= partial "third_parties/fields" 
+				= submit "create"

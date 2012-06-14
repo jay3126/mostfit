@@ -1,0 +1,29 @@
+%h2== Encumberances
+%p== #{link_to_with_rights 'Create a new encumberance',"/Encumberances/new",:class=>"add"}
+- if @encumberances.blank?
+  %p
+    %i No encumberances have been created yet.
+- else
+  %table.narrow.form{ :width => '100%' }
+    %thead
+      %tr
+        %th
+        %th id
+        %th name
+        %th amount
+        %th date of commencement
+    %tbody
+    - for encumberance in @encumberances
+      %tr{ :class => cycle('odd','') }
+        %td &nbsp;
+        %td
+          = encumberance.id
+        %td
+          = encumberance.name
+        %td
+          = encumberance.assigned_value_money_amount
+        %td
+          = encumberance.effective_on
+    %tfoot
+      %tr
+        %td{ :colspan => 9 }

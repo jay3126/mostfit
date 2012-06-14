@@ -1,0 +1,15 @@
+%h1
+  Encumberances controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/encumberances/edit.html.erb
+= error_messages_for @encumberance
+
+= form_for(@encumberance, :action => url(:encumberance, @encumberance)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:encumberance, @encumberance)
+|
+= link_to 'Back', url(:encumberances)
