@@ -171,7 +171,8 @@ class NewClients < Application
 
     @account_chart = AccountsChart.setup_counterparty_accounts_chart(@client)
     if @lendings.blank?
-      @ledgers = [Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined)]
+      ledger_map = Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined)
+      @ledgers = ledger_map.values
     else
       @lendings.each do |lending|
         ledger_map = Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined, :lending, lending.id)
