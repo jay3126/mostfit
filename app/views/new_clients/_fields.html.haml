@@ -14,12 +14,12 @@
     %th
       Gender
     %td
-      = select :gender, :collection => [[:female, "Female"], [:male, "Male"]], :prompt => "Select gender"
+      = select :gender, :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select gender"
   %tr
     %th
       Marital Status
     %td
-      =  select :marital_status, :collection => MARITAL_STATUS, :prompt => "Select"
+      =  select :marital_status, :collection => Constants::Masters::MARITAL_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
       Ration Card
@@ -95,7 +95,7 @@
     %th
       Telephone Type
     %td
-      = select :telephone_type, :collection => TELEPHONE_TYPES, :prompt => "Select"
+      = select :telephone_type, :collection => Constants::Masters::TELEPHONE_TYPES, :prompt => "Select"
   %tr
     %th
       Income
@@ -125,12 +125,12 @@
     %th
       Caste:
     %td
-      = select(:caste, :collection => [[:sc, "Sc"], [:st, "St"], [:obc, "Obc"], [:general, "General"]] , :prompt => "Select")
+      = select :caste, :collection => Constants::Masters::CASTE_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
       Religion:
     %td
-      = select(:religion, :collection => [[:hindu, "Hindu"], [:muslim, "Muslim"], [:sikh, "Sikh"], [:jain, "Jain"], [:buddha, "Buddha"], [:christian, "Christian"]] , :prompt => "Select")
+      = select :religion, :collection => Constants::Masters::RELIGION_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   - if not @client.new?
     %tr
       %th

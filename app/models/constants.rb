@@ -8,8 +8,8 @@ module Constants
 
   module Client
 
-    RELIGIONS = ['Hindu','Muslim','Sikh','Christian','Jain','Buddha']
-    CASTES = ['General','SC','ST','OBC']
+#    RELIGIONS = ['Hindu','Muslim','Sikh','Christian','Jain','Buddha']
+#    CASTES = ['General','SC','ST','OBC']
   end
 
   module CenterFormation
@@ -91,7 +91,40 @@ module Constants
     DEFAULT_REFERENCE2_TYPE = VOTER_ID
 
     REFERENCE_TYPES = [PASSPORT, VOTER_ID, UID, RATION_CARD, DRIVING_LICENCE, PAN]
+    REFERENCE2_TYPES = [PASSPORT, VOTER_ID, UID, RATION_CARD, DRIVING_LICENCE, PAN]
+
+    FEMALE_GENDER = :female; MALE_GENDER = :male
+    GENDER_NOT_SPECIFIED = :gender_not_specified
+    DEFAULT_GENDER = GENDER_NOT_SPECIFIED
+    GENDER_CHOICE = [GENDER_NOT_SPECIFIED, FEMALE_GENDER, MALE_GENDER]
+
+    OTHER_RELATIONSHIP = 'Other'
+    DEFAULT_RELATIONSHIP = OTHER_RELATIONSHIP
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
+
+    RELATIONSHIP_NOT_SPECIFIED = :relationship_not_specified
+    HUSBAND = "Husband"; FATHER = "Father"
+    DEFAULT_NEXT_TO_KIN_RELATIONSHIP = HUSBAND
+    NEXT_TO_KIN_RELATIONSHIPS = [RELATIONSHIP_NOT_SPECIFIED, HUSBAND, FATHER]
+
+    HINDU = :hindu; MUSLIM = :muslim; SIKH = :sikh; JAIN = :jain; BUDDHIST = :buddhist; CHRISTIAN = :christian
+    RELIGION_NOT_SPECIFIED = :religion_not_specified
+    DEFAULT_RELIGION = RELIGION_NOT_SPECIFIED
+    RELIGION_CHOICE = [RELIGION_NOT_SPECIFIED, HINDU, MUSLIM, SIKH, JAIN, BUDDHIST, CHRISTIAN]
+
+    SC = :sc; ST = :st; OBC = :obc; GENERAL = :general
+    CASTE_NOT_SPECIFIED = :caste_not_specified
+    DEFAULT_CASTE = CASTE_NOT_SPECIFIED
+    CASTE_CHOICE = [CASTE_NOT_SPECIFIED, SC, ST, OBC, GENERAL]
+
+    SINGLE = 'Single'; MARRIED = 'Married'; DIVORCE = 'Divorce'; WIDOWED = 'Widowed'
+    DEFAULT_MARRITAL_STATUS = SINGLE
+    MARITAL_STATUS= [SINGLE, MARRIED, DIVORCE , WIDOWED]
+
+    TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
+    UNTAGGED_TELEPHONE_TYPE = 'Untagged'
+    DEFAULT_TELEPHONE_TYPE = UNTAGGED_TELEPHONE_TYPE
+    
     LOAN_AMOUNTS = [10000, 12000, 15000]
     STATES = [
       "andhra_pradesh"     ,
