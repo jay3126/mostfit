@@ -4,7 +4,8 @@
     %th
       Group name
     %td
-      = select :client_group_id, :collection => nil, :value_method => :id, :text_method => :name, :id => "client_group_selector"
+      = select :client_group_id, :collection => ClientGroup.all.collect{|c| [c.id, c.name]}
+      = link_to 'Add new group', url(:controller => :client_groups, :action => :new)
   %tr
     %th
       Name:

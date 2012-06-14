@@ -1,6 +1,8 @@
 class ClientGroup
   include DataMapper::Resource
-#  before :valid?, :add_created_by_staff_member
+
+  #before :valid?, :add_created_by_staff_member
+
   after :save, :sync_clients
 
   property :id,                Serial
