@@ -4,9 +4,16 @@ if (local_gem_dir = File.join(File.dirname(__FILE__), '..', '..', 'gems')) && $B
   $BUNDLE = true; Gem.clear_paths; Gem.path.unshift(local_gem_dir)
 end
 
+require "merb-core"
+
+# this loads all plugins required in your init file so don't add them
+# here again, Merb will do it for you
+Merb.start_environment(:environment => ENV['MERB_ENV'] || 'development')
+
 namespace :mostfit do
   namespace :books do
 
+    desc "Setup accounting"
     task :setup_accounting do |t, args|
       USAGE = "USAGE: [bin/]rake mostfit:books:setup_accounting"
       begin
@@ -49,6 +56,7 @@ namespace :mostfit do
       end
     end
 
+    desc "Record cash summaries on a given date"
     task :record_cash_summaries, :for_date do |t, args|
       USAGE = "USAGE: [bin/]rake mostfit:books:record_cash_summaries[<'yyyy-mm-dd'>]"
       begin
@@ -65,6 +73,7 @@ namespace :mostfit do
       end
     end
 
+    desc "Record regular interst accruals on a given date"
     task :record_regular_interest_accruals, :for_date do |t, args|
       USAGE = "USAGE: [bin/]rake mostfit:books:record_regular_accrual_summaries[<'yyyy-mm-dd'>]"
       begin
@@ -81,6 +90,7 @@ namespace :mostfit do
       end
     end
 
+    desc "Record vouchers for a given date"
     task :record_vouchers, :for_date do |t, args|
       USAGE = "USAGE: [bin/]rake mostfit:books:record_vouchers[<'yyyy-mm-dd'>]"
       begin
