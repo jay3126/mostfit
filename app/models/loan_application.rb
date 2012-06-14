@@ -529,7 +529,7 @@ class LoanApplication
       nil,                                                                     # applicant telephone number number 2
       "D01",                                                                   # applicant address type 1
       client_address,                                                          # applicant address 1
-      Branch.get(at_branch_id).name,                                               # applicant address 1 city
+      BizLocation.get(at_branch_id).name,                                               # applicant address 1 city
       states[(client_state).to_sym],                                # applicant address 1 state
       client_pincode,                                                          # applicant address 1 pincode
       nil,                                                                     # applicant address type 2
