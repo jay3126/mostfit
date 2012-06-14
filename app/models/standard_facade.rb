@@ -11,5 +11,9 @@ class StandardFacade
   def to_s
     "#{self.class.name} instance for #{@for_user} created at #{@created_at}"
   end
+
+  def user_id
+    for_user.id
+  end
   
 end

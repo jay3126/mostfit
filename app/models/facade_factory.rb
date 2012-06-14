@@ -29,7 +29,7 @@ class FacadeFactory
       LOCATION_FACADE   => LocationFacade, 
       PAYMENT_FACADE    => PaymentFacade,
       ACCOUNTING_FACADE => AccountingFacade,
-	  LOAN_ASSIGNMENT_FACADE => LoanAssignmentFacade
+	    LOAN_ASSIGNMENT_FACADE => LoanAssignmentFacade,
       REPORTING_FACADE  => ReportingFacade,
       LOAN_APPLICATIONS_FACADE => LoanApplicationsFacade
   }

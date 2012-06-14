@@ -1,15 +1,13 @@
 # All operations on loan applications and underlying associations go through this facade
 class LoanApplicationsFacade < StandardFacade
 
-  # creation
-
   def create_for_client(client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
     hash = client.to_loan_application + {
       :amount              => loan_amount,  #params[:clients][client_id][:amount],
       :created_by_staff_id => by_staff,     #params[:staff_member_id].to_i,
       :at_branch_id        => at_branch,    #params[:at_branch_id].to_i,
       :at_center_id        => at_center,    #params[:at_center_id].to_i,
-      :created_by_user_id  => @user.id,      #session.user.id,
+      :created_by_user_id  => user_id,      #session.user.id,
       :center_cycle_id     => for_cycle, #center_cycle.id,
       :created_on          => on_date       #created_on1
     }
@@ -58,19 +56,19 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   def authorize_approve(loan_application_id, by_staff, on_date)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, @user.id)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_APPROVED, by_staff, on_date, user_id)
   end
 
   def authorize_approve_override(loan_application_id, by_staff, on_date, override_reason)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_APPROVED, by_staff, on_date, @user.id, override_reason)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_APPROVED, by_staff, on_date, user_id, override_reason)
   end
 
   def authorize_reject(loan_application_id,by_staff, on_date)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_REJECTED, by_staff, on_date, @user.id)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_REJECTED, by_staff, on_date, user_id)
   end
 
   def authorize_reject_override(loan_application_id, by_staff, on_date, override_reason)
-    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_REJECTED, by_staff, on_date, @user.id, override_reason)
+    LoanApplication.record_authorization(loan_application_id, Constants::Status::APPLICATION_OVERRIDE_REJECTED, by_staff, on_date, user_id, override_reason)
   end
 
   # CPVs
@@ -78,25 +76,25 @@ class LoanApplicationsFacade < StandardFacade
   def record_CPV1_approved(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.record_CPV1_approved(by_staff, on_date, @user.id)
+    loan_application.record_CPV1_approved(by_staff, on_date, user_id)
   end
 
   def record_CPV1_rejected(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.record_CPV1_rejected(by_staff, on_date, @user.id)
+    loan_application.record_CPV1_rejected(by_staff, on_date, user_id)
   end
 
   def record_CPV2_approved(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.record_CPV2_approved(by_staff, on_date, @user.id)
+    loan_application.record_CPV2_approved(by_staff, on_date, user_id)
   end
 
   def record_CPV2_rejected(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
-    loan_application.record_CPV2_rejected(by_staff, on_date, @user.id)
+    loan_application.record_CPV2_rejected(by_staff, on_date, user_id)
   end
 
   # Locate center cycle information
@@ -140,21 +138,21 @@ class LoanApplicationsFacade < StandardFacade
   # Create loan file
 
   def create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, *loan_application_id)
-    LoanApplication.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, @user.id, *loan_application_id)
+    LoanApplication.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, user_id, *loan_application_id)
   end
 
   def add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, *loan_application_id)
-    LoanApplication.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, @user.id, *loan_application_id)
+    LoanApplication.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, user_id, *loan_application_id)
   end
 
   # Recently Added Loan Applications
   def recently_added_applicants(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.recently_created_new_loan_applicants(search_options)
   end
 
   def recently_added_applications_for_existing_clients(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
   end
 
@@ -172,13 +170,13 @@ class LoanApplicationsFacade < StandardFacade
 
   # Return all loan applications which has status suspected_duplicate
   def suspected_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.suspected_duplicate(search_options)
   end
 
   # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
   def clear_or_confirm_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.clear_or_confirm_duplicate(search_options)
   end
 
@@ -193,27 +191,27 @@ class LoanApplicationsFacade < StandardFacade
   end
   
   def pending_credit_bureau_check(search_options = {})
-    search_options.merge!(:created_by_user_id => @user.id)
+    search_options.merge!(:created_by_user_id => user_id)
     LoanApplication.pending_overlap_report_request_generation(search_options)
   end
 
   def pending_authorization(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_authorization(search_options)
   end
 
   def pending_CPV(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_CPV(search_options)
   end
 
   def recently_recorded_CPV(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.recently_recorded_client_verifications(search_options)
   end
   
   def pending_loan_file_generation(search_options = {})
-    search_options.merge!({:created_by_user_id => @user.id})
+    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_loan_file_generation(search_options)
   end
 

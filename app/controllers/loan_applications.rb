@@ -107,7 +107,6 @@ class LoanApplications < Application
         @message[:error] << "No center selected"
       end
     end
-    
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => branch_id, :at_center_id => center_id})
     render :bulk_create
   end

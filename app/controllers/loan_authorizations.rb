@@ -63,7 +63,7 @@ class LoanAuthorizations < Application
             facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
           end
         rescue => ex
-          @errors << "An error has occured: #{ex.message}"
+          @errors << "An error has occured for Loan Application ID #{lap}: #{ex.message}"
         end
       end
     end

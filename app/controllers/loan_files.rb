@@ -178,6 +178,11 @@ class LoanFiles < Application
     end
   end
 
+  def loan_files_list
+    @loan_files = LoanFile.all(:at_branch_id => params[:at_branch_id], :at_center_id => params[:at_center_id], :health_check_status => params[:status])
+    render :index
+  end
+
   private
 
   def get_param_value(param_name_sym)

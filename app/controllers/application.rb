@@ -145,7 +145,8 @@ class Application < Merb::Controller
 
   def get_effective_date
     if session[:effective_date].blank?
-      return Date.today #redirect url(:controller => :home, :action => :effective_date), :message => {:error => "Please select effective date"}
+      set_effective_date(Date.today)
+      return Date.today  #redirect url(:controller => :home, :action => :effective_date), :message => {:error => "Please select effective date"}
     else
       session[:effective_date]
     end

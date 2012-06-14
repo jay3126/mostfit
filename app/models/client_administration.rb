@@ -15,7 +15,7 @@ class ClientAdministration
   def counterparty; Resolver.fetch_counterparty(self.counterparty_type, self.counterparty_id); end
   def administered_at_location; BizLocation.get(self.administered_at); end
   def registered_at_location; BizLocation.get(self.registered_at); end
-  def performed_by_staff; Staff.get(self.performed_by); end
+  def performed_by_staff; StaffMember.get(self.performed_by); end
   def recorded_by_user; User.get(self.recorded_by); end
 
   # Assign the administered_at and registered_at BizLocation instances to the counterparty performed by staff and recorded by user on the specified effective date
