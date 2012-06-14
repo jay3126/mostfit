@@ -33,11 +33,6 @@
         Staff member
       %td
         = @user.staff_member.name
-  %tr.staff_member
-    %td
-      Staff
-    %td
-      = select :staff, :collection => [["","---"]] + Staff.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :class => "chosen"
   %tr.funder
     %td
       Is a funder
