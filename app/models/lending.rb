@@ -106,6 +106,34 @@ class Lending
     new_loan
   end
 
+  #############
+  # Validations # begins
+  #############
+
+  def is_payment_permitted?(payment_transaction)
+    transaction_receipt_type = payment_transaction.receipt_type
+    transaction_effective_on = payment_transaction.effective_on
+    
+    Validators::Arguments.not_nil?(transaction_receipt_type, transaction_effective_on)
+
+    #payments
+    if transaction_receipt_type == PAYMENT
+      return [false, "Loan cannot be disbursed unless approved"] unless self.is_approved?
+    end
+
+    #receipts
+    if transaction_receipt_type == RECEIPT
+      if (transaction_effective_on < self.disbursal_date_value)
+        return [false, "Repayments cannot be accepted on loan before disbursement"]
+      end
+    end
+    true
+  end
+
+  #############
+  # Validations # ends
+  #############
+
   ########################
   # LOAN SCHEDULE DATES # begins
   ########################
@@ -354,6 +382,10 @@ class Lending
   ###########################
 
   def allocate_payment(payment_transaction, loan_action)
+    is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
+    is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
+        [true, nil]
+    raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
     case loan_action
       when LOAN_DISBURSEMENT then return disburse(payment_transaction)
       when LOAN_REPAYMENT then return repay(payment_transaction)
@@ -364,7 +396,7 @@ class Lending
 
   def approve(approved_amount, approved_on_date, approved_by)
     Validators::Arguments.not_nil?(approved_amount, approved_on_date, approved_by)
-    raise Errors::BusinessValidationError, "approved amount #{approved_amount.amount} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount
+    raise Errors::BusinessValidationError, "approved amount #{approved_amount.to_s} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount
     raise Errors::BusinessValidationError, "approved on date: #{approved_on_date} cannot precede the applied on date #{applied_on_date}" if approved_on_date < applied_on_date
     raise Errors::InvalidStateChangeError, "Only a new loan can be approved" unless current_loan_status == NEW_LOAN_STATUS
 

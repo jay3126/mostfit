@@ -3,6 +3,10 @@ module LoanLifeCycle
   # Obtain the current loan status
   def current_loan_status; status; end
 
+  def is_approved?
+    (current_loan_status == APPROVED_LOAN_STATUS) or is_disbursed?
+  end
+  
   def is_disbursed?
     LOAN_STATUSES.index(current_loan_status) >= LOAN_STATUSES.index(DISBURSED_LOAN_STATUS)
   end

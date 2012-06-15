@@ -32,7 +32,7 @@ class PaymentTransaction
   def by_counterparty; Resolver.fetch_counterparty(self.by_counterparty_type, self.by_counterparty_id); end
   def performed_at_location; BizLocation.get(self.performed_at); end
   def accounted_at_location; BizLocation.get(self.accounted_at); end
-  def performed_by_staff; Staff.get(self.performed_by); end
+  def performed_by_staff; StaffMember.get(self.performed_by); end
   def recorded_by_user; User.get(self.recorded_by); end
 
   def product_action

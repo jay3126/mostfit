@@ -112,6 +112,7 @@ FactoryGirl.define do
     date_joined     { Date.parse('2000-01-01') }
 
     association     :created_by, :factory => :user
+    association     :created_by_staff, :factory => :staff_member
   end
 
   factory :client_type do
@@ -674,14 +675,6 @@ FactoryGirl.define do
     child_id      { Factory(:biz_location).id }
   end
 
-  factory :staff do
-    name          { Factory.next(:name) }
-  end
-
-  factory :customer do
-    name          { Factory.next(:name) }
-  end
-
   factory :payment_transaction do
     amount                 10000
     currency               MoneyManager.get_default_currency
@@ -692,7 +685,7 @@ FactoryGirl.define do
     by_counterparty_id     { Factory(:client).id }
     performed_at           { Factory(:biz_location).id }
     accounted_at           { Factory(:biz_location).id }
-    performed_by           { Factory(:staff).id }
+    performed_by           { Factory(:staff_member).id }
     recorded_by            { Factory(:user).id }
     effective_on           { Date.parse('2012-05-01') }
   end
@@ -729,7 +722,7 @@ FactoryGirl.define do
     tenure                         52
     administered_at_origin         { Factory(:biz_location).id }
     accounted_at_origin            { Factory(:biz_location).id }
-    applied_by_staff               { Factory(:staff).id }
+    applied_by_staff               { Factory(:staff_member).id }
     recorded_by_user               { Factory(:user).id }
     repayment_allocation_strategy  Constants::LoanAmounts::EARLIEST_INTEREST_FIRST_THEN_EARLIEST_PRINCIPAL_ALLOCATION
     association                    :lending_product

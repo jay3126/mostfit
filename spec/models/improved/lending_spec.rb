@@ -61,7 +61,7 @@ describe Lending do
     @tenure = 52
     @administered_at_origin = Factory(:biz_location).id
     @accounted_at_origin = Factory(:biz_location).id
-    @applied_by_staff = Factory(:staff).id
+    @applied_by_staff = Factory(:staff_member).id
     @recorded_by_user = Factory(:user).id
 
     @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
@@ -150,7 +150,28 @@ describe Lending do
 
   end
 
+  context "when a loan is not approved" do
+
+    it "loan life cycle indicates loan is not approved" do
+      @loan.is_approved?.should be_false
+    end
+
+    it "disbursement is not permitted" do
+      disbursement_attributes = @common_transaction_attributes
+      disbursement_attributes.merge!( {:amount => @loan.applied_amount, :receipt_type => @payment_type, :effective_on => @loan.scheduled_disbursal_date} )
+      mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, disbursement_attributes)
+      mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
+      mock_disbursement.valid?.should be_true
+
+      @loan.is_approved?.should be_false
+      @loan.is_payment_permitted?(mock_disbursement).first.should be_false
+    end
+
+  end
+
   context "when a loan is approved" do
+
+    it "should not accept repayment until disbursed" 
 
     it "should raise an error if the approved amount exceeds the applied amount" do
       approved_amount_exceeding_applied = @total_principal_money_amount + Money.new(1, @loan.currency)
@@ -180,6 +201,7 @@ describe Lending do
       @loan.approved_by_staff.should == some_staff
 
       @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+      @loan.is_approved?.should be_true
       @loan.is_disbursed?.should be_false
 
       # Cannot approve a loan that is already approved
@@ -204,7 +226,6 @@ describe Lending do
       factory_init_attributes.merge!( {:amount => approved_amount, :receipt_type => @payment_type, :effective_on => incorrect_disbursed_on_date} )
 
       mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
-
       mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
 
       lambda {@loan.disburse(mock_disbursement)}.should raise_error
