@@ -13,7 +13,7 @@ class LocationManagement
   def biz_location; BizLocation.get self.location_id; end
   def staff; StaffMember.get self.staff_id; end
 
-  def self.assign(staff, location, effective_on, recorded_by)
+  def assign(staff, location, effective_on, recorded_by)
     Validators::Arguments.not_nil?(staff, location, effective_on, recorded_by)
 
     self.staff_id = staff.id

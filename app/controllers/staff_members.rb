@@ -119,6 +119,7 @@ class StaffMembers < Application
     @option = params[:option]
     raise NotFound unless @staff_member
     @manages = {:regions => @staff_member.regions, :areas => @staff_member.areas, :branches => @staff_member.branches, :centers => @staff_member.centers}
+    @biz_locations = LocationManagement.get_locations_for_staff(@staff_member, get_effective_date)
     display @staff_member
   end
 
@@ -183,6 +184,44 @@ class StaffMembers < Application
   def redirect_to_show(id)
     raise NotFound unless @staff_member = StaffMember.get(id)
     redirect resource(@staff_member)
+  end
+
+  def assign_location_to_staff
+    #INITIALIZING VALIABLE USED THROUGHTOUT
+
+    @message = {}
+
+    #GATE-KEEPING
+
+    staff_id     = params[:id]
+    location_id  = params[:staff_member][:location_id]
+    effective_on = params[:staff_member][:effective_on]
+    recorded_by  = session.user
+    @staff       = StaffMember.get staff_id
+
+    #VALIDATION
+
+    @message = {:error => "Please select location"} if location_id.blank?
+    @message = {:error => "Effective Date cannot blank"} if effective_on.blank?
+
+    #OPERATION
+
+    if @message[:error].blank?
+      begin
+        biz_location    = BizLocation.get location_id
+        assign_location = LocationManagement.new.assign(@staff, biz_location, effective_on, recorded_by)
+        if assign_location.new?
+          @message = {:notice => "Staff assignment fail"}
+        else
+          @message = {:notice => "Staff has assign to location seccussfully"}
+        end
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
+      end
+    end
+
+    #REDIRECT/RENDER
+    redirect resource(@staff), :message => @message
   end
 
   private

@@ -1,7 +1,7 @@
 class Home < Application
 
   def index
-    set_effective_date(Date.today)
+    set_effective_date(Date.today) if session[:effective_date].blank?
     @location_levels = LocationLevel.all(:level.not => 0)
     display @location_levels
   end

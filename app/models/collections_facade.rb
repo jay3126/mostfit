@@ -16,7 +16,7 @@ class CollectionsFacade
     biz_location    = BizLocation.get(at_biz_location)
     loan_facade     = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
     location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    center_manager  = StaffMember.first # Use this center_manager for staff ID, staff name
+    center_manager  = @user # Use this center_manager for staff ID, staff name
 
     loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
     return [] if loans.blank?
@@ -108,11 +108,10 @@ class CollectionsFacade
     collection_sheet = []
 
     #Find all centers by loan history on particular date
-    center_ids = LoanHistory.all(:date => [on_date, on_date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
-    centers = @user.centers(:id => center_ids, :order=>[:meeting_time_hours, :meeting_time_minutes])
+    biz_locations = LocationManagement.get_locations_for_staff(@user, on_date)
 
-    centers.each do |center|
-      collection_sheet << self.get_collection_sheet(center.id, on_date )
+    biz_locations.each do |biz_location|
+      collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
     end
 
     collection_sheet

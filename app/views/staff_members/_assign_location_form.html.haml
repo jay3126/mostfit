@@ -1,3 +1,19 @@
+.menu-strip
+  = link_to 'Assign Location', "#", :onclick =>"jQuery('#location_div').toggle(); return false;", :class => 'add'
+#location_div(style = "display : none")
+  = form_for(@staff_member, :action => url(:controller => :staff_members, :action=> :assign_location_to_staff, :id => @staff_member.id)) do
+    %table
+      %tr
+        %th
+          Location
+        %td
+          = select :name => 'staff_member[location_id]', :collection => BizLocation.all.aggregate(:id, :name)
+      %tr
+        %th
+          Effective Date
+        %td
+          = date_select 'staff_member[effective_on]', Date.today, {:id => "effective_date"}
+    = submit "Assign"
 %br
 - if @biz_locations.count == 0
   %p
@@ -13,8 +29,6 @@
         %th
           Location Level
         %th
-          Location No. Count
-        %th
           Created On
     - for biz_location in @biz_locations
       %tr
@@ -27,7 +41,5 @@
             = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
         %td
           = biz_location.location_level.name
-        %td
-          = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE,session.user).get_children(biz_location, session[:effective_date]).count
         %td
           = biz_location.creation_date.strftime("%Y-%m-%d")

@@ -30,7 +30,7 @@
     %th.odd
       Status
     %td
-      %span{:class => @staff_member.active? ? '' : 'red'}
+      %span{:class => "#{@staff_member.active? ? '' : 'red'}"}
         = @staff_member.active? ? 'active' : 'disabled'
 %table
   %tr
@@ -51,14 +51,7 @@
     - if Mfi.first.map_enabled
       %li#map Map
   %div.tab
-    - @manages.keys.each do |type|
-      - if @manages[type].length> 0
-        %h2
-          = "#{type.to_s.capitalize} managed"
-        %ul
-          - @manages[type].each do |obj|
-            %li
-              = link_to(obj.name, resource(obj))
+    = partial "staff_members/assign_location_form"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@staff_member.id}?for=staff_member&type=created"}
   %div.tab
