@@ -23,7 +23,7 @@ class CollectionsFacade
 
     loans           = loans.select{|loan| loan.status == :disbursed_loan_status}
     mf              = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
-    meeting_date    = mf.get_meeting_calendar(biz_location).first
+    meeting_date    = mf.get_meeting(biz_location, on_date)
     meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
     meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
     clients         = ClientAdministration.get_clients_administered(biz_location.id, on_date)
