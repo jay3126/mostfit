@@ -15,6 +15,8 @@ class StaffMember
   #  property :gender, Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
   # no designations, they are derived from the relations it has
 
+  belongs_to :designation
+
   belongs_to :origin_home_location, :model => 'BizLocation', :child_key => [:origin_home_location_id], :nullable => true
 
   has n, :branches,          :child_key => [:manager_staff_id]
