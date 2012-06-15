@@ -5,7 +5,7 @@ class NewClients < Application
 
   def new
     @biz_location = BizLocation.get params[:biz_location_id]
-    @client = Client.new
+    @client       = Client.new
     display @client
   end
 
@@ -165,14 +165,14 @@ class NewClients < Application
   end
 
   def show_accounts
-    @ledgers = []
-    @client = Client.get params[:id]
-    @lendings = LoanBorrower.get_all_loans_for_counterparty(@client)
-
+    @ledgers       = []
+    @client        = Client.get params[:id]
+    @lendings      = LoanBorrower.get_all_loans_for_counterparty(@client)
     @account_chart = AccountsChart.setup_counterparty_accounts_chart(@client)
+
     if @lendings.blank?
       ledger_map = Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined)
-      @ledgers = ledger_map.values
+      @ledgers   = ledger_map.values
     else
       @lendings.each do |lending|
         ledger_map = Ledger.setup_product_ledgers(@account_chart, :INR, @client.date_joined, :lending, lending.id)

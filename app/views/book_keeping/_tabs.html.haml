@@ -1,0 +1,13 @@
+%h1 Manage Book Keeping
+%div
+  %ul
+    %li#ledgers
+      = link_to 'Ledgers', resource(:ledgers)
+    %li#vouchers
+      = link_to 'Vouchers', resource(:vouchers)
+    %li#cost_centers
+      = link_to 'Cost Centers', resource(:cost_centers)
+    %li#transaction_summaries
+      = link_to 'Transaction Summaries', resource(:transaction_summaries)
+    %li#categories_and_rules
+      = link_to 'Categories and rules', resource(:accounting_rules)

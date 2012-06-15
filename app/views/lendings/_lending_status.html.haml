@@ -1,0 +1,35 @@
+:javascript
+  $('table.loan_status').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%br
+- if @lending_status_changes.blank?
+  %p
+    %i No Loan status have been created yet.
+- else
+  %table.dataTable.report.weeksheet.nojs.loan_status
+    %thead
+      %tr
+        %th
+          id
+        %th
+          For Status
+        %th
+          To Status
+        %th
+          Effective Date
+        %th
+          Created Date
+    - @lending_status_changes.each do |lending_status|
+      %tr
+        %td
+          = lending_status.id
+        %td
+          = lending_status.from_status
+        %td
+          = lending_status.to_status
+        %td
+          = lending_status.effective_on
+        %td
+          = lending_status.created_at.strftime("%Y-%m-%d")

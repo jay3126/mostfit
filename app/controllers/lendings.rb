@@ -1,18 +1,18 @@
 class Lendings < Application
 
   def index
-    @new_lendings = Lending.all(:status => [:new_loan_status])
-    @approve_lendings = Lending.all(:status => [:approved_loan_status])
+    @new_lendings      = Lending.all(:status => [:new_loan_status])
+    @approve_lendings  = Lending.all(:status => [:approved_loan_status])
     @disburse_lendings = Lending.all(:status => [:disbursed_loan_status])
     display @new_lendings
   end
 
   def new
-    @lending_product = LendingProduct.get params[:lending_product_id]
-    @loan_borrower = Client.get params[:client_id]
+    @lending_product  = LendingProduct.get params[:lending_product_id]
+    @loan_borrower    = Client.get params[:client_id]
     @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
-    @clients = Client.all(:id => @counterparty_ids)
-    @lending = @lending_product.lendings.new
+    @clients          = Client.all(:id => @counterparty_ids)
+    @lending          = @lending_product.lendings.new
     display @lending_product
   end
 
@@ -45,8 +45,8 @@ class Lendings < Application
     if @message[:error].blank?
       begin
         @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
-        money_amount = @lending_product.to_money[:amount]
-        lending = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
+        money_amount  = @lending_product.to_money[:amount]
+        lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
           @loan_borrower, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
           schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id)
 
@@ -70,8 +70,8 @@ class Lendings < Application
   end
 
   def show
-    @lending = Lending.get params[:id]
-    @lending_product = @lending.lending_product
+    @lending           = Lending.get params[:id]
+    @lending_product   = @lending.lending_product
     @lending_schedules = @lending.loan_base_schedule.base_schedule_line_items
     display @lending
   end
@@ -84,17 +84,18 @@ class Lendings < Application
   end
 
   def update_lending_new_to_approve
-    @message = {}
-    lendings = []
+    @message       = {}
+    lendings       = []
+    save_lendings  = 0
     lending_params = params[:lending]
     begin
       lending_params.each do |key, value|
         if value.size == 2
-          lending = Lending.get key
-          approve_amount = MoneyManager.get_money_instance(value.last[:approved_amount])
-          lending.approved_amount = approve_amount.amount
+          lending                   = Lending.get key
+          approve_amount            = MoneyManager.get_money_instance(value.last[:approved_amount])
+          lending.approved_amount   = approve_amount.amount
           lending.approved_by_staff = value.last[:approved_by_staff]
-          lending.approved_on_date = value.last[:approved_on_date]
+          lending.approved_on_date  = value.last[:approved_on_date]
           if lending.valid?
             lendings << lending
           else
@@ -104,32 +105,40 @@ class Lendings < Application
       end
       if @message[:error].blank?
         lendings.each do |lending|
-          if lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
-            @message = {:notice => "Loans approved successfully."}
-          else
-            @message = {:error => "Loans approved fails."}
-          end
+          save = params[:submit] == 'Reject' ? lending.reject() : lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
+          save =+ 1 if save
+          save_lendings =+ 1 if save
         end
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
     end
 
+    if @message.blank?
+      if lendings.blank?
+        @message = {:error => "Please select loan for approve/reject"}
+      elsif lendings.count != save_lendings
+        @message = {:error => "Loan #{params[:save]}ed fail."}
+      else
+        @message = {:notice => "Loan #{params[:save]}ed successfully."}
+      end
+    end
+
     redirect resource(:lendings) , :message => @message
   end
 
   def update_lending_approve_to_disburse
-    @message = {}
-    lendings = []
+    @message       = {}
+    lendings       = []
     lending_params = params[:lending]
     begin
       lending_params.each do |key, value|
         if value.size == 2
-          lending = Lending.get key
-          disbursed_amount = MoneyManager.get_money_instance(value.last[:disbursed_amount])
-          lending.disbursed_amount = disbursed_amount.amount
+          lending                    = Lending.get key
+          disbursed_amount           = MoneyManager.get_money_instance(value.last[:disbursed_amount])
+          lending.disbursed_amount   = disbursed_amount.amount
           lending.disbursed_by_staff = value.last[:disbursed_by_staff]
-          lending.disbursal_date  = value.last[:disbursal_date]
+          lending.disbursal_date     = value.last[:disbursal_date]
           if lending.valid?
             lendings << lending
           else
@@ -156,23 +165,23 @@ class Lendings < Application
   end
 
   def payment_on_disburse_loan
-    @message = {}
-    payments = []
+    @message       = {}
+    payments       = []
     lending_params = params[:lending]
     begin
       lending_params.each do |key, value|
         if value.size == 2
-          lending = Lending.get key
-          payment_amount = MoneyManager.get_money_instance(value.last[:payment_amount])
+          lending          = Lending.get key
+          payment_amount   = MoneyManager.get_money_instance(value.last[:payment_amount])
           payment_by_staff = value.last[:payment_by_staff]
-          payment_on_date = value.last[:payment_on_date]
+          payment_on_date  = value.last[:payment_on_date]
           payments << {:lending => lending, :payment_amount => payment_amount, :payment_by_staff => payment_by_staff, :payment_on_date => payment_on_date }
         end
       end
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         payments.each do |payment|
-          lending = payment[:lending]
+          lending         = payment[:lending]
           repayment_count = lending.loan_receipts.count
           mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], payment[:payment_on_date], Constants::Transaction::LOAN_REPAYMENT)
           raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
@@ -191,8 +200,8 @@ class Lendings < Application
   end
 
   def lending_transactions
-    @lending = Lending.get params[:id]
-    @lending_transactions =  PaymentTransaction.all(:on_product_type =>'lending' ,:on_product_id => @lending.id)
+    @lending              = Lending.get params[:id]
+    @lending_transactions = PaymentTransaction.all(:on_product_type =>'lending' ,:on_product_id => @lending.id)
     partial 'lending_transactions'
   end
 
@@ -233,5 +242,11 @@ class Lendings < Application
     else
       redirect resource(@lending), :message => @message
     end
+  end
+
+  def lending_due_statuses
+    @lending = Lending.get params[:id]
+    @lending_status_changes = LoanStatusChange.all(:loan_id => @lending.id)
+    partial 'lendings/lending_status'
   end
 end
