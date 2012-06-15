@@ -16,7 +16,8 @@ class LoanFiles < Application
     return NotFound unless params['id'] 
     @loan_file = LoanFile.get(id)
     raise NotFound unless @loan_file
-    @center = Center.get(@loan_file.at_center_id)
+    @center = BizLocation.get(@loan_file.at_center_id)
+    @branch = BizLocation.get(@loan_file.at_branch_id)
     @clients = @loan_file.loan_applications.collect{|l| Client.get(l.client_id) if (l.loan.nil? && !(l.client_id.nil?))}.compact
     sc = params[:clients].map{|k,v| k if v[:chosen]}.compact if params[:clients]   # nice to be able to say "if @selected_clients" 
     @selected_clients = sc.blank? ? nil : sc                                       # instead of "unless @selected_clients.blank?"

@@ -28,9 +28,9 @@
               %td
                 = link_to lf.loan_file_identifier, resource(lf)
               %td
-                = Branch.get(lf.at_branch_id).name
+                = BizLocation.get(lf.at_branch_id).name
               %td
-                = Center.get(lf.at_center_id).name
+                = BizLocation.get(lf.at_center_id).name
               %td
                 = lf.loan_applications.count
               %td

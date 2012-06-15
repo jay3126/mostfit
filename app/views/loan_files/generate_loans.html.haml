@@ -31,7 +31,7 @@
     Bulk loan entry for
     = @center.name
     in
-    = @center.branch.name
+    = @branch.name
   
   = form :action => url(:controller => :loan_files, :action => :generate_loans, :class => "_disable_button_", :id => @loan_file.id) do
     = hidden_field :name => :center_id, :value => @center.id
