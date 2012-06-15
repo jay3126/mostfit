@@ -10,23 +10,7 @@ class LoanFiles < Application
     raise NotFound unless @loan_file
     display @loan_file
   end
-  
-  def get_data(params)
-    if params[:branch_id] && params[:branch_id].empty?
-      @errors["Loan File"] = "No branch selected"
-    elsif params[:center_id] && params[:center_id].empty?
-      @errors["Loan File"] = "No center selected"
-    end
-    @branch_id = params['branch_id'] ? params['branch_id'] : nil
-    @center_id = params['center_id'] ? params['center_id'] : nil
-    @center = Center.get(@center_id)
-    @center_cycle_number = 1
-    facade = LoanApplicationsFacade.new(session.user)
-    @loan_file = facade.locate_loan_file_at_center(@branch_id, @center_id, @center_cycle_number)
-    @loan_applications_pending_loan_file_generation = facade.pending_loan_file_generation({:at_branch_id=>@branch_id, :at_center_id => @center_id})
-    @loan_applications_added_to_loan_file = (not @loan_file.nil?) ? @loan_file.loan_applications : nil
-  end
-  
+
   #for generating 
   def generate_loans(id)
     return NotFound unless params['id'] 
@@ -82,7 +66,6 @@ class LoanFiles < Application
 
   def record_loan_file
     @errors = []
-    laf = LoanApplicationsFacade.new(session.user)
     created_on = params[:created_on]
     scheduled_disbursal_date = params[:scheduled_disbursal_date]
     scheduled_first_payment_date = params[:scheduled_first_payment_date]
@@ -97,14 +80,14 @@ class LoanFiles < Application
     #was any data actually sent ?
     if @errors.blank?
       @loan_applications = params['selected'].keys
-      @branch_id = params['branch_id'] ? params['branch_id'] : nil
-      @center_id = params['center_id'] ? params['center_id'] : nil
+      @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
+      @center_id = params[:child_location_id] ? params[:child_location_id] : nil
       @for_cycle_number = 1
       if params['loan_file_identifier'] and not params['loan_file_identifier'].nil?
-        @loan_file = laf.locate_loan_file(params['loan_file_identifier'])
-        laf.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
+        @loan_file = loan_applications_facade.locate_loan_file(params['loan_file_identifier'])
+        loan_applications_facade.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
       else
-        @loan_file = laf.create_loan_file(@branch_id, @center_id, @for_cycle_number,
+        @loan_file = loan_applications_facade.create_loan_file(@branch_id, @center_id, @for_cycle_number,
           scheduled_disbursal_date, scheduled_first_payment_date,
           created_by_staff_id, created_on, *@loan_applications)
       end
@@ -119,8 +102,8 @@ class LoanFiles < Application
     @errors = []
 
     # GATE-KEEPING
-    branch_id = get_param_value(:branch_id)
-    center_id = get_param_value(:center_id)
+    branch_id = get_param_value(:parent_location_id)
+    center_id = get_param_value(:child_location_id)
 
     # VALIDATIONS
     unless params[:flag] == "true"
@@ -183,7 +166,23 @@ class LoanFiles < Application
     render :index
   end
 
+
   private
+
+  def get_data(params)
+    if params[:parent_location_id].blank?
+      @errors["Loan File"] = "No branch selected"
+    elsif params[:child_location_id].blank?
+      @errors["Loan File"] = "No center selected"
+    end
+    @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
+    @center_id = params[:child_location_id] ? params[:child_location_id] : nil
+    @center = location_facade.get_location(@center_id)
+    @center_cycle_number = 1
+    @loan_file = loan_applications_facade.locate_loan_file_at_center(@branch_id, @center_id, @center_cycle_number)
+    @loan_applications_pending_loan_file_generation = loan_applications_facade.pending_loan_file_generation({:at_branch_id=>@branch_id, :at_center_id => @center_id})
+    @loan_applications_added_to_loan_file = (not @loan_file.nil?) ? @loan_file.loan_applications : nil
+  end
 
   def get_param_value(param_name_sym)
     param_value_str = params[param_name_sym]
@@ -192,11 +191,18 @@ class LoanFiles < Application
   end
 
   def fetch_loan_files_for_branch_and_center(params)
-    @branch = Branch.get(params[:branch_id].to_i)
-    @center = Center.get(params[:center_id].to_i)
+    @branch =location_facade.get_location(params[:parent_location_id].to_i)
+    @center = location_facade.get_location(params[:child_location_id].to_i)
     for_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-    facade = LoanApplicationsFacade.new(session.user)
-    @loan_files_at_center_at_branch_for_cycle = facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
+    @loan_files_at_center_at_branch_for_cycle = loan_applications_facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
+  end
+
+  def location_facade
+    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+  end
+
+  def loan_applications_facade
+    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
   end
 
 end

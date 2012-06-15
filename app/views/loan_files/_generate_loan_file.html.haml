@@ -27,8 +27,8 @@
           - if @loan_file
             %input{:type => :hidden, :name => 'loan_file_identifier', :value => @loan_file.loan_file_identifier}
 
-          %input{:type => :hidden, :name => 'branch_id', :value => @branch_id}
-          %input{:type => :hidden, :name => 'center_id', :value => @center_id}
+          %input{:type => :hidden, :name => 'parent_location_id', :value => @branch_id}
+          %input{:type => :hidden, :name => 'child_location_id', :value => @center_id}
 
           - @loan_applications_pending_loan_file_generation.each do |lap|
             %tr

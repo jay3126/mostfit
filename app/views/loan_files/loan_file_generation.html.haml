@@ -12,7 +12,9 @@
         %br
 %h1
   = "Loan File Generation"
-= partial :filter_form
+%form{:action => url(:controller => :loan_files, :action => :pending_loan_file_generation), :method => :get}
+  = partial "lib/biz_location_selector"
+
 
 %br
 %hr

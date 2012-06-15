@@ -3,9 +3,9 @@
   = "Loan File #{@loan_file.id}"
 .menu-strip
   %h3
-    = "Branch: #{Branch.get(@loan_file.at_branch_id).name}"
+    = "Branch: #{BizLocation.get(@loan_file.at_branch_id).name}"
     |
-    = "Center: #{Center.get(@loan_file.at_center_id).name}"
+    = "Center: #{BizLocation.get(@loan_file.at_center_id).name}"
     - unless @loan_file.health_check_status.blank?
       |
       = "Status: #{@loan_file.health_check_status}"
