@@ -112,7 +112,11 @@ class LedgerBalance < Money
   
   def self.are_balanced?(*balances)
     sum_of_balances = add_balances(*balances)
-    sum_of_balances.amount == 0
+    if sum_of_balances.is_a?(Array) and sum_of_balances.include?(false)
+      return sum_of_balances
+    else
+      return sum_of_balances.amount == 0 
+    end
   end
 
   private
