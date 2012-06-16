@@ -8,7 +8,7 @@ FACTORY_PROVINCES   = ['Maharashtra', 'Andra Pradesh', 'Madhya Pradesh', 'Kerala
 FACTORY_PURPOSES    = ['Buying a boat', 'Christmas presents', 'Wife\'s birthday'].freeze
 FACTORY_ASSETS      = ['Laptop charger', 'Laser printer', 'Mobile phone', 'Airconditioner'].freeze
 FACTORY_LOCATION_NAMES = %w[Center Branch Area Region State Zone Country].freeze
-FACTORY_DESIGNATIONS = %w[ 'Manager' 'Relationship Officer' 'Audit Officer' 'Clerk' ]  
+FACTORY_DESIGNATIONS = %w[ Manager Relationship_Officer Audit_Officer Clerk ]
 
 FACTORY_ACCOUNTS_ASSETS      = ['Cash', 'Bank', 'Loans made'].freeze
 FACTORY_ACCOUNTS_LIABILITIES = ['Deposits', 'Loans taken'].freeze
@@ -97,6 +97,7 @@ FactoryGirl.define do
     association     :designation
     mobile_number   '06-123123123'
     active          true
+    association     :user
   end
 
   factory :funder do
