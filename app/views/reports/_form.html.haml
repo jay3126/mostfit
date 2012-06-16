@@ -100,9 +100,8 @@
         Loan File Status:
         = params[report][:loan_file_status]
       - if biz_location_branch
-        |
         Branch:
-        - BizLocation.get(biz_location_branch).name
+        = BizLocation.get(biz_location_branch).name
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed' : ''}"}

@@ -40,3 +40,42 @@
       Interest
     %th
       Total
+
+    - @data.sort_by{|biz_location_branch| biz_location_branch}.each do |biz_location, values|
+      %tr
+        %td
+          %b
+            = biz_location
+        %td
+          = values[:loans][:amount_applied].to_s
+        %td
+          = values[:loans][:amount_approved].to_s
+        %td
+          = values[:loans][:amount_disbursed].to_s
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+
+  %tr.footer
+    %th
+      Total
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
