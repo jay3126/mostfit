@@ -21,6 +21,8 @@
   - loan_application_status = (params[report] and params[report][:loan_application_status] and not params[report][:loan_application_status].blank?) ? params[report][:loan_application_status] : nil
   - loan_file_status = (params[report] and params[report][:loan_file_status] and not params[report][:loan_file_status].blank?) ? params[report][:loan_file_status] : nil
   - biz_location_branch = (params[report] and params[report][:biz_location_branch] and not params[report][:biz_location_branch].blank?) ? params[report][:biz_location_branch] : nil
+  - branch_for_loan_application_report = (params[report] and params[report][:branch_for_loan_application_report] and not params[report][:branch_for_loan_application_report].blank?) ? params[report][:branch_for_loan_application_report] : nil
+  - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -177,7 +179,7 @@
               = select(:combo_branches, :collection => get_accessible_combo_branches(area_id), :include_blank => true, :selected => combo_branches, :id => "combo_branch_selector")
           - if @report.respond_to?(:branch_id)
             %td
-              Branch: 
+              Branch:
               = select(:branch_id , :collection => get_accessible_branches(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :selected => branch_id, :id => "branch_selector")
           - if @report.respond_to?(:center_id)
             %td
@@ -239,6 +241,17 @@
               - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
               - branch_collection = location_facade.all_nominal_branches
               = select(:biz_location_branch, :collection => branch_collection, :value_method => :id, :text_method => :name, :include_blank => true)
+          - if @report.respond_to?(:branch_for_loan_application_report)
+            %td
+              Branch:
+              = select(:branch_for_loan_application_report, :collection => get_all_nominal_branches, :value_method => :id, :text_method => :name, :include_blank => true, :id => "parent_selector", :selected => branch_for_loan_application_report)
+          - if @report.respond_to?(:center_for_loan_application_report)
+            %td
+              Center:
+              = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(biz_location_branch), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
+          - if @report.respond_to?(:effective_date)
+            %td
+              %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:loan_cycle)
