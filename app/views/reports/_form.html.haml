@@ -247,7 +247,7 @@
           - if @report.respond_to?(:center_for_loan_application_report)
             %td
               Center:
-              = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(biz_location_branch), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
+              = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(branch_for_loan_application_report), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
           - if @report.respond_to?(:effective_date)
             %td
               %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
