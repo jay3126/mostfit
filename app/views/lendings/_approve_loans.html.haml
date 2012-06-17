@@ -63,9 +63,9 @@
           %td
             = lending.tenure
           %td
-            = link_to lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.administered_at_origin)
+            = link_to lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
           %td
-            = link_to lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.accounted_at_origin)
+            = link_to lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
           %td
             = lending.to_money[:approved_amount].to_s
           %td

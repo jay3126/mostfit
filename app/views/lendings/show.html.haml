@@ -30,6 +30,12 @@
   %tr.odd
     %th.odd Scheduled First Repayment Date
     %td= @lending.scheduled_first_repayment_date
+  %tr.even
+    %th.even Administered At
+    %td= link_to @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
+  %tr.odd
+    %th.odd Accounted At
+    %td= link_to @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
 
 %div.tab_container.shaded
   %ul.tabs
