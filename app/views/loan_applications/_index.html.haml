@@ -23,7 +23,7 @@
             %td
               = loan_application.client_id
             %td
-              = loan_application.client_name
+              = link_to loan_application.client_name, url(:controller => :new_clients, :action => :show, :id => loan_application.client_id)
             %td
               = loan_application.client_dob.nil? ? "Unknown" : loan_application.age
             %td

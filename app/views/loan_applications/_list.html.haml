@@ -41,7 +41,7 @@
                 %td
                   = client.id
                 %td
-                  = client.name
+                  = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
                 %td
                   = client.age
                 %td
