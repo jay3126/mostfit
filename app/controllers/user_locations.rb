@@ -90,4 +90,9 @@ class UserLocations < Application
     partial 'location_list', :layout => layout?
   end
 
+  def staffs_on_biz_location
+    @biz_location = BizLocation.get params[:id]
+    @staffs = LocationManagement.get_staffs_on_location(@biz_location, get_effective_date)
+    partial 'staffs_on_biz_location'
+  end
 end

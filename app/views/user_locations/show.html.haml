@@ -46,4 +46,5 @@
       - else
         = partial "user_locations/child_locations"
   %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
   %div.tab

@@ -19,7 +19,7 @@ class LoanApplicationsReport < Report
   end
 
   def generate
-    condition_hash =  {}
+    condition_hash = {}
     loan_app = {}
     condition_hash.merge!(:status => @loan_application_status) unless @loan_application_status.blank?
     condition_hash.merge!(:at_center_id => @center_id) unless @center_id.blank?

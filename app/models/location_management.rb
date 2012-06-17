@@ -29,4 +29,9 @@ class LocationManagement
     locations = all(:staff_id => staff.id, :effective_on.lte => on_date)
     locations.blank? ? [] : locations.map(&:biz_location).uniq
   end
+
+  def self.get_staffs_on_location(location, on_date = Date.today)
+    staffs = all(:location_id => location.id, :effective_on.lte => on_date)
+    staffs.blank? ? [] : staffs.map(&:staff).uniq
+  end
 end
