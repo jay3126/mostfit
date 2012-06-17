@@ -1,28 +1,30 @@
 = partial :form
-
-%table.report.nojs
-  %thead
-    %tr
-      %th
-        Generated Requests
-      %th
-        Received Responses
-      %th
-        Positive Responses
-      %th
-        Negative Responses
-  %tbody
-    - @data.keys.each do |date|
-      %tr.center
-        %td{:colspan => 4}
-          = date
+- unless @data.blank?
+  %table.report.nojs
+    %thead
       %tr
-        %td
-          = @data[date][:request]
-        %td
-          = @data[date][:response]
-        %td
-          = @data[date][:positive_response]
-        %td
-          = @data[date][:negative_response]
-  
+        %th
+          Generated Requests
+        %th
+          Received Responses
+        %th
+          Positive Responses
+        %th
+          Negative Responses
+    %tbody
+      - @data.keys.each do |date|
+        %tr.center
+          %td{:colspan => 4}
+            = date
+        %tr
+          %td
+            = @data[date][:request]
+          %td
+            = @data[date][:response]
+          %td
+            = @data[date][:positive_response]
+          %td
+            = @data[date][:negative_response]
+- else
+  .shaded
+    %h3 No records found

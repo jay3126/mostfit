@@ -24,16 +24,18 @@ class CreditBureauReport < Report
     responses_status = OverlapReportResponse.all(:created_at.gte => from_date_time, :created_at.lte => to_date_time).group_by{|x| x.status}
     positive_responses = responses_status["positive"].map{|x| {Date.new(x.created_at.year, x.created_at.month, x.created_at.day) => 1}}.sum if responses_status["positive"].is_a?(Array)
     negative_responses = responses_status["negative"].map{|x| {Date.new(x.created_at.year, x.created_at.month, x.created_at.day) => 1}}.sum if responses_status["negative"].is_a?(Array)
-    dates = [requests.keys, responses.keys].flatten.uniq
-    dates.each do |date|
-      @data[date] = {
-        :request           => (requests.nil? ? nil : requests[date]), 
-        :response          => (responses.nil? ? nil : responses[date]),
-        :positive_response => (positive_responses.nil? ? nil : positive_responses[date]),
-        :negative_response => (negative_responses.nil? ? nil : negative_responses[date])
-      }
+    unless requests.blank? || responses.blank?
+      dates = [requests.keys, responses.keys].flatten.uniq
+      dates.each do |date|
+        @data[date] = {
+          :request           => (requests.nil? ? nil : requests[date]),
+          :response          => (responses.nil? ? nil : responses[date]),
+          :positive_response => (positive_responses.nil? ? nil : positive_responses[date]),
+          :negative_response => (negative_responses.nil? ? nil : negative_responses[date])
+        }
+      end
+      @data
     end
-    @data
   end
 
 end

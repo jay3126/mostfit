@@ -26,7 +26,8 @@
               = value3
               = link_to "View", url(:controller => :loan_applications, :action => :loan_application_list, :at_branch_id => branch_id, :at_center_id => center_id, :status => status)
 - else
-  %h3 No records found
+  .shaded
+    %h3 No records found
 
 
 
