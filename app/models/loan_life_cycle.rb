@@ -21,4 +21,11 @@ module LoanLifeCycle
 
   LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
 
+  STATUSES_DATES_SUM_AMOUNTS = {
+    :applied => [NEW_LOAN_STATUS, :applied_on_date, :applied_amount.sum],
+    :approved => [APPROVED_LOAN_STATUS, :approved_on_date, :approved_amount.sum],
+    :scheduled_for_disbursement => [APPROVED_LOAN_STATUS, :scheduled_disbursal_date, :approved_amount.sum],
+    :disbursed => [DISBURSED_LOAN_STATUS, :disbursal_date, :disbursed_amount.sum]
+  }
+
 end
