@@ -43,7 +43,7 @@
                 %td
                   = client.name
                 %td
-                  = (client.age.nil? ? "Unknown" : client.age)
+                  = Date.today.year - client.date_of_birth.year rescue nil
                 %td
                   = client.address
                 %td
