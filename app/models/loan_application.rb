@@ -125,14 +125,17 @@ class LoanApplication
 
   #creates a client for this particular loan application
   def create_client
-    client = nil
-    return client unless self.client_id.nil? and self.client.nil?
-    Client.transaction do |t|
-      client = Client.create(self.to_client)
-      self.client_id = client.id
-      t.rollback unless client.saved? and self.save
-    end
-    client
+    return self.client if self.client
+
+    administered_at_location_id = self.at_branch_id
+    registered_at_location_id = self.at_center_id
+    client_hash = self.to_client
+    client_for_loan_application = Client.record_client(client_hash, administered_at_location_id, registered_at_location_id)
+    debugger
+    self.client = client_for_loan_application
+    save
+    raise Errors::DataError, "Unable to create and set the client for the loan application" unless self.saved?
+    self.client
   end
 
   
@@ -388,7 +391,7 @@ class LoanApplication
 
   def self.recently_created_new_loan_applications_from_existing_clients(search_options = {})
     search_options.merge!({:status => NEW_STATUS, :client_id.not => nil})
-    pending = all(search_options)
+    all(search_options)
   end
 
   #returns all loan applications for which CPV was recently recorded

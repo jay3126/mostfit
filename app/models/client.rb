@@ -139,6 +139,26 @@ class Client
     }
   end
 
+  def self.record_client(client_hash, administered_at_location_id, registered_at_location_id)
+    Validators::Arguments.not_nil?(client_hash, administered_at_location_id, registered_at_location_id)
+
+    administered_at = BizLocation.get(administered_at_location_id)
+    raise ArgumentError, "Unable to determine the administered location for client" unless administered_at
+
+    registered_at = BizLocation.get(registered_at_location_id)
+    raise ArgumentError, "Unable to determine the registered location for client" unless registered_at
+
+    new_client = create(client_hash)
+    raise Errors::DataError, new_client.errors.first.first unless new_client.saved?
+
+    effective_on = new_client.date_joined
+    performed_by = new_client.created_by_staff_member_id
+    recorded_by  = new_client.created_by_user_id
+    ClientAdministration.assign(administered_at, registered_at, new_client, performed_by, recorded_by, effective_on)
+    
+    new_client
+  end
+
   private
   def convert_blank_to_nil
     self.attributes.each{|k, v|
