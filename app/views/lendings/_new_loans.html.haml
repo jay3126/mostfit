@@ -18,6 +18,8 @@
           %th
             First Repayment Date
           %th
+            Scheduled Disbursal Date
+          %th
             Repayment Frequency
           %th
             Tenure
@@ -53,6 +55,8 @@
           %td
             = lending.scheduled_first_repayment_date
           %td
+            = lending.scheduled_disbursal_date
+          %td
             = lending.repayment_frequency
           %td
             = lending.tenure
@@ -67,7 +71,7 @@
           %td
             = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
-            = date_select "lending[#{lending.id}][][approved_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10"}
+            = date_select "lending[#{lending.id}][][approved_on_date]", lending.applied_on_date, {:id => "lending_#{lending.id}", :size=> "10"}
           %td
             = select :name => "lending[#{lending.id}][][approved_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}
           %td
@@ -75,6 +79,6 @@
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
-          %td{:colspan => 16}
+          %td{:colspan => 17}
     = submit "Approve"
     = submit "Reject"

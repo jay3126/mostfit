@@ -46,12 +46,12 @@ class Lendings < Application
       begin
         @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
         money_amount  = @lending_product.to_money[:amount]
-        lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
+        @lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
           @loan_borrower, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
           schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id)
 
-        if lending.new?
-          @message[:error] = lending.error.first.join(", ")
+        if @lending.new?
+          @message[:error] = @lending.error.first.join(", ")
         else
           @message[:notice] = "Lending created successfully"
         end
@@ -62,7 +62,7 @@ class Lendings < Application
 
     #REDIRECTION/RENDER
     if @message[:error].blank?
-      redirect resource(lending), :message => @message
+      redirect resource(@lending), :message => @message
     else
       render :new
     end
