@@ -46,7 +46,7 @@
     %th
       Date joined
     %td
-      = date_select_for @client, :date_joined, :max_date => Date.today
+      = date_select 'client[date_joined]', Date.today - 100, {:id => "date_joined"}
   %tr
     %th
       Spouse name:

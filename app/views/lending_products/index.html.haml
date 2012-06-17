@@ -1,7 +1,5 @@
 %h1 Loan Products
-
 = link_to "Add new Loan Product", url(:new_lending_product), :class => 'add grey_button'
-
 - unless @lending_products.blank?
   %table.dataTable.weeksheet{:style => "width:100%"}
     %thead

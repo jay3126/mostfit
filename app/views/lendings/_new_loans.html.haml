@@ -47,7 +47,7 @@
           %td
             = lending.to_money[:applied_amount].to_s
           %td
-            = lending.loan_borrower.counterparty.name
+            = link_to lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => lending.loan_borrower.counterparty.id)
           %td
             = lending.applied_on_date
           %td
@@ -57,9 +57,9 @@
           %td
             = lending.tenure
           %td
-            = BizLocation.get(lending.administered_at_origin).name rescue lending.administered_at_origin
+            = link_to lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.administered_at_origin)
           %td
-            = BizLocation.get(lending.accounted_at_origin).name rescue lending.accounted_at_origin
+            = link_to lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.accounted_at_origin)
           %td
             = lending.status
           %td

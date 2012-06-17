@@ -8,4 +8,8 @@
       Name
     %th
       = text_field :name
+    %th
+      Creation Date
+    %td
+      = date_select 'biz_location[creation_date]', Date.today, {:id => "creation_date"}
 

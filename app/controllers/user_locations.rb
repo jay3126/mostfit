@@ -7,16 +7,17 @@ class UserLocations < Application
 
   def show
     @biz_location = BizLocation.get params[:id]
-    @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
+    @date         = get_effective_date
+    @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     level = @biz_location.location_level.level
     if level == 0
       @location_level = LocationLevel.first(:level => level)
       @biz_locations = @location_level.biz_locations
     else
       @location_level = LocationLevel.first(:level => level-1)
-      @biz_locations = LocationLink.get_children(@biz_location, get_effective_date)
+      @biz_locations = LocationLink.get_children(@biz_location, @date)
       mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, get_effective_date) if @location_level.has_meeting
+      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, @date) if @location_level.has_meeting
     end
     display @biz_locations
   end

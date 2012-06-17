@@ -1,9 +1,10 @@
+- @date = Date.today if @date.blank?
 %h2
   = "#{@location_level.name} meeting on"
-  = @date.nil? ? Date.today.weekday : @date.weekday
+  = @date.weekday
 %p{:style => "margin-left: 15px;"}
   %b Select center meeting day: &nbsp;
-  = paginate_on_weekdays(@biz_location, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
+  = paginate_on_weekdays(@biz_location, (params.key?(:meeting_day) ? params[:meeting_day] : @date))
 %p{:style =>"text-align: right; margin-top: -19px; margin-right: 80px;"}
   = link_to "Today | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
   = link_to "Previous | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"

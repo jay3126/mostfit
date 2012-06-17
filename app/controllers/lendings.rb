@@ -62,7 +62,7 @@ class Lendings < Application
 
     #REDIRECTION/RENDER
     if @message[:error].blank?
-      redirect resource(:lending_products), :message => @message
+      redirect resource(lending), :message => @message
     else
       render :new
     end
@@ -118,9 +118,9 @@ class Lendings < Application
       if lendings.blank?
         @message = {:error => "Please select loan for approve/reject"}
       elsif lendings.count != save_lendings
-        @message = {:error => "Loan #{params[:save]}ed fail."}
+        @message = {:error => "Loan #{params[:submit].downcase}ed fail."}
       else
-        @message = {:notice => "Loan #{params[:save]}ed successfully."}
+        @message = {:notice => "Loan #{params[:submit].downcase}ed successfully."}
       end
     end
 
@@ -146,6 +146,7 @@ class Lendings < Application
           end
         end
       end
+      @message = {:error => "Please select loan for disburse"} if lendings.blank?
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
@@ -172,12 +173,14 @@ class Lendings < Application
       lending_params.each do |key, value|
         if value.size == 2
           lending          = Lending.get key
+
           payment_amount   = MoneyManager.get_money_instance(value.last[:payment_amount])
           payment_by_staff = value.last[:payment_by_staff]
           payment_on_date  = value.last[:payment_on_date]
           payments << {:lending => lending, :payment_amount => payment_amount, :payment_by_staff => payment_by_staff, :payment_on_date => payment_on_date }
         end
       end
+      @message = {:error => "Please select loan for repayment"} if payments.blank?
       if @message[:error].blank?
         mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         payments.each do |payment|

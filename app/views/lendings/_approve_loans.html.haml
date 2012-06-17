@@ -59,13 +59,13 @@
           %td
             = lending.tenure
           %td
-            = BizLocation.get(lending.administered_at_origin).name rescue lending.administered_at_origin
+            = link_to lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.administered_at_origin)
           %td
-            = BizLocation.get(lending.accounted_at_origin).name rescue lending.accounted_at_origin
+            = link_to lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.accounted_at_origin)
           %td
             = lending.to_money[:approved_amount].to_s
           %td
-            = StaffMember.get(lending.approved_by_staff).name
+            = link_to StaffMember.get(lending.approved_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.approved_by_staff)
           %td
             = lending.approved_on_date
           %td
@@ -80,4 +80,4 @@
       %tfoot
         %tr.org_total
           %td{:colspan => 17}
-    = submit "Save"
+    = submit "Disburse"

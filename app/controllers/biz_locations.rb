@@ -17,8 +17,9 @@ class BizLocations < Application
 
     # GATE-KEEPING
 
-    b_level = params[:biz_location][:location_level]
-    b_name = params[:biz_location][:name]
+    b_level         = params[:biz_location][:location_level]
+    b_creation_date = params[:biz_location][:creation_date]
+    b_name          = params[:biz_location][:name]
 
     # VALIDATIONS
 
@@ -29,7 +30,7 @@ class BizLocations < Application
     if message[:error].blank?
       begin
         location_level = LocationLevel.get b_level
-        biz_location = location_level.biz_locations.new(:name => b_name)
+        biz_location = location_level.biz_locations.new(:name => b_name, :creation_date => b_creation_date)
         if biz_location.save
           message = {:notice => " Location successfully created"}
         else
@@ -58,6 +59,8 @@ class BizLocations < Application
     # INITIALIZING VARIABLES USED THROUGHTOUT
 
     message = {}
+    parent  = ''
+    child   = ''
 
     # GATE-KEEPING
 
@@ -86,7 +89,11 @@ class BizLocations < Application
     end
 
     #REDIRECT/RENDER
-    redirect request.referer, :message => message
+    if parent.blank?
+      redirect request.referer, :message => message
+    else
+      redirect resource(parent), :message => message
+    end
   end
 
   def biz_location_clients
