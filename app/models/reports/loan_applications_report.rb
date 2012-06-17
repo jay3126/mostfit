@@ -5,8 +5,8 @@ class LoanApplicationsReport < Report
     @date = date.blank? ? Date.today : date
     @name   = "Report on #{@date}"
     @loan_application_status = params[:loan_application_status].gsub(' ',"_").downcase rescue ""
-    @center_id = params[:branch_for_loan_application_report] rescue ""
-    @branch_id = params[:center_for_loan_application_report] rescue ""
+    @branch_id = params[:branch_for_loan_application_report] rescue ""
+    @center_id = params[:center_for_loan_application_report] rescue ""
     get_parameters(params, user)
   end
 
