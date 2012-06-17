@@ -47,6 +47,8 @@ module PeopleValidations
     Date.today.year - recorded_dob.year
   end
 
+  alias age person_age
+
 end
 
 module ClientAgeValidations
@@ -59,4 +61,5 @@ module ClientAgeValidations
     Date.today.year - recorded_dob.year
   end
 
+  alias age client_age
 end
