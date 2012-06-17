@@ -228,11 +228,11 @@ class Lending
     amortization.values.first[SCHEDULED_PRINCIPAL_OUTSTANDING] if amortization
   end
 
-  def actual_principal_outstanding
+  def actual_principal_outstanding(on_date = Date.today)
     return zero_money_amount unless is_disbursed?
 
     # TODO Handle the case where principal receipts exceed loan disbursed amount (possible?)
-    total_loan_disbursed - principal_received_till_date
+    total_loan_disbursed - principal_received_till_date(on_date)
   end
 
   def actual_principal_due(on_date)
@@ -255,11 +255,11 @@ class Lending
     amortization.values.first[SCHEDULED_INTEREST_OUTSTANDING] if amortization
   end
 
-  def actual_interest_outstanding
+  def actual_interest_outstanding(on_date = Date.today)
     return zero_money_amount unless is_disbursed?
 
     # TODO Handle the case where the interest receipts exceed interest applicable (possible?)
-    total_interest_applicable - interest_received_till_date
+    total_interest_applicable - interest_received_till_date(on_date)
   end
 
   def actual_interest_due(on_date)
@@ -268,16 +268,20 @@ class Lending
     scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
   end
 
+  def actual_total_due(on_date)
+    actual_principal_due(on_date) + actual_interest_due(on_date)
+  end
+
   def scheduled_total_outstanding(on_date)
     return zero_money_amount if on_date < scheduled_first_repayment_date
 
     scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
   end
 
-  def actual_total_outstanding
+  def actual_total_outstanding(on_date = Date.today)
     return zero_money_amount unless is_disbursed?
 
-    actual_principal_outstanding + actual_interest_outstanding
+    actual_principal_outstanding(on_date) + actual_interest_outstanding(on_date)
   end
 
   def get_scheduled_amortization(on_date)
@@ -321,17 +325,17 @@ class Lending
     principal_received_on_date(on_date) + interest_received_on_date(on_date) + advance_received_on_date(on_date)
   end
 
-  def amounts_received_till_date
-    historical_amounts_received_till_date(Date.today)
+  def amounts_received_till_date(on_date = Date.today)
+    historical_amounts_received_till_date(on_date)
   end
 
   def historical_amounts_received_till_date(on_or_before_date)
     self.loan_receipts.sum_till_date(on_or_before_date)
   end
 
-  def principal_received_till_date; amounts_received_till_date[PRINCIPAL_RECEIVED]; end
-  def interest_received_till_date; amounts_received_till_date[INTEREST_RECEIVED]; end
-  def advance_received_till_date; amounts_received_till_date[ADVANCE_RECEIVED]; end
+  def principal_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[PRINCIPAL_RECEIVED]; end
+  def interest_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[INTEREST_RECEIVED]; end
+  def advance_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[ADVANCE_RECEIVED]; end
 
   def total_received_till_date
     principal_received_till_date + interest_received_till_date + advance_received_till_date
@@ -412,9 +416,11 @@ class Lending
 
   def disburse(by_disbursement_transaction)
     Validators::Arguments.not_nil?(by_disbursement_transaction)
+
+    raise Errors::InvalidStateChangeError, "Only a loan that is approved can be disbursed" unless current_loan_status == APPROVED_LOAN_STATUS
+
     on_disbursal_date = by_disbursement_transaction.effective_on
     raise Errors::BusinessValidationError, "disbursal date: #{on_disbursal_date} cannot precede approval date: #{approved_on_date}" if on_disbursal_date < self.approved_on_date
-    raise Errors::InvalidStateChangeError, "Only a loan that is approved can be disbursed" unless current_loan_status == APPROVED_LOAN_STATUS
 
     #TODO validate and respond to any changes in the scheduled_first_repayment_date
     self.disbursed_amount   = by_disbursement_transaction.amount
@@ -522,33 +528,38 @@ class Lending
     zero_money_amount = Money.zero_money_amount(payment_currency)
     resulting_allocation = Hash.new(zero_money_amount)
 
+    #allocate when not due
     if current_due_status == NOT_DUE
       resulting_allocation[ADVANCE_RECEIVED] = total_amount
       resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
     end
 
-    # Determine the actual total outstanding
-    allocate_to_principal_and_interest = [self.actual_total_outstanding, total_amount].min
+    #handle scenario where repayment is received between schedule dates
+    #allocate when due
+
+    #allocate when overdue
+
+    allocate_to_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
     advance_to_allocate = (total_amount > allocate_to_principal_and_interest) ?
         (total_amount - allocate_to_principal_and_interest) : zero_money_amount
 
-    allocation = {}
-    allocation[:principal] = principal_received_till_date
-    allocation[:interest]  = interest_received_till_date
+    earlier_allocation = {}
+    earlier_allocation[:principal] = principal_received_till_date
+    earlier_allocation[:interest]  = interest_received_till_date
 
     allocator = Constants::LoanAmounts.get_allocator(self.repayment_allocation_strategy, payment_currency)
 
     # Netoff the amount received earlier against earlier amortization items
     all_previous_amortization_items = get_all_amortization_items_till_date(on_date)
-    unallocated_amortization_items = allocator.netoff_allocation(allocation, all_previous_amortization_items)
+    unallocated_amortization_items = allocator.netoff_allocation(earlier_allocation, all_previous_amortization_items)
 
     # Allocation to be done on the amount that is not advance
-    allocation = allocator.allocate(allocate_to_principal_and_interest, unallocated_amortization_items)
+    fresh_allocation = allocator.allocate(allocate_to_principal_and_interest, unallocated_amortization_items)
 
-    resulting_allocation[PRINCIPAL_RECEIVED] = allocation[:principal]
-    resulting_allocation[INTEREST_RECEIVED] = allocation[:interest]
-    advance_to_allocate += resulting_allocation[:amount_not_allocated]
+    resulting_allocation[PRINCIPAL_RECEIVED] = fresh_allocation[:principal]
+    resulting_allocation[INTEREST_RECEIVED] = fresh_allocation[:interest]
+    advance_to_allocate += fresh_allocation[:amount_not_allocated]
     resulting_allocation[ADVANCE_RECEIVED] = advance_to_allocate
     resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     resulting_allocation

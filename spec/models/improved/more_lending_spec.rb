@@ -1,0 +1,509 @@
+require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
+
+describe Lending do
+
+  before(:all) do
+
+    @disbursement_action = Constants::Transaction::LOAN_DISBURSEMENT
+    @repayment_action   = Constants::Transaction::LOAN_REPAYMENT
+    @weekly_frequency   = MarkerInterfaces::Recurrence::WEEKLY
+    @biweekly_frequency = MarkerInterfaces::Recurrence::BIWEEKLY
+    @monthly_frequency  = MarkerInterfaces::Recurrence::MONTHLY
+
+    #Accounting setup
+    LedgerClassification.create_default_ledger_classifications
+
+    product_accounting_rules_file_name = File.join(Merb.root, 'config', 'product_accounting_rules.yml')
+    product_accounting_rules_file = File.read(product_accounting_rules_file_name)
+    product_accounting_rules = YAML.load(product_accounting_rules_file)
+    ProductAccountingRule.load_product_accounting_rules(product_accounting_rules)
+
+    #Accounting setup
+
+    @from_lending_product = Factory(:lending_product)
+    @currency = @from_lending_product.currency
+    @zero_money_amount = Money.zero_money_amount(@currency)
+
+    @principal_and_interest_amounts = {}
+
+    @principal_amounts            = [170.18, 171.03, 171.88, 172.74, 173.60, 174.46, 175.33, 176.21, 177.08, 177.97, 178.85, 179.74, 180.64, 181.54, 182.44, 183.35, 184.27, 185.18, 186.11, 187.03, 187.97, 188.90, 189.84, 190.79, 191.74, 192.69, 193.65, 194.62, 195.59, 196.56, 197.54, 198.53, 199.52, 200.51, 201.51, 202.51, 203.52, 204.53, 205.55, 206.58, 207.61, 208.64, 209.68, 210.73, 211.77, 212.83, 213.89, 214.96, 216.03, 217.10, 218.18, 146.30]
+    @principal_money_amounts      = MoneyManager.get_money_instance(*@principal_amounts)
+
+    @total_principal_money_amount = @principal_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
+
+    @interest_amounts            = [49.82, 48.97, 48.12, 47.26, 46.40, 45.54, 44.67, 43.79, 42.92, 42.03, 41.15, 40.26, 39.36, 38.46, 37.56, 36.65, 35.73, 34.82, 33.89, 32.97, 32.03, 31.10, 30.16, 29.21, 28.26, 27.31, 26.35, 25.38, 24.41, 23.44, 22.46, 21.47, 20.48, 19.49, 18.49, 17.49, 16.48, 15.47, 14.45, 13.42, 12.39, 11.36, 10.32, 9.27, 8.23, 7.17, 6.11, 5.04, 3.97, 2.90, 1.82, 0.73]
+
+    @equated_regular_installment = MoneyManager.get_money_instance(170.18 + 49.82)
+    @last_installment            = MoneyManager.get_money_instance(146.30 + 0.73)
+    @interest_money_amounts      = MoneyManager.get_money_instance(*@interest_amounts)
+    @total_interest_money_amount = @interest_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
+
+    1.upto(@principal_amounts.length) { |num|
+      principal_and_interest                                           = { }
+      principal_and_interest[Constants::Transaction::PRINCIPAL_AMOUNT] = @principal_money_amounts[num - 1]
+      principal_and_interest[Constants::Transaction::INTEREST_AMOUNT]  = @interest_money_amounts[num - 1]
+      @principal_and_interest_amounts[num]                             = principal_and_interest
+    }
+
+    @principal_and_interest_amounts[0] = {
+        Constants::Transaction::PRINCIPAL_AMOUNT => @total_principal_money_amount,
+        Constants::Transaction::INTEREST_AMOUNT  => @total_interest_money_amount
+    }
+
+    @name = 'test template 1'
+
+    @lst = LoanScheduleTemplate.create_schedule_template(@name, @total_principal_money_amount, @total_interest_money_amount, @principal_money_amounts.length, MarkerInterfaces::Recurrence::WEEKLY, @from_lending_product, @principal_and_interest_amounts)
+
+    lan = "#{DateTime.now}"
+    for_amount = @total_principal_money_amount
+    @for_borrower = Factory(:client)
+
+    @borrower_accounts_chart = AccountsChart.setup_counterparty_accounts_chart(@for_borrower)
+
+    @applied_on_date = Date.parse('2011-05-01')
+    @scheduled_disbursal_date = @applied_on_date + 7
+    @scheduled_first_repayment_date = @scheduled_disbursal_date + 7
+    @repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    @tenure = 52
+    @administered_at_origin = Factory(:biz_location).id
+    @accounted_at_origin = Factory(:biz_location).id
+    @applied_by_staff = Factory(:staff_member).id
+    @approved_by_staff = Factory(:staff_member).id
+    @recorded_by_user = Factory(:user).id
+
+    @loan = Lending.create_new_loan(for_amount, @repayment_frequency, @tenure, @from_lending_product, @for_borrower, @administered_at_origin, @accounted_at_origin, @applied_on_date, @scheduled_disbursal_date, @scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user, lan)
+    @loan.saved?.should == true
+    
+    for_product_type, for_product_id = Constants::Products::LENDING, @loan.id
+    Ledger.setup_product_ledgers(@borrower_accounts_chart, @currency, @applied_on_date, for_product_type, for_product_id)
+
+    # For payment transactions on the loan
+    @transaction_currency = @loan.currency
+    @payment_type = Constants::Transaction::PAYMENT
+    @receipt_type = Constants::Transaction::RECEIPT
+    @on_product_type = Constants::Products::LENDING
+    @on_product_id = @loan.id
+    @by_counterparty_type, @by_counterparty_id = Resolver.resolve_counterparty(@for_borrower)
+    @performed_at = @administered_at_origin
+    @accounted_at = @accounted_at_origin
+    @performed_by = @applied_by_staff
+    @recorded_by  = @recorded_by_user
+
+    @common_transaction_attributes = {:currency => @transaction_currency, :on_product_type => @on_product_type, :on_product_id => @on_product_id, :by_counterparty_type => @by_counterparty_type, :by_counterparty_id => @by_counterparty_id, :performed_at => @performed_at, :accounted_at => @accounted_at, :performed_by => @performed_by, :recorded_by => @recorded_by}
+
+    @payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, @recorded_by_user)
+  end
+
+  context "For repayments made on a loan on the date, in advance of the date, and later than scheduled repayment dates" do
+
+    it "repayments made ahead of the scheduled date on a loan that is not overdue are allocated to advance" do
+      from_lending_product = Factory(:lending_product)
+
+      principal_and_interest_amounts = {}
+      principal_amounts              = [100,105,110,115,120]
+      principal_money_amounts        = MoneyManager.get_money_instance(*principal_amounts)
+      total_principal_money_amount   = principal_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
+
+      interest_amounts            = [55,50,45,40,35]
+      equated_regular_installment = MoneyManager.get_money_instance(100 + 55)
+      last_installment            = MoneyManager.get_money_instance(120 + 35)
+      interest_money_amounts      = MoneyManager.get_money_instance(*interest_amounts)
+      total_interest_money_amount = interest_money_amounts.inject(@zero_money_amount) { |sum, money_amt| sum + money_amt }
+
+      1.upto(principal_amounts.length) { |num|
+        principal_and_interest                                           = { }
+        principal_and_interest[Constants::Transaction::PRINCIPAL_AMOUNT] = principal_money_amounts[num - 1]
+        principal_and_interest[Constants::Transaction::INTEREST_AMOUNT]  = interest_money_amounts[num - 1]
+        principal_and_interest_amounts[num]                             = principal_and_interest
+      }
+
+      principal_and_interest_amounts[0] = {
+          Constants::Transaction::PRINCIPAL_AMOUNT => total_principal_money_amount,
+          Constants::Transaction::INTEREST_AMOUNT  => total_interest_money_amount
+      }
+
+      loan_schedule_template_name = 'short test template 1'
+      lst = LoanScheduleTemplate.create_schedule_template(loan_schedule_template_name, total_principal_money_amount, total_interest_money_amount, principal_money_amounts.length, MarkerInterfaces::Recurrence::WEEKLY, from_lending_product, principal_and_interest_amounts)
+
+      applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date = Date.today - 16, Date.today - 9, Date.today - 2
+      approved_on_date = applied_on_date + 1
+      loan = Lending.create_new_loan(total_principal_money_amount, @weekly_frequency, principal_money_amounts.length, from_lending_product, @for_borrower, @administered_at_origin, @accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, @applied_by_staff, @recorded_by_user)
+
+      loan.approve(total_principal_money_amount, approved_on_date, @approved_by_staff)
+
+      counterparty_type, counterparty_id = Resolver.resolve_counterparty(@for_borrower)
+      common_attributes = {:currency => @currency, :on_product_type => @on_product_type, :on_product_id => from_lending_product.id, :by_counterparty_type => counterparty_type, :by_counterparty_id => counterparty_id, :performed_at => @performed_at, :accounted_at => @accounted_at, :performed_by => @performed_by, :recorded_by => @recorded_by}
+
+      disbursement_attributes = common_attributes.merge( {:amount => loan.applied_amount, :receipt_type => @payment_type, :effective_on => scheduled_disbursal_date} )
+      disbursement = Factory.create(:payment_transaction, disbursement_attributes)
+    
+      loan.disburse(disbursement)
+
+      #Repayments when loan is not due
+      not_due_short_repayment_date = scheduled_first_repayment_date - 1
+      not_due_short_repayment_amount = 100
+      not_due_short_repayment_attributes = common_attributes.merge( {:amount => not_due_short_repayment_amount, :receipt_type => @receipt_type, :effective_on => not_due_short_repayment_date} )
+      not_due_short_repayment = Factory.create(:payment_transaction, not_due_short_repayment_attributes)
+      loan.allocate_payment(not_due_short_repayment, Constants::Transaction::LOAN_REPAYMENT)
+      loan.advance_received_on_date(not_due_short_repayment_date).amount.should == not_due_short_repayment_amount
+
+=begin
+      late_short_first_repayment_amount, late_short_first_repayment_date = 10000, (scheduled_first_repayment_date + 1)
+      late_short_first_repayment_attributes = common_attributes.merge( {:amount => late_short_first_repayment_amount, :receipt_type => @receipt_type, :effective_on => late_short_first_repayment_date} )
+      late_short_first_repayment = Factory.create(:payment_transaction, late_short_first_repayment_attributes)
+      loan.allocate_payment(late_short_first_repayment, @repayment_action)
+      loan.interest_received_till_date.should == interest_money_amounts.first
+      loan.principal_received_till_date.amount.should == late_short_first_repayment_amount - (interest_money_amounts.first.amount)
+=end
+    end
+  end
+
+  it "should have a status of new" do
+    new_loan = Lending.new
+    loan_status = new_loan.current_loan_status
+    loan_status.should == LoanLifeCycle::STATUS_NOT_SPECIFIED
+  end
+
+  it "should create a new loan as expected" do
+    lan = "my_unique_lan #{DateTime.now}"
+    applied_amount = Money.new(1000000, :INR)
+    for_borrower = @for_borrower
+    applied_on_date = Date.parse('2012-05-01')
+    scheduled_disbursal_date = applied_on_date + 7
+    scheduled_first_repayment_date = scheduled_disbursal_date + 7
+    repayment_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    tenure = 52
+    administered_at_origin = @administered_at_origin
+    accounted_at_origin = @accounted_at_origin
+    applied_by_staff = 21
+    recorded_by_user = 23
+
+    new_loan = Lending.create_new_loan(applied_amount, repayment_frequency, tenure, @from_lending_product, for_borrower, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff, recorded_by_user, lan)
+
+    LoanAdministration.get_administered_at(new_loan.id, applied_on_date).should == new_loan.administered_at_origin_location
+    LoanAdministration.get_accounted_at(new_loan.id, applied_on_date).should == new_loan.accounted_at_origin_location
+    new_loan.lan.should                    == lan
+    new_loan.applied_amount.should         == applied_amount.amount
+    new_loan.currency.should               == applied_amount.currency
+
+    # Ensure that a loan borrower is created for the counterparty and loan
+    LoanBorrower.get_all_loans_for_counterparty(for_borrower).include?(new_loan).should be_true
+    new_loan.borrower.should               == for_borrower
+
+    new_loan.applied_on_date.should        == applied_on_date
+    new_loan.approved_amount.should        == nil
+    new_loan.repayment_frequency.should    == repayment_frequency
+    new_loan.tenure.should                 == tenure
+    new_loan.administered_at_origin.should == administered_at_origin
+    new_loan.accounted_at_origin.should    == accounted_at_origin
+    new_loan.applied_by_staff.should       == applied_by_staff
+    new_loan.recorded_by_user.should       == recorded_by_user
+    new_loan.status.should                 == LoanLifeCycle::NEW_LOAN_STATUS
+    new_loan.lending_product.should        == @from_lending_product
+
+    new_loan.scheduled_disbursal_date.should       == scheduled_disbursal_date
+    new_loan.scheduled_first_repayment_date.should == scheduled_first_repayment_date
+  end
+
+  context "when no repayments have been made on the loan" do
+
+    it "total principal repaid till date should be zero" do
+      @loan.principal_received_till_date.should == @zero_money_amount
+    end
+
+    it "total interest received till date should be zero" do
+      @loan.interest_received_till_date.should == @zero_money_amount
+    end
+
+    it "total received till date should be zero" do
+      @loan.total_received_till_date.should == @zero_money_amount
+    end
+
+  end
+
+  context "when a loan is not approved" do
+
+    it "loan life cycle indicates loan is not approved" do
+      @loan.is_approved?.should be_false
+    end
+
+    it "disbursement is not permitted" do
+      disbursement_attributes = @common_transaction_attributes
+      disbursement_attributes.merge!( {:amount => @loan.applied_amount, :receipt_type => @payment_type, :effective_on => @loan.scheduled_disbursal_date} )
+      mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, disbursement_attributes)
+      mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
+      mock_disbursement.valid?.should be_true
+
+      @loan.is_approved?.should be_false
+      @loan.is_payment_permitted?(mock_disbursement).first.should be_false
+    end
+
+  end
+
+  context "when a loan is approved" do
+
+    it "should not accept repayment until disbursed" 
+
+    it "should raise an error if the approved amount exceeds the applied amount" do
+      approved_amount_exceeding_applied = @total_principal_money_amount + Money.new(1, @loan.currency)
+      approved_on_date = @loan.applied_on_date + 7
+      some_staff = 12
+      lambda {@loan.approve(approved_amount_exceeding_applied, approved_on_date, some_staff)}.should raise_error
+    end
+
+    it "should raise an error if the approved date precedes the applied date" do
+      approved_amount = @total_principal_money_amount
+      approved_on_date = @loan.applied_on_date - 1
+      some_staff = 12
+      lambda {@loan.approve(approved_amount, approved_on_date, some_staff)}.should raise_error
+    end
+
+    it "should be marked as approved and have the information about approval as expected" do
+      approved_amount = @total_principal_money_amount
+      approved_on_date = @loan.applied_on_date + 1
+      some_staff = 12
+
+      # Can only approve a loan that has NEW_LOAN_STATUS
+      @loan.current_loan_status.should == LoanLifeCycle::NEW_LOAN_STATUS
+      @loan.is_disbursed?.should be_false
+      @loan.approve(approved_amount, approved_on_date, some_staff)
+      @loan.approved_amount.should == approved_amount.amount
+      @loan.approved_on_date.should == approved_on_date
+      @loan.approved_by_staff.should == some_staff
+
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+      @loan.is_approved?.should be_true
+      @loan.is_disbursed?.should be_false
+
+      # Cannot approve a loan that is already approved
+      lambda {@loan.approve(approved_amount, approved_on_date, some_staff)}.should raise_error
+    end
+
+  end
+
+  context "when a loan is disbursed" do
+
+    it "should raise an error if the date of disbursement precedes the date of approval" do
+      approved_amount = @loan.to_money_amount(:applied_amount)
+      approved_on_date = @loan.applied_on_date + 1
+      approved_by_staff = 12
+      @loan.approve(approved_amount, approved_on_date, approved_by_staff)
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+      @loan.is_disbursed?.should be_false
+
+      incorrect_disbursed_on_date = @loan.approved_on_date - 1
+
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => approved_amount, :receipt_type => @payment_type, :effective_on => incorrect_disbursed_on_date} )
+
+      mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+      mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
+
+      lambda {@loan.disburse(mock_disbursement)}.should raise_error
+      @loan.is_disbursed?.should be_false
+    end
+
+    it "should be marked as disbursed and have the information about disbursement as expected" do
+      disbursed_on_date = @loan.applied_on_date + 7
+
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
+
+      disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+
+      disbursement_money_amount = Money.new(@loan.approved_amount.to_i, @loan.currency)
+      receipt_type = disbursement_attributes[:receipt_type]
+      on_product_type = disbursement_attributes[:on_product_type]
+      on_product_id = disbursement_attributes[:on_product_id]
+      by_counterparty_type = disbursement_attributes[:by_counterparty_type]
+      by_counterparty_id   = disbursement_attributes[:by_counterparty_id]
+      performed_at         = disbursement_attributes[:performed_at]
+      accounted_at         = disbursement_attributes[:accounted_at]
+      performed_by         = disbursement_attributes[:performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
+
+      @loan.total_loan_disbursed.should == @zero_money_amount
+      
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+
+      @loan.reload
+      @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS    
+      @loan.is_disbursed?.should be_true
+      @loan.disbursal_date.should == disbursed_on_date
+      @loan.to_money_amount(:disbursed_amount).should == disbursement_money_amount
+      @loan.total_loan_disbursed.should == disbursement_money_amount
+      @loan.disbursed_by_staff.should == performed_by
+    end
+
+  end
+
+  context "when all repayments are made on a loan" do
+
+    it "should make allocations as per the repayment schedule" do
+      approved_amount = @loan.to_money_amount(:applied_amount)
+      approved_on_date = @loan.applied_on_date + 1
+      approved_by_staff = 12
+      @loan.approve(approved_amount, approved_on_date, approved_by_staff)
+      @loan.current_loan_status.should == LoanLifeCycle::APPROVED_LOAN_STATUS
+
+      disbursed_on_date = @loan.scheduled_disbursal_date
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
+
+      disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+
+      disbursement_money_amount = approved_amount
+      receipt_type    = disbursement_attributes[:receipt_type]
+      on_product_type = disbursement_attributes[:on_product_type]
+      on_product_id   = disbursement_attributes[:on_product_id]
+      by_counterparty_type = disbursement_attributes[:by_counterparty_type]
+      by_counterparty_id   = disbursement_attributes[:by_counterparty_id]
+      performed_at         = disbursement_attributes[:performed_at]
+      accounted_at         = disbursement_attributes[:accounted_at]
+      performed_by         = disbursement_attributes[:performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
+
+      @loan.total_loan_disbursed.should == @zero_money_amount
+
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+
+      @loan.total_loan_disbursed.should == disbursement_money_amount
+
+      factory_init_attributes = @common_transaction_attributes
+      factory_init_attributes.merge!( {:receipt_type => @receipt_type} )
+
+      repayment_on = nil; receipt_amount = nil
+      repayments = []
+      1.upto(@tenure).each { |installment|
+
+        if installment == 1
+          repayment_on = @scheduled_first_repayment_date
+        else
+          repayment_on = Constants::Time.get_next_date(repayment_on, @repayment_frequency)
+        end
+
+        if installment == @tenure
+          receipt_amount = @last_installment.amount
+        else
+          receipt_amount = @equated_regular_installment.amount
+        end
+
+        factory_init_attributes[:amount] = receipt_amount
+        factory_init_attributes[:effective_on] = repayment_on
+        repayment_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+
+        receipt_money_amount = Money.new(receipt_amount, @loan.currency)
+        receipt_type = repayment_attributes[:receipt_type]
+        on_product_type = repayment_attributes[:on_product_type]
+        on_product_id = repayment_attributes[:on_product_id]
+        by_counterparty_type = repayment_attributes[:by_counterparty_type]
+        by_counterparty_id   = repayment_attributes[:by_counterparty_id]
+        performed_at         = repayment_attributes[:performed_at]
+        accounted_at         = repayment_attributes[:accounted_at]
+        performed_by         = repayment_attributes[:performed_by]
+        effective_on         = repayment_attributes[:effective_on]
+        product_action       = Constants::Transaction::LOAN_REPAYMENT
+
+        @payment_facade.record_payment(receipt_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+
+        @loan.total_received_on_date(repayment_on).should == receipt_money_amount
+      }
+
+      @loan.total_received_till_date.should == (@loan.total_loan_disbursed + @loan.total_interest_applicable)
+      @loan.principal_received_till_date.should == @loan.total_loan_disbursed
+      @loan.interest_received_till_date.should == @loan.total_interest_applicable
+    end
+
+  end
+
+=begin
+  context "the date is the first scheduled repayment date on the loan" do
+
+    it "the loan due status is due on the date"
+
+    it "if there were any repayments received earlier and accumulated as advances,
+they are adjusted against the amounts due on the first scheduled repayment date and allocated accordingly"
+
+    it "the loan balance due on the date is as per the schedule on the date"
+
+  end
+
+  context "no repayment was received on the first scheduled repayment date and
+for a few days until a date preceding the next scheduled repayment date" do
+
+    it "the loan due status is OVERDUE on the next day and on future dates until a repayment is received that equals the loan balances due on the first scheduled repayment date"
+
+  end
+
+  context "no repayment was received since disbursement until a future date that falls ahead of the second schedule date,
+and the repayment received is under the amount expected as per the first scheduled repayment date" do
+
+    it "the loan due status is OVERDUE on each such date"
+
+    it "a single first repayment received on any such date that is less than the loan schedule balance at the first scheduled repayment date is allocated towards principal and interest"
+
+    it "any number of further repayments received on any such date that are collectively less than the loan schedule balance at the first scheduled repayment date are all allocated towards principal and interest and the loan due status remainds OVERDUE"
+
+    it "if one or more single repayment received that exceeds the loan scheduled balance on the first scheduled repayment date after the date, then the loan due status is now UDE, and all repayents are allocated against principal and interest"
+
+  end
+
+  context " a repayment is received on the scheduled repayment date" do
+
+    it "the loan due status is computed as overdue"
+
+    it "the loan due status is computed as due"
+
+  end
+
+  context "the loan balance for anticipated repayment is to be considered on a date that is not a schedule date" do
+
+    it "if the loan is overdue, the schedule balance to be considered for anticipated repayment is per the immediately previous scheduled repayment"
+
+    it "if the loan is not due, the schedule balance to be considered for anticipated repayment is per the immediately next scheduled repayment"
+
+  end
+
+  context "the date is before the disbursement date" do
+
+    it "no receipts can be accepted towards the loan"
+
+    it "the loan status is not yet disbursed"
+
+    it "the loan balances are as per the loan base schedule"
+
+  end
+
+  context "the loan is disbursed on the date" do
+
+    it "the loan amount disbursed cannot exceed the loan amount sanctioned"
+
+    it "the loan status is disbursed"
+
+    it "a payment transactions is recorded for the extent of disbursement"
+
+    it "the date of first scheduled repayment is recorded"
+
+    it "the loan base schedule has dates that begin with the date of first scheduled repayment,
+followed by dates as per the loan base schedule"
+
+  end
+
+  context "the date is before the scheduled first repayment date" do
+
+    it "the loan status is disbursed"
+
+    it "the loan due status should be not due"
+
+    it "any repayments received are accumulated as advance"
+
+    it "the scheduled first repayment date does not change despite the event that any repayments are received"
+
+  end
+=end
+
+end
+
+
