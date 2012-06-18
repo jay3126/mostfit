@@ -66,5 +66,13 @@ class BizLocation
     self.meeting_schedules << meeting_schedule
     save
   end
+
+  def self.search(q, per_page=10)
+    if /^\d+$/.match(q)
+      BizLocation.all(:conditions => {:id => q}, :limit => per_page)
+    else
+      BizLocation.all(:conditions => ["name=? or name like ?", q, q+'%'], :limit => per_page)
+    end
+  end
   
 end

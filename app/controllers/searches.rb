@@ -3,13 +3,13 @@ class Searches < Application
   def index
     if params[:query] and params[:query].length>=1
       per_page       = request.xhr? ? 11 : 100
-      @branches      = Branch.search(params[:query], per_page)
+      @biz_locations = BizLocation.search(params[:query], per_page)
       @clients       = Client.search(params[:query], per_page)
-      @centers       = Center.search(params[:query], per_page)
-      @loans         = Loan.search(params[:query], per_page)
+      @lendings      = Lending.search(params[:query], per_page)
       @client_groups = ClientGroup.search(params[:query], per_page)
       @staff_members = StaffMember.search(params[:query], per_page)
       @bookmarks     = Bookmark.search(params[:query], session.user, per_page)
+      @users         = User.search(params[:query], per_page)
     end
     @floating = true if request.xhr?
     render :layout => layout?

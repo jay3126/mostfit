@@ -596,4 +596,14 @@ class Lending
     # also get advances and amounts paid till date
   end
 
+  ##########
+  # Search #
+  ##########
+
+  def self.search(q, per_page)
+    if /^\d+$/.match(q)
+      Lending.all(:conditions => {:id => q}, :limit => per_page)
+    end
+  end
+
 end

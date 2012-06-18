@@ -88,14 +88,6 @@ class Branch
     self.centers.clients.loans(hash)
   end
 
-  def self.search(q, per_page=10)
-    if /^\d+$/.match(q)
-      Branch.all(:conditions => {:id => q}, :limit => per_page)
-    else
-      Branch.all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
-    end
-  end
-  
   def client_ids
     repository.adapter.query(%Q{
                                 SELECT cl.id clid

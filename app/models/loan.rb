@@ -387,12 +387,6 @@ class Loan
   end
 
 
-  def self.search(q, per_page)
-    if /^\d+$/.match(q)
-      all(:conditions => {:id => q}, :limit => per_page)
-    end
-  end
-
   #return installment frequencies in days
   def installment_frequency_in_days
     case installment_frequency

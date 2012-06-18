@@ -124,6 +124,14 @@ class User
     end
   end
 
+  def self.search(q, per_page)
+    if /^\d+$/.match(q)
+      User.all(:conditions => {:id => q}, :limit => per_page)
+    else
+      User.all(:conditions => ["login=? or login like ?", q, q+'%'], :limit => per_page)
+    end
+  end
+
  private
   def prevent_destroying_admin
     if id == 1

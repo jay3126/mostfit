@@ -62,14 +62,6 @@ class Center
     [obj.save, obj]
   end
 
-  def self.search(q, per_page=10)
-    if /^\d+$/.match(q)
-      all(:conditions => ["id = ? or code=?", q, q], :limit => per_page)
-    else
-      all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
-    end
-  end
-
   def self.meeting_days
     DAYS
   end
