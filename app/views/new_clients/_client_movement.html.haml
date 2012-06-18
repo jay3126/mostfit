@@ -1,0 +1,30 @@
+%h1 LOCATION MOVEMENT
+- unless @client_admins.blank?
+  %br
+  %table{:class => 'narrow'}
+    %thead
+      %tr
+        %th
+          Administered
+        %th
+          Registered
+        %th
+          Effective On
+        %th
+          Staff by
+        %th
+          Created At
+    %tr
+      - @client_admins.each do |client_admin|
+        - client = client_admin.counterparty
+        %tr
+          %td
+            = link_to client_admin.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => client_admin.administered_at)
+          %td
+            = link_to client_admin.registered_at_location.name, url(:controller => :user_locations, :action => :show, :id => client_admin.registered_at)
+          %td
+            = client_admin.effective_on.strftime("%Y-%m-%d")
+          %td
+            = client_admin.performed_by_staff.name rescue client_admin.performed_by_staff
+          %td
+            = client_admin.created_at.strftime("%Y-%m-%d")

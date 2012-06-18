@@ -1,3 +1,4 @@
+%h1 Client Movement
 = form_for(:new_clients, :action => url(:controller => :new_clients, :action => :index)) do
   = partial 'lib/biz_location_selector'
 - unless @client_admins.blank?
@@ -16,13 +17,13 @@
           %th
             Name
           %th
-            Created On
+            Effective on
           %th
             Move Client
           %th
             Staff by
           %th
-            Effective On
+            To Be Moved On
           %th
             Location
       %tr
@@ -34,13 +35,13 @@
             %td
               = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
             %td
-              = client_admin.created_at.strftime("%Y-%m-%d")
+              = client_admin.effective_on
             %td
               = radio_button :name => "client_id", :value => client.id
             %td
               = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
             %td
-              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on.strftime("%Y-%m-%d"), {:id => "effective_on_#{client.id}"}
+              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}"}
             %td
               = select :name=>"client[#{client.id}][][biz_location]", :collection => (biz_locations-@biz_location.to_a).collect{|b| [b.id, b.name] }
     = submit "Save"

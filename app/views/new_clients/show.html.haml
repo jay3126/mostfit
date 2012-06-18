@@ -25,7 +25,7 @@
     %td= @client_admin.administered_at_location.name
   %tr.even
     %th.even Group
-    %td= ''
+    %td= @client.client_group.name
   %tr.odd
     %th.odd Occupation
     %td= @client.occupation_id
@@ -36,11 +36,15 @@
       Loans
     %li#accounting
       Accounting
+    %li
+      Movement
     %li#history
       History
   %div.tab
     = partial "user_locations/loans_on_biz_location"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :show_accounts, :id => @client.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :client_movement, :id => @client.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

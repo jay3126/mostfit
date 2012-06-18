@@ -77,6 +77,15 @@ class ClientAdministration
     first(current_query)
   end
 
+  def self.get_counterparty_administration(for_counterparty)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    current_query = {}
+    current_query[:counterparty_type] = counterparty_type
+    current_query[:counterparty_id]   = counterparty_id
+    current_query[:order]             = [:effective_on.desc]
+    all(current_query)
+  end
+
   # Returns a list of client instances that are administered at the specified location (by ID) on the specified date
   def self.get_clients_administered(at_location_id, on_date = Date.today)
     get_clients_at_location(COUNTERPARTY_ADMINISTERED_AT, at_location_id, on_date)

@@ -224,4 +224,10 @@ class NewClients < Application
       redirect url(:controller => :new_clients, :action => :index, :child_location_id => child_location, :parent_location_id => parent_location, :effective_date => effective_date) , :message => @message
     end
   end
+
+  def client_movement
+    @client = Client.get params[:id]
+    @client_admins = ClientAdministration.get_counterparty_administration(@client)
+    partial 'new_clients/client_movement'
+  end
 end
