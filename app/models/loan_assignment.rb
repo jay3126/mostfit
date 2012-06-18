@@ -22,7 +22,7 @@ class LoanAssignment
   end
 
   def loan_exists?
-    Loan.get(loan_id) ? true : [false, "There is no loan with ID: #{loan_id}"]
+    Lending.get(loan_id) ? true : [false, "There is no loan with ID: #{loan_id}"]
   end
 
   def loan_assignment_instance

@@ -1,3 +1,4 @@
+- facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
 %h1== Loan Name: <i>#{@lending_product.name}</i>
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.odd
@@ -31,10 +32,18 @@
     %th.odd Scheduled First Repayment Date
     %td= @lending.scheduled_first_repayment_date
   %tr.even
-    %th.even Administered At
-    %td= link_to @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
+    %th.even Loan assignment status
+    %td
+      - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
+      - if loan_assigned_to.nil?
+        = "Not Assigned"
+      - else
+        = loan_assigned_to.loan_assignment_instance.to_s
   %tr.odd
-    %th.odd Accounted At
+    %th.odd Administered At
+    %td= link_to @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
+  %tr.even
+    %th.even Accounted At
     %td= link_to @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
 
 %div.tab_container.shaded
