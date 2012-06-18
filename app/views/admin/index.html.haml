@@ -21,11 +21,9 @@
       %h2 Manage staff, users, and roles
       %ul.icon_links
         %li
-          = link_to_with_rights 'Staff Designations', resource(:designations), :class => 'staff icon'
+          = link_to_with_rights 'Designation Master', resource(:designations), :class => 'staff icon'
         %li
           = link_to_with_rights 'Staff Members', resource(:staff_members), :class => 'staff icon'
-        %li
-          = link_to_with_rights 'User Roles', resource(:user_roles), :class => 'user icon'
         %li
           = link_to_with_rights 'Users', resource(:users), :class => 'user icon'
 

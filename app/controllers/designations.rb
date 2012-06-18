@@ -19,17 +19,19 @@ class Designations < Application
 
     name =  params[:designation][:name]
     location_level_id = params[:designation][:location_level]
+    role_class = params[:designation][:role_class]
 
     # VALIDATIONS
 
     message[:error] = " Please select Location Level." if location_level_id.blank?
     message[:error] = " Name cannot be blank" if name.blank?
+    message[:error] = " Role cannot be blank" if role_class.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
         location_level = LocationLevel.get location_level_id
-        designation = Designation.new(:name => name, :location_level => location_level)
+        designation = Designation.new(:name => name, :location_level => location_level, :role_class => role_class)
         if designation.save
           message = {:notice => "Designation successfully created"}
         else

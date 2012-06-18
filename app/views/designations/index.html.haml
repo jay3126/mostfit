@@ -6,5 +6,7 @@
     = form_for(@designation, :action => url(:designations) ) do
       = partial :fields
       = submit 'Save'
+      %b
+        Or
       = link_to 'Cancel', url(params[:return]), :class => "grey_button"
 = partial 'list'

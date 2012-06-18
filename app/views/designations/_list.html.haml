@@ -7,6 +7,7 @@
     %thead
       %tr
         %th
+        %th
           Id
         %th
           Name
@@ -16,11 +17,12 @@
           User Role
         %th
           Created On
-        %th
-          Actions
+        // %th
+        // Actions
     %tr
     - for designation in @designations
       %tr{:class => cycle('odd','even')}
+        %td
         %td
           = designation.id
         %td
@@ -28,8 +30,8 @@
         %td
           = designation.location_level.name
         %td
-          = designation.user_roles.aggregate(:name).join(", ")
+          = designation.role_class.to_s.capitalize
         %td
           = designation.created_at
-        %td
-          = link_to 'Assign Staff' ,'#'
+        //%td
+        //= link_to 'Assign Staff' ,'#'

@@ -13,6 +13,11 @@
       ( id:
       = @staff_member.id
       )
+  %tr.even
+    %th.even
+      Designation
+    %td
+      = @staff_member.designation.name if @staff_member.designation 
   %tr.odd
     %th.odd
       Mobile Number
