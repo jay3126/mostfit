@@ -249,7 +249,7 @@ class Lendings < Application
 
   def lending_due_statuses
     @lending = Lending.get params[:id]
-    @lending_status_changes = LoanStatusChange.all(:loan_id => @lending.id)
+    @lending_status_changes = LoanStatusChange.all(:lending_id => @lending.id)
     partial 'lendings/lending_status'
   end
 end

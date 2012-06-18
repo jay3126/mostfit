@@ -32,7 +32,7 @@
               = biz_location.id
             %td
               - if biz_location_level.first == 0
-                = biz_location.name
+                = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id)
               - else
                 = link_to biz_location.name, resource(biz_location)
             %td
