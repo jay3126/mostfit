@@ -119,7 +119,7 @@ class LoanApplication
       :created_by_staff_member_id => created_by_staff_id,
       :created_by_user_id         => created_by_user_id,
       :center_id                  => at_center_id,
-      :date_joined                => Date.today()
+      :date_joined                => created_on
     }
   end
 
