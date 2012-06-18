@@ -9,6 +9,7 @@
   - staff_member_id = (params[report] and params[report][:staff_member_id] and not params[report][:staff_member_id].blank?) ? params[report][:staff_member_id] : nil
   - funder_id = (params[report] and params[report][:funder_id] and not params[report][:funder_id].blank?) ? params[report][:funder_id] : nil
   - funding_line_id = (params[report] and params[report][:funding_line_id] and not params[report][:funding_line_id].blank?) ? params[report][:funding_line_id] : nil
+  - securitization_id = (params[report] and params[report][:securitization_id] and not params[report][:securitization_id].blank?) ? params[report][:securitization_id] : nil
   - account_id = (params[report] and params[report][:account_id] and not params[report][:account_id].blank?) ? params[report][:account_id] : nil
   - type_of_target = (params[report] and params[report][:type_of_target] and not params[report][:type_of_target].blank?) ? params[report][:type_of_target] : nil
   - type_of_journal = (params[report] and params[report][:type_of_journal] and not params[report][:type_of_journal].blank?) ? params[report][:type_of_journal] : nil
@@ -55,6 +56,10 @@
         |
         Funding Line:
         = FundingLine.get(funding_line_id).name
+      - if securitization_id
+        |
+        Securitization:
+        = Securitization.get(securitization_id).name
       - if account_id
         |
         Account:
@@ -196,6 +201,10 @@
             %td
               Funding Line:
               = select(:funding_line_id, :collection => get_accessible_funding_lines(funder_id, @user), :include_blank => true, :selected => funding_line_id, :id => "funding_line_selector")
+          - if @report.respond_to?(:securitization_id)
+            %td
+              Securitization:
+              = select(:securitization_id, :collection => Securitization.all, :include_blank => true, :selected => securitization_id, :id => "securitization_selector")
           - if @report.respond_to?(:account_id)
             %td
               Account:

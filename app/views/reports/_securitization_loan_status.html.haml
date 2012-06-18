@@ -1,0 +1,53 @@
+= partial :form
+%table.report.nojs
+  %thead
+    %tr
+      %th
+        Client ID
+      %th
+        Loan ID
+      %th
+        District
+      %th
+        Branch
+      %th
+        Client Name
+      %th
+        Loan Amount
+      %th
+        Disbursement Date
+      %th
+        Loan Status
+      %th
+        Loan Closure Date
+      %th
+        No of Installments Remaining
+      %th
+        Principal Outstanding Beginning of Period
+      %th
+        Principal Due During Period
+      %th
+        Principal Paid During Period
+      %th
+        Principal Overdue
+      %th
+        No. of Days Principal Overdue
+      %th
+        Current Principal Outstanding
+      %th
+        Interest Outstaninding Beginning of Period
+      %th
+        Interest due during Period
+      %th
+        Interest paid during Period
+      %th
+        Interest Overdue
+      %th
+        No. of days Interest Outstanding
+      %th
+        Current Interest Outstanding
+  %tbody
+    %tr
+      - (1..22).each  do |x|
+        %td
+          = x
