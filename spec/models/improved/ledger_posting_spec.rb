@@ -27,6 +27,11 @@ describe LedgerPosting do
     @credit_posting.amount = nil
     @credit_posting.should_not be_valid
   end
+
+  it "should not be valid if the posting amount is zero" do
+    @credit_posting.amount = 0
+    @credit_posting.should_not be_valid
+  end
   
   it "should not be valid without a posting currency" do
     @credit_posting.currency = nil

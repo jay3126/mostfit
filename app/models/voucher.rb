@@ -79,10 +79,11 @@ class Voucher
     values[:total_amount] = total_amount
     values[:currency] = currency
     values[:effective_on] = effective_on
-    values[:narration] = narration if narration
+    values[:narration] = notation if notation
     values[:generated_mode] = generated_mode
     ledger_postings = []
     postings.each { |p|
+      next unless p.amount > 0
       posting = {}
       posting[:effective_on] = effective_on
       posting[:amount] = p.amount

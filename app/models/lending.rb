@@ -426,10 +426,6 @@ class Lending
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
   end
 
-  def reject
-    #TODO
-  end
-
   def disburse(by_disbursement_transaction)
     Validators::Arguments.not_nil?(by_disbursement_transaction)
 
@@ -450,10 +446,6 @@ class Lending
     disbursement_allocation
   end
 
-  def cancel
-    #TODO
-  end
-
   def repay(by_receipt)
     update_for_payment(by_receipt)
   end
@@ -461,28 +453,6 @@ class Lending
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
-
-  #TODO: revisit and check if redundant or otherwise
-=begin
- def get_current_due_status
-    return NOT_DUE if Date.today < self.scheduled_first_repayment_date
-
-    recent_loan_due_status_record = self.loan_due_statuses.most_recent_status_record
-    if recent_loan_due_status_record
-      recent_loan_due_status           = recent_loan_due_status_record.due_status
-      loan_due_status_recorded_on_date = recent_loan_due_status_record.on_date
-
-      #The most recent loan due status is indeed the current status if it was recorded today
-      return recent_loan_due_status if (loan_due_status_recorded_on_date == Date.today)
-
-      #The most recent loan due status implies there have not been any intervening repayments
-      #If the loan was already overdue, there is no possibility that it has improved to due, because there are no intervening repayments
-      return recent_loan_due_status if (recent_loan_due_status == OVERDUE)
-    end
-
-    get_due_status_from_receipts
-  end
-=end
 
   ###########
   # UPDATES # begins
@@ -581,19 +551,9 @@ class Lending
   # UPDATES # ends
   ###########
 
-  def get_due_status_from_receipts
-    #TODO
-  end
-
   def get_all_amortization_items_till_date(on_date)
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide amortization" unless self.loan_base_schedule
     self.loan_base_schedule.get_all_amortization_items_till_date(on_date)
-  end
-
-  def get_all_balances(on_date)
-    #TODO
-    # schedule_balances = get_schedule_balances(on_date)
-    # also get advances and amounts paid till date
   end
 
   ##########
