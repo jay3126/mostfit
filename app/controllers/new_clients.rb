@@ -1,6 +1,13 @@
 class NewClients < Application
 
   def index
+    unless params[:child_location_id].blank?
+      @biz_location = BizLocation.get params[:child_location_id]
+      client_facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
+      @clients      = client_facade.get_clients_administered(@biz_location.id, params[:effective_date])
+      @client_admins = @clients.collect{|client| ClientAdministration.get_current_administration(client)}
+    end
+    display @client_admins
   end
 
   def new
@@ -181,5 +188,40 @@ class NewClients < Application
     end
     @ledgers = @ledgers.flatten.uniq.group_by{|l| l.account_type}
     partial "new_clients/show_accounts"
+  end
+
+  def update_client_location
+    @message        = {}
+    parent_location = params[:parent_biz_location]
+    child_location  = params[:child_biz_location]
+    client_id       = params[:client_id]
+    effective_date  = params[:effective_date]
+    client_params   = params[:client][client_id].blank? ? [] : params[:client][client_id]
+    @message        = {:error => "Please select client for assignment"} if client_params.blank?
+
+    begin
+      if @message[:error].blank?
+        administered_location = BizLocation.get client_params[:biz_location]
+        registered_location   = BizLocation.get parent_location
+        client                = Client.get client_id
+        performed_by          = client_params[:performed_by]
+        effective_on          = client_params[:effective_on]
+        recorded_by           = session.user.id
+        client                = ClientAdministration.assign(administered_location, registered_location, client, performed_by, recorded_by, effective_on)
+        if client.new?
+          @message = {:error => "Client assignment fails."}
+        else
+          @message = {:notice => "Client assignment successfully."}
+        end
+      end
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+    
+    if @message[:error].blank?
+      redirect url(:controller => :new_clients, :action => :show, :id => client_id) , :message => @message
+    else
+      redirect url(:controller => :new_clients, :action => :index, :child_location_id => child_location, :parent_location_id => parent_location, :effective_date => effective_date) , :message => @message
+    end
   end
 end

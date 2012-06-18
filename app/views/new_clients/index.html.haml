@@ -1,0 +1,46 @@
+= form_for(:new_clients, :action => url(:controller => :new_clients, :action => :index)) do
+  = partial 'lib/biz_location_selector'
+- unless @client_admins.blank?
+  - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+  - biz_locations = location_facade.all_nominal_centers
+  = form_for(:new_clients, :action => url(:controller => :new_clients, :action => :update_client_location)) do
+    = hidden_field :name => "parent_biz_location", :value => params[:parent_location_id]
+    = hidden_field :name => "child_biz_location", :value => params[:child_location_id]
+    = hidden_field :name => "effective_date", :value => params[:effective_date]
+    %br
+    %table{:class => 'narrow'}
+      %thead
+        %tr
+          %th
+            id
+          %th
+            Name
+          %th
+            Created On
+          %th
+            Move Client
+          %th
+            Staff by
+          %th
+            Effective On
+          %th
+            Location
+      %tr
+        - @client_admins.each do |client_admin|
+          - client = client_admin.counterparty
+          %tr
+            %td
+              = client.id
+            %td
+              = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+            %td
+              = client_admin.created_at.strftime("%Y-%m-%d")
+            %td
+              = radio_button :name => "client_id", :value => client.id
+            %td
+              = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
+            %td
+              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on.strftime("%Y-%m-%d"), {:id => "effective_on_#{client.id}"}
+            %td
+              = select :name=>"client[#{client.id}][][biz_location]", :collection => (biz_locations-@biz_location.to_a).collect{|b| [b.id, b.name] }
+    = submit "Save"

@@ -21,7 +21,7 @@ class ClientAdministration
   # Assign the administered_at and registered_at BizLocation instances to the counterparty performed by staff and recorded by user on the specified effective date
   def self.assign(administered_at, registered_at, to_counterparty, performed_by, recorded_by, effective_on = Date.today)
     raise ArgumentError, "Locations to be assigned must be instances of BizLocation" unless (administered_at.is_a?(BizLocation) and registered_at.is_a?(BizLocation))
-    raise ArgumentError, "#{to_counterparty} provided for assignment is not a valid counterparty" unless Resolver.is_a_counterparty?(to_counterparty)
+    raise ArgumentError, "#{to_counterparty.class} provided for assignment is not a valid counterparty" unless Resolver.is_a_counterparty?(to_counterparty)
     assignment                         = { }
     assignment[:administered_at]       = administered_at.id
     assignment[:registered_at]         = registered_at.id
@@ -66,6 +66,15 @@ class ClientAdministration
     locations[:order]                  = [:effective_on.desc]
     recent_assignment                  = first(locations)
     recent_assignment ? recent_assignment.to_location_map : nil
+  end
+
+  def self.get_current_administration(for_counterparty)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    current_query = {}
+    current_query[:counterparty_type] = counterparty_type
+    current_query[:counterparty_id]   = counterparty_id
+    current_query[:order]             = [:effective_on.desc]
+    first(current_query)
   end
 
   # Returns a list of client instances that are administered at the specified location (by ID) on the specified date
