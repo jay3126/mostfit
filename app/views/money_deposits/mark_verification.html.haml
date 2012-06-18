@@ -5,6 +5,7 @@
   = "Mark verification status"
 = form_for(@money_deposit, :action => url(:controller => 'money_deposits', :action => 'record_verification'), :method => :post, :class => 'bank_deposites') do
   %input{:type => :hidden, :value => params[:id], :name => 'money_deposit_id'}
+  %input{:type => :hidden, :value => @at_location_id, :name => 'at_location_id'}
   %table.form{:style => "width:100%;"}
     %thead
       %tr
@@ -40,4 +41,4 @@
           = date_select :verified_on, Date.today
       %td{:colspan => 3}
         = submit "Submit"
-        = link_to "Cancel", "/money_deposits", :class => "greenButton"
+        = link_to "Cancel", "/user_locations/show/#{@at_location_id}#money_deposits", :class => "greenButton"

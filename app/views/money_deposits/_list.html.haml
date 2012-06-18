@@ -73,7 +73,7 @@
             = md.verification_status.humanize rescue nil
             %br
             - if md.verification_status == Constants::MoneyDepositVerificationStatus::PENDING_VERIFICATION
-              = link_to "(Mark verification)", url(:controller => :money_deposits, :action => :mark_verification, :id => md.id)
+              = link_to "(Mark verification)", url(:controller => :money_deposits, :action => :mark_verification, :id => md.id, :at_location_id => params[:at_location_id])
           %td
             = StaffMember.get(md.created_by_staff_id).name
 
