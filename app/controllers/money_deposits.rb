@@ -64,7 +64,7 @@ class MoneyDeposits < Application
     verification_status = params[:verification_status]
     verified_by = params[:verified_by_staff_id]
     verified_on = params[:verified_on]
-    at_location_id = params[:at_location_id]
+    @at_location_id = params[:at_location_id]
 
     # VALIDATIONS
     @errors << "Verification status must not be blank" if verification_status.blank?
@@ -84,10 +84,10 @@ class MoneyDeposits < Application
       rescue => ex
         @errors.push(ex.message)
       end
-      redirect url("user_locations/show/#{at_location_id}#money_deposits"), :message => message
+      redirect url("user_locations/show/#{@at_location_id}#money_deposits"), :message => message
     else
       # RENDER/RE-DIRECT
-      redirect url("money_deposits/mark_verification/#{id}"), :message => {:error => @errors.to_a.flatten.join(', ')}
+      redirect url("money_deposits/mark_verification/#{id}?at_location_id=#{@at_location_id}"), :message => {:error => @errors.to_a.flatten.join(', ')}
     end
   end
 

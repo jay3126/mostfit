@@ -12,4 +12,8 @@ class ClientFacade < StandardFacade
     ClientAdministration.get_clients_registered(at_location_id, on_date)
   end
 
+  def get_all_loans_for_counterparty(client)
+    LoanBorrower.get_all_loans_for_counterparty(client)
+  end
+
 end
