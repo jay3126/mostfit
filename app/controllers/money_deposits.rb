@@ -1,7 +1,7 @@
 class MoneyDeposits < Application
 
   def index
-    @money_deposits = MoneyDeposit.all(:order => [:created_on.desc])
+    @money_deposits = MoneyDeposit.all(:at_location_id => params[:at_location_id], :order => [:created_on.desc])
     @branch_id = params[:branch_id]
     render :layout => layout?
   end
@@ -15,6 +15,8 @@ class MoneyDeposits < Application
     amount = params[:amount]
     by_staff = params[:by_staff_id]
     created_on = params[:created_on]
+    at_location_id = params[:at_location_id]
+
     @account = BankAccount.get(account)
 
     # VALIDATIONS
@@ -26,7 +28,7 @@ class MoneyDeposits < Application
     if @errors.blank?
       begin
         @money = MoneyManager.get_money_instance(amount)
-        @money_deposit = MoneyDeposit.record_money_deposit(@money, @account.id, created_on, by_staff, session.user.id)
+        @money_deposit = MoneyDeposit.record_money_deposit(@money, @account.id, created_on, by_staff, session.user.id, at_location_id)
 
         if @money_deposit
           message = {:notice => "Save Successfully"}
@@ -37,32 +39,14 @@ class MoneyDeposits < Application
         message = {:error => ex.message }
       end
     end
-    
+
     # REDIRECTIONS
-    if params[:branch_id].blank?
+    if at_location_id.blank?
       redirect "/money_deposits", :message => message
     else
-      redirect url("branches/#{params[:branch_id]}#bank_deposits"), :message => message
+      redirect url("user_locations/show/#{at_location_id}#money_deposits"), :message => message
     end
 
-  end
-
-  def get_bank_branches
-    if params[:bank_id]
-      bank = Bank.get(params[:bank_id])
-      return("<option value=''>Select branch</option>") unless bank
-      bank_branches = bank.bank_branches
-      return("<option value=''>Select branch</option>"+bank_branches.map{|b| "<option value=#{b.id}>#{b.name}</option>"}.join)
-    end
-  end
-
-  def get_bank_accounts
-    if params[:branch_id]
-      bank_branch = BankBranch.get(params[:branch_id])
-      return("<option value=''>Select account</option>") unless bank_branch
-      bank_accounts = bank_branch.bank_accounts
-      return("<option value=''>Select account</option>"+bank_accounts.map{|b| "<option value=#{b.id}>#{b.name}-#{b.account_no}</option>"}.join)
-    end
   end
 
   def mark_verification
@@ -89,7 +73,7 @@ class MoneyDeposits < Application
     # OPERATIONS-PERFORMED
     if @errors.blank?
       begin
-        is_saved = @money_deposit.update(:verification_status => params[:verification_status], :verified_on => params[:verified_on], :verified_by_staff_id => params[:verified_by] )
+        is_saved = @money_deposit.update(:verification_status => verification_status, :verified_on => verified_on, :verified_by_staff_id => verified_by)
         if is_saved
           message = {:notice => "Verification status successfuly marked"}
         else
@@ -105,4 +89,23 @@ class MoneyDeposits < Application
     end
   end
 
+  def get_bank_branches
+    if params[:bank_id]
+      bank = Bank.get(params[:bank_id])
+      return("<option value=''>Select branch</option>") unless bank
+      bank_branches = bank.bank_branches
+      return("<option value=''>Select branch</option>"+bank_branches.map{|b| "<option value=#{b.id}>#{b.name}</option>"}.join)
+    end
+  end
+
+  def get_bank_accounts
+    if params[:branch_id]
+      bank_branch = BankBranch.get(params[:branch_id])
+      return("<option value=''>Select account</option>") unless bank_branch
+      bank_accounts = bank_branch.bank_accounts
+      return("<option value=''>Select account</option>"+bank_accounts.map{|b| "<option value=#{b.id}>#{b.name}-#{b.account_no}</option>"}.join)
+    end
+  end
+
+  
 end

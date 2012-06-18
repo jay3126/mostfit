@@ -37,6 +37,8 @@
       = @location_level.name
     %li#staff
       Staff
+    %li#money_deposits
+      Money Deposits
     %li#history
       History
   %div.tab
@@ -47,4 +49,6 @@
         = partial "user_locations/child_locations"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
   %div.tab

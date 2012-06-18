@@ -57,16 +57,16 @@
 %h2
   = "Make deposits"
 = form(:action => url(:controller => 'money_deposits', :action => 'create'), :method => :post, :class => 'bank_deposites') do
-  %input{:type => :hidden, :value => @branch_id, :name => 'branch_id'}
+  %input{:type => :hidden, :value => params[:at_location_id], :name => 'at_location_id'}
   %table.form{:style => "width:100%;"}
     %thead
       %tr
         %th
           = "Bank"
         %th
-          = "Branch"
+          = "Bank branch"
         %th
-          = "Accounts"
+          = "Bank account"
         %th
           = "Amount"
         %th
