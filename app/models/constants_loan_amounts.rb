@@ -57,8 +57,10 @@ module Constants
     TOTAL_ADVANCE_ADJUSTED                                     = :total_advance_adjusted
     SCHEDULED_PRINCIPAL_OUTSTANDING                            = :scheduled_principal_outstanding
     SCHEDULED_INTEREST_OUTSTANDING                             = :scheduled_interest_outstanding
+    SCHEDULED_TOTAL_OUTSTANDING                                = :scheduled_total_outstanding
     SCHEDULED_PRINCIPAL_DUE                                    = :scheduled_principal_due
     SCHEDULED_INTEREST_DUE                                     = :scheduled_interest_due
+    SCHEDULED_TOTAL_DUE                                        = :scheduled_total_due
     PRINCIPAL_OVERDUE                                          = :principal_overdue
     INTEREST_OVERDUE                                           = :interest_overdue
     PRINCIPAL_TO_ALLOCATE                                      = :principal_to_allocate
@@ -71,6 +73,10 @@ module Constants
     ADVANCE_ADJUSTED                                           = :advance_adjusted
     ACTUAL_PRINCIPAL_OUTSTANDING                               = :actual_principal_outstanding
     ACTUAL_INTEREST_OUTSTANDING                                = :actual_interest_outstanding
+    ACTUAL_TOTAL_OUTSTANDING                                   = :actual_total_outstanding
+    ACTUAL_PRINCIPAL_DUE                                       = :actual_principal_due
+    ACTUAL_INTEREST_DUE                                        = :actual_interest_due
+    ACTUAL_TOTAL_DUE                                           = :actual_total_due
 
     LOAN_PRODUCT_AMOUNTS = [LOAN_DISBURSED, PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, TOTAL_RECEIVED, TOTAL_PAID]
 

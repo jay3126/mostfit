@@ -214,6 +214,11 @@ class Lending
     {SCHEDULED_PRINCIPAL_DUE => scheduled_principal_due(on_date), SCHEDULED_INTEREST_DUE => scheduled_interest_due(on_date)}
   end
 
+  def scheduled_total_due(on_date)
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+    scheduled_principal_due(on_date) + scheduled_interest_due(on_date)
+  end
+
   def scheduled_principal_due(on_date)
     return zero_money_amount if on_date < scheduled_first_repayment_date
 
@@ -341,6 +346,10 @@ class Lending
     principal_received_till_date + interest_received_till_date + advance_received_till_date
   end
 
+  def advance_adjusted_till_date(on_date = Date.today); zero_money_amount; end
+  def advance_adjusted_on_date(on_date = Date.today); zero_money_amount; end
+  def advance_balance(on_date = Date.today); zero_money_amount; end
+
   ########################################################
   # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # begins
   ########################################################
@@ -367,6 +376,10 @@ class Lending
     return NOT_DUE if on_date < scheduled_first_repayment_date
 
     actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+  end
+  
+  def get_loan_due_status_record(on_date)
+    LoanDueStatus.most_recent_status_record_on_date(self.id, on_date)
   end
 
   def historical_due_status_on_date(on_date)
