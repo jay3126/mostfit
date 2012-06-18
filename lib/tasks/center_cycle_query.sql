@@ -1,0 +1,2 @@
+--This sql query create center cycle for centers-----
+insert into center_cycles(cycle_number, initiated_by_staff_id, created_by, initiated_on, center_id) (select 1, 1, 1, creation_date, id from biz_locations where location_level_id in (select id from location_levels where level = 0));
