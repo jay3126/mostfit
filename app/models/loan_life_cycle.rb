@@ -11,6 +11,10 @@ module LoanLifeCycle
     LOAN_STATUSES.index(current_loan_status) >= LOAN_STATUSES.index(DISBURSED_LOAN_STATUS)
   end
 
+  def is_outstanding?
+    (current_loan_status == DISBURSED_LOAN_STATUS)
+  end
+
   STATUS_NOT_SPECIFIED  = :status_not_specified
   NEW_LOAN_STATUS       = :new_loan_status
   APPROVED_LOAN_STATUS  = :approved_loan_status
@@ -18,6 +22,11 @@ module LoanLifeCycle
   DISBURSED_LOAN_STATUS = :disbursed_loan_status
   CANCELLED_LOAN_STATUS = :cancelled_loan_status
   REPAID_LOAN_STATUS    = :repaid_loan_status
+
+  REPAID_IN_FULL = :repaid_in_full
+  PRECLOSED      = :preclosed
+  WRITTEN_OFF    = :written_off
+  REPAID_NATURES = [REPAID_IN_FULL, PRECLOSED, WRITTEN_OFF]
 
   LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
 

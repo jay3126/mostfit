@@ -16,6 +16,7 @@ class Lending
   property :scheduled_first_repayment_date, *DATE_NOT_NULL
   property :approved_on_date,               *DATE
   property :disbursal_date,                 *DATE
+  property :repaid_on_date,                 *DATE
   property :repayment_frequency,            *FREQUENCY
   property :tenure,                         *TENURE
   property :administered_at_origin,         *INTEGER_NOT_NULL
@@ -53,7 +54,9 @@ class Lending
   has 1, :loan_base_schedule
   has n, :loan_payments
   has n, :loan_receipts
+  has n, :loan_status_changes
   has n, :loan_due_statuses
+  has 1, :loan_repaid_status
 
   # Creates a new loan
   def self.create_new_loan(
@@ -91,8 +94,7 @@ class Lending
     num_of_installments = tenure
     principal_and_interest_amounts = from_lending_product.amortization
     # TODO create a LoanAdministration instance for the loan administered_at_origin and accounted_at_origin
-    was_saved = new_loan.save
-    raise Errors::DataError, new_loan.errors.first.first unless was_saved
+    new_loan.set_status(NEW_LOAN_STATUS, applied_on_date)
     LoanBaseSchedule.create_base_schedule(
         applied_amount,
         total_interest_applicable,
@@ -360,7 +362,8 @@ class Lending
 
   # Obtain the loan status as on a particular date
   def historical_loan_status_on_date(on_date)
-    #TODO
+    status_in_force_on_date = self.loan_status_changes.status_in_force(on_date)
+    status_in_force_on_date.to_status
   end
 
   #######################
@@ -455,10 +458,6 @@ class Lending
     update_for_payment(by_receipt)
   end
 
-  def pre_close
-    #TODO
-  end
-
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
@@ -485,6 +484,19 @@ class Lending
   end
 =end
 
+  ###########
+  # UPDATES # begins
+  ###########
+
+  # Set the loan status
+  def set_status(new_loan_status, effective_on)
+    current_status = self.status
+    raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
+    self.status = new_loan_status
+    raise Errors::DataError, errors.first.first unless save
+    LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
+  end
+
   private
 
   def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
@@ -508,22 +520,9 @@ class Lending
     loan_hash[:scheduled_first_repayment_date] = scheduled_first_repayment_date
     loan_hash[:recorded_by_user]               = recorded_by_user
     loan_hash[:repayment_allocation_strategy]  = from_lending_product.repayment_allocation_strategy
-    loan_hash[:status]                         = NEW_LOAN_STATUS
+    loan_hash[:status]                         = STATUS_NOT_SPECIFIED
     loan_hash[:lan]                            = lan if lan
     Lending.new(loan_hash)
-  end
-
-  ###########
-  # UPDATES # begins
-  ###########
-
-  # Set the loan status
-  def set_status(new_loan_status, effective_on)
-    current_status = self.status
-    raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
-    self.status = new_loan_status
-    raise Errors::DataError, errors.first.first unless save
-    LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
 
   # All actions required to update the loan for the payment
@@ -577,7 +576,6 @@ class Lending
     resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     resulting_allocation
   end
-
 
   ###########
   # UPDATES # ends
