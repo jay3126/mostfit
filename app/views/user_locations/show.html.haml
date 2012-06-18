@@ -37,8 +37,11 @@
       = @location_level.name
     %li#staff
       Staff
-    %li#money_deposits
-      Money Deposits
+    - if @biz_location.is_nominal_branch?
+      %li#money_deposits
+        Money Deposits
+    %li#branch_eod_summary
+      Branch EOD summary
     %li#history
       History
   %div.tab
@@ -51,4 +54,5 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
+  %div.tab
   %div.tab

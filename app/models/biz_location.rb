@@ -13,6 +13,18 @@ class BizLocation
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
 
+  def level_number
+    self.location_level.level
+  end
+
+  def is_nominal_branch?
+    self.level_number == LocationLevel::NOMINAL_BRANCH_LEVEL
+  end
+
+  def is_nominal_center?
+    self.level_number == LocationLevel::NOMINAL_CENTER_LEVEL
+  end
+
   # Returns all locations that belong to LocationLevel
   def self.all_locations_at_level(by_level_number)
     level = LocationLevel.get_level_by_number(by_level_number)
