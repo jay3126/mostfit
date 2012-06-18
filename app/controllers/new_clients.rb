@@ -1,11 +1,15 @@
 class NewClients < Application
 
   def index
+    effective_date = params[:effective_date]
     unless params[:child_location_id].blank?
-      @biz_location = BizLocation.get params[:child_location_id]
-      client_facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
-      @clients      = client_facade.get_clients_administered(@biz_location.id, params[:effective_date])
-      @client_admins = @clients.collect{|client| ClientAdministration.get_current_administration(client)}
+      @biz_location    = BizLocation.get params[:child_location_id]
+      @parent_location = BizLocation.get params[:parent_location_id]
+      location_facade  = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+      client_facade    = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
+      @child_locations = location_facade.get_children(@parent_location, effective_date) - [@biz_location]
+      @clients         = client_facade.get_clients_administered(@biz_location.id, effective_date)
+      @client_admins   = @clients.collect{|client| ClientAdministration.get_current_administration(client)}
     end
     display @client_admins
   end
@@ -196,7 +200,7 @@ class NewClients < Application
     child_location  = params[:child_biz_location]
     client_id       = params[:client_id]
     effective_date  = params[:effective_date]
-    client_params   = params[:client][client_id].blank? ? [] : params[:client][client_id]
+    client_params   = params[:client][client_id].blank? ? [] : params[:client][client_id].first
     @message        = {:error => "Please select client for assignment"} if client_params.blank?
 
     begin
