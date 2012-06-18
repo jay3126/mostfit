@@ -12,7 +12,6 @@ class User
   property :password_changed_at, DateTime, :default => Time.now, :nullable => false
   property :active,       Boolean, :default => true, :nullable => false
   property :preferred_locale,        String
-  #property :created_by, *INTEGER_NOT_NULL
 
   # permissions
   # to add to this, only add at the back of the array
