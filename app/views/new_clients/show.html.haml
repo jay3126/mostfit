@@ -25,10 +25,10 @@
     %td= @client_admin.administered_at_location.name
   %tr.even
     %th.even Group
-    %td= @client.client_group.name
+    %td= @client.client_group.name unless @client.client_group.blank?
   %tr.odd
     %th.odd Occupation
-    %td= @client.occupation_id
+    %td= @client.occupation.name unless @client.occupation.blank?
 
 %div.tab_container.shaded
   %ul.tabs
