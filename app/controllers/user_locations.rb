@@ -95,4 +95,12 @@ class UserLocations < Application
     @staffs = LocationManagement.get_staffs_on_location(@biz_location, get_effective_date)
     partial 'staffs_on_biz_location'
   end
+
+  def location_eod_summary
+    @biz_location_eod = {}
+    @biz_location = BizLocation.get params[:id]
+    rf = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, get_effective_date)
+    @biz_location_eod[:total_loans_disbursed] = rf.loans_scheduled_for_disbursement_by_branches_on_date(@biz_location.id, get_effective_date)
+    partial 'location_eod_summary'
+  end
 end

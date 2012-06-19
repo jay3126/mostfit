@@ -118,7 +118,7 @@ class Client
     if /^\d+$/.match(q)
       all(:conditions => {:id => q}, :limit => per_page)
     else
-      all(:conditions => ["reference=? or reference2 or name like ?", q, q+'%'], :limit => per_page)
+      all(:conditions => ["reference=? or reference2=? or name like ?", q, q, q+'%'], :limit => per_page)
     end
   end
 

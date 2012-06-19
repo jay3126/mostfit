@@ -1,0 +1,19 @@
+%h1 LOCATION EOD SUMMARY
+%br
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Name
+      %th
+        Sum
+      %th
+        Count
+  - @biz_location_eod.each do |key, value|
+    %tr
+      %td
+        = key.humanize
+      %td
+        = value[:total_amount].to_s
+      %td
+        = value[:count]
