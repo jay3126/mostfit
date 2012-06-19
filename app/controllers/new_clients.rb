@@ -234,4 +234,10 @@ class NewClients < Application
     @client_admins = ClientAdministration.get_counterparty_administration(@client)
     partial 'new_clients/client_movement'
   end
+
+  #this function is used by the router for proper redirection.
+  def redirect_to_show(id)
+    redirect url(:controller => :new_clients, :action => :show, :id => id)
+  end
+
 end
