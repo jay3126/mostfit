@@ -1,18 +1,19 @@
-%div{:class => (@floating ? "floatingBox" : ""), :style => "max-width: 80%"}
+%div{:class => "#{@floating ? 'floatingBox' : ''}", :style => "max-width: 80%"}
   - if @floating
     %a.closeButton
       [close]
   - atleast_one = false
-  - [["biz_locations", [:name]], ["new_clients", [:name]], ["client_groups", [:name]], ["lendings", [:applied_amount, :lan]], ["staff_members", [:name]], ["bookmarks",[:name]], ["users", [:login]]].each do |model, functions|
+  - [["locations", [:name]], ["clients", [:name]], ["client_groups", [:name]], ["lendings", [:applied_amount, :lan]], ["staff_members", [:name]], ["bookmarks",[:name]], ["users", [:login]]].each do |model, functions|
     - objects = instance_variable_get("@#{model}")
     - if objects and count = objects.length and count > 0
       - atleast_one = true
       - last = @floating ? 9 : count-1
+
       %table
         %tr
           %th{:colspan => 4}
             %h2
-              = model.camelcase(' ')
+              = model == 'lendings' ? 'Loans' : model.camelcase(' ')
         %tr
           %th
             ID
@@ -33,6 +34,8 @@
                   - elsif function == :applied_amount
                     - field = Lending.get(params[:query]).to_money[:applied_amount].to_s
                     = link_to(field, "/#{model}/#{obj.id}")
+                  -elsif model.to_sym == :locations
+                    = link_to obj.name, url(:controller => :user_locations, :action => "#{obj.location_level.level==0 ? 'weeksheet_collection' : 'show'}", :id => obj.id)
                   - else
                     = link_to(field.respond_to?(:name) ? field.name : field, "/#{model}/#{obj.id}")
         - if @floating and count > 10
