@@ -2,7 +2,24 @@ require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 
 describe Constants::Time do
 
-  before(:all) do
+  it "should correctly indicate the last day of the month" do
+    Constants::Time.is_last_day_of_month?(Date.parse('2012-01-31')).should be_true
+    Constants::Time.is_last_day_of_month?(Date.parse('2011-12-31')).should be_true    
+    Constants::Time.is_last_day_of_month?(Date.parse('2012-02-29')).should be_true
+
+    1.upto(30).each { |n|
+      Constants::Time.is_last_day_of_month?(Date.parse("2012-01-#{n}")).should be_false
+    }    
+  end
+
+  it "should correctly indicate the first day of month" do
+    Constants::Time.is_first_day_of_month?(Date.parse('2012-01-01')).should be_true
+    Constants::Time.is_first_day_of_month?(Date.parse('2011-12-01')).should be_true    
+    Constants::Time.is_first_day_of_month?(Date.parse('2012-03-01')).should be_true
+
+    2.upto(31).each { |n|
+      Constants::Time.is_first_day_of_month?(Date.parse("2012-01-#{n}")).should be_false
+    }    
   end
 
   it "should return the correct date for a desired weekday after a given day" do

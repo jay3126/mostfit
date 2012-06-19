@@ -1,4 +1,5 @@
 module BookKeeper
+  include Constants::LoanAmounts, Constants::Accounting, Constants::Products, Constants::Transaction
 
   def record_voucher(transaction_summary)
   	#the money category says what kind of transaction this is
@@ -35,6 +36,51 @@ module BookKeeper
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
 
     Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation)
+  end
+
+  def accrue_all_receipts_on_loan(loan, on_date)
+    return if ((on_date < loan.scheduled_first_repayment_date) or (on_date > loan.last_scheduled_date))
+    if (loan.schedule_date?(on_date))
+      # only accrue regular interest receipts for loans that are scheduled to repay on_date
+      accrue_regular_receipts_on_loan(loan, on_date)
+    elsif
+      if (Constants::Time.is_last_day_of_month?(on_date))
+        accrue_broken_period_interest_receipts_on_loan(loan, on_date)
+      end
+    end
+  end
+
+  def accrue_regular_receipts_on_loan(loan, on_date)
+    return unless loan.schedule_date?(on_date)
+    amortization_on_date = loan.get_scheduled_amortization(on_date)
+    amortization = amortization_on_date.values.first
+    scheduled_principal_due = amortization[SCHEDULED_PRINCIPAL_DUE]
+    scheduled_interest_due  = amortization[SCHEDULED_INTEREST_DUE] 
+    accrual_temporal_type = ACCRUE_REGULAR
+    receipt_type = RECEIPT
+    on_product_type, on_product_id = LENDING, loan.id
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+    accounted_at = (LoanAdministration.get_accounted_at(loan.id, on_date)).id
+    effective_on = on_date
+
+    accrue_principal = AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+    accrue_interest  = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+  end
+
+  def accrue_broken_period_interest_receipts_on_loan(loan, on_date)
+    broken_period_interest = loan.broken_period_interest_due(on_date)
+    accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+    receipt_type = RECEIPT
+    on_product_type, on_product_id = LENDING, loan.id
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+    accounted_at = (LoanAdministration.get_accounted_at(loan.id, on_date)).id
+    effective_on = on_date
+
+    accrue_broken_period_interest_receipt = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+  end
+
+  def account_for_accrual(accrual_transaction, accrual_allocation)
+    #TODO
   end
 
   def get_primary_chart_of_accounts

@@ -4,10 +4,14 @@ loan_disbursement:
     loan_disbursed: customer_loan_disbursed
   credit:
     total_paid: customer_cash
+loan_accrual:
+  debit:
+    total_accrued: customer_loan_debtors
+  credit:
+    principal_accrued: customer_loan_disbursed
+    interest_accrued: customer_loan_interest_receipt
 loan_repayment:
   debit:
     total_received: customer_cash
   credit:
-    principal_received: customer_loan_repaid
-    interest_received: customer_loan_interest_receipt
-    advance_received: customer_loan_advance_receipt
+    total_received: customer_loan_debtors

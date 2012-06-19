@@ -1,7 +1,6 @@
 class PaymentTransaction
   include DataMapper::Resource
   include Constants::Properties, Constants::Money, Constants::Transaction, Constants::Accounting
-  include Validators::Arguments
   
   property :id,                   Serial
   property :amount,               *MONEY_AMOUNT

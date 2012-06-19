@@ -146,6 +146,10 @@ class Lending
     self.loan_base_schedule.get_schedule_dates
   end
 
+  def last_scheduled_date
+    schedule_dates.sort.last
+  end
+
   # Gets a Range that begins with the first schedule date (disbursement) and ends with the last schedule date
   def schedule_date_range
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
@@ -168,6 +172,7 @@ class Lending
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.get_previous_and_current_amortization_items(for_date)
   end
+
   #######################
   # LOAN SCHEDULE DATES # ends
   #######################
@@ -253,6 +258,20 @@ class Lending
 
     amortization = get_scheduled_amortization(on_date)
     amortization.values.first[SCHEDULED_INTEREST_DUE] if amortization
+  end
+
+  def broken_period_interest_due(on_date)
+    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
+    return zero_money_amount if schedule_date?(on_date)
+    return zero_money_amount if on_date >= last_scheduled_date
+    
+    previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_dates)
+    next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_dates)
+
+    interim_interest = scheduled_interest_outstanding(previous_schedule_date) - scheduled_interest_outstanding(next_schedule_date)
+
+    fractional_days_left = (on_date - previous_schedule_date)/(next_schedule_date - previous_schedule_date)
+    interim_interest * fractional_days_left
   end
 
   def scheduled_interest_outstanding(on_date)

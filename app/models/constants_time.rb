@@ -54,6 +54,12 @@ module Constants
       Date.new(next_month_year, next_month_month, for_date.day)
     end
 
+    def self.is_first_day_of_month?(some_date); some_date.day == 1; end
+
+    def self.is_last_day_of_month?(some_date)
+      is_first_day_of_month?(some_date + 1)
+    end
+
     # Returns the next date as per the specified date incremented by the frequency
     def self.get_next_date(from_date, frequency)
       if frequency == MarkerInterfaces::Recurrence::MONTHLY
