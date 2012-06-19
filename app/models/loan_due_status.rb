@@ -1,8 +1,10 @@
 class LoanDueStatus
   include DataMapper::Resource
-  include Constants::Properties, Constants::Loan, Constants::LoanAmounts
+  include Constants::Properties, Constants::Loan, Constants::LoanAmounts, LoanLifeCycle
+  include Comparable
   
   property :id,                             Serial
+  property :loan_status,                    Enum.send('[]', *LOAN_STATUSES), :nullable => false
   property :due_status,                     Enum.send('[]', *LOAN_DUE_STATUSES), :nullable => false
   property :administered_at,                *INTEGER_NOT_NULL
   property :accounted_at,                   *INTEGER_NOT_NULL
@@ -33,8 +35,45 @@ class LoanDueStatus
 
   belongs_to :lending
 
+  def <=>(other)
+    return nil unless other.is_a?(LoanDueStatus)
+    compare_on_date = other.on_date <=> self.on_date
+    (compare_on_date == 0) ? (other.created_at <=> self.created_at) : compare_on_date
+  end
+
+  def is_overdue?
+    self.due_status == OVERDUE
+  end
+
+  # The number of consecutive days upto the specified date; that the loan was overdue
+  def self.unbroken_days_past_due(for_loan_id, on_date)
+    generate_due_status_records_till_date(for_loan_id, on_date)
+    days_past_due_till_date = all(:lending_id => for_loan_id, :on_date.lte => on_date).sort
+    days_past_due_on_date = days_past_due_till_date.first
+    return 0 unless days_past_due_on_date.is_overdue?
+    unbroken_days_past_due = 0
+    days_past_due_till_date.each { |due_status_record|
+      if due_status_record.is_overdue?
+        unbroken_days_past_due += 1
+      else
+        break
+      end
+    }
+    unbroken_days_past_due
+  end
+
+  # The total number of days (not necessarily consecutive) that a loan was overdue upto the specified date
+  def self.cumulative_days_past_due(for_loan_id, on_date)
+    #TODO
+  end
+
+  # A list of the series of dates that the loan was overdue on consecutive days.
+  # When the loan is overdue on two consecutive days, these days will belong to a range
+  def self.days_past_due_episodes(for_loan_id, on_date)
+    #TODO
+  end
+
   def self.generate_loan_due_status(for_loan_id, on_date)
-    debugger
     loan = Lending.get(for_loan_id)
     raise Errors::DataError, "Unable to locate the loan for ID: #{for_loan_id}" unless loan
 
@@ -46,7 +85,8 @@ class LoanDueStatus
 
     due_status = {}
     due_status[:lending_id]      = for_loan_id
-    due_status[:due_status]      = loan.current_due_status
+    due_status[:loan_status]     = loan.current_loan_status
+    due_status[:due_status]      = loan.due_status_from_outstanding(on_date)
     due_status[:administered_at] = administered_at_id
     due_status[:accounted_at]    = accounted_at_id
     due_status[:on_date]         = on_date
@@ -86,6 +126,18 @@ class LoanDueStatus
     status_records_on_date = all(:lending_id => for_loan_id, :on_date => on_date)
     most_recent_status = status_records_on_date.most_recent_status_record
     most_recent_status || generate_loan_due_status(for_loan_id, on_date)
+  end
+
+  def self.generate_due_status_records_till_date(for_loan_id, on_date)
+    loan = Lending.get(for_loan_id)
+    raise Errors::DataError, "Unable to locate the loan for ID: #{for_loan_id}" unless loan
+
+    scheduled_first_repayment_date = loan.scheduled_first_repayment_date
+    return unless (loan.disbursal_date and (on_date >= scheduled_first_repayment_date))
+
+    (scheduled_first_repayment_date..on_date).each { |each_date|
+      most_recent_status_record_on_date(for_loan_id, each_date)
+    }
   end
 
   def self.most_recent_status_record

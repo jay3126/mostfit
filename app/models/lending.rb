@@ -375,18 +375,20 @@ class Lending
   #########################
 
   def current_due_status
-    on_date = Date.today
-    return NOT_DUE if on_date < scheduled_first_repayment_date
-
-    actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+    due_status_from_outstanding(Date.today)
   end
   
   def get_loan_due_status_record(on_date)
     LoanDueStatus.most_recent_status_record_on_date(self.id, on_date)
   end
 
-  def historical_due_status_on_date(on_date)
-    #TODO
+  def generate_loan_due_status_record(on_date)
+    LoanDueStatus.generate_loan_due_status(self.id, on_date)
+  end
+  
+  def due_status_from_outstanding(on_date)
+    return NOT_DUE if on_date < self.scheduled_first_repayment_date
+    actual_total_outstanding(on_date) > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
   end
 
   def days_past_due
@@ -406,12 +408,15 @@ class Lending
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
         [true, nil]
     raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
+    allocation = nil
     case loan_action
-      when LOAN_DISBURSEMENT then return disburse(payment_transaction)
-      when LOAN_REPAYMENT then return repay(payment_transaction)
+      when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
+      when LOAN_REPAYMENT then allocation = repay(payment_transaction)
       else
         raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
+    generate_loan_due_status_record(payment_transaction.effective_on)
+    allocation
   end
 
   def approve(approved_amount, approved_on_date, approved_by)
@@ -507,37 +512,22 @@ class Lending
   # Record an allocation on the loan for the given total amount
   def make_allocation(total_amount, on_date)
     payment_currency = total_amount.currency
-    zero_money_amount = Money.zero_money_amount(payment_currency)
     resulting_allocation = Hash.new(zero_money_amount)
 
     #allocate when not due
-    if current_due_status == NOT_DUE
+    if due_status_from_outstanding(on_date) == NOT_DUE
       resulting_allocation[ADVANCE_RECEIVED] = total_amount
       resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
     end
 
-    #handle scenario where repayment is received between schedule dates
-    #allocate when due
+    #TODO handle scenario where repayment is received between schedule dates
 
-    #allocate when overdue
+    only_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
+    advance_to_allocate = (total_amount > only_principal_and_interest) ?
+        (total_amount - only_principal_and_interest) : zero_money_amount
 
-    allocate_to_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
-    advance_to_allocate = (total_amount > allocate_to_principal_and_interest) ?
-        (total_amount - allocate_to_principal_and_interest) : zero_money_amount
-
-    earlier_allocation = {}
-    earlier_allocation[:principal] = principal_received_till_date
-    earlier_allocation[:interest]  = interest_received_till_date
-
-    allocator = Constants::LoanAmounts.get_allocator(self.repayment_allocation_strategy, payment_currency)
-
-    # Netoff the amount received earlier against earlier amortization items
-    all_previous_amortization_items = get_all_amortization_items_till_date(on_date)
-    unallocated_amortization_items = allocator.netoff_allocation(earlier_allocation, all_previous_amortization_items)
-
-    # Allocation to be done on the amount that is not advance
-    fresh_allocation = allocator.allocate(allocate_to_principal_and_interest, unallocated_amortization_items)
+    fresh_allocation = allocate_principal_and_interest(only_principal_and_interest, on_date)
 
     resulting_allocation[PRINCIPAL_RECEIVED] = fresh_allocation[:principal]
     resulting_allocation[INTEREST_RECEIVED] = fresh_allocation[:interest]
@@ -547,6 +537,20 @@ class Lending
     resulting_allocation
   end
 
+  def allocate_principal_and_interest(total_money_amount, on_date)
+    earlier_allocation = {}
+    earlier_allocation[:principal] = principal_received_till_date(on_date)
+    earlier_allocation[:interest]  = interest_received_till_date(on_date)
+
+    # Netoff the amount received earlier against earlier amortization items
+    all_previous_amortization_items = get_all_amortization_items_till_date(on_date)
+    unallocated_amortization_items = allocator.netoff_allocation(earlier_allocation, all_previous_amortization_items)
+
+    # Allocation to be done on the amount that is not advance
+    allocation = allocator.allocate(total_money_amount, unallocated_amortization_items)
+    allocation
+  end
+
   ###########
   # UPDATES # ends
   ###########
@@ -554,6 +558,10 @@ class Lending
   def get_all_amortization_items_till_date(on_date)
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide amortization" unless self.loan_base_schedule
     self.loan_base_schedule.get_all_amortization_items_till_date(on_date)
+  end
+
+  def allocator
+    @allocator ||= Constants::LoanAmounts.get_allocator(self.repayment_allocation_strategy, self.currency)
   end
 
   ##########
