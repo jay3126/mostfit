@@ -127,8 +127,8 @@ class LoanApplication
   def create_client
     return self.client if self.client
 
-    administered_at_location_id = self.at_branch_id
-    registered_at_location_id = self.at_center_id
+    administered_at_location_id = self.at_center_id
+    registered_at_location_id = self.at_branch_id
     client_hash = self.to_client
     client_for_loan_application = Client.record_client(client_hash, administered_at_location_id, registered_at_location_id)
     self.client = client_for_loan_application
