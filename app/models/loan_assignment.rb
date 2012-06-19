@@ -55,6 +55,14 @@ class LoanAssignment
     first(for_loan_on_date)
   end
 
+  # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance
+  def self.get_loans_assigned(to_assignment)
+    assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)    
+    all(:assignment_nature => assignment_nature, :assignment_id => assignment_id, :assignment_status => ASSIGNED).collect { |assignment|
+      assignment.loan_id
+    }
+  end
+
   # Indicates the loan assignment status on a specified date
   def self.get_loan_assignment_status(for_loan_id, on_date)
     assignment = get_loan_assigned_to(for_loan_id, on_date)
