@@ -1,3 +1,4 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     - @errors.keys.each do |client_id|
@@ -14,9 +15,12 @@
 %h1
   = "Suspected duplicate loan applicantions"
 
+
 %form{:action => url(:controller => :loan_applications, :action => :suspected_duplicates), :method => :get}
   = partial 'lib/biz_location_selector'
-
+- if @center
+  %h2
+    = "Center Cycle Number: #{center_cycle_number}"
 = partial :pending_duplicates
 
 %br

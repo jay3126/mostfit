@@ -46,32 +46,32 @@ class LoanApplication
   include ClientValidations
   include ClientAgeValidations
 
-  property :id,                   Serial
-  property :status,               Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
-  property :at_branch_id,         Integer,  :nullable => false
-  property :at_center_id,         Integer,  :nullable => false
-  property :created_by_staff_id,  Integer,  :nullable => false
-  property :created_by_user_id,   Integer,  :nullable => false
-  property :created_at,           DateTime, :nullable => false, :default => DateTime.now
-  property :updated_at,           DateTime, :nullable => false, :default => DateTime.now
-  property :created_on,           Date,     :nullable => false
-  property :amount,               Float,    :nullable => false
-  property :credit_bureau_status, Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH
-  property :credit_bureau_rated_at, DateTime
+  property :id,                             Serial
+  property :status,                         Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :at_branch_id,                   Integer,  :nullable => false
+  property :at_center_id,                   Integer,  :nullable => false
+  property :created_by_staff_id,            Integer,  :nullable => false
+  property :created_by_user_id,             Integer,  :nullable => false
+  property :created_at,                     DateTime, :nullable => false, :default => DateTime.now
+  property :updated_at,                     DateTime, :nullable => false, :default => DateTime.now
+  property :created_on,                     Date,     :nullable => false
+  property :amount,                         Float,    :nullable => false
+  property :credit_bureau_status,           Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH
+  property :credit_bureau_rated_at,         DateTime
   
   #basic client info
-  property :client_id,            Integer,  :nullable => true
-  property :client_name,          String,   :nullable => false
-  property :client_dob,           Date
-  property :client_address,       Text,     :nullable => false
-  property :client_state,         Enum.send('[]', *STATES)
-  property :client_pincode,       Integer,  :nullable => false
-  property :client_reference1,    String,   :nullable => false
-  property :client_reference1_type, Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE_TYPE
-  property :client_reference2,    String,   :nullable => false
-  property :client_reference2_type, Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE2_TYPE
-  property :client_guarantor_name, String, :nullable => false
-  property :client_guarantor_relationship, Enum.send('[]', *RELATIONSHIPS)
+  property :client_id,                      Integer,  :nullable => true
+  property :client_name,                    String,   :nullable => false
+  property :client_dob,                     Date
+  property :client_address,                 Text,     :nullable => false
+  property :client_state,                   Enum.send('[]', *STATES)
+  property :client_pincode,                 Integer,  :nullable => false
+  property :client_reference1,              String,   :nullable => false
+  property :client_reference1_type,         Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE_TYPE
+  property :client_reference2,              String,   :nullable => false
+  property :client_reference2_type,         Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE2_TYPE
+  property :client_guarantor_name,          String, :nullable => false
+  property :client_guarantor_relationship,  Enum.send('[]', *RELATIONSHIPS)
 
   belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
@@ -131,7 +131,6 @@ class LoanApplication
     registered_at_location_id = self.at_center_id
     client_hash = self.to_client
     client_for_loan_application = Client.record_client(client_hash, administered_at_location_id, registered_at_location_id)
-    debugger
     self.client = client_for_loan_application
     save
     raise Errors::DataError, "Unable to create and set the client for the loan application" unless self.saved?
