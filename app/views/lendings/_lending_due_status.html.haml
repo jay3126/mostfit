@@ -1,0 +1,51 @@
+:javascript
+  $('table.loan_due_status').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%br
+- if @lending_due_statuses.blank?
+  %p
+    %i No Loan due status have been created yet.
+- else
+  %table.report.weeksheet.nojs.loan_due_status
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Loan Status
+        %th
+          Due Status
+        %th
+          Administered At
+        %th
+          Accounted At
+        %th
+          Actual Principal Due
+        %th
+          Actual Interest Due
+        %th
+          Actual Total Due
+        %th
+          On Date
+    - @lending_due_statuses.each do |lending_status|
+      %tr
+        %td
+          = lending_status.id
+        %td
+          = lending_status.loan_status
+        %td
+          = lending_status.due_status
+        %td
+          = link_to lending_status.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending_status.administered_at)
+        %td
+          = link_to lending_status.accounted_at_location.name, url(:controller => :user_locations, :action => :show, :id => lending_status.accounted_at)
+        %td
+          = lending_status.to_money[:actual_principal_due].to_s
+        %td
+          = lending_status.to_money[:actual_interest_due].to_s
+        %td
+          = lending_status.to_money[:actual_total_due].to_s
+        %td
+          = lending_status.on_date
