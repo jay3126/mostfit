@@ -19,6 +19,7 @@
               %th DOB
               %th Address
               %th{:colspan => 2, :style=>"text-align : center"} Actions
+              %th Potential Matches
           %tbody
             - s_no = 0
             - @suspected_duplicates.each do |loan_application|
@@ -47,6 +48,9 @@
                   Confirm
                   = hidden_field :name => 'parent_location_id', :value => @branch.id
                   = hidden_field :name => 'child_location_id', :value => @center.id
+                %td
+                  = link_to loan_application.client_reference1_type, url(:controller => :searches, :action => :index, :query => "#{loan_application.client_reference1}"), :target => 'blank'
+                  = link_to loan_application.client_reference2_type, url(:controller => :searches, :action => :index, :query => "#{loan_application.client_reference2}"), :target => 'blank'
         %table.narrow.form
           %tfoot
             %tr
