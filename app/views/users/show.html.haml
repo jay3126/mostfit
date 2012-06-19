@@ -24,7 +24,7 @@
     %tr{:class=>"#{'odd' if counter % 2 == 1}"}
       %td Created At
       %td=@user.created_at.to_s
-    - unless session.user.role == :admin
+    - unless session.user.role == :administrator
       - counter+= 1
       = form_for(@user, :action => "/preferred_locale") do
         = error_messages_for @user
@@ -51,6 +51,3 @@
     %div.tab
       = partial "audit_trails/list", :layout => false
       %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
-   
-
-      

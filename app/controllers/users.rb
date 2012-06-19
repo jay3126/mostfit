@@ -5,7 +5,7 @@ class Users < Application
   def show(id)
     @user = User.get(id)
     raise NotFound unless @user
-    if session.user.role == :admin or session.user.id == @user.id
+    if session.user.role == :administrator or session.user.id == @user.id
       @trails = AuditTrail.all(:auditable_id => @user.id, :auditable_type => "User", :order => [:created_at.desc])
       @obj = @user
       display @user

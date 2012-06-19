@@ -45,7 +45,7 @@
             = link_to_with_class('Data entry', url(:data_entry))
             = link_to_with_class('Admin', url(:admin))
             = link_to_with_class('Loans', url(:loan_applications))
-            = link_to('Books', url(:controller => :book_keeping, :action => :index))
+            = link_to_with_class('Books', url(:controller => :book_keeping, :action => :index))
             = link_to_with_class('Reports', url(:reports))
         #header_search_div
           %form._remote_{:action => '/search', :class => 'search', :method => "POST", :style => "float:left;", :id => "search-form"}

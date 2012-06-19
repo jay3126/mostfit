@@ -1,8 +1,8 @@
 module Misfit
   module Extensions
     module User
-      CUD_Actions =["create", "new", "edit", "update", "destroy", "approve", "disburse", "reject", "suggest_write_off", "write_off_suggest", "write_off", "write_off_reject"]
-      CR_Actions =["create", "new", "index", "show"]
+      CUD_Actions =["create", "new", "edit", "update", "destroy", "approve", "disburse", "reject", "suggest_write_off", "write_off_suggest", "write_off", "write_off_reject", "bulk_new", "bulk_create", "bulk_create_loan_applicant"]
+      CR_Actions =["create", "new", "index", "show", "list"]
       #add hooks to before and after can_access? and can_manage? methods to override their behaviour
       # here we add hooks to see if the user can manage a particular instance of a model.
       def self.included(base)
@@ -110,19 +110,10 @@ module Misfit
         return true if @controller=="admin" and @action=="index"
         return rights_from_access_rules
       end
-      
-      def _can_access?(route, params = nil)       
+
+      def _can_access?(route, params = nil)
         user_role = self.role
-        return true  if user_role == :admin
-
-
-        return false if route[:controller] == "journals" and route[:action] == "edit"
-        return true  if route[:controller] == "users" and route[:action] == "change_password"
-        return true  if route[:controller] == "users" and route[:action] == "show"
-        return true  if route[:controller] == "users" and route[:action] == "preferred_locale"
-        return true  if route[:controller] == "reports" and route[:action] == "index" and not user_role == :data_entry
-        return false if (user_role == :read_only or user_role == :funder or user_role == :data_entry) and route[:controller] == "payments" and route[:action] == "delete"
-        return false if (user_role != :admin) and route[:controller] == "loans" and route[:action] == "write_off_suggested"
+        return true if user_role == :administrator
 
         @route = route
         @params = params
@@ -130,108 +121,13 @@ module Misfit
         @model = route[:controller].singularize.to_sym
         @action = route[:action]
 
-        debugger
-        if user_role == :mis_manager
-          return true if [:region, :area, :branch, :center, :client_group, :client, :loan, :payment, :insurance_policy].include?(@model)
-          return true unless [:edit, :update, :delete, :destroy, :create].include?(@action.to_sym)
+        if user_role == :supervisor
+          return true if [:loan_applications].include?(@model)
+          return true unless [:edit, :update, :delete, :destroy, :bulk_create, :bulk_new].include?(@action.to_sym)
           return false
         end
-
-        # reports access control rules
-        if route[:controller] == "reports" and route[:action] == "show" and route[:report_type] and Mfi.first.report_access_rules.key?(route[:report_type])
-          return Mfi.first.report_access_rules[route[:report_type]].include?(user_role.to_s)
-        end
-
-        #read only stuff
-        return allow_read_only if user_role == :read_only
-
-        #user is a funder
-        if user_role == :funder and @funder ||= Funder.first(:user_id => self.id)
-          return true if route[:controller] == "dashboard" or route[:controller] == "graph_data" or route[:controller] == "bookmarks"
-          @funding_lines = @funder.funding_lines
-          @funding_line_ids = @funder.funding_lines.map{|fl| fl.id}
-          return(is_funder? and allow_read_only)
-        end
-        
-        @staff ||= self.staff_member
-        return true if @action == "redirect_to_show"
-        if @controller=="documents" and CUD_Actions.include?(@action)
-          return true  if params[:parent_model]=="Client"
-          return false if params[:parent_model]=="Mfi"    and (role!=:admin or role!=:mis_manager)
-          return true  if params[:parent_model]=="Center" and (role==:staff_member or role==:mis_manager or role==:admin)
-          return true  if params[:parent_model]=="Branch" and (role==:staff_member and Branch.get(params[:parent_id]).manager==@staff)
-          return false
-        end
-        
-        if role == :data_entry 
-          return ["new", "edit", "create", "update"].include?(@action) if ["clients", "loans", "client_groups"].include?(@controller)
-          return (@action == "disbursement_sheet" or @action == "day_sheet") if @controller == "staff_members"
-        end
-        
-        if @staff
-          return additional_checks if @route.has_key?(:id) and @route[:id] and not [:graph_data, :dashboard, :info].include?(@route[:controller].to_sym)
-          unless CUD_Actions.include?(@action)
-            return true if ["staff_members"].include?(@controller)
-            return true if @controller == "regions" and @staff.regions.length > 0
-            return true if @controller == "branches" and @action == "index"
-            return(@staff.areas.length>0 or @staff.regions.length > 0) if @controller == "areas"
-          else
-            return(@staff.areas.length>0 or @staff.regions.length>0 or role == :mis_manager) if @controller == "staff_members"
-            if @controller == "loans"
-              if ["approve", "disburse", "reject", "suggest_write_off"].include?(@action)
-                return(@staff.branches.length>0 or @staff.areas.length>0 or @staff.regions.length>0 or role == :mis_manager)
-              elsif ["write_off", "write_off_suggested", "write_off_reject"].include?(@action)
-                return false
-              end
-            end
-            return false if @controller == "regions"
-            return(@staff.regions.length > 0) if @controller == "areas" 
-          end
-          if [:branches, :centers, :clients, :loans].include?(@controller.to_sym) and params
-            params = params.merge(@route)
-            
-            {:branch_id => Branch, :center_id => Center, :client_id => Client, :area_id => Area, :region_id => Region}.each{|key, klass|
-              # allowing branch, center, area, region managers to create stuff inside his/her own branch/center/area/region
-              return is_manager_of?(klass.get(params[key])) if params[key] and not params[key].blank?
-            }
-
-            if hash = params[@controller.singularize.to_sym] or (params[:loan_type] and not params[:loan_type].blank? and hash=params[params[:loan_type].snake_case.to_sym])
-              if hash[:branch_id] and branch=Branch.get(hash[:branch_id])
-                return is_manager_of?(branch)
-              elsif (hash[:center_id] and center = Center.get(hash[:center_id])) or (hash[:client_id] and center = Client.get(hash[:client_id]).center)
-                return is_manager_of?(center)
-              elsif (hash[:area_id] and area = Area.get(hash[:area_id]))                
-                return is_manager_of?(area)
-              end
-            else
-              return false
-            end
-          end
-          
-          if @controller == "audit_trails" and params and params[:audit_for] and params[:audit_for][:controller]
-            if params[:audit_for][:id]
-              return is_manager_of?(Kernel.const_get(params[:audit_for][:controller].singularize.camelcase).get(params[:audit_for][:id]))
-            else
-              return false
-            end
-          end
-
-          if not (access_rights.key?(@action.to_s.to_sym) and access_rights[@action.to_s.to_sym].include?(@controller.to_sym))
-            if r = access_rights[:all]
-              return false unless r.include?(@controller.to_sym) || r.include?(@controller.split("/")[0].to_sym)
-            end
-          end
-
-          return is_manager_of?(Kernel.const_get(route[:for].camelcase).get(route[:id])) if @controller == "info" and route[:for] and route[:id]
-        end
-
-        if access_rights.key?(@action.to_s.to_sym) and access_rights[@action.to_s.to_sym].include?(@controller.to_sym)
-          return true
-        elsif r = access_rights[:all]
-          r.include?(@controller.to_sym) || r.include?(@controller.split("/")[0].to_sym)
-        end        
       end
-    end #User
+    end#User
 
     def self.hook
       # includes the modules in their respective classes
