@@ -33,7 +33,7 @@ class Vouchers < Application
 
   def create(voucher)
     @voucher = Voucher.new(voucher)
-    sum = 0
+    sum = MoneyManager.get_money_instance("0")
     postings = []
     date_str = params["voucher"]["effective_on"]
     effective_on = Date.parse(date_str)
@@ -41,24 +41,21 @@ class Vouchers < Application
     credit_accounts = params['credit_accounts']
     credit_accounts.each do |credit_posting|
       ledger_id = credit_posting["account_id"].to_i
-      amount = credit_posting["amount"].to_i
-      sum += amount
+      money = MoneyManager.get_money_instance(credit_posting["amount"])
+      sum = sum + money
       ledger = Ledger.get(ledger_id)
-      postings << PostingInfo.new(amount, ledger.opening_balance_currency, :credit, ledger)
+      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger)
     end
     debit_accounts = params['debit_accounts']
     debit_accounts.each do |debit_posting|
       ledger_id = debit_posting["account_id"].to_i
-      amount = debit_posting["amount"].to_i
-      sum += amount
+      money = MoneyManager.get_money_instance(debit_posting["amount"])
+      sum = sum + money
       ledger = Ledger.get(ledger_id)
-      postings << PostingInfo.new(amount, ledger.opening_balance_currency, :debit, ledger)
+      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger)
     end
-    currencies =  postings.map(&:currency).uniq!
-    # raise ArgumentError, "Currencies Mismatch in Vouchers, #{currencies.to_json}" if (currencies.count > 1)
-    money_sum = Money.new((sum * 100), currencies.first)
     accounting_facade = AccountingFacade.new(session.user)
-    @voucher = accounting_facade.create_manual_voucher(money_sum, effective_on, postings, narration)
+    @voucher = accounting_facade.create_manual_voucher(sum, effective_on, postings, narration)
     if @voucher.save
       if params["form_submit"] == "Create and Continue"
         redirect url(:controller => "vouchers", :action => "new"), :message => {:notice => "Voucher was successfully created"}
