@@ -534,7 +534,7 @@ class Lending
     resulting_allocation = Hash.new(zero_money_amount)
 
     #allocate when not due
-    if due_status_from_outstanding(on_date) == NOT_DUE
+    if current_due_status == NOT_DUE
       resulting_allocation[ADVANCE_RECEIVED] = total_amount
       resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
@@ -542,7 +542,7 @@ class Lending
 
     #TODO handle scenario where repayment is received between schedule dates
 
-    only_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
+    only_principal_and_interest = [self.actual_total_due(Date.today), total_amount].min
     advance_to_allocate = (total_amount > only_principal_and_interest) ?
         (total_amount - only_principal_and_interest) : zero_money_amount
 
