@@ -22,7 +22,7 @@
           %td
             = location_level.name
           %td
-            = location_level.created_at
+            = location_level.created_at.strftime("%Y-%m-%d")
 = link_to 'Add New Location Level', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
 #location_level{:style => "display : #{@location_levels.blank? ? false : 'none' }"}
   = form_for(@location_level, :action => url(:location_levels) ) do

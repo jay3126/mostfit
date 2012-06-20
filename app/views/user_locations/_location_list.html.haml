@@ -23,8 +23,7 @@
       %th Name
       %th Manager
       %th Meeting
-      %th Clients
-      %th Edit
+      %th No. Of Clients
     %tbody
       - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
         - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
@@ -42,8 +41,6 @@
             = meeting_date.meeting_begins_at
           %td
             = ClientAdministration.get_clients_administered(biz_location.id, @date).count
-          %td
-            = link_to 'edit', resource(biz_location, :edit)
     %tfoot
       %tr
-        %td{ :colspan => 7 }
+        %td{ :colspan => 6 }

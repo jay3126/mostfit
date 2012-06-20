@@ -12,8 +12,6 @@
           Effective On
         %th
           Staff by
-        %th
-          Created At
     %tr
       - @client_admins.each do |client_admin|
         - client = client_admin.counterparty
@@ -26,5 +24,3 @@
             = client_admin.effective_on.strftime("%Y-%m-%d")
           %td
             = client_admin.performed_by_staff.name rescue client_admin.performed_by_staff
-          %td
-            = client.created_at.strftime("%Y-%m-%d")
