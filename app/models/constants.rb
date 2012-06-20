@@ -125,7 +125,7 @@ module Constants
     UNTAGGED_TELEPHONE_TYPE = 'Untagged'
     DEFAULT_TELEPHONE_TYPE = UNTAGGED_TELEPHONE_TYPE
     
-    LOAN_AMOUNTS = [10000, 12000, 15000]
+    LOAN_AMOUNTS = [7000, 10000, 11000, 12500, 14000, 15000]
     STATES = [
       "andhra_pradesh"     ,
       "arunachal_pradesh"  ,

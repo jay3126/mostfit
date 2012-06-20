@@ -247,9 +247,15 @@ class Lendings < Application
     end
   end
 
-  def lending_due_statuses
+  def lending_status_history
     @lending = Lending.get params[:id]
     @lending_status_changes = LoanStatusChange.all(:lending_id => @lending.id)
-    partial 'lendings/lending_status'
+    partial 'lendings/lending_status_history'
+  end
+
+  def lending_due_statuses
+    @lending = Lending.get params[:id]
+    @lending_due_statuses = @lending.loan_due_statuses
+    partial 'lendings/lending_due_status'
   end
 end

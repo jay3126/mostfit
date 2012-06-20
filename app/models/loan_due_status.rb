@@ -35,6 +35,9 @@ class LoanDueStatus
 
   belongs_to :lending
 
+  def administered_at_location; BizLocation.get(self.administered_at); end
+  def accounted_at_location; BizLocation.get(self.accounted_at); end
+
   def <=>(other)
     return nil unless other.is_a?(LoanDueStatus)
     compare_on_date = other.on_date <=> self.on_date

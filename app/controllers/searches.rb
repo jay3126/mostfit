@@ -4,7 +4,7 @@ class Searches < Application
     if params[:query] and params[:query].length>=1
       per_page       = request.xhr? ? 11 : 100
       @locations     = BizLocation.search(params[:query], per_page)
-      @clients       = Client.search(params[:query], per_page)
+      @new_clients   = Client.search(params[:query], per_page)
       @lendings      = Lending.search(params[:query], per_page)
       @client_groups = ClientGroup.search(params[:query], per_page)
       @staff_members = StaffMember.search(params[:query], per_page)

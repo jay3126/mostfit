@@ -156,6 +156,10 @@ class LoanFacade < StandardFacade
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
 
+  def create_new_loan(applied_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_repayment_date,applied_by_staff,recorded_by_user,lan)
+    Lending.create_new_loan(applied_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_repayment_date,applied_by_staff,recorded_by_user,lan)
+  end
+
   #############
   # Aggregation # begins
   #############

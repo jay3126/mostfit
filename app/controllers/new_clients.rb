@@ -171,7 +171,7 @@ class NewClients < Application
     @client       = Client.get params[:id]
     @biz_location = ClientAdministration.get_administered_at(@client, session[:effective_date])
     @client_admin = ClientAdministration.first(:counterparty_type => 'client', :counterparty_id => @client.id)
-    @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client)
+    @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client).compact
     display @client
   end
 

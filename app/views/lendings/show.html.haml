@@ -54,6 +54,8 @@
       Transactions
     %li#Accruals
       Accruals
+    %li#due_status
+      Due Status
     %li#status_history
       Status History
   %div.tab
@@ -64,3 +66,5 @@
   %div.tab
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_due_statuses, :id => @lending.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_status_history, :id => @lending.id)}

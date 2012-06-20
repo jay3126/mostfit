@@ -95,4 +95,24 @@ class UserLocations < Application
     @staffs = LocationManagement.get_staffs_on_location(@biz_location, get_effective_date)
     partial 'staffs_on_biz_location'
   end
+
+  def location_eod_summary
+    @biz_location_eod = {}
+    @biz_location = BizLocation.get params[:id]
+    rf = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, get_effective_date)
+    @biz_location_eod[:total_loans_disbursed] = rf.loans_scheduled_for_disbursement_by_branches_on_date(@biz_location.id, get_effective_date)
+    @biz_location_eod[:Total_fees_collected] = ''
+    @biz_location_eod[:Total_repayments_due] = ''
+    @biz_location_eod[:Total_repayments_received] = ''
+    @biz_location_eod[:Total_interest_accrued] = ''
+    @biz_location_eod[:Total_advance_adjusted] = ''
+    @biz_location_eod[:Total_advance_available] = ''
+    @biz_location_eod[:Total_loans_outstanding ] = ''
+    @biz_location_eod[:Total_new_loan_applications] = ''
+    @biz_location_eod[:Total_money_deposits_today] = ''
+    @biz_location_eod[:Holidays] = ''
+    @biz_location_eod[:Staff_member_attendance] = ''
+    @biz_location_eod[:Surprise_center_visits] = ''
+    partial 'location_eod_summary'
+  end
 end

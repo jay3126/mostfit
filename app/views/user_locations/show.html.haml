@@ -55,4 +55,5 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
   %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id)}
   %div.tab

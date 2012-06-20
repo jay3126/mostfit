@@ -17,7 +17,10 @@ class SecuritizationLoanStatus < Report
   end
 
   def generate
-    @data
+    securitization = Securitization.get(@securitization_id)
+    loan_assignment_facade = LoanAssignmentFacade.new(User.first)
+    loan_ids = loan_assignment_facade.get_loans_assigned(securitization)
+    @data = loan_ids
   end
 
 end

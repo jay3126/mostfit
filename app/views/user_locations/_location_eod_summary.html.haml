@@ -1,0 +1,26 @@
+:javascript
+  $('table.branch_eod').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+
+
+%h1 LOCATION EOD SUMMARY
+%br
+%table.branch_eod.report.weeksheet
+  %thead
+    %tr
+      %th
+        Name
+      %th
+        Sum
+      %th
+        Count
+  - @biz_location_eod.each do |key, value|
+    %tr
+      %td
+        = key.humanize
+      %td
+        = value[:total_amount].to_s unless value[:total_amount].blank?
+      %td
+        = value[:count] unless value[:count].blank?

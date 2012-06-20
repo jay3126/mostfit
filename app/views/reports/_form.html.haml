@@ -204,7 +204,7 @@
           - if @report.respond_to?(:securitization_id)
             %td
               Securitization:
-              = select(:securitization_id, :collection => Securitization.all, :include_blank => true, :selected => securitization_id, :id => "securitization_selector")
+              = select(:securitization_id, :collection => Securitization.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => securitization_id, :id => "securitization_selector")
           - if @report.respond_to?(:account_id)
             %td
               Account:

@@ -13,37 +13,54 @@ class LoanFiles < Application
 
   #for generating 
   def generate_loans(id)
+    client_facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
+    loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, session.user)
     return NotFound unless params['id'] 
     @loan_file = LoanFile.get(id)
     raise NotFound unless @loan_file
     @center = BizLocation.get(@loan_file.at_center_id)
     @branch = BizLocation.get(@loan_file.at_branch_id)
-    @clients = @loan_file.loan_applications.collect{|l| Client.get(l.client_id) if (l.loan.nil? && !(l.client_id.nil?))}.compact
-    sc = params[:clients].map{|k,v| k if v[:chosen]}.compact if params[:clients]   # nice to be able to say "if @selected_clients" 
+    #    @clients = @loan_file.loan_applications.collect{|l| Client.get(l.client_id) if (l.loan.nil? && !(l.client_id.nil?))}.compact
+    @clients = []
+    @loan_file.loan_applications.each do |l|
+      client = Client.get(l.client_id)
+      not_eligible_client = client_facade.get_all_loans_for_counterparty(client)
+      @clients << client if not_eligible_client.blank?
+    end
+    sc = params[:clients].map{|k,v| k if v[:chosen]}.compact if params[:clients]   # nice to be able to say "if @selected_clients"
     @selected_clients = sc.blank? ? nil : sc                                       # instead of "unless @selected_clients.blank?"
     if params[:loan]
       if @selected_clients
-        # ok, we have enough to start making the loans
         @loans = []
         message = nil
         @selected_clients.each do |client_id|
           params[:clients][client_id].delete(:chosen)
           lap = @loan_file.loan_applications(:client_id => client_id).first
-          l = lap.create_loan(params[:loan].merge(params[:clients][client_id]).merge(:client_id => client_id))
-          l.set_loan_product_parameters
-          @loans.push(l)
+          applied_money_amount = MoneyManager.get_money_instance(lap.amount.to_s)
+          applied_amount = applied_money_amount
+          from_lending_product = LendingProduct.get(params[:loan][:loan_product_id])
+          repayment_frequency = from_lending_product.repayment_frequency
+          tenure = from_lending_product.tenure
+          for_borrower = Client.get(client_id)
+          administered_at_origin = lap.at_center_id
+          accounted_at_origin = lap.at_branch_id
+          applied_on_date = params[:loan][:applied_on]
+          scheduled_disbursal_date = params[:loan][:scheduled_disbursal_date]
+          scheduled_first_payment_date = params[:loan][:scheduled_first_payment_date]
+          applied_by_staff = params[:loan][:applied_by_staff_id]
+          recorded_by_user = session.user.id
+          loan = loan_facade.create_new_loan(applied_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_payment_date,applied_by_staff,recorded_by_user, nil)
+          @loans.push(loan)
         end
-        Loan.transaction do |t|
-          r = @loans.map{|l| l.saved?}
-          if r.include?(false)
-            t.rollback 
-            message = {:error => "Loans cannot be saved"}
-          else
-            @loan_file.update(:health_check_status => Constants::Status::READY_FOR_DISBURSEMENT)
-            loan_ids = @loans.map{|x| x.id}
-            message = {:notice => "Successfully added loans with ids #{loan_ids.to_json}"}
-          end
+        r = @loans.map{|l| l.saved?}
+        if r.include?(false)
+          message = {:error => "Loans cannot be saved"}
+        else
+          @loan_file.update(:health_check_status => Constants::Status::READY_FOR_DISBURSEMENT)
+          loan_ids = @loans.map{|x| x.id}
+          message = {:notice => "Successfully added loans with ids #{loan_ids.to_json}"}
         end
+
         redirect resource(@loan_file), :message => message
       end
     else
