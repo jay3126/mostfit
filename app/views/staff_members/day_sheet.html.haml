@@ -14,9 +14,9 @@
 %br
 - @weeksheets.each do |@weeksheet|
   - unless @weeksheet.blank?
-    - biz_location = @biz_locations.select{|location| location.id == @weeksheet.at_biz_location_id }.first
+    - @biz_location = @biz_locations.select{|location| location.id == @weeksheet.at_biz_location_id }.first
     %h2
-      = "#{biz_location.name} at #{@weeksheet.at_meeting_time_begins_hours}:#{'%02d' % @weeksheet.at_meeting_time_begins_minutes}"
-      = "(No meeting)" unless MeetingCalendar.meeting_at_location_on_date(biz_location, @date)
+      = "#{@biz_location.name} at #{@weeksheet.at_meeting_time_begins_hours}:#{'%02d' % @weeksheet.at_meeting_time_begins_minutes}"
+      = "(No meeting)" unless MeetingCalendar.meeting_at_location_on_date(@biz_location, @date)
     = partial "user_locations/weeksheet_collection_list"
     %hr
