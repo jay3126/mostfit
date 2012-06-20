@@ -258,4 +258,10 @@ class Lendings < Application
     @lending_due_statuses = @lending.loan_due_statuses
     partial 'lendings/lending_due_status'
   end
+
+  def lending_accrual_transaction
+    @lending = Lending.get params[:id]
+    @lending_accrual_transactions = AccrualTransaction.all(:on_product_type => 'lending', :on_product_id => @lending.id)
+    partial 'lendings/lending_accrual'
+  end
 end

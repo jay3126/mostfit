@@ -18,6 +18,8 @@ class AccrualTransaction
 
   def money_amounts; [ :amount ]; end
   def accrual_money_amount; to_money_amount(:amount); end
+  def accounted_location; BizLocation.get(self.accounted_at); end
+  def counterparty; Resolver.fetch_counterparty(self.by_counterparty_type, self.by_counterparty_id); end
 
   def self.record_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
     Validators::Arguments.not_nil?(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)

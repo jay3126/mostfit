@@ -64,6 +64,7 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_transactions, :id => @lending.id)}
   %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_accrual_transaction, :id => @lending.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_due_statuses, :id => @lending.id)}
   %div.tab
