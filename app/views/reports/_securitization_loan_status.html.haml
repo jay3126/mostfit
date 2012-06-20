@@ -47,7 +47,10 @@
       %th
         Current Interest Outstanding
   %tbody
-    - @data.each do |loan_id|
+    - from_date = @data[:from_date]
+    - to_date = @data[:to_date]
+    - loan_ids = @data[:loan_ids]
+    - loan_ids.each do |loan_id|
       - loan = Lending.get(loan_id)
       %tr
         %td
@@ -71,9 +74,9 @@
         %td
           = nil # no of installments remaining
         %td
-          = loan.actual_principal_outstanding(@from_date)
+          = loan.actual_principal_outstanding(from_date)
         %td
-          = loan.scheduled_principal_due(@to_date) - loan.scheduled_principal_due(@from_date)
+          = loan.scheduled_principal_due(to_date) - loan.scheduled_principal_due(from_date)
         %td
           = nil #principal paid during period
         %td
@@ -83,9 +86,9 @@
         %td
           = loan.actual_principal_outstanding(Date.today)
         %td
-          = loan.actual_interest_outstanding(@from_date)
+          = loan.actual_interest_outstanding(from_date)
         %td
-          = loan.scheduled_interest_due(@to_date) - loan.scheduled_interest_due(@from_date)
+          = loan.scheduled_interest_due(to_date) - loan.scheduled_interest_due(from_date)
         %td
           = nil # interest paid during period
         %td

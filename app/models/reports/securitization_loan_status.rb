@@ -9,7 +9,7 @@ class SecuritizationLoanStatus < Report
   end
 
   def name
-    "Securitization Loan Status #{from_date} to #{to_date}"
+    "Securitization Loan Status #{@from_date} to #{@to_date}"
   end
 
   def self.name
@@ -17,10 +17,14 @@ class SecuritizationLoanStatus < Report
   end
 
   def generate
+    @data = {} 
     securitization = Securitization.get(@securitization_id)
     loan_assignment_facade = LoanAssignmentFacade.new(User.first)
     loan_ids = loan_assignment_facade.get_loans_assigned(securitization)
-    @data = loan_ids
+    @data[:from_date] = @from_date
+    @data[:to_date]   = @to_date
+    @data[:loan_ids] = loan_ids
+    @data
   end
 
 end
