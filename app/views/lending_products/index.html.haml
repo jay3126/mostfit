@@ -32,4 +32,4 @@
           %td
             = link_to "Show Loans", resource(lp)
             |
-            = link_to "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}")
+            = link_to "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}", :biz_location_id => params[:biz_location_id])

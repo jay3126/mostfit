@@ -1,3 +1,8 @@
+:javascript
+  $('table.center_list').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 - @date = Date.today if @date.blank?
 %h2
   = "#{@location_level.name} meeting on"
@@ -17,30 +22,30 @@
     %p
       %i No centers meet on this day.
 - else
-  %table{:style => "text-align:left", :class => "narrow floating_header"}
-    %tr.header
-      %th{:style => "width: 5%"} ID
-      %th Name
-      %th Manager
-      %th Meeting
-      %th No. Of Clients
-    %tbody
-      - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
-        - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
-        %tr{:class => cycle('odd','')}
-          %td
-            = biz_location.id
-          %td
-            - if @location_level.level == 0
-              = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id, :date => meeting_date.on_date )
-            - else
-              = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
-          %td
-            = ''
-          %td
-            = meeting_date.meeting_begins_at
-          %td
-            = ClientAdministration.get_clients_administered(biz_location.id, @date).count
+  %table.dataTable.weeksheet.report.nojs.center_list
+    %thead
+      %tr
+        %th ID
+        %th Name
+        %th Manager
+        %th Meeting
+        %th No. Of Clients
+    - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
+      - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
+      %tr{:class => cycle('odd','')}
+        %td
+          = biz_location.id
+        %td
+          - if @location_level.level == 0
+            = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id, :date => meeting_date.on_date )
+          - else
+            = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
+        %td
+          = ''
+        %td
+          = meeting_date.meeting_begins_at
+        %td
+          = ClientAdministration.get_clients_administered(biz_location.id, @date).count
     %tfoot
       %tr
         %td{ :colspan => 6 }

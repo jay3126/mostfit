@@ -11,7 +11,9 @@ class Lendings < Application
     @lending_product  = LendingProduct.get params[:lending_product_id]
     @loan_borrower    = Client.get params[:client_id]
     @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
-    @clients          = Client.all(:id => @counterparty_ids)
+    @location         = BizLocation.get params[:biz_location_id] unless params[:biz_location_id].blank?
+    client_facade     = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user.id)
+    @clients          = @location.blank? ? Client.all(:id => @counterparty_ids) : client_facade.get_clients_administered(@location.id, get_effective_date)
     @lending          = @lending_product.lendings.new
     display @lending_product
   end
@@ -106,9 +108,8 @@ class Lendings < Application
       end
       if @message[:error].blank?
         lendings.each do |lending|
-          save = params[:submit] == 'Reject' ? lending.reject() : lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
-          save =+ 1 if save
-          save_lendings =+ 1 if save
+          params[:submit] == 'Reject' ? lending.reject() : lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
+          save_lendings = save_lendings +  1 if lending.reload.is_approved?
         end
       end
     rescue => ex
