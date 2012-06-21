@@ -1,10 +1,15 @@
+:javascript
+  $('table.center_meeting_cal').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 %h1
   == Center Meeting Calender for center #{@biz_location.name}
 %br
 - if @meeting_dates.blank?
   %b= "No Meeting Dates in Calendar."
 - else
-  %table.narrow.form{ :width => '80%' }
+  %table.report.weeksheet.nojs.center_meeting_cal
     %thead
       %tr
         %td

@@ -1,9 +1,14 @@
+:javascript
+  $('table.approve_loan').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 - if lendings.blank?
   %h3
     No loan exists
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_lending_approve_to_disburse)) do
-    %table.dataTable.report.weeksheet.nojs
+    %table.report.weeksheet.nojs.approve_loan
       %thead
         %tr
           %th

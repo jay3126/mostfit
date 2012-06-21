@@ -1,7 +1,11 @@
-%h1 LOCATION MOVEMENT
+:javascript
+  $('table.client_move').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 - unless @client_admins.blank?
   %br
-  %table{:class => 'narrow'}
+  %table.report.weeksheet.nojs.client_move
     %thead
       %tr
         %th
@@ -12,15 +16,14 @@
           Effective On
         %th
           Staff by
-    %tr
-      - @client_admins.each do |client_admin|
-        - client = client_admin.counterparty
-        %tr
-          %td
-            = link_to client_admin.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => client_admin.administered_at)
-          %td
-            = link_to client_admin.registered_at_location.name, url(:controller => :user_locations, :action => :show, :id => client_admin.registered_at)
-          %td
-            = client_admin.effective_on.strftime("%Y-%m-%d")
-          %td
-            = client_admin.performed_by_staff.name rescue client_admin.performed_by_staff
+    - @client_admins.each do |client_admin|
+      - client = client_admin.counterparty
+      %tr
+        %td
+          = link_to client_admin.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => client_admin.administered_at)
+        %td
+          = link_to client_admin.registered_at_location.name, url(:controller => :user_locations, :action => :show, :id => client_admin.registered_at)
+        %td
+          = client_admin.effective_on.strftime("%Y-%m-%d")
+        %td
+          = client_admin.performed_by_staff.name rescue client_admin.performed_by_staff

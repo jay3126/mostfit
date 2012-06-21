@@ -4,32 +4,19 @@
     %th.even Name
     %td= @biz_location.name
   %tr.odd
-    %th.odd Reports to
-    %td
-      %b= ''
-  %tr.even
-    %th.even Formation
+    %th.odd Formation
     %td
       = "#{@biz_location.creation_date}( #{@biz_location.creation_date.strftime('%A')} )"
+  - unless @parent_biz_location.blank?
+    %tr.even
+      %th.even Reports to
+      %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
   %tr.odd
-    %th.odd Manager By
+    %th.odd Managed By
     %td= ''
   %tr.even
     %th.even= "No. Of #{@location_level.name}"
     %td= @biz_locations.count
-  %tr.odd
-    %th.odd Address
-    %td= ''
-  %tr.even
-    %th.even Contact Number
-    %td= ''
-  %tr.odd
-    %th.odd Landmark
-    %td= ''
-  - unless @parent_biz_location.blank?
-    %tr.even
-      %th.even= @parent_biz_location.location_level.name
-      %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
 
 %div.tab_container.shaded
   %ul.tabs

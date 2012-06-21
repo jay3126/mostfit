@@ -1,3 +1,8 @@
+:javascript
+  $('table.center_loan').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 .menu-strip
   = link_to 'Add Loan', resource(:lending_products, :biz_location => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => 'add'
 %br
@@ -5,7 +10,7 @@
   %p
     %i No Loans Mapping have been created yet.
 - else
-  %table.dataTable.report.weeksheet.nojs
+  %table.report.weeksheet.nojs.center_loan
     %thead
       %tr
         %th

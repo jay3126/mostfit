@@ -1,38 +1,41 @@
 - facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
 %h1== Loan Name: <i>#{@lending_product.name}</i>
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
-  %tr.odd
-    %th.odd Borrower
-    %td= link_to @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
   %tr.even
-    %th.even Amount
+    %th.even Borrower
+    %td= link_to @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
+  %tr.odd
+    %th.odd Loan disbursed
     %td
       %b= @lending.to_money[:applied_amount].to_s
-  %tr.odd
-    %th.odd Frequency
+  %tr.even
+    %th.even Disbursed On
     %td
-      = @lending.repayment_frequency
+      = @lending.disbursal_date
+  %tr.odd
+    %th.odd First Repayment Date
+    %td= @lending.scheduled_first_repayment_date
   %tr.even
     %th.even Loan Product
     %td
       = @lending_product.name
   %tr.odd
-    %th.odd Disbursed On
-    %td= @lending.disbursal_date
+    %th.odd Frequency
+    %td= @lending.repayment_frequency
   %tr.even
     %th.even Loan Status
-    %td= @lending.status
+    %td= @lending.status.humanize
   %tr.odd
-    %th.odd Loan outstanding Principal
-    %td= @lending.actual_principal_outstanding
+    %th.odd Loan Due Status
+    %td= @lending.current_due_status.humanize
   %tr.even
-    %th.even Loan outstanding Interest
-    %td= @lending.actual_interest_outstanding
+    %th.even Loan outstanding Principal
+    %td= "#{@lending.actual_principal_outstanding} as on #{@effective_date}"
   %tr.odd
-    %th.odd Scheduled First Repayment Date
-    %td= @lending.scheduled_first_repayment_date
-  %tr.even
-    %th.even Loan assignment status
+    %th.odd Loan outstanding Interest
+    %td= "#{@lending.actual_interest_outstanding} as on #{@effective_date}"
+  %tr.odd
+    %th.odd Loan assignment status
     %td
       - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
       - if loan_assigned_to.nil?

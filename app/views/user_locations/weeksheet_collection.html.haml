@@ -9,50 +9,36 @@
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name
-    %td
-      %b= @biz_location.name
+    %td= @biz_location.name
   %tr.odd
-    %th.odd Reports to
-    %td
-      %b= ''
-  %tr.even
-    %th.even Formation
+    %th.odd Formation
     %td
       = "#{@biz_location.creation_date}( #{@biz_location.creation_date.strftime('%A')} )"
-  %tr.odd
-    %th.odd Manager By
-    %td= ''
-  %tr.even
-    %th.even Address
-    %td= ''
-  %tr.odd
-    %th.odd Contact Number
-    %td= ''
-  %tr.even
-    %th.even Landmark
-    %td= ''
   - unless @parent_biz_location.blank?
-    %tr.odd
-      %th.odd= @parent_biz_location.location_level.name
+    %tr.even
+      %th.even Reports to
       %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
+  %tr.odd
+    %th.odd Managed By
+    %td= ''
 
 %div.tab_container.shaded
   %ul.tabs
     %li#Collections
       Collections
-    %li#MeetingSchedule
-      Meeting Schedule
-    %li#Meeting
-      Meeting
     %li#client
       Clients
     %li#Loan
       Loans
+    %li#Meeting
+      Meeting
+    %li#MeetingSchedule
+      Meeting Schedule
     %li#History
       History
   %div.tab
     %div#location_list
-      %h1 WEEKSHEET
+      %br
       - if @meeting_schedule.blank?
         Today don't have any Meeting Schedule
       - else
@@ -62,11 +48,11 @@
         - else
           =partial "user_locations/weeksheet_collection_list"
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_calendar, :id => @biz_location.id)}
-  %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :loans_on_biz_location, :id => @biz_location.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_calendar, :id => @biz_location.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
   %div.tab

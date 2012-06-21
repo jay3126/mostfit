@@ -3,6 +3,8 @@
   %ul.tabs
     %li#Locations
       Locations
+    %li#sourcing
+      Sourcing
     %li#Loans
       Loans
     %li#Collections
@@ -15,11 +17,15 @@
       Configuration
   %div.tab
     %div#location_list
-      =partial "user_locations/list"
+      = partial "user_locations/list"
+  %div.tab
+    = partial "loan_applications/loan_application_links"
   %div.tab
   %div.tab
   %div.tab
     %div#accounts
       = partial 'book_keeping/tabs'
   %div.tab
+    = partial "reports/report_links"
   %div.tab
+    = partial "admin/admin_links"

@@ -1,0 +1,17 @@
+%div.tab_container.shaded
+  %ul.tabs
+    %li#apply_loans
+      Applied Loans
+    %li#approved_Loans
+      Approved Loans
+    %li#disbursed_loans
+      Disbursed Loans
+  %div.tab
+    %div#new_loans
+      =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
+  %div.tab
+    %div#approve_loans
+      =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
+  %div.tab
+    %div#disburse_loans
+      =partial "lendings/disburse_loans", :lendings => @disburse_lendings

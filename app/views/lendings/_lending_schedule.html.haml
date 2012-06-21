@@ -1,4 +1,3 @@
-%h1 LOAN SCHEDULES
 %br
 - if @lending_schedules.blank?
   Loan schedule does not exist.
@@ -6,20 +5,18 @@
   %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
-        %th
+        %th Transaction
         %th Installment Date
         %th Installment
         %th Principal Outstanding
-        %th Interest Outstanding
         %th Principal Due
+        %th Interest Outstanding
         %th Interest Due
-        %th Payment Type
     %tbody
-      - count = 0
       - @lending_schedules.each do |l_schedule|
         %tr{ :class => cycle('odd','even') }
           %td{:class => 'default_class'}
-            = count = count + 1
+            %b= l_schedule.payment_type
           %td
             = l_schedule.on_date
           %td
@@ -27,13 +24,11 @@
           %td
             %b= l_schedule.to_money[:scheduled_principal_outstanding].to_s
           %td
-            %b= l_schedule.to_money[:scheduled_interest_outstanding].to_s
-          %td
             %b= l_schedule.to_money[:scheduled_principal_due].to_s
           %td
-            %b= l_schedule.to_money[:scheduled_interest_due].to_s
+            %b= l_schedule.to_money[:scheduled_interest_outstanding].to_s
           %td
-            %b= l_schedule.payment_type
+            %b= l_schedule.to_money[:scheduled_interest_due].to_s
     %tfoot
       %tr
-        %td{ :colspan => 9 }
+        %td{ :colspan => 8}

@@ -72,6 +72,7 @@ class Lendings < Application
   def show
     @lending           = Lending.get params[:id]
     @lending_product   = @lending.lending_product
+    @effective_date    = get_effective_date
     @lending_schedules = @lending.loan_base_schedule.base_schedule_line_items
     display @lending
   end

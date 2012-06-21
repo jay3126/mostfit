@@ -12,40 +12,36 @@
     %thead
       %tr
         %th
-          id
+          On Date
         %th
           Loan Status
         %th
           Due Status
         %th
-          Administered At
+          Schedule Principal Due
         %th
-          Accounted At
+          Actual Principal DUe
         %th
-          Actual Principal Due
+          Schedule Interest Due
         %th
           Actual Interest Due
         %th
           Actual Total Due
-        %th
-          On Date
     - @lending_due_statuses.each do |lending_status|
       %tr
         %td
-          = lending_status.id
+          = lending_status.on_date
         %td
-          = lending_status.loan_status
+          = lending_status.loan_status.humanize
         %td
-          = lending_status.due_status
+          = lending_status.due_status.humanize
         %td
-          = link_to lending_status.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending_status.administered_at)
+          = lending_status.to_money[:scheduled_principal_due]
         %td
-          = link_to lending_status.accounted_at_location.name, url(:controller => :user_locations, :action => :show, :id => lending_status.accounted_at)
+          =lending_status.to_money[:actual_principal_due].to_s
         %td
-          = lending_status.to_money[:actual_principal_due].to_s
+          = lending_status.to_money[:scheduled_interest_due].to_s
         %td
           = lending_status.to_money[:actual_interest_due].to_s
         %td
           = lending_status.to_money[:actual_total_due].to_s
-        %td
-          = lending_status.on_date

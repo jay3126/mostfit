@@ -1,3 +1,8 @@
+:javascript
+  $('table.center_meetings').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 .menu-strip
   = link_to 'Add Meeting Schedule', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
 #meeting_div(style = "display : none")
@@ -5,11 +10,9 @@
     = partial 'meeting_schedules/fields'
     = submit 'Create Meeting Schedule', :class => "greenButton"
 %br
-%table.narrow.form{ :width => '80%' }
+%table.report.weeksheet.nojs.center_meetings
   %thead
     %tr
-      %td
-      %td
       %td
         Begin On
       %td
@@ -21,9 +24,7 @@
       %td
         Description
   - @meeting_schedule_infos.sort.each do |msi|
-    %tr{ :class => cycle('odd','')}
-      %td
-      %td
+    %tr
       %td
         = msi.schedule_begins_on
       %td

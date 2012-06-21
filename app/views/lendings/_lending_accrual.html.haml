@@ -34,9 +34,9 @@
         %td
           = accrual_transaction.id
         %td
-          = accrual_transaction.accrual_allocation_type
+          = accrual_transaction.accrual_allocation_type.humanize
         %td
-          = accrual_transaction.accrual_temporal_type
+          = accrual_transaction.accrual_temporal_type.humanize
         %td
           = accrual_transaction.to_money[:amount].to_s
         %td

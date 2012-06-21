@@ -1,3 +1,8 @@
+:javascript
+  $('table.client_tab').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 .menu-strip
   = link_to 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
 %br
@@ -5,7 +10,7 @@
   %p
     %i No Client Mapping have been created yet.
 - else
-  %table{:class => 'narrow'}
+  %table.report.weeksheet.nojs.client_tab
     %thead
       %tr
         %th
@@ -13,13 +18,12 @@
         %th
           Name
         %th
-          Created On
-    %tr
-      - for customer in @customers
-        %tr
-          %td
-            = customer.id
-          %td
-            = link_to customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
-          %td
-            = customer.created_at.strftime("%Y-%m-%d")
+          Joining Date
+    - for customer in @customers
+      %tr
+        %td
+          = customer.id
+        %td
+          = link_to customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+        %td
+          = customer.date_joined
