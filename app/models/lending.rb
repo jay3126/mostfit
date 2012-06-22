@@ -250,7 +250,11 @@ class Lending
   def actual_principal_due(on_date)
     return zero_money_amount if on_date < scheduled_first_repayment_date
 
-    scheduled_principal_due(on_date) + (actual_principal_outstanding - scheduled_principal_outstanding(on_date))
+    if (actual_principal_outstanding > scheduled_principal_outstanding(on_date))
+      scheduled_principal_due(on_date) + (actual_principal_outstanding - scheduled_principal_outstanding(on_date))
+    else
+      scheduled_principal_due(on_date)
+    end
   end
 
   def scheduled_interest_due(on_date)
@@ -291,7 +295,11 @@ class Lending
   def actual_interest_due(on_date)
     return zero_money_amount if on_date < scheduled_first_repayment_date
 
-    scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
+    if (actual_interest_outstanding > scheduled_interest_outstanding(on_date))
+      scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
+    else
+      scheduled_interest_due(on_date)
+    end
   end
 
   def actual_total_due(on_date)
@@ -299,9 +307,16 @@ class Lending
   end
 
   def scheduled_total_outstanding(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
+    return zero_money_amount if on_date < disbursal_date_value
+    return total_loan_disbursed if on_date < scheduled_first_repayment_date
 
     scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
+  end
+
+  def scheduled_total_outstanding_after_receipts(on_date)
+    return zero_money_amount if on_date < scheduled_first_repayment_date
+    
+    scheduled_total_outstanding(on_date) - scheduled_total_due(on_date)
   end
 
   def actual_total_outstanding(on_date = Date.today)
@@ -407,7 +422,11 @@ class Lending
   
   def due_status_from_outstanding(on_date)
     return NOT_DUE if on_date < self.scheduled_first_repayment_date
-    actual_total_outstanding(on_date) > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+    if (schedule_date?(on_date))
+      actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+    else
+      actual_total_outstanding > scheduled_total_outstanding_after_receipts(on_date) ? OVERDUE : DUE
+    end
   end
 
   def days_past_due
