@@ -1,0 +1,2 @@
+class ChoiceFacade < StandardFacade
+end
