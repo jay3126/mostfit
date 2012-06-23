@@ -16,8 +16,7 @@ class UserLocations < Application
     else
       @location_level = LocationLevel.first(:level => level-1)
       @biz_locations = LocationLink.get_children(@biz_location, @date)
-      mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, @date) if @location_level.has_meeting
+      @meeting_dates = meeting_facade.get_meetings_for_loncations_on_date(@biz_locations, @date) if @location_level.has_meeting
     end
     display @biz_locations
   end
@@ -25,8 +24,7 @@ class UserLocations < Application
   def meeting_schedule
     @biz_location = BizLocation.get params[:id]
     raise NotFound unless @biz_location
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_schedule_infos = mf.get_meeting_schedules(@biz_location)
+    @meeting_schedule_infos = meeting_facade.get_meeting_schedules(@biz_location)
     @meeting_schedule = MeetingSchedule.new
     partial "user_locations/meeting_schedule_list"
   end
@@ -34,8 +32,7 @@ class UserLocations < Application
   def meeting_calendar
     @biz_location = BizLocation.get params[:id]
     raise NotFound unless @biz_location
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_dates = mf.get_meeting_calendar(@biz_location, session[:effective_date] - Constants::Time::DEFAULT_PAST_MAX_DURATION_IN_DAYS )
+    @meeting_dates = meeting_facade.get_meeting_calendar(@biz_location, session[:effective_date] - Constants::Time::DEFAULT_PAST_MAX_DURATION_IN_DAYS )
     partial "user_locations/meeting_calendar"
   end
 
@@ -44,11 +41,10 @@ class UserLocations < Application
     @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
     set_effective_date(Date.today) if session[:effective_date].blank?
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-    mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-    @meeting_schedule = mf.get_meeting_schedules(@biz_location)
+    @meeting_schedule = meeting_facade.get_meeting_schedules(@biz_location)
     unless @meeting_schedule.blank?
-      @next_meeting = mf.get_next_meeting(@biz_location, @date)
-      @previous_meeting = mf.get_previous_meeting(@biz_location, @date)
+      @next_meeting = meeting_facade.get_next_meeting(@biz_location, @date)
+      @previous_meeting = meeting_facade.get_previous_meeting(@biz_location, @date)
       @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
     end
     display @weeksheet
@@ -84,8 +80,7 @@ class UserLocations < Application
     else
       @location_level = LocationLevel.first(:level => level-1)
       @biz_locations = LocationLink.get_children(@biz_location, session[:effective_date])
-      mf = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, session.user)
-      @meeting_dates = mf.get_meetings_for_loncations_on_date(@biz_locations, @date)
+      @meeting_dates = meeting_facade.get_meetings_for_loncations_on_date(@biz_locations, @date)
     end
     partial 'location_list', :layout => layout?
   end

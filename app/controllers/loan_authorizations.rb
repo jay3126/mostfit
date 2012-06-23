@@ -100,12 +100,4 @@ class LoanAuthorizations < Application
     options
   end
 
-  def location_facade
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-  end
-
-  def loan_applications_facade
-    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
-  end
-
 end

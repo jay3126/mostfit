@@ -162,6 +162,21 @@ class Application < Merb::Controller
     return(request.xhr? ? false : :application)
   end
   
+  def method_missing(facade_name, *args)
+    raise ArgumentError, "There is no facade by the name: #{facade_name}" unless FacadeFactory::ALL_FACADES.include?(facade_name)
+    for_user = session.user
+    @facade_cache = {} unless @facade_cache
+    facade_instance = @facade_cache[facade_name]
+    unless facade_instance
+      raise ArgumentError, "No user available from the current session" unless for_user
+      facade_instance = FacadeFactory.instance.get_instance(facade_name, for_user)
+      raise ArgumentError, "Unable to obtain an instance of #{facade_name}" unless facade_instance
+      @facade_cache[facade_name] = facade_instance
+    end
+    facade_instance
+  end
+
+
   def get_dependent_relationships(obj)
     flag  = true
     model =  obj.class

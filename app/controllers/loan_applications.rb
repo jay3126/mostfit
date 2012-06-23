@@ -282,16 +282,4 @@ class LoanApplications < Application
     @cleared_or_confirmed_diplicate_loan_files = loan_applications_facade.clear_or_confirm_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
   end
 
-  def location_facade
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-  end
-
-  def loan_applications_facade
-    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
-  end
-
-  def client_facade
-    @client_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
-  end
-
 end # LoanApplications

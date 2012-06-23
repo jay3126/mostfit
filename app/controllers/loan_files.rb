@@ -215,12 +215,4 @@ class LoanFiles < Application
     @loan_files_at_center_at_branch_for_cycle = loan_applications_facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
   end
 
-  def location_facade
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-  end
-
-  def loan_applications_facade
-    @loan_applications_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_APPLICATIONS_FACADE, session.user)
-  end
-
 end
