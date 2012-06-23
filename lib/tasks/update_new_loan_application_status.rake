@@ -10,7 +10,7 @@ namespace :mostfit do
   task :update_loan_application_status do
     require 'fastercsv'
 
-    clients = Client.all(:fields => [:id, :name, :reference])
+    clients = Client.all(:fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
     loan_applicants = LoanApplicationsFacade.pending_dedupe
     total_loan_applications = LoanApplication.all - loan_applicants
 
