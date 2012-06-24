@@ -2,6 +2,7 @@ module Constants
   module Properties
 
     MEDIUM_STRING_LENGTH = 255
+    LONG_STRING_LENGTH   = 1024
     NOT_NULL          = { :nullable => false }
     UNIQUE            = { :unique => true }
 
@@ -12,6 +13,7 @@ module Constants
 
     NAME              = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL) ]
     UNIQUE_NAME       = [ String, { :length => MEDIUM_STRING_LENGTH }.merge(NOT_NULL).merge(UNIQUE) ]
+    LONG_STRING       = [ String, { :length => LONG_STRING_LENGTH } ]
     TENURE            = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
     COUNTER           = [ Integer, { :min => 1 }.merge(NOT_NULL) ]
     INSTALLMENT       = [ Integer, { :min => 0 }.merge(NOT_NULL) ]

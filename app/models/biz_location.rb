@@ -10,8 +10,19 @@ class BizLocation
 
   belongs_to :location_level
   has n, :meeting_schedules, :through => Resource
+  has 1, :address
+  has n, :permitted_pin_codes, 'AddressPinCode'
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
+
+  def address_text
+    address ? address.full_address_text : "NOT SPECIFIED"
+  end
+
+  def all_pin_codes
+    own_address_pin_code_ary = address ? [address.address_pin_code] : nil
+    own_address_pin_code_ary ? (own_address_pin_code_ary + self.permitted_pin_codes).flatten.uniq : self.permitted_pin_codes
+  end
 
   def level_number
     self.location_level.level
