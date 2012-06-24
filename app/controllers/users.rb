@@ -36,13 +36,16 @@ class Users < Application
   def create(user)
     message = {}
 
-    messsage[:error] = "Staff Member cannot be blank" if params[:user][:staff_member].blank?
-    params[:user][:funder]       = Funder.get(params[:user][:funder]) if params[:user][:funder]
+    message[:error]                      = "Staff Member cannot be blank"     if params[:staff_member].blank?
+    params[:user][:funder]              = Funder.get(params[:user][:funder]) if params[:user][:funder]
     params[:user][:password_changed_at] = Time.now
     @user = User.new(user)
 
     if message[:error].blank?
       if @user.save
+        staff = StaffMember.get params[:staff_member]
+        staff.user_id = @user.id
+        staff.save
         message[:notice] = "Successfully created user #{@user.login}"
       else
         message[:error] = @user.errors.first.join(', ')
