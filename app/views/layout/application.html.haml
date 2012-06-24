@@ -80,7 +80,7 @@
         = catch_content :for_layout
     #footer
       %p{:style => "position: relative; right: 10%; float: right;"}
-        - if session.authenticated? and session.user.role == :admin and Merb.env == "development"
+        - if session.authenticated? and session.user.get_user_role == :administrator and Merb.env == "development"
           %form{:action => "/admin/proxy_logon", :methoid => :post}
             login as
             = select :user_id, :collection => User.all(:order => [:login]).map{|u| [u.id, u.login]}, :class => 'field'

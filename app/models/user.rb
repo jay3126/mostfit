@@ -14,7 +14,6 @@ class User
   property :active,       Boolean, :default => true, :nullable => false
   property :preferred_locale,        String
 
-  property :role, Enum.send('[]', *ROLE_CLASSES)
 
   # it gets                                   
   #   - :password and :password_confirmation accessors
@@ -25,6 +24,7 @@ class User
   validates_length :login, :min => 3
   validates_is_unique :login
   validates_length :password, :min => 6, :if => Proc.new{|u| not u.password.nil?}
+  
   has 1, :staff_member
   has 1, :funder
 
@@ -34,7 +34,7 @@ class User
   
   def set_staff_member
     if self.staff_member
-      staff          = StaffMember.get(self.staff_member.id)
+      staff          = StaffMember.get(self.staff_member)
       staff.user_id  = self.id
       staff.save
     end
@@ -62,7 +62,7 @@ class User
   end
 
   def admin?
-    role == :administrator
+     get_user_role == :administrator
   end
   
   def crud_rights

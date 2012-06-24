@@ -147,8 +147,11 @@ Merb::BootLoader.after_app_loads do
 
   begin
     if User.all.empty?
-      u = User.new(:login => 'admin', :password => 'password', :password_confirmation => 'password', :role => :admin)
+      u = User.new(:login => 'admin', :password => 'password', :password_confirmation => 'password')
       if u.save
+        location_level = LocationLevel.create(:name => 'Center', :level => 0, :has_meeting => true)
+        designation = Designation.create(:name => "Admin Manager", :location_level => location_level, :role_class => Constants::User::ADMINISTRATOR)
+        StaffMember.create(:name => 'admin', :date_of_birth => Date.parse('16-06-1985'), :designation => designation, :user => u )
         Merb.logger.info("The initial user 'admin' was created (password is set to 'password')...")
       else
         Merb.logger.info("Couldn't create the 'admin' user...")

@@ -19,7 +19,7 @@ module Merb
       f = Funder.first(:user_id => session.user.id)
       staff_or_funder += " #{f.name}" if f
       effective_date = session[:effective_date].blank? ? Date.today : session[:effective_date]
-      "#{staff_or_funder} Logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) #{link_to effective_date, url(:controller => :home, :action => :effective_date)} | #{link_to 'log out', url(:logout)}"
+      "#{staff_or_funder} Logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.get_user_role.to_s.humanize}) #{link_to effective_date, url(:controller => :home, :action => :effective_date)} | #{link_to 'log out', url(:logout)}"
     end
 
     #returns a hash with all the branches with the branch ids as keys

@@ -25,7 +25,7 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   # @overwritable
   def redirect_after_login
     message[:notice] = "Authenticated Successfully"
-    case session.user.role
+    case session.user.get_user_role
     when :data_entry
       redirect url(:data_entry)
     when :staff_member
