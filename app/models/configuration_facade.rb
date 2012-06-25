@@ -57,5 +57,9 @@ class ConfigurationFacade
   def regulation_total_oustanding_allowed
     50000
   end
+
+  def available_loan_products(on_date = Date.today)  
+    LendingProduct.all
+  end
   
 end

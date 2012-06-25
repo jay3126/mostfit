@@ -29,4 +29,8 @@ class LocationManager
     all_locations_at_level(LocationLevel::NOMINAL_CENTER_LEVEL)
   end
 
+  def all_locations_after_date(on_date = Date.today)
+    BizLocation.all(:creation_date.gte => on_date)
+  end
+
 end
