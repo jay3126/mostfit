@@ -14,6 +14,9 @@ class LoanApplicationsFacade < StandardFacade
     loan_application = LoanApplication.new(hash)
   end
 
+  def get_all_loan_applications_for_branch_and_center(search_options = {})
+    LoanApplication.get_all_loan_applications_for_branch_and_center(search_options)
+  end
   # General information
   def get_loan_application_status(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)

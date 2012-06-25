@@ -36,7 +36,7 @@
                 %td
                   - is_eligible = LoanApplication.allow_new_loan_application?(client.id)
                   - if (is_eligible)
-                    - checked_value =  params[:clients] && params[:clients]["#{client.id}"][:selected] == "on" ? "on" : nil
+                    - checked_value =  params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:selected] == "on" ? "on" : nil
                     = check_box :name => "clients[#{client.id}][selected]", :class => "select" , :checked => checked_value
                 %td
                   = client.id

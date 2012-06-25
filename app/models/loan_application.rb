@@ -123,6 +123,10 @@ class LoanApplication
     }
   end
 
+  def self.get_all_loan_applications_for_branch_and_center(search_options = {})
+    LoanApplication.all(search_options)
+  end
+  
   #creates a client for this particular loan application
   def create_client
     return self.client if self.client

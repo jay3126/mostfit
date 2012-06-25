@@ -1,0 +1,47 @@
+.shaded
+  %h2 All loan applications
+  - if @all_loan_applications and not @all_loan_applications.empty?
+    %table.form
+      %thead
+        %tr
+          %th Applicant Name
+          %th Guarantor Name
+          %th Relationship
+          %th Applicant Birth Date
+          %th Ration Card No.
+          %th Reference 2 Type
+          %th Reference 2 No.
+          %th Applied for amount
+          %th Address
+          %th Location
+          %th Pincode
+          %th Status
+      %tbody
+        - @all_loan_applications.sort.reverse.each do |loan_application|
+          %tr
+            %td
+              = loan_application.client_name
+            %td
+              = loan_application.client_guarantor_name
+            %td
+              = loan_application.client_guarantor_relationship
+            %td
+              = loan_application.client_dob
+            %td
+              = loan_application.client_reference1
+            %td
+              = loan_application.client_reference2_type.humanize
+            %td
+              = loan_application.client_reference2
+            %td
+              = loan_application.amount
+            %td
+              = loan_application.client_address
+            %td
+              = loan_application.client_state.humanize
+            %td
+              = loan_application.client_pincode
+            %td
+              = loan_application.status
+  - else
+    %h3 No recently added loan applications
