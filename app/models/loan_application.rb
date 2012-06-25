@@ -45,6 +45,7 @@ class LoanApplication
   include LoanApplicationWorkflow
   include ClientValidations
   include ClientAgeValidations
+  include Constants::Properties
 
   property :id,                             Serial
   property :status,                         Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -55,7 +56,8 @@ class LoanApplication
   property :created_at,                     DateTime, :nullable => false, :default => DateTime.now
   property :updated_at,                     DateTime, :nullable => false, :default => DateTime.now
   property :created_on,                     Date,     :nullable => false
-  property :amount,                         Float,    :nullable => false
+  property :amount,                         *MONEY_AMOUNT
+  property :currency,                       *CURRENCY
   property :credit_bureau_status,           Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH
   property :credit_bureau_rated_at,         DateTime
   
@@ -90,6 +92,9 @@ class LoanApplication
   # validates_is_unique :client_reference1, :scope => :center_cycle_id
   # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
+
+  def money_amounts; [:amount]; end
+  def loan_money_amount; to_money_amount(:amount); end
 
   # Returns a list of the client IDs for loan applications in progress at the center
   # for the specified center cycle
@@ -478,7 +483,7 @@ class LoanApplication
       self.client_dob,
       self.client_address,
       self.credit_bureau_status,
-      self.amount,
+      self.loan_money_amount,
       self.get_status,
       authorization_info,
       cpvs_infos['cpv1'],
