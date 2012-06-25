@@ -130,7 +130,6 @@ class LoanApplications < Application
     dob = params[:client_dob]
     reference1 = params[:loan_application][:client_reference1]
     reference2 = params[:loan_application][:client_reference2]
-    amount = params[:loan_application][:amount]
     address = params[:loan_application][:client_address]
     state = params[:loan_application][:client_state]
     pincode = params[:loan_application][:client_pincode]
@@ -138,6 +137,7 @@ class LoanApplications < Application
     created_on = params[:created_on]
     center_cycle_number = params[:center_cycle_number].to_i
     center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+    loan_amount_str = params[:loan_application][:amount]
 
     # VALIDATIONS
     @message[:error] << "Applicant name must not be blank" if name.blank?
@@ -146,7 +146,7 @@ class LoanApplications < Application
     @message[:error] << "DOB name must not be blank" if dob.blank?
     @message[:error] << "Ration card must not be blank" if reference1.blank?
     @message[:error] << "Reference 2 ID must not be blank" if reference2.blank?
-    @message[:error] << "Applied for amount name must not be blank" if amount.blank?
+    @message[:error] << "Applied for amount must not be blank" if loan_amount_str.blank?
     @message[:error] << "Address name must not be blank" if address.blank?
     @message[:error] << "State name must not be blank" if state.blank?
     @message[:error] << "Pincode name must not be blank" if pincode.blank?
@@ -156,8 +156,14 @@ class LoanApplications < Application
     # OPERATIONS-PERFORMED
     if @message[:error].blank?
       if request.method == :post
+        loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
+        loan_amount = loan_money_amount.amount.to_i
+        loan_amount_currency = loan_money_amount.currency
+        params[:loan_application][:amount] = loan_amount
+        params[:loan_application][:currency] = loan_amount_currency
         params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_staff_id => created_by, :created_by_user_id => session.user.id}
         @loan_application = LoanApplication.new(params[:loan_application])
+
         if @loan_application.save
           @message[:notice] = "The Loan Application has been successfully saved"
         else
