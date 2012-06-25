@@ -15,6 +15,8 @@ class BizLocation
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
 
+  def created_on; creation_date; end
+
   def address_text
     address ? address.full_address_text : "NOT SPECIFIED"
   end

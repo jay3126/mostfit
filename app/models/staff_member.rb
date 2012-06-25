@@ -41,6 +41,8 @@ class StaffMember
   validates_is_unique :name
   validates_length :name, :min => 3
 
+  def created_on; creation_date; end
+
   def self.search(q, per_page)
     if /^\d+$/.match(q)
       all(:conditions => {:id => q}, :limit => per_page)
