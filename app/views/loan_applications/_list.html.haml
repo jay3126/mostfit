@@ -56,7 +56,7 @@
               %td
                 %b
                   Created by
-                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
+                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"
               %td
                 %b
                   Created on

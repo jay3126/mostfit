@@ -59,7 +59,7 @@
               = date_select("created_on", Date.today, :id => "created_on", :size => 10)
             %td
               = "Staff Member"
-              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"
             %td
               = submit "Generate Loan File"
   - else

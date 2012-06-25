@@ -75,7 +75,7 @@
                     %td
                       = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.staff_that_can_manage_specific_location(@center_id), :prompt => "Select staff member"
                   - else
                     %td{:colspan => 4, :style => center_text}
                       %i
