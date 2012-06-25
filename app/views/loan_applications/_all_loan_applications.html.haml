@@ -1,7 +1,7 @@
 .shaded
   %h2 All loan applications
   - if @all_loan_applications and not @all_loan_applications.empty?
-    %table.form
+    %table.dataTable
       %thead
         %tr
           %th Applicant Name
@@ -42,6 +42,6 @@
             %td
               = loan_application.client_pincode
             %td
-              = loan_application.status
+              = loan_application.status.humanize
   - else
     %h3 No recently added loan applications

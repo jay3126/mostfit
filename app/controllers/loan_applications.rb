@@ -171,6 +171,7 @@ class LoanApplications < Application
         
     # POPULATING RESPONSE AND OTHER VARIABLES
     @loan_application = LoanApplication.new(params[:loan_application])
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     @loan_applications = loan_applications_facade.recently_added_applicants({:at_branch_id => branch_id, :at_center_id => center_id}) if @center
 
     # RENDER/RE-DIRECT
