@@ -8,7 +8,7 @@ class LocationFacade < StandardFacade
   ###########
 
   def visible_locations(for_staff_id, on_date = Date.today)
-    location_manager.all_locations_after_date(on_date)
+    location_manager.all_locations_on_date(on_date)
   end
 
   # Returns a map of all the different kinds of locations that can have meetings
