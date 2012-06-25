@@ -34,7 +34,8 @@ function dataTables(){
     });
   }else{
     $('table.dataTable').dataTable({
-      "sPaginationType": "full_numbers"
+      "sPaginationType": "full_numbers",
+      "bJQueryUI": true
     });
   }
   
