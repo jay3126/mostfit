@@ -8,15 +8,9 @@
       %span.greytext the screen name of the staff member
   %tr
     %td
-      Date Of Birth
-    %td
-      = date_select_for @staff_member, :date_of_birth, {:min_date => Date.parse('01/01/1960')}
-  %tr
-    %td
       Designation
     %td
       = select :designation_id, :collection => Designation.all.map{|d| [d.id.to_s, d.name]}
-      = link_to "Add new Designation", resource(:designations)
   %tr
     %td
       Mobile number:

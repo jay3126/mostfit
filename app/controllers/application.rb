@@ -53,7 +53,7 @@ class Application < Merb::Controller
   end
 
   def ensure_admin
-    unless (session.user and session.user.get_user_role == :administrator)
+    unless (session.user and session.user.role == :administrator)
       raise NotPrivileged
     end
   end
@@ -214,7 +214,7 @@ class Application < Merb::Controller
   end
 
   def add_collections
-    return unless session.user.get_user_role==:funder
+    return unless session.user.role==:funder
     return unless @@controllers.include?(params[:controller])
     return if params[:controller] == "loans"
     @funder = Funder.first(:user_id => session.user.id)

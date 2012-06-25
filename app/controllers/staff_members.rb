@@ -191,7 +191,7 @@ class StaffMembers < Application
   end
   
   def get_staff_members_hash
-    if session.user.get_user_role == :staff_member
+    if session.user.role == :staff_member or session.user.staff_member
       st = session.user.staff_member
       ids = []
       [st.areas.branches, st.regions.areas.branches, st.branches, st.centers.branches].flatten.uniq.each{|branch|        

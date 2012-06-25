@@ -3,16 +3,15 @@ class StaffMember
   include Identified
   include Pdf::DaySheet if PDF_WRITER
 
-  property :id,            Serial
-  property :name,          String, :length => 100, :nullable => false
-  property :mobile_number, String, :length => 12,  :nullable => true
-  property :creation_date, Date,   :length => 12,  :nullable => true, :default => Date.today
-  property :address,       Text,   :lazy => true
-  property :father_name,   String, :length => 100, :nullable => true
-  property :gender,        Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
-  property :active,        Boolean,:default => true, :nullable => false
-  property :joined_date,   Date,   :length => 12, :default => Date.today
-  property :date_of_birth, Date,   :length => 12, :nullable => false, :default => Date.today
+  property :id,      Serial
+  property :name,    String, :length => 100, :nullable => false
+  property :mobile_number,  String, :length => 12,  :nullable => true
+  property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
+  property :address, Text, :lazy => true
+  property :father_name,  String, :length => 100, :nullable => true
+  property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
+  property :active,  Boolean, :default => true, :nullable => false
+  property :user_id,  Integer,  :nullable => true
   #  property :gender, Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
   # no designations, they are derived from the relations it has
 
@@ -39,8 +38,9 @@ class StaffMember
   has n, :weeksheets
   has n, :staff_member_attendances
 
-  belongs_to :user, :nullable => true
+  belongs_to :user
 
+  validates_is_unique :name
   validates_length :name, :min => 3
 
   def self.search(q, per_page)
@@ -69,10 +69,6 @@ class StaffMember
               :gender => row[headers[:gender]],
               :mobile_number => mobile, :active => true, :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
-  end
-
-  def self.none_user_staff_members
-    all(:user_id => nil, :order => [:name])
   end
 
   def clients(hash={}, owner_type = :created)

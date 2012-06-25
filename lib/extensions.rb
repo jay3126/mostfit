@@ -112,7 +112,7 @@ module Misfit
       end
 
       def _can_access?(route, params = nil)
-        user_role = self.get_user_role
+        user_role = self.role
         return true if user_role == :administrator
 
         @route = route
