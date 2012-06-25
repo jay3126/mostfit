@@ -47,6 +47,7 @@ class LoanApplications < Application
       final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
       @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
     end
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_branch_id => branch_id, :at_center_id => center_id) if @center
     render
   end
@@ -90,6 +91,7 @@ class LoanApplications < Application
     end
 
     # POPULATING RESPONSE AND OTHER VARIABLES
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     @loan_applications = loan_applications_facade.recently_added_applications_for_existing_clients(:at_center_id => center_id) if center_id
 
     # RENDER/RE-DIRECT
@@ -281,6 +283,7 @@ class LoanApplications < Application
     @branch = location_facade.get_location(branch_id) if branch_id
     @center = location_facade.get_location(center_id) if center_id
     @suspected_duplicates = loan_applications_facade.suspected_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     @cleared_or_confirmed_diplicate_loan_files = loan_applications_facade.clear_or_confirm_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
   end
 

@@ -4,7 +4,7 @@
       = "Log of Loan File #{@loan_file.loan_file_identifier}"
 
   - if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
-    %table{:style => "width:100%;"}
+    %table.dataTable{:style => "width:100%;"}
       %thead
         %tr
           %th{:width => '5%'}

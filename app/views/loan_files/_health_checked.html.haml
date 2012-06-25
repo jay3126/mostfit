@@ -2,7 +2,7 @@
   %h2 Recently recorded loan files for health check
   - status_map = @loan_files_at_center_at_branch_for_cycle.map{|x| x.health_check_status}.uniq.flatten
   - if @loan_files_at_center_at_branch_for_cycle && !@loan_files_at_center_at_branch_for_cycle.empty? && status_map.include?(Constants::Status::HEALTH_CHECK_APPROVED)
-    %table.form{:style => "width:100%;"}
+    %table.dataTable.form{:style => "width:100%;"}
       %thead
         %tr
           %th
