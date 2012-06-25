@@ -2,6 +2,7 @@ class CenterCycle
   include DataMapper::Resource
   include Constants::Space
   include Constants::CenterFormation
+  include Constants::Properties
 
   # In general, each center advances as a whole to a new cycle of loans
   # All activities to disburse new loans are within the 'scope' of this cycle
@@ -11,6 +12,7 @@ class CenterCycle
   
   property :id,                    Serial
   property :cycle_number,          Integer, :nullable => false, :min => 1, :default => lambda{ |obj, p| (CenterCycle.get_current_center_cycle(obj.center_id) + 1)}
+  property :center_id,             Integer, :nullable => false
   property :initiated_by_staff_id, Integer, :nullable => false
   property :initiated_on,          Date, :nullable => false
   property :closed_by_staff_id,    Integer, :nullable => true
@@ -21,22 +23,7 @@ class CenterCycle
   property :cgt_date_two,          Date, :nullable => true
   property :cgt_date_three,        Date, :nullable => true
   property :cgt_performed_by_staff,Integer, :nullable => true #Staff Member ID
-  property :cgt_scheduled_by_staff,Integer, :nullable => true
-  property :cgt_scheduled_by_user, Integer, :nullable => true
-  property :cgt_scheduled_at,      DateTime, :nullable => true
-
-  # mark CGT completion
-  property :cgt_completed_status,  Boolean, :nullable => true, :default => false
-  property :cgt_marked_by_staff,   Integer, :nullable => true #Staff Member ID
-  property :cgt_marked_by_user,    Integer, :nullable => true #User ID
-  property :cgt_marked_at,         DateTime, :nullable => true
-
-  # schedule GRT
-
-  property :grt_scheduled_on,      Date, :nullable => true
-  property :grt_by_staff,          Integer, :nullable => true
-  property :grt_scheduled_by_user, Integer, :nullable => true
-  property :grt_scheduled_at,      DateTime, :nullable => true
+  property :cgt_recorded_by_user,  Integer, :nullable => true
 
   # GRT completion
   property :grt_status,            Enum.send('[]', *GRT_STATUSES), :nullable => false, :default => GRT_NOT_DONE
@@ -47,24 +34,13 @@ class CenterCycle
 
   property :status,                Enum.send('[]', *CENTER_CYCLE_STATUSES), :nullable => false, :default => OPEN_CENTER_CYCLE_STATUS
   property :created_by,            Integer, :nullable => false
-  property :created_at,            DateTime, :nullable => false, :default => DateTime.now
+  property :created_at,            *CREATED_AT
+  property :updated_at,            DateTime, :nullable => false, :default => DateTime.now
 
-  belongs_to :center, :nullable => false
-  
   has n, :loan_applications
 
   validates_with_method :cycle_number, :method => :is_cycle_incremented?
   validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
-
-  def schedule_CGT(cgt_dates, performed_by, scheduled_by_staff, scheduled_by_user)
-    raise ArgumentError, "Three different dates for CGT must be supplied. Dates supplied were: #{cgt_dates}" unless ((cgt_dates.uniq).length == 3)
-    sorted_dates = cgt_dates.sort
-    self.cgt_date_one = sorted_dates[0]; self.cgt_date_two = sorted_dates[1]; self.cgt_date_three = sorted_dates[2]
-    self.cgt_performed_by_staff = performed_by
-    self.cgt_scheduled_by_staff = scheduled_by_staff; self.scheduled_by_user; scheduled_by_user
-    self.cgt_scheduled_at = DateTime.now
-    save
-  end
 
   def mark_GRT_status(with_status, by_staff, on_date, by_user)
     self.grt_status = with_status
