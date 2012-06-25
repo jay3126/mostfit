@@ -32,7 +32,15 @@ function dataTables(){
       "bPaginate": false,
       "bJQueryUI": true
     });
-  }else{
+  }
+  else if ($('table').hasClass('unsortable')){
+    $('table.unsortable').dataTable({
+      "sPaginationType": "full_numbers",
+      "bSort": false,
+      "bJQueryUI": true
+    });
+  }
+  else{
     $('table.dataTable').dataTable({
       "sPaginationType": "full_numbers",
       "bJQueryUI": true
