@@ -19,8 +19,11 @@
 %form{:action => url(:controller => :loan_applications, :action => :suspected_duplicates), :method => :get}
   = partial 'lib/biz_location_selector'
 - if @center
-  %h2
-    = "Center Cycle Number: #{center_cycle_number}"
+  - if center_cycle_number.eql?(0)
+    %h3 No Center cycle currently exists for this center
+  - else
+    %h2= "Center Cycle Number: #{center_cycle_number}"
+
 = partial :pending_duplicates
 
 %br

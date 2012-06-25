@@ -1,3 +1,4 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center_id)
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -10,9 +11,12 @@
   = "Client Verifications"
 %form{:action => url(:controller => :client_verifications, :action => :pending_verifications), :method => :get}
   = partial "lib/biz_location_selector"
+- if @center_id
+  - if center_cycle_number.eql?(0)
+    %h3 No Center cycle currently exists for this center
+  - else
+    %h2= "Center Cycle Number: #{center_cycle_number}"
 
-%br
-%hr
 = partial :pending
 
 %br

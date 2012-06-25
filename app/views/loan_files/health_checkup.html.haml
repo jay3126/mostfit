@@ -1,3 +1,4 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -15,7 +16,11 @@
 
 %form{:action => url(:controller => :loan_files, :action => :record_health_check_status), :method => :get}
   = partial "lib/biz_location_selector"
-%hr
+- if @center.id
+  - if center_cycle_number.eql?(0)
+    %h3 No Center cycle currently exists for this center
+  - else
+    %h2= "Center Cycle Number: #{center_cycle_number}"
 
 .shaded
   %h2 Loan files pending for health check
