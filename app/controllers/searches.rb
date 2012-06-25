@@ -10,6 +10,7 @@ class Searches < Application
       @staff_members = StaffMember.search(params[:query], per_page)
       @bookmarks     = Bookmark.search(params[:query], session.user, per_page)
       @users         = User.search(params[:query], per_page)
+      @loan_files    = LoanFile.search(params[:query], per_page)
     end
     @floating = true if request.xhr?
     render :layout => layout?

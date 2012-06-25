@@ -48,6 +48,10 @@ class LoanFile
     LoanFileInfo.new(id, loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_on, created_by_staff_id, created_by, created_at, loan_applications)
   end
 
+  def self.search(q, per_page=10)
+    all(:conditions => {:loan_file_identifier => q}, :limit => per_page)
+  end
+  
   def self.generate_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, by_user)
     query_params = {}
     query_params[:at_branch_id] = at_branch
