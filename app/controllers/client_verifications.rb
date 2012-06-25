@@ -17,7 +17,6 @@ class ClientVerifications < Application
     get_data(params)
     
     # Show the recently recorded verifications
-    facade = LoanApplicationsFacade.new(session.user)
     if params.key?('verification_status')
       params['verification_status'].keys.each do | cpv_type |
         params['verification_status'][cpv_type].keys.each do | id |
@@ -34,15 +33,15 @@ class ClientVerifications < Application
 
           if cpv_type == Constants::Verification::CPV1
             if verification_status == Constants::Verification::VERIFIED_ACCEPTED
-              facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
+              loan_applications_facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
             elsif verification_status == Constants::Verification::VERIFIED_REJECTED
-              facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
+              loan_applications_facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
             end
           elsif cpv_type == Constants::Verification::CPV2
             if verification_status == Constants::Verification::VERIFIED_ACCEPTED
-              facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
+              loan_applications_facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
             elsif verification_status == Constants::Verification::VERIFIED_REJECTED
-              facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
+              loan_applications_facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
             end
           end
         end
@@ -76,10 +75,9 @@ class ClientVerifications < Application
 
   def get_pending_and_recent_recorded_verification(params)
     # POPULATING RESPONSE AND OTHER VARIABLES
-    facade = LoanApplicationsFacade.new(session.user)
-    @loan_applications_pending_verification = facade.pending_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
+    @loan_applications_pending_verification = loan_applications_facade.pending_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
-    @loan_applications_recently_recorded = facade.recently_recorded_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
+    @loan_applications_recently_recorded = loan_applications_facade.recently_recorded_CPV({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id]})
   end
 
 end # ClientVerifications

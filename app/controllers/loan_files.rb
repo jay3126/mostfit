@@ -13,8 +13,6 @@ class LoanFiles < Application
 
   #for generating 
   def generate_loans(id)
-    client_facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user)
-    loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, session.user)
     return NotFound unless params['id'] 
     @loan_file = LoanFile.get(id)
     raise NotFound unless @loan_file
