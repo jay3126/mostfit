@@ -35,7 +35,8 @@
               %tr
                 %td
                   - is_eligible = LoanApplication.allow_new_loan_application?(client.id)
-                  - if (is_eligible)
+                  - client_loans = client_facade.get_all_loans_for_counterparty(client)
+                  - if (client_loans.blank? && is_eligible)
                     - checked_value =  params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:selected] == "on" ? "on" : nil
                     = check_box :name => "clients[#{client.id}][selected]", :class => "select" , :checked => checked_value
                 %td
@@ -47,7 +48,7 @@
                 %td
                   = client.address
                 %td
-                  - if (is_eligible)
+                  - if (client_loans.blank? && is_eligible)
                     = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}
         %table.narrow.form{:style => "width:100%;"}
           %tfoot

@@ -76,13 +76,9 @@ class LoanApplications < Application
         if center_cycle_number > 0
           center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
           client_from_center = client_facade.get_clients_administered(center_id, Date.today)
-          eligible_client = []
-          client_from_center.each do |client|
-            not_eligible_client = client_facade.get_all_loans_for_counterparty(client)
-            eligible_client << client.id if not_eligible_client.blank?
-          end
+          client_ids_from_center = client_from_center.collect{|client| client.id}
           client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
-          final_client_ids = eligible_client - client_ids_from_existing_loan_applications
+          final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
           @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
         end
       rescue => ex
