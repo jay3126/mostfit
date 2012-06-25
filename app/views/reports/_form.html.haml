@@ -109,7 +109,7 @@
         = BizLocation.get(biz_location_branch).name
     %a.expand_collapsed{:href => "#"}
       Change parameters
-  %div{:class => "#{params[:submit] ? 'collapsed' : ''}"}
+  %div{:class => "#{params[:submit] ? 'collapsed':''}"}
     = form_for(@report, :action => url(:show_report, :report_type => params[:report_type]), :method => :get, :class => "_disable_button_") do
       %table
         %tr

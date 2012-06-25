@@ -21,7 +21,7 @@ class CollectionsFacade
     loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
     return [] if loans.blank?
 
-    loans           = loans.select{|loan| loan.status == :disbursed_loan_status}
+    loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
     mf              = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
     meeting_date    = mf.get_meeting(biz_location, on_date)
     meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours

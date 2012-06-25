@@ -1,0 +1,43 @@
+= partial :form
+- unless @data.blank?
+  %br
+  %br
+  %table{:class => "report nojs"}
+    %tr
+      %th
+        Branch
+      %th
+        Center
+      %th
+        Loan Account No.
+      %th
+        Schedule Date
+      %th
+        Principal
+      %th
+        Interest
+      %th
+        Amount
+    - @data.each do |key, value|
+      %tr
+        %td
+          = value[:accounted_at]
+        %td
+          = value[:administered_at]
+        %td
+          = value[:lan]
+        %td
+          = value[:schedule_date]
+        %td
+          = value[:schedule_principal_due].to_s
+        %td
+          = value[:schedule_interest_due].to_s
+        %td
+          = value[:total_due].to_s
+- else
+  .shaded
+    %h3 No records found
+
+
+
+
