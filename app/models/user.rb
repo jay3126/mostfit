@@ -4,7 +4,7 @@ class User
   include Constants::User
 
   before :destroy, :prevent_destroying_admin
- # after  :save,    :set_staff_member
+  after  :save,    :set_staff_member
 
   property :id,           Serial
   property :login,        String, :nullable => false
