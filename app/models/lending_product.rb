@@ -14,6 +14,8 @@ class LendingProduct
 
   def money_amounts; [:amount]; end
 
+  def loan_money_amount; to_money_amount(:amount); end
+
   has 1, :loan_schedule_template
   has n, :lendings
 
