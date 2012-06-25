@@ -32,6 +32,7 @@ class LoanApplications < Application
           @errors = []
           @errors << "Please select a Staff Member" if by_staff.empty?
           @errors << "Please select a created on date" if params[:created_on].empty?
+          @errors << "Created on date must not be future date" if Date.parse(params[:created_on]) > Date.today
         else
           client_ids.each do |client_id|
             client = Client.get(client_id)
