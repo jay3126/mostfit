@@ -35,9 +35,9 @@ describe UserFacade do
     @bmd = Factory.create(:designation, {:name => "BM", :role_class => @supervisor, :location_level => @branch_level})
     @rod = Factory.create(:designation, {:name => "RO", :role_class => @executive, :location_level => @branch_level})
     @aod = Factory.create(:designation, {:name => "AO", :role_class => @support, :location_level => @branch_level})
-    @clerkd = Factory.create(:designation, {:name => "BM", :role_class => @supervisor, :location_level => @branch_level})
+    @clerkd = Factory.create(:designation, {:name => "Clerk", :role_class => @supervisor, :location_level => @branch_level})
     @amd = Factory.create(:designation, {:name => "AM", :role_class => @supervisor, :location_level => @area_level})
-    @rmd = Factory.create(:designation, {:name => "AM", :role_class => @supervisor, :location_level => @region_level})
+    @rmd = Factory.create(:designation, {:name => "RM", :role_class => @supervisor, :location_level => @region_level})
 
     staff_member_attributes = Factory.attributes_for(:staff_member)
 
