@@ -21,8 +21,9 @@
       %tr
         %th CGT recorded on:
         %td
-          = @center_cycle.cgt_recorded_at
-    - if @center_cycle.grt_status == nil
+          = @center_cycle.cgt_recorded_at.display
+
+    - if @center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE
       = form(:action => url(:controller => 'center_cycles', :action => 'record_grt'), :method => :post) do
         = hidden_field :name => :parent_location_id, :value => @branch.id
         = hidden_field :name => :child_location_id, :value => @center.id
@@ -55,7 +56,7 @@
           %tr
             %th GRT status:
             %td
-              = @center_cycle.grt_status
+              = @center_cycle.grt_status.humanize
           %tr
             %th GRT completed on:
             %td
@@ -63,8 +64,8 @@
           %tr
             %th GRT completed by:
             %td
-              = StaffMember.get(@center_cycle.grt_completed_by_staff).name
+              = StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
           %tr
             %th GRT recorded on:
             %td
-              = @center_cycle.grt_recorded_at
+              = @center_cycle.grt_recorded_at.display
