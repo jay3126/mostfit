@@ -19,16 +19,26 @@ describe LocationManagement do
 
     @performed_by = Factory(:staff_member).id
     @recorded_by  = Factory(:user).id
+    @recorded_by_id = @recorded_by.id
+
+    @choice_facade = FacadeFactory.instance.get_instance(FacadeFactory::CHOICE_FACADE, @recorded_by)
+  end
+
+  it "should disallow assigning a new staff member on the same date as an existing assignment" do
+    effective_on = Date.parse('2012-04-01')
+    LocationManagement.assign_manager_to_location(@s1, @l1, effective_on, @performed_by, @recorded_by_id)
+    lambda{ LocationManagement.assign_manager_to_location(@s2, @l1, effective_on, @performed_by, @recorded_by_id) }.should raise_error
   end
 
   it "should return the staff managing a location as per the effective date" do
     effective_on = Date.parse('2012-04-01')
-    LocationManagement.assign_manager_to_location(@s1, @l1, effective_on, @performed_by, @recorded_by)
+    LocationManagement.assign_manager_to_location(@s1, @l1, effective_on, @performed_by, @recorded_by_id)
 
     LocationManagement.staff_managing_location(@l1.id, effective_on - 1).should be_nil
 
     manager_on_date = LocationManagement.staff_managing_location(@l1.id, effective_on)
     manager_on_date.manager_staff_member.should == @s1
+    @choice_facade.staff_managing_location(@l1.id, effective_on).should == @s1
 
     manager_after_date = LocationManagement.staff_managing_location(@l1.id, effective_on + 1)
     manager_after_date.manager_staff_member.should == @s1
@@ -42,7 +52,7 @@ describe LocationManagement do
     later_instances.sort.should == instances.sort
 
     much_later = effective_on + 23
-    LocationManagement.assign_manager_to_location(@s1, @l2, much_later, @performed_by, @recorded_by)
+    LocationManagement.assign_manager_to_location(@s1, @l2, much_later, @performed_by, @recorded_by_id)
     much_later_instances = LocationManagement.locations_managed_by_staff(@s1.id, much_later)
     locations_managed = much_later_instances.sort.collect {|instance| instance.managed_location}
     locations_managed.should == [@l2, @l1]
@@ -50,10 +60,10 @@ describe LocationManagement do
 
   it "should return the series of staff managing a location as per the effective date when managers are assigned serially" do
     first_manage_date = Date.parse('2012-04-01')
-    LocationManagement.assign_manager_to_location(@s1, @l1, first_manage_date, @performed_by, @recorded_by)
+    LocationManagement.assign_manager_to_location(@s1, @l1, first_manage_date, @performed_by, @recorded_by_id)
     
     second_manage_date = Date.parse('2012-04-02')
-    LocationManagement.assign_manager_to_location(@s2, @l1, second_manage_date, @performed_by, @recorded_by)
+    LocationManagement.assign_manager_to_location(@s2, @l1, second_manage_date, @performed_by, @recorded_by_id)
 
     earlier_manager_instance = LocationManagement.staff_managing_location(@l1.id, first_manage_date - 1)
     earlier_manager_instance.should be_nil
@@ -76,8 +86,8 @@ describe LocationManagement do
   end
 
   it "should disallow assigning a staff as manager before the date that either the staff member or the location is created" do
-    lambda {LocationManagement.assign_manager_to_location(@s1, @l1, @staff_creation_date - 1, @performed_by, @recorded_by)}.should raise_error
-    lambda {LocationManagement.assign_manager_to_location(@s1, @l1, @location_creation_date - 1, @performed_by, @recorded_by)}.should raise_error
+    lambda {LocationManagement.assign_manager_to_location(@s1, @l1, @staff_creation_date - 1, @performed_by, @recorded_by_id)}.should raise_error
+    lambda {LocationManagement.assign_manager_to_location(@s1, @l1, @location_creation_date - 1, @performed_by, @recorded_by_id)}.should raise_error
   end
 
   it "should disallow assigning a staff as manager when the staff is inactive" do

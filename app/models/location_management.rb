@@ -11,7 +11,15 @@ class LocationManagement
   property :recorded_by,         *INTEGER_NOT_NULL
   property :created_at,          *CREATED_AT
 
-  validates_with_method :assignment_and_creation_dates_are_valid?, :staff_member_is_active?
+  validates_with_method :only_one_assignment_on_date?
+  validates_with_method :assignment_and_creation_dates_are_valid?
+  validates_with_method :staff_member_is_active?
+
+  def only_one_assignment_on_date?
+    already_assigned_on_date = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)
+    already_assigned_on_date ? [false, "There is already a staff member assigned to manage the location on the date: #{self.effective_on}"] :
+        true
+  end
 
   def assignment_and_creation_dates_are_valid?
     Validators::Assignments.is_valid_assignment_date?(effective_on, manager_staff_member, managed_location)

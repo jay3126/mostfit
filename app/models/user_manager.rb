@@ -42,7 +42,8 @@ class UserManager
   end
 
   def staff_managing_location(location_id, on_date = Date.today)
-    StaffMember.first(:creation_date.lte => on_date)
+    location_management = LocationManagement.staff_managing_location(location_id, on_date)
+    location_management ? location_management.manager_staff_member : nil
   end
 
   # This is the list of staff members that can potentially be assigned to manage any location at a particular location level
