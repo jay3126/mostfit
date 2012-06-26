@@ -33,4 +33,25 @@ class CenterCycles < Application
     end
   end
 
+  def mark_cgt_grt
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    @center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+    @cgt = CenterCycle.first(:center_id => @center.id, :cycle_number => 1)
+    render
+  end
+
+  def record_cgt_grt
+    @cgt = CenterCycle.first(:center_id => params[:child_location_id], :cycle_number => 1)
+    is_saved = @cgt.update(:cgt_performed_by_staff => params[:cgt_performed_by_staff], :cgt_date_one => params[:cgt_date_one], :cgt_date_two => params[:cgt_date_two], :cgt_date_three => params[:cgt_date_three])
+    if is_saved
+      message = {:notice => "Save Successfully"}
+    else
+      message = {:error => "#{@cgt.errors.first.to_s}"}
+    end
+    redirect url("/mark_cgt_grt"), :message => message
+  end
+  
 end # AccountBalances

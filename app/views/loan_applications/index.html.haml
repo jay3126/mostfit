@@ -58,7 +58,7 @@
         Center formation
       = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
       %br
-      = link_to "Record CGT, GRT", '#', :class => 'add_small'
+      = link_to "Record CGT, GRT", url(:controller => :center_cycles, :action => :mark_cgt_grt, :flag => 'true'), :class => 'add_small'
   %tr
     %td
       %br
