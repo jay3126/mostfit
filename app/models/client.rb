@@ -81,6 +81,8 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
 
+  def created_on; self.date_joined; end
+
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
       if center   = Center.first(:name => center_attr)

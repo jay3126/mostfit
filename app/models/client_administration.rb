@@ -18,6 +18,30 @@ class ClientAdministration
   def performed_by_staff; StaffMember.get(self.performed_by); end
   def recorded_by_user; User.get(self.recorded_by); end
 
+  validates_with_method :assignment_and_creation_dates_are_valid?
+  validates_with_method :can_only_assign_to_one_set_of_locations_on_date?
+  validates_with_method :counterparty_is_active?
+
+  def assignment_and_creation_dates_are_valid?
+    Validators::Assignments.is_valid_assignment_date?(effective_on, counterparty, administered_at_location, registered_at_location)
+  end
+
+  def can_only_assign_to_one_set_of_locations_on_date?
+    administered_at_on_date = ClientAdministration.first(:counterparty_type => self.counterparty_type, :counterparty_id => self.counterparty_id, :administered_at => self.administered_at, :effective_on => self.effective_on)
+    registered_at_on_date = ClientAdministration.first(:counterparty_type => self.counterparty_type, :counterparty_id => self.counterparty_id, :registered_at => self.registered_at, :effective_on => self.effective_on)
+    (administered_at_on_date or registered_at_on_date) ? [false, "The client is already assigned to location on the same date: #{effective_on}"] :
+        true
+  end
+
+  def counterparty_is_active?
+    if self.counterparty
+      validate_value = self.counterparty.active ? true :
+          [false, "Inactive client cannot be re-assigned"]
+      return validate_value
+    end
+    true
+  end
+
   # Assign the administered_at and registered_at BizLocation instances to the counterparty performed by staff and recorded by user on the specified effective date
   def self.assign(administered_at, registered_at, to_counterparty, performed_by, recorded_by, effective_on = Date.today)
     raise ArgumentError, "Locations to be assigned must be instances of BizLocation" unless (administered_at.is_a?(BizLocation) and registered_at.is_a?(BizLocation))
@@ -106,16 +130,19 @@ class ClientAdministration
     locations[:counterparty_type]                = Constants::Transaction::CLIENT
     locations[:effective_on.lte]                 = on_date
     administration                               = all(locations)
-    given_location                               = BizLocation.get(given_location_id)
-    administration.each { |each_admin|
-      client = each_admin.counterparty
 
+    all_clients = (administration.collect {|admin_instance| admin_instance.counterparty}).uniq
+
+    all_clients.each { |client|
+      current_administration = get_locations(client, on_date)
       if administered_or_registered_choice == COUNTERPARTY_ADMINISTERED_AT
-        clients.push(client) if (given_location == each_admin.administered_at_location)
+        administered_at = current_administration[COUNTERPARTY_ADMINISTERED_AT]
+        clients.push(client) if (administered_at and (administered_at.id == given_location_id))
       end
 
       if administered_or_registered_choice == COUNTERPARTY_REGISTERED_AT
-        clients.push(client) if (given_location == each_admin.registered_at_location)
+        registered_at = current_administration[COUNTERPARTY_REGISTERED_AT]
+        clients.push(client) if (registered_at and (registered_at.id == given_location_id))
       end
     }
     clients.uniq
