@@ -26,6 +26,7 @@ class LoanApplications < Application
     if request.method == :post
       created_on = Date.parse(params[:created_on])
       center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+
       if params[:clients]
         client_ids = params[:clients].keys
         if by_staff.empty? or params[:created_on].empty?
@@ -35,8 +36,10 @@ class LoanApplications < Application
           @errors << "Created on date must not be future date" if Date.parse(params[:created_on]) > Date.today
         else
           client_ids.each do |client_id|
+            loan_amount_str = params[:clients][client_id][:amount]
+            loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
             client = Client.get(client_id)
-            loan_application = loan_applications_facade.create_for_client(client, params[:clients][client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if params[:clients][client_id][:selected] == "on"
+            loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, params[:clients][client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if params[:clients][client_id][:selected] == "on"
             save_status = loan_application.save if loan_application
             @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
           end

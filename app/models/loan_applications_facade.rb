@@ -1,9 +1,10 @@
 # All operations on loan applications and underlying associations go through this facade
 class LoanApplicationsFacade < StandardFacade
 
-  def create_for_client(client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
+  def create_for_client(loan_money_amount, client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
     hash = client.to_loan_application + {
-      :amount              => loan_amount,
+      :amount              => loan_money_amount.amount.to_i,
+      :currency            => loan_money_amount.currency,
       :created_by_staff_id => by_staff,
       :at_branch_id        => at_branch,
       :at_center_id        => at_center,
