@@ -25,21 +25,23 @@ class LoanFile
   include Constants::Status
   include Pdf::LoanSchedule if PDF_WRITER
 
-  property :id,                   Serial
-  property :at_branch_id,         Integer, :nullable => false
-  property :at_center_id,         Integer, :nullable => false
-  property :for_cycle_number,     Integer, :nullable => false
-  property :loan_file_identifier, String, :nullable => false,
+  property :id,                           Serial
+  property :at_branch_id,                 Integer, :nullable => false
+  property :at_center_id,                 Integer, :nullable => false
+  property :for_cycle_number,             Integer, :nullable => false
+  property :loan_file_identifier,         String,  :nullable => false,
     :default => lambda {|obj, p| "#{obj.at_branch_id}_#{obj.at_center_id}_#{obj.created_on.strftime('%d-%m-%Y')}"}
-  property :scheduled_disbursal_date, Date, :nullable => false
+  property :scheduled_disbursal_date,     Date, :nullable => false
   property :scheduled_first_payment_date, Date, :nullable => false
-  property :created_by_staff_id,  Integer, :nullable => false
-  property :created_on,           Date, :nullable => false
-  property :created_by,           Integer, :nullable => false
-  property :created_at,           DateTime, :nullable => false, :default => DateTime.now
-  property :health_check_status,  Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => NEW_STATUS
-  property :health_status_remark, Text, :nullable => true, :lazy => true
-  
+  property :created_by_staff_id,          Integer, :nullable => false
+  property :created_on,                   Date, :nullable => false
+  property :created_by,                   Integer, :nullable => false
+  property :created_at,                   DateTime, :nullable => false, :default => DateTime.now
+  property :health_check_status,          Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => NEW_STATUS
+  property :health_status_remark,         Text, :nullable => true, :lazy => true
+  property :health_check_approved_by,     Integer, :nullable => false
+  property :health_check_approved_on,     Integer, :nullable => false
+
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
 
