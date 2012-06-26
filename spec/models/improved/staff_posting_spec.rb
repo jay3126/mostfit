@@ -45,6 +45,11 @@ describe StaffPosting do
     s2_date_staff.length.should == 2
     s2_date_staff.first.staff_assigned.should == @s2
     s2_date_staff.last.staff_assigned.should == @s1
+
+    staff_list = @choice_facade.all_staff_at_location(@l1.id, s2_date)
+    staff_list.length.should == 2
+    staff_list.include?(@s1).should be_true
+    staff_list.include?(@s2).should be_true
   end
   
   it "should return the staff assigned to a location as per the effective date" do

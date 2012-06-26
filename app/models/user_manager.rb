@@ -37,8 +37,11 @@ class UserManager
     operator
   end
 
-  def all_staff_at_location(location_id, on_date = Date.today) 
-    StaffMember.all(:creation_date.lte => on_date)
+  def all_staff_at_location(location_id, on_date = Date.today)
+    staff_postings = StaffPosting.get_staff_assigned(location_id, on_date)
+    return staff_postings if staff_postings.empty?
+
+    staff_postings.collect {|posting| posting.staff_assigned}
   end
 
   def staff_managing_location(location_id, on_date = Date.today)
