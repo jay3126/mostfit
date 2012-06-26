@@ -148,17 +148,6 @@ class LoanApplicationsFacade < StandardFacade
     LoanApplication.add_to_loan_file(on_loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, user_id, *loan_application_id)
   end
 
-  # Recently Added Loan Applications
-  def recently_added_applicants(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
-    LoanApplication.recently_created_new_loan_applicants(search_options)
-  end
-
-  def recently_added_applications_for_existing_clients(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
-    LoanApplication.recently_created_new_loan_applications_from_existing_clients(search_options)
-  end
-
   # De-dupe
 
   # returns all loan applications which are pending for de-dupe process
@@ -175,12 +164,6 @@ class LoanApplicationsFacade < StandardFacade
   def suspected_duplicate(search_options = {})
     search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.suspected_duplicate(search_options)
-  end
-
-  # Return all loan applications which has status cleared_not_duplicate and confirmed_duplicate
-  def clear_or_confirm_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
-    LoanApplication.clear_or_confirm_duplicate(search_options)
   end
 
   # set loan application status as cleared_not_duplicate
