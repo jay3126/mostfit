@@ -157,7 +157,7 @@ class LoanApplications < Application
         loan_amount_currency = loan_money_amount.currency
         params[:loan_application][:amount] = loan_amount
         params[:loan_application][:currency] = loan_amount_currency
-        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id,  :created_by_staff_id => created_by, :created_by_user_id => session.user.id}
+        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id, :created_by_user_id => session.user.id}
         @loan_application = LoanApplication.new(params[:loan_application])
 
         if @loan_application.save

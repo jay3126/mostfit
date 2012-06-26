@@ -37,7 +37,7 @@
       %th Applied for amount
       %td
         - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.amount}).uniq
-        = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :prompt => 'Select'
+        = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => @loan_application.amount, :prompt => 'Select'
     %tr
       %th Address
       %td
@@ -55,9 +55,5 @@
       %tfoot
         %tr
           %td
-            %b Loan Application created by
-            = select :created_by_staff_id, :text_method => :name, :value_method => :id, :collection => StaffMember.all, :prompt => "Select staff member"
-          %td
             = submit 'Update', :class => "grey_button"
-          %td
             = link_to 'Cancel',"/loan_applications/#{@loan_application.id}", :class => "grey_button"
