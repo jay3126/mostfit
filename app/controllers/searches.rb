@@ -11,6 +11,8 @@ class Searches < Application
       @bookmarks     = Bookmark.search(params[:query], session.user, per_page)
       @users         = User.search(params[:query], per_page)
       @loan_files    = LoanFile.search(params[:query], per_page)
+      loan_app_condition = {:conditions => ["client_reference1 = ? or client_reference2 = ?",params[:query], params[:query]], :limit => per_page}
+      @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition)
     end
     @floating = true if request.xhr?
     render :layout => layout?

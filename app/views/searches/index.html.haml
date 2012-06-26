@@ -3,7 +3,7 @@
     %a.closeButton
       [close]
   - atleast_one = false
-  - [["biz_locations", [:name]], ["new_clients", [:name]], ["client_groups", [:name]], ["lendings", [:applied_amount, :lan]], ["staff_members", [:name]], ["bookmarks",[:name]], ["users", [:login]], ['loan_files', [:loan_file_identifier]]].each do |model, functions|
+  - [["biz_locations", [:name]], ["new_clients", [:name]], ["client_groups", [:name]], ["lendings", [:applied_amount, :lan]], ["staff_members", [:name]], ["bookmarks",[:name]], ["users", [:login]], ['loan_files', [:loan_file_identifier]], ['loan_applications', [:client_reference1_type, :client_reference1, :client_reference2_type, :client_reference2]]].each do |model, functions|
     - objects = instance_variable_get("@#{model}")
     - if objects and count = objects.length and count > 0
       - atleast_one = true
