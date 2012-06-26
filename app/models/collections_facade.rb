@@ -108,8 +108,8 @@ class CollectionsFacade
     collection_sheet = []
 
     #Find all centers by loan history on particular date
-    biz_locations = LocationManagement.get_locations_for_staff(@user, on_date)
-
+    location_manage = LocationManagement.locations_managed_by_staff(@user.id, on_date)
+    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
     biz_locations.each do |biz_location|
       collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
     end

@@ -77,7 +77,8 @@ class StaffMembers < Application
     raise NotFound unless @staff_member
     @date       = params[:date] ? parse_date(params[:date]) : get_effective_date
     @date       = @date.holiday_bump
-    @biz_locations = LocationManagement.get_locations_for_staff(@staff_member, @date)
+    location_manage = LocationManagement.locations_managed_by_staff(@staff_member.id, @date)
+    @biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
     @weeksheets = CollectionsFacade.new(@staff_member.id).get_collection_sheet_for_staff(@date)
     if params[:format] == "pdf"
       file = @staff_member.generate_collection_pdf(@date)

@@ -7,7 +7,8 @@ module Pdf
       filename = File.join(folder, "collection_#{self.id}_#{date.strftime('%Y_%m_%d')}.pdf")
       # center_ids = LoanHistory.all(:date => [date, date.holidays_shifted_today].uniq, :fields => [:loan_id, :date, :center_id], :status => [:disbursed, :outstanding]).map{|x| x.center_id}.uniq
       # centers = self.centers(:id => center_ids).sort_by{|x| x.name}
-      @biz_locations = LocationManagement.get_locations_for_staff(self, date)
+      location_manage = LocationManagement.locations_managed_by_staff(self.id, date)
+      @biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
       pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
       pdf.select_font "Times-Roman"
       pdf.text "Daily Collection Sheet for #{self.name} for #{date}", :font_size => 24, :justification => :center
