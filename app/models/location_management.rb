@@ -58,6 +58,15 @@ class LocationManagement
     location_manager
   end
 
+  def self.all_staffs_managing_location(location_id, on_date = Date.today)
+    Validators::Arguments.not_nil?(location_id, on_date)
+    staff_query = {}
+    staff_query[:managed_location_id] = location_id
+    staff_query[:effective_on.lte]    = on_date
+    staff_query[:order]               = [:effective_on.desc]
+    all(staff_query)
+  end
+
   def self.staff_managing_location(location_id, on_date = Date.today)
     Validators::Arguments.not_nil?(location_id, on_date)
     staff_query = {}

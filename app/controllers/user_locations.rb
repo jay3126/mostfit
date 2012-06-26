@@ -86,8 +86,8 @@ class UserLocations < Application
   end
 
   def staffs_on_biz_location
-    @biz_location = BizLocation.get params[:id]
-    @staffs = LocationManagement.get_staffs_on_location(@biz_location, get_effective_date)
+    @biz_location     = BizLocation.get params[:id]
+    @location_manages = LocationManagement.all_staffs_managing_location(@biz_location.id, get_effective_date)
     partial 'staffs_on_biz_location'
   end
 
