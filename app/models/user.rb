@@ -51,6 +51,23 @@ class User
     end
   end
 
+  def allow_route?(route, params)
+    @route = route
+    @params = params
+    @controller = (route[:namespace] ? route[:namespace] + "/" : "" ) + route[:controller]
+    @model = route[:controller].singularize.to_sym
+    @action = route[:action]
+    
+    filename = File.join(Merb.root, 'config', 'acl.yml')
+    acl_structure = YAML.load_file(filename)
+    @permissions = acl_structure[self.role.to_s]
+    return true if @permissions == "all"
+    return false if @permissions[@controller].blank?
+    return true if @permissions[@controller].include?("all")
+    return true if @permissions[@controller].include?(@action)
+    return false
+  end
+
   def self.roles
     roles = []
     Constants::User::ROLE_CLASSES.each_with_index{|v, idx|
@@ -64,7 +81,7 @@ class User
   end
 
   def admin?
-    role == :administrator
+    role == :operator
   end
   
   def crud_rights
@@ -87,7 +104,7 @@ class User
 
   def method_missing(name, params)
     if x = /can_\w+\?/.match(name.to_s)
-      return true if role == :administrator
+      return true if role == :operator
       function = x[0].split("_")[1].gsub("?","").to_sym
       puts function
       raise NoMethodError if not ([:edit, :update, :create, :new, :delete, :destroy].include?(function))
@@ -103,7 +120,7 @@ class User
  private
   def prevent_destroying_admin
     if id == 1
-      errors.add(:login, "Cannot delete #{login} (the admin user).")
+      errors.add(:login, "Cannot delete #{login} (the operator).")
       throw :halt
     end                                                             
   end

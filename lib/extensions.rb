@@ -112,20 +112,7 @@ module Misfit
       end
 
       def _can_access?(route, params = nil)
-        user_role = self.role
-        return true if user_role == :administrator
-
-        @route = route
-        @params = params
-        @controller = (route[:namespace] ? route[:namespace] + "/" : "" ) + route[:controller]
-        @model = route[:controller].singularize.to_sym
-        @action = route[:action]
-
-        if user_role == :supervisor
-          return true if [:loan_applications].include?(@model)
-          return true unless [:edit, :update, :delete, :destroy, :bulk_create, :bulk_new].include?(@action.to_sym)
-          return false
-        end
+        self.allow_route?(route, params)
       end
     end#User
 

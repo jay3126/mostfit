@@ -1,0 +1,27 @@
+# EXAMPLE: this is how you define a particular role type and what controllers and actions it can access.
+# an "all" under a controller means all actions under that controller are accessible.
+# an "all" under a rolename means all controllers and subsequent actions under them are all accessible to that rolename
+
+# <rolename1> :
+#   <controller1> :
+#     - <action1>
+#     - <action2>
+#     - <action3>
+#   <controller2> :
+#     - all
+#   <controller3> :
+#     - <action1>
+#     - <action3>
+# <rolename2> : all
+      
+
+operator : all
+administrator :
+  loan_applications : 
+    - all      
+supervisor : 
+  loan_applications : 
+    - create
+    - edit
+    - delete
+  
