@@ -26,8 +26,12 @@ class LocationManagement
   end
   
   def staff_member_is_active?
-    self.manager_staff_member.active ? true : 
+    if self.manager_staff_member
+      validate_value = self.manager_staff_member.active ? true :
         [false, "Inactive staff member cannot be assigned to manage a location"]
+      return validate_value
+    end
+    true
   end
 
   def managed_location; BizLocation.get(self.managed_location_id); end
