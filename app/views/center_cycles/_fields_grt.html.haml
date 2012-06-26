@@ -1,0 +1,70 @@
+- if @center_cycle && !@center_cycle.blank?
+  %table.form
+    %h1
+      = "CGT"
+      %tr
+        %th Date 1:
+        %td
+          = @center_cycle.cgt_date_one
+      %tr
+        %th Date 2:
+        %td
+          = @center_cycle.cgt_date_two
+      %tr
+        %th Date 3:
+        %td
+          = @center_cycle.cgt_date_three
+      %tr
+        %th CGT recorded by:
+        %td
+          = StaffMember.get(@center_cycle.cgt_performed_by_staff).name
+      %tr
+        %th CGT recorded on:
+        %td
+          = @center_cycle.cgt_recorded_at
+    - if @center_cycle.grt_status == nil
+      = form(:action => url(:controller => 'center_cycles', :action => 'record_grt'), :method => :post) do
+        = hidden_field :name => :parent_location_id, :value => @branch.id
+        = hidden_field :name => :child_location_id, :value => @center.id
+        = hidden_field :name => 'center_cycle_number', :value => @center_cycle_number
+        %table.form
+          %h1
+            = "Record GRT"
+            %tr
+              %th GRT status:
+              %td
+                Pass
+                %input{:name => "grt_status", :type => "radio", :value => Constants::CenterFormation::GRT_PASSED}
+              %td
+                Fail
+                %input{:name => "grt_status", :type => "radio", :value => Constants::CenterFormation::GRT_FAILED}
+        %table.narrow.form{:style => "width:100%;"}
+          %tfoot
+            %tr
+              %td
+                %b GRT recorded by:
+                = select :grt_completed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"
+              %td
+                %b GRT recorded on:
+                = date_select :grt_completed_on, Date.today
+                = submit 'Save', :class => "grey_button"
+    - else
+      %table.form
+        %h1
+          = "GRT"
+          %tr
+            %th GRT status:
+            %td
+              = @center_cycle.grt_status
+          %tr
+            %th GRT completed on:
+            %td
+              = @center_cycle.grt_completed_on
+          %tr
+            %th GRT completed by:
+            %td
+              = StaffMember.get(@center_cycle.grt_completed_by_staff).name
+          %tr
+            %th GRT recorded on:
+            %td
+              = @center_cycle.grt_recorded_at

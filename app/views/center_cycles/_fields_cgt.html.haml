@@ -1,0 +1,26 @@
+- if @center_cycle && !@center_cycle.blank?
+  = form(:action => url(:controller => 'center_cycles', :action => 'record_cgt'), :method => :post) do
+    = hidden_field :name => :parent_location_id, :value => @branch.id
+    = hidden_field :name => :child_location_id, :value => @center.id
+    = hidden_field :name => 'center_cycle_number', :value => @center_cycle_number
+    %table.form
+      %h1
+        = "Record CGT"
+        %tr
+          %th Date 1:
+          %td
+            = date_select :cgt_date_one
+        %tr
+          %th Date 2:
+          %td
+            = date_select :cgt_date_two
+        %tr
+          %th Date 3:
+          %td
+            = date_select :cgt_date_three
+        %table.narrow.form{:style => "width:100%;"}
+          %tfoot
+            %tr
+              %td
+                %b CGT recorded by:
+                = select :cgt_performed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"

@@ -13,6 +13,7 @@ Merb::Router.prepare do
   resources :loan_files,               :id => %r(\d+)
   resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get]}
   resources :overlap_report_responses, :id => %r(\d+)
+  resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
   #book-keeping from bk ends
 
   resources :branch_eod_summaries
