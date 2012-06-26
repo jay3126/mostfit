@@ -46,6 +46,7 @@ class LoanApplication
   include ClientValidations
   include ClientAgeValidations
   include Constants::Properties
+  include Comparable
 
   property :id,                             Serial
   property :status,                         Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -95,6 +96,12 @@ class LoanApplication
 
   def money_amounts; [:amount]; end
   def loan_money_amount; to_money_amount(:amount); end
+
+  def <=>(other)
+    return nil unless (other.respond_to?(:updated_at) and other.respond_to?(:created_at))
+    compare_on_updated_at = other.updated_at <=> self.updated_at
+    (compare_on_updated_at == 0) ? (other.created_at <=> self.created_at) : compare_on_updated_at
+  end
 
   # Returns a list of the client IDs for loan applications in progress at the center
   # for the specified center cycle

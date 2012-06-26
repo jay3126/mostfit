@@ -1,7 +1,7 @@
 .shaded
   %h2 All loan applications
   - if @all_loan_applications and not @all_loan_applications.empty?
-    %table.dataTable
+    %table.form.unsortable
       %thead
         %tr
           %th Applicant Name
@@ -16,8 +16,9 @@
           %th Location
           %th Pincode
           %th Status
+          %th Updated at
       %tbody
-        - @all_loan_applications.sort.reverse.each do |loan_application|
+        - @all_loan_applications.sort.each do |loan_application|
           %tr
             %td
               = loan_application.client_name
@@ -43,5 +44,7 @@
               = loan_application.client_pincode
             %td
               = loan_application.status.humanize
+            %td
+              = loan_application.updated_at
   - else
     %h3 No loan application found
