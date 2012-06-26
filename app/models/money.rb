@@ -61,7 +61,11 @@ class Money
 
   # The string representation of Money as an amount in regular units and the currency
   def to_s
-    "#{Money.format_decimal_places(@amount, @currency)} #{@currency}"
+    "#{to_regular_amount} #{@currency}"
+  end
+
+  def to_regular_amount
+    "#{Money.format_decimal_places(@amount, @currency)}"
   end
 
   # Use this to parse a money amount in regular units as a string

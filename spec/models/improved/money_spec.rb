@@ -63,19 +63,27 @@ describe Money do
     amount_in_paise = 7103
     m1 = Money.new(amount_in_paise, @INR)
     m1.to_s.should == "71.03 INR"
+    m1.to_regular_amount.should == "71.03"
 
     amount_in_paise = 103
     m1 = Money.new(amount_in_paise, @INR)
     m1.to_s.should == "1.03 INR"
+    m1.to_regular_amount.should == "1.03"
 
     amount_in_paise = 23
-    Money.new(amount_in_paise, @INR).to_s.should == "0.23 INR"
+    m1 = Money.new(amount_in_paise, @INR)
+    m1.to_s.should == "0.23 INR"
+    m1.to_regular_amount.should == "0.23"
 
     amount_in_paise = 7
-    Money.new(amount_in_paise, @INR).to_s.should == "0.07 INR"
+    m1 = Money.new(amount_in_paise, @INR)
+    m1.to_s.should == "0.07 INR"
+    m1.to_regular_amount.should == "0.07"
 
     amount_in_paise = 0
-    Money.new(amount_in_paise, @INR).to_s.should == "0.00 INR"
+    m1 = Money.new(amount_in_paise, @INR)
+    m1.to_s.should == "0.00 INR"
+    m1.to_regular_amount.should == "0.00"
   end
 
   it "should format the amount for Japanese Yen without decimal separators" do
@@ -84,13 +92,19 @@ describe Money do
     m1.to_s.should == amount_in_yen.to_s + " JPY"
 
     amount_in_yen = 351
-    Money.new(amount_in_yen, @YEN).to_s.should == "351 JPY"
+    m1 = Money.new(amount_in_yen, @YEN)
+    m1.to_s.should == "351 JPY"
+    m1.to_regular_amount.should == "351"
 
     amount_in_yen = 51
-    Money.new(amount_in_yen, @YEN).to_s.should == "51 JPY"
+    m1 = Money.new(amount_in_yen, @YEN)
+    m1.to_s.should == "51 JPY"
+    m1.to_regular_amount.should == "51"
 
     amount_in_yen = 1
-    Money.new(amount_in_yen, @YEN).to_s.should == "1 JPY"
+    m1 = Money.new(amount_in_yen, @YEN)
+    m1.to_s.should == "1 JPY"
+    m1.to_regular_amount.should == "1"
   end
 
   it "should multiply a money amount as expected" do
