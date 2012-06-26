@@ -24,6 +24,7 @@ class CenterCycle
   property :cgt_date_three,        Date, :nullable => true
   property :cgt_performed_by_staff,Integer, :nullable => true #Staff Member ID
   property :cgt_recorded_by_user,  Integer, :nullable => true
+  property :cgt_recorded_at,       DateTime, :nullable => true
 
   # GRT completion
   property :grt_status,            Enum.send('[]', *GRT_STATUSES), :nullable => false, :default => GRT_NOT_DONE

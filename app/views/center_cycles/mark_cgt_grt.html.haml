@@ -1,4 +1,5 @@
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+- debugger
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     .error
@@ -17,7 +18,7 @@
 %form{:action => url(:controller => :center_cycles, :action => :mark_cgt_grt), :method => :get}
   = partial "lib/biz_location_selector"
 
-- if @cgt && !@cgt.blank?
+- if @center_cycle && !@center_cycle.blank?
   = form(:action => url(:controller => 'center_cycles', :action => 'record_cgt_grt'), :method => :post) do
     = hidden_field :name => :parent_location_id, :value => @branch.id
     = hidden_field :name => :child_location_id, :value => @center.id
@@ -45,5 +46,5 @@
                 = select :cgt_performed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"
               %td
                 %b On
-                =# date_select :cgt_date_three, Date.today
+                = date_select :cgt_recorded_at, Date.today
                 = submit 'Save', :class => "grey_button"
