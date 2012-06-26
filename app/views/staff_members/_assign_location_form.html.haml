@@ -1,21 +1,26 @@
-.menu-strip
+%p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
   = link_to 'Assign Location', "#", :onclick =>"jQuery('#location_div').toggle(); return false;", :class => 'add'
-#location_div(style = "display : none")
-  = form_for(@staff_member, :action => url(:controller => :staff_members, :action=> :assign_location_to_staff, :id => @staff_member.id)) do
-    %table
-      %tr
-        %th
-          Location
-        %td
-          = select :name => 'staff_member[location_id]', :collection => BizLocation.all.aggregate(:id, :name)
-      %tr
-        %th
-          Effective Date
-        %td
-          = date_select 'staff_member[effective_on]', Date.today, {:id => "effective_date"}
-    = submit "Assign"
-%br
-- if @biz_locations.count == 0
+  #location_div(style = "display : none")
+    = form_for(@staff_member, :action => url(:controller => :staff_members, :action=> :assign_location_to_staff, :id => @staff_member.id)) do
+      %table
+        %tr
+          %th
+            Location
+          %td
+            = select :name => 'staff_member[managed_location_id]', :collection => BizLocation.all.aggregate(:id, :name)
+        %tr
+          %th
+            Perfomed By
+          %td
+            = select :name => 'staff_member[perfomed_by]', :collection => @staff_members.map{|staff| [staff.id, staff.name]}
+        %tr
+          %th
+            Effective Date
+          %td
+            = date_select 'staff_member[effective_on]', Date.today, {:id => "effective_date"}
+      = submit "Assign"
+  %br
+- if @manage_locations.count == 0
   %p
     %i No Location Mapping have been created yet.
 - else
@@ -23,23 +28,28 @@
     %thead
       %tr
         %th
-          id
+          location id
         %th
-          Name
+          location Name
         %th
           Location Level
         %th
-          Created On
-    - for biz_location in @biz_locations
+          Perfomed By
+        %th
+          Effective Date for manage
+    - @manage_locations.each do |management|
+      - location = management.managed_location
       %tr
         %td
-          = biz_location.id
+          = location.id
         %td
-          - if biz_location.location_level.level == 0
-            = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id)
+          - if location.location_level.level == 0
+            = link_to location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => location.id)
           - else
-            = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
+            = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
         %td
-          = biz_location.location_level.name
+          = location.location_level.name
         %td
-          = biz_location.creation_date.strftime("%Y-%m-%d")
+          = management.manager_staff_member.name
+        %td
+          = management.effective_on

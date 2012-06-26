@@ -17,8 +17,7 @@ class LocationManagement
 
   def only_one_assignment_on_date?
     already_assigned_on_date = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)
-    already_assigned_on_date ? [false, "There is already a staff member assigned to manage the location on the date: #{self.effective_on}"] :
-        true
+    already_assigned_on_date ? [false, "There is already a staff member assigned to manage the location on the date: #{self.effective_on}"] : true
   end
 
   def assignment_and_creation_dates_are_valid?

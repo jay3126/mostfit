@@ -117,8 +117,8 @@ class StaffMembers < Application
     @date = params[:date] ? Date.parse(params[:date]) : Date.today
     @option = params[:option]
     raise NotFound unless @staff_member
-    @manages = {:regions => @staff_member.regions, :areas => @staff_member.areas, :branches => @staff_member.branches, :centers => @staff_member.centers}
-    @biz_locations = LocationManagement.get_locations_for_staff(@staff_member, get_effective_date)
+    @manage_locations = LocationManagement.locations_managed_by_staff(@staff_member.id, get_effective_date)
+    @staff_members = StaffMember.all - [@staff_member]
     display @staff_member
   end
 
@@ -193,14 +193,16 @@ class StaffMembers < Application
     #GATE-KEEPING
 
     staff_id     = params[:id]
-    location_id  = params[:staff_member][:location_id]
+    location_id  = params[:staff_member][:managed_location_id]
     effective_on = params[:staff_member][:effective_on]
-    recorded_by  = session.user
+    recorded_by  = session.user.id
+    perfomed_by  = params[:staff_member][:perfomed_by]
     @staff       = StaffMember.get staff_id
 
     #VALIDATION
 
     @message = {:error => "Please select location"} if location_id.blank?
+    @message = {:error => "Please select Perfomed by"} if perfomed_by.blank?
     @message = {:error => "Effective Date cannot blank"} if effective_on.blank?
 
     #OPERATION
@@ -208,7 +210,7 @@ class StaffMembers < Application
     if @message[:error].blank?
       begin
         biz_location    = BizLocation.get location_id
-        assign_location = LocationManagement.new.assign(@staff, biz_location, effective_on, recorded_by)
+        assign_location = LocationManagement.assign_manager_to_location(@staff, biz_location, effective_on, perfomed_by, recorded_by)
         if assign_location.new?
           @message = {:notice => "Staff assignment fail"}
         else
