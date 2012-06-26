@@ -146,19 +146,71 @@ Merb::BootLoader.after_app_loads do
   Merb.add_mime_type(:pdf, :to_pdf, %w[application/pdf], "Content-Encoding" => "gzip")
 
   begin
-    if User.all.empty?
-      u = User.new(:login => 'admin', :password => 'password', :password_confirmation => 'password', :role => :admin)
-      if u.save
-        Merb.logger.info("The initial user 'admin' was created (password is set to 'password')...")
+    if LocationLevel.all(:level => 0).empty?
+      location_level = LocationLevel.new(:name => 'Center', :level => 0)
+      if location_level.save
+        Merb.logger.info("The initial #{location_level.class} #{location_level.name} with level #{location_level.level} was created")
       else
-        Merb.logger.info("Couldn't create the 'admin' user...")
+        Merb.logger.info("Could not create the #{location_level.name} #{location_level.class}...")
+        location_level.errors do |e|
+          Merb.logger.info(e)
+        end
+      end
+    end
+  rescue
+    Merb.logger.info("Couldn't create the 'Center' Location Level, possibly unable to access the database.")
+  end
+
+  begin
+    if Designation.all(:role_class => Constants::User::OPERATOR).empty?
+      location_level = LocationLevel.all(:level => 0).first
+      designation = Designation.new(:name => 'SuperUser', :role_class => Constants::User::OPERATOR, :location_level => location_level)
+      if designation.save
+        Merb.logger.info("The initial #{designation.class} #{designation.name} with level #{designation.level} was created")
+      else
+        Merb.logger.info("Could not create the #{designation.name} #{designation.class}...")
+        designation.errors.each do |e|
+          Merb.logger.info(e)
+        end
+      end
+    end
+  rescue
+    Merb.logger.info("Couldn't create the 'SuperUser' designation, possibly unable to access the database.")
+  end
+
+  begin
+    designation = Designation.all(:role_class => Constants::User::OPERATOR).first
+    if StaffMember.all(:designation => designation).empty?
+      staff_member = StaffMember.new(:name => 'SuperUser', :designation => designation)
+      if staff_member.save
+        Merb.logger.info("The initial #{staff_member.class} #{staff_member.name} with level #{staff_member.level} was created")
+      else
+        Merb.logger.info("Could not create the #{staff_member.name} #{staff_member.class}...")
+        staff_member.errors.each do |e|
+          Merb.logger.info(e)
+        end
+      end
+    end
+  rescue
+    Merb.logger.info("Couldn't create the 'SuperUser' staff member, possibly unable to access the database.")
+  end
+
+  begin
+    designation = Designation.all(:role_class => Constants::User::OPERATOR).first
+    staff_member = StaffMember.all(:designation => designation).first
+    if User.all(:staff_member => staff_member).empty?
+      u = User.new(:login => 'superuser', :password => 'password', :password_confirmation => 'password', :staff_member => staff_member)
+      if u.save
+        Merb.logger.info("The initial user 'superuser' was created (password is set to 'password')...")
+      else
+        Merb.logger.info("Couldn't create the 'superuser' user...")
         u.errors.each do |e|
           Merb.logger.info(e)
         end
       end
     end
   rescue
-    Merb.logger.info("Couldn't create the 'admin' user, possibly unable to access the database.")
+    Merb.logger.info("Couldn't create the 'superuser' user, possibly unable to access the database.")
   end
 
   begin 

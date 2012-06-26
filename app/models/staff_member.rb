@@ -3,18 +3,17 @@ class StaffMember
   include Identified
   include Pdf::DaySheet if PDF_WRITER
 
-  property :id,      Serial
-  property :name,    String, :length => 100, :nullable => false
-  property :mobile_number,  String, :length => 12,  :nullable => true
-  property :creation_date,  Date, :length => 12,  :nullable => true, :default => Date.today
-  property :address, Text, :lazy => true
-  property :father_name,  String, :length => 100, :nullable => true
-  property :gender,     Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
-  property :active,  Boolean, :default => true, :nullable => false
-  property :user_id,  Integer,  :nullable => true
-  #  property :gender, Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
-  # no designations, they are derived from the relations it has
+  property :id,            Serial
+  property :name,          String, :length => 100, :nullable => false
+  property :mobile_number, String, :length => 12,  :nullable => true
+  property :creation_date, Date,   :length => 12,  :nullable => true, :default => Date.today
+  property :address,       Text,   :lazy => true
+  property :father_name,   String, :length => 100, :nullable => true
+  property :gender,        Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
+  property :active,        Boolean, :default => true, :nullable => false
+  #  property :gender,     Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
 
+  # no designations, they are derived from the relations it has
   belongs_to :designation
 
   belongs_to :origin_home_location, :model => 'BizLocation', :child_key => [:origin_home_location_id], :nullable => true
@@ -27,7 +26,7 @@ class StaffMember
   has n, :regions,           :child_key => [:manager_id]
   has n, :areas,             :child_key => [:manager_id]
   has n, :approved_loans,    :child_key => [:approved_by_staff_id],    :model => 'Loan'
-  has n, :applied_loans,     :child_key => [:applied_by_staff_id],    :model => 'Loan'
+  has n, :applied_loans,     :child_key => [:applied_by_staff_id],     :model => 'Loan'
   has n, :rejected_loans,    :child_key => [:rejected_by_staff_id],    :model => 'Loan'
   has n, :disbursed_loans,   :child_key => [:disbursed_by_staff_id],   :model => 'Loan'
   has n, :written_off_loans, :child_key => [:written_off_by_staff_id], :model => 'Loan'
@@ -38,9 +37,8 @@ class StaffMember
   has n, :weeksheets
   has n, :staff_member_attendances
 
-  belongs_to :user
+  has 1, :user
 
-  validates_is_unique :name
   validates_length :name, :min => 3
 
   def self.search(q, per_page)
