@@ -4,6 +4,7 @@
     %table.form.unsortable
       %thead
         %tr
+          %th ID
           %th Applicant Name
           %th Guarantor Name
           %th Relationship
@@ -20,6 +21,8 @@
       %tbody
         - @all_loan_applications.sort.each do |loan_application|
           %tr
+            %td
+              = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
             %td
               = loan_application.client_name
             %td

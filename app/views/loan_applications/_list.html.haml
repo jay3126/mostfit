@@ -7,8 +7,7 @@
 #client_list
   .shaded
     - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-
-    - if center_cycle_number == 0
+    - if center_cycle_number == 0 && !@center.blank?
       %h3 No Center cycle currently exists for this center. Please create one from the center show page
     - elsif @clients and @clients != [] 
       %h2 Add new loan applications

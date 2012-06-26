@@ -1,5 +1,5 @@
 - loan_application = @loan_app
-%table{:style => "text-align:left;"}
+%table.form{:style => "text-align:left;"}
   %h2
     Loan application details:
     = link_to "Edit", resource(loan_application, :edit), :class => 'edit'
@@ -53,7 +53,7 @@
   %tr
     %th Applied for amount
     %td
-      = loan_application.amount
+      = loan_application.loan_money_amount.to_s
 
   %tr
     %th Address

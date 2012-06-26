@@ -36,7 +36,8 @@
     %tr
       %th Applied for amount
       %td
-        = select :amount, :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x.to_f]}, :prompt => 'Select'
+        - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.amount}).uniq
+        = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :prompt => 'Select'
     %tr
       %th Address
       %td
