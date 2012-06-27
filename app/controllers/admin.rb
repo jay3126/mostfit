@@ -64,7 +64,7 @@ class Admin < Application
 
   def proxy_logon
     raise NotFound unless Merb.env=="development"    
-    if session.user.role == :administrator and params[:user_id] and user = User.get(params[:user_id])
+    if session.user.role == :operator and params[:user_id] and user = User.get(params[:user_id])
       session.user = user
       redirect resource(:branches)
     else
