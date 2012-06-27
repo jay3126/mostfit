@@ -15,7 +15,7 @@
     %th
       Gender
     %td
-      = select :gender, :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select gender"
+      = select :gender, :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}
   %tr
     %th
       Marital Status

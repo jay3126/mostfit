@@ -39,7 +39,7 @@
             %td
               = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
             %td
-              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}"}
+              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}", :min_date => client_admin.effective_on+1}
             %td
               = select :name=>"client[#{client.id}][][biz_location]", :collection => @child_locations.collect{|b| [b.id, b.name] }
     = submit "Save"

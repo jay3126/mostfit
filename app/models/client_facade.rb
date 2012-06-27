@@ -16,4 +16,7 @@ class ClientFacade < StandardFacade
     LoanBorrower.get_all_loans_for_counterparty(client)
   end
 
+  def get_administration_on_date(counterparty, on_date)
+    ClientAdministration.get_administration_on_date(counterparty, on_date)
+  end
 end

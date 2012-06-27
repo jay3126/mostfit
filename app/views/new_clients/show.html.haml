@@ -22,7 +22,7 @@
     %td= @client_admin.performed_by_staff
   %tr.odd
     %th.odd At Location
-    %td=link_to @client_admin.administered_at_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @client_admin.administered_at)
+    %td=link_to @biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @biz_location.id)
   %tr.even
     %th.even Group
     %td= @client.client_group.name unless @client.client_group.blank?

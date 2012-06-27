@@ -30,13 +30,13 @@ class ClientAdministration
     administered_at_on_date = ClientAdministration.first(:counterparty_type => self.counterparty_type, :counterparty_id => self.counterparty_id, :administered_at => self.administered_at, :effective_on => self.effective_on)
     registered_at_on_date = ClientAdministration.first(:counterparty_type => self.counterparty_type, :counterparty_id => self.counterparty_id, :registered_at => self.registered_at, :effective_on => self.effective_on)
     (administered_at_on_date or registered_at_on_date) ? [false, "The client is already assigned to location on the same date: #{effective_on}"] :
-        true
+      true
   end
 
   def counterparty_is_active?
     if self.counterparty
       validate_value = self.counterparty.active ? true :
-          [false, "Inactive client cannot be re-assigned"]
+        [false, "Inactive client cannot be re-assigned"]
       return validate_value
     end
     true
@@ -75,20 +75,14 @@ class ClientAdministration
   # For each ClientAdministration, this returns a map with the administered and registered locations as values
   def to_location_map
     {
-        COUNTERPARTY_ADMINISTERED_AT => administered_at_location,
-        COUNTERPARTY_REGISTERED_AT   => registered_at_location
+      COUNTERPARTY_ADMINISTERED_AT => administered_at_location,
+      COUNTERPARTY_REGISTERED_AT   => registered_at_location
     }
   end
 
   # Gets the locations for the counterparty on the specified date
   def self.get_locations(for_counterparty, on_date = Date.today)
-    locations                          = { }
-    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
-    locations[:counterparty_type]      = counterparty_type
-    locations[:counterparty_id]        = counterparty_id
-    locations[:effective_on.lte]       = on_date
-    locations[:order]                  = [:effective_on.desc]
-    recent_assignment                  = first(locations)
+    recent_assignment = get_administration_on_date(for_counterparty, on_date)
     recent_assignment ? recent_assignment.to_location_map : nil
   end
 
@@ -97,6 +91,16 @@ class ClientAdministration
     current_query = {}
     current_query[:counterparty_type] = counterparty_type
     current_query[:counterparty_id]   = counterparty_id
+    current_query[:order]             = [:effective_on.desc]
+    first(current_query)
+  end
+
+  def self.get_administration_on_date(for_counterparty, on_date = Date.today)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    current_query = {}
+    current_query[:counterparty_type] = counterparty_type
+    current_query[:counterparty_id]   = counterparty_id
+    current_query[:effective_on.lte]  = on_date
     current_query[:order]             = [:effective_on.desc]
     first(current_query)
   end

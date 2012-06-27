@@ -161,6 +161,19 @@ class Client
     new_client
   end
 
+  def self.create_client(fields, admin_location_id, reg_location_id)
+    
+    client = Client.new(fields)
+    admin_location = BizLocation.get admin_location_id
+    reg_location = BizLocation.get reg_location_id
+    raise Errors::DataError, client.errors.first.join(', ') unless client.valid?
+    valid = Validators::Assignments.is_valid_assignment_date?(client.date_joined, admin_location, reg_location)
+    raise Errors::DataError, valid.last unless valid == true
+    client.save
+    ClientAdministration.assign(admin_location, reg_location , client, client.created_by_staff_member_id, client.created_by_user_id, client.date_joined)
+    client
+  end
+
   private
   def convert_blank_to_nil
     self.attributes.each{|k, v|

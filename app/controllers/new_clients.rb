@@ -15,7 +15,12 @@ class NewClients < Application
   def new
     @biz_location = BizLocation.get params[:biz_location_id]
     @client       = Client.new
-    display @client
+    if @biz_location.blank?
+      redirect url(:home), :message => {:error => "Please select location"}
+    else
+      display @client
+    end
+    
   end
 
   def create
@@ -56,24 +61,29 @@ class NewClients < Application
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
 
+
     # VALIDATIONS
 
     # OPERATIONS PERFORMED
     begin
       @biz_location = BizLocation.get biz_location_id
-      @client = Client.new(:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
+      parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
+      fields = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
         :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
         :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
         :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
         :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
         :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff,
-        :created_by_user_id => created_by)
-      if @client.save
-        parent_biz_location = LocationLink.get_parent(@biz_location, Date.today)
-        ClientAdministration.assign(@biz_location, parent_biz_location , @client, created_by_staff, created_by, date_joined)
-        @message = {:notice => "Client created successfully"}
+        :created_by_user_id => created_by}
+
+      @client     = Client.new(fields)
+      @client_new = Client.create_client(fields, biz_location_id, parent_biz_location.id)
+
+      if @client_new.new?
+        @message = {:error => "Client creation fail"}
       else
-        @message = { :error => @client.errors.collect{|error| error}.flatten.join(', ')}
+        @message = {:notice => "Client created successfully"}
+        
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
@@ -81,7 +91,7 @@ class NewClients < Application
 
     # REDIRECT/RENDER
     if @message[:error].blank?
-      redirect url(:controller => :new_clients, :action => :show, :id => @client.id), :message => @message
+      redirect url(:controller => :new_clients, :action => :show, :id => @client_new.id), :message => @message
     else
       render :new
     end
@@ -167,8 +177,8 @@ class NewClients < Application
 
   def show
     @client       = Client.get params[:id]
-    @biz_location = ClientAdministration.get_administered_at(@client, session[:effective_date])
-    @client_admin = ClientAdministration.first(:counterparty_type => 'client', :counterparty_id => @client.id)
+    @client_admin = client_facade.get_administration_on_date(@client, get_effective_date)
+    @biz_location = @client_admin.administered_at_location
     @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client).compact
     display @client
   end
