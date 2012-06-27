@@ -4,7 +4,6 @@ class User
   include Constants::User
 
   before :destroy, :prevent_destroying_admin
-  after  :save,    :set_staff_member
 
   property :id,           Serial
   property :login,        String, :nullable => false
@@ -24,20 +23,11 @@ class User
   validates_is_unique :login
   validates_length :password, :min => 6, :if => Proc.new{|u| not u.password.nil?}
   belongs_to :staff_member
-  has 1, :funder
 
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
   
-  def set_staff_member
-    if self.staff_member
-      staff          = StaffMember.get(self.staff_member.id)
-      staff.user_id  = self.id
-      staff.save
-    end
-  end
-
   def role
     self.get_user_role
   end

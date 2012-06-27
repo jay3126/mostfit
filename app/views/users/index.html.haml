@@ -7,7 +7,6 @@
       %th
       %th ID
       %th Login
-      //%th Role
       %th Staff member/Funder
       %th Status
       %th Action
@@ -20,16 +19,13 @@
         = user.id
       %td
         %b= link_to user.login, resource(user)
-      -# %td
-      -#   = user.role.to_s.humanize
       %td
         = (link_to user.staff_member.name, resource(user.staff_member)) if user.staff_member
-        = (link_to user.funder.name, resource(user.funder)) if user.funder
       %td
         = user.active ? "active" : "inactive"
-      - if session.user.role == :admin  # only show to admin
+      - if session.user.role == :operator  # only show to admin
         %td
-          = link_to 'edit', resource(user, :edit)
+          = link_to_with_rights 'edit', resource(user, :edit)
   %tfoot
     %tr
       %td{ :colspan => 8 }

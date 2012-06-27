@@ -53,7 +53,7 @@ class Application < Merb::Controller
   end
 
   def ensure_admin
-    unless (session.user and session.user.role == :administrator)
+    unless (session.user and (session.user.role == :operator || session.user.role == :administrator))
       raise NotPrivileged
     end
   end
