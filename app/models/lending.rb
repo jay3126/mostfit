@@ -57,6 +57,7 @@ class Lending
   has n, :loan_status_changes
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
+  belongs_to :loan_purpose, :nullable => true
 
   # Creates a new loan
   def self.create_new_loan(
@@ -72,7 +73,9 @@ class Lending
           scheduled_first_repayment_date,
           applied_by_staff,
           recorded_by_user,
-          lan = nil)
+          lan = nil,
+          loan_purpose = nil
+        )
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
 
     new_loan  = to_loan(
@@ -88,7 +91,9 @@ class Lending
         scheduled_first_repayment_date,
         applied_by_staff,
         recorded_by_user,
-        lan)
+        lan,
+        loan_purpose
+      )
 
     total_interest_applicable = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
@@ -313,12 +318,6 @@ class Lending
     scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
   end
 
-  def scheduled_total_outstanding_after_receipts(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
-    
-    scheduled_total_outstanding(on_date) - scheduled_total_due(on_date)
-  end
-
   def actual_total_outstanding(on_date = Date.today)
     return zero_money_amount unless is_disbursed?
 
@@ -425,7 +424,7 @@ class Lending
     if (schedule_date?(on_date))
       actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
     else
-      actual_total_outstanding > scheduled_total_outstanding_after_receipts(on_date) ? OVERDUE : DUE
+      actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
     end
   end
 
@@ -514,7 +513,7 @@ class Lending
 
   def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
       administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-      applied_by_staff, recorded_by_user, lan = nil)
+      applied_by_staff, recorded_by_user, lan = nil, loan_purpose = nil)
     Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
                                    administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date,
                                    scheduled_first_repayment_date, applied_by_staff, recorded_by_user)
@@ -535,6 +534,7 @@ class Lending
     loan_hash[:repayment_allocation_strategy]  = from_lending_product.repayment_allocation_strategy
     loan_hash[:status]                         = STATUS_NOT_SPECIFIED
     loan_hash[:lan]                            = lan if lan
+    loan_hash[:loan_purpose]                   = loan_purpose if loan_purpose
     Lending.new(loan_hash)
   end
 
