@@ -1,23 +1,5 @@
 :javascript
   $(document).ready(function() {
-    $('.loan_purpose').change(function() {
-      my_id = $(this).attr('id');
-      $('#client_' + my_id).attr('checked',true);
-    });
-    $('.loan_purpose').change(function() {
-      my_id = $(this).attr('id');
-      $('#client_' + my_id).attr('checked',true);
-    });
-    $('#loan_purpose_chooser').change(function(){
-      $('.loan_purpose').each(function(){
-        $(this).attr('selectedIndex',$('#loan_purpose_chooser').attr('selectedIndex'));
-      });
-    });
-    $('#loan_product_chooser').change(function(){
-      $('.loan_product').each(function(){
-        $(this).attr('selectedIndex',$('#loan_product_chooser').attr('selectedIndex'));
-      });
-    });
     $('#toggle_choose_loan').change(function() {
       $('.choose_loan').attr('checked',$(this).attr('checked'))
       });
@@ -43,29 +25,23 @@
               = @loans.first.errors[field].each do |x|
                 %li
                   = x
-      %b Make bulk applications for loan product
       - params[:loan] ||= Nothing
-      = select :name => "loan[loan_product_id]", :id => "loan_product_chooser", :collection => LendingProduct.all.map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => ((@loan_product or Nothing).id or Nothing).to_s
-      %br
-      %span.greytext Loan Products listed above are valid loan products for today which are not linked to any insurance
-      %br
-      %b application date
-      = date_select("loan[applied_on]", Date.today, :id =>"applied_on")
-      %b scheduled disbursal date
-      = date_select "loan[scheduled_disbursal_date]", (params[:loan] or Nothing)[:scheduled_disbursal_date], :id =>"scheduled_disbursal_date"
-      %b scheduled first payment date
-      = date_select "loan[scheduled_first_payment_date]", (params[:loan] or Nothing)[:scheduled_first_payment_date], :id =>"scheduled_first_payment_date"
-      %br
-      %b applied_by
-      = select :name => "loan[applied_by_staff_id]", :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
-      %br
-      %b funding line
-      - unless Mfi.first.set_default_funding_line
-        = select :name => "loan[funding_line_id]", :collection => FundingLine.all, :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a funding line', :selected => params[:loan][:funding_line_id]
-      - else
-        - funding_line = FundingLine.get(Mfi.first.funding_line_id)
-        = funding_line.name rescue nil
-        = hidden_field :name => "loan[funding_line_id]", :value => funding_line.id
+      %table{:style => "text-align:right;"}
+        %tr
+          %th application date
+          %td
+            = date_select("loan[applied_on]", Date.today, :id =>"applied_on")
+        %tr
+          %th scheduled disbursal date
+          %td
+            = date_select "loan[scheduled_disbursal_date]", (params[:loan] or Nothing)[:scheduled_disbursal_date], :id =>"scheduled_disbursal_date"
+        %tr
+          %th scheduled first payment date
+          %td
+            = date_select "loan[scheduled_first_payment_date]", (params[:loan] or Nothing)[:scheduled_first_payment_date], :id =>"scheduled_first_payment_date"
+          %th applied by
+          %td
+            = select :name => "loan[applied_by_staff_id]", :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
     %h2 Choose clients
 
     %table.report.nojs
@@ -104,32 +80,32 @@
               %td
                 = client.reference
               %td
-                = link_to client.name, "/new_clients/#{client.id}"
+                = client.name
               %td
-                = select :name => "clients[#{client.id}][loan_product_id]", :class => "loan_product", :collection => LendingProduct.all.map{|lp| [lp.id, lp.name]}, :prompt => "Please select a loan product", :value_method => :id, :text_method => :name, :selected => ((params[:clients] && params[:clients][client.id.to_s]) ? params[:clients][client.id.to_s][:loan_product_id] : nil)
+                = select :name => "loan[loan_product_id]", :value_method => :id, :text_method => :name, :id => "loan_product_chooser", :collection => LendingProduct.all.each{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => ((@loan_product or Nothing).id or Nothing).to_s
+              %td
+                = select :name => "clients[#{client.id}][loan_purpose_id]", :class => "loan_purpose", :collection => LoanPurpose.all.map{|lp| [lp.id, lp.name]}, :prompt => "select loan purpose", :selected => ((params[:clients] && params[:clients][client.id.to_s]) ? params[:clients][client.id.to_s][:loan_purpose_id] : nil), :id => client.id
             -# blank row for grouping purpose 
             - if (row_number % 5 == 0)
               %tr
                 %td{:colspan => 7}
                   = "&nbsp;"
-
-      - unless @clients.blank?
-        %tr
-          %th
-            Select All
-            %br
-              = check_box :id => "toggle_choose_loan2"
-          %th
-            Sl.
-          %th
-            Client ID
-          %th
-            Reference
-          %th
-            Name
-          %th
-            Loan Product
-          %th
-            Loan Purpose
-        = submit "Go"
-        %hr
+      %tr
+        %th
+          Select All
+          %br
+            = check_box :id => "toggle_choose_loan2"
+        %th
+          Sl.
+        %th
+          Client ID
+        %th
+          Reference
+        %th
+          Name
+        %th
+          Loan Product
+        %th
+          Loan Purpose
+    = submit "Go"
+    %hr
