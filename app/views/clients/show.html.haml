@@ -9,7 +9,7 @@
         = @client.name
       == (id: #{@client.id}, ref: #{@client.reference})
       (
-      =link_to('edit', params[:controller]=="data_entry/clients" ? url(:enter_clients, :action => 'edit', :id => @client) : resource(@branch, @center, @client, :edit))
+      =link_to_with_rights('edit', params[:controller]=="data_entry/clients" ? url(:enter_clients, :action => 'edit', :id => @client) : resource(@branch, @center, @client, :edit))
       )
   %tr
     %td spouse name
@@ -17,16 +17,16 @@
       = @client.spouse_name
   %tr.odd
     %td manager
-    %td= link_to @center.manager.name, resource(@center.manager)
+    %td= link_to_with_rights @center.manager.name, resource(@center.manager)
   %tr
     %td at center
     %td
-      = link_to @center.name, resource(@branch, @center)
-      == (of branch #{link_to @branch.name, resource(@branch)})
+      = link_to_with_rights @center.name, resource(@branch, @center)
+      == (of branch #{link_to_with_rights @branch.name, resource(@branch)})
       %br/
       %span.greytext
         center managed by:
-        = link_to @center.branch.manager.name, resource(@center.manager)
+        = link_to_with_rights @center.branch.manager.name, resource(@center.manager)
   %tr
     %td group name1
     %td
@@ -34,5 +34,5 @@
         =@client.client_group.name
       -else
         Not associated with a group yet (
-        =link_to('Edit', resource(@branch, @center, @client, :edit))
+        =link_to_with_rights('Edit', resource(@branch, @center, @client, :edit))
         to change)

@@ -24,15 +24,15 @@
     - client = @clients.find{|x| x.id==loan.client_id}
     %tr{:class => cycle('odd','')}
       %td.number
-        = link_to loan.id, url(:quick_link, "loans", loan.id)
+        = link_to_with_rights loan.id, url(:quick_link, "loans", loan.id)
       %td.text
-        = link_to loan.client.name, resource(client)
+        = link_to_with_rights loan.client.name, resource(client)
       %td.number
         = loan.description
       %td.number
         = text_field :name => "loans[#{loan.id}][amount_sanctioned]", :value => loan.amount, :size => 6
       %td.text
-        = link_to client.center.name, url(:quick_link, "centers", client.center.id)
+        = link_to_with_rights client.center.name, url(:quick_link, "centers", client.center.id)
       %td.text
         - min_date = (loan.suggested_written_off_on > Date.min_transaction_date ? loan.suggested_written_off_on : Date.min_transaction_date)
         = date_select("loans[#{loan.id}][written_off_on]", min_date, :id => "loans_#{loan.id}_written_off_on", :min_date => min_date, :max_date => Date.max_transaction_date)

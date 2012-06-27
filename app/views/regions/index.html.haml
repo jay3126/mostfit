@@ -1,7 +1,7 @@
 %h1
   = I18n.t "region.index.title", :default => "Regions"
 .menu-strip
-  = link_to I18n.t("region.index.new", :default => "Add a Region"), url(:new_region), :class => "add grey_button"
+  = link_to_with_rights I18n.t("region.index.new", :default => "Add a Region"), url(:new_region), :class => "add grey_button"
 
 %table.shaded{:width=>"100%"}
   %thead
@@ -19,10 +19,10 @@
       %td
         = region.id
       %td 
-        = link_to region.name, resource(region)
+        = link_to_with_rights region.name, resource(region)
       %td
         = region.areas.count
       %td
-        = link_to I18n.t("region.index.edit", :default => "Edit"), url(:edit_region,  region)
+        = link_to_with_rights I18n.t("region.index.edit", :default => "Edit"), url(:edit_region,  region)
 
 

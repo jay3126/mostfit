@@ -26,7 +26,7 @@
         %td
           = stock_register.id
         %td
-          = link_to stock_register.branch.name, url(:quick_link, "branches", stock_register.branch_id)
+          = link_to_with_rights stock_register.branch.name, url(:quick_link, "branches", stock_register.branch_id)
         %td
           = stock_register.stock_code
         %td
@@ -40,9 +40,9 @@
         %td
           = stock_register.date_of_entry
         %td
-          = link_to stock_register.manager.name, url(:quick_link, "staff_members", stock_register.manager_staff_id)
+          = link_to_with_rights stock_register.manager.name, url(:quick_link, "staff_members", stock_register.manager_staff_id)
         %td
-          = link_to 'edit', resource(stock_register, :edit)
+          = link_to_with_rights 'edit', resource(stock_register, :edit)
           
     %tfoot
       %tr
@@ -50,6 +50,6 @@
 
   = paginate @stock_registers
   - if @branch
-    = link_to 'Back', url(:quick_link, "branches", stock_register.branch_id)
+    = link_to_with_rights 'Back', url(:quick_link, "branches", stock_register.branch_id)
   - else
-    = link_to 'Back', url(:stock_registers)
+    = link_to_with_rights 'Back', url(:stock_registers)

@@ -1,7 +1,7 @@
 %h1
   Client Types
 .menu-strip
-  = link_to 'New Client Type', url(:new_client_type), :class => "add grey_button"
+  = link_to_with_rights 'New Client Type', url(:new_client_type), :class => "add grey_button"
 %br
 %table.narrow.shaded
   %thead
@@ -20,9 +20,9 @@
         %ul.inline
           - client_type.fees.each do |f|
             %li
-              = link_to f.name.humanize, resource(f)
+              = link_to_with_rights f.name.humanize, resource(f)
       %td
-        = link_to 'Show', url(:client_type, client_type)
+        = link_to_with_rights 'Show', url(:client_type, client_type)
         |
-        = link_to 'Edit', url(:edit_client_type,  client_type)
+        = link_to_with_rights 'Edit', url(:edit_client_type,  client_type)
 

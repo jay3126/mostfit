@@ -5,13 +5,13 @@
     = submit "Go"
     - all_centers = @staff_member.centers
     - if all_centers.length>0
-      = link_to 'previous day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.lt => @date).max(:date))
-      = link_to 'next day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.gt => @date).min(:date)), :style => "padding-left: 120px;"
+      = link_to_with_rights 'previous day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.lt => @date).max(:date))
+      = link_to_with_rights 'next day', url(:day_sheet, :date => LoanHistory.all(:center => all_centers, :date.gt => @date).min(:date)), :style => "padding-left: 120px;"
 %h1
   = "Daily Collection Sheet for #{@staff_member.name} for #{@date}"
 %p
   - if @centers.count > 0
-    = link_to "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
+    = link_to_with_rights "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
   - else
     %b This Staff Manager has no collection today.
 %br

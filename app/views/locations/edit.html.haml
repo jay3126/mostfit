@@ -10,6 +10,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:location, @location)
+= link_to_with_rights 'Show', url(:location, @location)
 |
-= link_to 'Back', url(:locations)
+= link_to_with_rights 'Back', url(:locations)

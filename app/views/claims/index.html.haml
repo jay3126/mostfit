@@ -19,6 +19,6 @@
       %td
         = claim.claim_submission_date
       %td
-        = link_to 'Update', resource(@client, claim, :edit)
+        = link_to_with_rights 'Update', resource(@client, claim, :edit)
 
-= link_to 'New', resource(@client, :claims, :new)
+= link_to_with_rights 'New', resource(@client, :claims, :new)

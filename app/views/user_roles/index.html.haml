@@ -1,10 +1,10 @@
 %h1
   User Role
 .menu-strip{:style => "margin-bottom: 0.5em; width: auto;"}
-  = link_to 'Create User Role', '#', :class => "add", :onclick => "jQuery(this).next().toggle(); return false;"
+  = link_to_with_rights 'Create User Role', '#', :class => "add", :onclick => "jQuery(this).next().toggle(); return false;"
   #user_role{:style => "display : none"}
     = form_for(@user_role, :action => url(:user_roles) ) do
       = partial :fields
       = submit 'Save'
-      = link_to 'Cancel', url(params[:return]), :class => "grey_button"
+      = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
 = partial 'list'

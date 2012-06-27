@@ -6,7 +6,7 @@
       %th{:align => "left"} 
         id
       %td
-        = link_to(@funding_line.id, resource(@funder, @funding_line))
+        = link_to_with_rights(@funding_line.id, resource(@funder, @funding_line))
     %tr
       %th{:align => "left"} amount
       %td

@@ -2,7 +2,7 @@
 %table{:style => "text-align:left;"}
   %h2
     Loan application details:
-    = link_to "Edit Loan Application", resource(loan_application, :edit), :class => 'edit'
+    = link_to_with_rights "Edit Loan Application", resource(loan_application, :edit), :class => 'edit'
 
   %tr
     %th Loan Applicantion ID
@@ -84,4 +84,4 @@
     %th Created on
     %td
       = loan_application.created_on
-=# link_to '<< Back', request.env['HTTP_REFERER']
+=# link_to_with_rights '<< Back', request.env['HTTP_REFERER']

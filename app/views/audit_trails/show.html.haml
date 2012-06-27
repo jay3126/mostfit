@@ -44,7 +44,7 @@
         = trail.auditable_type
       %td
         - if obj
-          = link_to "#{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          = link_to_with_rights "#{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
         - else
           = "#{trail.auditable_id} [deleted]"
       %td.text

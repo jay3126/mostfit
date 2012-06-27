@@ -15,6 +15,6 @@
     %td
       == #{@report_format.name}
     %td
-      = link_to 'Edit',  url(:edit_report_format,  @report_format)
+      = link_to_with_rights 'Edit',  url(:edit_report_format,  @report_format)
       |
-      = link_to 'Back', url(:report_formats)
+      = link_to_with_rights 'Back', url(:report_formats)

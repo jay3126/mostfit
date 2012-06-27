@@ -7,4 +7,4 @@
   = hidden_field :name => :biz_location, :value => @biz_location.id
   = partial("new_clients/tabs")
   = submit "Add client", :class => "grey_button"
-  = link_to 'Cancel', params[:return], :class => "grey_button"
+  = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"

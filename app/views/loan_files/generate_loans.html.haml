@@ -102,7 +102,7 @@
                 - row_number = row_number + 1
                 = row_number
               %td
-                = link_to client.id, resource(client)
+                = link_to_with_rights client.id, resource(client)
               %td
                 = client.reference
               %td

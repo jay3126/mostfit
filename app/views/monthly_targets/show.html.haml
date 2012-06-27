@@ -14,6 +14,6 @@
     %td
       = @monthly_target.collections_target
     %td
-      = link_to 'Edit', url(:edit_monthly_target, @monthly_target), :class => "edit"
+      = link_to_with_rights 'Edit', url(:edit_monthly_target, @monthly_target), :class => "edit"
 
-= link_to 'Back', url(:monthly_targets)
+= link_to_with_rights 'Back', url(:monthly_targets)

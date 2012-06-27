@@ -24,18 +24,18 @@
         %td
           = branch.id
         %td
-          %b= link_to branch.name, resource(branch)
+          %b= link_to_with_rights branch.name, resource(branch)
         %td
-          = link_to branch.manager.name, resource(branch.manager)
+          = link_to_with_rights branch.manager.name, resource(branch.manager)
         %td
-          = link_to branch.area.name, resource(branch.area) if branch.area
+          = link_to_with_rights branch.area.name, resource(branch.area) if branch.area
         %td
           %b= branch.centers.size
-          == (#{link_to 'view', resource(branch, :centers)})
+          == (#{link_to_with_rights 'view', resource(branch, :centers)})
         %td
-          = link_to 'edit', resource(branch, :edit)
+          = link_to_with_rights 'edit', resource(branch, :edit)
           &nbsp;|&nbsp
-          = link_to 'new center', resource(branch, :centers, :new)
+          = link_to_with_rights 'new center', resource(branch, :centers, :new)
 
     %tfoot
       %tr

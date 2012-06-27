@@ -22,9 +22,9 @@
     - loans_to_disburse.each do |loan|
       %tr
         %td
-          = link_to loan.client.name, resource(loan.client)
+          = link_to_with_rights loan.client.name, resource(loan.client)
         %td
-          = link_to loan.description
+          = link_to_with_rights loan.description
         %td
           = loan.scheduled_disbursal_date
         %td

@@ -18,9 +18,9 @@
       %td
         = user.id
       %td
-        %b= link_to user.login, resource(user)
+        %b= link_to_with_rights user.login, resource(user)
       %td
-        = (link_to user.staff_member.name, resource(user.staff_member)) if user.staff_member
+        = (link_to_with_rights user.staff_member.name, resource(user.staff_member)) if user.staff_member
       %td
         = user.active ? "active" : "inactive"
       - if session.user.role == :operator  # only show to admin

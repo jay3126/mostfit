@@ -80,7 +80,7 @@
           - center = @centers[center_id]
           %tr.center{:class => cycle('odd','even')}
             %td
-              = link_to(center.name, url(:quick_link, "centers", center.id) + "?date=#{@date.strftime('%Y-%m-%d')}#weeksheet")
+              = link_to_with_rights(center.name, url(:quick_link, "centers", center.id) + "?date=#{@date.strftime('%Y-%m-%d')}#weeksheet")
             %td.numeric
               = (pd = (lh[2] and lh[2] > 0) ? lh[2] : 0).to_currency
               - branch_arr[0] += pd

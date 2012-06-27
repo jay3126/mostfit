@@ -5,6 +5,6 @@
   %tt
     app/views/bookmarks/show.html.erb
 
-= link_to 'Edit',  url(:edit_bookmark,  @bookmark)
+= link_to_with_rights 'Edit',  url(:edit_bookmark,  @bookmark)
 |
-= link_to 'Back', url(:bookmarks)
+= link_to_with_rights 'Back', url(:bookmarks)

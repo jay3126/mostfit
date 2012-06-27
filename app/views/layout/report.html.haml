@@ -18,7 +18,7 @@
             - message.each do |key, value|
               .flash{ :class => key.to_s }
                 %p= value.gsub("\n", "<br/>")
-        = link_to("Back to reports", url(:reports), :class => "top_link")
+        = link_to_with_rights("Back to reports", url(:reports), :class => "top_link")
         %br
         = catch_content :for_layout
     #footer
@@ -30,4 +30,4 @@
             = submit "go"
       %p{:style => "position: relative; right: 10%; float: right;"}
         =image_tag("/images/mostfit_logo.png", :height => 80)
-      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.
+      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to_with_rights 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.

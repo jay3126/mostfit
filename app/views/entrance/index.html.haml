@@ -14,16 +14,16 @@
     %br/
     &nbsp;
     %br/
-    %h1== #{link_to 'Check us out on Github', 'http://github.com/svs/misfit'}
+    %h1== #{link_to_with_rights 'Check us out on Github', 'http://github.com/svs/misfit'}
     %h1 or
-    %h1== #{link_to 'try our demo', demo_uri}
+    %h1== #{link_to_with_rights 'try our demo', demo_uri}
     %span.greytext (login: 'admin', password: 'password')
   
   
   
   %h1 MOST FIT &mdash; a free and open source MIS for MFI's
   
-  %p== Welcome. This is the homepage of MOSTFIT an #{link_to 'MIS', 'http://en.wikipedia.org/wiki/Management_Information_System'} for #{link_to 'MFIs', 'http://en.wikipedia.org/wiki/Microfinance_institution'} developed by #{link_to 'Intellecap', 'http://intellecap.net'}. This software is release under the #{link_to 'GNU Affero Public License (v3)', 'http://www.fsf.org/licensing/licenses/agpl-3.0.html'}, in simple terms: it is open source.
+  %p== Welcome. This is the homepage of MOSTFIT an #{link_to_with_rights 'MIS', 'http://en.wikipedia.org/wiki/Management_Information_System'} for #{link_to 'MFIs', 'http://en.wikipedia.org/wiki/Microfinance_institution'} developed by #{link_to 'Intellecap', 'http://intellecap.net'}. This software is release under the #{link_to 'GNU Affero Public License (v3)', 'http://www.fsf.org/licensing/licenses/agpl-3.0.html'}, in simple terms: it is open source.
   
   %h2 <a href="/branches" class="button">Try our demo >></a>
   <a href="/branches">Login</a> with username "admin" and password "password" (without the quotes)
@@ -38,7 +38,7 @@
   
   %p
     We believe passionately in
-    = link_to 'open source', 'http://en.wikipedia.org/wiki/Open_Source'
+    = link_to_with_rights 'open source', 'http://en.wikipedia.org/wiki/Open_Source'
     therefor we prefer to use Linux over Microsoft's Windows (or Apple's OSX). Yet the following tools are worth mentioning because the helped making MOSTFIT possible.
   
   
@@ -50,24 +50,24 @@
         We love the Ruby programming language. It has revolutionized the way programmers can do their work, and, maybe more important: it helps us to write better software, using less lines-of-code, in less time!
         %br/
         %br/
-        = link_to 'The Ruby programming language', 'http://ruby-lang.org'
+        = link_to_with_rights 'The Ruby programming language', 'http://ruby-lang.org'
     %tr
       %td{ :style => 'text-align: right;' }
         %img{ :src => '/images/merb.jpg' }
       %td
-        == #{link_to 'Merb', 'http://merbivore.org'} is a fantastic web development environment that "just makes sense". It borrows a lot of concepts form #{link_to 'Ruby On Rails', 'http://rubyonrails.org'}, and it has been announced that it will be merged into Rails as of version 3. Together with Merb we use several other tools that are worth mentioning:
+        == #{link_to_with_rights 'Merb', 'http://merbivore.org'} is a fantastic web development environment that "just makes sense". It borrows a lot of concepts form #{link_to 'Ruby On Rails', 'http://rubyonrails.org'}, and it has been announced that it will be merged into Rails as of version 3. Together with Merb we use several other tools that are worth mentioning:
         %ul
-          %li== #{link_to 'DataMapper', 'http://datamapper.org'} &ndash; a god-sent ORM,
-          %li== #{link_to 'haml', 'http://haml.hamptoncatlin.com'} &ndash; to ease the pain that is HTML and CSS,
-          %li== #{link_to 'Open Flash Chart 2', 'http://teethgrinder.co.uk/open-flash-chart-2'} &ndash; for all our graphing,
-          %li== #{link_to 'mod_passenger', 'http://www.modrails.com'} mod_passenger for apache &ndash; as otherwise we'd still be in the stone age.
+          %li== #{link_to_with_rights 'DataMapper', 'http://datamapper.org'} &ndash; a god-sent ORM,
+          %li== #{link_to_with_rights 'haml', 'http://haml.hamptoncatlin.com'} &ndash; to ease the pain that is HTML and CSS,
+          %li== #{link_to_with_rights 'Open Flash Chart 2', 'http://teethgrinder.co.uk/open-flash-chart-2'} &ndash; for all our graphing,
+          %li== #{link_to_with_rights 'mod_passenger', 'http://www.modrails.com'} mod_passenger for apache &ndash; as otherwise we'd still be in the stone age.
   
 
   %h2 Download, use, test-drive, feedback, etc.
   
   %p In order to make use of the source code, it is recommended to have a good skill at Ruby and some experience with Linux servers (do Apache, MySQL, bash and ssh ring a bell?). If these terms mean nothing to you, then downloading MOSTFIT is probably not the best option for you. However, you can still enjoy MOSTFIT with a free demo account. <a href="mailto:svs@intellecap.net">Mail us</a> to set this up. 
-  %p== Stay tuned for more updates and in the mean time #{link_to 'enjoy the source code', 'http://github.com/svs/misfit'}.
+  %p== Stay tuned for more updates and in the mean time #{link_to_with_rights 'enjoy the source code', 'http://github.com/svs/misfit'}.
   %p If you just want to test MOSTFIT you do not have to download it: the site that you are looking at right now is a live demo of MOSTFIT!
-  %p== #{link_to 'Proceed to the login page', demo_uri}, and use login 'admin', and password 'password' to start testing MOSTFIT. In case the demo is not working properly, please let us know.
+  %p== #{link_to_with_rights 'Proceed to the login page', demo_uri}, and use login 'admin', and password 'password' to start testing MOSTFIT. In case the demo is not working properly, please let us know.
   
         

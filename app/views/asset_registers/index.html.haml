@@ -24,7 +24,7 @@
         %td
           = asset_register.id
         %td
-          = link_to asset_register.branch.name, url(:quick_link, "branches", asset_register.branch_id)
+          = link_to_with_rights asset_register.branch.name, url(:quick_link, "branches", asset_register.branch_id)
         %td
           = asset_register.name
         %td
@@ -32,11 +32,11 @@
         %td
           = asset_register.issue_date
         %td
-          = link_to asset_register.manager.name, url(:quick_link, "staff_members", asset_register.manager_staff_id)
+          = link_to_with_rights asset_register.manager.name, url(:quick_link, "staff_members", asset_register.manager_staff_id)
         %td
           = asset_register.returned_date
         %td
-          = link_to 'edit', resource(asset_register, :edit)
+          = link_to_with_rights 'edit', resource(asset_register, :edit)
 
     %tfoot
       %tr
@@ -44,6 +44,6 @@
 
   = paginate @asset_registers
   - if @branch
-    = link_to 'Back', url(:quick_link, "branches", asset_register.branch_id)
+    = link_to_with_rights 'Back', url(:quick_link, "branches", asset_register.branch_id)
   - else
-    = link_to 'Back', url(:asset_registers)
+    = link_to_with_rights 'Back', url(:asset_registers)

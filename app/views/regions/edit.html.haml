@@ -11,7 +11,7 @@
   %b
     Or
   &nbsp;&nbsp;&nbsp;
-  = link_to I18n.t("region.fields.show", :default => "Show"), url(:region, @region), :class => "grey_button"
+  = link_to_with_rights I18n.t("region.fields.show", :default => "Show"), url(:region, @region), :class => "grey_button"
   &nbsp;&nbsp;&nbsp;
   &nbsp;&nbsp;&nbsp;
-  = link_to I18n.t("region.fields.back", :default => "Back"), url(:regions), :class => "grey_button"
+  = link_to_with_rights I18n.t("region.fields.back", :default => "Back"), url(:regions), :class => "grey_button"

@@ -5,6 +5,6 @@
   %tt
     app/views/asset_registers/show.html.erb
 
-= link_to 'Edit',  url(:edit_asset_register,  @asset_register)
+= link_to_with_rights 'Edit',  url(:edit_asset_register,  @asset_register)
 |
-= link_to 'Back', url(:asset_registers)
+= link_to_with_rights 'Back', url(:asset_registers)

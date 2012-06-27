@@ -22,7 +22,7 @@
             - @suspected_duplicates.each do |loan_application|
               %tr
                 %td
-                  = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
+                  = link_to_with_rights loan_application.id, "/loan_applications/#{loan_application.id}"
                 %td
                   = loan_application.client_name
                 %td

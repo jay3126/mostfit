@@ -5,7 +5,7 @@
       Group name
     %td
       = select :client_group_id, :collection => ClientGroup.all.collect{|c| [c.id, c.name]}
-      = link_to 'Add new group', url(:controller => :client_groups, :action => :new)
+      = link_to_with_rights 'Add new group', url(:controller => :client_groups, :action => :new)
   %tr
     %th
       Name:

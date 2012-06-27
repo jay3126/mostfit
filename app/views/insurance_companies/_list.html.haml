@@ -12,6 +12,6 @@
       %td
         = insurance_company.id
       %td
-        = link_to insurance_company.name, url(:insurance_company, insurance_company)
+        = link_to_with_rights insurance_company.name, url(:insurance_company, insurance_company)
       %td
-        = link_to 'Edit', url(:edit_insurance_company,  insurance_company)
+        = link_to_with_rights 'Edit', url(:edit_insurance_company,  insurance_company)

@@ -6,6 +6,6 @@
   = partial :fields
   = submit "Update"
 
-= link_to 'Show', url(:monthly_target, @monthly_target)
+= link_to_with_rights 'Show', url(:monthly_target, @monthly_target)
 |
-= link_to 'Back', url(:monthly_targets)
+= link_to_with_rights 'Back', url(:monthly_targets)

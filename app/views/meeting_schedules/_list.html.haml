@@ -1,5 +1,5 @@
 .menu-strip
-  = link_to 'Add Meeting Schedule', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+  = link_to_with_rights 'Add Meeting Schedule', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
 #meeting_div(style = "display : none")
   = form_for(@meeting_schedule, :action => url(:controller => :meeting_schedules,:action => :create, :center_id => @center.id), :method => "POST", :class => "tall shaded") do
     = partial 'meeting_schedules/fields'

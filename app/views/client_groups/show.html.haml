@@ -1,6 +1,6 @@
 %h1 
   == Clients for #{@client_group.name}
-  = link_to("[Edit]", resource(@client_group, :edit), :class => "edit")
+  = link_to_with_rights("[Edit]", resource(@client_group, :edit), :class => "edit")
 %h2 Clients
 %table.narrow
   %tr
@@ -14,13 +14,13 @@
       %td
         = client.id
       %td
-        = link_to client.name, resource(client)
+        = link_to_with_rights client.name, resource(client)
   
   
 %h1 CGTs
-= link_to 'Manage CGTs', resource(@client_group, :cgts, :return => @return), :class => 'edit'
+= link_to_with_rights 'Manage CGTs', resource(@client_group, :cgts, :return => @return), :class => 'edit'
 = partial 'cgts/cgts'
 
 %h1 GRTs
-= link_to 'Manage GRTs', resource(@client_group, :grts, :return => @return), :class => 'edit'
+= link_to_with_rights 'Manage GRTs', resource(@client_group, :grts, :return => @return), :class => 'edit'
 = partial 'grts/grts'

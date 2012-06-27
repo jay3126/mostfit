@@ -32,7 +32,7 @@
           - loan_application = LoanApplication.get(response.loan_application_id)
           %tr
             %td
-              = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
+              = link_to_with_rights loan_application.id, "/loan_applications/#{loan_application.id}"
             %td
               = loan_application.client_name
             %td
@@ -40,7 +40,7 @@
             %td
               = loan_application.client_address
             %td
-              = link_to response.id, resource(response)
+              = link_to_with_rights response.id, resource(response)
             %td
               - response_status = 'Not rated'
               - begin; response_status = response.status; rescue; response_status = 'Error'; end

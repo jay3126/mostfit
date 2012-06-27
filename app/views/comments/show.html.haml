@@ -5,6 +5,6 @@
   %tt
     app/views/comments/show.html.erb
 
-= link_to 'Edit',  url(:edit_comment,  @comment)
+= link_to_with_rights 'Edit',  url(:edit_comment,  @comment)
 |
-= link_to 'Back', url(:comments)
+= link_to_with_rights 'Back', url(:comments)

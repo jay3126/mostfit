@@ -24,4 +24,4 @@
         %td
           = grt.status
         %td
-          = link_to 'Edit', resource(@client_group, grt, :edit, :return => @return)
+          = link_to_with_rights 'Edit', resource(@client_group, grt, :edit, :return => @return)

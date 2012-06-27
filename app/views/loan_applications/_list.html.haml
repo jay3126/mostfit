@@ -41,7 +41,7 @@
                 %td
                   = client.id
                 %td
-                  = link_to client.name, "/branches/#{@center.branch_id}/centers/#{@center.id}/clients/#{client.id}"
+                  = link_to_with_rights client.name, "/branches/#{@center.branch_id}/centers/#{@center.id}/clients/#{client.id}"
                 %td
                   = (client.age.nil? ? "Unknown" : client.age)
                 %td

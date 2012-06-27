@@ -33,7 +33,7 @@
             %td
               = loan_application.created_at.ctime
             %td
-              = link_to loan_application.staff_member.name, resource(loan_application.staff_member)
+              = link_to_with_rights loan_application.staff_member.name, resource(loan_application.staff_member)
             %td
               = loan_application.created_on
             

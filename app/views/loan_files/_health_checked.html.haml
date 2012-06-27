@@ -22,7 +22,7 @@
               %td
                 = lf.id
               %td
-                = link_to lf.loan_file_identifier, resource(lf)
+                = link_to_with_rights lf.loan_file_identifier, resource(lf)
               %td
                 = lf.loan_applications.count
               %td

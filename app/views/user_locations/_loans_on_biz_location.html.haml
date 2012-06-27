@@ -1,5 +1,5 @@
 .menu-strip
-  = link_to 'Add Loan', resource(:lending_products, :biz_location => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => 'add'
+  = link_to_with_rights 'Add Loan', resource(:lending_products, :biz_location => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => 'add'
 %br
 - if @lendings.blank?
   %p
@@ -23,7 +23,7 @@
         %td
           = lending.id
         %td
-          = link_to lending.lending_product.name, resource(lending)
+          = link_to_with_rights lending.lending_product.name, resource(lending)
         %td
           = lending.to_s
         %td

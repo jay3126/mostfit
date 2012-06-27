@@ -19,5 +19,5 @@
         = hidden_field :branch_id, :value => @branch.id.to_s
         = partial "rule_books/fields"
         = submit "Create"
-        = link_to "Cancel", url(:rule_books)
+        = link_to_with_rights "Cancel", url(:rule_books)
 

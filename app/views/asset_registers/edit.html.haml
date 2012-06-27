@@ -9,6 +9,6 @@
     = partial "asset_registers/edit_fields"
     = submit "Save changes"
     - if @branch
-      = link_to 'Cancel', url(:quick_link, "branches", @asset_register.branch_id)
+      = link_to_with_rights 'Cancel', url(:quick_link, "branches", @asset_register.branch_id)
     - else
-      = link_to 'Cancel', url(:asset_registers)
+      = link_to_with_rights 'Cancel', url(:asset_registers)

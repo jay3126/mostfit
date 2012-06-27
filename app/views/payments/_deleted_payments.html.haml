@@ -45,7 +45,7 @@
         %td
           %i= payment.received_on
         %td
-          %b= link_to payment.received_by.name, resource(payment.received_by)
+          %b= link_to_with_rights payment.received_by.name, resource(payment.received_by)
         %td
           %b= payment.amount.to_currency
         %td
@@ -57,4 +57,4 @@
         %td
           = User.get(payment.deleted_by_user_id).login
 
-%p= link_to 'new repayment >>', url_for_loan(@loan, 'payments/new'), :class => "button"
+%p= link_to_with_rights 'new repayment >>', url_for_loan(@loan, 'payments/new'), :class => "button"

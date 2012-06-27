@@ -1,12 +1,12 @@
 %h1
   Designation
 .menu-strip{:style => "margin-bottom: 0.5em; width: auto;"}
-  = link_to 'Create Designation', '#', :class => "add", :onclick => "jQuery(this).next().toggle(); return false;"
+  = link_to_with_rights 'Create Designation', '#', :class => "add", :onclick => "jQuery(this).next().toggle(); return false;"
   #designation{:style => "display : none"}
     = form_for(@designation, :action => url(:designations) ) do
       = partial :fields
       = submit 'Save'
       %b
         Or
-      = link_to 'Cancel', url(params[:return]), :class => "grey_button"
+      = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
 = partial 'list'

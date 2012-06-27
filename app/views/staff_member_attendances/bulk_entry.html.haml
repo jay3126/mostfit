@@ -38,7 +38,7 @@
       - staff_members.each do |staff|
         %tr
           %td
-            = link_to staff.name, resource(staff), :target => "_blank"
+            = link_to_with_rights staff.name, resource(staff), :target => "_blank"
           %td
             = params[:staff_member_attendance][:date]
           %td
@@ -48,4 +48,4 @@
     %b
       Or
     &nbsp;&nbsp;
-    = link_to 'Cancel', resource(:staff_members), :class => "grey_button"
+    = link_to_with_rights 'Cancel', resource(:staff_members), :class => "grey_button"

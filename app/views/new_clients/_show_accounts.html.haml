@@ -23,7 +23,7 @@
         - value.each do |ledger|
           %tr{:style=>"text-align:center"}
             %td
-              = link_to ledger.name, resource(ledger)
+              = link_to_with_rights ledger.name, resource(ledger)
             %td
               = ledger.balance
             %td

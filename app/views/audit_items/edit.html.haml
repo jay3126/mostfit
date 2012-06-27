@@ -6,6 +6,6 @@
     = partial :fields
     = submit "Update"
 
-= link_to 'Show', url(:audit_item, @audit_item)
+= link_to_with_rights 'Show', url(:audit_item, @audit_item)
 |
-= link_to 'Back', url(:audit_items)
+= link_to_with_rights 'Back', url(:audit_items)

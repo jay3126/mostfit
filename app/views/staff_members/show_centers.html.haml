@@ -20,7 +20,7 @@
   - for center in @centers
     %tr{ :class => cycle('odd','even')}
       %td
-        = link_to center.name, url(:branch_center, center.branch.id, center.id)
+        = link_to_with_rights center.name, url(:branch_center, center.branch.id, center.id)
       -c = center.clients
       -l = c.loans
       %td

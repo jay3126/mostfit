@@ -4,7 +4,7 @@
       == No #{params[:type_sheet]} exist for this staff member
   - else
     - @files.each do |f|
-      = link_to f, url(:controller => :staff_members, :action => :send_sheet, :filename => (File.join(@folder, f)))
+      = link_to_with_rights f, url(:controller => :staff_members, :action => :send_sheet, :filename => (File.join(@folder, f)))
       %br
 - else
   %h3 

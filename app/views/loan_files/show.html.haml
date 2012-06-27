@@ -47,7 +47,7 @@
         - @loan_file.loan_applications.each do |lap|
           %tr
             %td
-              = link_to lap.id, "/loan_applications/#{lap.id}"
+              = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
             %td
               = lap.client_name
             %td
@@ -77,7 +77,7 @@
   %h2
     = "Actions"
   - if @loan_file.loan_applications.count > 0 && (@loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil)) && @loan_file.loan_applications.collect{|x| x.loan.nil?}.include?(true)
-    = link_to "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
+    = link_to_with_rights "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
   - if @loan_file.loan_applications.count > 0 && @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT
-    = link_to "Download Labels", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button'
-    = link_to "Download Disbursement", url(:controller => :loan_files, :action => :generate_disbursement_sheet, :id => params[:id], :format => "pdf"), :class => 'grey_button'
+    = link_to_with_rights "Download Labels", url(:controller => :loan_files, :action => :generate_disbursement_labels, :id => params[:id], :format => "pdf"), :class => 'grey_button'
+    = link_to_with_rights "Download Disbursement", url(:controller => :loan_files, :action => :generate_disbursement_sheet, :id => params[:id], :format => "pdf"), :class => 'grey_button'

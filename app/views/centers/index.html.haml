@@ -23,7 +23,7 @@
           )
       %tr.odd
         %th.odd Manager
-        %td= link_to @branch.manager.name, resource(@branch.manager), :target => "_blank"
+        %td= link_to_with_rights @branch.manager.name, resource(@branch.manager), :target => "_blank"
       %tr.even
         %th.even No. of centers
         %td=@branch.centers.count
@@ -39,7 +39,7 @@
       %tr.even
         %th.even Area
         - area = @branch.area
-        %td=link_to(area.name, resource(area)) if area
+        %td=link_to_with_rights(area.name, resource(area)) if area
       - if total_attendance_at_branch = Attendance.count("client.center.branch_id" => @branch.id) and total_attendance_at_branch > 0
         %tr.odd
           %th.odd

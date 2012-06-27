@@ -7,6 +7,6 @@
   shifts the meeting to the day 
   = @holiday.shift_meeting
   the actual meeting day
-= link_to 'Edit',  url(:edit_holiday,  @holiday)
+= link_to_with_rights 'Edit',  url(:edit_holiday,  @holiday)
 |
-= link_to 'Back', url(:holidays)
+= link_to_with_rights 'Back', url(:holidays)

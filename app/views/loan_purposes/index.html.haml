@@ -1,6 +1,6 @@
 %h1
   = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
-= link_to I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add'
+= link_to_with_rights I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add'
 %table.narrow
   %thead
     %tr
@@ -21,6 +21,6 @@
       %td
         = loan_purpose.parent_id != 0 ? LoanPurpose.get(loan_purpose.parent_id).name : '-'
       %td
-        = link_to I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
+        = link_to_with_rights I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
         |
-        = link_to I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
+        = link_to_with_rights I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)

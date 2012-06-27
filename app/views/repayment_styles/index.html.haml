@@ -2,7 +2,7 @@
   Repayment Styles
 
 .menu-strip
-  = link_to 'New Repayment Style', url(:new_repayment_style), :class => "add grey_button"
+  = link_to_with_rights 'New Repayment Style', url(:new_repayment_style), :class => "add grey_button"
 
 %table.narrow
   %thead
@@ -36,6 +36,6 @@
         %td
           = repayment_style.active
         %td
-          = link_to 'Show', url(:edit_repayment_style, repayment_style)
+          = link_to_with_rights 'Show', url(:edit_repayment_style, repayment_style)
           |
-          = link_to 'Edit', url(:edit_repayment_style,  repayment_style)
+          = link_to_with_rights 'Edit', url(:edit_repayment_style,  repayment_style)

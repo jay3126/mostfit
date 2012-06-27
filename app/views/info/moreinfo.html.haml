@@ -193,4 +193,4 @@
           Center Managers
         %td
           %ul
-            = @centers[:upto].managers.collect{|sm| "<li>#{link_to(sm.name, resource(sm))}</li>"}.join if @centers[:upto] and @centers[:upto].length>0
+            = @centers[:upto].managers.collect{|sm| "<li>#{link_to_with_rights(sm.name, resource(sm))}</li>"}.join if @centers[:upto] and @centers[:upto].length>0

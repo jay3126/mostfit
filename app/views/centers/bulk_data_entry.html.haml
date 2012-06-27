@@ -49,7 +49,7 @@
                 %td
                   = client.reference
                 %td
-                  = link_to client.name, resource(@branch, @center, client)
+                  = link_to_with_rights client.name, resource(@branch, @center, client)
                 %td
                   = loan.amount
                   (disbursed on
@@ -65,7 +65,7 @@
             %td
               = client.reference
             %td
-              = link_to client.name, resource(@branch, @center, client)
+              = link_to_with_rights client.name, resource(@branch, @center, client)
             %td
               = client.spouse_name
             %td

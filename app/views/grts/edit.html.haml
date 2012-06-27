@@ -17,4 +17,4 @@
         = select :status, :collection => Grt.statuses, :value_method => :to_s, :prompt => '---'
   = submit 'Update GRT'
   
-= link_to 'Back', resource(@client_group, :grts)
+= link_to_with_rights 'Back', resource(@client_group, :grts)

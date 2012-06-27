@@ -20,7 +20,7 @@
         %td
           - if params[:last_update_report][:branch_id].empty?
             %b
-              = link_to "#{datum[0]}", url(:submit => 'go', :last_update_report => {:branch_id => datum[2][0][0]}, :action => 'show', :controller => 'reports', :report_type => 'LastUpdateReport', :branch_id => datum[2][0][0])
+              = link_to_with_rights "#{datum[0]}", url(:submit => 'go', :last_update_report => {:branch_id => datum[2][0][0]}, :action => 'show', :controller => 'reports', :report_type => 'LastUpdateReport', :branch_id => datum[2][0][0])
           - else
             %b 
               = datum[0]

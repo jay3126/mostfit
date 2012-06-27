@@ -21,7 +21,7 @@
         %td
           = biz_location.id
         %td
-          = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
+          = link_to_with_rights biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
         %td
           = biz_location.location_level.name
         %td

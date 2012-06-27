@@ -13,7 +13,7 @@
             - ledgers.each do |ledger|
               %tr
                 %td
-                  = link_to ledger.name, resource(ledger) 
+                  = link_to_with_rights ledger.name, resource(ledger) 
           - else
             %tr
               %td

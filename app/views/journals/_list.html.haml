@@ -37,7 +37,7 @@
           - unless count > 0
             %tr
               %td{:rowspan => postings_count}
-                = link_to "#{journal.id}", resource(journal)
+                = link_to_with_rights "#{journal.id}", resource(journal)
                 %br
                 = "Txn ID: (#{journal.transaction_id})" unless journal.transaction_id.empty? 
               %td{:rowspan => postings_count}

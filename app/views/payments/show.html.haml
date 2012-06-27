@@ -8,7 +8,7 @@
       Loan
     %td
       - if @payment.loan
-        = link_to @payment.loan.description, resource(@payment.loan) 
+        = link_to_with_rights @payment.loan.description, resource(@payment.loan) 
       - else 
         N/A
   %tr

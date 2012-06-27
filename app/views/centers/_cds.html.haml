@@ -31,9 +31,9 @@
           %tr{ :class => cycle('odd','') }
             %td &nbsp;
             %td
-              %b= link_to loan.client.name, resource(@branch, @center, loan.client)
+              %b= link_to_with_rights loan.client.name, resource(@branch, @center, loan.client)
             %td
-              = link_to loan.id, url_for_loan(loan)
+              = link_to_with_rights loan.id, url_for_loan(loan)
             %td.numeric
               - amt = loan.amount
               %b= amt.to_currency
@@ -71,7 +71,7 @@
           %tr{ :class => cycle('odd','') }
             %td
             %td
-              %b= link_to client.name, resource(@branch, @center, client)
+              %b= link_to_with_rights client.name, resource(@branch, @center, client)
             %td{ :colspan => 5 }
               %i nothing outstanding
       %tr{ :style => 'border-bottom: 2px solid;' }

@@ -1,7 +1,7 @@
 = css_include_tag "jquery.treeview.css", :media => "screen, projection"
 %script{:type => "text/javascript", :src => "/javascripts/jquery.cookie.js"}
 %script{:type => "text/javascript", :src => "/javascripts/jquery.treeview.js"}
-= link_to "Back", url(:admin), :style => "float:right"
+= link_to_with_rights "Back", url(:admin), :style => "float:right"
 %h1  Manage Book Keeping
 %div.tab_container.shaded
   %ul.tabs

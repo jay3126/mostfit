@@ -29,4 +29,4 @@
         %a{:href => "#", :onclick => "$('#new_client_group_form').html('')"}
           cancel
       -else
-        = link_to 'cancel', cancel_link
+        = link_to_with_rights 'cancel', cancel_link

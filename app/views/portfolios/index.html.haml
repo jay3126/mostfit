@@ -9,8 +9,8 @@
   - for portfolio in @portfolios
     %tr
       %td
-        = link_to 'Show', url(:portfolio, portfolio)
+        = link_to_with_rights 'Show', url(:portfolio, portfolio)
       %td
-        = link_to 'Edit', url(:edit_portfolio,  portfolio)
+        = link_to_with_rights 'Edit', url(:edit_portfolio,  portfolio)
 
-= link_to 'New', url(:new_portfolio)
+= link_to_with_rights 'New', url(:new_portfolio)

@@ -5,6 +5,6 @@
   %tt
     app/views/ledger_entries/show.html.erb
 
-= link_to 'Edit',  url(:edit_ledger_entry,  @ledger_entry)
+= link_to_with_rights 'Edit',  url(:edit_ledger_entry,  @ledger_entry)
 |
-= link_to 'Back', url(:ledger_entries)
+= link_to_with_rights 'Back', url(:ledger_entries)

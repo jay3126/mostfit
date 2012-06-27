@@ -1,4 +1,4 @@
-= link_to "Repayment by Weeksheet", resource(:payment_transactions, :weeksheet_payments ,:biz_location_id => @biz_location.id, :date => @date)
+= link_to_with_rights "Repayment by Weeksheet", resource(:payment_transactions, :weeksheet_payments ,:biz_location_id => @biz_location.id, :date => @date)
 - total_amount, total_schedule_principal_due, total_principal_due, total_schedule_principal_outstanding, total_schedule_interest_due = 0,0,0,0,0
 - total_schedule_interest_outstanding, total_advance_amount_balance, total_receipt_principal, total_receipt_interest, total_receipt_advance = 0,0,0,0,0
 - total_due_principal, total_due_interest, total = 0,0,0
@@ -54,9 +54,9 @@
     - collection_sheets.each do |ws|
       %tr
         %td
-          = link_to ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
+          = link_to_with_rights ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
         %td
-          = link_to ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
+          = link_to_with_rights ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
         %td
           = ws.loan_status.to_s.humanize
         %td

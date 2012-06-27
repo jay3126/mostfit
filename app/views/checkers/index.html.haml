@@ -1,8 +1,8 @@
 %h1
   == Checking Loan Balances for Upload #{@upload.id}
 .menu-strip
-  = link_to "Recheck!", url(:recheck_upload_checkers, @upload)
-  = link_to "Recheck 50!", url(:recheck_upload_checkers, @upload, :limit => 50)
+  = link_to_with_rights "Recheck!", url(:recheck_upload_checkers, @upload)
+  = link_to_with_rights "Recheck 50!", url(:recheck_upload_checkers, @upload, :limit => 50)
 %table.narrow.shaded
   %tr
     %th
@@ -25,7 +25,7 @@
         = checker.id
       %td
         - if checker.loan
-          = link_to checker.reference, resource(checker.loan)
+          = link_to_with_rights checker.reference, resource(checker.loan)
         - else
           = checker.reference
       %td

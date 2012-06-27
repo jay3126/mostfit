@@ -9,7 +9,7 @@
     = hidden_field :id, :value => @payment.id
     = submit "Delete it!"
     &nbsp;&nbsp;
-    = link_to 'Back', url(:enter_payments)
+    = link_to_with_rights 'Back', url(:enter_payments)
 
 
 - elsif @loan
@@ -32,7 +32,7 @@
         %td
           %i= payment.received_on
         %td
-          %b= link_to payment.received_by.name, resource(payment.received_by)
+          %b= link_to_with_rights payment.received_by.name, resource(payment.received_by)
         %td
           %b= payment.amount
         %td

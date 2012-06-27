@@ -39,7 +39,7 @@
       - @journal.postings.each do |p|
         %tr
           %td
-            = link_to("#{p.account.id}", resource(p.account)) unless p.account.nil?
+            = link_to_with_rights("#{p.account.id}", resource(p.account)) unless p.account.nil?
           %td
             = p.account.display_name unless p.account.nil?
           %td
@@ -48,4 +48,4 @@
             = p.amount.to_account_balance if p.amount && p.amount > 0
 
             
-= link_to 'Back', url(:journals)
+= link_to_with_rights 'Back', url(:journals)

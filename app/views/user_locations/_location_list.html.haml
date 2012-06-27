@@ -5,9 +5,9 @@
   %b Select center meeting day: &nbsp;
   = paginate_on_weekdays(@biz_location, (params.key?(:meeting_day) ? params[:meeting_day] : Date.today))
 %p{:style =>"text-align: right; margin-top: -19px; margin-right: 80px;"}
-  = link_to "Today | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
-  = link_to "Previous | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"
-  = link_to "Next" , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today + 7 : @date + 7), :id => "centers_list", :class => "_remote_", :title => "Next Week Meeting Centers"
+  = link_to_with_rights "Today | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => Date.today), :id => "centers_list", :class => "_remote_", :title => "Today Meeting Centers"
+  = link_to_with_rights "Previous | " , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today - 7 : @date - 7), :id => "centers_list", :class => "_remote_", :title => "Pervious Week Meeting Centers"
+  = link_to_with_rights "Next" , url(:controller => "user_locations", :action => "biz_location_list", :id => @biz_location.id, :meeting_day => @date.nil? ? Date.today + 7 : @date + 7), :id => "centers_list", :class => "_remote_", :title => "Next Week Meeting Centers"
 - if @biz_location.blank? || @meeting_dates.blank?
   - if @biz_locations.count==0
     %p
@@ -32,9 +32,9 @@
             = biz_location.id
           %td
             - if @location_level.level == 0
-              = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id, :date => meeting_date.on_date )
+              = link_to_with_rights biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id, :date => meeting_date.on_date )
             - else
-              = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
+              = link_to_with_rights biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
           %td
             = ''
           %td

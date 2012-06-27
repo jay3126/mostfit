@@ -7,7 +7,7 @@
     = hidden_field :name => "_target_", :value => "accounting_rules_table"
     = submit "GO"
   .menu-strip
-    = link_to "Add a new rule", url(:new_rule_book, :return => params[:return], :branch_id => params[:branch_id]), :class => "_remote_ add"
+    = link_to_with_rights "Add a new rule", url(:new_rule_book, :return => params[:return], :branch_id => params[:branch_id]), :class => "_remote_ add"
   %table.report.nojs
     %tr
       %th 
@@ -65,7 +65,7 @@
         %td
           = rule_book.active
         %td
-          = link_to 'Edit', url(:edit_rule_book,  rule_book, {:return => (url(:accounts) + "#accounting_rules")})
+          = link_to_with_rights 'Edit', url(:edit_rule_book,  rule_book, {:return => (url(:accounts) + "#accounting_rules")})
   
   = paginate @rule_books
   %br

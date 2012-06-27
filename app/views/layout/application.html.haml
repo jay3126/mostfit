@@ -57,7 +57,7 @@
           = current_user_info
         - else
           existing users can
-          %b= link_to 'login', url(:login)
+          %b= link_to_with_rights 'login', url(:login)
           to proceed
     - if (params[:controller] == "loan_applications" && (params[:action] != "index" && params[:action] != "show" && params[:action] != "edit")) || params[:controller] == "overlap_report_requests" || params[:controller] == "overlap_report_responses" || params[:controller] == "loan_authorizations" || params[:controller] == "client_verifications" || params[:controller] == "loan_files"
       = partial "layout/loan_application_workflow_header"
@@ -76,7 +76,7 @@
               = e.message
         - if params[:action]=="edit" and session.user.admin?
           %p{:style => "float: right; border: 1px solid orange; padding: 4px;"}
-            = link_to("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
+            = link_to_with_rights("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
         = catch_content :for_layout
     #footer
       %p{:style => "position: relative; right: 10%; float: right;"}
@@ -87,4 +87,4 @@
             = submit "go"
       %p{:style => "position: relative; right: 10%; float: right;"}
         =image_tag("/images/mostfit_logo.png", :height => 80)
-      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.
+      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to_with_rights 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.

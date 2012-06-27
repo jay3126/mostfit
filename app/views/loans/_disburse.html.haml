@@ -31,9 +31,9 @@
   - loans_to_disburse.each do |loan|
     %tr
       %td.number
-        = link_to loan.id, url(:quick_link, "loans", loan.id)
+        = link_to_with_rights loan.id, url(:quick_link, "loans", loan.id)
       %td.text
-        = link_to loan.client.name, resource(loan.client)
+        = link_to_with_rights loan.client.name, resource(loan.client)
       %td.number  
         = text_field :name => "loans[#{loan.id}][amount]", :size => 8, :value => loan.amount
       %td.text

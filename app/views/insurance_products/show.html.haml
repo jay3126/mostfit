@@ -5,6 +5,6 @@
     No fees attached to this product
 - @insurance_product.fees.each do |f|
   = f.description
-= link_to 'Edit',  url(:edit_insurance_product,  @insurance_product)
+= link_to_with_rights 'Edit',  url(:edit_insurance_product,  @insurance_product)
 |
-= link_to 'Back', url(:insurance_products)
+= link_to_with_rights 'Back', url(:insurance_products)

@@ -25,7 +25,7 @@
         %tr
           %td
             %b 
-              = link_to obj.name, resource(obj), :target => "blank"
+              = link_to_with_rights obj.name, resource(obj), :target => "blank"
           - dates.each do |start_date|
             %td              
               - target = ((@targets.key?(obj.id) and @targets[obj.id][start_date]) ? @targets[obj.id][start_date][0] : nil)

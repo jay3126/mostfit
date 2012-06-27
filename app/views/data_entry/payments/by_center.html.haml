@@ -22,7 +22,7 @@
 - if @center and @date
   - @md = @center.meeting_day?(@date)
   %h1
-    = link_to "Center #{@center.name}", resource(@center.branch, @center)
+    = link_to_with_rights "Center #{@center.name}", resource(@center.branch, @center)
     = @date 
     - if @center
       (
@@ -50,15 +50,15 @@
         - else
           %i no meeting today
       %td
-        = link_to 'today', url(:enter_payments, :action => 'by_center', :for_date => Date.today, :center_id => @center.id) + '#weeksheet'
+        = link_to_with_rights 'today', url(:enter_payments, :action => 'by_center', :for_date => Date.today, :center_id => @center.id) + '#weeksheet'
         &nbsp;|&nbsp;
-        = link_to 'previous meeting', url(:enter_payments, :action => 'by_center', :for_date => @center.previous_meeting_date_from(@date), :center_id => @center.id) + '#weeksheet'
+        = link_to_with_rights 'previous meeting', url(:enter_payments, :action => 'by_center', :for_date => @center.previous_meeting_date_from(@date), :center_id => @center.id) + '#weeksheet'
         &nbsp;|&nbsp;
-        = link_to 'next meeting', url(:enter_payments, :action => 'by_center', :for_date => @center.next_meeting_date_from(@date), :center_id => @center.id) + '#weeksheet'
+        = link_to_with_rights 'next meeting', url(:enter_payments, :action => 'by_center', :for_date => @center.next_meeting_date_from(@date), :center_id => @center.id) + '#weeksheet'
     %tr
       %td center manager
       %td
-        = link_to @center.manager.name, resource(@center.manager)
+        = link_to_with_rights @center.manager.name, resource(@center.manager)
       %td
         %form{:action => url(:enter_payments, :action => 'by_center'), :method => 'GET', :style => 'margin: 0px; padding: 0px;'}
           = date_select 'for_date', @date
@@ -151,9 +151,9 @@
               %td
                 = obj.id
               %td.text
-                = obj.is_a?(Loan) ? link_to(obj.client.name, url_for_loan(obj)) : link_to(obj.name, resource(obj))
+                = obj.is_a?(Loan) ? link_to_with_rights(obj.client.name, url_for_loan(obj)) : link_to(obj.name, resource(obj))
               %td.text
-                = (link_to obj.description, url_for_loan(obj)) if obj.respond_to?("description")
+                = (link_to_with_rights obj.description, url_for_loan(obj)) if obj.respond_to?("description")
               %td.text
                 = obj.total_fees_due
               %td.text
@@ -173,9 +173,9 @@
             %tr
               %td.number
               %td.text
-                = link_to f.client.name, resource(f.client)
+                = link_to_with_rights f.client.name, resource(f.client)
               %td.text
-                = (link_to f.loan.description, url_for_loan(f.loan)) if f.loan
+                = (link_to_with_rights f.loan.description, url_for_loan(f.loan)) if f.loan
               %td.text
               %td.number
                 = f.amount

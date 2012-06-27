@@ -20,12 +20,12 @@
       %td
         = insurance_policy.id
       %td
-        = link_to insurance_policy.description, resource(insurance_policy.client, insurance_policy)
+        = link_to_with_rights insurance_policy.description, resource(insurance_policy.client, insurance_policy)
       %td
-        = link_to insurance_policy.insurance_product.name, resource(insurance_policy.insurance_product)
+        = link_to_with_rights insurance_policy.insurance_product.name, resource(insurance_policy.insurance_product)
       %td
-        = link_to 'Show', resource(@client, insurance_policy)
+        = link_to_with_rights 'Show', resource(@client, insurance_policy)
         |
-        = link_to 'Edit', resource(@client, insurance_policy, :edit)
+        = link_to_with_rights 'Edit', resource(@client, insurance_policy, :edit)
 
-= link_to 'New', resource(@client, :insurance_policies, :new)
+= link_to_with_rights 'New', resource(@client, :insurance_policies, :new)

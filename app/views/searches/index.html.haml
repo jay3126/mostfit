@@ -27,13 +27,13 @@
                 %td
                   - field = obj.send(function)
                   - if function == :manager or function == :center
-                    = link_to(field.name, resource(field)) rescue ''
+                    = link_to_with_rights(field.name, resource(field)) rescue ''
                   - elsif model.to_sym == :bookmarks
                     - if obj.method==:get
                       - route = YAML::load(obj.route).last
-                      = link_to obj.name, url(route)
+                      = link_to_with_rights obj.name, url(route)
                   - else
-                    = link_to(field.respond_to?(:name) ? field.name : field, "/#{model}/#{obj.id}")
+                    = link_to_with_rights(field.respond_to?(:name) ? field.name : field, "/#{model}/#{obj.id}")
         - if @floating and count > 10
           %tr
             %td

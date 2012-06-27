@@ -34,7 +34,7 @@
         - client = loan.client
         %tr
           %td
-            = link_to(loan.id, resource(loan), :target => "BLANK")
+            = link_to_with_rights(loan.id, resource(loan), :target => "BLANK")
           %td
             = client.name
           %td

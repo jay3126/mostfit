@@ -17,7 +17,7 @@
               = submit "Proceed"
     -if @loan_products.length==0
       %div.error
-        =link_to("There are no loan products available. Create one now", resource(:loan_products, :new)) 
+        =link_to_with_rights("There are no loan products available. Create one now", resource(:loan_products, :new)) 
   - else
     = form_for(@loan, :action => resource(@client.center.branch, @client.center, @client, :loans, {:return => "/data_entry"}), :onsubmit => "javascript: return confirm_for(o);") do
       = hidden_field :client_id, :value => @client.id

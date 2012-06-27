@@ -12,4 +12,4 @@
       %td
         = staff.name
       %td
-        = link_to 'Generate sheet',url(:day_sheet,staff.id)
+        = link_to_with_rights 'Generate sheet',url(:day_sheet,staff.id)

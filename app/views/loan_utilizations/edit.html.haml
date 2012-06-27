@@ -9,6 +9,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:loan_utilization, @loan_utilization)
+= link_to_with_rights 'Show', url(:loan_utilization, @loan_utilization)
 |
-= link_to 'Back', url(:loan_utilizations)
+= link_to_with_rights 'Back', url(:loan_utilizations)

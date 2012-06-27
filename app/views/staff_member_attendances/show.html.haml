@@ -5,6 +5,6 @@
   %tt
     app/views/staff_member_attendances/show.html.erb
 
-= link_to 'Edit',  url(:edit_staff_member_attendance,  @staff_member_attendance)
+= link_to_with_rights 'Edit',  url(:edit_staff_member_attendance,  @staff_member_attendance)
 |
-= link_to 'Back', url(:staff_member_attendances)
+= link_to_with_rights 'Back', url(:staff_member_attendances)

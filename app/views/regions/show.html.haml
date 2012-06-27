@@ -1,9 +1,9 @@
 %h1
   == #{I18n.t "region.show.name", :default => "Region"} : <i>#{@region.name}</i>
 %p.menu-strip{:style => "width: 29%; margin-bottom: 0.2em;"}
-  = link_to I18n.t("region.index.edit", :default => "Edit"), url(:edit_region, @region), :class => 'edit grey_button'
+  = link_to_with_rights I18n.t("region.index.edit", :default => "Edit"), url(:edit_region, @region), :class => 'edit grey_button'
   &nbsp;&nbsp;&nbsp;&nbsp;
-  = link_to 'back', resource(:regions), :class => 'grey_button'
+  = link_to_with_rights 'back', resource(:regions), :class => 'grey_button'
 
 %table.loan{ :style => "width: 30%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.odd
@@ -23,7 +23,7 @@
     %th.odd
       = I18n.t "region.show.manager", :default => "Manager"
     %td
-      = link_to @region.manager.name, resource(@region.manager), :target => "_blank"
+      = link_to_with_rights @region.manager.name, resource(@region.manager), :target => "_blank"
   %tr.odd
     %th.odd
       = I18n.t "region.show.address", :default => "Address"
@@ -40,7 +40,7 @@
     %td
       = @region.landmark
 %br
-= link_to I18n.t("region.show.new_link", :default => "Add a new area" ), resource(@region, :areas, :new), :class => "add grey_button"
+= link_to_with_rights I18n.t("region.show.new_link", :default => "Add a new area" ), resource(@region, :areas, :new), :class => "add grey_button"
 %div.tab_container
   %ul.tabs
     %li#areas
@@ -56,7 +56,7 @@
     - if @region.areas.count == 0
       .flash.notice
         == #{@region.name} #{I18n.t 'region.show.areas.no_area_msg', :default => 'does not have any Areas.'}
-        = link_to I18n.t('region.show.areas.add_area', :default => "Click here"), resource(@region, :areas, :new) 
+        = link_to_with_rights I18n.t('region.show.areas.add_area', :default => "Click here"), resource(@region, :areas, :new) 
         = I18n.t 'region.show.areas.to_add_one', :default => "to add one"
     - else 
       %table.narrow
@@ -75,11 +75,11 @@
             %td
               = a.id
             %td
-              = link_to a.name, resource(a)
+              = link_to_with_rights a.name, resource(a)
             %td
-              = link_to a.branches.count, resource(a)
+              = link_to_with_rights a.branches.count, resource(a)
             %td
-              = link_to I18n.t('region.index.edit', :default => "Edit"), resource(a, :edit)
+              = link_to_with_rights I18n.t('region.index.edit', :default => "Edit"), resource(a, :edit)
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@region.id}?for=region"}
   - if Mfi.first.map_enabled        

@@ -15,7 +15,7 @@
       %b
         Or
       &nbsp;&nbsp;&nbsp;
-      = link_to "Cancel", url(:quick_link, "staff_members", @staff_member.id), :class => "grey_button"
+      = link_to_with_rights "Cancel", url(:quick_link, "staff_members", @staff_member.id), :class => "grey_button"
 - else
   %h2
     Please choose a branch and a date to mark attendance

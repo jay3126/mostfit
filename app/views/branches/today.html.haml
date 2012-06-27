@@ -21,7 +21,7 @@
           %td
             = loan.id
           %td
-            %b= link_to loan.client.name, resource(@branch, center, loan.client)
+            %b= link_to_with_rights loan.client.name, resource(@branch, center, loan.client)
           %td 
             == Rs.#{loan.amount} disbursed #{loan.disbursal_date}
           %td

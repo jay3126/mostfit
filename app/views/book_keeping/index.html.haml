@@ -2,12 +2,12 @@
 %div
   %ul
     %li#ledgers
-      = link_to 'Ledgers', resource(:ledgers)
+      = link_to_with_rights 'Ledgers', resource(:ledgers)
     %li#vouchers
-      = link_to 'Vouchers', resource(:vouchers)
+      = link_to_with_rights 'Vouchers', resource(:vouchers)
     %li#cost_centers
-      = link_to 'Cost Centers', resource(:cost_centers)
+      = link_to_with_rights 'Cost Centers', resource(:cost_centers)
     %li#transaction_summaries
-      = link_to 'Transaction Summaries', resource(:transaction_summaries)
+      = link_to_with_rights 'Transaction Summaries', resource(:transaction_summaries)
     %li#categories_and_rules
-      = link_to 'Categories and rules', resource(:accounting_rules)
+      = link_to_with_rights 'Categories and rules', resource(:accounting_rules)

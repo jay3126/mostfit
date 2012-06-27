@@ -5,6 +5,6 @@
   %tt
     app/views/cgts/show.html.erb
 
-= link_to 'Edit',  url(:edit_cgt,  @cgt)
+= link_to_with_rights 'Edit',  url(:edit_cgt,  @cgt)
 |
-= link_to 'Back', url(:cgts)
+= link_to_with_rights 'Back', url(:cgts)

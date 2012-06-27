@@ -25,4 +25,4 @@
         %td
           = loan_application.status
 
-= link_to 'New', url(:controller => :loan_applications, :action => :bulk_new)
+= link_to_with_rights 'New', url(:controller => :loan_applications, :action => :bulk_new)

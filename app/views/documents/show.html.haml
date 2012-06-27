@@ -31,8 +31,8 @@
     %td
       %b Download
     %td
-      = link_to "here", @document.document.url
+      = link_to_with_rights "here", @document.document.url
 
-= link_to 'Edit',  url(:edit_document,  @document)
+= link_to_with_rights 'Edit',  url(:edit_document,  @document)
 |
-= link_to 'Back', resource(parent)
+= link_to_with_rights 'Back', resource(parent)

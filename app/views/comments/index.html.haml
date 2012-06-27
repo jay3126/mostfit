@@ -9,8 +9,8 @@
   - for comment in @comments
     %tr
       %td
-        = link_to 'Show', url(:comment, comment)
+        = link_to_with_rights 'Show', url(:comment, comment)
       %td
-        = link_to 'Edit', url(:edit_comment,  comment)
+        = link_to_with_rights 'Edit', url(:edit_comment,  comment)
 
-= link_to 'New', url(:new_comment)
+= link_to_with_rights 'New', url(:new_comment)

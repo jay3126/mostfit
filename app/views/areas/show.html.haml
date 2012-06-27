@@ -1,8 +1,8 @@
 %h1== Area : <i>#{@area.name}</i>
 %p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
-  = link_to 'edit this area details', url(:edit_area, @area), :class => 'edit grey_button'
+  = link_to_with_rights 'edit this area details', url(:edit_area, @area), :class => 'edit grey_button'
   &nbsp;&nbsp;&nbsp;&nbsp;
-  = link_to 'back', resource(:areas), :class => 'grey_button'
+  = link_to_with_rights 'back', resource(:areas), :class => 'grey_button'
 
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.odd
@@ -17,12 +17,12 @@
     %th.even
       Region
     %td
-      = link_to @area.region.name, resource(@area.region), :target => "_blank"
+      = link_to_with_rights @area.region.name, resource(@area.region), :target => "_blank"
   %tr.odd
     %th.odd
       Manager
     %td
-      = link_to @area.manager.name, resource(@area.manager), :target => "_blank"
+      = link_to_with_rights @area.manager.name, resource(@area.manager), :target => "_blank"
   %tr.even
     %th.even
       Address
@@ -65,7 +65,7 @@
           %td
             = b.id
           %td
-            = link_to b.name, resource(b)
+            = link_to_with_rights b.name, resource(b)
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@area.id}?for=area"}
   - if Mfi.first.map_enabled        
