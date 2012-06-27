@@ -45,7 +45,7 @@ class LoanApplications < Application
           end
         end
       end
-      client_from_center = client_facade.get_clients_administered(center_id, Date.today) if @center
+      client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today) if @center
       client_ids_from_center = client_from_center.collect{|client| client.id}
       client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
       final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
@@ -77,7 +77,7 @@ class LoanApplications < Application
         center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
         if center_cycle_number > 0
           center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
-          client_from_center = client_facade.get_clients_administered(center_id, Date.today)
+          client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today)
           client_ids_from_center = client_from_center.collect{|client| client.id}
           client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
           final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
