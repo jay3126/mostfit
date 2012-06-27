@@ -4,8 +4,8 @@ module Constants
     DISBURSEMENT = :disbursement; REPAYMENT = :repayment
     LOAN_PAYMENT_TYPES = [ DISBURSEMENT, REPAYMENT ]
 
-    NOT_DUE = :not_due; DUE = :due; OVERDUE = :overdue
-    LOAN_DUE_STATUSES = [ NOT_DUE, DUE, OVERDUE ]
+    NOT_APPLICABLE = :not_applicable; NOT_DUE = :not_due; DUE = :due; OVERDUE = :overdue
+    LOAN_DUE_STATUSES = [ NOT_APPLICABLE, NOT_DUE, DUE, OVERDUE ]
 
     ADMINISTERED_AT = :administered_at
     ACCOUNTED_AT    = :accounted_at

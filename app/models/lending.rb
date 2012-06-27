@@ -220,19 +220,8 @@ class Lending
   # LOAN BALANCES QUERIES # begins
   #########################
 
-  def scheduled_principal_and_interest_due(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
-
-    {SCHEDULED_PRINCIPAL_DUE => scheduled_principal_due(on_date), SCHEDULED_INTEREST_DUE => scheduled_interest_due(on_date)}
-  end
-
-  def scheduled_total_due(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
-    scheduled_principal_due(on_date) + scheduled_interest_due(on_date)
-  end
-
   def scheduled_principal_due(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
+    return zero_money_amount if (on_date < scheduled_first_repayment_date)
 
     amortization = get_scheduled_amortization(on_date)
     amortization.values.first[SCHEDULED_PRINCIPAL_DUE] if amortization
@@ -245,42 +234,11 @@ class Lending
     amortization.values.first[SCHEDULED_PRINCIPAL_OUTSTANDING] if amortization
   end
 
-  def actual_principal_outstanding(on_date = Date.today)
-    return zero_money_amount unless is_disbursed?
-
-    # TODO Handle the case where principal receipts exceed loan disbursed amount (possible?)
-    total_loan_disbursed - principal_received_till_date(on_date)
-  end
-
-  def actual_principal_due(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
-
-    if (actual_principal_outstanding > scheduled_principal_outstanding(on_date))
-      scheduled_principal_due(on_date) + (actual_principal_outstanding - scheduled_principal_outstanding(on_date))
-    else
-      scheduled_principal_due(on_date)
-    end
-  end
-
   def scheduled_interest_due(on_date)
     return zero_money_amount if on_date < scheduled_first_repayment_date
 
     amortization = get_scheduled_amortization(on_date)
     amortization.values.first[SCHEDULED_INTEREST_DUE] if amortization
-  end
-
-  def broken_period_interest_due(on_date)
-    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
-    return zero_money_amount if schedule_date?(on_date)
-    return zero_money_amount if on_date >= last_scheduled_date
-    
-    previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_dates)
-    next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_dates)
-
-    interim_interest = scheduled_interest_outstanding(previous_schedule_date) - scheduled_interest_outstanding(next_schedule_date)
-
-    fractional_days_left = (on_date - previous_schedule_date)/(next_schedule_date - previous_schedule_date)
-    interim_interest * fractional_days_left
   end
 
   def scheduled_interest_outstanding(on_date)
@@ -290,38 +248,79 @@ class Lending
     amortization.values.first[SCHEDULED_INTEREST_OUTSTANDING] if amortization
   end
 
-  def actual_interest_outstanding(on_date = Date.today)
-    return zero_money_amount unless is_disbursed?
-
-    # TODO Handle the case where the interest receipts exceed interest applicable (possible?)
-    total_interest_applicable - interest_received_till_date(on_date)
-  end
-
-  def actual_interest_due(on_date)
-    return zero_money_amount if on_date < scheduled_first_repayment_date
-
-    if (actual_interest_outstanding > scheduled_interest_outstanding(on_date))
-      scheduled_interest_due(on_date) + (actual_interest_outstanding - scheduled_interest_outstanding(on_date))
-    else
-      scheduled_interest_due(on_date)
-    end
-  end
-
-  def actual_total_due(on_date)
-    actual_principal_due(on_date) + actual_interest_due(on_date)
-  end
-
   def scheduled_total_outstanding(on_date)
-    return zero_money_amount if on_date < disbursal_date_value
-    return total_loan_disbursed if on_date < scheduled_first_repayment_date
-
     scheduled_principal_outstanding(on_date) + scheduled_interest_outstanding(on_date)
   end
 
-  def actual_total_outstanding(on_date = Date.today)
-    return zero_money_amount unless is_disbursed?
+  def scheduled_principal_and_interest_due(on_date)
+    {SCHEDULED_PRINCIPAL_DUE => scheduled_principal_due(on_date), SCHEDULED_INTEREST_DUE => scheduled_interest_due(on_date)}
+  end
 
-    actual_principal_outstanding(on_date) + actual_interest_outstanding(on_date)
+  def scheduled_total_due(on_date)
+    scheduled_principal_due(on_date) + scheduled_interest_due(on_date)
+  end
+
+  def actual_principal_outstanding
+    return zero_money_amount unless is_outstanding?
+
+    if (total_loan_disbursed > principal_received_till_date)
+      return (total_loan_disbursed - principal_received_till_date)
+    end
+    zero_money_amount
+  end
+
+  def sum_of_oustanding_and_due_principal(on_date)
+    scheduled_principal_outstanding(on_date) + scheduled_principal_due(on_date)
+  end
+
+  def sum_of_oustanding_and_due_interest(on_date)
+    scheduled_interest_outstanding(on_date) + scheduled_interest_due(on_date)
+  end
+
+  def sum_of_outstanding_and_due_total(on_date)
+    sum_of_oustanding_and_due_principal(on_date) + sum_of_oustanding_and_due_interest(on_date)
+  end
+
+  def actual_interest_outstanding
+    return zero_money_amount unless is_outstanding?
+
+    if (total_interest_applicable > interest_received_till_date)
+      return (total_interest_applicable - interest_received_till_date)
+    end
+    zero_money_amount
+  end
+
+  def actual_total_due(on_date)    
+    net_outstanding = actual_total_outstanding_net_advance_balance
+    scheduled_outstanding = scheduled_total_outstanding(on_date)
+
+    (net_outstanding > scheduled_outstanding) ? (net_outstanding - scheduled_outstanding) :
+        zero_money_amount
+  end
+
+  def actual_total_outstanding_net_advance_balance
+    if (actual_total_outstanding > current_advance_available)
+      return (actual_total_outstanding - current_advance_available)
+    end
+    zero_money_amount
+  end
+
+  def actual_total_outstanding
+    actual_principal_outstanding + actual_interest_outstanding
+  end
+
+  def broken_period_interest_due(on_date)
+    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
+    return zero_money_amount if schedule_date?(on_date)
+    return zero_money_amount if on_date >= last_scheduled_date
+
+    previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_dates)
+    next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_dates)
+
+    interim_interest = scheduled_interest_outstanding(previous_schedule_date) - scheduled_interest_outstanding(next_schedule_date)
+
+    fractional_days_left = (on_date - previous_schedule_date)/(next_schedule_date - previous_schedule_date)
+    interim_interest * fractional_days_left
   end
 
   def get_scheduled_amortization(on_date)
@@ -350,7 +349,7 @@ class Lending
 
   def historical_advance_available(on_date)
     # TODO implement using accounting facade
-    zero_money_amount
+    advance_received_till_date(on_date)
   end
 
   def amounts_received_on_date(on_date = Date.today)
@@ -399,6 +398,15 @@ class Lending
     status_in_force_on_date.to_status
   end
 
+  def is_outstanding_now?
+    is_outstanding_on_date?(Date.today)
+  end
+
+  def is_outstanding_on_date?(on_date)
+    loan_status_on_date = historical_loan_status_on_date(on_date)
+    LoanLifeCycle.is_outstanding_status?(loan_status_on_date)
+  end
+
   #######################
   # LOAN STATUS QUERIES # ends
   #######################
@@ -408,24 +416,21 @@ class Lending
   #########################
 
   def current_due_status
+    return NOT_APPLICABLE unless is_outstanding_now?
     due_status_from_outstanding(Date.today)
   end
   
+  def due_status_from_outstanding(on_date)
+    return NOT_APPLICABLE unless is_outstanding_on_date?(on_date)
+    actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+  end
+
   def get_loan_due_status_record(on_date)
     LoanDueStatus.most_recent_status_record_on_date(self.id, on_date)
   end
 
   def generate_loan_due_status_record(on_date)
     LoanDueStatus.generate_loan_due_status(self.id, on_date)
-  end
-  
-  def due_status_from_outstanding(on_date)
-    return NOT_DUE if on_date < self.scheduled_first_repayment_date
-    if (schedule_date?(on_date))
-      actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
-    else
-      actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
-    end
   end
 
   def days_past_due

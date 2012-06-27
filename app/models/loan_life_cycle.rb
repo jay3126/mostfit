@@ -1,18 +1,48 @@
 module LoanLifeCycle
 
-  # Obtain the current loan status
-  def current_loan_status; status; end
+  def current_loan_status
+    raise TypeError, "Does not implement status" unless (respond_to?(:status) and status)
+    status
+  end
 
   def is_approved?
-    (current_loan_status == APPROVED_LOAN_STATUS) or is_disbursed?
+    LoanLifeCycle.is_approved_status?(current_loan_status)
+  end
+
+  def self.is_approved_status?(status)
+    validate_status(status)
+    (status == APPROVED_LOAN_STATUS) or is_disbursed_status?(status)
   end
   
   def is_disbursed?
-    LOAN_STATUSES.index(current_loan_status) >= LOAN_STATUSES.index(DISBURSED_LOAN_STATUS)
+    LoanLifeCycle.is_disbursed_status?(current_loan_status)
+  end
+
+  def self.is_disbursed_status?(status)
+    validate_status(status)
+    LOAN_STATUSES.index(status) >= LOAN_STATUSES.index(DISBURSED_LOAN_STATUS)
   end
 
   def is_outstanding?
-    (current_loan_status == DISBURSED_LOAN_STATUS)
+    LoanLifeCycle.is_outstanding_status?(current_loan_status)
+  end
+  
+  def self.is_outstanding_status?(status)
+    validate_status(status)
+    (status == DISBURSED_LOAN_STATUS)    
+  end
+  
+  def is_repaid?
+    LoanLifeCycle.is_repaid_status?(current_loan_status)
+  end
+
+  def self.is_repaid_status?(status)
+    validate_status(status)
+    status == REPAID_LOAN_STATUS
+  end
+
+  def self.validate_status(status)
+    raise ArgumentError, "Status #{status} is not recognised" unless LOAN_STATUSES.include?(status)
   end
 
   STATUS_NOT_SPECIFIED  = :status_not_specified
@@ -25,8 +55,9 @@ module LoanLifeCycle
 
   REPAID_IN_FULL = :repaid_in_full
   PRECLOSED      = :preclosed
+  REPAID_SHORT   = :repaid_short
   WRITTEN_OFF    = :written_off
-  REPAID_NATURES = [REPAID_IN_FULL, PRECLOSED, WRITTEN_OFF]
+  REPAID_NATURES = [REPAID_IN_FULL, PRECLOSED, REPAID_SHORT, WRITTEN_OFF]
 
   LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
 
