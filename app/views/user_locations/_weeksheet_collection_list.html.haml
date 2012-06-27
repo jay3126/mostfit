@@ -2,7 +2,6 @@
 - total_amount, total_schedule_principal_due, total_principal_due, total_schedule_principal_outstanding, total_schedule_interest_due = 0,0,0,0,0
 - total_schedule_interest_outstanding, total_advance_amount_balance, total_receipt_principal, total_receipt_interest, total_receipt_advance = 0,0,0,0,0
 - total_due_principal, total_due_interest, total = 0,0,0
-- total_actual_principal_due, total_actual_interest_due = 0,0
 %table.dataTable.report.weeksheet.nojs
   %thead
     %tr
@@ -27,13 +26,9 @@
       %th
         Schedule Principal Due
       %th
-        Actual Principal Due
-      %th
         Actual Principal Outstanding
       %th
         Schedule Interest Due
-      %th
-        Actual Interest Due
       %th
         Actual Interest Outstanding
       %th
@@ -74,13 +69,9 @@
         %td
           = ws.loan_schedule_principal_due.to_s
         %td
-          = ws.loan_actual_principal_due.to_s
-        %td
           = ws.loan_actual_principal_outstanding.to_s
         %td
           = ws.loan_schedule_interest_due.to_s
-        %td
-          = ws.loan_actual_interest_due.to_s
         %td
           = ws.loan_actual_interest_outstanding.to_s
         %td
@@ -92,7 +83,7 @@
         %td
           = ws.loan_advance_receipts.to_s
         %td
-          = ws.total_amount_to_be_paid.to_s
+          = ws.loan_actual_total_due.to_s
   %tfoot
     %tr.org_total
       %td{:colspan => 20}

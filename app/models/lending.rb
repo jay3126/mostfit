@@ -269,6 +269,15 @@ class Lending
     zero_money_amount
   end
 
+  def actual_interest_outstanding
+    return zero_money_amount unless is_outstanding?
+
+    if (total_interest_applicable > interest_received_till_date)
+      return (total_interest_applicable - interest_received_till_date)
+    end
+    zero_money_amount
+  end
+
   def sum_of_oustanding_and_due_principal(on_date)
     scheduled_principal_outstanding(on_date) + scheduled_principal_due(on_date)
   end
@@ -279,15 +288,6 @@ class Lending
 
   def sum_of_outstanding_and_due_total(on_date)
     sum_of_oustanding_and_due_principal(on_date) + sum_of_oustanding_and_due_interest(on_date)
-  end
-
-  def actual_interest_outstanding
-    return zero_money_amount unless is_outstanding?
-
-    if (total_interest_applicable > interest_received_till_date)
-      return (total_interest_applicable - interest_received_till_date)
-    end
-    zero_money_amount
   end
 
   def actual_total_due(on_date)    
@@ -422,7 +422,8 @@ class Lending
   
   def due_status_from_outstanding(on_date)
     return NOT_APPLICABLE unless is_outstanding_on_date?(on_date)
-    actual_total_outstanding > scheduled_total_outstanding(on_date) ? OVERDUE : DUE
+    return NOT_DUE if (on_date < self.scheduled_first_repayment_date)
+    (actual_total_outstanding_net_advance_balance > scheduled_total_outstanding(on_date)) ? OVERDUE : DUE
   end
 
   def get_loan_due_status_record(on_date)
@@ -566,7 +567,7 @@ class Lending
 
     #TODO handle scenario where repayment is received between schedule dates
 
-    only_principal_and_interest = [self.actual_total_due(Date.today), total_amount].min
+    only_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
     advance_to_allocate = (total_amount > only_principal_and_interest) ?
         (total_amount - only_principal_and_interest) : zero_money_amount
 

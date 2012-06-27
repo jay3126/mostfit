@@ -154,8 +154,6 @@ class LoanDueStatus
       ACTUAL_PRINCIPAL_OUTSTANDING,
       ACTUAL_INTEREST_OUTSTANDING,
       ACTUAL_TOTAL_OUTSTANDING,
-      ACTUAL_PRINCIPAL_DUE,
-      ACTUAL_INTEREST_DUE,
       ACTUAL_TOTAL_DUE,
       :principal_received_on_date,
       :interest_received_on_date,

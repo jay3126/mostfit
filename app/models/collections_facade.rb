@@ -64,12 +64,11 @@ class CollectionsFacade
          
           loan_schedule_installment_no        = loan_schedule_item.first.first
           loan_schedule_principal_due         = loan_schedule_item.last[:scheduled_principal_due]
-          loan_actual_principal_due           = client_loan.actual_principal_due(loan_schedule_date)
           loan_actual_principal_outstanding   = client_loan.actual_principal_outstanding
           loan_schedule_principal_outstanding = loan_schedule_item.last[:scheduled_principal_outstanding]
 
           loan_schedule_interest_due          = loan_schedule_item.last[:scheduled_interest_due]
-          loan_actual_interest_due            = client_loan.actual_interest_due(loan_schedule_date)
+          loan_actual_total_due               = client_loan.actual_total_due(loan_schedule_date)
           loan_actual_interest_outstanding    = client_loan.actual_interest_outstanding
           loan_schedule_interest_outstanding  = loan_schedule_item.last[:scheduled_interest_outstanding]
 
@@ -82,20 +81,13 @@ class CollectionsFacade
           loan_total_interest_due             = ''
           loan_total_principal_due            = ''
           
-          if (loan_actual_principal_due + loan_actual_interest_due) >= loan_advance_amount
-            total_amount_to_be_paid = (loan_actual_principal_due + loan_actual_interest_due) - loan_advance_amount
-          else
-            total_amount_to_be_paid = 0
-          end
-
           collection_sheet_line << CollectionSheetLineItem.new(at_biz_location, biz_location.name, on_date, client_id, client_name, client_group_id,
             client_group_name, loan_id, loan_amount,
             loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no, loan_schedule_date, loan_days_past_due, loan_principal_due,
             loan_schedule_principal_due, loan_schedule_principal_outstanding, loan_schedule_interest_due, loan_schedule_interest_outstanding,
             loan_advance_amount, loan_principal_receipts, loan_interest_receipts, loan_advance_receipts,
             loan_total_principal_due, loan_total_interest_due, 
-            loan_actual_principal_due, loan_actual_interest_due,
-            loan_actual_principal_outstanding, loan_actual_interest_outstanding, total_amount_to_be_paid)
+            loan_actual_principal_outstanding, loan_actual_interest_outstanding, loan_actual_total_due)
         end
       end
     end
