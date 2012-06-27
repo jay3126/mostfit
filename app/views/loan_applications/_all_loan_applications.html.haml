@@ -24,7 +24,10 @@
             %td
               = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
             %td
-              = loan_application.client_name
+              - if loan_application.client_id.nil?
+                = loan_application.client_name
+              - else
+                = link_to loan_application.client_name, url(:controller => :new_clients, :action => :show, :id => loan_application.client_id)
             %td
               = loan_application.client_guarantor_name
             %td
