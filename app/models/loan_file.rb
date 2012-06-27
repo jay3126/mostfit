@@ -39,8 +39,8 @@ class LoanFile
   property :created_at,                   DateTime, :nullable => false, :default => DateTime.now
   property :health_check_status,          Enum.send('[]', *HEALTH_CHECK_STATUSES), :nullable => false, :default => NEW_STATUS
   property :health_status_remark,         Text, :nullable => true, :lazy => true
-  property :health_check_approved_by,     Integer, :nullable => false
-  property :health_check_approved_on,     Integer, :nullable => false
+  property :health_check_approved_by,     Integer, :nullable => true
+  property :health_check_approved_on,     Integer, :nullable => true
 
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
