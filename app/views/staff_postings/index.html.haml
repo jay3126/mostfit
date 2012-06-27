@@ -1,0 +1,46 @@
+:javascript
+  $('table.center_meetings').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%h1 Staff Posting
+.menu-strip
+  = link_to 'Add Posting', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+#meeting_div(style = "display : none")
+  = form_for(@staff_posting, :action => url(:controller => :staff_postings, :action => :create), :method => "POST", :class => "tall shaded") do
+    = partial 'staff_postings/fields'
+    = submit 'Save', :class => "greenButton"
+%br
+- if @staff_postings.count == 0
+  %p
+    %i No Staff Posting have been created yet.
+- else
+  %table.report.weeksheet.nojs.center_meetings
+    %thead
+      %tr
+        %td
+          id
+        %td
+          Staff Name
+        %td
+          Designation
+        %td
+          Posting
+        %td
+          Effective On
+    - @staff_postings.each do |staff_posting|
+      - staff_member = staff_posting.staff_assigned
+      %tr
+        %td
+          = staff_posting.id
+        %td
+          = staff_member.name
+        %td
+          =# staff_member.designation.name
+        %td
+          = staff_posting.assigned_to_location.name
+        %td
+          = staff_posting.effective_on
+    %tfoot
+      %tr
+        %td{ :colspan => 7 }

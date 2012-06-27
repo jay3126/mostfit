@@ -1,0 +1,21 @@
+%table.form
+  %tr
+    %td
+      Staff Member
+    %td
+      = select :staff_id, :collection => StaffMember.all.collect{|sm| [sm.id, sm.name]}
+  %tr
+    %td
+      Location
+    %td
+      = select :at_location_id, :collection => @biz_locations.map{|bl| [bl.id, bl.name]}
+  %tr
+    %td
+      Performed By
+    %td
+      = select :performed_by, :collection => StaffMember.all.collect{|sm| [sm.id, sm.name]}
+  %tr
+    %td
+      Effective On
+    %td
+      = date_select 'staff_posting[effective_on]', Date.today, {:id => 'effective_on'}

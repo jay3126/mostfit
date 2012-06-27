@@ -25,6 +25,7 @@ Merb::Router.prepare do
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
+  resources :staff_postings
 
   resources :banks do
     resources :bank_branches do
