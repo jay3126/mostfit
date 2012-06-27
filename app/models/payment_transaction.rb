@@ -48,24 +48,6 @@ class PaymentTransaction
     recorded_payment
   end
 
-  # QUERIES
-
-  def self.get_payments_performed_on_date(at_location, effective_on = Date.today, by_staff = nil)
-    payments_performed = {}
-    payments_performed[:performed_at] = at_location
-    payments_performed[:effective_on] = effective_on
-    payments_performed[:performed_by] = by_staff if by_staff
-    all(payments_performed)
-  end
-
-  def self.get_payments_performed_till_date(at_location, effective_on = Date.today, by_staff = nil)
-    payments_performed = {}
-    payments_performed[:performed_at] = at_location
-    payments_performed[:effective_on.lte] = effective_on
-    payments_performed[:performed_by] = by_staff if by_staff
-    all(payments_performed)
-  end
-
   private
 
   # Constructs the hash required to create a payment
