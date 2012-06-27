@@ -48,7 +48,8 @@
                   = client.address
                 %td
                   - if (client_loans.blank? && is_eligible)
-                    = select :name => "clients[#{client.id}][amount]", :collection => Constants::Masters::LOAN_AMOUNTS.map{|x| [x, x.to_s]}
+                    - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.amount}).uniq
+                    = select :name => "clients[#{client.id}][amount]", :collection => loan_product_amount.map{|x| [x.to_s]}
         %table.narrow.form{:style => "width:100%;"}
           %tfoot
             %tr
