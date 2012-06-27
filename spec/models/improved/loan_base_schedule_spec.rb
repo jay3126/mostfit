@@ -49,14 +49,14 @@ describe LoanBaseSchedule do
         third_installment = {
             [3, Date.parse('2012-04-22')] =>
                 { @spd => MoneyManager.get_money_instance(171.88), @slid => MoneyManager.get_money_instance(48.12),
-                  @spo => MoneyManager.get_money_instance(9658.79), @slio => MoneyManager.get_money_instance(1268.24)
+                  @spo => MoneyManager.get_money_instance(9486.91), @slio => MoneyManager.get_money_instance(1268.24 - 48.12)
                 }
         }
 
         fourth_installment = {
             [4, Date.parse('2012-04-29')] =>
                 { @spd => MoneyManager.get_money_instance(172.74), @slid => MoneyManager.get_money_instance(47.26),
-                  @spo => MoneyManager.get_money_instance(9658.79 - 171.88), @slio => MoneyManager.get_money_instance(1268.24 - 48.12)
+                  @spo => MoneyManager.get_money_instance(9486.91 - 172.74), @slio => MoneyManager.get_money_instance(1268.24 - 48.12 - 47.26)
                 }
         }
 

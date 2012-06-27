@@ -218,14 +218,14 @@ class BaseScheduleLineItem
 
       repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency) if (num > 1)
 
-      repayment = get_instance(num, repayment_on, REPAYMENT, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
-      schedule_line_items << repayment
-
       scheduled_principal_outstanding -= scheduled_principal_due
       raise Errors::BusinessValidationError, "Scheduled principal due: #{scheduled_principal_due} exceeds scheduled principal outstanding: #{scheduled_principal_outstanding}" if scheduled_principal_outstanding < 0
 
       scheduled_interest_outstanding  -= scheduled_interest_due
       raise Errors::BusinessValidationError, "Scheduled interest due: #{scheduled_interest_due} exceeds scheduled interest outstanding #{scheduled_interest_outstanding}" if scheduled_interest_outstanding < 0
+
+      repayment = get_instance(num, repayment_on, REPAYMENT, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
+      schedule_line_items << repayment
     }
 
     base_schedule.base_schedule_line_items = schedule_line_items.sort
