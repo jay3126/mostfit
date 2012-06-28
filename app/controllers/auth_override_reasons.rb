@@ -27,7 +27,7 @@ class AuthOverrideReasons < Application
 	def change_state(id)
 		@auth_override_reason = AuthOverrideReason.get(id)
 		@auth_override_reason.active=!@auth_override_reason.active
-		if @auth_override_reason.save!
+		if @auth_override_reason.save
 			redirect("/auth_override_reasons", :message => {:notice => "Loan authorized override reason'#{@auth_override_reason.reason}' (Id:#{@auth_override_reason.id}) state changed"})
     else
 			redirect("/auth_override_reasons", :message => {:notice => "Loan authorized override reason'#{@auth_override_reason.reason}' (Id:#{@auth_override_reason.id}) failed to be updated"})			
@@ -47,7 +47,7 @@ class AuthOverrideReasons < Application
       @auth_override_reason = AuthOverrideReason.new(auth_override_reason)
       @auth_override_reason.created_by_id = session.user.id
       if(AuthOverrideReason.all(:reason => @auth_override_reason.reason).count==0)
-        if @auth_override_reason.save!
+        if @auth_override_reason.save
           redirect("/auth_override_reasons", :message => {:notice => "Loan authorized override reasons'#{@auth_override_reason.reason}' (Id:#{@auth_override_reason.id}) successfully created"})
         else
           message[:error] = "Loan authorized override reasons failed to be created"
