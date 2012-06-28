@@ -1,11 +1,12 @@
 class StaffPostings < Application
 
   def index
-    @staff_postings = StaffPosting.all
     @staff_posting = StaffPosting.new
     if params[:location_level].blank?
       @biz_locations = BizLocation.all.select{|l| l.location_level.level != 0}
+      @staff_postings = StaffPosting.all
     else
+      @staff_postings = StaffPosting.get_staff_assigned(params[:biz_location_id].to_i, get_effective_date)
       @biz_locations = LocationLevel.first(:level => params[:location_level]).biz_locations
     end
     if request.xhr?
