@@ -177,7 +177,7 @@ class NewClients < Application
 
   def show
     @client       = Client.get params[:id]
-    @client_admin = client_facade.get_administration_on_date(@client, get_effective_date)
+    @client_admin = client_facade.get_administration_on_date(@client, @client.date_joined)
     @biz_location = @client_admin.administered_at_location
     @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client).compact
     display @client
