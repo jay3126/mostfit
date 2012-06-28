@@ -1,26 +1,21 @@
 %h1
   = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
 = link_to I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add'
-%table.narrow
-  %thead
-    %tr
-      %th
-        = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
-      %th
-        = I18n.t "loan_purpose.index.code", :default => "Code"
-      %th
-        = I18n.t "loan_purpose.index.classified_as", :default => "Classified As"
-      %th
-        = I18n.t "loan_purpose.index.actions", :default => "Actions"
-  - for loan_purpose in @loan_purposes
-    %tr{:class => cycle('odd', '')}
-      %td
-        = loan_purpose.name
-      %td
-        = loan_purpose.code
-      %td
-        = loan_purpose.parent_id != 0 ? LoanPurpose.get(loan_purpose.parent_id).name : '-'
-      %td
-        = link_to I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
-        |
-        = link_to I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
+- unless @loan_purposes.blank?
+  %table.narrow
+    %thead
+      %tr
+        %th
+          = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
+        %th
+          = I18n.t "loan_purpose.index.actions", :default => "Actions"
+    - for loan_purpose in @loan_purposes
+      %tr{:class => cycle('odd', '')}
+        %td
+          = loan_purpose.name
+        %td
+          = link_to I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
+          |
+          = link_to I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
+- else
+  %h3 No loan purpose has been created

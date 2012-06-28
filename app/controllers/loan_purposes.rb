@@ -29,7 +29,6 @@ class LoanPurposes < Application
 
   def create(loan_purpose)
     @loan_purpose = LoanPurpose.new(loan_purpose)
-    @loan_purpose.parent_id = 0 if @loan_purpose.parent_id.blank?
     if @loan_purpose.save
       redirect resource(@loan_purpose), :message => {:notice => "LoanPurpose was successfully created"}
     else
@@ -40,7 +39,6 @@ class LoanPurposes < Application
 
   def update(id, loan_purpose)
     @loan_purpose = LoanPurpose.get(id)
-    loan_purpose['parent_id'] = 0 if loan_purpose['parent_id'].blank?
     raise NotFound unless @loan_purpose
     if @loan_purpose.update(loan_purpose)
        redirect resource(@loan_purpose)
