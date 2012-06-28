@@ -15,7 +15,7 @@
   = "Loan File Generation"
 %form{:action => url(:controller => :loan_files, :action => :pending_loan_file_generation), :method => :get}
   = partial "lib/biz_location_selector"
-- if @center_id
+- unless @center.blank?
   - if center_cycle_number.eql?(0)
     %h3 No Center cycle currently exists for this center
   - else

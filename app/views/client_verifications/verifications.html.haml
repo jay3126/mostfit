@@ -11,7 +11,7 @@
   = "Client Verifications"
 %form{:action => url(:controller => :client_verifications, :action => :pending_verifications), :method => :get}
   = partial "lib/biz_location_selector"
-- if @center_id
+- unless @center_id.blank?
   - if center_cycle_number.eql?(0)
     %h3 No Center cycle currently exists for this center
   - else

@@ -16,7 +16,7 @@
 
 %form{:action => url(:controller => :loan_files, :action => :record_health_check_status), :method => :get}
   = partial "lib/biz_location_selector"
-- if @center.id
+- unless @center.blank?
   - if center_cycle_number.eql?(0)
     %h3 No Center cycle currently exists for this center
   - else
