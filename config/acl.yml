@@ -14,14 +14,247 @@
 #     - <action3>
 # <rolename2> : all
       
-
 operator : all
+################
 administrator :
-  loan_applications : 
-    - all      
+  audit_trails:
+    - index
+    - show
+  designations :
+    - all
+  document_types :
+    - all
+  documents :
+    - all
+  lending_products :
+    - all
+  lendings :
+    - index
+    - show
+  loan_purposes :
+    - all
+################
+executive :
+  attendances :
+    - index
+    - create
+  audit_trails :
+    - index
+    - show
+  biz_locations :
+    - index
+    - show
+  client_groups :
+    - all
+  client_verifications :
+    - all
+  clients :
+    - index
+    - new
+    - create
+    - bulk_entry
+    - show
+  documents :
+    - all
+  lendings :
+    - index  
+    - create
+    - create_repayment_on_lending
+    - show
+    - update_lending_approve_to_disburse
+    - update_lending_new_to_approve
+  loan_applications :
+    - all
+  loan_authorizations :
+    - all
+  loan_files :
+    - all  
+################    
 supervisor : 
   loan_applications : 
     - create
     - edit
     - delete
-  
+  asset_register :
+    - index  
+    - new
+    - create
+    - edit
+    - update
+    - show
+  attendances :
+    - index
+    - create
+  audit_trails:
+    - index
+    - show
+  biz_locations:
+    - index
+    - create
+    - edit
+    - update
+    - show
+  center_cycles :
+    - all
+  client_groups :
+    - all
+  client_groups :
+    - all
+  client_verifications :
+    - all
+  clients :
+    - index
+    - new
+    - create
+    - bulk_entry
+    - show
+    - edit
+    - update
+  documents :
+    - all
+  holiday_calendars :
+    - all
+  holidays :
+    - all
+  lendings :
+    - index  
+    - create
+    - create_repayment_on_lending
+    - show
+    - edit
+    - update
+    - update_lending_approve_to_disburse
+    - update_lending_new_to_approve
+  loan_applications :
+    - all
+  loan_authorizations :
+    - all
+  loan_files :
+    - all  
+#################
+support :
+  accounting_rules :
+    - index
+    - show
+  asset_register :
+    - index  
+    - new
+    - create
+    - edit
+    - update
+    - show
+  attendances :
+    - index
+    - create
+  audit_trails:
+    - index
+    - show
+  book_keeping :
+    - all
+  center_cycles :
+    - all
+  client_groups :
+    - all
+  client_verifications :
+    - all
+  clients :
+    - index
+    - new
+    - create
+    - bulk_entry
+    - show
+  documents :
+    - all
+  holiday_calendars :
+    - all
+  ledgers :
+    - index
+    - show
+  lendings :
+    - index  
+    - create
+    - create_repayment_on_lending
+    - show
+    - edit
+    - update
+    - update_lending_approve_to_disburse
+    - update_lending_new_to_approve
+  loan_applications :
+    - all
+  loan_authorizations :
+    - all
+  loan_files :
+    - all  
+################    
+finops :
+  accounting_rules :
+    - index
+    - show
+  asset_register :
+    - index  
+    - new
+    - create
+    - edit
+    - update
+    - show
+  attendances :
+    - index
+    - create
+  audit_trails :
+    - index
+    - show
+  biz_locations :
+    - index
+    - create
+    - edit
+    - update
+    - show
+  book_keeping :
+    - all
+  center_cycles :
+    - all
+  client_groups :
+    - all
+  client_verifications :
+    - all
+  clients :
+    - index
+    - new
+    - create
+    - bulk_entry
+    - show
+    - edit
+    - update
+  designations :
+    - all
+  document_types :
+    - all
+  documents :
+    - all  
+  funders :
+    - all  
+  funding_lines :
+    - all
+  ledgers :
+    - index
+    - show
+  lending_products :
+    - all
+  lendings :
+    - index  
+    - create
+    - create_repayment_on_lending
+    - show
+    - edit
+    - update
+  loan_applications :
+    - all
+    - edit
+    - update
+  loan_purposes :
+    - all  
+################        
+read_only :
+  lendings :
+    - index
+    - show
