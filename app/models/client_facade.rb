@@ -19,4 +19,13 @@ class ClientFacade < StandardFacade
   def get_administration_on_date(counterparty, on_date)
     ClientAdministration.get_administration_on_date(counterparty, on_date)
   end
+  
+  def number_of_loans_for_counterparty_till_date(counterparty, on_date = Date.today)
+    LoanBorrower.number_of_loans_for_counterparty_till_date(counterparty, on_date)
+  end
+
+  def number_of_outstanding_loans_for_counterparty_on_date(counterparty, on_date = Date.today)
+    LoanBorrower.number_of_oustanding_loans_for_counterparty_on_date(counterparty, on_date)
+  end
+
 end

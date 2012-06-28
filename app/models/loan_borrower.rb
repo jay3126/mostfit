@@ -61,4 +61,24 @@ class LoanBorrower
     end
   end
 
+  def self.loans_for_counterparty_till_date(counterparty, on_date = Date.today)
+    counterparty_type, counterparty_id = Resolver.resolve_counterparty(counterparty)
+    borrower_instances = {}
+    borrower_instances[:counterparty_id]   = counterparty_id
+    borrower_instances[:counterparty_type] = counterparty_type
+    borrower_instances[:effective_on.lte]  = on_date
+    borrowers = all(borrower_instances)
+    loans = (borrowers.collect {|borrower| borrower.lending}).uniq
+  end
+
+  def self.number_of_loans_for_counterparty_till_date(counterparty, on_date = Date.today)
+    loans_for_counterparty_till_date(counterparty, on_date).length
+  end
+
+  def self.number_of_oustanding_loans_for_counterparty_on_date(counterparty, on_date = Date.today)
+    loans = loans_for_counterparty_till_date(counterparty, on_date)
+    outstanding_loans = loans.select {|ln| ln.is_outstanding_on_date?(on_date)}
+    outstanding_loans.length
+  end
+
 end
