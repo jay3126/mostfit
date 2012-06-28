@@ -9,12 +9,27 @@ class LocationLink
   property :child_id,     Integer, :nullable => false
   property :deleted_at, ParanoidDateTime
 
-  validates_with_method :linked_locations_are_not_peers?
+  def parent_location; BizLocation.get(self.parent_id); end
+  def child_location; BizLocation.get(self.child_id); end
+
+  validates_with_method :linked_locations_are_at_adjacent_levels?
+  validates_with_method :linked_and_creation_dates_are_valid?
+  validates_with_method :linked_to_one_location_only_on_one_date?
 
   # Two locations are related to one another on different location levels and not on the same location level
-  def linked_locations_are_not_peers?
-    self.parent.location_level == self.child.location_level ?
-      [false, "Two locations on the same location level cannot be linked"] : true
+  def linked_locations_are_at_adjacent_levels?
+    (self.parent.level_number - self.child.level_number == 1) ? true :
+        [false, "The linked locations are not on valid adjacent levels"]
+  end
+
+  def linked_and_creation_dates_are_valid?
+    Validators::Assignments.is_valid_assignment_date?(effective_on, self.parent_location, self.child_location)
+  end
+  
+  def linked_to_one_location_only_on_one_date?
+    linked_on_same_date = LocationLink.first(:child_id => self.child_id, :effective_on => self.effective_on)
+    linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] :
+        true
   end
 
   # Get the 'ancestor' or parent for this location link
