@@ -33,9 +33,11 @@
             - @clients.each do |client|
               %tr
                 %td
-                  - is_eligible = LoanApplication.allow_new_loan_application?(client.id)
-                  - client_loans = client_facade.get_all_loans_for_counterparty(client)
-                  - if (client_loans.blank? && is_eligible)
+                  - is_age_valid = LoanApplication.allow_new_loan_application?(client.id)
+                  - is_multiple_loans_allowed = configuration_facade.allow_multiple_loans?
+                  - number_of_loans_for_client = client_facade.number_of_outstanding_loans_for_counterparty_on_date(client, get_effective_date)
+                  - eligibility = is_multiple_loans_allowed.eql?(true) ? is_age_valid : (number_of_loans_for_client.eql?(0) && is_age_valid)
+                  - if eligibility
                     - checked_value =  params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:selected] == "on" ? "on" : nil
                     = check_box :name => "clients[#{client.id}][selected]", :class => "select" , :checked => checked_value
                 %td
@@ -47,7 +49,7 @@
                 %td
                   = client.address
                 %td
-                  - if (client_loans.blank? && is_eligible)
+                  - if eligibility
                     - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.to_regular_amount}).uniq
                     = select :name => "clients[#{client.id}][amount]", :collection => loan_product_amount.map{|x| [x.to_s]}
         %table.narrow.form{:style => "width:100%;"}

@@ -3,7 +3,7 @@ module ClientValidations
   # This checks for multiple conditions including whether configuration allows multiple loans
   # and whether the age of client (if one can be computed) is as per permissible age for credit
   def new_loan_permitted?
-    return false unless permissible_age_for_credit?
+    return false if !permissible_age_for_credit?.eql?(true)
     return !(has_loans_oustanding?) unless ConfigurationFacade.instance.allow_multiple_loans?
     true
   end
