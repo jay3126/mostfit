@@ -16,7 +16,12 @@ describe StaffPosting do
     @s1 = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date))
     @s2 = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date))
     @s3 = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date))
-    @is_not_assigned = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date))
+
+    @active_staff_is_not_posted = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date))
+    @inactive_staff_is_not_posted = Factory.create(:staff_member, staff_attributes.merge(:creation_date => @staff_creation_date, :active => false))
+
+    @all_active_staff = [@s1, @s2, @s3, @active_staff_is_not_posted]
+    @all_inactive_staff = [@inactive_staff_is_not_posted]
 
     @performed_by = Factory(:staff_member).id
     @recorded_by  = Factory(:user).id
@@ -83,19 +88,37 @@ describe StaffPosting do
     StaffPosting.get_staff_assigned(@l1.id, Date.today).should be_empty
   end
 
-  it "should indicate that staff is not assigned to any location until assigned" do
+  it "should indicate that staff is not posting to any location until posted" do
     StaffPosting.get_assigned_location(@s1.id, Date.today).should be_nil
   end
 
-  it "should disallow assigning a staff as manager before the date that either the staff member or the location is created" do
+  it "should disallow posting a staff to a location before the date that either the staff member or the location is created" do
     lambda{ StaffPosting.assign(@s1, @l1, (@staff_creation_date - 1), @performed_by, @recorded_by_id) }.should raise_error
     lambda{ StaffPosting.assign(@s1, @l1, (@location_creation_date - 1), @performed_by, @recorded_by_id) }.should raise_error
   end
 
-  it "should disallow assigning a staff as manager when the staff is inactive" do
+  it "should disallow posting a staff to a location when the staff is inactive" do
+    lambda{ StaffPosting.assign(@inactive_staff_is_not_posted, @l1, Date.today, @performed_by, @recorded_by_id) }.should raise_error
+
     @s1.update(:active => false)
     @s1.active.should be_false
     lambda{ StaffPosting.assign(@s1, @l1, Date.today, @performed_by, @recorded_by_id) }.should raise_error
+  end
+
+  it "should return the list of active staff not currently posted as expected" do
+    active_staff_not_posted = @choice_facade.active_staff_not_currently_posted
+    @all_active_staff.each {|staff| active_staff_not_posted.include?(staff).should be_true}
+    @all_inactive_staff.each {|staff| active_staff_not_posted.include?(staff).should be_false}
+
+    effective_on = Date.today
+    @all_active_staff.each {|staff|
+      StaffPosting.assign(staff, @l1, effective_on, @performed_by, @recorded_by_id)
+    }
+
+    fresh_active_staff_not_posted = @choice_facade.active_staff_not_currently_posted
+    @all_active_staff.each {|staff| fresh_active_staff_not_posted.include?(staff).should be_false}
+    @all_inactive_staff.each {|staff| active_staff_not_posted.include?(staff).should be_false}
+    
   end
 
 end

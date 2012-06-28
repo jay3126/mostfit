@@ -44,6 +44,10 @@ class UserManager
     staff_postings.collect {|posting| posting.staff_assigned}
   end
 
+  def active_staff_not_currently_posted
+    StaffPosting.active_staff_not_currently_posted
+  end
+
   def staff_managing_location(location_id, on_date = Date.today)
     location_management = LocationManagement.staff_managing_location(location_id, on_date)
     location_management ? location_management.manager_staff_member : nil

@@ -29,6 +29,10 @@ class UserFacade
     user_manager.all_staff_at_location(location_id, on_date)
   end
 
+  def active_staff_not_currently_posted
+    user_manager.active_staff_not_currently_posted
+  end
+
   def staff_managing_location(location_id, on_date = Date.today)
     user_manager.staff_managing_location(location_id, on_date)
   end

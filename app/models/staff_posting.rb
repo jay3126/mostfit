@@ -43,6 +43,14 @@ class StaffPosting
     other.respond_to?(:effective_on) ? (other.effective_on <=> self.effective_on) : nil
   end
 
+  # Returns the active staff that is not posted to any locations at the current instant
+  def self.active_staff_not_currently_posted
+    all_active_staff = StaffMember.all(:active => true)
+    all_staff_posted = (StaffPosting.all.collect {|posting| posting.staff_assigned}).uniq
+    all_active_staff_posted = all_staff_posted.select {|staff| staff.active}
+    all_active_staff - all_active_staff_posted
+  end
+
   def self.assign(staff_member, to_location, effective_on, performed_by, recorded_by)
     Validators::Arguments.not_nil?(staff_member, to_location, effective_on, performed_by, recorded_by)
     raise ArgumentError, "Staff member to be assigned is not an instance of StaffMember" unless staff_member.is_a?(StaffMember)

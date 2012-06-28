@@ -10,6 +10,11 @@ class ChoiceFacade < StandardFacade
     user_facade.all_staff_at_location(location_id, on_date)
   end
 
+  # This is the list of staff that are not currently posted anywhere
+  def active_staff_not_currently_posted
+    user_facade.active_staff_not_currently_posted
+  end
+
   # This is the staff managing a particular location on the specified date
   def staff_managing_location(location_id, on_date = Date.today)
     user_facade.staff_managing_location(location_id, on_date)
