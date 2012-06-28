@@ -1,0 +1,12 @@
+
+
+%xml
+  %auth_override_reason
+    %id #{@auth_override_reason.id}
+    %name #{@auth_override_reason.name}
+
+
+
+= link_to 'Edit',  url(:edit_auth_override_reason,  @auth_override_reason)
+|
+= link_to 'Back', url(:auth_override_reasons)

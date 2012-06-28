@@ -16,6 +16,7 @@ Merb::Router.prepare do
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
   #book-keeping from bk ends
 
+  resources :auth_override_reasons
   resources :branch_eod_summaries
   resources :cheque_leaves
   resources :securitizations
@@ -205,6 +206,8 @@ Merb::Router.prepare do
   match('/third_parties/:id').to(:controller => 'third_parties', :action => 'show')
   match('/tranches/:action').to(:controller => 'tranches').name(:tranch_actions)
   match('/tranches/new').to(:controller => 'tranch', :action => 'new')
+  match('/auth_override_reasons/:action').to(:controller => 'auth_override_reasons').name(:auth_override_reason_actions)
+  match('/auth_override_reasons/new').to(:controller => 'auth_override_reasons', :action => 'new')
 
   #cachers
   match('/cachers/:action').to(:controller => 'cachers').name(:caches)

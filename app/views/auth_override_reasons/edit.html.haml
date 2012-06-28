@@ -1,0 +1,16 @@
+
+= form_for(@auth_override_reason, :action => url(:auth_override_reason, @auth_override_reason)) do
+  %p
+    = submit "Update"
+
+  %p
+    %b Reason id
+    = text_field :reason, :size => 10
+
+  %p
+    %b Loan authorize override reason name
+    = check_box :active, :size => 10
+
+= link_to 'Show', url(:auth_override_reason, @auth_override_reason)
+|
+= link_to 'Back', url(:auth_override_reason)

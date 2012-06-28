@@ -1,0 +1,37 @@
+%h1 Overview of all loan authorize override reasons
+.menu-strip{:style => "margin: 10px;"}
+  = link_to 'Create a new loan authorize override reason', url(:action=>:new), :class => "add"
+
+- if @auth_override_reasons.blank?
+  %p
+    %i No loan authorize override reasons have been created yet.
+- else
+  %table.shaded{ :width => '100%' }
+    %thead
+      %tr
+        
+        %th Reason name
+        %th Active
+        %th
+        %th
+        %th
+    %tbody
+    - for auth_override_reason in @auth_override_reasons
+      
+      %tr
+        %td{:width=>"80"}
+          =auth_override_reason.reason
+        %td{:width=>"80"}
+          =auth_override_reason.active
+        %td
+          - if auth_override_reason.active
+            = link_to 'Deactivate', url(:action=>:change_state,:id=>auth_override_reason.id), :class => "add"
+          - if !auth_override_reason.active
+            = link_to 'Activate', url(:action=>:change_state,:id=>auth_override_reason.id), :class => "add"
+        %td    
+          = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "add"
+        %td  
+    %tfoot
+      %tr
+        %td{ :colspan => 6 }
+
