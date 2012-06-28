@@ -22,7 +22,7 @@ class LoanAuthorization
   property :id,              Serial
   property :status,          Enum.send('[]', *APPLICATION_AUTHORIZATION_STATUSES), :nullable => false
   property :by_staff_id,     Integer, :nullable => false
-  property :override_reason, Enum.send('[]', *LOAN_AUTHORIZATION_OVERRIDE_REASONS), :nullable => false, :default => REASON_FOR_NO_OVERRIDES
+  property :override_reason, String, :nullable => true
   property :performed_on,    Date, :nullable => false
   property :created_by,      Integer, :nullable => false
   property :created_at,      DateTime, :nullable => false, :default => DateTime.now

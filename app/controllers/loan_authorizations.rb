@@ -51,14 +51,14 @@ class LoanAuthorizations < Application
             loan_applications_facade.authorize_approve(lap, by_staff, on_date)
 
           elsif final_status == Constants::Status::APPLICATION_OVERRIDE_APPROVED
-            raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+            raise ArgumentError, "Please provide override reason" if override_reason.blank?
             loan_applications_facade.authorize_approve_override(lap, by_staff, on_date, override_reason)
            
           elsif final_status == Constants::Status::APPLICATION_REJECTED
             loan_applications_facade.authorize_reject(lap, by_staff, on_date)
 
           else
-            raise ArgumentError, "Please provide override reason" if override_reason.include?("Not overriden")
+            raise ArgumentError, "Please provide override reason" if override_reason.blank?
             loan_applications_facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
           end
         rescue => ex

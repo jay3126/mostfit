@@ -47,7 +47,7 @@
                 %td
                   = lpa.client_address
                 %td
-                  = lpa.credit_bureau_status
+                  = lpa.credit_bureau_status.humanize rescue nil
                   %input{:type => :hidden, :value => lpa.credit_bureau_status, :name => 'credit_bureau_status'}
                 %td
                   - selected_approved = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_APPROVED ? "checked" : nil
@@ -59,7 +59,7 @@
                   Rejected
                 %td
                   - selected_reason = params[:override_reason]? params[:override_reason]["#{lpa.loan_application_id}"] : nil
-                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection => Constants::Status::LOAN_AUTHORIZATION_OVERRIDE_REASONS.map {|reason| [reason.to_s, reason]}, :selected => selected_reason
+                  = select :name => "[override_reason][#{lpa.loan_application_id}]", :collection =>AuthOverrideReason.all.map {|r| [r.reason]}, :selected => selected_reason, :prompt => 'Select reason'
         %table.narrow.form{:style => "width:100%;"}
           %tfoot
             %tr

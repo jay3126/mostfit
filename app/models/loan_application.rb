@@ -318,7 +318,7 @@ class LoanApplication
     was_saved = (not (auth.id.nil?))
     application_status = AUTHORIZATION_AND_APPLICATION_STATUSES[as_status]
     status_updated = loan_application.set_status(application_status) if was_saved
-    raise ArgumentError, "Record cannot be updated" unless was_saved
+    raise ArgumentError, "#{auth.errors.first}" unless was_saved
     status_updated
   end
 
