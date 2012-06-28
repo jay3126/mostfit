@@ -118,10 +118,15 @@ class Client
 
   def self.search(q, search_on = nil, per_page=10)
     if /^\d+$/.match(q) && search_on == nil
-      all(:conditions => {:id => q}, :limit => per_page)
+      clients = all(:conditions => {:id => q}, :limit => per_page)
     else
-      all(:conditions => ["reference=? or reference2=? or name like ?", q, q, q+'%'], :limit => per_page)
+      clients = all(:conditions => ["reference=? or reference2=? or name like ?", q, q, q+'%'], :limit => per_page)
+      if clients.blank?
+        q = q.gsub(/[^0-9]/, '')
+        clients = all(:conditions => ["reference=? ", q], :limit => per_page)
+      end
     end
+    clients
   end
 
   def to_loan_application
