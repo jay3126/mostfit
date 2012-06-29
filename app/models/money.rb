@@ -133,6 +133,24 @@ class Money
     money_amounts_map
   end
 
+  # Adds together the corresponding money values,
+  # given a list of maps that each have similar keys and money amounts as values,
+  # and maps the money amount totals to a hash with the same keys
+  def self.add_money_hash_values(in_currency, *money_hash_list)
+    debugger
+    totals_money_hash = Hash.new(zero_money_amount(in_currency))
+    money_hash_list.each { |hash|
+      hash.each { |key, money_value|
+        if money_value.is_a?(Money)
+          totals_value_for_key = totals_money_hash[key]
+          totals_value_for_key += money_value
+          totals_money_hash[key] = totals_value_for_key
+        end
+      }
+    }
+    totals_money_hash
+  end
+
   private
 
   # Formats the money amount in least units for the given locale

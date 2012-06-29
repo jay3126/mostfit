@@ -210,5 +210,17 @@ describe Money do
     money_hash.keys.length.should == 2
   end
 
+  it "adds together hashes with similar keys and money amount values as expected" do
+    hash_one = {:abc => @ikkis, :def => "not_money", :pqr => @ek_sau_ek}
+    hash_two = {:abc => @gyarah, :pqr => @gyarah, :xyz => @ikkis}
+
+    debugger
+    sum_hash = Money.add_money_hash_values(@ek_sau_ek.currency, hash_one, hash_two)
+    sum_hash[:abc].should == @ikkis + @gyarah
+    sum_hash[:def].should == Money.zero_money_amount(@ek_sau_ek.currency)
+    sum_hash[:pqr].should == @ek_sau_ek + @gyarah
+    sum_hash[:xyz].should == @ikkis
+  end
+
 
 end
