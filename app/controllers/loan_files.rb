@@ -50,7 +50,7 @@ class LoanFiles < Application
 
     sc = clients.map{|k,v| k if v[:chosen]}.compact if clients
     @selected_clients = sc.blank? ? nil : sc
-    debugger
+
     if params[:loan]
       if @errors.blank?
         unless @selected_clients.blank?
