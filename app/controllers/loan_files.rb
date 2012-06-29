@@ -61,6 +61,7 @@ class LoanFiles < Application
               params[:clients][client_id].delete(:chosen)
               lap = @loan_file.loan_applications(:client_id => client_id).first
               applied_money_amount = MoneyManager.get_money_instance_least_terms(lap.amount.to_i)
+              raise NotFound, "loan product must not be blank for Cliend ID: #{client_id}" if params[:clients][client_id][:loan_product_id].blank?
               from_lending_product = LendingProduct.get(params[:clients][client_id][:loan_product_id])
               repayment_frequency = from_lending_product.repayment_frequency
               tenure = from_lending_product.tenure
