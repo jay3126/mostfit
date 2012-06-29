@@ -17,6 +17,10 @@ module Constants
 
     TRANSACTED_PRODUCTS = Constants::Products::PRODUCTS
 
+    FEE_CHARGED_ON_CLIENT = :fee_charged_on_client; FEE_CHARGED_ON_LOAN = :fee_charged_on_loan
+    PREMIUM_COLLECTED_ON_INSURANCE = :premium_collected_on_insurance
+    FEE_CHARGED_ON_TYPES = [FEE_CHARGED_ON_CLIENT, FEE_CHARGED_ON_LOAN, PREMIUM_COLLECTED_ON_INSURANCE]
+
     PRINCIPAL_AMOUNT = :principal_amount; INTEREST_AMOUNT = :interest_amount
     TOTAL_PRINCIPAL_AMOUNT = :total_principal_amount; TOTAL_INTEREST_AMOUNT = :total_interest_amount
 
