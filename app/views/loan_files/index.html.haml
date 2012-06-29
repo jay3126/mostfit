@@ -34,7 +34,7 @@
               %td
                 = lf.loan_applications.count
               %td
-                = lf.health_check_status
+                = lf.health_check_status.humanize rescue nil
               %td
                 = lf.health_status_remark
     
