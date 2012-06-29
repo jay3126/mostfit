@@ -51,7 +51,8 @@ class Money
   def -(other)
     raise TypeError, "#{other} is not money" unless other.is_a?(Money)
     raise ArgumentError, "cannot add mismatched currency #{other.currency}" unless (self.currency == other.currency)
-    Money.new((self.amount - other.amount).abs, self.currency)
+    raise ArgumentError, "Amount to be subtracted: #{other.amount} exceeds this amount: #{self.amount}" if (other.amount > self.amount)
+    Money.new((self.amount - other.amount), self.currency)
   end
 
   def *(other)

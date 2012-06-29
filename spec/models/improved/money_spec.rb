@@ -163,9 +163,13 @@ describe Money do
     (@ek_sau_ek + @ikkis).amount.should == (21 + 101)
   end
 
+  it "should refuse to subtract a larger sum of money from a smaller sum of money" do
+    lambda{(@ikkis - @ek_sau_ek)}.should raise_error
+    (@ek_sau_ek - @ikkis).amount.should == (101 - 21)
+  end
+
   it "should subtract one money amount from the other by taking the difference of the amounts" do
-    (@ikkis - @ek_sau_ek).amount.should == (101 - 21)
-    (@ek_sau_ek - @ikkis).should == (@ikkis - @ek_sau_ek)
+    (@ek_sau_ek - @ikkis).amount.should == (@ek_sau_ek.amount - @ikkis.amount)
   end
 
   it "should return a money amount of zero value when requested for the particular currency" do
