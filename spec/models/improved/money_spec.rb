@@ -172,6 +172,11 @@ describe Money do
     (@ek_sau_ek - @ikkis).amount.should == (@ek_sau_ek.amount - @ikkis.amount)
   end
 
+  it "should net the money amounts as expected" do
+    Money.net_amount(@ek_sau_ek, @ikkis).should == (@ek_sau_ek - @ikkis)
+    Money.net_amount(@ikkis, @ek_sau_ek).should == (@ek_sau_ek - @ikkis)
+  end
+
   it "should return a money amount of zero value when requested for the particular currency" do
     zero_usd = Money.zero_money_amount(@USD)
     zero_usd.amount.should == 0; zero_usd.currency.should == @USD

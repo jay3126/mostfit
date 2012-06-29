@@ -55,6 +55,11 @@ class Money
     Money.new((self.amount - other.amount), self.currency)
   end
 
+  # Returns the net amount by subtracting the smaller from the larger sum of money
+  def self.net_amount(some_money, some_other_money)
+    some_money > some_other_money ? (some_money - some_other_money) : (some_other_money - some_money)
+  end
+
   def *(other)
     raise ArgumentError, "The multiplicand for money must be numeric" unless other.is_a?(Numeric)
     Money.new((amount * other).to_i, currency)

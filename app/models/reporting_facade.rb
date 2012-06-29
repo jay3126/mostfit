@@ -1,7 +1,61 @@
 class ReportingFacade < StandardFacade
   include Constants::Transaction, Constants::Products
 
-  # Transactions at locations on date
+  # Outstanding loan IDs by location
+
+  def all_outstanding_loan_ids_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
+    all_outstanding_loan_ids_at_locations_on_date(on_date, Constants::Loan::ACCOUNTED_AT, at_location_ids_ary)
+  end
+
+  def all_outstanding_loan_ids_administered_at_locations_on_date(on_date, *at_location_ids_ary)
+    all_outstanding_loan_ids_at_locations_on_date(on_date, Constants::Loan::ADMINISTERED_AT, at_location_ids_ary)
+  end
+
+  def all_outstanding_loan_ids_at_locations_on_date(on_date, accounted_or_administered_choice, *at_location_ids_ary)
+    location_ids_array = *at_location_ids_ary.to_a
+    all_loan_ids_grouped_by_location = {}
+    location_ids_array.each { |at_location_id|
+      all_loans_at_location = []
+      case accounted_or_administered_choice
+        when Constants::Loan::ACCOUNTED_AT then all_loans_at_location = LoanAdministration.get_loans_accounted(at_location_id, on_date)
+        when Constants::Loan::ADMINISTERED_AT then all_loans_at_location = LoanAdministration.get_loans_administered(at_location_id, on_date)
+        else raise ArgumentError, "Please specify whether loans accounted or loans administered are needed"
+      end
+      all_outstanding_loans_at_location = all_loans_at_location.select {|loan| loan.is_outstanding_on_date?(on_date)}
+      all_loan_ids_grouped_by_location[at_location_id] = get_ids(all_outstanding_loans_at_location)
+    }
+    all_loan_ids_grouped_by_location
+  end
+
+  # Outstanding loan balances
+
+  def all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
+    all_outstanding_loans_balances_at_locations_on_date(on_date, Constants::Loan::ACCOUNTED_AT, at_location_ids_ary)
+  end
+
+  def all_outstanding_loans_balances_administered_at_locations_on_date(on_date, *at_location_ids_ary)
+    all_outstanding_loans_balances_at_locations_on_date(on_date, Constants::Loan::ADMINISTERED_AT, at_location_ids_ary)
+  end
+
+  def all_outstanding_loans_balances_at_locations_on_date(on_date, accounted_or_administered_choice, *at_location_ids_ary)
+    location_ids_array = *at_location_ids_ary.to_a
+    all_loan_balances_grouped_by_location = {}
+    all_loans_grouped_by_location = all_outstanding_loan_ids_at_locations_on_date(on_date, accounted_or_administered_choice, *at_location_ids_ary)
+    all_loans_grouped_by_location.each { |at_location_id, for_loan_ids_ary|
+      all_loan_balances_grouped_by_location[at_location_id] = loan_balances_for_loan_ids_on_date(on_date, for_loan_ids_ary)
+    }
+    all_loan_balances_grouped_by_location
+  end
+
+  def loan_balances_for_loan_ids_on_date(on_date, *for_loan_ids_ary)
+    loan_ids_array = *for_loan_ids_ary.to_a
+    loan_balances_by_loan_id = {}
+    loan_ids_array.each { |for_loan_id|
+      due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
+      loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+    }
+    loan_balances_by_loan_id
+  end
 
   # QUERIES
   #performed_at is nominally a center location
@@ -61,7 +115,7 @@ class ReportingFacade < StandardFacade
 
     total_payments_amount = payments[:total_amount]; total_receipts_amount = receipts[:total_amount]
     net_transaction_type = total_payments_amount > total_receipts_amount ? PAYMENT : RECEIPT
-    net_amount = total_payments_amount - total_receipts_amount
+    net_amount = Money.net_amount(total_payments_amount, total_receipts_amount)
     total_count = payments[:count] + receipts[:count]
 
     {:count => total_count, :total_amount => net_amount}
@@ -124,7 +178,7 @@ class ReportingFacade < StandardFacade
   private
 
   def to_money_amount(amount)
-    Money.new(amount, default_currency)
+    Money.new(amount.to_i, default_currency)
   end
 
   def zero_money_amount
@@ -141,6 +195,11 @@ class ReportingFacade < StandardFacade
 
   def location_facade
     @location_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOCATION_FACADE, self)
+  end
+
+  def get_ids(collection)
+    raise ArgumentError, "Collection does not appear to be enumerable" unless collection.is_a?(Enumerable)
+    collection.collect {|element| element.id}
   end
 
 end
