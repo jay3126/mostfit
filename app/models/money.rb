@@ -137,7 +137,6 @@ class Money
   # given a list of maps that each have similar keys and money amounts as values,
   # and maps the money amount totals to a hash with the same keys
   def self.add_money_hash_values(in_currency, *money_hash_list)
-    debugger
     totals_money_hash = Hash.new(zero_money_amount(in_currency))
     money_hash_list.each { |hash|
       hash.each { |key, money_value|

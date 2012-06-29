@@ -29,6 +29,24 @@ class ReportingFacade < StandardFacade
 
   # Outstanding loan balances
 
+  def sum_all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
+    balances_grouped_by_location = all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, at_location_ids_ary)
+    sum_of_balances_by_location = {}
+    balances_grouped_by_location.each { |at_location_id, balances_map|
+      sum_of_balances_by_location[at_location_id] = Money.add_money_hash_values(MoneyManager.get_default_currency, *balances_map.values)
+    }
+    sum_of_balances_by_location
+  end
+
+  def sum_all_outstanding_loans_balances_administered_at_locations_on_date(on_date, *at_location_ids_ary)
+    balances_grouped_by_location = all_outstanding_loans_balances_administered_at_locations_on_date(on_date, at_location_ids_ary)
+    sum_of_balances_by_location = {}
+    balances_grouped_by_location.each { |at_location_id, balances_map|
+      sum_of_balances_by_location[at_location_id] = Money.add_money_hash_values(MoneyManager.get_default_currency, *balances_map.values)
+    }
+    sum_of_balances_by_location
+  end
+
   def all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
     all_outstanding_loans_balances_at_locations_on_date(on_date, Constants::Loan::ACCOUNTED_AT, at_location_ids_ary)
   end

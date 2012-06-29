@@ -214,7 +214,6 @@ describe Money do
     hash_one = {:abc => @ikkis, :def => "not_money", :pqr => @ek_sau_ek}
     hash_two = {:abc => @gyarah, :pqr => @gyarah, :xyz => @ikkis}
 
-    debugger
     sum_hash = Money.add_money_hash_values(@ek_sau_ek.currency, hash_one, hash_two)
     sum_hash[:abc].should == @ikkis + @gyarah
     sum_hash[:def].should == Money.zero_money_amount(@ek_sau_ek.currency)
