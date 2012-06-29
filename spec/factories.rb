@@ -1,7 +1,7 @@
 require 'factory_girl'
 
-FACTORY_NAMES       = %w[Smith Anderson Rodriguez Gonzalez Campbell Parker Moore Helen Donald Richard Dick Deborah].freeze
-FACTORY_PLACES      = %w[Mumbai Hyderabad Pune Bangalore Cochin Chennai Kolkata].freeze
+FACTORY_NAMES       = %w[Isa Kena Mundaka Mandukya Brihadaranyaka Katha Taittiriya Aitareya Chandogya Kausitaki Prasna Svetasvatara].freeze
+FACTORY_PLACES      = %w[Shire Khazad_dum Moria Lothlorean Elendil Chennai Kolkata].freeze
 FACTORY_HOLIDAYS    = %w[Diwali Holi Pongal Dussehra].freeze
 FACTORY_OCCUPATIONS = %w[Carpenter Astrologer Engineer Teller Cook Butcher Actuary Executive Artist].freeze
 FACTORY_PROVINCES   = ['Maharashtra', 'Andra Pradesh', 'Madhya Pradesh', 'Kerala', 'Tamil Nadu'].freeze
