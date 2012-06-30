@@ -24,7 +24,7 @@
       = @location_level.name
     %li#staff
       Staff
-    %li#staff_posting
+    %li#staff_posting{:style => 'display:none'}
       Staff Posting
     - if @biz_location.is_nominal_branch?
       %li#money_deposits

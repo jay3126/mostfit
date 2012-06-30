@@ -1,19 +1,10 @@
 class StaffPostings < Application
 
   def index
-    @staff_posting = StaffPosting.new
-    if params[:location_level].blank?
-      @biz_locations = BizLocation.all.select{|l| l.location_level.level != 0}
-      @staff_postings = StaffPosting.all
-    else
-      @staff_postings = StaffPosting.get_staff_assigned(params[:biz_location_id].to_i, get_effective_date)
-      @biz_locations = LocationLevel.first(:level => params[:location_level]).biz_locations
-    end
-    if request.xhr?
-      render :template => 'staff_postings/index', :layout => layout?
-    else
-      display @staff_posting
-    end
+    @staff_posting  = StaffPosting.new
+    @biz_locations  = BizLocation.all.select{|l| l.location_level.level != 0}
+    @staff_postings = StaffPosting.all
+    display @staff_posting
   end
 
   def create
@@ -26,7 +17,6 @@ class StaffPostings < Application
     location_id     = params[:staff_posting][:at_location_id]
     performed_by_id = params[:staff_posting][:performed_by]
     effective_on    = params[:staff_posting][:effective_on]
-    biz_location_id = params[:biz_location_id]
     recorded_by     = session.user.id
     
     # VALIDATIONS
@@ -52,7 +42,7 @@ class StaffPostings < Application
     end
 
     #REDIRECT/RENDER
-    redirect url(:controller => :user_locations, :action => :show, :id => biz_location_id), :message => @message
+    redirect resource(:staff_postings), :message => @message
 
   end
 end
