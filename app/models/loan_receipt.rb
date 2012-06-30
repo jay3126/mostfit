@@ -7,6 +7,8 @@ class LoanReceipt
   property INTEREST_RECEIVED,  *MONEY_AMOUNT
   property ADVANCE_RECEIVED,   *MONEY_AMOUNT
   property :currency,          *CURRENCY
+  property :performed_at,      *INTEGER_NOT_NULL
+  property :accounted_at,      *INTEGER_NOT_NULL
   property :effective_on,      *DATE_NOT_NULL
   property :created_at,        *CREATED_AT
 
@@ -20,9 +22,12 @@ class LoanReceipt
   # @param [Hash] allocation_values such as {:principal_received => principal_received_money_obj, :interest_received => interest_received_money_obj, :advance_received => advance_received_money_obj}
   # @param [Lending] on_loan
   # @param [Date] effective_on
-  def self.record_allocation_as_loan_receipt(allocation_values, on_loan, effective_on)
+  def self.record_allocation_as_loan_receipt(allocation_values, performed_at, accounted_at, on_loan, effective_on)
+    Validators::Arguments.not_nil?(allocation_values, performed_at, accounted_at, on_loan, effective_on)
     receipt                     = Money.from_money(allocation_values)
     receipt.delete(TOTAL_RECEIVED)
+    receipt[:performed_at]      = performed_at
+    receipt[:accounted_at]      = accounted_at
     receipt[:lending]           = on_loan
     receipt[:effective_on]      = effective_on
     loan_receipt                = create(receipt)
@@ -54,7 +59,11 @@ class LoanReceipt
     totals[PRINCIPAL_RECEIVED] = MoneyManager.default_zero_money
     totals[INTEREST_RECEIVED]  = MoneyManager.default_zero_money
     totals[ADVANCE_RECEIVED]   = MoneyManager.default_zero_money
-    return totals unless (receipts and (not (receipts.empty?)))
+    
+    if receipts.empty?
+      totals = Money.add_total_to_map(totals, :total_received)
+      return totals
+    end
 
     all_money_receipts = receipts.collect { |receipt| receipt.to_money }
 
@@ -67,6 +76,7 @@ class LoanReceipt
     all_advance_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_RECEIVED] }
     totals[ADVANCE_RECEIVED] = all_advance_amounts.reduce(:+) unless all_advance_amounts.empty?
 
+    totals = Money.add_total_to_map(totals, :total_received)
     totals
   end
 

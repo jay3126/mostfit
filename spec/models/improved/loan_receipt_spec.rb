@@ -4,6 +4,8 @@ describe LoanReceipt do
 
   before(:each) do
     @lending = Factory(:lending)
+    @performed_at_id = Factory(:biz_location).id
+    @accounted_at_id = Factory(:biz_location).id
 
     @principal_received_amount = 23000
     @interest_received_amount  = 2000
@@ -20,7 +22,7 @@ describe LoanReceipt do
   end
 
   it "should create a loan receipt as requested" do
-    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(@allocation_values, @lending, Date.today)
+    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(@allocation_values, @performed_at_id, @accounted_at_id, @lending, Date.today)
     loan_receipt.saved?.should be_true
   end
 
@@ -31,12 +33,12 @@ describe LoanReceipt do
     first_principal = 2300; first_interest = 1275; first_advance = 793
     first_allocation_values = Money.money_amounts_hash_to_money({:principal_received => first_principal, :interest_received => first_interest, :advance_received => first_advance}, MoneyManager.get_default_currency)
 
-    LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @lending, first)
+    LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
 
     thirty_first_principal = 1243; thirty_first_interest = 1896; thirty_first_advance = 723
     thirty_first_allocation_values = Money.money_amounts_hash_to_money({ :principal_received => thirty_first_principal, :interest_received => thirty_first_interest, :advance_received => thirty_first_advance }, MoneyManager.get_default_currency)
 
-    LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @lending, thirty_first)
+    LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @performed_at_id, @accounted_at_id, @lending, thirty_first)
 
     first_sum = LoanReceipt.sum_on_date(first)
     first_sum[:principal_received].amount.should == first_principal
@@ -59,12 +61,12 @@ describe LoanReceipt do
     first_principal = 2300; first_interest = 1275; first_advance = 793
     first_allocation_values = Money.money_amounts_hash_to_money({:principal_received => first_principal, :interest_received => first_interest, :advance_received => first_advance}, MoneyManager.get_default_currency)
 
-    LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @lending, first)
+    LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
 
     thirty_first_principal = 1243; thirty_first_interest = 1896; thirty_first_advance = 723
     thirty_first_allocation_values = Money.money_amounts_hash_to_money({ :principal_received => thirty_first_principal, :interest_received => thirty_first_interest, :advance_received => thirty_first_advance }, MoneyManager.get_default_currency)
 
-    LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @lending, thirty_first)
+    LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @performed_at_id, @accounted_at_id, @lending, thirty_first)
 
     first_sum = LoanReceipt.sum_till_date(first)
     first_sum[:principal_received].amount.should == (first_principal + thirty_first_principal)

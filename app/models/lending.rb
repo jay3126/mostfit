@@ -548,8 +548,10 @@ class Lending
   def update_for_payment(payment_transaction)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
+    performed_at = payment_transaction.performed_at
+    accounted_at = payment_transaction.accounted_at
     payment_allocation = make_allocation(payment_amount, effective_on)
-    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, self, effective_on)
+    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
     payment_allocation
   end
 

@@ -12,6 +12,13 @@ module Constants
     RECEIPT = :receipt; PAYMENT = :payment
     RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
 
+    TRANSACTION_PERFORMED_AT = :transaction_performed_at
+    TRANSACTION_ACCOUNTED_AT = :transaction_accounted_at
+    TRANSACTION_LOCATIONS = {
+      TRANSACTION_PERFORMED_AT => :performed_at,
+      TRANSACTION_ACCOUNTED_AT => :accounted_at
+    }
+
     LOAN_DISBURSEMENT = :loan_disbursement; LOAN_REPAYMENT = :loan_repayment; LOAN_ACCRUAL = :loan_accrual
     PRODUCT_ACTIONS = [LOAN_DISBURSEMENT, LOAN_REPAYMENT, LOAN_ACCRUAL]
 

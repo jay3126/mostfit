@@ -1,6 +1,26 @@
 class ReportingFacade < StandardFacade
   include Constants::Transaction, Constants::Products
 
+  # Allocations
+
+  def total_loan_allocation_receipts_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
+    total_loan_allocation_receipts_at_locations_on_value_date(on_date, TRANSACTION_ACCOUNTED_AT, at_location_ids_ary)
+  end
+
+  def total_loan_allocation_receipts_performed_at_locations_on_value_date(on_date, *at_location_ids_ary)
+    total_loan_allocation_receipts_at_locations_on_value_date(on_date, TRANSACTION_PERFORMED_AT, at_location_ids_ary)
+  end
+
+  def total_loan_allocation_receipts_at_locations_on_value_date(on_date, performed_or_accounted_choice, *at_location_ids_ary)
+    total_loan_allocation_receipts_grouped_by_location = {}
+    property_sym = TRANSACTION_LOCATIONS[performed_or_accounted_choice]
+    at_location_ids_ary.each { |at_location_id|
+      all_loan_receipts_at_location = LoanReceipt.all(:effective_on => on_date, property_sym => at_location_id)
+      total_loan_allocation_receipts_grouped_by_location[at_location_id] = LoanReceipt.add_up(all_loan_receipts_at_location)
+    }
+    total_loan_allocation_receipts_grouped_by_location
+  end
+
   # Outstanding loan IDs by location
 
   def all_outstanding_loan_ids_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
