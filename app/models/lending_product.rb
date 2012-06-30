@@ -18,6 +18,8 @@ class LendingProduct
 
   has 1, :loan_schedule_template
   has n, :lendings
+  has 1, :loan_fee, 'SimpleFeeProduct'
+  has n, :simple_insurance_products
 
   # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency; self.repayment_frequency; end

@@ -9,6 +9,8 @@ class SimpleFeeProduct
   property :created_at,          *CREATED_AT
 
   has n, :timed_amounts
+  belongs_to :simple_insurance_product, :nullable => true
+  belongs_to :lending_product, :nullable => true
 
   def effective_timed_amount(on_date = Date.today)
     self.timed_amounts.first(:effective_on.lte => on_date, :order => [:effective_on.desc])
