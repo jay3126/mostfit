@@ -47,6 +47,7 @@ class LoanApplication
   include ClientAgeValidations
   include Constants::Properties
   include Comparable
+  include CommonClient::Validations
 
   property :id,                             Serial
   property :status,                         Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -64,17 +65,17 @@ class LoanApplication
   
   #basic client info
   property :client_id,                      Integer,  :nullable => true
-  property :client_name,                    String,   :nullable => false
+  property :client_name,                    String, CommonClient::Validations.get_validation(:client_name, LoanApplication)
   property :client_dob,                     Date
-  property :client_address,                 Text,     :nullable => false
+  property :client_address,                 Text, CommonClient::Validations.get_validation(:client_address, LoanApplication)
   property :client_state,                   Enum.send('[]', *STATES)
-  property :client_pincode,                 Integer,  :nullable => false
-  property :client_reference1,              String,   :nullable => false
-  property :client_reference1_type,         Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE_TYPE
-  property :client_reference2,              String,   :nullable => false
-  property :client_reference2_type,         Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE2_TYPE
-  property :client_guarantor_name,          String, :nullable => false
-  property :client_guarantor_relationship,  Enum.send('[]', *RELATIONSHIPS)
+  property :client_pincode,                 Integer, CommonClient::Validations.get_validation(:client_pincode, LoanApplication)
+  property :client_reference1,              String, CommonClient::Validations.get_validation(:client_reference1, LoanApplication)
+  property :client_reference1_type,         Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:client_reference1_type, LoanApplication)
+  property :client_reference2,              String, CommonClient::Validations.get_validation(:client_reference2, LoanApplication)
+  property :client_reference2_type,         Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:client_reference2_type, LoanApplication)
+  property :client_guarantor_name,          String, CommonClient::Validations.get_validation(:client_guarantor_name, LoanApplication)
+  property :client_guarantor_relationship,  Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:client_guarantor_relationship, LoanApplication)
 
   belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
@@ -87,6 +88,7 @@ class LoanApplication
   has 1, :loan_authorization
   has 1, :loan
 
+  validates_length :client_name, :min => 3
   validates_present   :client_dob
   validates_with_method :client_dob, :method => :permissible_age_for_credit?
   # this validation should be skip when client_id exist.
@@ -379,8 +381,8 @@ class LoanApplication
 
   def self.completed_authorization(search_options = {})
     search_options.merge!(:status => AUTHORIZATION_STATUSES, :order => [:updated_at.desc])
-    loan_applications = all(search_options)
-    loan_applications.collect {|lap| lap.to_info}
+    all(search_options)
+    #    loan_applications.collect {|lap| lap.to_info}
   end
 
   # Is pending loan file generation

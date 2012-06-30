@@ -4,31 +4,31 @@ class Client
   include DateParser  # mixin for the hook "before :valid?, :parse_dates"
   include ClientValidations, PeopleValidations
   include Constants::Masters
+  include CommonClient::Validations
 
   before :valid?, :convert_blank_to_nil
 
   property :id,                       Serial
-  property :guarantor_name,           String
+  property :guarantor_name,           String, CommonClient::Validations.get_validation(:guarantor_name, Client)
   property :guarantor_dob,            Date
-  property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), :default => OTHER_RELATIONSHIP
+  property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:guarantor_relationship, Client)
   property :telephone_number,         String, :nullable => true
   property :telephone_type,           Enum.send('[]', *TELEPHONE_TYPES), :default => DEFAULT_TELEPHONE_TYPE
   property :state,                    Enum.send('[]', *STATES)
-  property :pincode,                  Integer, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE
+  property :pincode,                  Integer, CommonClient::Validations.get_validation(:pincode, Client)
   property :income,                   Integer
   property :family_income,            Integer
-  property :reference,                String, :length => 100, :nullable => false
-  property :name,                     String, :length => 100, :nullable => false
+  property :reference,                String, CommonClient::Validations.get_validation(:reference, Client)
+  property :name,                     String, CommonClient::Validations.get_validation(:name, Client)
   property :gender,                   Enum.send('[]', *GENDER_CHOICE), :nullable => true, :default => DEFAULT_GENDER
   property :marital_status,           Enum.send('[]', *MARITAL_STATUS), :default => DEFAULT_MARRITAL_STATUS
-  property :reference_type,           Enum.send('[]', *REFERENCE_TYPES), :default => DEFAULT_REFERENCE_TYPE
-  property :reference2,               String
-  property :reference2_type,          Enum.send('[]', *REFERENCE2_TYPES), :default => DEFAULT_REFERENCE2_TYPE
+  property :reference_type,           Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:reference_type, Client)
+  property :reference2,               String, CommonClient::Validations.get_validation(:client_reference2, LoanApplication)
+  property :reference2_type,          Enum.send('[]', *REFERENCE2_TYPES), CommonClient::Validations.get_validation(:reference2_type, Client)
   property :spouse_name,              String, :length => 100
   property :date_of_birth,            Date
   property :spouse_date_of_birth,     Date
-  property :address,                  Text
-  property :pincode,                  Integer
+  property :address,                  Text, CommonClient::Validations.get_validation(:address, Client)
   property :active,                   Boolean, :default => true, :nullable => false
   property :inactive_reason,          Enum.send('[]', *INACTIVE_REASONS), :nullable => true, :default => ''
   property :date_joined,              Date
