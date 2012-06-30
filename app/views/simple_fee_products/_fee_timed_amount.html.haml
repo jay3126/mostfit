@@ -1,0 +1,38 @@
+:javascript
+  $('table.timed_amount').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+#meeting_div(style = "display : none")
+  = form_for(@timed_amount, :action => url(:controller => :simple_fee_products, :action => :fee_timed_amount_create, :id => @fee_product.id), :method => "POST", :class => "tall shaded") do
+    = partial 'simple_fee_products/timed_amount_fields'
+    = submit 'Save', :class => "greenButton"
+%br
+- if @fee_timed_amounts.count == 0
+  %p
+    %i No Fee Amount have been created yet.
+- else
+  %table.report.weeksheet.nojs.timed_amount
+    %thead
+      %tr
+        %td
+          id
+        %td
+          Fee Amount
+        %td
+          Tax Amount
+        %td
+          Effective On
+    - @fee_timed_amounts.each do |amount|
+      %tr
+        %td
+          = amount.id
+        %td
+          = amount.to_money[:fee_only_amount].to_s
+        %td
+          = amount.to_money[:tax_only_amount].to_s
+        %td
+          = amount.effective_on
+    %tfoot
+      %tr
+        %td{ :colspan => 4 }

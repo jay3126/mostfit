@@ -27,6 +27,7 @@ Merb::Router.prepare do
   resources :report_formats
   resources :checkers
   resources :staff_postings
+  resources :simple_fee_products
 
   resources :banks do
     resources :bank_branches do

@@ -1,0 +1,21 @@
+%table.form
+  %tr
+    %td
+      Fee Amount
+    %td
+      = text_field :fee_only_amount
+  %tr
+    %td
+      Tax Amount
+    %td
+      = text_field :tax_only_amount
+  %tr
+    %td
+      Currency
+    %td
+      = select :currency, :collection => ['INR']
+  %tr
+    %td
+      Effective On
+    %td
+      = date_select 'timed_amount[effective_on]', Date.today, {:id => 'effective_on'}

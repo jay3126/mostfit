@@ -51,7 +51,17 @@
       = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|frequency| [frequency.to_s]}
   %tr
     %th
+      Fee Product
+    %td
+      = select :loan_fee, :collection => SimpleFeeProduct.all.map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
+  %tr
+    %th
+      Insurance Products
+    %td
+      = select :simple_insurance_products, :collection => SimpleInsuranceProduct.all.map{|ins| [ins.id, ins.name]}, :prompt => "Select Insurance"
+  %tr
+    %th
       Repayment Allocation Strategy
     %td
       = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las.to_s]}
- 
+
