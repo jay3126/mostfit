@@ -28,7 +28,7 @@
     %tr
       %th Reference 2 Type
       %td
-        = select :client_reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES_ALLOWED.map{|x| [x.to_s, x.to_s.humanize]}, :selected => params[:loan_application] ? params[:loan_application][:client_reference2_type] : Constants::Masters::VOTER_ID.to_s
+        = select :client_reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES_ALLOWED.map{|x| [x.to_s, x.to_s.humanize]}
     %tr
       %th Reference 2 No.
       %td
@@ -37,7 +37,7 @@
       %th Applied for amount
       %td
         - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.amount}).uniq
-        = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => @loan_application.amount, :prompt => 'Select'
+        = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}
     %tr
       %th Address
       %td
