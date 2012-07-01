@@ -1,8 +1,17 @@
 class LocationLevel
   include DataMapper::Resource
 
-  NOMINAL_BRANCH_LEVEL = 1
-  NOMINAL_CENTER_LEVEL = 0
+  NOMINAL_BRANCH_LEVEL = 1; NOMINAL_BRANCH_LEVEL_NAME = "Branch"
+  NOMINAL_CENTER_LEVEL = 0; NOMINAL_CENTER_LEVEL_NAME = "Center"
+  DESIGNATIONS_CANNOT_BE_CREATED_AT_LEVELS = [NOMINAL_CENTER_LEVEL]  
+
+  DEFAULT_LEVELS = [NOMINAL_CENTER_LEVEL, NOMINAL_BRANCH_LEVEL]
+  DEFAULT_LEVELS_AND_ATTRIBUTES = {
+    NOMINAL_CENTER_LEVEL =>
+      {:level => NOMINAL_CENTER_LEVEL, :name => NOMINAL_CENTER_LEVEL_NAME, :has_meeting => true, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION},
+    NOMINAL_BRANCH_LEVEL =>
+      {:level => NOMINAL_BRANCH_LEVEL, :name => NOMINAL_BRANCH_LEVEL_NAME, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION},
+  }
   
   property :id,            Serial
   property :level,         Integer,         :nullable => false, :unique => true, :min => 0
@@ -44,5 +53,10 @@ class LocationLevel
         level_number_range === given_number
     first(:level => given_number)
   end
+
+
+  def self.levels_that_support_designations
+    all.reject {|level_instance| DESIGNATIONS_CANNOT_BE_CREATED_AT_LEVELS.include?(level_instance.level)}
+  end  
 
 end

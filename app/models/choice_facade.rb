@@ -5,6 +5,10 @@ class ChoiceFacade < StandardFacade
     location_facade.visible_locations(for_staff_id, on_date)
   end
 
+  def levels_that_support_designations
+    LocationLevel.levels_that_support_designations
+  end
+
   # This is a list of all staff at the particular location on the specified date
   def all_staff_at_location(location_id, on_date = Date.today)
     user_facade.all_staff_at_location(location_id, on_date)
