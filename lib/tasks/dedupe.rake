@@ -7,7 +7,7 @@ Merb.start_environment(:environment => ENV['MERB_ENV'] || 'production')
 
 namespace :mostfit do
   desc "Update New Loan Application Status"
-  task :update_loan_application_status do
+  task :dedupe do
     require 'fastercsv'
 
     clients = Client.all(:fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
