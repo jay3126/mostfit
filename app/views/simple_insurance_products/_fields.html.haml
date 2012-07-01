@@ -13,7 +13,7 @@
     %td
       Fee Product
     %td
-      = select :name => 'fee_product_id', :collection => SimpleFeeProduct.all.map{|s| [s.id, s.name]}, :prompt => 'Select Fee'
+      = select :name => 'fee_product_id', :collection => @fee_products.map{|s| [s.id, s.name]}, :prompt => 'Select Fee'
   %tr
     %td
       Created On

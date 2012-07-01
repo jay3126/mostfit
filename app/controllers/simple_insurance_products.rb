@@ -3,6 +3,7 @@ class SimpleInsuranceProducts < Application
   def index
     @insurance_products = SimpleInsuranceProduct.all
     @insurance_product = SimpleInsuranceProduct.new
+    @fee_products      = SimpleFeeProduct.all(:fee_charged_on_type => Constants::Transaction::PREMIUM_COLLECTED_ON_INSURANCE)
     display @insurance_products
   end
 
