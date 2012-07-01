@@ -45,7 +45,9 @@
       %li
         = link_to_with_rights 'Third parties', resource(:third_parties), :class => 'funder icon'
       %li
-        = link_to_with_rights 'Fees', resource(:fees), :class => 'icon coins'
+        = link_to_with_rights 'Fees', resource(:simple_fee_products), :class => 'icon coins'
+      %li
+        = link_to_with_rights 'Insurance', resource(:simple_insurance_products), :class => 'icon coins'
       %li
         = link_to_with_rights 'Banks', resource(:banks), :class => 'funder icon'
       %li
