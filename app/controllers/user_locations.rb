@@ -45,7 +45,7 @@ class UserLocations < Application
     unless @meeting_schedule.blank?
       @next_meeting = meeting_facade.get_next_meeting(@biz_location, @date)
       @previous_meeting = meeting_facade.get_previous_meeting(@biz_location, @date)
-      @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
+      @weeksheet = collections_facade.get_collection_sheet(@biz_location.id, @date)
     end
     display @weeksheet
   end

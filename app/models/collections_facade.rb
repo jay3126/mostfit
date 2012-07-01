@@ -1,11 +1,5 @@
 # This facade serves functionality from the collections sub-system
-class CollectionsFacade
-
-  attr_reader :user_id, :created_at
-
-  def initialize(user_id)
-    @user = StaffMember.get(user_id); @created_at = DateTime.now
-  end
+class CollectionsFacade < StandardFacade
 
   # This returns instances of CollectionSheet which represent
   # the collection sheet at a center location on a given date
@@ -14,16 +8,16 @@ class CollectionsFacade
     collection_sheet_line = []
     client_non_loan       = []
     biz_location    = BizLocation.get(at_biz_location)
-    loan_facade     = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, @user)
-    location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    center_manager  = @user # Use this center_manager for staff ID, staff name
+    location_manage = LocationManagement.staff_managing_location(biz_location.id, on_date ) # Use this center_manager for staff ID, staff name
+    center_manager  = location_manage.manager_staff_member unless location_manage.blank?
+    manager_name    = center_manager.blank? ? 'No Manage' : center_manager.name
+    manager_id      = center_manager.blank? ? '' : center_manager.id
 
     loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
     return [] if loans.blank?
 
     loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
-    mf              = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, @user)
-    meeting_date    = mf.get_meeting(biz_location, on_date)
+    meeting_date    = meeting_facade.get_meeting(biz_location, on_date)
     meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
     meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
     clients         = ClientAdministration.get_clients_administered(biz_location.id, on_date)
@@ -92,20 +86,35 @@ class CollectionsFacade
       end
     end
     groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
-    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_hours, meeting_minutes, center_manager.id, center_manager.name, collection_sheet_line, groups)
+    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_hours, meeting_minutes, manager_id, manager_name, collection_sheet_line, groups)
   end
 
   #following function will generate the daily collection sheet for staff_member.
-  def get_collection_sheet_for_staff(on_date)
+  def get_collection_sheet_for_staff(staff_id, on_date)
     collection_sheet = []
+    staff = StaffMember.get staff_id
 
     #Find all centers by loan history on particular date
-    location_manage = LocationManagement.locations_managed_by_staff(@user.id, on_date)
+    location_manage = LocationManagement.locations_managed_by_staff(staff.id, on_date)
     biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
     biz_locations.each do |biz_location|
       collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
     end
 
     collection_sheet
+  end
+
+  private
+
+  def loan_facade
+    @loan_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOAN_FACADE, self)
+  end
+
+  def location_facade
+    @location_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOCATION_FACADE, self)
+  end
+
+  def meeting_facade
+    @meeting_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::MEETING_FACADE, self)
   end
 end

@@ -21,6 +21,7 @@ class FacadeFactory
   CHOICE_FACADE     = :choice_facade
   LOAN_APPLICATIONS_FACADE = :loan_applications_facade
   LOAN_ASSIGNMENT_FACADE   = :loan_assignment_facade
+  COLLETIONS_FACADE = :collections_facade
 
   STANDARD_FACADES      = {
       CLIENT_FACADE     => ClientFacade,
@@ -32,7 +33,8 @@ class FacadeFactory
       REPORTING_FACADE  => ReportingFacade,
       CHOICE_FACADE     => ChoiceFacade,
       LOAN_APPLICATIONS_FACADE => LoanApplicationsFacade,
-      LOAN_ASSIGNMENT_FACADE => LoanAssignmentFacade
+      LOAN_ASSIGNMENT_FACADE => LoanAssignmentFacade,
+      COLLETIONS_FACADE  => CollectionsFacade
   }
 
   CONFIGURATION_FACADE  = :configuration_facade

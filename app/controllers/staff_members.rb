@@ -79,7 +79,7 @@ class StaffMembers < Application
     @date       = @date.holiday_bump
     location_manage = LocationManagement.locations_managed_by_staff(@staff_member.id, @date)
     @biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
-    @weeksheets = CollectionsFacade.new(@staff_member.id).get_collection_sheet_for_staff(@date)
+    @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
     if params[:format] == "pdf"
       file = @staff_member.generate_collection_pdf(@date)
       filename   = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, "collection_sheets", "collection_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
