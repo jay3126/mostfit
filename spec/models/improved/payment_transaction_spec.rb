@@ -7,6 +7,7 @@ describe PaymentTransaction do
     @currency = Constants::Money::INR
     @money_amount = Money.new(@amount, @currency)
     @receipt_type = Constants::Transaction::RECEIPT
+    @payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
     @on_product_type = Constants::Products::LENDING
     @on_product_id = 12
     @by_counterparty_type = Constants::Transaction::CLIENT
@@ -21,6 +22,7 @@ describe PaymentTransaction do
       :amount               => @amount,
       :currency             => @currency,
       :receipt_type         => @receipt_type,
+      :payment_towards      => @payment_towards,
       :on_product_type      => @on_product_type,
       :on_product_id        => @on_product_id,
       :by_counterparty_type => @by_counterparty_type,
@@ -42,11 +44,12 @@ describe PaymentTransaction do
   end
 
   it "should record a payment as expected" do
-    payment = PaymentTransaction.record_payment(@money_amount, @receipt_type, @on_product_type, @on_product_id, @by_counterparty_type, @by_counterparty_id, @performed_at, @accounted_at, @performed_by, @effective_on, @recorded_by)
+    payment = PaymentTransaction.record_payment(@money_amount, @receipt_type, @payment_towards, @on_product_type, @on_product_id, @by_counterparty_type, @by_counterparty_id, @performed_at, @accounted_at, @performed_by, @effective_on, @recorded_by)
     payment.saved?.should be_true
     payment.amount.should == @money_amount.amount
     payment.currency.should == @money_amount.currency
     payment.receipt_type.should == @receipt_type
+    payment.payment_towards.should == @payment_towards
     payment.on_product_type.should == @on_product_type
     payment.on_product_id.should == @on_product_id
     payment.by_counterparty_type.should == @by_counterparty_type
@@ -58,8 +61,45 @@ describe PaymentTransaction do
     payment.recorded_by.should == @recorded_by
   end
 
+  it "the payment transaction info instance should have the same values as expected" do
+    payment = PaymentTransaction.record_payment(@money_amount, @receipt_type, @payment_towards, @on_product_type, @on_product_id, @by_counterparty_type, @by_counterparty_id, @performed_at, @accounted_at, @performed_by, @effective_on, @recorded_by)
+    payment.saved?.should be_true
+    payment.amount.should == @money_amount.amount
+    payment.currency.should == @money_amount.currency
+    payment.receipt_type.should == @receipt_type
+    payment.payment_towards.should == @payment_towards
+    payment.on_product_type.should == @on_product_type
+    payment.on_product_id.should == @on_product_id
+    payment.by_counterparty_type.should == @by_counterparty_type
+    payment.by_counterparty_id.should == @by_counterparty_id
+    payment.performed_at.should == @performed_at
+    payment.accounted_at.should == @accounted_at
+    payment.performed_by.should == @performed_by
+    payment.effective_on.should == @effective_on
+    payment.recorded_by.should == @recorded_by
+
+    payment_info = PaymentTransactionInfo.new(@money_amount, @receipt_type, @payment_towards, @on_product_type, @on_product_id, @by_counterparty_type, @by_counterparty_id, @performed_at, @accounted_at, @performed_by, @effective_on, @recorded_by)
+    payment_info.amount.should == payment.amount
+    payment_info.currency.should == payment.currency
+    payment_info.receipt_type.should == payment.receipt_type
+    payment_info.payment_towards.should == payment.payment_towards
+    payment_info.on_product_type.should == payment.on_product_type; payment_info.on_product_id.should == payment.on_product_id
+    payment_info.by_counterparty_type.should == payment.by_counterparty_type
+    payment_info.by_counterparty_id.should == payment.by_counterparty_id
+    payment_info.performed_at.should == payment.performed_at
+    payment_info.accounted_at.should == payment.accounted_at
+    payment_info.performed_by.should == payment.performed_by
+    payment_info.effective_on.should == payment.effective_on
+    payment_info.recorded_by.should  == payment.recorded_by
+  end
+
   it "should not be valid without specifying whether it is a payment or a receipt" do
     @receipt.receipt_type = nil
+    @receipt.should_not be_valid
+  end
+
+  it "should not be valid without a specifying the payment towards type" do
+    @receipt.payment_towards = nil
     @receipt.should_not be_valid
   end
 

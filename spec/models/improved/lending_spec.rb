@@ -74,6 +74,8 @@ describe Lending do
     @transaction_currency = @loan.currency
     @payment_type = Constants::Transaction::PAYMENT
     @receipt_type = Constants::Transaction::RECEIPT
+    @disbursement_payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT
+    @receipt_payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
     @on_product_type = Constants::Products::LENDING
     @on_product_id = @loan.id
     @by_counterparty_type, @by_counterparty_id = Resolver.resolve_counterparty(@for_borrower)
@@ -158,7 +160,7 @@ describe Lending do
 
     it "disbursement is not permitted" do
       disbursement_attributes = @common_transaction_attributes
-      disbursement_attributes.merge!( {:amount => @loan.applied_amount, :receipt_type => @payment_type, :effective_on => @loan.scheduled_disbursal_date} )
+      disbursement_attributes.merge!( {:amount => @loan.applied_amount, :receipt_type => @payment_type, :payment_towards => @disbursement_payment_towards, :effective_on => @loan.scheduled_disbursal_date} )
       mock_disbursement_attributes = Factory.attributes_for(:payment_transaction, disbursement_attributes)
       mock_disbursement = PaymentTransaction.new(mock_disbursement_attributes)
       mock_disbursement.valid?.should be_true
@@ -242,6 +244,7 @@ describe Lending do
 
       disbursement_money_amount = Money.new(@loan.approved_amount.to_i, @loan.currency)
       receipt_type = disbursement_attributes[:receipt_type]
+      payment_towards = disbursement_attributes[:payment_towards]
       on_product_type = disbursement_attributes[:on_product_type]
       on_product_id = disbursement_attributes[:on_product_id]
       by_counterparty_type = disbursement_attributes[:by_counterparty_type]
@@ -254,7 +257,7 @@ describe Lending do
 
       @loan.total_loan_disbursed.should == @zero_money_amount
       
-      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
 
       @loan.reload
       @loan.current_loan_status.should == LoanLifeCycle::DISBURSED_LOAN_STATUS    
@@ -278,12 +281,13 @@ describe Lending do
 
       disbursed_on_date = @loan.scheduled_disbursal_date
       factory_init_attributes =  @common_transaction_attributes
-      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :effective_on => disbursed_on_date} )
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :payment_towards => @disbursement_payment_towards, :effective_on => disbursed_on_date} )
 
       disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
 
       disbursement_money_amount = approved_amount
       receipt_type    = disbursement_attributes[:receipt_type]
+      payment_towards = disbursement_attributes[:payment_towards]
       on_product_type = disbursement_attributes[:on_product_type]
       on_product_id   = disbursement_attributes[:on_product_id]
       by_counterparty_type = disbursement_attributes[:by_counterparty_type]
@@ -296,7 +300,7 @@ describe Lending do
 
       @loan.total_loan_disbursed.should == @zero_money_amount
 
-      @payment_facade.record_payment(disbursement_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
 
       @loan.total_loan_disbursed.should == disbursement_money_amount
 
@@ -325,6 +329,7 @@ describe Lending do
 
         receipt_money_amount = Money.new(receipt_amount, @loan.currency)
         receipt_type = repayment_attributes[:receipt_type]
+        payment_towards = repayment_attributes[:payment_towards]
         on_product_type = repayment_attributes[:on_product_type]
         on_product_id = repayment_attributes[:on_product_id]
         by_counterparty_type = repayment_attributes[:by_counterparty_type]
@@ -335,7 +340,7 @@ describe Lending do
         effective_on         = repayment_attributes[:effective_on]
         product_action       = Constants::Transaction::LOAN_REPAYMENT
 
-        @payment_facade.record_payment(receipt_money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+        @payment_facade.record_payment(receipt_money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
 
         @loan.total_received_on_date(repayment_on).should == receipt_money_amount
       }
@@ -343,10 +348,16 @@ describe Lending do
       @loan.total_received_till_date.should == (@loan.total_loan_disbursed + @loan.total_interest_applicable)
       @loan.principal_received_till_date.should == @loan.total_loan_disbursed
       @loan.interest_received_till_date.should == @loan.total_interest_applicable
+
+      @loan.is_outstanding?.should be_false
+      loan_repaid_status = @loan.loan_repaid_status
+      loan_repaid_status.should_not be_nil
+      loan_repaid_status.repaid_nature.should == LoanLifeCycle::REPAID_IN_FULL
+      loan_repaid_status.closing_outstanding_principal.should == 0
+      loan_repaid_status.closing_outstanding_interest.should == 0
     end
 
   end
-
 
 =begin
   context "the date is the first scheduled repayment date on the loan" do

@@ -679,6 +679,7 @@ FactoryGirl.define do
     amount                 10000
     currency               MoneyManager.get_default_currency
     receipt_type           Constants::Transaction::RECEIPT
+    payment_towards        Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
     on_product_type        Constants::Products::LENDING
     on_product_id          { Factory(:lending).id }
     by_counterparty_type   Constants::Transaction::CLIENT

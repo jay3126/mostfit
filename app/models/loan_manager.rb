@@ -88,8 +88,14 @@ class LoanManager
 
   # transactions
 
-  def allocate_payment(payment_transaction, on_loan_id, with_loan_action)
-    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action)
+  def is_payment_permitted?(payment_transaction)
+    payment_on_loan = payment_transaction.on_product_instance
+    raise ArgumentError, "Payment transaction is not on loan" unless payment_on_loan.is_a?(Lending)
+    payment_on_loan.is_payment_permitted?(payment_transaction)
+  end
+
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
   end
 
 end

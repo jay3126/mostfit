@@ -50,6 +50,8 @@ class LoanDueStatus
   def self.unbroken_days_past_due(for_loan_id, on_date)
     generate_due_status_records_till_date(for_loan_id, on_date)
     days_past_due_till_date = all(:lending_id => for_loan_id, :on_date.lte => on_date).sort
+    return 0 if days_past_due_till_date.empty?
+    
     days_past_due_on_date = days_past_due_till_date.first
     return 0 unless days_past_due_on_date.is_overdue?
     unbroken_days_past_due = 0

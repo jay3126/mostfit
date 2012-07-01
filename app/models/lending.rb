@@ -120,8 +120,9 @@ class Lending
   def is_payment_permitted?(payment_transaction)
     transaction_receipt_type = payment_transaction.receipt_type
     transaction_effective_on = payment_transaction.effective_on
+    transaction_money_amount = payment_transaction.payment_money_amount
     
-    Validators::Arguments.not_nil?(transaction_receipt_type, transaction_effective_on)
+    Validators::Arguments.not_nil?(transaction_receipt_type, transaction_effective_on, transaction_money_amount)
 
     #payments
     if transaction_receipt_type == PAYMENT
@@ -130,10 +131,14 @@ class Lending
 
     #receipts
     if transaction_receipt_type == RECEIPT
-      if (transaction_effective_on < self.disbursal_date_value)
-        return [false, "Repayments cannot be accepted on loan before disbursement"]
+      return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
+      
+      maximum_receipt_to_accept = actual_total_outstanding_net_advance_balance
+      if (maximum_receipt_to_accept < transaction_money_amount)
+        return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
       end
     end
+
     true
   end
 
@@ -435,22 +440,24 @@ class Lending
   end
 
   def days_past_due
-    #TODO
+    days_past_due_on_date(Date.today)
   end
 
   def days_past_due_on_date(on_date)
-    #TODO
+    return 0 unless is_outstanding_on_date?(on_date)
+    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
   end
 
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################
 
-  def allocate_payment(payment_transaction, loan_action)
+  def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
         [true, nil]
     raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
+
     allocation = nil
     case loan_action
       when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
@@ -458,8 +465,30 @@ class Lending
       else
         raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
+    process_allocation(payment_transaction, loan_action, allocation)
+  end
+
+  def process_allocation(payment_transaction, loan_action, allocation)
     generate_loan_due_status_record(payment_transaction.effective_on)
+    process_status_change(payment_transaction, loan_action, allocation)
     allocation
+  end
+
+  def process_status_change(payment_transaction, loan_action, allocation)
+    if payment_transaction.receipt_type == RECEIPT
+      if loan_action == LOAN_REPAYMENT
+        if (actual_total_outstanding == zero_money_amount)
+          repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
+          raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
+          mark_loan_repaid(payment_transaction.effective_on, repaid_nature, actual_principal_outstanding, actual_interest_outstanding)
+        end
+      end
+    end
+  end
+
+  def mark_loan_repaid(repaid_on_date, repaid_nature, closing_principal_outstanding, closing_interest_outstanding)
+    self.loan_repaid_status = LoanRepaidStatus.to_loan_repaid_status(self, repaid_nature, repaid_on_date, closing_principal_outstanding, closing_interest_outstanding)
+    set_status(REPAID_LOAN_STATUS, repaid_on_date)
   end
 
   def approve(approved_amount, approved_on_date, approved_by)
@@ -545,20 +574,30 @@ class Lending
   end
 
   # All actions required to update the loan for the payment
-  def update_for_payment(payment_transaction)
+  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
     performed_at = payment_transaction.performed_at
     accounted_at = payment_transaction.accounted_at
-    payment_allocation = make_allocation(payment_amount, effective_on)
+    payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
     loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
     payment_allocation
   end
 
   # Record an allocation on the loan for the given total amount
-  def make_allocation(total_amount, on_date)
+  def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
     payment_currency = total_amount.currency
     resulting_allocation = Hash.new(zero_money_amount)
+
+    if (make_specific_allocation)
+      raise ArgumentError, "Specific principal amount was not available" unless (specific_principal_money_amount and (specific_principal_money_amount.is_a?(Money)))
+      raise ArgumentError, "Specific interest amount was not available" unless (specific_interest_money_amount and (specific_interest_money_amount.is_a?(Money)))
+
+      resulting_allocation[PRINCIPAL_RECEIVED] = specific_principal_money_amount
+      resulting_allocation[INTEREST_RECEIVED]  = specific_interest_money_amount
+      resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
+      return resulting_allocation
+    end
 
     #allocate when not due
     if current_due_status == NOT_DUE

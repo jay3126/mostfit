@@ -66,25 +66,25 @@ module Constants
     PRODUCT_ACCOUNTING = :product_accounting; FINANCIAL_ACCOUNTING = :financial_accounting
     ACCOUNTS_CHART_TYPES = [PRODUCT_ACCOUNTING, FINANCIAL_ACCOUNTING]
 
-    CUSTOMER_CASH = :customer_cash
-    CUSTOMER_FEE_RECEIPT = :customer_fee_receipt
-    CUSTOMER_LOAN_DISBURSED = :customer_loan_disbursed
-    CUSTOMER_LOAN_REPAID = :customer_loan_repaid
-    CUSTOMER_LOAN_ADVANCE_RECEIPT = :customer_loan_advance_receipt
+    CUSTOMER_CASH                  = :customer_cash
+    CUSTOMER_FEE_RECEIPT           = :customer_fee_receipt
+    CUSTOMER_LOAN_DISBURSED        = :customer_loan_disbursed
+    CUSTOMER_LOAN_REPAID           = :customer_loan_repaid
+    CUSTOMER_LOAN_ADVANCE_RECEIPT  = :customer_loan_advance_receipt
     CUSTOMER_LOAN_INTEREST_RECEIPT = :customer_loan_interest_receipt
-    CUSTOMER_LOAN_FEE_RECEIPT = :customer_loan_fee_receipt
-    CUSTOMER_LOAN_DEBTORS = :customer_loan_debtors
+    CUSTOMER_LOAN_FEE_RECEIPT      = :customer_loan_fee_receipt
+    CUSTOMER_LOAN_DEBTORS          = :customer_loan_debtors
 
     CUSTOMER_SPECIFIC_LEDGER_TYPES = [CUSTOMER_CASH, CUSTOMER_FEE_RECEIPT]
     CUSTOMER_LOAN_PRODUCT_SPECIFIC_LEDGER_TYPES = [CUSTOMER_LOAN_DISBURSED, CUSTOMER_LOAN_REPAID, CUSTOMER_LOAN_ADVANCE_RECEIPT, CUSTOMER_LOAN_INTEREST_RECEIPT, CUSTOMER_LOAN_FEE_RECEIPT, CUSTOMER_LOAN_DEBTORS]
 
     ACCRUE_PRINCIPAL_ALLOCATION = :accrue_principal_allocation
     ACCRUE_INTEREST_ALLOCATION  = :accrue_interest_allocation
-    ACCRUE_REGULAR = :accrue_regular
-    ACCRUE_BROKEN_PERIOD = :accrue_broken_period
+    ACCRUE_REGULAR              = :accrue_regular
+    ACCRUE_BROKEN_PERIOD        = :accrue_broken_period
 
     ACCRUAL_ALLOCATION_TYPES = [ACCRUE_PRINCIPAL_ALLOCATION, ACCRUE_INTEREST_ALLOCATION]
-    ACCRUAL_TEMPORAL_TYPES = [ACCRUE_REGULAR, ACCRUE_BROKEN_PERIOD]
+    ACCRUAL_TEMPORAL_TYPES   = [ACCRUE_REGULAR, ACCRUE_BROKEN_PERIOD]
 
     PRODUCT_LEDGER_TYPES = (CUSTOMER_SPECIFIC_LEDGER_TYPES + CUSTOMER_LOAN_PRODUCT_SPECIFIC_LEDGER_TYPES).flatten
 
