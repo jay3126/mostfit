@@ -25,6 +25,23 @@ class LocationLevel
 
   has n, :biz_locations
 
+  def created_on; self.creation_date; end
+
+  # This initialises the basic location levels needed, and must be invooked at startup
+  def self.setup_defaults
+    DEFAULT_LEVELS_AND_ATTRIBUTES.values.each { |attributes|
+      first_or_create(attributes)
+    }
+  end
+
+  def self.lowest_level
+    first(:order => [:level.asc])
+  end
+
+  def self.highest_level
+    first(:order => [:level.desc])
+  end
+
   # Creates the next level, by incrementing the level number
   def self.create_next_level(name, on_creation_date)
     new_level = {}

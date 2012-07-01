@@ -15,6 +15,12 @@ class BizLocation
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
 
+  validates_with_method :location_level_precedes_biz_location?
+
+  def location_level_precedes_biz_location?
+    Validators::Assignments.is_valid_assignment_date?(self.creation_date, self, self.location_level)
+  end
+
   def created_on; creation_date; end
 
   def address_text

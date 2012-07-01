@@ -24,6 +24,8 @@ module Constants
     DEFAULT_MEETING_TIME_FORMAT = TWELVE_HOUR_FORMAT
     TIME_FORMATS                = [TWELVE_HOUR_FORMAT, TWENTY_FOUR_HOUR_FORMAT]
 
+    EARLIEST_DATE_OF_OPERATION = Date.parse('2009-01-01')
+
     # Returns the constant in the application for the day of the week
     def self.get_week_day(on_date)
       DAYS_OF_THE_WEEK[on_date.wday]
