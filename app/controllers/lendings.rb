@@ -150,13 +150,12 @@ class Lendings < Application
       end
       @message = {:error => "Please select loan for disburse"} if lendings.blank?
       if @message[:error].blank?
-        mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         lendings.each do |lending|
-          mf.record_payment(lending.to_money[:disbursed_amount], 'payment', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, lending.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
-          if lending.status == :disbursed_loan_status
+          payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, lending.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+          if lending.is_outstanding?
             @message = {:notice => "Loans disbursed successfully."}
           else
-            @message = {:error => "Loans desbursed fails."}
+            @message = {:error => "Loan disbursement failed."}
           end
         end
       end
@@ -184,13 +183,10 @@ class Lendings < Application
       end
       @message = {:error => "Please select loan for repayment"} if payments.blank?
       if @message[:error].blank?
-        mf = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
         payments.each do |payment|
           lending         = payment[:lending]
-          repayment_count = lending.loan_receipts.count
-          mf.record_payment(payment[:payment_amount], 'receipt', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], payment[:payment_on_date], Constants::Transaction::LOAN_REPAYMENT)
-          raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == lending.loan_receipts.count
-          @message = {:notice => "Loans payments successfully."}
+          payment_facade.record_payment(payment[:payment_amount], 'receipt', Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, payment[:payment_by_staff], payment[:payment_on_date], Constants::Transaction::LOAN_REPAYMENT)
+          @message = {:notice => "Loan repayment done successfully."}
         end
       end
     rescue => ex
@@ -219,9 +215,14 @@ class Lendings < Application
     @lending         = Lending.get params[:id]
     payment_amount   = params[:payment_amount]
     payment_type     = params[:payment_type]
+    payment_towards  = nil
+    if payment_type == Constants::Transaction::PAYMENT
+      payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT
+    elsif payment_type == Constants::Transaction::RECEIPT
+      payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+    end
     payment_date     = params[:payment_date]
     payment_by_staff = params[:payment_by_staff]
-    mf               = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, session.user.id)
 
     #VALIDATION
     @message[:error] = "Payment amount cannot be blank" if payment_amount.blank?
@@ -231,10 +232,8 @@ class Lendings < Application
 
     if @message[:error].blank?
       begin
-        repayment_count = @lending.loan_receipts.count
         money_amount    = MoneyManager.get_money_instance(payment_amount)
-        mf.record_payment(money_amount, payment_type, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, Constants::Transaction::LOAN_REPAYMENT)
-        raise Errors::OperationNotSupportedError, "Operation Repayment is currently not supported" if repayment_count == @lending.loan_receipts.count
+        payment_facade.record_payment(money_amount, payment_type, payment_towards, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, Constants::Transaction::LOAN_REPAYMENT)
         @message = {:notice => "Loan payment saved successfully."}
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}
