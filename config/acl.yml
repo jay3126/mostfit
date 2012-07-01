@@ -17,6 +17,12 @@
 operator : all
 ################
 administrator :
+  home : 
+    - all
+  browse :
+    - all
+  admin :
+    - all  
   audit_trails:
     - index
     - show
@@ -33,17 +39,25 @@ administrator :
     - show
   loan_purposes :
     - all
+  searches :
+    - all  
 ################
 executive :
+  home : 
+    - all
+  admin :
+    - index
+  browse :
+    - all	
   attendances :
     - index
     - create
   audit_trails :
     - index
     - show
-  biz_locations :
-    - index
-    - show
+#  biz_locations :
+#    - index
+#   - show
   client_groups :
     - all
   client_verifications :
@@ -54,27 +68,59 @@ executive :
     - create
     - bulk_entry
     - show
+    - edit
+    - update
+  new_clients :
+    - all
   documents :
     - all
-  lendings :
-    - index  
-    - create
-    - create_repayment_on_lending
-    - show
-    - update_lending_approve_to_disburse
-    - update_lending_new_to_approve
   loan_applications :
-    - all
-  loan_authorizations :
-    - all
+    - index
+    - show
+    - bulk_create_loan_applicant
+    - bulk_create
+    - list
+    - bulk_new
+#   - edit
+    - update
+    - get_param_value
+#   - all
   loan_files :
-    - all  
+    - index
+    - show  
+    - get_data
+    - generate_disbursement_sheet
+    - generate_disbursement_labels
+    - record_loan_file
+    - loan_file_generation
+    - get_param_value
+#   - all
+  lendings :
+    - all
+#    - index  
+#    - create
+#    - create_repayment_on_lending
+#    - show
+#    - update_lending_approve_to_disburse
+#   - update_lending_new_to_approve
+   
+  searches :
+    - all
+  user_locations :
+    - all
+  lending_products :
+    - index
+    - show
+  reports :
+    - all     
 ################    
-supervisor : 
-  loan_applications : 
-    - create
-    - edit
-    - delete
+supervisor :
+  home :
+    - all	
+  browse :
+    - all
+  admin :
+    - index	 
   asset_register :
     - index  
     - new
@@ -89,11 +135,7 @@ supervisor :
     - index
     - show
   biz_locations:
-    - index
-    - create
-    - edit
-    - update
-    - show
+    - all    	
   center_cycles :
     - all
   client_groups :
@@ -110,6 +152,8 @@ supervisor :
     - show
     - edit
     - update
+  new_clients :
+    - all
   documents :
     - all
   holiday_calendars :
@@ -117,36 +161,82 @@ supervisor :
   holidays :
     - all
   lendings :
-    - index  
-    - create
-    - create_repayment_on_lending
-    - show
-    - edit
-    - update
-    - update_lending_approve_to_disburse
-    - update_lending_new_to_approve
+    - all
+#    - index  
+#    - create
+#   - create_repayment_on_lending
+#    - show
+#    - edit
+#    - update
+#    - update_lending_approve_to_disburse
+#    - update_lending_new_to_approve
+#    - new
+#    - lending_transactions
+#    - payment_on_disburse_loan
+#    - lending_due_statuses
   loan_applications :
-    - all
+     - index
+     - show
+     - bulk_create_loan_applicant
+     - bulk_create
+     - list
+     - bulk_new
+     - edit
+     - update
+     - get_param_value
+#    - all
   loan_authorizations :
-    - all
+     - all
   loan_files :
+     - index
+     - show  
+     - get_data
+     - generate_disbursement_sheet
+     - generate_disbursement_labels
+     - record_loan_file
+     - loan_file_generation
+     - get_param_value
+#    - all
+#  overlap_report_requests:
+#    - all
+#  overlap_report_responses:
+#    - all  
+  user_locations :
     - all  
+  searches :
+    - all
+  lending_products :
+    - index
+    - show
+  reports :
+    - all
+    
 #################
 support :
+  admin :
+    - index
+    - show
+  home : 
+    - all
+  browse :
+    - all
   accounting_rules :
     - index
     - show
   asset_register :
+#     - all		 
     - index  
     - new
     - create
     - edit
     - update
     - show
+    
   attendances :
     - index
     - create
   audit_trails:
+    - all
     - index
     - show
   book_keeping :
@@ -163,13 +253,13 @@ support :
     - create
     - bulk_entry
     - show
-  documents :
-    - all
-  holiday_calendars :
-    - all
-  ledgers :
-    - index
-    - show
+#  documents :
+#    - all
+#  holiday_calendars :
+#    - all
+#  ledgers :
+#    - index
+#   - show
   lendings :
     - index  
     - create
@@ -180,13 +270,42 @@ support :
     - update_lending_approve_to_disburse
     - update_lending_new_to_approve
   loan_applications :
-    - all
-  loan_authorizations :
-    - all
+    - index
+    - show
+#   - bulk_create_loan_applicant
+#   - bulk_create
+    - list
+    - bulk_new
+#   - edit
+    - update
+    - get_param_value
+    - suspected_duplicates
+    - get_de_dupe_loan_applications
+    - record_suspected_duplicates
+#   - all
   loan_files :
+    - index
+    - show  
+    - get_data
+    - generate_disbursement_sheet
+    - generate_disbursement_labels
+#   - record_loan_file
+#   - loan_file_generation
+    - get_param_value
+#   - all
+  reports :
+#    - index
+    - show
+    - get_dates
+    - get_date   
+  searches :
     - all  
 ################    
 finops :
+  home : 
+    - all
+  browse :
+    - all
   accounting_rules :
     - index
     - show
@@ -248,13 +367,56 @@ finops :
     - edit
     - update
   loan_applications :
+    - index
+    - show
+#   - bulk_create_loan_applicant
+#   - bulk_create
+    - list
+#    - bulk_new
+#   - edit
+#    - update
+    - get_param_value
+    - suspected_duplicates
+    - get_de_dupe_loan_applications
+    - record_suspected_duplicates
+#  loan_applications :
+#    - all
+#    - edit
+#    - update
+  overlap_report_requests:
     - all
-    - edit
-    - update
+  overlap_report_responses:
+    - all 
   loan_purposes :
+    - all
+  searches :
     - all  
+  loan_files :
+#    - index
+    - show  
+#    - get_data
+    - generate_disbursement_sheet
+    - generate_disbursement_labels
+    - record_loan_file
+    - loan_file_generation
+#    - get_param_value
+    - record_health_check_status
+  loan_authorizations :
+    - all
+  reports :
+#    - all 
+#    - index
+    - show
+    - get_dates
+    - get_date   
 ################        
 read_only :
+  home : 
+    - all
+  browse :
+    - all
   lendings :
     - index
     - show
+  searches :
+    - all  
