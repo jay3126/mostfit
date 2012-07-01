@@ -62,13 +62,15 @@ class LoanFiles < Application
               lap = @loan_file.loan_applications(:client_id => client_id).first
               applied_money_amount = MoneyManager.get_money_instance_least_terms(lap.amount.to_i)
               raise NotFound, "loan product must not be blank for Cliend ID: #{client_id}" if params[:clients][client_id][:loan_product_id].blank?
+              raise NotFound, "loan purpose must not be blank for Client ID: #{client_id}" if params[:clients][client_id][:loan_purpose].blank?
+              loan_purpose = params[:clients][client_id][:loan_purpose]
               from_lending_product = LendingProduct.get(params[:clients][client_id][:loan_product_id])
               repayment_frequency = from_lending_product.repayment_frequency
               tenure = from_lending_product.tenure
               for_borrower = Client.get(client_id)
               administered_at_origin = lap.at_center_id
               accounted_at_origin = lap.at_branch_id
-              loan = loan_facade.create_new_loan(applied_money_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_payment_date,applied_by_staff,recorded_by_user, nil)
+              loan = loan_facade.create_new_loan(applied_money_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_payment_date,applied_by_staff,recorded_by_user, nil, loan_purpose)
               @loans.push(loan)
             end
             r = @loans.map{|l| l.saved?}
@@ -82,14 +84,13 @@ class LoanFiles < Application
           rescue => ex
             message = {:error => "An error has occured: #{ex.message}"}
           end
-          redirect resource(@loan_file), :message => message
         else
-          display([@center, @clients], "loan_files/generate_loans")
+          message = {:error => "No clients selected"}
         end
       else
         message = {:error => @errors.flatten.join(', ')}
-        redirect url("loan_files/generate_loans/#{params['id']}"), :message => message
       end
+      redirect url("loan_files/generate_loans/#{params['id']}"), :message => message
     else
       if @clients.include?(nil)
         redirect resource(@loan_file), :message => {:error => 'Cannot generate loans for this loan file because clients have not been created for certain loan applications'}

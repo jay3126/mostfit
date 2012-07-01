@@ -5,8 +5,6 @@ class LoanPurpose
   property :id,   Serial
   property :name, *UNIQUE_NAME
   
-  has n, :lendings
-
   def to_s
     self.name
   end

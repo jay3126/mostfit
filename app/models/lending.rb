@@ -27,6 +27,7 @@ class Lending
   property :recorded_by_user,               *INTEGER_NOT_NULL
   property :repayment_allocation_strategy,  Enum.send('[]', *LOAN_REPAYMENT_ALLOCATION_STRATEGIES), :nullable => false
   property :status,                         Enum.send('[]', *LOAN_STATUSES), :nullable => false, :default => STATUS_NOT_SPECIFIED
+  property :loan_purpose,                   String
   property :created_at,                     *CREATED_AT
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
@@ -57,7 +58,6 @@ class Lending
   has n, :loan_status_changes
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
-  belongs_to :loan_purpose, :nullable => true
 
   # Creates a new loan
   def self.create_new_loan(
