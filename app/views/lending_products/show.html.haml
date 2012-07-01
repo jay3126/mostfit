@@ -33,6 +33,12 @@
         Tenure
       %td
         = @lending_product.tenure
+    - unless @lending_product.loan_fee.blank?
+      %tr.even
+        %th.even
+          Fee
+        %td
+          = @lending_product.loan_fee.timed_amounts.first.fee_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
 
 - unless @lendings.blank?
   %table.dataTable.report.weeksheet.nojs

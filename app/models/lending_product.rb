@@ -36,7 +36,9 @@ class LendingProduct
     tenure,
     repayment_allocation_strategy,
     principal_amounts,
-    interest_amounts
+    interest_amounts,
+    fee_product_id = nil,
+    insurance_product_id = nil
   )
     Validators::Amortization.is_valid_amortization?(tenure, standard_loan_money_amount, total_interest_applicable_money_amount, principal_amounts, interest_amounts)
 
@@ -48,8 +50,12 @@ class LendingProduct
     product[:repayment_frequency] = repayment_frequency
     product[:tenure] = tenure
     product[:repayment_allocation_strategy] = repayment_allocation_strategy
+
     new_product = first_or_create(product)
     raise Errors::DataError, new_product.errors.first.first unless new_product.saved?
+    
+    SimpleFeeProduct.get(fee_product_id).update(:lending_product_id => new_product.id) unless fee_product_id.blank?
+    SimpleInsuranceProduct.get(insurance_product_id).update(:lending_product_id => new_product.id) unless insurance_product_id.blank?
 
     principal_and_interest_amounts = assemble_amortization(tenure, principal_amounts, interest_amounts)
     LoanScheduleTemplate.create_schedule_template(name, standard_loan_money_amount, total_interest_applicable_money_amount, tenure, repayment_frequency, new_product, principal_and_interest_amounts)

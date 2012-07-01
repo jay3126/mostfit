@@ -53,12 +53,12 @@
     %th
       Fee Product
     %td
-      = select :loan_fee, :collection => SimpleFeeProduct.all.map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
+      = select :name => 'loan_fee_id', :collection => SimpleFeeProduct.all.map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
   %tr
     %th
       Insurance Products
     %td
-      = select :simple_insurance_products, :collection => SimpleInsuranceProduct.all.map{|ins| [ins.id, ins.name]}, :prompt => "Select Insurance"
+      = select :name => 'insurance_product_id', :collection => SimpleInsuranceProduct.all.map{|ins| [ins.id, ins.name]}, :prompt => "Select Insurance"
   %tr
     %th
       Repayment Allocation Strategy

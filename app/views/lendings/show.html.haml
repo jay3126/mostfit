@@ -19,6 +19,12 @@
     %th.even Loan Product
     %td
       = @lending_product.name
+  - unless @lending_product.loan_fee.blank?
+    %tr.odd
+      %th.odd
+        Fee
+      %td
+        = @lending_product.loan_fee.timed_amounts.first.fee_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
   %tr.odd
     %th.odd Frequency
     %td= @lending.repayment_frequency

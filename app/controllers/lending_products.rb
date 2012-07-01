@@ -20,15 +20,18 @@ class LendingProducts < Application
     @message = {}
 
     # GATE-KEEPING
-    name = params[:lending_product][:name]
-    amount = params[:lending_product][:amount]
-    repayment_frequency = params[:lending_product][:repayment_frequency]
-    tenure = params[:lending_product][:tenure]
-    interest_rate = params[:lending_product][:interest_rate]
+    name                 = params[:lending_product][:name]
+    amount               = params[:lending_product][:amount]
+    repayment_frequency  = params[:lending_product][:repayment_frequency]
+    tenure               = params[:lending_product][:tenure]
+    interest_rate        = params[:lending_product][:interest_rate]
     repayment_allocation = params[:lending_product][:repayment_allocation_strategy]
-    interest_amount = params[:lending_product_template][:interest_amount]
-    principal_schedule = params[:lending_product_template][:principal_schedule]
-    interest_schedule = params[:lending_product_template][:interest_schedule]
+    fee_product_id       = params[:loan_fee_id]
+    insurance_product_id = params[:insurance_product_id]
+    interest_amount      = params[:lending_product_template][:interest_amount]
+    principal_schedule   = params[:lending_product_template][:principal_schedule]
+    interest_schedule    = params[:lending_product_template][:interest_schedule]
+
     @lending_product = LendingProduct.new(params[:lending_product])
 
     # VALIDATIONS
@@ -49,7 +52,7 @@ class LendingProducts < Application
         money_interest_amount = MoneyManager.get_money_instance(interest_amount)
         money_principal_schedule_amount = MoneyManager.get_money_instance(*principal_schedule.split(','))
         money_interest_schedule_amount = MoneyManager.get_money_instance(*interest_schedule.split(','))
-       lending_product = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount)
+        lending_product = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount, fee_product_id, insurance_product_id)
 
         if lending_product.new?
           @message[:error] = lending_product.error.first.join(', ')
