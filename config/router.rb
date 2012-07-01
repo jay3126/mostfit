@@ -28,6 +28,7 @@ Merb::Router.prepare do
   resources :checkers
   resources :staff_postings
   resources :simple_fee_products
+  resources :simple_insurance_products
 
   resources :banks do
     resources :bank_branches do

@@ -38,7 +38,14 @@
         %th.even
           Fee
         %td
-          = @lending_product.loan_fee.timed_amounts.first.fee_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
+          = @lending_product.loan_fee.timed_amounts.first.total_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
+    - unless @lending_product.simple_insurance_products.blank?
+      %tr.even
+        %th.even
+          Insurance
+        %td
+          - unless @lending_product.simple_insurance_products.premium.blank?
+            = @lending_product.simple_insurance_products.premium.timed_amounts.first.total_money_amount.to_s unless @lending_product.simple_insurance_products.premium.timed_amounts.blank?
 
 - unless @lendings.blank?
   %table.dataTable.report.weeksheet.nojs

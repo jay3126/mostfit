@@ -1,0 +1,41 @@
+:javascript
+  $('table.insurance').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%h1 Insurance
+.menu-strip
+  = link_to 'Add Insurance', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+#meeting_div(style = "display : none")
+  = form_for(@insurance_product, :action => url(:controller => :simple_insurance_products, :action => :create), :method => "POST", :class => "tall shaded") do
+    = partial 'simple_insurance_products/fields'
+    = submit 'Save', :class => "greenButton"
+%br
+- if @insurance_products.count == 0
+  %p
+    %i No Insurance have been created yet.
+- else
+  %table.report.weeksheet.nojs.insurance
+    %thead
+      %tr
+        %td
+          id
+        %td
+          Name
+        %td
+          Fee Charge Type
+        %td
+          Created On
+    - @insurance_products.each do |insurance_product|
+      %tr
+        %td
+          = insurance_product.id
+        %td
+          = insurance_product.name
+        %td
+          = insurance_product.insurance_for.humanize
+        %td
+          = insurance_product.created_on
+    %tfoot
+      %tr
+        %td{ :colspan => 4 }

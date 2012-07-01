@@ -1,0 +1,21 @@
+%table.form
+  %tr
+    %td
+      Name
+    %td
+      = text_field :name
+  %tr
+    %td
+      Insurance For
+    %td
+      = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|f| [f.to_s]}
+  %tr
+    %td
+      Fee Product
+    %td
+      = select :name => 'fee_product_id', :collection => SimpleFeeProduct.all.map{|s| [s.id, s.name]}, :prompt => 'Select Fee'
+  %tr
+    %td
+      Created On
+    %td
+      = date_select 'simple_insurance_product[created_on]', Date.today, {:id => 'created_on'}
