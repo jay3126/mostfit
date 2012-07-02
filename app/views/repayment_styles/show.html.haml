@@ -1,8 +1,8 @@
 %h1== Repayment Style : <i>#{@repayment_style.name}</i>
 %p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
-  = link_to 'Edit',  url(:edit_repayment_style,  @repayment_style), :class => "edit grey_button"
+  = link_to_with_rights 'Edit',  url(:edit_repayment_style,  @repayment_style), :class => "edit grey_button"
   &nbsp;&nbsp;&nbsp;&nbsp;
-  = link_to 'Back', url(:repayment_styles), :class => "grey_button"
+  = link_to_with_rights 'Back', url(:repayment_styles), :class => "grey_button"
 
 %table.tall.shaded{:width => "44%"}
   %tr

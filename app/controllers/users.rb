@@ -5,7 +5,7 @@ class Users < Application
   def show(id)
     @user = User.get(id)
     raise NotFound unless @user
-    if session.user.role == :admin or session.user.id == @user.id
+    if session.user.role == :administrator or session.user.role == :operator or session.user.id == @user.id
       @trails = AuditTrail.all(:auditable_id => @user.id, :auditable_type => "User", :order => [:created_at.desc])
       @obj = @user
       display @user
@@ -37,8 +37,6 @@ class Users < Application
     params[:user][:staff_member] = StaffMember.get(params[:user][:staff_member]) if params[:user][:staff_member]
     params[:user][:funder]       = Funder.get(params[:user][:funder]) if params[:user][:funder]
     params[:user][:password_changed_at] = Time.now
-    params[:user][:staff] = Staff.get(params[:user][:staff]) if params[:user][:staff]
-    user.merge!(:created_by => session.user.id)
     @user = User.new(user)
 
     if @user.save

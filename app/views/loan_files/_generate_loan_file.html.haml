@@ -36,7 +36,7 @@
                 - checked_value = params[:selected] && params[:selected]["#{lap.loan_application_id}"] == "#{lap.loan_application_id}" ? "on" : nil
                 = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select', :checked => checked_value
               %td
-                = link_to lap.loan_application_id, "/loan_applications/#{lap.loan_application_id}"
+                = link_to_with_rights lap.loan_application_id, "/loan_applications/#{lap.loan_application_id}"
               %td
                 = lap.client_name
               %td

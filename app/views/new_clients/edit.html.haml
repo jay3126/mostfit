@@ -6,4 +6,4 @@
   = hidden_field :name => :client_type, :value => @client.class
   = partial("new_clients/tabs")
   = submit "Update client", :class => "grey_button"
-  = link_to 'Cancel', params[:return], :class => "grey_button"
+  = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"

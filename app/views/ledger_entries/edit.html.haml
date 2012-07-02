@@ -10,6 +10,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:ledger_entry, @ledger_entry)
+= link_to_with_rights 'Show', url(:ledger_entry, @ledger_entry)
 |
-= link_to 'Back', url(:ledger_entries)
+= link_to_with_rights 'Back', url(:ledger_entries)

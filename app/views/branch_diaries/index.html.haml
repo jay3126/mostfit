@@ -28,7 +28,7 @@
           = branch_diary.id
         %td
         %td
-          = link_to branch_diary.branch.name, url(:quick_link, "branches", branch_diary.branch_id)
+          = link_to_with_rights branch_diary.branch.name, url(:quick_link, "branches", branch_diary.branch_id)
         %td
           = branch_diary.diary_date
         %td
@@ -42,9 +42,9 @@
         %td
           = branch_diary.branch_key
         %td
-          = link_to branch_diary.manager.name, url(:quick_link, "staff_members", branch_diary.manager_staff_id)
+          = link_to_with_rights branch_diary.manager.name, url(:quick_link, "staff_members", branch_diary.manager_staff_id)
         %td
-          = link_to 'edit', resource(branch_diary, :edit)
+          = link_to_with_rights 'edit', resource(branch_diary, :edit)
 
     %tfoot
       %tr
@@ -52,8 +52,8 @@
 
   = paginate @branch_diaries
   - if @branch
-    = link_to 'Back', url(:quick_link, "branches", branch_diary.branch_id)
+    = link_to_with_rights 'Back', url(:quick_link, "branches", branch_diary.branch_id)
   - else
-    = link_to 'Back', url(:branch_diaries)
+    = link_to_with_rights 'Back', url(:branch_diaries)
 
 

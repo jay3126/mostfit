@@ -10,9 +10,9 @@
   %ul{:style => 'display: inline;'}
     - @branches.each do |branch|
       %li
-        = link_to branch.name, resource(branch)
+        = link_to_with_rights branch.name, resource(branch)
 - if not @centers.blank?
   %h3 
     - @centers.branch.each do |branch|
       ="You manage #{@centers.find_all{|c| c.branch_id==branch.id}.count} centers in #{branch.name} branch"
-      = link_to '[View]', url(:browse, :action =>'centers')
+      = link_to_with_rights '[View]', url(:browse, :action =>'centers')

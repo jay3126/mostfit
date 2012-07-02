@@ -5,5 +5,5 @@
       %td
         = applicable_fee.description
       %td
-        = link_to "[edit]", resource(applicable_fee, :edit)
-        = link_to "[delete]", url(:controller => "application", :action => "delete", :id => applicable_fee.id, :model => "applicable_fees", :return => return_url)
+        = link_to_with_rights "[edit]", resource(applicable_fee, :edit)
+        = link_to_with_rights "[delete]", url(:controller => "application", :action => "delete", :id => applicable_fee.id, :model => "applicable_fees", :return => return_url)

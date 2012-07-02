@@ -79,12 +79,12 @@
               = e.message
         - if params[:action]=="edit" and session.user.admin?
           %p{:style => "float: right; border: 1px solid orange; padding: 4px;"}
-            = link_to("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
+            = link_to_with_rights("Delete", url(:controller => "application", :action => "delete", :id => params[:id], :model => params[:controller], :return => request.uri), :class => 'delete')
         = catch_content :for_layout
     #footer
       %p{:style => "position: relative; right: 10%; float: right;"}
         - if session.authenticated? and session.user.role == :admin and Merb.env == "development"
-          %form{:action => "/admin/proxy_logon", :methoid => :post}
+          %form{:action => "/admin/proxy_logon", :method => :post}
             login as
             = select :user_id, :collection => User.all(:order => [:login]).map{|u| [u.id, u.login]}, :class => 'field'
             = submit "go"

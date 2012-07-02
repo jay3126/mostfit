@@ -10,6 +10,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:checker, @checker)
+= link_to_with_rights 'Show', url(:checker, @checker)
 |
-= link_to 'Back', url(:checkers)
+= link_to_with_rights 'Back', url(:checkers)

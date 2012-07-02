@@ -31,9 +31,9 @@
           %td{:colspan => 5}
             - if client.client_group
               %b
-                = link_to client.client_group.name, resource(client.client_group)
+                = link_to_with_rights client.client_group.name, resource(client.client_group)
                 (
-                = link_to('edit', resource(@branch, @center, client.client_group, :edit))
+                = link_to_with_rights('edit', resource(@branch, @center, client.client_group, :edit))
                 )
             - else
               Not attached to any group
@@ -46,23 +46,23 @@
             %i{:style => "background-color : #{client.active ? '#fff' : '#fdd'}; padding: 3px;" }
               inactive 
         %td
-          %b= link_to client.name, resource(@branch, @center, client)
+          %b= link_to_with_rights client.name, resource(@branch, @center, client)
         %td
           %ul.inline
             - client.loans.each do |l|
               %li
-                = (link_to l.short_tag, url_for_loan(l), :class => (l.info ? l.info[:status] : l.get_status)) rescue "#{l.id}: please check center meeting schedule"
+                = (link_to_with_rights l.short_tag, url_for_loan(l), :class => (l.info ? l.info[:status] : l.get_status)) rescue "#{l.id}: please check center meeting schedule"
         %td
-          = link_to 'edit', resource(@branch, @center, client, :edit)
+          = link_to_with_rights 'edit', resource(@branch, @center, client, :edit)
           &nbsp;|&nbsp;
-          = link_to 'new loan', resource(@branch, @center, client, :loans, :new)
+          = link_to_with_rights 'new loan', resource(@branch, @center, client, :loans, :new)
     - ClientGroup.all(:center => @center).reject{|cg| cg.clients.count!=0}.each do |client_group|
       %tr.group
         %td{:colspan => 5}
           %b
-            = link_to client_group.name, resource(client_group)
+            = link_to_with_rights client_group.name, resource(client_group)
             (
-            = link_to('edit', resource(@branch, @center, client_group, :edit))
+            = link_to_with_rights('edit', resource(@branch, @center, client_group, :edit))
             )
       %tr
 

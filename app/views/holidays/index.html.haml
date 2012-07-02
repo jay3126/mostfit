@@ -1,6 +1,6 @@
 %h1 Manage Holidays
 .menu-strip
-  = link_to 'Add a holiday', url(:new_holiday), :class => "add"  
+  = link_to_with_rights 'Add a holiday', url(:new_holiday), :class => "add"  
 %table.shaded{:width => "100%"}
   %thead
     %tr
@@ -21,7 +21,7 @@
       %td
         = holiday.shift_meeting
       %td
-        = link_to 'Show', url(:holiday, holiday)
+        = link_to_with_rights 'Show', url(:holiday, holiday)
         |
-        = link_to 'Edit', url(:edit_holiday,  holiday)
+        = link_to_with_rights 'Edit', url(:edit_holiday,  holiday)
 

@@ -5,6 +5,6 @@
   %tt
     app/views/rule_books/show.html.erb
 
-= link_to 'Edit',  url(:edit_rule_book,  @rule_book)
+= link_to_with_rights 'Edit',  url(:edit_rule_book,  @rule_book)
 |
-= link_to 'Back', url(:rule_books)
+= link_to_with_rights 'Back', url(:rule_books)

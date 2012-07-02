@@ -5,6 +5,6 @@
   %tt
     app/views/claims/show.html.erb
 
-= link_to 'Edit',  url(:edit_claim,  @claim)
+= link_to_with_rights 'Edit',  url(:edit_claim,  @claim)
 |
-= link_to 'Back', url(:claims)
+= link_to_with_rights 'Back', url(:claims)

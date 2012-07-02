@@ -8,7 +8,7 @@
       %h2 Create a new accounting period
       = partial "accounting_periods/fields"
       = submit "Create"
-      = link_to 'Cancel', url(:accounting_periods)
+      = link_to_with_rights 'Cancel', url(:accounting_periods)
     - else
       - last_period = AccountingPeriod.last_period
       - next_period_begin_date = last_period ? last_period.end_date + 1 : Date.today
@@ -30,4 +30,4 @@
           %td
             = date_select_for @accounting_period, :end_date, :nullable => false, :min_date => Date.min_date, :max_date =>  next_period_begin_date+(2*365)
             = submit "Create"
-            = link_to 'Cancel', url(:accounting_periods)
+            = link_to_with_rights 'Cancel', url(:accounting_periods)

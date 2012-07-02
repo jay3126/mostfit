@@ -16,5 +16,5 @@
       %td
         = client_group.center.name
       %td
-        = link_to('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
+        = link_to_with_rights('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
 

@@ -1,7 +1,7 @@
 .shaded
   %h1 Loan Applications:
   %div{:style => "text-align:right"}
-    = link_to "<< Back to report", "/reports/LoanApplicationsReport"
+    = link_to_with_rights "<< Back to report", "/reports/LoanApplicationsReport"
   %br
   %table.narrow.form{:width => "100%"}
     %thead
@@ -34,4 +34,4 @@
           %td
             = loan_application.status.humanize rescue nil
           %td
-            = link_to "Show", "/loan_applications/#{loan_application.id}"
+            = link_to_with_rights "Show", "/loan_applications/#{loan_application.id}"

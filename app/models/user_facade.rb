@@ -72,4 +72,8 @@ class UserFacade
     @user_manager ||= UserManager.new
   end
 
+  def user_manager
+    @user_manager ||= UserManager.new
+  end
+
 end

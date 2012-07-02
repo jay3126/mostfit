@@ -34,7 +34,7 @@
               - if biz_location_level.first == 0
                 = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id)
               - else
-                = link_to biz_location.name, resource(biz_location)
+                = link_to_with_rights biz_location.name, resource(biz_location)
             %td
               = biz_location.level_name
             - unless biz_location_link.class == BizLocation
@@ -44,8 +44,8 @@
               = biz_location_link.creation_date.strftime("%Y-%m-%d")
             %td
               - if biz_location_level.first == 0
-                = link_to "Add Client", resource(biz_location,:new_clients,:new)
+                = link_to_with_rights "Add Client", resource(biz_location,:new_clients,:new)
                 |
-                = link_to "Show Clients", resource(biz_location, :biz_location_clients)
+                = link_to_with_rights "Show Clients", resource(biz_location, :biz_location_clients)
               - else
-                = link_to "Childrens", resource(biz_location)
+                = link_to_with_rights "Childrens", resource(biz_location)

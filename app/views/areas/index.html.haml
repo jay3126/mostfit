@@ -5,7 +5,7 @@
   .flash
     .notice
       No areas
-  = link_to 'Add New Area', url(:new_area), :class => 'add grey_button'
+  = link_to_with_rights 'Add New Area', url(:new_area), :class => 'add grey_button'
 - else
   %table.narrow
     %thead
@@ -22,9 +22,9 @@
           %td
             = area.id
           %td
-            = link_to area.name, resource(area.region, area)
+            = link_to_with_rights area.name, resource(area.region, area)
           %td
-            = link_to 'Show', url(:area, area)
+            = link_to_with_rights 'Show', url(:area, area)
             |
-            = link_to 'Edit', url(:edit_area, area)
-    = link_to 'Add new Area', url(:new_area), :class => 'add grey_button'
+            = link_to_with_rights 'Edit', url(:edit_area, area)
+    = link_to_with_rights 'Add new Area', url(:new_area), :class => 'add grey_button'

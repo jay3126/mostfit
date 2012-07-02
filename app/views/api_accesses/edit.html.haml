@@ -10,6 +10,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:api_access, @api_access)
+= link_to_with_rights 'Show', url(:api_access, @api_access)
 |
-= link_to 'Back', url(:api_accesses)
+= link_to_with_rights 'Back', url(:api_accesses)

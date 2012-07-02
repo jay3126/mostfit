@@ -56,7 +56,7 @@
     - if ClientType.count==0 and session.user.role==:admin
       %div.error
         You have not set any Client Types. Create them 
-        = link_to("here", resource(:client_types, :new), :target => "_blank")
+        = link_to_with_rights("here", resource(:client_types, :new), :target => "_blank")
     %th
       Gender
     %td

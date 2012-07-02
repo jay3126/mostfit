@@ -5,9 +5,9 @@
     =submit "Go"
     - all_centers = @staff_member.centers.aggregate(:id)
     -if all_centers.length>0
-      = link_to 'previous day', url(:disbursement_sheet, :date => Loan.all(:scheduled_disbursal_date.lt => @date, "client.center_id" => all_centers).max(:scheduled_disbursal_date))
+      = link_to_with_rights 'previous day', url(:disbursement_sheet, :date => Loan.all(:scheduled_disbursal_date.lt => @date, "client.center_id" => all_centers).max(:scheduled_disbursal_date))
       |
-      = link_to 'next day', url(:disbursement_sheet, :date => Loan.all(:scheduled_disbursal_date.gt => @date, "client.center_id" => all_centers).min(:scheduled_disbursal_date))
+      = link_to_with_rights 'next day', url(:disbursement_sheet, :date => Loan.all(:scheduled_disbursal_date.gt => @date, "client.center_id" => all_centers).min(:scheduled_disbursal_date))
 %h1 
   Daily Disbursement Sheet for 
   = @staff_member.name
@@ -15,7 +15,7 @@
   = @date
 %p
   - if @centers.count > 0
-    = link_to "Download pdf >>", url(:disbursement_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button" #since day sheet contains disbursement as well as collection so print it
+    = link_to_with_rights "Download pdf >>", url(:disbursement_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button" #since day sheet contains disbursement as well as collection so print it
   - else
     %b
       This Staff Manager has no disbursement today.

@@ -3,17 +3,17 @@
     %td Meeting At
     %td= MeetingCalendar.proposed_meeting_on_date?(@biz_location, @date) ? @date : 'No Meeting'
     %td
-      = link_to "today", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
+      = link_to_with_rights "today", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => Date.today)
       &nbsp;|&nbsp;
       - if @previous_meeting.blank?
         Pervious Meeting
       - else
-        = link_to "previous meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @previous_meeting.on_date)
+        = link_to_with_rights "previous meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @previous_meeting.on_date)
       &nbsp;|&nbsp;
       - if @next_meeting.blank?
         Next Meeting
       - else
-        = link_to "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @next_meeting.on_date)
+        = link_to_with_rights "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @next_meeting.on_date)
   %tr
     %td= "center manager"
     %td= @weeksheet.by_staff_member_name

@@ -25,8 +25,8 @@
       %td
         = monthly_target.collections_target
       %td
-        = link_to 'Show', url(:monthly_target, monthly_target)
+        = link_to_with_rights 'Show', url(:monthly_target, monthly_target)
       %td
-        = link_to 'Edit', url(:edit_monthly_target,  monthly_target)
+        = link_to_with_rights 'Edit', url(:edit_monthly_target,  monthly_target)
 
-= link_to 'New', url(:new_monthly_target)
+= link_to_with_rights 'New', url(:new_monthly_target)

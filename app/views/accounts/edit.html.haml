@@ -8,6 +8,6 @@
     = partial "accounts/fields"
     = submit "Update"
 
-= link_to 'Show', url(:account, @account)
+= link_to_with_rights 'Show', url(:account, @account)
 |
-= link_to 'Back', url(:account, @account)
+= link_to_with_rights 'Back', url(:account, @account)

@@ -50,8 +50,8 @@
       Active
     %td
       = @rule.active
-      = link_to 'toggle active state', url(:controller => :rules, :action => :toggle_active, :id => @rule.id)
+      = link_to_with_rights 'toggle active state', url(:controller => :rules, :action => :toggle_active, :id => @rule.id)
 
-= link_to 'Edit',  url(:edit_rule,  @rule)
+= link_to_with_rights 'Edit',  url(:edit_rule,  @rule)
 |
-= link_to 'Back', url(:rules)
+= link_to_with_rights 'Back', url(:rules)

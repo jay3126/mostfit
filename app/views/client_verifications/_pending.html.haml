@@ -45,7 +45,7 @@
               - @loan_applications_pending_verification.each do |l|
                 %tr
                   %td
-                    = link_to l.id, "/loan_applications/#{l.id}"
+                    = link_to_with_rights l.id, "/loan_applications/#{l.id}"
                   %td
                     = l.client_name
                   %td

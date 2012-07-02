@@ -15,9 +15,9 @@
             %h2
               - if model == 'lendings'
                 Loans
-              -elsif model == 'new_clients'
+              - elsif model == 'new_clients'
                 Clients
-              -else
+              - else
                 = model.camelcase(' ')
         %tr
           %th
@@ -35,14 +35,14 @@
                   - if model.to_sym == :bookmarks
                     - if obj.method==:get
                       - route = YAML::load(obj.route).last
-                      = link_to obj.name, url(route)
+                      = link_to_with_rights obj.name, url(route)
                   - elsif function == :applied_amount
                     - field = Lending.get(params[:query]).to_money[:applied_amount].to_s
-                    = link_to(field, "/#{model}/#{obj.id}")
-                  -elsif model.to_sym == :locations
-                    = link_to obj.name, url(:controller => :user_locations, :action => "#{obj.location_level.level==0 ? 'weeksheet_collection' : 'show'}", :id => obj.id)
+                    = link_to_with_rights(field, "/#{model}/#{obj.id}")
+                  - elsif model.to_sym == :locations
+                    = link_to_with_rights obj.name, url(:controller => :user_locations, :action => "#{obj.location_level.level==0 ? 'weeksheet_collection' : 'show'}", :id => obj.id)
                   - else
-                    = link_to(field.respond_to?(:name) ? field.name : field, "/#{model}/#{obj.id}")
+                    = link_to_with_rights(field.respond_to?(:name) ? field.name : field, "/#{model}/#{obj.id}")
         - if @floating and count > 10
           %tr
             %td

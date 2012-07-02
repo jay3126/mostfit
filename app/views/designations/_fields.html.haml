@@ -1,10 +1,16 @@
-%tr
-  %th
-    Name
-  %td
-    = text_field :name
-%tr
-  %td
-    Location Level
-  %td
-    = select :location_level, :collection => LocationLevel.all(:order => [:name]).map{|s| [s.id, s.name]}
+%table
+  %tr
+    %th
+      Name
+    %td
+      = text_field :name
+  %tr
+    %th
+      Role
+    %td
+      = select :role_class, :collection => Constants::User::ROLE_CLASSES.collect{|x| x.to_s}
+  %tr
+    %th
+      Location Level
+    %td
+      = select :location_level, :collection => LocationLevel.all(:order => [:name]).map{|s| [s.id, s.name]}

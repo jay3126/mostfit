@@ -8,6 +8,7 @@ FACTORY_PROVINCES   = ['Maharashtra', 'Andra Pradesh', 'Madhya Pradesh', 'Kerala
 FACTORY_PURPOSES    = ['Buying a boat', 'Christmas presents', 'Wife\'s birthday'].freeze
 FACTORY_ASSETS      = ['Laptop charger', 'Laser printer', 'Mobile phone', 'Airconditioner'].freeze
 FACTORY_LOCATION_NAMES = %w[Center Branch Area Region State Zone Country].freeze
+FACTORY_DESIGNATION_NAMES = %w[ Manager Relationship_Officer Audit_Officer Clerk ]
 
 FACTORY_ACCOUNTS_ASSETS      = ['Cash', 'Bank', 'Loans made'].freeze
 FACTORY_ACCOUNTS_LIABILITIES = ['Deposits', 'Loans taken'].freeze
@@ -18,6 +19,7 @@ ACCOUNTING_DATE_BEGINS       = Date.parse("2011-04-01")
 FactoryGirl.define do
 
   # General sequences
+  sequence(:designation_name)   { |n| [FACTORY_DESIGNATION_NAMES[n%FACTORY_DESIGNATION_NAMES.length]] }
   sequence(:name)               { |n| [FACTORY_NAMES[n%FACTORY_NAMES.length], n.to_s].join(' ') }
   sequence(:email)              { |n| [FACTORY_NAMES[n%FACTORY_NAMES.length], n.to_s, '@', FACTORY_PLACES[n%FACTORY_PLACES.length], '.in'].join.downcase }
   sequence(:city)               { |n| [FACTORY_PLACES[n%FACTORY_PLACES.length], "center", n.to_s].join(' ') }
@@ -80,12 +82,19 @@ FactoryGirl.define do
     login                 { Factory.next(:user_login) }
     password              'secret'
     password_confirmation 'secret'
-    role                  'staff_member'
     active                true
+    association           :staff_member
+  end
+
+  factory :designation do
+    name            { Factory.next(:designation_name) }
+    role_class      Constants::User::SUPERVISOR
+    association     :location_level
   end
 
   factory :staff_member do
     name            { Factory.next(:name) }
+    association     :designation
     mobile_number   '06-123123123'
     active          true
   end
@@ -112,7 +121,6 @@ FactoryGirl.define do
     date_joined     { Date.parse('2000-01-01') }
 
     association     :created_by, :factory => :user
-    association     :created_by_staff, :factory => :staff_member
   end
 
   factory :client_type do
@@ -596,7 +604,7 @@ FactoryGirl.define do
     title               'Home page'
     route               '/'
     type                BookmarkTypes.first
-    share_with          User::ROLES.first
+    share_with          User::ROLE_CLASSES.first
 
     association         :user
   end

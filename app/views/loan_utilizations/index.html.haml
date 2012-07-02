@@ -7,6 +7,6 @@
       %td
         = loan_utilization.name
       %td
-        = link_to 'Edit', url(:edit_loan_utilization,  loan_utilization)
+        = link_to_with_rights 'Edit', url(:edit_loan_utilization,  loan_utilization)
 
-= link_to 'New', url(:new_loan_utilization)
+= link_to_with_rights 'New', url(:new_loan_utilization)

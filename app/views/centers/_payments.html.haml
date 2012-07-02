@@ -43,9 +43,9 @@
           - fee = 0
           - client = Client.get ws.borrower_id
           %td
-            %b= link_to ws.borrower_name, resource(center.branch, center, client)
+            %b= link_to_with_rights ws.borrower_name, resource(center.branch, center, client)
           %td
-            = link_to ws.loan_id, url(:quick_link, "loans", ws.loan_id)
+            = link_to_with_rights ws.loan_id, url(:quick_link, "loans", ws.loan_id)
           %td
             - i = ws.loan_disbursed_amount
             %b= i.to_currency
@@ -89,7 +89,7 @@
         - if loan_row_count == 0 and not params[:filter]
           %tr{ :class => cycle('odd','even') }
             %td
-              %b= link_to client.name, resource(center.branch, center, client)
+              %b= link_to_with_rights client.name, resource(center.branch, center, client)
             %td{ :colspan => 5, :style => "text-align: center;" }
               %i nothing outstanding
             %td.left-numeric.due

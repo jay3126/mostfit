@@ -31,7 +31,7 @@
         %td
           = @accounting_period.closed ? "Closed" : "Open"
         %td
-          = link_to 'Balances', url(:period_balances, @accounting_period)
+          = link_to_with_rights 'Balances', url(:period_balances, @accounting_period)
 
   - if @accounting_period.closed
     = submit 'Reopen this Accounting Period'

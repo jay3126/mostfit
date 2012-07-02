@@ -5,6 +5,6 @@
   %tt
     app/views/holiday_calendar_holidays/show.html.erb
 
-= link_to 'Edit',  url(:edit_holiday_calendar_holiday,  @holiday_calendar_holiday)
+= link_to_with_rights 'Edit',  url(:edit_holiday_calendar_holiday,  @holiday_calendar_holiday)
 |
-= link_to 'Back', url(:holiday_calendar_holidays)
+= link_to_with_rights 'Back', url(:holiday_calendar_holidays)

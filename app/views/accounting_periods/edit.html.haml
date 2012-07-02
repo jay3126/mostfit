@@ -7,6 +7,6 @@
     = partial "accounting_periods/fields"
     = submit "Update"
 
-= link_to 'Show', url(:accounting_period, @accounting_period)
+= link_to_with_rights 'Show', url(:accounting_period, @accounting_period)
 |
-= link_to 'Back', url(:accounting_periods)
+= link_to_with_rights 'Back', url(:accounting_periods)

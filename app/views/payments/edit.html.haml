@@ -7,4 +7,4 @@
 %div.greytext
   This form is does not perform a normal edit. Payment #{@payment.id} will be deleted and a new one will be created with parameters below 
 %br
-= link_to 'Back', url_for_loan(@loan, 'payments')
+= link_to_with_rights 'Back', url_for_loan(@loan, 'payments')

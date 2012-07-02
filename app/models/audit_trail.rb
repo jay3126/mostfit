@@ -1,5 +1,6 @@
 class AuditTrail
   include DataMapper::Resource
+  include Constants::User
   
   property :id,              Serial
   property :auditable_id,    Integer, :nullable => false, :index => true
@@ -9,7 +10,7 @@ class AuditTrail
   property :changes,         Yaml, :length => 20000
   property :created_at,      DateTime, :index => true
   property :type, Enum[:log, :warning, :error], :index => true
-  property :user_role,       Enum.send('[]', *User::ROLES), :nullable => false, :index => true #, :default => lambda {|obj, p| obj.user.role}
+  property :user_role,       Enum.send('[]', *ROLE_CLASSES), :nullable => false, :index => true #, :default => lambda {|obj, p| obj.user.role}
   belongs_to :user
 
   # we need this dummy validation to define the reallocation context which bubbles down into AuditTrail as well. 

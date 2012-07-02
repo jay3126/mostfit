@@ -38,11 +38,11 @@
       %td
         - if ab
           - unless ab.verified_on
-            = link_to 'Edit', resource(@account, ap, ab)
-            = link_to 'Close Account'
+            = link_to_with_rights 'Edit', resource(@account, ap, ab)
+            = link_to_with_rights 'Close Account'
           - else
             Account Balance Locked
         - else
-          = link_to "Create", resource(@account, ap, :account_balances, :new)
+          = link_to_with_rights "Create", resource(@account, ap, :account_balances, :new)
 
   

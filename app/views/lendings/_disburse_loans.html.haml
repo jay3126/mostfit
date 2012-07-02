@@ -52,7 +52,7 @@
           %td
             = loan_row_count
           %td
-            = link_to lending.id, resource(lending)
+            = link_to_with_rights lending.id, resource(lending)
           %td
             = lending.to_money[:applied_amount].to_s
           %td

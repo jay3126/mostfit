@@ -32,7 +32,7 @@
     - claims.each do |claim|      
       %tr.claim
         %td
-          = link_to claim.client.name, resource(claim.client)
+          = link_to_with_rights claim.client.name, resource(claim.client)
           - branch_total[0] += 1
         %td
           = claim.client.id
@@ -50,7 +50,7 @@
         - loans = claim.client.loans(:under_claim_settlement.not => nil)
         %td
           - loans.each do |l|
-            = link_to l.id, url_for_loan(l)
+            = link_to_with_rights l.id, url_for_loan(l)
         %td
           - loans.each do |l|
             = l.amount.to_currency

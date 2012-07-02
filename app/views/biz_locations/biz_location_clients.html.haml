@@ -1,7 +1,7 @@
 %h1
   = "Biz-Location :-  #{@biz_location.name}"
 .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-  = link_to 'Add Client', resource(@biz_location, :new_clients, :new), :class => "add"
+  = link_to_with_rights 'Add Client', resource(@biz_location, :new_clients, :new), :class => "add"
 - if @clients.count == 0
   %p
     %i No Client Mapping have been created yet.
@@ -24,10 +24,10 @@
         %td
           = client.id
         %td
-          = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+          = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
         %td
           = client.date_joined.strftime("%Y-%m-%d")
         %td
           = client.created_at.strftime("%Y-%m-%d")
         %td
-          = link_to "Apply Loan", resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => client.id)
+          = link_to_with_rights "Apply Loan", resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => client.id)

@@ -45,7 +45,7 @@
           %br/
           %span.greytext
             by
-            = link_to loan.written_off_by.name, resource(loan.written_off_by)
+            = link_to_with_rights loan.written_off_by.name, resource(loan.written_off_by)
             on
             = loan.written_off_on
         - else

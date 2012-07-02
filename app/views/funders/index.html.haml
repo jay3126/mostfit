@@ -22,7 +22,7 @@
         %td
           = funder.id
         %td
-          %b= link_to funder.name, resource(funder)
+          %b= link_to_with_rights funder.name, resource(funder)
         %td
           %b= funder.funding_lines.size
         %td

@@ -1,7 +1,7 @@
 %h1
   == GRTs for Client Group "#{@client_group.name}"
 
-= link_to 'Add a GRT Date', resource(@client_group, :grts, :new), :class => 'add'
+= link_to_with_rights 'Add a GRT Date', resource(@client_group, :grts, :new), :class => 'add'
 = partial 'grts/grts'
 
 = error_messages_for @grt

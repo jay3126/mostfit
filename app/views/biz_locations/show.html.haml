@@ -19,4 +19,4 @@
         %th
           = date_select "begin_date", Date.today
     = submit 'Save'
-    = link_to 'Cancel', url(params[:return]), :class => "grey_button"
+    = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"

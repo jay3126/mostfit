@@ -19,7 +19,7 @@
   %ul
     - [:clients, :loans, :payments, :portfolios, :journals].each do |model|
       %li
-        = link_to("List unverified #{model}", resource(:verifications, {:model => model}))
+        = link_to_with_rights("List unverified #{model}", resource(:verifications, {:model => model}))
         (
         = instance_variable_get("@#{model}_count")
         )

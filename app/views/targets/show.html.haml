@@ -5,6 +5,6 @@
   %tt
     app/views/targets/show.html.erb
 
-= link_to 'Edit',  url(:edit_target,  @target)
+= link_to_with_rights 'Edit',  url(:edit_target,  @target)
 |
-= link_to 'Back', url(:targets)
+= link_to_with_rights 'Back', url(:targets)

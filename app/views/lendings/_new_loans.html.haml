@@ -50,7 +50,7 @@
           %td
             = loan_row_count
           %td
-            = link_to lending.id, resource(lending)
+            = link_to_with_rights lending.id, resource(lending)
           %td
             = lending.to_money[:applied_amount].to_s
           %td
@@ -66,9 +66,9 @@
           %td
             = lending.tenure
           %td
-            = link_to lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+            = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
           %td
-            = link_to lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+            = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
           %td
             = lending.status
           %td

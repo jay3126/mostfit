@@ -1,6 +1,6 @@
 %h1 API Access
 %p
-  == View clients registered for API access or #{link_to 'Register a new client for API', resource(:api_accesses, :new), :class => "bold"}.
+  == View clients registered for API access or #{link_to_with_rights 'Register a new client for API', resource(:api_accesses, :new), :class => "bold"}.
 
 - if @api_accesses.blank?
   %p
@@ -20,7 +20,7 @@
         %td
           %b= api_access.description
         %td
-          %b= link_to api_access.origin, resource(api_access)
+          %b= link_to_with_rights api_access.origin, resource(api_access)
     %tfoot
       %tr
         %td{ :colspan => 6 }

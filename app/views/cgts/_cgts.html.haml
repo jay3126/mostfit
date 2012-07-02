@@ -2,7 +2,7 @@
   .notice
     %h3 
       No CGTs scheduled yet
-      = link_to 'Add a CGT Date', resource(@client_group, :cgts, :return => @return)
+      = link_to_with_rights 'Add a CGT Date', resource(@client_group, :cgts, :return => @return)
 - else
   %table.narrow
     %tr
@@ -29,4 +29,4 @@
         %td
           = cgt.status
         %td
-          = link_to 'Edit', resource(@client_group, cgt, :edit, :return => @return)
+          = link_to_with_rights 'Edit', resource(@client_group, cgt, :edit, :return => @return)

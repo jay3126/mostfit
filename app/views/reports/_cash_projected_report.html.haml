@@ -43,7 +43,7 @@
       %tr
         - row_total = 0
         %td
-          = link_to(b.name, resource(b)) if b
+          = link_to_with_rights(b.name, resource(b)) if b
         - late_disbursals = Loan.all(:scheduled_disbursal_date.lt => @report.from_date, :approved_on.not => nil, :disbursal_date => nil, "c_#{item.to_s.snake_case}_id".to_sym => b.id).aggregate(:amount_applied_for.sum, :amount_sanctioned.sum)
         - late_applied_total += (late_disbursals[0] || 0)
         - late_sanctioned_total += (late_disbursals[1] || 0)

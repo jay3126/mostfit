@@ -5,6 +5,6 @@
   %tt
     app/views/account_balances/show.html.erb
 
-= link_to 'Edit',  url(:edit_account_balance,  @account_balance)
+= link_to_with_rights 'Edit',  url(:edit_account_balance,  @account_balance)
 |
-= link_to 'Back', url(:account_balances)
+= link_to_with_rights 'Back', url(:account_balances)

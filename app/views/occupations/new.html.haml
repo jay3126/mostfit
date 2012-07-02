@@ -7,4 +7,4 @@
   = partial :fields
   = submit I18n.t "occupation.new.create", :default => "Create"
 
-= link_to I18n.t("occupation.new.back", :default => "Back"), url(:occupations)
+= link_to_with_rights I18n.t("occupation.new.back", :default => "Back"), url(:occupations)

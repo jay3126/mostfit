@@ -60,9 +60,9 @@
           - center = Center.get ws.at_center_id
           %tr{ :class => cycle('odd','even') }
             %td.text
-              %b= link_to ws.borrower_name, resource(center.branch, center, Client.get(ws.borrower_id))
+              %b= link_to_with_rights ws.borrower_name, resource(center.branch, center, Client.get(ws.borrower_id))
             %td.number
-              = link_to ws.loan_id, url(:quick_link, "loans", ws.loan_id)
+              = link_to_with_rights ws.loan_id, url(:quick_link, "loans", ws.loan_id)
             %td.number
               - amt = ws.loan_disbursed_amount
               %b= amt.to_currency
@@ -99,7 +99,7 @@
           - if loan_row_count == 0
             %tr{ :class => cycle('odd','') }
               %td.text
-                %b= link_to ws.borrower_name, resource(center.branch, center, Client.get(ws.borrower_id))
+                %b= link_to_with_rights ws.borrower_name, resource(center.branch, center, Client.get(ws.borrower_id))
               %td{ :colspan => 10 }
                 %i nothing outstanding
               %td

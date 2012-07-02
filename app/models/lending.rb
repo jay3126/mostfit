@@ -636,6 +636,7 @@ class Lending
     allocation
   end
 
+
   ###########
   # UPDATES # ends
   ###########

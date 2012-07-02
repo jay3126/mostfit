@@ -14,8 +14,8 @@
         %td
           = loan_purpose.name
         %td
-          = link_to I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
+          = link_to_with_rights I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
           |
-          = link_to I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
+          = link_to_with_rights I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
 - else
   %h3 No loan purpose has been created

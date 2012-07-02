@@ -57,7 +57,7 @@
     - for staff_member in @staff_members
       %tr{ :class => cycle('odd','') }
         %td.text
-          %b= link_to staff_member.name_and_id, resource(staff_member)
+          %b= link_to_with_rights staff_member.name_and_id, resource(staff_member)
         %td
           %span{:class => staff_member.active? ? '' : 'red'}
             = staff_member.active? ? 'active' : 'disabled'
@@ -65,72 +65,72 @@
           - hash = {:manager_staff_id => staff_member.id, :creation_date.gte => this_month, :creation_date.lte => this_month_end}
           - item = @branch_managers_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          =link_to(item, search_url(hash, Branch))||"-"
+          =link_to_with_rights(item, search_url(hash, Branch))||"-"
         %td
           - hash = {:manager_staff_id => staff_member.id}
           - item = @branch_managers_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          =link_to(item, search_url(hash, Branch))||"-"
+          =link_to_with_rights(item, search_url(hash, Branch))||"-"
         %td
           - hash = {:manager_staff_id => staff_member.id, :creation_date.gte => this_month, :creation_date.lte => this_month_end}
           - item = @center_managers_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Center))||"-"
+          = link_to_with_rights(item, search_url(hash, Center))||"-"
         %td
           - hash = {:manager_staff_id => staff_member.id}
           - item = @center_managers_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Center))||"-"
+          = link_to_with_rights(item, search_url(hash, Center))||"-"
         %td
           - hash = {:applied_by_staff_id => staff_member.id, :applied_on.gte => this_month, :applied_on.lte => this_month_end}
           - item = @applied_loans_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:applied_by_staff_id => staff_member.id}
           - item = @applied_loans_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:approved_by_staff_id => staff_member.id, :approved_on.gte => this_month, :approved_on.lte => this_month_end}
           - item = @approved_loans_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:approved_by_staff_id => staff_member.id}
           - item = @approved_loans_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:rejected_by_staff_id => staff_member.id, :rejected_on.gte => this_month, :rejected_on.lte => this_month_end}
           - item = @rejected_loans_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:rejected_by_staff_id => staff_member.id}
           - item = @rejected_loans_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:disbursed_by_staff_id => staff_member.id, :disbursal_date.gte => this_month, :disbursal_date.lte => this_month_end}
           - item = @disbursed_loans_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:disbursed_by_staff_id => staff_member.id}
           - item = @disbursed_loans_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:written_off_by_staff_id => staff_member.id, :written_off_on.gte => this_month, :written_off_on.lte => this_month_end}
           - item = @written_off_loans_thismonth.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
         %td
           - hash = {:written_off_by_staff_id => staff_member.id}
           - item = @written_off_loans_overall.find{|x| x[0]==staff_member.id}
           - item = item ? item[1] : 0
-          = link_to(item, search_url(hash, Loan))||"-"
+          = link_to_with_rights(item, search_url(hash, Loan))||"-"
     - sum_total      = 0,0,0,0,0,0,0
     - sum_tm         = 0,0,0,0,0,0,0
     - vars = [:branch_managers, :center_managers, :applied_loans, :approved_loans, :rejected_loans, :disbursed_loans, :written_off_loans]

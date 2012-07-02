@@ -56,4 +56,6 @@
         %tr
           %td
             = submit 'Update', :class => "grey_button"
-            = link_to 'Cancel',"/loan_applications/#{@loan_application.id}", :class => "grey_button"
+          %td
+            = link_to_with_rights 'Cancel',"/loan_applications/#{@loan_application.id}", :class => "grey_button"
+

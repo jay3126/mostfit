@@ -297,6 +297,9 @@ describe Lending do
       performed_by         = disbursement_attributes[:performed_by]
       effective_on         = disbursement_attributes[:effective_on]
       product_action       = Constants::Transaction::LOAN_DISBURSEMENT
+performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
 
       @loan.total_loan_disbursed.should == @zero_money_amount
 

@@ -27,7 +27,7 @@
               - srno = srno + 1
               = srno
             %td
-              = link_to laa.loan_application_id, "/loan_applications/#{laa.loan_application_id}"
+              = link_to_with_rights laa.loan_application_id, "/loan_applications/#{laa.loan_application_id}"
             %td
               = laa.client_name
             %td

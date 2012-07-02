@@ -2,7 +2,7 @@
   Fees
 
 .menu-strip{:style => "margin: 10px;"}
-  = link_to 'Add a fee', url(:new_fee), :class => "add"
+  = link_to_with_rights 'Add a fee', url(:new_fee), :class => "add"
 
 %table.narrow.shaded
   %thead
@@ -22,7 +22,7 @@
       %td
         = fee.description
       %td
-        = link_to 'Show', url(:fee, fee)
+        = link_to_with_rights 'Show', url(:fee, fee)
       %td
-        = link_to 'Edit', url(:edit_fee,  fee)
+        = link_to_with_rights 'Edit', url(:edit_fee,  fee)
 

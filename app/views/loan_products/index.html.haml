@@ -1,11 +1,11 @@
 %h1
   LoanProducts
-  = link_to 'New Loan Product', url(:new_loan_product), :class => 'add'
-  = link_to 'Design a Product', url(:design_loan_product), :class => 'edit'
+  = link_to_with_rights 'New Loan Product', url(:new_loan_product), :class => 'add'
+  = link_to_with_rights 'Design a Product', url(:design_loan_product), :class => 'edit'
 - if @loan_products.length == 0
   %h3
     No Loan Products defined. 
-    = link_to 'Click here', url(:new_loan_product)
+    = link_to_with_rights 'Click here', url(:new_loan_product)
     to add one
 
 %table.narrow.form{:width => "100%"}
@@ -31,7 +31,7 @@
   - @loan_products.find_all{|x| x.valid_upto >= Date.today}.each do |loan_product|
     %tr{:class => cycle('odd','')}
       %td
-        = link_to loan_product.name, url(:loan_product, loan_product) 
+        = link_to_with_rights loan_product.name, url(:loan_product, loan_product) 
       %td
         = loan_product.repayment_style.name if loan_product.repayment_style
       %td
@@ -41,7 +41,7 @@
       %td
         = loan_product.valid_from!=loan_product.valid_upto ? "#{loan_product.valid_from} to #{loan_product.valid_upto}" : loan_product.valid_upto
       %td
-        = link_to "Edit", resource(loan_product, :edit)
+        = link_to_with_rights "Edit", resource(loan_product, :edit)
   - if @loan_products.find_all{|x| x.valid_from > Date.today}.length>0
     %tr
       %td{:colspan => 5, :style => 'background-color: #eee; text-align: center'}
@@ -50,7 +50,7 @@
       - @loan_products.find_all{|x| x.valid_from > Date.today}.each do |loan_product|
         %tr{:class => cycle('odd','')}
           %td
-            = link_to loan_product.name, url(:loan_product, loan_product) 
+            = link_to_with_rights loan_product.name, url(:loan_product, loan_product) 
           %td
             = loan_product.repayment_style.name if loan_product.repayment_style
           %td
@@ -60,7 +60,7 @@
           %td
             = loan_product.valid_from!=loan_product.valid_upto ? "#{loan_product.valid_from} to #{loan_product.valid_upto}" : loan_product.valid_upto
           %td
-            = link_to "Edit", resource(loan_product, :edit)
+            = link_to_with_rights "Edit", resource(loan_product, :edit)
   - if @loan_products.find_all{|x| x.valid_upto < Date.today}.length>0
     %tr
       %td{:colspan => 5, :style => 'background-color: #eee; text-align: center'}
@@ -69,7 +69,7 @@
       - @loan_products.find_all{|x| x.valid_upto < Date.today}.each do |loan_product|
         %tr{:class => cycle('odd','')}
           %td
-            = link_to loan_product.name, url(:loan_product, loan_product) 
+            = link_to_with_rights loan_product.name, url(:loan_product, loan_product) 
           %td
             = loan_product.repayment_style.name if loan_product.repayment_style
           %td

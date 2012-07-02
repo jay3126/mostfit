@@ -7,4 +7,4 @@
   = partial :fields
   = submit I18n.t "loan_purpose.new.create", :default => "Create"
 
-= link_to I18n.t("loan_purpose.new.back", :default => "Back"), url(:loan_purposes)
+= link_to_with_rights I18n.t("loan_purpose.new.back", :default => "Back"), url(:loan_purposes)

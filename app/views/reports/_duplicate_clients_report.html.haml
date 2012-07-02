@@ -45,7 +45,7 @@
         - next if client1.nil? or client2.nil?
         %tr
           %td
-            =link_to(dup1[0], resource(client1))
+            =link_to_with_rights(dup1[0], resource(client1))
           %td
             =dup1[1]
           %td
@@ -60,7 +60,7 @@
             =dup1[4]
         %tr
           %td
-            =link_to(dup2[0], resource(client2))
+            =link_to_with_rights(dup2[0], resource(client2))
           %td
             =dup2[1]
           %td

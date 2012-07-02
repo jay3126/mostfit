@@ -9,7 +9,7 @@
   #container_form
     .notice{:style => "background: none; text-align: center;"}
       No opening or closing account balances are currently set
-      /= link_to 'Set an account balance', url(:new_account_balance, :account_id => @account.id), :class => '_remote_ add', :id => 'form'
+      /= link_to_with_rights 'Set an account balance', url(:new_account_balance, :account_id => @account.id), :class => '_remote_ add', :id => 'form'
 
 - else
   %table.narrow
@@ -32,7 +32,7 @@
     - for account_balance in @account_balances
       %tr{:class => cycle('odd','even')}
         %td
-          = link_to account_balance.accounting_period.name, resource(account_balance.accounting_period)
+          = link_to_with_rights account_balance.accounting_period.name, resource(account_balance.accounting_period)
         %td
           = account_balance.opening_balance.to_account_balance
         %td
@@ -45,6 +45,6 @@
         %td
           - if session.user.role == :admin and (not account_balance.accounting_period.closed)
             - if account_balance == to_be_verified
-              = link_to 'Verify', url(:verify_account_balance, account_balance.account, account_balance.accounting_period, account_balance)
+              = link_to_with_rights 'Verify', url(:verify_account_balance, account_balance.account, account_balance.accounting_period, account_balance)
             - elsif reverifyAB.include?(account_balance)
-              = link_to 'Reverify', url(:verify_account_balance, account_balance.account, account_balance.accounting_period, account_balance)
+              = link_to_with_rights 'Reverify', url(:verify_account_balance, account_balance.account, account_balance.accounting_period, account_balance)

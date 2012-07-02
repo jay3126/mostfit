@@ -5,4 +5,4 @@
 = form_for(@funding_line, :action => resource(@funder, @funding_line)) do
   = partial :fields
   = submit "Save changes"
-  = link_to 'Cancel', resource(@funder, :funding_lines)
+  = link_to_with_rights 'Cancel', resource(@funder, :funding_lines)

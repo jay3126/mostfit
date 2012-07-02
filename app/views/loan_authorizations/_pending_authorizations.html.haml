@@ -39,7 +39,7 @@
                   - s_no += 1
                   = s_no
                 %td
-                  = link_to lpa.loan_application_id, "/loan_applications/#{lpa.loan_application_id}"
+                  = link_to_with_rights lpa.loan_application_id, "/loan_applications/#{lpa.loan_application_id}"
                 %td
                   = lpa.client_name
                 %td

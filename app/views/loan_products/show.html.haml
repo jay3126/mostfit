@@ -1,8 +1,8 @@
 %h1
   = @loan_product.name
-= link_to 'Edit',  url(:edit_loan_product,  @loan_product), :class => 'edit'
+= link_to_with_rights 'Edit',  url(:edit_loan_product,  @loan_product), :class => 'edit'
 |
-= link_to 'Back', url(:loan_products)
+= link_to_with_rights 'Back', url(:loan_products)
 
 %div.tab_container
   %ul.tabs

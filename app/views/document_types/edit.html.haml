@@ -4,6 +4,6 @@
 = form_for(@document_type, :action => url(:document_type, @document_type)) do
   =partial :fields
   = submit "Save"
-= link_to 'Show', url(:document_type, @document_type)
+= link_to_with_rights 'Show', url(:document_type, @document_type)
 |
-= link_to 'Back', url(:document_types)
+= link_to_with_rights 'Back', url(:document_types)

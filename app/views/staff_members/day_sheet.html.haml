@@ -7,7 +7,7 @@
   = "Daily Collection Sheet for #{@staff_member.name} for #{@date}"
 %p
   - if @biz_locations.count > 0
-    = link_to "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
+    = link_to_with_rights "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
   - else
     %b This Staff Manager has no collection today.
 %br

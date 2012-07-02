@@ -1,5 +1,5 @@
 -# This partial is used in case of AJAX request, for example in the Clients page.
-%h2== Claims for #{@client.name} #{link_to 'New Claim', resource(@client, :claims, :new), :class => "add"}
+%h2== Claims for #{@client.name} #{link_to_with_rights 'New Claim', resource(@client, :claims, :new), :class => "add"}
 
 - unless @claims.empty?
   %table.narrow.form{:width => '100%'} 
@@ -23,7 +23,7 @@
           %td
             = claim.claim_submission_date
           %td
-            = link_to 'Update', resource(@client, claim, :edit)
+            = link_to_with_rights 'Update', resource(@client, claim, :edit)
 - else
   %h3
     = "No claims found"

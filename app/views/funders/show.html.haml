@@ -23,7 +23,7 @@
     %td      
       %b= @funder.portfolios.size
 
-%p= link_to 'edit this funders details', resource(@funder, :edit), :class => "edit"
+%p= link_to_with_rights 'edit this funders details', resource(@funder, :edit), :class => "edit"
 
 %div.tab_container
   %ul.tabs

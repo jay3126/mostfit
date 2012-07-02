@@ -8,6 +8,6 @@
   = partial :fields 
   = submit "Update"
 
-= link_to 'Show', url(:insurance_product, @insurance_product)
+= link_to_with_rights 'Show', url(:insurance_product, @insurance_product)
 |
-= link_to 'Back', url(:insurance_products)
+= link_to_with_rights 'Back', url(:insurance_products)

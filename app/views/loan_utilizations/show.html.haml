@@ -5,6 +5,6 @@
   %tt
     app/views/loan_utilizations/show.html.erb
 
-= link_to 'Edit',  url(:edit_loan_utilization,  @loan_utilization)
+= link_to_with_rights 'Edit',  url(:edit_loan_utilization,  @loan_utilization)
 |
-= link_to 'Back', url(:loan_utilizations)
+= link_to_with_rights 'Back', url(:loan_utilizations)

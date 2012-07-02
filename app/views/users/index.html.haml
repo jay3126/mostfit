@@ -1,16 +1,15 @@
 %h1  Users
 .menu-strip
-  = link_to 'create a new user', resource(:users, :new), :class => "add"
+  = link_to_with_rights 'create a new user', resource(:users, :new), :class => "add grey_button"
 %table.shaded{ :width => '100%' }
   %thead
     %tr
       %th
       %th ID
       %th Login
-      %th Role
       %th Staff member/Funder
       %th Status
-      %th 
+      %th Action
   %tbody
   - for user in @users
     - next if user.role == :maintainer
@@ -19,17 +18,14 @@
       %td
         = user.id
       %td
-        %b= link_to user.login, resource(user)
+        %b= link_to_with_rights user.login, resource(user)
       %td
-        = user.role.to_s.humanize
-      %td
-        = (link_to user.staff_member.name, resource(user.staff_member)) if user.staff_member
-        = (link_to user.funder.name, resource(user.funder)) if user.funder
+        = (link_to_with_rights user.staff_member.name, resource(user.staff_member)) if user.staff_member
       %td
         = user.active ? "active" : "inactive"
-      - if session.user.role == :admin  # only show to admin
+      - if session.user.role == :operator  # only show to admin
         %td
-          = link_to 'edit', resource(user, :edit)
+          = link_to_with_rights 'edit', resource(user, :edit)
   %tfoot
     %tr
-      %td{ :colspan => 9 }
+      %td{ :colspan => 8 }

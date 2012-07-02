@@ -21,7 +21,7 @@
       -@journals.each do |journal|
         %tr
           %td
-            = link_to journal.id, resource(journal)
+            = link_to_with_rights journal.id, resource(journal)
           %td
             = journal.comment
           %td

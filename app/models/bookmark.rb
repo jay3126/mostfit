@@ -1,5 +1,6 @@
 class Bookmark
   include DataMapper::Resource
+  include Constants::User
   attr_accessor :url
   #ShareWith = [:none, :all, :admin, :staff_member, :mis_manager, :data_entry, :read_only]
 
@@ -11,7 +12,7 @@ class Bookmark
   property :method_name,     Enum.send('[]', *MethodNames), :nullable => true, :default => :get, :index => true
   property :params,          Text,    :nullable => true
   property :user_id,         Integer, :nullable => false, :index => true
-  property :share_with,      Flag.send('[]', *User::ROLES), :nullable => false, :default => :none, :index => true
+  property :share_with,      Flag.send('[]', *ROLE_CLASSES), :nullable => false, :default => :none, :index => true
   belongs_to :user
   
   validates_is_unique :name, :with_scope => [:type, :user]

@@ -2,7 +2,7 @@
 %p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
   = link_to_with_rights 'edit this staff member details', resource(@staff_member, :edit), :class => 'edit grey_button'
   &nbsp;&nbsp;&nbsp;&nbsp;
-  = link_to 'back', resource(:staff_members), :class => 'grey_button'
+  = link_to_with_rights 'back', resource(:staff_members), :class => 'grey_button'
 
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.odd
@@ -13,6 +13,11 @@
       ( id:
       = @staff_member.id
       )
+  %tr.even
+    %th.even
+      Designation
+    %td
+      = @staff_member.designation.name if @staff_member.designation 
   %tr.odd
     %th.odd
       Mobile Number
@@ -35,11 +40,11 @@
 %table
   %tr
     %td
-      = link_to 'Daily Collection Sheet', url(:day_sheet, @staff_member.id), :class => "grey_button"
-    %td{:style => "display:none"}
-      = link_to 'Daily Disbursement Sheet', url(:disbursement_sheet, @staff_member.id), :class => "grey_button"
-    %td{:style => "display:none"}
-      = link_to 'Centers Managed', url(:show_staff_member_centers, @staff_member.id), :class => "grey_button"
+      = link_to_with_rights 'Daily Collection Sheet', url(:day_sheet, @staff_member.id), :class => "grey_button"
+    %td
+      = link_to_with_rights 'Daily Disbursement Sheet', url(:disbursement_sheet, @staff_member.id), :class => "grey_button"
+    %td
+      = link_to_with_rights 'Centers Managed', url(:show_staff_member_centers, @staff_member.id), :class => "grey_button"
 
 %div.tab_container
   %ul.tabs

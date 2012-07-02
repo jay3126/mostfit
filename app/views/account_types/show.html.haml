@@ -5,6 +5,6 @@
   %tt
     app/views/account_types/show.html.erb
 
-= link_to 'Edit',  url(:edit_account_type,  @account_type)
+= link_to_with_rights 'Edit',  url(:edit_account_type,  @account_type)
 |
-= link_to 'Back', url(:account_types)
+= link_to_with_rights 'Back', url(:account_types)

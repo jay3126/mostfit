@@ -10,8 +10,8 @@
       %td
         = holiday_calendar.applic.name
       %td
-        = link_to 'Show', url(:holiday_calendar, holiday_calendar)
+        = link_to_with_rights 'Show', url(:holiday_calendar, holiday_calendar)
       %td
-        = link_to 'Edit', url(:edit_holiday_calendar,  holiday_calendar)
+        = link_to_with_rights 'Edit', url(:edit_holiday_calendar,  holiday_calendar)
 
-= link_to 'New', url(:new_holiday_calendar)
+= link_to_with_rights 'New', url(:new_holiday_calendar)

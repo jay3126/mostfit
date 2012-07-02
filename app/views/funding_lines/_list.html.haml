@@ -23,7 +23,7 @@
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
         %td
-          = link_to(funding_line.id, resource(@funder, funding_line))
+          = link_to_with_rights(funding_line.id, resource(@funder, funding_line))
         %td
           %b= funding_line.amount
         %td
@@ -37,12 +37,12 @@
         %td
           = funding_line.last_payment_date
         %td
-          = link_to("Tranches","/tranches/list/#{funding_line.id}")
+          = link_to_with_rights("Tranches","/tranches/list/#{funding_line.id}")
           
         %td
-          = link_to("details", resource(@funder, funding_line))          
+          = link_to_with_rights("details", resource(@funder, funding_line))          
         %td
-          = link_to 'edit', resource(@funder, funding_line, :edit), :class => "edit"
+          = link_to_with_rights 'edit', resource(@funder, funding_line, :edit), :class => "edit"
     %tfoot
       %tr
         %td{ :colspan => 10 }

@@ -10,6 +10,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:comment, @comment)
+= link_to_with_rights 'Show', url(:comment, @comment)
 |
-= link_to 'Back', url(:comments)
+= link_to_with_rights 'Back', url(:comments)

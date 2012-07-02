@@ -21,9 +21,9 @@
   -@loans_to_utilize.each do |loan|   
     %tr{:class => cycle('odd','')}
       %td.number
-        = link_to loan.id, url(:quick_link, "loans", loan.id)
+        = link_to_with_rights loan.id, url(:quick_link, "loans", loan.id)
       %td.text
-        = link_to loan.client.name
+        = link_to_with_rights loan.client.name
       %td.number
         = loan.description
       %td.number

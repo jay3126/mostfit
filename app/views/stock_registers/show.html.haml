@@ -5,6 +5,6 @@
   %tt
     app/views/stock_registers/show.html.erb
 
-= link_to 'Edit',  url(:edit_stock_register,  @stock_register)
+= link_to_with_rights 'Edit',  url(:edit_stock_register,  @stock_register)
 |
-= link_to 'Back', url(:stock_registers)
+= link_to_with_rights 'Back', url(:stock_registers)

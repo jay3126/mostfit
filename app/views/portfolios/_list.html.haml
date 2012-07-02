@@ -24,9 +24,9 @@
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
         %td
-          = link_to portfolio.id, resource(@funder, portfolio)
+          = link_to_with_rights portfolio.id, resource(@funder, portfolio)
         %td
-          = link_to portfolio.name, resource(@funder, portfolio)
+          = link_to_with_rights portfolio.name, resource(@funder, portfolio)
         %td
           %b= portfolio.portfolio_loans.count
         %td

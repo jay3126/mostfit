@@ -10,7 +10,7 @@
     %p
       = submit "Yes, delete user '#{@user.login}'..."
 
-  = link_to 'Back', url(:users)
+  = link_to_with_rights 'Back', url(:users)
 
   %p
     %br/

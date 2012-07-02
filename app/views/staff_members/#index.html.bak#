@@ -1,7 +1,7 @@
 %h1 Overview of all staff members
 
 %p
-  == Manage existing staff members or #{link_to 'create a new staff member', resource(:staff_members, :new)}.
+  == Manage existing staff members or #{link_to_with_rights 'create a new staff member', resource(:staff_members, :new)}.
 
 - if @staff_members.blank?
   %p
@@ -35,7 +35,7 @@
       %tr{ :class => cycle('odd','') }
         %td
         %td
-          %b= link_to staff_member.name, resource(staff_member)
+          %b= link_to_with_rights staff_member.name, resource(staff_member)
         %td
           %b= staff_member.active? ? 'active' : 'disabled'
         %td
@@ -53,10 +53,10 @@
         %td
           = staff_member.written_off_loans.count
         %td
-          = link_to 'edit', resource(staff_member, :edit)
+          = link_to_with_rights 'edit', resource(staff_member, :edit)
 
     %tfoot
       %tr
         %td{ :colspan => 11 }
-  = link_to 'Create a new staff member', url(:new_staff_member)
+  = link_to_with_rights 'Create a new staff member', url(:new_staff_member)
 /

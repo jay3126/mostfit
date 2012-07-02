@@ -4,7 +4,7 @@
       "bJQueryUI": true
     });
 .menu-strip
-  = link_to 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
+  = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
 %br
 - if @customers.count == 0
   %p
@@ -24,6 +24,6 @@
         %td
           = customer.id
         %td
-          = link_to customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+          = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
         %td
           = customer.date_joined

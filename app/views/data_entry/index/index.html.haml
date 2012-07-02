@@ -19,12 +19,12 @@
         %h3{:style => "border-bottom: dotted 1px #999"} 
           = plural.capitalize
         - if thing == :payment
-          = link_to "Record a repayment", url("enter_#{plural}".to_sym, :action => 'record'), :class => 'add_small'
+          = link_to_with_rights "Record a repayment", url("enter_#{plural}".to_sym, :action => 'record'), :class => 'add_small'
           %br
-          = link_to "By Center", url("enter_#{plural}".to_sym, :action => 'by_center'), :class => 'add_small'
+          = link_to_with_rights "By Center", url("enter_#{plural}".to_sym, :action => 'by_center'), :class => 'add_small'
           %br
-          = link_to "By Staff Member", url("enter_#{plural}".to_sym, :action => 'by_staff_member'), :class => 'add_small'
+          = link_to_with_rights "By Staff Member", url("enter_#{plural}".to_sym, :action => 'by_staff_member'), :class => 'add_small'
           %br
-          = link_to "Delete a repayment <br/>", url("enter_#{plural}".to_sym, :action => 'delete'), :class => 'add_small' 
-          = link_to "Daily Report", url(:show_report, 'DailyReport', {:daily_report => {:date => Date.today, :branch_id => session[:branch_id], :center_id => session[:center_id]}, :submit => "Go"}), :class => 'edit_small'
-        - @i += 1
+          = link_to_with_rights "Delete a repayment <br/>", url("enter_#{plural}".to_sym, :action => 'delete'), :class => 'add_small' 
+          = link_to_with_rights "Daily Report", url(:show_report, 'DailyReport', {:daily_report => {:date => Date.today, :branch_id => session[:branch_id], :center_id => session[:center_id]}, :submit => "Go"}), :class => 'edit_small'
+          %br

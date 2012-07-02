@@ -5,4 +5,4 @@
     %td
     %td
       = submit "Create"
-=link_to("back", resource(:documents)) if not request.xhr?
+=link_to_with_rights("back", resource(:documents)) if not request.xhr?

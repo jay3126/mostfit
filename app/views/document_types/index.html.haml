@@ -9,8 +9,8 @@
       %td
         =document_type.parent_model
       %td
-        = link_to 'Edit', url(:edit_document_type,  document_type)
+        = link_to_with_rights 'Edit', url(:edit_document_type,  document_type)
 
-= link_to 'New', url(:new_document_type)
+= link_to_with_rights 'New', url(:new_document_type)
 |
-= link_to 'Back', url(:admin)
+= link_to_with_rights 'Back', url(:admin)

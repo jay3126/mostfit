@@ -2,8 +2,8 @@
   Targets
 
 .menu-strip{:style => "margin: 10px;"}
-  = link_to 'Add a target', url(:new_target), :class => "add"
-  = link_to "Monthly bulk target entry", url(:action => :bulk_entry_new), :class => "add"
+  = link_to_with_rights 'Add a target', url(:new_target), :class => "add"
+  = link_to_with_rights "Monthly bulk target entry", url(:action => :bulk_entry_new), :class => "add"
 
 %table.narrow
   %thead
@@ -30,11 +30,11 @@
     %tr{ :class => cycle('odd','') }
       %td
         - if target.attached_to == :staff_member
-          = link_to target.responsible.name, url(:quick_link, "staff_members", target.responsible.id)
+          = link_to_with_rights target.responsible.name, url(:quick_link, "staff_members", target.responsible.id)
         - if target.attached_to == :branch
-          = link_to target.responsible.name, url(:quick_link, "branches", target.responsible.id)
+          = link_to_with_rights target.responsible.name, url(:quick_link, "branches", target.responsible.id)
         - if target.attached_to == :center
-          = link_to target.responsible.name, url(:quick_link, "centers", target.responsible.id)
+          = link_to_with_rights target.responsible.name, url(:quick_link, "centers", target.responsible.id)
       %td
         = target.target_of.to_s.camelcase(' ')
       %td
@@ -59,7 +59,7 @@
         - else
           = target.target_value - target.start_value
       %td
-        = link_to 'Edit', url(:edit_target,  target)
+        = link_to_with_rights 'Edit', url(:edit_target,  target)
 
   %tfoot
     %tr

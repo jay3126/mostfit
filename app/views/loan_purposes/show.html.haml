@@ -9,6 +9,6 @@
     %td
       = I18n.t"loan_purpose.show.name", :default => "Name"
     %td=@loan_purpose.name
-= link_to I18n.t("loan_purpose.show.edit", :default => "Edit"), url(:edit_loan_purpose, @loan_purpose)
+= link_to_with_rights I18n.t("loan_purpose.show.edit", :default => "Edit"), url(:edit_loan_purpose, @loan_purpose)
 |
-= link_to I18n.t("loan_purpose.show.back", :default => "Back"), url(:loan_purposes)
+= link_to_with_rights I18n.t("loan_purpose.show.back", :default => "Back"), url(:loan_purposes)

@@ -15,7 +15,7 @@
             %b
               = group.name
               (
-              =link_to('edit', resource(@branch, @center, group, :edit))
+              =link_to_with_rights('edit', resource(@branch, @center, group, :edit))
               )
           -else
             =I18n.t "center.approval.no_center", :default => "Not attached to any center"

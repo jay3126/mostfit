@@ -1,6 +1,6 @@
 %h1== Client Name: <i>#{@client.name}</i>
 .menu-strip
-  = link_to 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add'
+  = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add'
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name

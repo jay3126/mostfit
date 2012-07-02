@@ -8,18 +8,18 @@
   - if @loan.loan_history.length == 0 or (@loan.disbursal_date and @loan.payments.count > 0  and @loan.loan_history.max(:created_at).to_time < @loan.payments.max(:created_at).to_time)
     .error
       History of this loan is not updated. Click
-      = link_to("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
+      = link_to_with_rights("here", url(:controller => "loans", :id => @loan.id, :action => "repair"))
       to repair
   %h1
     Loan
-    = link_to "#{@loan.description}", url_for_loan(@loan)
+    = link_to_with_rights "#{@loan.description}", url_for_loan(@loan)
     by client
-    = link_to "#{@client.name}", resource(@branch, @center, @client)
+    = link_to_with_rights "#{@client.name}", resource(@branch, @center, @client)
   - @history = @loan.loan_history
   .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-    = link_to 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit"
-    = link_to 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add"
-    = link_to 'visit center', resource(@loan.client.center)
+    = link_to_with_rights 'edit this loan', url_for_loan(@loan, 'edit'), :class => "edit"
+    = link_to_with_rights 'make repayment', url_for_loan(@loan, 'payments/new'), :class => "add"
+    = link_to_with_rights 'visit center', resource(@loan.client.center)
   
   %table.loan{ :style => 'width : 50%; border: solid 1px #c9c9c9' }
     %tr
@@ -35,7 +35,7 @@
         = @loan.applied_on.strftime('%A')
         )
         by
-        %b= link_to @loan.applied_by.name, resource(@loan.applied_by) if @loan.applied_by
+        %b= link_to_with_rights @loan.applied_by.name, resource(@loan.applied_by) if @loan.applied_by
     %tr
       %th.even{ :width => '30%', :rowspan => "2" } Sanction
       %td
@@ -53,7 +53,7 @@
           = @loan.approved_on.strftime('%A')
           )
           by
-          %b= link_to @loan.approved_by.name, resource(@loan.approved_by) if @loan.approved_by
+          %b= link_to_with_rights @loan.approved_by.name, resource(@loan.approved_by) if @loan.approved_by
         - else
           %i approval is pending
 
@@ -74,7 +74,7 @@
           = @loan.disbursal_date.strftime('%A')
           )
           by
-          %b= link_to @loan.disbursed_by.name, resource(@loan.disbursed_by) if @loan.disbursed_by
+          %b= link_to_with_rights @loan.disbursed_by.name, resource(@loan.disbursed_by) if @loan.disbursed_by
         - else
           to be disbursed on
           = @loan.scheduled_disbursal_date
@@ -92,7 +92,7 @@
     %tr
       %th.even Product
       %td
-        = link_to @loan.loan_product.name, resource(@loan.loan_product)
+        = link_to_with_rights @loan.loan_product.name, resource(@loan.loan_product)
         %br
         = @loan.loan_product.repayment_style.name if @loan.loan_product.repayment_style
     %tr
@@ -169,7 +169,7 @@
           = st.to_s.gsub('_', ' ')
         - if @status == :written_off
           by
-          %b= link_to @loan.written_off_by.name, resource(@loan.written_off_by)
+          %b= link_to_with_rights @loan.written_off_by.name, resource(@loan.written_off_by)
     %tr
       %th.odd
         Loan Assignment Status
@@ -196,7 +196,7 @@
     %div.tab
       %h2 
         Repayment schedule
-        = link_to "Download pdf", url(:action =>'repayment_sheet', :controller => 'loans', :format => "pdf", :id =>@loan.id), :style => "float: right; margin-right: 25px", :class => "button"
+        = link_to_with_rights "Download pdf", url(:action =>'repayment_sheet', :controller => 'loans', :format => "pdf", :id =>@loan.id), :style => "float: right; margin-right: 25px", :class => "button"
       %table{ :style => 'width:98%; margin: auto' }
         %thead
           %tr{:style => "box-shadow: 0px 2px 2px #cfcfcf; -moz-box-shadow: 0px 2px 2px #cfcfcf;"}
@@ -267,7 +267,7 @@
           %tr
             %td{ :colspan => 7 }
     %div.tab
-      %h2== Repayments #{link_to 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
+      %h2== Repayments #{link_to_with_rights 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
       - if @payments.blank?
         %p
           %i No repayments have been made so far.

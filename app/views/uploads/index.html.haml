@@ -1,6 +1,6 @@
 %h1 Uploads
 .menu-strip
-  = link_to 'new', resource(:uploads, :new), :class => 'add'
+  = link_to_with_rights 'new', resource(:uploads, :new), :class => 'add'
 %table.narrow.shaded
   %tr
     %th
@@ -28,6 +28,6 @@
       %td
         = Checker.all(:upload_id => upload.id, :ok => false).count
       %td
-        = link_to "Details", resource(upload)
+        = link_to_with_rights "Details", resource(upload)
         |
-        = link_to "Continue", url(:continue_upload, :id => upload.id)
+        = link_to_with_rights "Continue", url(:continue_upload, :id => upload.id)

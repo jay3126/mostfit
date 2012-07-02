@@ -25,7 +25,7 @@
       - clients.each do |client|
         %tr{:class => cycle('odd','')}
           %td
-            = link_to client.name, resource(@branch, @center, client)
+            = link_to_with_rights client.name, resource(@branch, @center, client)
           %td
             = text_field :name => "loans[#{client.id}][:amount]"
           %td

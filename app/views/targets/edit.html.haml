@@ -7,6 +7,6 @@
   %p
     = submit "Update"
 
-= link_to 'Show', url(:target, @target)
+= link_to_with_rights 'Show', url(:target, @target)
 |
-= link_to 'Back', url(:targets)
+= link_to_with_rights 'Back', url(:targets)

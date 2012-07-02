@@ -1,7 +1,7 @@
 %h1
   Audit Items
 
-= link_to 'New Audit Item', url(:new_audit_item), :class => "add"
+= link_to_with_rights 'New Audit Item', url(:new_audit_item), :class => "add"
 
 %p
   - if @audit_items.blank?
@@ -19,7 +19,7 @@
       - for audit_item in @audit_items
         %tr{:class => cycle('odd','even')}
           %td
-            = link_to audit_item.object.name, resource(audit_item.object)
+            = link_to_with_rights audit_item.object.name, resource(audit_item.object)
           %td
             = audit_item.due_on
           %td
@@ -29,7 +29,7 @@
           %td.numeric
             = Comment.for(audit_item).count
           %td
-            = link_to 'Show', url(:audit_item, audit_item)
+            = link_to_with_rights 'Show', url(:audit_item, audit_item)
             |
-            = link_to 'Edit', url(:edit_audit_item,  audit_item)
+            = link_to_with_rights 'Edit', url(:edit_audit_item,  audit_item)
 

@@ -14,6 +14,6 @@
     No fees is applicable on this client type.
   
 %br
-  = link_to 'Edit',  url(:edit_client_type,  @client_type), :class => "grey_button"
+  = link_to_with_rights 'Edit',  url(:edit_client_type,  @client_type), :class => "grey_button"
   &nbsp;&nbsp;&nbsp;
-  = link_to 'Back', url(:client_types), :class => "grey_button"
+  = link_to_with_rights 'Back', url(:client_types), :class => "grey_button"

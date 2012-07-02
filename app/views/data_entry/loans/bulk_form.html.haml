@@ -84,7 +84,7 @@
           - clients.each do |client|
             %tr
               %td
-                = link_to client.id, resource(client)
+                = link_to_with_rights client.id, resource(client)
               %td
                 = client.reference
               %td
