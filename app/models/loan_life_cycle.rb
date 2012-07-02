@@ -9,22 +9,27 @@ module LoanLifeCycle
     LoanLifeCycle.is_approved_status?(current_loan_status)
   end
 
+  def is_disbursed?
+    LoanLifeCycle.is_disbursed_status?(current_loan_status)
+  end
+
+  def is_outstanding?
+    LoanLifeCycle.is_outstanding_status?(current_loan_status)
+  end
+
+  def is_repaid?
+    LoanLifeCycle.is_repaid_status?(current_loan_status)
+  end
+
+  # Use the below to test status in general
   def self.is_approved_status?(status)
     validate_status(status)
     (status == APPROVED_LOAN_STATUS) or is_disbursed_status?(status)
   end
   
-  def is_disbursed?
-    LoanLifeCycle.is_disbursed_status?(current_loan_status)
-  end
-
   def self.is_disbursed_status?(status)
     validate_status(status)
     LOAN_STATUSES.index(status) >= LOAN_STATUSES.index(DISBURSED_LOAN_STATUS)
-  end
-
-  def is_outstanding?
-    LoanLifeCycle.is_outstanding_status?(current_loan_status)
   end
   
   def self.is_outstanding_status?(status)
@@ -32,10 +37,6 @@ module LoanLifeCycle
     (status == DISBURSED_LOAN_STATUS)    
   end
   
-  def is_repaid?
-    LoanLifeCycle.is_repaid_status?(current_loan_status)
-  end
-
   def self.is_repaid_status?(status)
     validate_status(status)
     status == REPAID_LOAN_STATUS
@@ -53,6 +54,8 @@ module LoanLifeCycle
   CANCELLED_LOAN_STATUS = :cancelled_loan_status
   REPAID_LOAN_STATUS    = :repaid_loan_status
 
+  LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
+
   REPAID_IN_FULL = :repaid_in_full
   PRECLOSED      = :preclosed
   REPAID_SHORT   = :repaid_short
@@ -63,8 +66,6 @@ module LoanLifeCycle
     Constants::Transaction::LOAN_REPAYMENT => REPAID_IN_FULL,
     Constants::Transaction::LOAN_PRECLOSURE => PRECLOSED
   }
-
-  LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
 
   STATUSES_DATES_SUM_AMOUNTS = {
     :applied => [NEW_LOAN_STATUS, :applied_on_date, :applied_amount.sum],

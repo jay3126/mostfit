@@ -322,12 +322,12 @@ class Lending
     previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_dates)
     next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_dates)
 
-    interim_interest = scheduled_interest_outstanding(previous_schedule_date) - scheduled_interest_outstanding(next_schedule_date)
+    ios_earlier = scheduled_interest_outstanding(previous_schedule_date)
+    ios_later = scheduled_interest_outstanding(next_schedule_date)
 
-    fractional_days_left = (on_date - previous_schedule_date)/(next_schedule_date - previous_schedule_date)
-    interim_interest * fractional_days_left
+    Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, previous_schedule_date, next_schedule_date, on_date)
   end
-
+  
   def get_scheduled_amortization(on_date)
     #TODO determine what is to be done before the scheduled first repayment date for amortization
     return nil if on_date < scheduled_first_repayment_date
