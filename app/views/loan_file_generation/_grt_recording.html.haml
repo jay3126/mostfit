@@ -13,7 +13,7 @@
         %td
           = "Completed by"
         %td
-          = select :name => "grt_completed_by", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+          = select :name => "grt_completed_by", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.all_staff_at_location(@center.id,get_effective_date()), :prompt => "Select staff member"
       %tr
         %th
           %b

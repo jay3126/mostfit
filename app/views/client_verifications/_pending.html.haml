@@ -59,7 +59,7 @@
                     %td
                       = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                     %td
-                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => StaffMember.all, :prompt => "Select staff member"
+                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.all_staff_at_location(@center.id,get_effective_date()), :prompt => "Select staff member"
                   - else
                     %td{:colspan => 2,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
