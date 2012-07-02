@@ -14,7 +14,8 @@
             %td
               Payment Type
             %td
-              = select :name => "payment_type", :collection => Constants::Transaction::RECEIVED_OR_PAID.collect{|s| s.to_s}
+              = Constants::Transaction::RECEIPT.humanize
+              = hidden_field :name => "payment_type", :value => Constants::Transaction::RECEIPT
           %tr
             %td
               Payment Date

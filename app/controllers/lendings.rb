@@ -215,12 +215,7 @@ class Lendings < Application
     @lending         = Lending.get params[:id]
     payment_amount   = params[:payment_amount]
     payment_type     = params[:payment_type]
-    payment_towards  = nil
-    if payment_type == Constants::Transaction::PAYMENT
-      payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT
-    elsif payment_type == Constants::Transaction::RECEIPT
-      payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
-    end
+    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
     payment_date     = params[:payment_date]
     payment_by_staff = params[:payment_by_staff]
 
