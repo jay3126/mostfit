@@ -207,7 +207,6 @@ class Lendings < Application
   end
 
   def create_repayment_on_lending
-
     # INITIALIZING OF VARIABLES USED THROUGHTOUT
     @message = {}
 
@@ -224,7 +223,6 @@ class Lendings < Application
     @message[:error] = "Please enter valid value of amount" if payment_amount.to_f <= 0
 
     #OPREATION
-
     if @message[:error].blank?
       begin
         money_amount    = MoneyManager.get_money_instance(payment_amount)
@@ -236,11 +234,7 @@ class Lendings < Application
     end
     
     #REDIRECT/RENDER
-    if @message[:error].blank?
-      redirect resource(:payment_transactions, :lending_ids => [@lending.id]), :message => @message
-    else
-      redirect resource(@lending), :message => @message
-    end
+    redirect url("lendings/#{params[:id]}"), :message => @message
   end
 
   def lending_status_history
