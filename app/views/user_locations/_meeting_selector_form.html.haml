@@ -16,7 +16,7 @@
         = link_to_with_rights "next meeting", url(:controller => :user_locations, :action=> :weeksheet_collection, :id => @biz_location.id, :date => @next_meeting.on_date)
   %tr
     %td= "center manager"
-    %td= @weeksheet.by_staff_member_name
+    %td= @weeksheet.by_staff_member_name rescue nil
     %td
       %form{ :action => url(:controller => :user_locations, :acition=> :weeksheet_collection, :id => @biz_location.id) + '#weeksheet', :method => 'GET', :style => 'margin: 0px; padding: 0px;'  }
         = date_select 'date', @date

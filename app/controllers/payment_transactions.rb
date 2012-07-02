@@ -29,12 +29,10 @@ class PaymentTransactions < Application
 
   def create_group_payments
     # INITIALIZING VARIABLES USED THROUGHTOUT
-
     @message = {}
     @payment_transactions = []
 
     # GATE-KEEPING
-
     currency     = params[:payment_transactions][:currency]
     receipt      = params[:payment_transactions][:receipt_type]
     performed_at = params[:payment_transactions][:performed_at]
@@ -43,45 +41,55 @@ class PaymentTransactions < Application
     recorded_by  = params[:payment_transactions][:recorded_by]
     effective_on = params[:payment_transactions][:effective_on]
     payments     = params[:payment_transactions][:payments]
-    
-    # VALIDATIONS
 
+    # VALIDATIONS
+    @message[:error] = "Performed by must not be blank" if performed_by.blank?
 
     # OPERATIONS PERFORMED
     if @message[:error].blank?
       begin
         payments.each do |key, payment_value|
           amount       = payment_value[:amount]
-          money_amount = MoneyManager.get_money_instance(amount)
+          money_amount = MoneyManager.get_money_instance_least_terms(amount.to_i)
           payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
           cp_type      = payment_value[:counterparty_type]
           cp_id        = payment_value[:counterparty_id]
           product_type = payment_value[:product_type]
           product_id   = payment_value[:product_id]
-          payment_transaction = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency,
-            :on_product_type => product_type, :on_product_id => product_id,
-            :performed_at => performed_at, :accounted_at => accounted_at,
-            :performed_by => performed_by, :recorded_by => recorded_by,
-            :by_counterparty_type => cp_type, :by_counterparty_id => cp_id,
-            :receipt_type => receipt, :payment_towards => payment_towards, :effective_on => effective_on)
-          if payment_transaction.valid?
-            @payment_transactions << payment_transaction
-          else
-            @message[:error]= "#{@message[:error]}  #{product_type}(#{product_id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
+          if money_amount.amount > 0
+            payment_transaction = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency,
+              :on_product_type => product_type, :on_product_id => product_id,
+              :performed_at => performed_at, :accounted_at => accounted_at,
+              :performed_by => performed_by, :recorded_by => recorded_by,
+              :by_counterparty_type => cp_type, :by_counterparty_id => cp_id,
+              :receipt_type => receipt, :payment_towards => payment_towards, :effective_on => effective_on)
+            if payment_transaction.valid?
+              if payment_facade.is_loan_payment_permitted?(payment_transaction)
+                @payment_transactions << payment_transaction
+              else
+                @message[:error]= "#{@message[:error]}  #{product_type}(#{product_id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
+              end
+            end
           end
         end
+
         @payment_transactions.each do |pt|
-          payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
+          begin
+            money_amount = MoneyManager.get_money_instance_least_terms(pt.amount.to_i)
+            payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
+            @message = {:notice => "Payment successfully created"}
+          rescue => ex
+            @message = {:error => "An error has occured: #{ex.message}"}
+          end
         end
+
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}
       end
     end
-    #REDIRECT/RENDER
-    if @message[:error].blank?
-      redirect resource(:payment_transactions, :lending_ids => @payment_transactions.map(&:on_product_id) ), :message => @message
-    else
-      redirect resource(:payment_transactions, :biz_location_id => performed_at, :date => effective_on)
-    end
+
+    # REDIRECT/RENDER
+    redirect resource(:payment_transactions, :weeksheet_payments, :biz_location_id => performed_at, :date => effective_on), :message => @message
   end
+  
 end

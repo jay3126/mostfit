@@ -49,7 +49,7 @@
         - if @weeksheet.blank?
           Today don't have any repayments
         - else
-          =partial "user_locations/weeksheet_collection_list"
+          = partial "user_locations/weeksheet_collection_list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
   %div.tab
