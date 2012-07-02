@@ -1,6 +1,7 @@
 class BizLocation
   include DataMapper::Resource
   include Identified
+  include Pdf::LoanSchedule if PDF_WRITER
   
   property :id,         Serial
   property :name,       String, :nullable => false

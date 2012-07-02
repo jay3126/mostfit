@@ -110,4 +110,21 @@ class UserLocations < Application
     @biz_location_eod[:Surprise_center_visits] = ''
     partial 'location_eod_summary'
   end
+
+  def pdf_on_biz_location
+    file     = ''
+    pdf_type = params[:pdf_type]
+    biz_location = BizLocation.get params[:id]
+    date         = params[:date].blank?? get_effective_date : params[:date]
+    raise NotFound unless biz_location
+    if pdf_type == 'disbursement_labels'
+      file = biz_location.generate_disbursement_labels_pdf(session.user.id, date)
+    end
+
+    if file.blank?
+      redirect request.referer, :message => {:error => "Pdf cannot generate that time"}
+    else
+      send_data(file.to_s, :filename => "disbursement_labels_#{biz_location.name}.pdf")
+    end
+  end
 end

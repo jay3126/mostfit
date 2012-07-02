@@ -65,26 +65,32 @@ module Pdf
       return pdf
     end
 
-    def generate_disbursement_labels_pdf
-      loan_applications = self.loan_applications
-      pdf =  PDF::QuickRef.new("LETTER", 2)
+    def generate_disbursement_labels_pdf(user_id, on_date)
+      loan_facade    = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, user_id)
+      meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
+      lendings       = loan_facade.get_loans_at_location(self, on_date)
+      pdf            = PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 12
       pdf.h1_font_size = 11
-      count = 0
-      loan_applications.each do |la|
-        count = count + 1
-        center = Center.get(la.at_center_id)
-        start_date = la.loan.loan_history.first.date.strftime('%d/%m/%Y') rescue ''
-        end_date = la.loan.loan_history.last.date.strftime('%d/%m/%Y') rescue ''
-        disburse_date = la.loan.scheduled_disbursal_date.strftime('%d/%m/%Y') rescue ''
-        loan_purpose = la.loan.loan_purpose rescue ''
+      count   = 0
+      meeting = meeting_facade.get_meeting(self, on_date)
+      lendings.each do |la|
+        count         = count + 1
+        start_date    = la.scheduled_first_repayment_date rescue ''
+        end_date      = la.last_scheduled_date rescue ''
+        disburse_date = la.scheduled_disbursal_date rescue ''
+        loan_purpose  = la.loan_purpose.to_s rescue ''
         pdf.h1 "<b>Purpose of Loan</b>                   #{loan_purpose}"
         pdf.h1 "<b>Name</b>                                     #{la.client_name}"
         pdf.h1 "<b>Gtr. Name</b>                             #{la.client_guarantor_name}"
-        pdf.h1 "<b>Center Name</b>                         #{center.name}"
-        pdf.h1 "<b>Meeting Address</b>                   #{center.address}"
-        pdf.h1 "<b>Meeting Day / Time</b>              #{center.meeting_day}/#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"
-        pdf.h1 "<b>Disbursal Date</b>        #{disburse_date}        <b>Loan A/c. No.</b>       #{la.loan.id}"
+        pdf.h1 "<b>Center Name</b>                         #{self.name}"
+        pdf.h1 "<b>Meeting Address</b>                   #{}"
+        if meeting.blank?
+          pdf.h1 "<b>Meeting Day / Time</b>              No Meeting"
+        else
+          pdf.h1 "<b>Meeting Day / Time</b>              #{on_date}/#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+        end
+        pdf.h1 "<b>Disbursal Date</b>        #{disburse_date}        <b>Loan A/c. No.</b>       #{la.lan}"
         pdf.h1 "<b>Start Date</b>                #{start_date}        <b>End Date</b>               #{end_date}"
         pdf.body "\n"
         pdf.body "\n" if count%5 == 0

@@ -6,6 +6,7 @@
 
 
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
+= link_to "Pdf of Disbursement label", url(:contorller => :user_locations, :action => :generate_disbursement_labels, :id => @biz_location.id), :class => 'add grey_button'
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name
@@ -34,6 +35,8 @@
       Meeting
     %li#MeetingSchedule
       Meeting Schedule
+    %li#pdf
+      Pdf
     %li#History
       History
   %div.tab
@@ -56,3 +59,4 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
   %div.tab
+    = partial 'user_locations/pdf_on_biz_location'

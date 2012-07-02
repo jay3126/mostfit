@@ -1,0 +1,18 @@
+%br
+= form_for(:user_locations, :action => url(:controller => :user_locations, :action=> :pdf_on_biz_location, :id => @biz_location.id)) do
+  %table.shaded
+    %tr
+      %th
+        Date
+      %td
+        = date_select 'date', Date.today
+    %tr
+      %th
+        Pdf
+      %td
+        Disbursement Labels
+        = radio_button :name => 'pdf_type', :value => 'disbursement_labels'
+        Disbursement Loan
+        = radio_button :name => 'pdf_type', :value => 'Disbursement Loan'
+  = submit "Pdf Generate", :class => "grey_button"
+  = link_to 'Cancel', params[:return], :class => "grey_button"
