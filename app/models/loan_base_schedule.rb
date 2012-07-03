@@ -202,7 +202,7 @@ class BaseScheduleLineItem
     first_disbursed_on        = base_schedule.first_disbursed_on
     repayment_frequency       = base_schedule.frequency
 
-    disbursement = get_instance(0, first_disbursed_on, DISBURSEMENT, 0, 0, 0, 0, currency)
+    disbursement = get_instance(0, first_disbursed_on, DISBURSEMENT, total_loan_disbursed, 0, total_interest_applicable, 0, currency)
     schedule_line_items << disbursement
 
     repayment_on                    = base_schedule.first_receipt_on
