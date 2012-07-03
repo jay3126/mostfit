@@ -2,7 +2,7 @@ class LocationLevels < Application
 
   def index
     @location_levels = LocationLevel.all
-    level            =  LocationLevel.level_number_for_new
+    level            = LocationLevel.level_number_for_new
     @location_level  = LocationLevel.new(:level => level)
     display @location_levels
   end
@@ -24,10 +24,10 @@ class LocationLevels < Application
 
     # VALIDATIONS
 
-    message[:error] = "Location Level cannot be blank !" if l_level.blank?
-    message[:error] = "Location Level is not valid !" unless l_level == LocationLevel.level_number_for_new
-    message[:error] = "Location Name cannot be blank !" if l_name.blank?
-    message[:error] = "Creation Date cannot be blank !" if l_creation_date.blank?
+    message[:error] = "Location Level cannot be blank" if l_level.blank?
+    message[:error] = "Location Level is not valid" unless l_level == LocationLevel.level_number_for_new
+    message[:error] = "Location Name cannot be blank" if l_name.blank?
+    message[:error] = "Creation Date cannot be blank" if l_name.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
