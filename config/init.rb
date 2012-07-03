@@ -147,7 +147,7 @@ Merb::BootLoader.after_app_loads do
 
   begin
     if LocationLevel.all(:level => 0).empty?
-      location_level = LocationLevel.new(:name => 'Center', :level => 0)
+      location_level = LocationLevel.new(:name => 'Center', :level => 0, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
       if location_level.save
         Merb.logger.info("The initial #{location_level.class} #{location_level.name} with level #{location_level.level} was created")
       else
