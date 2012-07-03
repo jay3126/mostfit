@@ -2,8 +2,8 @@ class LocationLevels < Application
 
   def index
     @location_levels = LocationLevel.all
-    level = LocationLevel.level_number_for_new
-    @location_level = LocationLevel.new(:level => level)
+    level            =  LocationLevel.level_number_for_new
+    @location_level  = LocationLevel.new(:level => level)
     display @location_levels
   end
 
@@ -32,11 +32,11 @@ class LocationLevels < Application
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        location_level = LocationLevel.new(:level => l_level, :name => l_name, :creation_date => l_creation_date)
-        if location_level.save
-          message = {:notice => "Location Level successfully created"}
+        location_level = LocationLevel.create_next_level(l_name, l_creation_date)
+        if location_level.new?
+          message = {:notice => "Location Level creation fail"}
         else
-          message = {:error => location_level.errors.collect{|error| error}.flatten.join(', ')}
+          message = {:notice => "Location Level successfully created"}
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}

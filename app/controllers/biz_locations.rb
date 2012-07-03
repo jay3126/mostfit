@@ -2,8 +2,8 @@ class BizLocations < Application
 
   def index
     @location_levels = LocationLevel.all
-    @biz_locations = BizLocation.all.group_by{|c| c.location_level.level}
-    @biz_location = BizLocation.new()
+    @biz_locations   = BizLocation.all.group_by{|c| c.location_level.level}
+    @biz_location    = BizLocation.new()
     display @location_levels
   end
 
@@ -23,18 +23,18 @@ class BizLocations < Application
 
     # VALIDATIONS
 
-    message[:error] = "Please select Location Level !" if b_level.blank?
-    message[:error] = "Name cannot be blank !" if b_name.blank?
+    message[:error] = "Name cannot be blank" if b_name.blank?
+    message[:error] = "Please select Location Level" if b_level.blank?
+    message[:error] = "Creation Date cannot blank" if b_creation_date.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        location_level = LocationLevel.get b_level
-        biz_location = location_level.biz_locations.new(:name => b_name, :creation_date => b_creation_date)
-        if biz_location.save
-          message = {:notice => " Location successfully created"}
+        biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i)
+        if biz_location.new?
+          message = {:notice => "Location creation fail"}
         else
-          message = {:error => biz_location.errors.collect{|error| error}.flatten.join(', ')}
+          message = {:notice => " Location successfully created"}
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
@@ -47,11 +47,11 @@ class BizLocations < Application
   end
 
   def show
-    @biz_location = BizLocation.get params[:id]
-    @biz_locations = LocationLink.all(:parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
-    location_level = LocationLevel.first(:level => (@biz_location.location_level.level - 1))
+    @biz_location     = BizLocation.get params[:id]
+    @biz_locations    = LocationLink.all(:parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
+    location_level    = LocationLevel.first(:level => (@biz_location.location_level.level - 1))
     @parent_locations = BizLocation.all_locations_at_level(@biz_location.location_level.level)
-    @child_locations = location_level.blank? ? [] : BizLocation.all_locations_at_level(location_level.level)
+    @child_locations  = location_level.blank? ? [] : BizLocation.all_locations_at_level(location_level.level)
     display @biz_location
   end
 
@@ -64,21 +64,22 @@ class BizLocations < Application
 
     # GATE-KEEPING
 
-    p_location = params[:parent_location]
-    c_location = params[:child_location]
-    date = Date.parse(params[:begin_date])
+    p_location    = params[:parent_location]
+    c_location    = params[:child_location]
+    creation_date = Date.parse(params[:begin_date])
 
     # VALIDATIONS
 
-    message[:error] = "Please select Parent Location !" if p_location.blank?
-    message[:error] = "Please select Child Location !" if c_location.blank?
+    message[:error] = "Please select Parent Location" if p_location.blank?
+    message[:error] = "Please select Child Location" if c_location.blank?
+    message[:error] = "Creation Date cannot blank" if creation_date.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
         parent = BizLocation.get p_location
-        child = BizLocation.get c_location
-        if LocationLink.assign(child, parent, date)
+        child  = BizLocation.get c_location
+        if location_facade.assign(child, parent, creation_date)
           message = {:notice => " Location Mapping successfully created"}
         else
           message = {:error => "Save Location Mapping fail"}
@@ -98,7 +99,7 @@ class BizLocations < Application
 
   def biz_location_clients
     @biz_location = BizLocation.get params[:id]
-    @clients = ClientAdministration.get_clients_administered(@biz_location.id, Date.today)
+    @clients      = client_facade.get_clients_administered(@biz_location.id, get_effective_date)
     display @clients
   end
 
