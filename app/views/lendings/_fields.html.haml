@@ -37,6 +37,11 @@
       = text_field :lan
   %tr
     %th
+      Loan Purpose
+    %td
+      = select :name => "lending[loan_purpose]", :collection => LoanPurpose.all.map{|lp| [lp.id, lp.name]}
+  %tr
+    %th
       Applied Date
     %td
       = date_select_for @lending, 'applied_on_date'
