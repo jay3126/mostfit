@@ -38,8 +38,14 @@ module BookKeeper
     Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation)
   end
 
+  def self.can_accrue_on_loan_on_date?(loan, on_date)
+    loan.is_outstanding_on_date?(on_date) and
+      (on_date >= loan.scheduled_first_repayment_date) and
+      (on_date >  loan.disbursal_date_value)
+  end
+
   def accrue_all_receipts_on_loan(loan, on_date)
-    return unless loan.is_outstanding_on_date?(on_date)
+    return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
     if (loan.schedule_date?(on_date))
       # only accrue regular interest receipts for loans that are scheduled to repay on_date
       accrue_regular_receipts_on_loan(loan, on_date)
@@ -51,7 +57,7 @@ module BookKeeper
   end
 
   def accrue_regular_receipts_on_loan(loan, on_date)
-    return unless loan.schedule_date?(on_date)
+    return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
     amortization_on_date = loan.get_scheduled_amortization(on_date)
     amortization = amortization_on_date.values.first
     scheduled_principal_due = amortization[SCHEDULED_PRINCIPAL_DUE]
@@ -68,6 +74,7 @@ module BookKeeper
   end
 
   def accrue_broken_period_interest_receipts_on_loan(loan, on_date)
+    return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
     broken_period_interest = loan.broken_period_interest_due(on_date)
     accrual_temporal_type = ACCRUE_BROKEN_PERIOD
     receipt_type = RECEIPT

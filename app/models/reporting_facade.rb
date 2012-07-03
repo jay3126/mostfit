@@ -47,6 +47,10 @@ class ReportingFacade < StandardFacade
     all_loan_ids_grouped_by_location
   end
 
+  def all_outstanding_loans_on_date(on_date = Date.today)
+    Lending.all.select{|loan| loan.is_outstanding_on_date?(on_date)}
+  end
+
   # Outstanding loan balances
 
   def sum_all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
