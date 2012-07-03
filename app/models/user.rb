@@ -29,16 +29,7 @@ class User
   has n, :audit_trail, :model => 'AuditTrail'
   
   def role
-    self.get_user_role
-  end
-
-  def get_user_role
-    if self.staff_member
-      staff_member_designation = self.staff_member.designation
-      if staff_member_designation
-        return staff_member_designation.role_class
-      end
-    end
+    self.staff_member ? self.staff_member.role : nil
   end
 
   def allow_route?(route, params)

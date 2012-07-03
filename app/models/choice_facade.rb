@@ -9,6 +9,11 @@ class ChoiceFacade < StandardFacade
     LocationLevel.levels_that_support_designations
   end
 
+  # This is a list of staff members that are in the SUPPORT role at a given location on the specified date
+  def support_staff_at_location(location_id, on_date = Date.today)
+    user_facade.support_staff_at_location(location_id, on_date)
+  end
+
   # This is a list of all staff at the particular location on the specified date
   def all_staff_at_location(location_id, on_date = Date.today)
     user_facade.all_staff_at_location(location_id, on_date)

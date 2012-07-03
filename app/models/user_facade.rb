@@ -25,6 +25,10 @@ class UserFacade
   # QUERIES # on user end
   ###########
 
+  def support_staff_at_location(location_id, on_date = Date.today)
+    user_manager.support_staff_at_location(location_id, on_date)
+  end
+
   def all_staff_at_location(location_id, on_date = Date.today)
     user_manager.all_staff_at_location(location_id, on_date)
   end

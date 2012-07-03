@@ -31,7 +31,7 @@ class UserManager
     all_users = User.all
     operator = nil
     all_users.each { |user|
-      operator = user if user.get_user_role == OPERATOR
+      operator = user if user.role == OPERATOR
       break if operator
     }
     operator
@@ -90,6 +90,10 @@ class UserManager
     staff_member_to_exclude = get_staff_member(staff_member_id)
     all_staff_that_can_manage = staff_that_can_manage_specific_location(location_id, on_date)
     all_staff_that_can_manage.empty? ? [] : all_staff_that_can_manage - [staff_member_to_exclude]
+  end
+
+  def support_staff_at_location(location_id, on_date = Date.today)
+    StaffMember.all.select {|staff| staff.role == Constants::User::SUPPORT}
   end
 
 end
