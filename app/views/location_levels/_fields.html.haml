@@ -8,4 +8,8 @@
       Name
     %td
       = text_field :name
+    %th
+      Creation Date
+    %td
+      = date_select 'location_level[creation_date]', Constants::Time::EARLIEST_DATE_OF_OPERATION, {:id => 'creation_date'}
 

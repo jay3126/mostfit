@@ -20,7 +20,6 @@ class NewClients < Application
     else
       display @client
     end
-    
   end
 
   def create
@@ -61,7 +60,6 @@ class NewClients < Application
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
 
-
     # VALIDATIONS
 
     # OPERATIONS PERFORMED
@@ -95,7 +93,6 @@ class NewClients < Application
     else
       render :new
     end
-
   end
 
   def edit
@@ -169,15 +166,13 @@ class NewClients < Application
     else
       render :edit
     end
-
-  end
-
-  def distory
   end
 
   def show
     @client       = Client.get params[:id]
-    @client_admin = client_facade.get_administration_on_date(@client, @client.date_joined)
+    date_joined   = @client.date_joined
+    client_administration_on_date = get_effective_date ? [get_effective_date, date_joined].max : date_joined
+    @client_admin = client_facade.get_administration_on_date(@client, client_administration_on_date)
     @biz_location = @client_admin.administered_at_location
     @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client).compact
     display @client

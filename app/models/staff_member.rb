@@ -42,6 +42,9 @@ class StaffMember
   validates_length :name, :min => 3
 
   def created_on; creation_date; end
+  def role
+    self.designation ? self.designation.role_class : nil
+  end
 
   def self.search(q, per_page)
     if /^\d+$/.match(q)

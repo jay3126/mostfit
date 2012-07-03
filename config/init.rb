@@ -147,7 +147,7 @@ Merb::BootLoader.after_app_loads do
 
   begin
     if LocationLevel.all(:level => 0).empty?
-      location_level = LocationLevel.new(:name => 'Center', :level => 0)
+      location_level = LocationLevel.new(:name => 'Center', :level => 0, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
       if location_level.save
         Merb.logger.info("The initial #{location_level.class} #{location_level.name} with level #{location_level.level} was created")
       else
@@ -159,6 +159,22 @@ Merb::BootLoader.after_app_loads do
     end
   rescue
     Merb.logger.info("Couldn't create the 'Center' Location Level, possibly unable to access the database.")
+  end
+
+  begin
+    if LocationLevel.all(:level => 1).empty?
+      location_level = LocationLevel.new(:name => 'Branch', :level => 1, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
+      if location_level.save
+        Merb.logger.info("The initial #{location_level.class} #{location_level.name} with level #{location_level.level} was created")
+      else
+        Merb.logger.info("Could not create the #{location_level.name} #{location_level.class}...")
+        location_level.errors do |e|
+          Merb.logger.info(e)
+        end
+      end
+    end
+  rescue
+    Merb.logger.info("Couldn't create the 'Branch' Location Level, possibly unable to access the database.")
   end
 
   begin

@@ -40,9 +40,9 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :staff_postings, :action => :index, :biz_location_id => @biz_location.id, :location_level => @biz_location.location_level.level)}
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id)}
+  - if @biz_location.is_nominal_branch?
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id)}
   %div.tab

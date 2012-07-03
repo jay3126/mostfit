@@ -55,9 +55,6 @@
       %tfoot
         %tr
           %td
-            %b Loan Application created by
-            = select :created_by_staff_id, :text_method => :name, :value_method => :id, :collection => choice_facade.all_staff_at_location(@center.id,get_effective_date()), :prompt => "Select staff member"
-          %td
             = submit 'Update', :class => "grey_button"
           %td
             = link_to_with_rights 'Cancel',"/loan_applications/#{@loan_application.id}", :class => "grey_button"

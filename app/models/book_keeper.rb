@@ -39,7 +39,7 @@ module BookKeeper
   end
 
   def accrue_all_receipts_on_loan(loan, on_date)
-    return if ((on_date < loan.scheduled_first_repayment_date) or (on_date > loan.last_scheduled_date))
+    return unless loan.is_outstanding_on_date?(on_date)
     if (loan.schedule_date?(on_date))
       # only accrue regular interest receipts for loans that are scheduled to repay on_date
       accrue_regular_receipts_on_loan(loan, on_date)
