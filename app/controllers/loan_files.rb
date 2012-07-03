@@ -116,11 +116,14 @@ class LoanFiles < Application
     scheduled_disbursal_date = params[:scheduled_disbursal_date]
     scheduled_first_payment_date = params[:scheduled_first_payment_date]
     created_by_staff_id = params[:created_by_staff_id]
+    is_grt_marked = CenterCycle.is_grt_marked?(params[:child_location_id])
+
     @errors << "Staff member must not be blank" if created_by_staff_id.blank?
     @errors << "Please select atleast one loan application" unless params.key?('selected')
     @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
     @errors << "Scheduled disbursal date must not be past date" if Date.parse(scheduled_disbursal_date) < Date.today
     @errors << "Scheduled First Payment date must not be past date" if Date.parse(scheduled_first_payment_date) < Date.today
+    @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
 
     #record the loan file first
     #was any data actually sent ?

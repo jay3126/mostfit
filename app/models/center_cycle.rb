@@ -104,4 +104,10 @@ class CenterCycle
     self.save
   end
 
+  # Return true if GRT passed fro particular center
+  def self.is_grt_marked?(center_id)
+    center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
+    center_cycle.grt_status == Constants::CenterFormation::GRT_PASSED ? true : false
+  end
+
 end
