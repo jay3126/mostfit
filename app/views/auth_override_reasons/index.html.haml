@@ -1,6 +1,6 @@
 %h1 Overview of all loan authorize override reasons
 .menu-strip{:style => "margin: 10px;"}
-  = link_to 'Create a new loan authorize override reason', url(:action=>:new), :class => "add"
+  = link_to_with_rights('Create a new loan authorize override reason', url(:action=>:new), :class => "add")
 
 - if @auth_override_reasons.blank?
   %p
@@ -25,9 +25,9 @@
           =auth_override_reason.active
         %td
           - if auth_override_reason.active
-            = link_to 'Deactivate', url(:action=>:change_state,:id=>auth_override_reason.id), :class => "add"
+            = link_to_with_rights 'Deactivate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add"
           - if !auth_override_reason.active
-            = link_to 'Activate', url(:action=>:change_state,:id=>auth_override_reason.id), :class => "add"
+            = link_to_with_rights 'Activate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add"
         %td    
           = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "add"
         %td  
