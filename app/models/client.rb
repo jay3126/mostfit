@@ -80,6 +80,7 @@ class Client
   validates_is_unique :reference2
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
+  validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
 
   def created_on; self.date_joined; end
 
