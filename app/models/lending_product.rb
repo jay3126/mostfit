@@ -78,4 +78,9 @@ class LendingProduct
     self.loan_schedule_template.total_interest_money_amount
   end
 
+  # Return all loan product for particular loan amount
+  def self.get_all_loan_product_for_loan_amount(loan_amount)
+    LendingProduct.all(:amount => loan_amount)
+  end
+
 end
