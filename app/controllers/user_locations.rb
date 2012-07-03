@@ -38,6 +38,8 @@ class UserLocations < Application
 
   def weeksheet_collection
     @biz_location = BizLocation.get params[:id]
+    center_cycle_no = CenterCycle.get_current_center_cycle params[:id]
+    @center_cycle =  CenterCycle.get_cycle(params[:id], center_cycle_no)
     @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
     set_effective_date(Date.today) if session[:effective_date].blank?
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
