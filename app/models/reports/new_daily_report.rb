@@ -12,11 +12,11 @@ class NewDailyReport < Report
   end
 
   def name
-    "New Daily Report for #{@date}"
+    "Daily Report for #{@date}"
   end
 
   def self.name
-    "New Daily Report"
+    "Daily Report"
   end
 
   def get_reporting_facade(user)

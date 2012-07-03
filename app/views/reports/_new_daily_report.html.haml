@@ -1,6 +1,4 @@
 = partial :form
-- @data
-- debugger
 %table.report.nojs
   %tr.header
     %th{:rowspan => 2}
@@ -11,6 +9,8 @@
       Repayment
     %th{:colspan => 3}
       Balance Outstanding
+    %th{:colspan => 2}
+      Advances
     %th{:colspan => 3}
       Balance Overdue
 
@@ -38,26 +38,60 @@
     %th
       Total
     %th
+      Received
+    %th
+      Adjusted
+    %th
       Principal
     %th
       Interest
     %th
       Total
--#
-  Content to be rendered once again using data
-  %tr.footer
-    %th
-      Total
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
+
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          %b
+            = BizLocation.get(branch).name
+        %td
+          = values[:loans_applied][:total_amount]
+        %td
+          = values[:loans_approved][:total_amount]
+        %td
+          = values[:loans_scheduled_for_disbursement][:total_amount]
+        %td
+          = values[:loans_disbursed][:total_amount]
+        %td
+          - payments = values[:loan_allocations].values[0]
+          = payments[:principal_received]
+        %td
+          = payments[:interest_received]
+        %td
+        %td
+          = payments[:total_received]
+        %td
+          - outstandings = values[:loan_balances].values[0]
+          = outstandings[:actual_principal_outstanding]
+        %td
+          = outstandings[:actual_interest_outstanding]
+        %td
+          = outstandings[:actual_total_outstanding]
+        %td
+          = outstandings[:advance_received_on_date]
+        %td
+          = outstandings[:advance_adjusted_on_date]
+        %td
+          - if (outstandings[:actual_principal_outstanding] > outstandings[:scheduled_principal_outstanding])
+            = outstandings[:actual_principal_outstanding] - outstandings[:scheduled_principal_outstanding]
+          - else
+            = outstandings[:scheduled_principal_outstanding] - outstandings[:actual_principal_outstanding]
+        %td
+          - if (outstandings[:actual_interest_outstanding] > outstandings[:scheduled_interest_outstanding])
+            = outstandings[:actual_interest_outstanding] - outstandings[:scheduled_interest_outstanding]
+          - else
+            = outstandings[:scheduled_interest_outstanding] - outstandings[:actual_interest_outstanding]
+        %td
+          - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
+            = outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding]
+          - else
+            = outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding]
