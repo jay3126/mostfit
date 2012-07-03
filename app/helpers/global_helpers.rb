@@ -35,12 +35,14 @@ module Merb
     end
 
     def link_to_with_rights(text, path, params = {}, method="GET")
-      uri = URI.parse(path)
+      uri = path.nil? ? '' : URI.parse(path)
       method = method.to_s.upcase || "GET"
+      uri_path = path.nil? ? '' : uri.path
+      uri_query = path.nil? ? '' : uri.query
       request = Merb::Request.new(
-        Merb::Const::REQUEST_PATH => uri.path,
+        Merb::Const::REQUEST_PATH => uri_path,
         Merb::Const::REQUEST_METHOD => method,
-        Merb::Const::QUERY_STRING => uri.query)
+        Merb::Const::QUERY_STRING => uri_query)
       route = Merb::Router.match(request)[1] rescue nil
       return link_to(text,path,params) if session.user.can_access?(route, params)
     end
