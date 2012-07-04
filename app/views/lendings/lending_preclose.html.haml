@@ -1,0 +1,33 @@
+%h1 Preclose loan
+.menu-strip
+  = form_for(@lending, :action => url(:controller => :lendings, :action => :lending_preclose)) do
+    %table
+      %tr
+        %td
+          Principal due
+        %td
+          = @lending.actual_principal_outstanding.to_s
+      %tr
+        %td
+          Interest due
+        %td
+          =  @lending.actual_interest_outstanding.to_s
+      %tr
+        %td
+          Preclosure penalty
+        %td
+          = "preclosure penalty textbox"
+      %tr
+        %td
+          Payment by Staff
+        %td
+          = "payment by staffmember drop down"
+      %tr
+        %td
+          Date
+        %td
+          = "Date field"
+      %tr
+        %td
+          = submit 'Preclose', :class => "greenButton"
+          = link_to 'Back', url("lendings/#{@lending.id}"), :class => "greenButton"

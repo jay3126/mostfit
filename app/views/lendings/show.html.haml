@@ -63,6 +63,9 @@
   %tr.even
     %th.even Accounted At
     %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
+  %tr.even
+    %td
+      = link_to_with_rights "Preclosue", url(:controller => :lendings, :action => :lending_preclose, :id => @lending.id), :class => "greenButton"
 
 %div.tab_container.shaded
   %ul.tabs
