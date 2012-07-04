@@ -39,6 +39,12 @@
           Fee
         %td
           = @lending_product.loan_fee.timed_amounts.first.total_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
+    - unless @lending_product.loan_preclosure_penalty.blank?
+      %tr.odd
+        %th.odd
+          Perclouser Penalty Fee
+        %td
+          = @lending_product.loan_preclosure_penalty.timed_amounts.first.total_money_amount.to_s unless @lending_product.loan_preclosure_penalty.timed_amounts.blank?
     - unless @lending_product.simple_insurance_products.blank?
       %tr.even
         %th.even

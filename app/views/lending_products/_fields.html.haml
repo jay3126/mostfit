@@ -53,12 +53,17 @@
     %th
       Fee Product
     %td
-      = select :name => 'loan_fee_id', :collection => SimpleFeeProduct.all.map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
+      = select :name => 'loan_fee_id', :collection => SimpleFeeProduct.all(:fee_charged_on_type => Constants::Transaction::FEE_CHARGED_ON_LOAN).map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
   %tr
     %th
       Insurance Products
     %td
       = select :name => 'insurance_product_id', :collection => SimpleInsuranceProduct.all.map{|ins| [ins.id, ins.name]}, :prompt => "Select Insurance"
+  %tr
+    %th
+      Preclosure Penalty
+    %td
+      = select :name => 'loan_preclosure_penalty_id', :collection => SimpleFeeProduct.all(:fee_charged_on_type => Constants::Transaction::PRECLOSURE_PENALTY_ON_LOAN).map{|fee| [fee.id, fee.name]}, :prompt => "Select Preclosure fee"
   %tr
     %th
       Repayment Allocation Strategy
