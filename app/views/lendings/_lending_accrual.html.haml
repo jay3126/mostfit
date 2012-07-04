@@ -12,40 +12,20 @@
     %thead
       %tr
         %th
-          id
+          Effective Date
         %th
           Accrual Allocation Type
         %th
           Accrual Temporal Type
         %th
           Amount
-        %th
-          Receipt Type
-        %th
-          Client
-        %th
-          Location
-        %th
-          Effective On
-        %th
-          Created At
     - @lending_accrual_transactions.each do |accrual_transaction|
       %tr
         %td
-          = accrual_transaction.id
+          = accrual_transaction.effective_on
         %td
           = accrual_transaction.accrual_allocation_type.humanize
         %td
           = accrual_transaction.accrual_temporal_type.humanize
         %td
           = accrual_transaction.to_money[:amount].to_s
-        %td
-          = accrual_transaction.receipt_type
-        %td
-          = accrual_transaction.counterparty.name
-        %td
-          = accrual_transaction.accounted_location.name
-        %td
-          = accrual_transaction.effective_on
-        %td
-          = accrual_transaction.created_at.strftime("%Y-%m-%d")

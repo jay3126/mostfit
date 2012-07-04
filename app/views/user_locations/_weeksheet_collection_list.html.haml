@@ -25,8 +25,6 @@
       %th
         Due Status
       %th
-        Days Past Due
-      %th
         Schedule Principal Due
       %th
         Actual Principal Outstanding
@@ -43,7 +41,7 @@
       %th
         Receipts Advance
       %th
-        Total
+        Total Due
   - @weeksheet.groups.each do |group|
     - loan_row_count = 0
     - biz_location = BizLocation.get @weeksheet.at_biz_location_id
@@ -67,8 +65,6 @@
           = ws.loan_schedule_date
         %td
           = ws.loan_due_status.to_s.humanize
-        %td
-          = ws.loan_days_past_due
         %td
           = ws.loan_schedule_principal_due.to_s
         %td

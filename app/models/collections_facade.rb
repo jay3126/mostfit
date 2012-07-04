@@ -40,7 +40,7 @@ class CollectionsFacade < StandardFacade
           loan_status                        = client_loan.current_loan_status
           loan_disbursal_date                = client_loan.disbursal_date
           loan_due_status                    = client_loan.current_due_status
-          loan_days_past_due                 = client_loan.days_past_due
+          loan_days_past_due                 = ''
           loan_schedule_status               = '' #TODO
           #loan_days_past_due                = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
           loan_principal_due                 = ''

@@ -33,8 +33,6 @@
         %th
           Installment Date
         %th
-          Days Past Due
-        %th
           Schedule Principal Due
         %th
           Principal Due
@@ -57,7 +55,7 @@
         %th
           Due Interest
         %th
-          Total
+          Total Due
     - @weeksheet.groups.each do |group|
       - loan_row_count = 0
       - biz_location = BizLocation.get @weeksheet.at_biz_location_id
@@ -82,8 +80,6 @@
             = ws.loan_installment_number
           %td
             = ws.loan_schedule_date
-          %td
-            = ws.loan_days_past_due
           %td
             = ws.loan_schedule_principal_due.to_s
             - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount.to_i unless ws.loan_schedule_principal_due.blank?
