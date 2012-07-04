@@ -46,7 +46,7 @@
     %th
       Date joined
     %td
-      = date_select 'client[date_joined]', Date.today, {:id => "date_joined"}
+      = date_select 'client[date_joined]', @client.date_joined.nil? ? Date.today : @client.date_joined, {:id => "date_joined"}
   %tr
     %th
       Spouse name:
