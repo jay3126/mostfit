@@ -52,14 +52,19 @@
                     = l.client_address
                   -# CPV1 can be recorded only if CPV1 is not already done.
                   - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
-                    %td
-                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
-                    %td
-                      %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
-                    %td
-                      = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
-                    %td
-                      = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.all_staff_at_location(@center.id,get_effective_date()), :prompt => "Select staff member"
+                    - unless session.user.role == :support || session.user.role == :finops
+                      %td
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                      %td
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                      %td
+                        = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
+                      %td
+                        = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.all_staff_at_location(@center.id,get_effective_date()), :prompt => "Select staff member"
+                    - else
+                      %td{:colspan => 4, :style => center_text}
+                        %b
+                          = "Not privilaged"
                   - else
                     %td{:colspan => 2,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
@@ -68,14 +73,19 @@
                     %td
                       = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
                   - if ClientVerification.is_CPV1_verified?(l.id)
-                    %td
-                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
-                    %td
-                      %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
-                    %td
-                      = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
-                    %td
-                      = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.staff_that_can_manage_specific_location(@center_id), :prompt => "Select staff member"
+                    - if session.user.role == :support || session.user.role == :operator
+                      %td
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                      %td
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                      %td
+                        = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
+                      %td
+                        = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.staff_that_can_manage_specific_location(@center_id), :prompt => "Select staff member"
+                    - else
+                      %td{:colspan => 4, :style => center_text}
+                        %b
+                          = "Not privilaged"
                   - else
                     %td{:colspan => 4, :style => center_text}
                       %i
