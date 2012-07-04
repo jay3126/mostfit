@@ -114,6 +114,53 @@ class BizLocations < Application
       return("<option value=''>Select center</option>")
     end
   end
+  
+  def biz_location_form
+    @biz_location = BizLocation.get params[:id]
+    level = @biz_location.location_level.level
+    @child_location_level = LocationLevel.first(:level => level-1)
+    render :partial => 'biz_locations/location_fields', :layout => layout?
+  end
+
+  def create_and_assign_location
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+
+    message = {}
+
+    # GATE-KEEPING
+
+    b_level          = params[:location_level]
+    b_creation_date  = params[:creation_date]
+    b_name           = params[:name]
+    b_id             = params[:id]
+    @parent_location = BizLocation.get b_id
+
+    # VALIDATIONS
+
+    message[:error] = "Name cannot be blank" if b_name.blank?
+    message[:error] = "Please select Location Level" if b_level.blank?
+    message[:error] = "Creation Date cannot blank" if b_creation_date.blank?
+    message[:error] = "Parent location is invaild" if @parent_location.blank?
+    
+    # OPERATIONS PERFORMED
+    if message[:error].blank?
+      begin
+        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i)
+        if child_location.new?
+          message = {:notice => "Location creation fail"}
+        else
+          location_facade.assign(child_location, @parent_location, b_creation_date)
+          message = {:notice => " Location successfully created"}
+        end
+      rescue => ex
+        message = {:error => "An error has occured: #{ex.message}"}
+      end
+    end
+
+    #REDIRECT/RENDER
+    redirect url(:controller => :user_locations, :action => :show, :id => @parent_location.id), :message => message
+
+  end
 
   def update
   end
