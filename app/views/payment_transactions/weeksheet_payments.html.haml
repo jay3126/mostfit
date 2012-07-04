@@ -10,10 +10,14 @@
           Client
         %th{:colspan => 7}
           Loan
-        %th{:colspan => 3}
+        %th{:colspan => 2}
           Principal Schedule
-        %th{:colspan => 3}
+        %th{:colspan => 2}
           Interest Schedule
+        %th
+          Advance
+        %th
+          Total
       %tr
         %th
           Client Name
@@ -34,15 +38,15 @@
         %th
           Schedule Principal Due
         %th
-          Actual Principal Due
-        %th
-          Actual Princiapl Outstanding
+          Actual Principal Outstanding
         %th
           Schedule Interest Due
         %th
-          Actual Interest Due
-        %th
           Actual Interest Outstanding
+        %th
+          Advance Amount Balance
+        %th
+          Total Due
     - @weeksheet.groups.each do |group|
       = hidden_field :name => "payment_transactions[performed_at]", :value => @biz_location.id
       = hidden_field :name => "payment_transactions[accounted_at]", :value => @parent_biz_location.id
