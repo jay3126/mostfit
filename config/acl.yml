@@ -161,7 +161,7 @@ supervisor :
   holidays :
     - all
   lendings :
-    - all
+    - all 
 #    - index  
 #    - create
 #   - create_repayment_on_lending
@@ -415,8 +415,91 @@ read_only :
     - all
   browse :
     - all
-  lendings :
+#  accounting_rules :
+#    - index
+#    - show
+#  asset_register :
+#     - all		 
+#    - index  
+#    - new
+#    - create
+#    - edit
+#    - update
+#    - show
+    
+#  attendances :
+#    - index
+#    - create
+#  audit_trails:
+#    - all
+#    - index
+#    - show
+#  biz_locations:
+#    - all    
+#  book_keeping :
+#    - all
+#  center_cycles :
+#    - all
+#  client_groups :
+#    - all
+#  client_verifications :
+#    - all
+  new_clients :
+    - show  
+  clients :
     - index
+#    - new
+#    - create
+#    - bulk_entry
     - show
-  searches :
-    - all  
+  user_locations :
+    - all
+#  documents :
+#    - all
+#  holiday_calendars :
+#    - all
+#  ledgers :
+#    - index
+#   - show
+  lendings :
+    - index  
+  
+#    - create
+#    - create_repayment_on_lending
+    - show
+#    - edit
+#    - update
+#   - update_lending_approve_to_disburse
+#    - update_lending_new_to_approve
+    - lending_accrual_transaction
+#  loan_applications :
+#   - index
+#    - show
+#   - bulk_create_loan_applicant
+#   - bulk_create
+#    - list
+#    - bulk_new
+#   - edit
+#    - update
+#    - get_param_value
+#    - suspected_duplicates
+#    - get_de_dupe_loan_applications
+#    - record_suspected_duplicates
+#   - all
+#  loan_files :
+#    - index
+#    - show  
+#    - get_data
+#    - generate_disbursement_sheet
+#    - generate_disbursement_labels
+#   - record_loan_file
+#   - loan_file_generation
+#    - get_param_value
+#   - all
+  reports :
+#    - index
+#    - show
+#    - get_dates
+#    - get_date   
+#  searches :
+#    - all
