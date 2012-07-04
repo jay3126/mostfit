@@ -9,7 +9,7 @@ class TimedAmount
   property :effective_on,    *DATE_NOT_NULL
   property :created_at,      *CREATED_AT
 
-  belongs_to :simple_fee_product
+  belongs_to :simple_fee_product, :nullable => true
 
   def money_amounts; [:fee_only_amount, :tax_only_amount]; end
 

@@ -15,6 +15,7 @@ FACTORY_ACCOUNTS_LIABILITIES = ['Deposits', 'Loans taken'].freeze
 FACTORY_ACCOUNTS_EXPENSES    = ['Rent', 'Electricity', 'Salaries'].freeze
 FACTORY_ACCOUNTS_INCOMES     = ['Interest Income', 'Fee Income', 'Other Income'].freeze
 ACCOUNTING_DATE_BEGINS       = Date.parse("2011-04-01")
+EARLIEST_DATE_CHOICE         = Constants::Time::EARLIEST_DATE_OF_OPERATION
 
 FactoryGirl.define do
 
@@ -479,7 +480,7 @@ FactoryGirl.define do
   factory :condition do
     keys                'amount'
     comparator          :<
-    value               '10'
+      value               '10'
 
     association         :rule
   end
@@ -707,6 +708,25 @@ FactoryGirl.define do
     repayment_frequency MarkerInterfaces::Recurrence::WEEKLY
     repayment_allocation_strategy Constants::LoanAmounts::EARLIEST_INTEREST_FIRST_THEN_EARLIEST_PRINCIPAL_ALLOCATION
     tenure              52
+  end
+
+  factory :simple_fee_product do
+    name                { "#{Factory.next(:name)}" + " fee product"}
+    fee_charged_on_type { Constants::Transaction::FEE_CHARGED_ON_LOAN }
+    created_on          { EARLIEST_DATE_CHOICE }
+  end
+
+  factory :timed_amount do
+    fee_only_amount     { 2500 }
+    tax_only_amount     { 1236 }
+    currency            { MoneyManager.get_default_currency }
+    effective_on        { EARLIEST_DATE_CHOICE }
+  end
+
+  factory :simple_insurance_product do
+    name                { "#{Factory.next(:name)}" + " insurance product"}
+    insurance_for       { Constants::Insurance::INSURED_CLIENT }
+    created_on          { EARLIEST_DATE_CHOICE }
   end
 
   factory :loan_borrower do

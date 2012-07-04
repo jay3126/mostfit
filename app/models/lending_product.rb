@@ -18,7 +18,8 @@ class LendingProduct
 
   has 1, :loan_schedule_template
   has n, :lendings
-  has 1, :loan_fee, 'SimpleFeeProduct'
+  has 1, :loan_fee, 'SimpleFeeProduct', :parent_key => [:id], :child_key => [:loan_fee_id]
+  has 1, :loan_preclosure_penalty, 'SimpleFeeProduct', :parent_key => [:id], :child_key => [:loan_preclosure_penalty_id]
   has n, :simple_insurance_products
 
   # Implementing MarkerInterfaces::Recurrence#frequency
@@ -60,6 +61,16 @@ class LendingProduct
     principal_and_interest_amounts = assemble_amortization(tenure, principal_amounts, interest_amounts)
     LoanScheduleTemplate.create_schedule_template(name, standard_loan_money_amount, total_interest_applicable_money_amount, tenure, repayment_frequency, new_product, principal_and_interest_amounts)
     new_product
+  end
+
+  def get_applicable_fee_products
+    SimpleFeeProduct.get_applicable_fee_products_on_loan_product(self.id)
+  end
+
+  def get_applicable_premium_products
+    self.simple_insurance_products.collect { |insurance_product|
+      [insurance_product, SimpleFeeProduct.get_applicable_premium_on_insurance_product(insurance_product.id)]
+    }
   end
 
   # Creates a data structure that has both the principal and interest amounts to be repaid on each installment
