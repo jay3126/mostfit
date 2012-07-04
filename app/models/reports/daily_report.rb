@@ -1,4 +1,4 @@
-class NewDailyReport < Report
+class DailyReport < Report
   attr_accessor :date, :biz_location_branch
 
   def initialize(params, dates, user)
