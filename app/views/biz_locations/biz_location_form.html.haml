@@ -1,0 +1,16 @@
+%br
+= form_for(@new_biz_location, :action => url(:controller => :biz_locations, :action=> :create_and_assign_location, :id => @biz_location.id)) do
+  = hidden_field :location_level, :value => @child_location_level.level
+  %table.shaded
+    %tr
+      %th
+        Name
+      %td
+        = text_field :name
+    %tr
+      %th
+        Creation Date
+      %td
+        = date_select 'creation_date'
+  = submit "Save", :class => "grey_button"
+  = link_to 'Cancel', params[:return], :class => "grey_button"
