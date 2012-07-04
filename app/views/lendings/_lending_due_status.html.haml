@@ -20,11 +20,7 @@
         %th
           Schedule Principal Due
         %th
-          Actual Principal DUe
-        %th
           Schedule Interest Due
-        %th
-          Actual Interest Due
         %th
           Actual Total Due
     - @lending_due_statuses.each do |lending_status|
@@ -38,10 +34,6 @@
         %td
           = lending_status.to_money[:scheduled_principal_due]
         %td
-          =lending_status.to_money[:actual_principal_due].to_s
-        %td
           = lending_status.to_money[:scheduled_interest_due].to_s
-        %td
-          = lending_status.to_money[:actual_interest_due].to_s
         %td
           = lending_status.to_money[:actual_total_due].to_s
