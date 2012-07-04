@@ -32,41 +32,6 @@ class NewDailyReport < Report
   end
 
   def generate
-=begin
-loan amount
-    loan_amounts_applied
-    loan_amounts_approved
-    loan_amounts_disbursed
-repayment
-    principal_receipts
-    interest_receipts
-    fee_receipts
-    total_receipts
-balance outstanding
-    principal_outstanding
-    interest_outstanding
-    total_outstanding
-balance overdue
-    principal_overdue
-    interest_overdue
-    total_overdue
-advance
-    advance_collected
-    advance_adjusted
-    advance_balance
-loans closed
-    loan_amounts_preclosed
-    loan_amounts_repaid
-    loan_amounts_written_off
-=end
-=begin
-    The report will be filtered with branch as of now.
-    daily report will have following columns :-
-    2. Repayment amounts (Principal, Interest, Total, Fees)
-    3. Balance Outstandings (Principal, Interest, Total)
-    4. Balance Overdue (Principal, Interest, Total)
-    5. Advance Payments (Collected, Adjusted, Balance)
-=end
 
     reporting_facade = get_reporting_facade(@user)
     location_facade  = get_location_facade(@user)
