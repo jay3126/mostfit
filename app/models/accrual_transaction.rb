@@ -45,4 +45,29 @@ class AccrualTransaction
     accrual
   end
 
+  def to_reversed_broken_period_accrual
+    return nil unless self.accrual_temporal_type == ACCRUE_BROKEN_PERIOD
+    original_accrual_attributes = self.attributes.dup
+    original_accrual_attributes.delete(:id)
+    original_accrual_attributes.delete(:created_at)
+    reversal_attributes = original_accrual_attributes
+
+    reversal_attributes[:accrual_temporal_type] = REVERSE_BROKEN_PERIOD_ACCRUAL
+    reversal_attributes[:effective_on] = (self.effective_on + 1)
+    AccrualTransaction.first_or_new(reversal_attributes)
+  end
+
+  def is_reversed?
+    return true unless self.accrual_temporal_type == ACCRUE_BROKEN_PERIOD
+    ReversedAccrualLog.reversal_for_accrual(self.id)
+  end
+
+  def self.all_broken_period_interest_accruals_not_reversed(on_date)
+    broken_period_accruals_on_date = {}
+    broken_period_accruals_on_date[:effective_on] = on_date
+    broken_period_accruals_on_date[:accrual_temporal_type] = ACCRUE_BROKEN_PERIOD
+    all_broken_period_accruals_on_date = all(broken_period_accruals_on_date)
+    all_broken_period_accruals_on_date.reject {|bpial| bpial.is_reversed?}
+  end
+
 end

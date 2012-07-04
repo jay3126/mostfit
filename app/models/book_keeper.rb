@@ -54,6 +54,9 @@ module BookKeeper
         accrue_broken_period_interest_receipts_on_loan(loan, on_date)
       end
     end
+    if (Constants::Time.is_first_day_of_month?(on_date))
+      reverse_all_broken_period_interest_receipts(on_date)
+    end
   end
 
   def accrue_regular_receipts_on_loan(loan, on_date)
@@ -84,6 +87,15 @@ module BookKeeper
     effective_on = on_date
 
     accrue_broken_period_interest_receipt = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+  end
+
+  def reverse_all_broken_period_interest_receipts(on_date)
+    all_broken_period_interest_receipts_to_reverse = AccrualTransaction.all_broken_period_interest_accruals_not_reversed(on_date - 1)
+    all_broken_period_interest_receipts_to_reverse.each { |bpial|
+      reversal_accrual = bpial.to_reversed_broken_period_accrual
+      raise Errors::DataError, reversal_accrual.errors.first.first unless reversal_accrual.save
+      ReversedAccrualLog.record_reversed_accrual_log(bpial, reversal_accrual)
+    }
   end
 
   def account_for_accrual(accrual_transaction, accrual_allocation)
