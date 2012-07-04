@@ -62,38 +62,38 @@ class Lending
   # Creates a new loan
   def self.create_new_loan(
       applied_amount,
-          repayment_frequency,
-          tenure,
-          from_lending_product,
-          for_borrower,
-          administered_at_origin,
-          accounted_at_origin,
-          applied_on_date,
-          scheduled_disbursal_date,
-          scheduled_first_repayment_date,
-          applied_by_staff,
-          recorded_by_user,
-          lan = nil,
-          loan_purpose = nil
-        )
+      repayment_frequency,
+      tenure,
+      from_lending_product,
+      for_borrower,
+      administered_at_origin,
+      accounted_at_origin,
+      applied_on_date,
+      scheduled_disbursal_date,
+      scheduled_first_repayment_date,
+      applied_by_staff,
+      recorded_by_user,
+      lan = nil,
+      loan_purpose = nil
+    )
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
 
     new_loan  = to_loan(
-        applied_amount,
-        repayment_frequency,
-        tenure,
-        from_lending_product,
-        new_loan_borrower,
-        administered_at_origin,
-        accounted_at_origin,
-        applied_on_date,
-        scheduled_disbursal_date,
-        scheduled_first_repayment_date,
-        applied_by_staff,
-        recorded_by_user,
-        lan,
-        loan_purpose
-      )
+      applied_amount,
+      repayment_frequency,
+      tenure,
+      from_lending_product,
+      new_loan_borrower,
+      administered_at_origin,
+      accounted_at_origin,
+      applied_on_date,
+      scheduled_disbursal_date,
+      scheduled_first_repayment_date,
+      applied_by_staff,
+      recorded_by_user,
+      lan,
+      loan_purpose
+    )
 
     total_interest_applicable = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
@@ -101,14 +101,14 @@ class Lending
     # TODO create a LoanAdministration instance for the loan administered_at_origin and accounted_at_origin
     new_loan.set_status(NEW_LOAN_STATUS, applied_on_date)
     LoanBaseSchedule.create_base_schedule(
-        applied_amount,
-        total_interest_applicable,
-        scheduled_disbursal_date,
-        scheduled_first_repayment_date,
-        repayment_frequency,
-        num_of_installments,
-        new_loan,
-        principal_and_interest_amounts)
+      applied_amount,
+      total_interest_applicable,
+      scheduled_disbursal_date,
+      scheduled_first_repayment_date,
+      repayment_frequency,
+      num_of_installments,
+      new_loan,
+      principal_and_interest_amounts)
     LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
     new_loan
   end
@@ -300,7 +300,7 @@ class Lending
     scheduled_outstanding = scheduled_total_outstanding(on_date)
 
     (net_outstanding > scheduled_outstanding) ? (net_outstanding - scheduled_outstanding) :
-        zero_money_amount
+      zero_money_amount
   end
 
   def actual_total_outstanding_net_advance_balance
@@ -335,7 +335,7 @@ class Lending
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan" unless self.loan_base_schedule
     previous_and_current_amortization_items_val = self.loan_base_schedule.get_previous_and_current_amortization_items(on_date)
     earlier_amortization_item = previous_and_current_amortization_items_val.is_a?(Array) ? previous_and_current_amortization_items_val.first :
-        previous_and_current_amortization_items_val
+      previous_and_current_amortization_items_val
 
     earlier_amortization_item
   end
@@ -455,15 +455,15 @@ class Lending
   def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
-        [true, nil]
+      [true, nil]
     raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
 
     allocation = nil
     case loan_action
-      when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
-      when LOAN_REPAYMENT then allocation = repay(payment_transaction)
-      else
-        raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
+    when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
+    when LOAN_REPAYMENT then allocation = repay(payment_transaction)
+    else
+      raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
     process_allocation(payment_transaction, loan_action, allocation)
   end
@@ -550,8 +550,8 @@ class Lending
       administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
       applied_by_staff, recorded_by_user, lan = nil, loan_purpose = nil)
     Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
-                                   administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date,
-                                   scheduled_first_repayment_date, applied_by_staff, recorded_by_user)
+      administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date,
+      scheduled_first_repayment_date, applied_by_staff, recorded_by_user)
     loan_hash                                  = { }
     loan_hash[:applied_amount]                 = for_amount.amount
     loan_hash[:currency]                       = for_amount.currency
@@ -610,7 +610,7 @@ class Lending
 
     only_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
     advance_to_allocate = (total_amount > only_principal_and_interest) ?
-        (total_amount - only_principal_and_interest) : zero_money_amount
+      (total_amount - only_principal_and_interest) : zero_money_amount
 
     fresh_allocation = allocate_principal_and_interest(only_principal_and_interest, on_date)
 
@@ -635,7 +635,6 @@ class Lending
     allocation = allocator.allocate(total_money_amount, unallocated_amortization_items)
     allocation
   end
-
 
   ###########
   # UPDATES # ends

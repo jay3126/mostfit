@@ -29,6 +29,7 @@ class Lendings < Application
     applied_by_staff              = params[:lending][:applied_by_staff]
     schedule_disbursal_date       = params[:lending][:scheduled_disbursal_date]
     schedule_first_repayment_date = params[:lending][:scheduled_first_repayment_date]
+    loan_purpose_id               = params[:lending][:loan_purpose]
     loan_borrower_id              = params[:loan_borrower]
     recorded_by_user              = session.user.id
     
@@ -48,9 +49,10 @@ class Lendings < Application
       begin
         @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
         money_amount  = @lending_product.to_money[:amount]
+        @loan_purpose = LoanPurpose.get loan_purpose_id
         @lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
           @loan_borrower, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
-          schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id)
+          schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id, @loan_purpose)
 
         if @lending.new?
           @message[:error] = @lending.error.first.join(", ")
@@ -254,4 +256,10 @@ class Lendings < Application
     @lending_accrual_transactions = AccrualTransaction.all(:on_product_type => 'lending', :on_product_id => @lending.id)
     partial 'lendings/lending_accrual'
   end
+
+  def lending_preclose
+   @lending = Lending.get params[:id]
+   render
+  end
+
 end

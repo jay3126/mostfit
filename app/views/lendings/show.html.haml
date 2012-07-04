@@ -6,47 +6,51 @@
     %td
       = link_to_with_rights @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
   %tr.odd
-    %th.odd Loan disbursed
+    %th.odd Amount
     %td
       %b= @lending.to_money[:applied_amount].to_s
-  %tr.odd
-    %th.odd Frequency
+  %tr.even
+    %th.even Frequency
     %td
       = @lending.repayment_frequency
-  %tr.even
-    %th.even Disbursed On
-    %td
-      = @lending.disbursal_date
+  - if @lending.is_outstanding_now?
+    %tr.odd
+      %th.odd Disbursed On
+      %td
+        = @lending.disbursal_date
+    %tr.even
+      %th.even Scheduled first Repayment Date
+      %td= @lending.scheduled_first_repayment_date
+    %tr.odd
+      %th.odd Loan Due Status
+      %td= @lending.current_due_status.humanize
   %tr.odd
-    %th.odd First Repayment Date
-    %td= @lending.scheduled_first_repayment_date
-  %tr.even
-    %th.even Loan Product
+    %th.odd Loan Product
     %td
       = @lending_product.name
+  %tr.even
+    %th.even Loan Purpose
+    %td
+      = @lending.loan_purpose unless @lending.loan_purpose.blank?
+
   - unless @lending_product.loan_fee.blank?
     %tr.odd
       %th.odd
         Fee
       %td
         = @lending_product.loan_fee.timed_amounts.first.fee_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
-  %tr.odd
-    %th.odd Frequency
-    %td= @lending.repayment_frequency
   %tr.even
     %th.even Loan Status
     %td= @lending.status.humanize
-  %tr.odd
-    %th.odd Loan Due Status
-    %td= @lending.current_due_status.humanize
+
   %tr.even
     %th.even Loan outstanding Principal
     %td= "#{@lending.actual_principal_outstanding} as on #{@effective_date}"
   %tr.odd
     %th.odd Loan outstanding Interest
     %td= "#{@lending.actual_interest_outstanding} as on #{@effective_date}"
-  %tr.odd
-    %th.odd Loan assignment status
+  %tr.even
+    %th.even Loan assignment status
     %td
       - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
       - if loan_assigned_to.nil?
