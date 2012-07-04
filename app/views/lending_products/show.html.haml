@@ -33,26 +33,6 @@
         Tenure
       %td
         = @lending_product.tenure
-    - unless @lending_product.loan_fee.blank?
-      %tr.even
-        %th.even
-          Fee
-        %td
-          = @lending_product.loan_fee.timed_amounts.first.total_money_amount.to_s unless @lending_product.loan_fee.timed_amounts.blank?
-    - unless @lending_product.loan_preclosure_penalty.blank?
-      %tr.odd
-        %th.odd
-          Perclouser Penalty Fee
-        %td
-          = @lending_product.loan_preclosure_penalty.timed_amounts.first.total_money_amount.to_s unless @lending_product.loan_preclosure_penalty.timed_amounts.blank?
-    - unless @lending_product.simple_insurance_products.blank?
-      %tr.even
-        %th.even
-          Insurance
-        %td
-          - unless @lending_product.simple_insurance_products.premium.blank?
-            = @lending_product.simple_insurance_products.premium.timed_amounts.first.total_money_amount.to_s unless @lending_product.simple_insurance_products.premium.timed_amounts.blank?
-
 - unless @lendings.blank?
   %table.dataTable.report.weeksheet.nojs
     %thead

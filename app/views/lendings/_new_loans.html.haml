@@ -76,7 +76,7 @@
           %td
             = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
-            = date_select "lending[#{lending.id}][][approved_on_date]", lending.applied_on_date, {:id => "lending_#{lending.id}", :size=> "10"}
+            = date_select "lending[#{lending.id}][][approved_on_date]", lending.applied_on_date, {:id => "lending_#{lending.id}", :size=> "10", :min_date => lending.applied_on_date, :max_date => lending.scheduled_disbursal_date}
           %td
             = select :name => "lending[#{lending.id}][][approved_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}
           %td
