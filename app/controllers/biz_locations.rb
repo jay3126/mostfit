@@ -109,7 +109,7 @@ class BizLocations < Application
       branch = location_facade.get_location(params[:id])
       effective_date = params[:effective_date]
       centers = location_facade.get_children(branch, effective_date)
-      return("<option value=''>Select center</option>"+centers.map{|center| "<option value=#{center.id}>#{center.name}:#{branch.name}"}.join)
+      return("<option value=''>Select center</option>"+centers.map{|center| "<option value=#{center.id}>#{center.name}"}.join)
     else
       return("<option value=''>Select center</option>")
     end
