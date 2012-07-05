@@ -78,6 +78,16 @@ module Merb
         :selected     => selected)
     end
 
+    def managed_by_staff_member(location_id, on_date)
+      location_manage = location_facade.location_managed_by_staff(location_id, on_date)
+      if location_manage.blank?
+        'Not Managed'
+      else
+        staff_member = location_manage.manager_staff_member
+        link_to_with_rights staff_member.name, resource(staff_member)
+      end
+    end
+
     def select_center_for(obj, col, attrs = {})
       id_col = "#{col.to_s}_id".to_sym
       collection = []

@@ -20,7 +20,7 @@
       %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
   %tr.odd
     %th.odd Managed By
-    %td= ''
+    %td= managed_by_staff_member(@biz_location.id, get_effective_date)
 
 %div.tab_container.shaded
   %ul.tabs

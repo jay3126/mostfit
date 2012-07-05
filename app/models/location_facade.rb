@@ -98,6 +98,11 @@ class LocationFacade < StandardFacade
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
 
+  # Find staff_member that is manage location on date
+  def location_managed_by_staff(location_id, on_date = Date.today)
+    LocationManagement.staff_managing_location(location_id, on_date)
+  end
+
   private
 
   def location_manager
