@@ -36,7 +36,7 @@
           = select :name => "performed_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}
       %tr
         %td
-          Date
+          Preclosure date
         %td
           = date_select :effective_on
       %tr

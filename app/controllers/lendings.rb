@@ -290,19 +290,19 @@ class Lendings < Application
     total_money_amount = specific_principal_money_amount + specific_interest_money_amount
 
     # VALIDATIONS
-
+    @errors << "Preclosure date must not be future date" if Date.parse(effective_on) > Date.today
     # OPERATIONS
-    if @error.blank?
+    if @errors.blank?
       begin
         payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
         message = {:notice => "Succesfully preclosed"}
       rescue => ex
         message = {:error => ex.message}
       end
+      redirect url("lendings/#{@lending.id}"), :message => message
+    else
+      redirect url("lendings/lending_preclose/#{@lending.id}"), :message => {:error => @errors.flatten.join(' ,')}
     end
-
-    # RE-DIRECT
-    redirect url("lendings/#{@lending.id}"), :message => message
   end
 
 end
