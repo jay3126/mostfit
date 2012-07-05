@@ -50,7 +50,7 @@ class PaymentTransactions < Application
       begin
         payments.each do |key, payment_value|
           amount       = payment_value[:amount]
-          money_amount = MoneyManager.get_money_instance_least_terms(amount.to_i)
+          money_amount = MoneyManager.get_money_instance(amount.to_i)
           payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
           cp_type      = payment_value[:counterparty_type]
           cp_id        = payment_value[:counterparty_id]
@@ -73,13 +73,15 @@ class PaymentTransactions < Application
           end
         end
 
-        @payment_transactions.each do |pt|
-          begin
-            money_amount = MoneyManager.get_money_instance_least_terms(pt.amount.to_i)
-            payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
-            @message = {:notice => "Payment successfully created"}
-          rescue => ex
-            @message = {:error => "An error has occured: #{ex.message}"}
+        if @message[:error].blank?
+          @payment_transactions.each do |pt|
+            begin
+              money_amount = pt.to_money[:amount]
+              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
+              @message = {:notice => "Payment successfully created"}
+            rescue => ex
+              @message = {:error => "An error has occured: #{ex.message}"}
+            end
           end
         end
 
