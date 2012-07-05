@@ -21,16 +21,7 @@
   %tr.odd
     %th.odd Managed By
     %td= ''
-  - if (!(@center_cycle.blank?) && @center_cycle.is_open?)
-    %p.menu-strip
-      = "Center Cycle no: #{@center_cycle.cycle_number}"
-  - else
-    = form :action => url(:controller => :center_cycles, :action => :create) do
-      %p.menu-strip
-        = 'Start New Center Cycle'
-        = hidden_field :name => :center_id, :value => params[:id]
-        = date_select "initiated_date", Date.today, :id => "cycle_date", :min_date => (@center_cycle.blank? ? nil : @center_cycle.initiated_on)
-        = submit "Start"
+
 %div.tab_container.shaded
   %ul.tabs
     %li#Collections
@@ -47,6 +38,8 @@
       Pdf
     %li#History
       History
+    %li#center_cycle
+      Center cycle
   %div.tab
     %div#location_list
       %br
@@ -68,3 +61,6 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
   %div.tab
     = partial 'user_locations/pdf_on_biz_location'
+  %div.tab
+  %div.tab
+    = partial 'center_cycles/tab_center_cycle', :center_cycle => @center_cycle

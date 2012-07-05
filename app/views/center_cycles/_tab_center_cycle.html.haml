@@ -1,0 +1,58 @@
+- if (!(center_cycle.blank?) && center_cycle.is_open?)
+  %h2= "Center Cycle no: #{center_cycle.cycle_number}"
+- else
+  = form :action => url(:controller => :center_cycles, :action => :create) do
+    %p.menu-strip
+      = 'Start New Center Cycle'
+      = hidden_field :name => :center_id, :value => params[:id]
+      = date_select "initiated_date", Date.today, :id => "cycle_date", :min_date => (@center_cycle.blank? ? nil : @center_cycle.initiated_on)
+      = submit "Start"
+%hr
+- if center_cycle
+  %h1= "CGT"
+  - unless center_cycle.cgt_date_one == nil && center_cycle.cgt_date_two == nil && center_cycle.cgt_date_two == nil
+    %table.form
+      %tr
+        %th Date 1:
+        %td
+          = center_cycle.cgt_date_one
+      %tr
+        %th Date 2:
+        %td
+          = center_cycle.cgt_date_two
+      %tr
+        %th Date 3:
+        %td
+          = center_cycle.cgt_date_three
+      %tr
+        %th CGT recorded by:
+        %td
+          = StaffMember.get(center_cycle.cgt_performed_by_staff).name
+      %tr
+        %th CGT recorded on:
+        %td
+          = center_cycle.cgt_recorded_at.display
+  - else
+    %h3= "CGT not done"
+
+  %h1= "GRT"
+  - unless center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE
+    %table.form
+      %tr
+        %th GRT status:
+        %td
+          = @center_cycle.grt_status.humanize
+      %tr
+        %th GRT completed on:
+        %td
+          = @center_cycle.grt_completed_on
+      %tr
+        %th GRT completed by:
+        %td
+          = StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
+      %tr
+        %th GRT recorded on:
+        %td
+          = @center_cycle.grt_recorded_at.display
+  - else
+    %h3= "GRT not done"
