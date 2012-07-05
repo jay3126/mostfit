@@ -1,0 +1,33 @@
+class FeeInstance
+  include DataMapper::Resource
+  include Constants::Properties
+  include Constants::Fee
+
+  property :id,                     Serial
+  property :fee_applied_on_type,    Enum.send('[]', *FEE_APPLIED_ON_TYPES), :nullable => false
+  property :fee_applied_on_type_id, *INTEGER_NOT_NULL
+  property :administered_at,        *INTEGER_NOT_NULL
+  property :accounted_at,           *INTEGER_NOT_NULL
+  property :applied_on,             *DATE_NOT_NULL
+  property :created_at,             *CREATED_AT
+
+  belongs_to :simple_fee_product
+  has 1, :fee_receipt
+
+  def self.register_fee_instance(fee_product, fee_on_type, administered_at_id, accounted_at_id, applied_on)
+    Validators::Arguments.not_nil?(fee_product, fee_on_type, administered_at_id, accounted_at_id, applied_on)
+    fee_instance = {}
+    fee_applied_on_type, fee_applied_on_type_id = Resolver.resolve_fee_applied_on(fee_on_type)
+
+    fee_instance[:fee_applied_on_type] = fee_applied_on_type
+    fee_instance[:fee_applied_on_type_id] = fee_applied_on_type_id
+    fee_instance[:administered_at] = administered_at_id
+    fee_instance[:accounted_at]    = accounted_at_id
+    fee_instance[:applied_on]      = applied_on
+    fee_instance[:simple_fee_product] = fee_product
+    fee = create(fee_instance)
+    raise Errors::DataError, fee.errors.first.first unless fee.saved?
+    fee
+  end
+ 
+end

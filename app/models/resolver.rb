@@ -5,6 +5,13 @@ module Resolver
     [:center, for_location.id]
   end
 
+  def self.resolve_fee_applied_on(fee_on_type_instance)
+    klass_name = fee_on_type_instance.class.name
+    fee_applied_on_type = Constants::Fee::MODELS_AND_FEE_APPLIED_ON_TYPES[klass_name]
+    raise ArgumentError, "Unable to recognize a counterparty that corresponds to the instance: #{fee_applied_on_type}" if fee_applied_on_type.nil?
+    [fee_applied_on_type, fee_on_type_instance.id]
+  end
+
   # Returns a constant for the counterparty type and the counterparty ID
   def self.resolve_counterparty(for_counterparty)
     klass_name = for_counterparty.class.name

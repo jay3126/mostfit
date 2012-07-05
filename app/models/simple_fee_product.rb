@@ -12,6 +12,8 @@ class SimpleFeeProduct
   belongs_to :simple_insurance_product, :nullable => true
   belongs_to :lending_product_for_fee, 'LendingProduct', :nullable => true, :parent_key => [:id], :child_key => [:loan_fee_id]
   belongs_to :lending_product_for_penalty, 'LendingProduct', :nullable => true, :parent_key => [:id], :child_key => [:loan_preclosure_penalty_id]
+
+  has n, :fee_instances
  
   def effective_timed_amount(on_date = Date.today)
     self.timed_amounts.first(:effective_on.lte => on_date, :order => [:effective_on.desc])
