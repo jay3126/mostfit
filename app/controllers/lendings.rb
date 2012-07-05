@@ -258,8 +258,51 @@ class Lendings < Application
   end
 
   def lending_preclose
-   @lending = Lending.get params[:id]
-   render
+    # INITIALIZATIONS
+    lending_id = params[:id]
+    raise NotFound, "Id not found" if lending_id.blank?
+    @lending = Lending.get lending_id
+    display @lending
+  end
+  
+  def record_lending_preclose
+    # INITIALIZATIONS
+    @errors = []
+    @lending = Lending.get params[:loan_id]
+
+    # GATE-KEEPING
+    receipt_type = params[:receipt_type]
+    payment_towards = params[:payment_towards]
+    on_product_type = params[:on_product_type]
+    on_product_id = params[:on_product_id]
+    by_counterparty_type = params[:by_counterparty_type]
+    by_counterparty_id = params[:by_counterparty_id]
+    performed_at = params[:performed_at]
+    accounted_at = params[:accounted_at]
+    performed_by = params[:performed_by]
+    effective_on = params[:effective_on]
+    product_action = params[:product_action]
+    make_specific_allocation = true
+    specific_principal_amount = params[:specific_principal_amount]
+    specific_principal_money_amount = MoneyManager.get_money_instance(specific_principal_amount)
+    specific_interest_amount = params[:specific_interest_amount]
+    specific_interest_money_amount =  MoneyManager.get_money_instance(specific_interest_amount)
+    total_money_amount = specific_principal_money_amount + specific_interest_money_amount
+
+    # VALIDATIONS
+
+    # OPERATIONS
+    if @error.blank?
+      begin
+        payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+        message = {:notice => "Succesfully preclosed"}
+      rescue => ex
+        message = {:error => ex.message}
+      end
+    end
+
+    # RE-DIRECT
+    redirect url("lendings/#{@lending.id}"), :message => message
   end
 
 end

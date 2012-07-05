@@ -82,7 +82,7 @@ Merb::Router.prepare do
   resources :occupations
   resources :loan_purposes
   resources :lending_products
-  resources :lendings
+  resources :lendings, :id => %r(\d+), :member => {:record_lending_preclose => [:put]}
   resources :regions do
     resources :areas do
       resources :branches
