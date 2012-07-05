@@ -44,7 +44,7 @@
             %tr
               %td
                 %b GRT recorded by:
-                = select :grt_completed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_that_can_manage_specific_location(@center.id), :prompt => "Select staff member"
+                = select :grt_completed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.staff_managing_location(@center.id, get_effective_date), :prompt => "Select staff member"
               %td
                 %b GRT recorded on:
                 = date_select :grt_completed_on, Date.today

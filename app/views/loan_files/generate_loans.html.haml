@@ -43,7 +43,7 @@
           = date_select "loan[scheduled_first_payment_date]", scheduled_first_payment_date_selected, :id =>"scheduled_first_payment_date"
         %th Applied by
         %td
-          = select :name => "loan[applied_by_staff_id]", :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
+          = select :name => "loan[applied_by_staff_id]", :collection => choice_facade.all_finops, :value_method => :id, :text_method => :name, :class => 'chosen', :prompt => 'select a staff member', :selected => params[:loan][:applied_by_staff_id]
 
   %h2 Choose clients
   %table.report.nojs
