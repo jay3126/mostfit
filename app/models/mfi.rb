@@ -120,7 +120,6 @@ class Mfi
     self.report_access_rules = REPORT_ACCESS_HASH if not self.report_access_rules or self.report_access_rules == {}
     Misfit::Config::DateFormat.compile
     set_currency_format
-    DirtyLoan.start_thread
   end
 
   def date_format
