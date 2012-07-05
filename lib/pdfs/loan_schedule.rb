@@ -66,10 +66,12 @@ module Pdf
     end
 
     def generate_disbursement_labels_pdf(user_id, on_date)
-      loan_facade    = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, user_id)
-      meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
-      lendings       = loan_facade.get_loans_at_location(self, on_date)
-      return nil if lendings.blank?
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
+      lendings        = location_facade.get_loans_administered(self.id, on_date).compact
+      lendings        = lendings.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS} unless lendings.blank?
+      raise ArgumentError,"No loans for generate labels pdf" if lendings.blank?
+
       pdf            = PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 12
       pdf.h1_font_size = 11
