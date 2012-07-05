@@ -69,6 +69,7 @@ module Pdf
       loan_facade    = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, user_id)
       meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       lendings       = loan_facade.get_loans_at_location(self, on_date)
+      return nil if lendings.blank?
       pdf            = PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 12
       pdf.h1_font_size = 11

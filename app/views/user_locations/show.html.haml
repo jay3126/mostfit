@@ -43,7 +43,6 @@
     = partial "user_locations/child_locations"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
-  %div.tab
   - if @biz_location.is_nominal_branch?
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}

@@ -3,7 +3,7 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-- @date = Date.today if @date.blank?
+- @date = get_effective_date if @date.blank?
 %h2
   = "#{@location_level.name} meeting on"
   = @date.weekday
@@ -41,7 +41,7 @@
           - else
             = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
         %td
-          = ''
+          = managed_by_staff_member(biz_location.id, @date)
         %td
           = meeting_date.meeting_begins_at
         %td
