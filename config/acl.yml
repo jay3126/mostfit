@@ -45,8 +45,8 @@ administrator :
 executive :
   home : 
     - all
-  admin :
-    - index
+#  admin :
+#    - index
   browse :
     - all	
   attendances :
@@ -55,23 +55,24 @@ executive :
   audit_trails :
     - index
     - show
-#  biz_locations :
+  biz_locations :
 #    - index
 #   - show
+    - centers_for_selector
   client_groups :
     - all
   client_verifications :
     - all
   clients :
     - index
-    - new
-    - create
+#    - new
+#    - create
     - bulk_entry
     - show
-    - edit
+#    - edit
     - update
   new_clients :
-    - all
+    - show
   documents :
     - all
   loan_applications :
@@ -85,34 +86,47 @@ executive :
     - update
     - get_param_value
 #   - all
-  loan_files :
-    - index
-    - show  
-    - get_data
-    - generate_disbursement_sheet
-    - generate_disbursement_labels
-    - record_loan_file
-    - loan_file_generation
-    - get_param_value
+#  loan_files :
+#    - index
+#    - show  
+#    - get_data
+#    - generate_disbursement_sheet
+#    - generate_disbursement_labels
+#    - record_loan_file
+#    - loan_file_generation
+#    - get_param_value
 #   - all
   lendings :
-    - all
-#    - index  
-#    - create
-#    - create_repayment_on_lending
-#    - show
-#    - update_lending_approve_to_disburse
-#   - update_lending_new_to_approve
-   
+#    - all
+    - index  
+    - create
+    - create_repayment_on_lending
+    - show
+    - update_lending_approve_to_disburse
+    - update_lending_new_to_approve
+    - new
+    - lending_transactions
+    - payment_on_disburse_loan
+    - lending_due_statuses
+    - lending_status_history
   searches :
     - all
   user_locations :
     - all
-  lending_products :
-    - index
-    - show
+#  lending_products :
+#    - index
+#    - show
   reports :
-    - all     
+    - all
+  payment_transactions :
+    - index
+    - new
+    - weeksheet_payments
+    - create_group_payments  
+  center_cycles :
+    - record_cgt
+    - mark_cgt_grt
+#    - record_grt     
 ################    
 supervisor :
   home :
@@ -121,13 +135,13 @@ supervisor :
     - all
   admin :
     - index	 
-  asset_register :
-    - index  
-    - new
-    - create
-    - edit
-    - update
-    - show
+#  asset_register :
+#    - index  
+#    - new
+#    - create
+#    - edit
+#    - update
+#    - show
   attendances :
     - index
     - create
@@ -135,7 +149,15 @@ supervisor :
     - index
     - show
   biz_locations:
-    - all    	
+ #   - all
+    - create_and_assign_location
+    - map_locations
+    - show
+    - create
+#    - index
+    - biz_location_clients
+    - biz_location_form
+    - centers_for_selector    	
   center_cycles :
     - all
   client_groups :
@@ -179,12 +201,15 @@ supervisor :
      - show
      - bulk_create_loan_applicant
      - bulk_create
-     - list
+     - list 
      - bulk_new
      - edit
      - update
      - get_param_value
-#    - all
+     - suspected_duplicates
+     - get_de_dupe_loan_applications
+     - record_suspected_duplicates
+#     - all
   loan_authorizations :
      - all
   loan_files :
@@ -196,7 +221,8 @@ supervisor :
      - record_loan_file
      - loan_file_generation
      - get_param_value
-#    - all
+     - pending_loan_file_generation
+#     - all
 #  overlap_report_requests:
 #    - all
 #  overlap_report_responses:
@@ -205,12 +231,34 @@ supervisor :
     - all  
   searches :
     - all
-  lending_products :
-    - index
-    - show
+#  lending_products :
+#    - index
+#    - show
   reports :
-    - all
-    
+    - show
+    - create
+    - edit
+ #   - all
+  center_cycles :
+    - record_cgt
+    - mark_cgt_grt
+    - record_grt
+  payment_transactions :
+    - index
+    - new
+    - weeksheet_payments
+    - create_group_payments
+ # book_keeping :
+ #   - all
+ # ledgers :
+ #   - all
+  money_deposits :
+     - index
+     - create
+#     - mark_verification
+#     - record_verification
+     - get_bank_branches
+     - get_bank_accounts  
 #################
 support :
   admin :
@@ -299,7 +347,11 @@ support :
     - get_dates
     - get_date   
   searches :
-    - all  
+    - all
+  user_locations :
+    - all
+  biz_locations :
+    - centers_for_selector  
 ################    
 finops :
   home : 
@@ -307,8 +359,11 @@ finops :
   browse :
     - all
   accounting_rules :
+    - all
     - index
     - show
+  ledgers :
+    - all
   asset_register :
     - index  
     - new
@@ -316,33 +371,34 @@ finops :
     - edit
     - update
     - show
-  attendances :
-    - index
-    - create
+#  attendances :
+#    - index
+#    - create
   audit_trails :
     - index
     - show
   biz_locations :
-    - index
-    - create
-    - edit
-    - update
-    - show
+#    - index
+#    - create
+#    - edit
+#    - update
+#    - show
+    - centers_for_selector
   book_keeping :
     - all
-  center_cycles :
-    - all
+#  center_cycles :
+#    - all
   client_groups :
     - all
-  client_verifications :
-    - all
+#  client_verifications :
+#    - all
   clients :
     - index
-    - new
-    - create
-    - bulk_entry
+#    - new
+#    - create
+#    - bulk_entry
     - show
-    - edit
+#    - edit
     - update
   designations :
     - all
@@ -354,9 +410,9 @@ finops :
     - all  
   funding_lines :
     - all
-  ledgers :
-    - index
-    - show
+#  ledgers :
+#    - index
+#    - show
   lending_products :
     - all
   lendings :
@@ -373,8 +429,8 @@ finops :
 #   - bulk_create
     - list
 #    - bulk_new
-#   - edit
-#    - update
+    - edit
+    - update
     - get_param_value
     - suspected_duplicates
     - get_de_dupe_loan_applications
@@ -397,18 +453,32 @@ finops :
 #    - get_data
     - generate_disbursement_sheet
     - generate_disbursement_labels
-    - record_loan_file
-    - loan_file_generation
-#    - get_param_value
+#    - record_loan_file
+#    - loan_file_generation
+    - get_param_value
     - record_health_check_status
-  loan_authorizations :
-    - all
+    - generate_loans
+#  loan_authorizations :
+#    - all
   reports :
 #    - all 
 #    - index
     - show
     - get_dates
-    - get_date   
+    - get_date
+  center_cycles :
+    - record_cgt
+    - mark_cgt_grt
+#    - record_grt 
+  user_locations :
+    - all
+  money_deposits :
+     - index
+#     - create
+     - mark_verification
+     - record_verification
+#     - get_bank_branches
+#     - get_bank_accounts  
 ################        
 read_only :
   home : 
