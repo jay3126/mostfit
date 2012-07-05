@@ -45,6 +45,10 @@ class LoanFile
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
 
+  def name
+    "loan_file_#{self.loan_file_identifier}"
+  end
+
   def to_info
     loan_applications = self.loan_applications.collect{|lap| lap.to_info}
     LoanFileInfo.new(id, loan_file_identifier, at_branch_id, at_center_id, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, created_on, created_by_staff_id, created_by, created_at, loan_applications)
