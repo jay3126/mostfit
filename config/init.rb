@@ -199,7 +199,7 @@ Merb::BootLoader.after_app_loads do
     if StaffMember.all(:designation => designation).empty?
       staff_member = StaffMember.new(:name => 'SuperUser', :designation => designation, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
       if staff_member.save
-        Merb.logger.info("The initial #{staff_member.class} #{staff_member.name} with level #{staff_member.level} was created")
+        Merb.logger.info("The initial #{staff_member.class} #{staff_member.name} with level #{designation.location_level.level} was created")
       else
         Merb.logger.info("Could not create the #{staff_member.name} #{staff_member.class}...")
         staff_member.errors.each do |e|
