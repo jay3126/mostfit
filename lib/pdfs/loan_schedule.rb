@@ -69,7 +69,6 @@ module Pdf
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
       meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       lendings        = location_facade.get_loans_administered(self.id, on_date).compact
-      lendings        = lendings.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS} unless lendings.blank?
       raise ArgumentError,"No loans for generate labels pdf" if lendings.blank?
 
       pdf            = PDF::QuickRef.new("LETTER", 2)
@@ -78,14 +77,14 @@ module Pdf
       count   = 0
       meeting = meeting_facade.get_meeting(self, on_date)
       lendings.each do |la|
+        client        = la.borrower
         count         = count + 1
-        start_date    = la.scheduled_first_repayment_date rescue ''
-        end_date      = la.last_scheduled_date rescue ''
-        disburse_date = la.scheduled_disbursal_date rescue ''
-        loan_purpose  = la.loan_purpose.to_s rescue ''
-        pdf.h1 "<b>Purpose of Loan</b>                   #{loan_purpose}"
-        pdf.h1 "<b>Name</b>                                     #{la.client_name}"
-        pdf.h1 "<b>Gtr. Name</b>                             #{la.client_guarantor_name}"
+        start_date    = la.scheduled_first_repayment_date
+        end_date      = la.last_scheduled_date
+        disburse_date = la.scheduled_disbursal_date
+        pdf.h1 "<b>Purpose of Loan</b>                   #{la.loan_purpose}"
+        pdf.h1 "<b>Name</b>                                     #{client.nil? ? 'No Client' : client.name}"
+        pdf.h1 "<b>Gtr. Name</b>                             #{client.nil? ? 'No Guarantor' : client.guarantor_name}"
         pdf.h1 "<b>Center Name</b>                         #{self.name}"
         pdf.h1 "<b>Meeting Address</b>                   #{}"
         if meeting.blank?
