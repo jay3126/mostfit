@@ -4,29 +4,36 @@
       "bJQueryUI": true
     });
 %br
-- if @location_manages.count == 0
+- if @staff_postings.count == 0
   %p
-    %i No Staff Mapping have been created yet.
+    %i No Staff Posting have been created yet.
 - else
-  %table.dataTable.report.weeksheet.nojs.staff
+  %table.report.weeksheet.nojs.staff
     %thead
       %tr
-        %th
+        %td
           id
-        %th
-          Name
-        %th
-          Active
-        %th
+        %td
+          Staff Name
+        %td
+          Designation
+        %td
+          Posting
+        %td
           Effective On
-    - @location_manages.each do |location_manage|
-      - staff = location_manage.manager_staff_member
+    - @staff_postings.each do |staff_posting|
+      - staff_member = staff_posting.staff_assigned
       %tr
         %td
-          = staff.id
+          = staff_posting.id
         %td
-          = link_to staff.name, resource(staff)
+          = staff_member.name
         %td
-          = staff.active
+          =# staff_member.designation.name
         %td
-          = location_manage.effective_on
+          = staff_posting.assigned_to_location.name
+        %td
+          = staff_posting.effective_on
+    %tfoot
+      %tr
+        %td{ :colspan => 7 }
