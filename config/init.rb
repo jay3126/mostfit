@@ -147,7 +147,7 @@ Merb::BootLoader.after_app_loads do
 
   begin
     if LocationLevel.all(:level => 0).empty?
-      location_level = LocationLevel.new(:name => 'Center', :level => 0, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
+      location_level = LocationLevel.new(:name => 'Center', :level => 0, :has_meeting => true, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
       if location_level.save
         Merb.logger.info("The initial #{location_level.class} #{location_level.name} with level #{location_level.level} was created")
       else
@@ -197,7 +197,7 @@ Merb::BootLoader.after_app_loads do
   begin
     designation = Designation.all(:role_class => Constants::User::OPERATOR).first
     if StaffMember.all(:designation => designation).empty?
-      staff_member = StaffMember.new(:name => 'SuperUser', :designation => designation)
+      staff_member = StaffMember.new(:name => 'SuperUser', :designation => designation, :creation_date => Constants::Time::EARLIEST_DATE_OF_OPERATION)
       if staff_member.save
         Merb.logger.info("The initial #{staff_member.class} #{staff_member.name} with level #{staff_member.level} was created")
       else
