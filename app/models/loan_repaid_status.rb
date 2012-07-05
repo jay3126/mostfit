@@ -15,6 +15,10 @@ class LoanRepaidStatus
 
   def money_amounts; [:closing_outstanding_principal, :closing_outstanding_interest, :closing_outstanding_total]; end
 
+  def closing_outstanding_principal_money_amount; to_money_amount(:closing_outstanding_principal); end
+  def closing_outstanding_interest_money_amount; to_money_amount(:closing_outstanding_interest); end
+  def closing_outstanding_total_money_amount; to_money_amount(:closing_outstanding_total); end
+
   def self.to_loan_repaid_status(for_loan, repaid_nature, repaid_on_date, closing_oustanding_principal_money_amount, closing_outstanding_interest_money_amount)
     Validators::Arguments.not_nil?(for_loan, repaid_nature, repaid_on_date, closing_oustanding_principal_money_amount, closing_outstanding_interest_money_amount)
     loan_repaid_status = {}

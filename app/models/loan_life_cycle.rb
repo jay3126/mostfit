@@ -67,6 +67,8 @@ module LoanLifeCycle
     Constants::Transaction::LOAN_PRECLOSURE => PRECLOSED
   }
 
+  LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS]
+
   STATUSES_DATES_SUM_AMOUNTS = {
     :applied => [NEW_LOAN_STATUS, :applied_on_date, :applied_amount.sum],
     :approved => [APPROVED_LOAN_STATUS, :approved_on_date, :approved_amount.sum],

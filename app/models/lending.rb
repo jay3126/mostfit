@@ -390,7 +390,7 @@ class Lending
   def advance_balance(on_date = Date.today); zero_money_amount; end
 
   ########################################################
-  # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # begins
+  # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # ends
   ########################################################
 
   #######################
@@ -454,16 +454,27 @@ class Lending
 
   def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
+
+    if (make_specific_allocation)
+      raise ArgumentError, "A principal and interest amount to allocate must be specified" unless (specific_principal_amount and specific_interest_amount)
+      
+      total_principal_and_interest = specific_principal_amount + specific_interest_amount
+      if (total_principal_and_interest > actual_total_outstanding_net_advance_balance)
+        raise Errors::BusinessValidationError, "Total principal and interest amount to allocate cannot exceed loan amount outstanding"
+      end
+    end
+
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
       [true, nil]
     raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
 
     allocation = nil
     case loan_action
-    when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
-    when LOAN_REPAYMENT then allocation = repay(payment_transaction)
-    else
-      raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
+      when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
+      when LOAN_REPAYMENT then allocation = repay(payment_transaction)
+      when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
+      else
+        raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
     process_allocation(payment_transaction, loan_action, allocation)
   end
@@ -480,13 +491,17 @@ class Lending
         if (actual_total_outstanding == zero_money_amount)
           repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
           raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
-          mark_loan_repaid(payment_transaction.effective_on, repaid_nature, actual_principal_outstanding, actual_interest_outstanding)
+          mark_loan_repaid(repaid_nature, payment_transaction.effective_on, actual_principal_outstanding, actual_interest_outstanding)
         end
+      elsif loan_action == LOAN_PRECLOSURE
+        repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
+        raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
+        mark_loan_repaid(repaid_nature, payment_transaction.effective_on, actual_principal_outstanding, actual_interest_outstanding)
       end
     end
   end
 
-  def mark_loan_repaid(repaid_on_date, repaid_nature, closing_principal_outstanding, closing_interest_outstanding)
+  def mark_loan_repaid(repaid_nature, repaid_on_date, closing_principal_outstanding, closing_interest_outstanding)
     self.loan_repaid_status = LoanRepaidStatus.to_loan_repaid_status(self, repaid_nature, repaid_on_date, closing_principal_outstanding, closing_interest_outstanding)
     set_status(REPAID_LOAN_STATUS, repaid_on_date)
   end
@@ -525,6 +540,11 @@ class Lending
 
   def repay(by_receipt)
     update_for_payment(by_receipt)
+  end
+
+  def preclose(by_receipt, principal_money_amount, interest_money_amount)
+    make_specific_allocation = true
+    update_for_payment(by_receipt, make_specific_allocation, principal_money_amount, interest_money_amount)
   end
 
   ###########################
@@ -595,6 +615,7 @@ class Lending
 
       resulting_allocation[PRINCIPAL_RECEIVED] = specific_principal_money_amount
       resulting_allocation[INTEREST_RECEIVED]  = specific_interest_money_amount
+      resulting_allocation[ADVANCE_RECEIVED]   = zero_money_amount
       resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
     end

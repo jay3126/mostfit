@@ -362,6 +362,82 @@ performed_by]
 
   end
 
+  context "when a loan is preclosed" do
+    it "should be preclosed with the closing outstanding amounts as expected" do
+      
+      approved_amount = @loan.to_money_amount(:applied_amount)
+      approved_on_date = @loan.applied_on_date + 1; approved_by_staff = 12
+      @loan.approve(approved_amount, approved_on_date, approved_by_staff)
+      @loan.is_approved?.should be_true
+
+      disbursed_on_date = @loan.scheduled_disbursal_date
+      factory_init_attributes =  @common_transaction_attributes
+      factory_init_attributes.merge!( {:amount => @loan.approved_amount, :receipt_type => @payment_type, :payment_towards => @disbursement_payment_towards, :effective_on => disbursed_on_date} )
+
+      disbursement_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+      disbursement_money_amount = approved_amount
+      receipt_type    = disbursement_attributes[:receipt_type]
+      payment_towards = disbursement_attributes[:payment_towards]
+      on_product_type = disbursement_attributes[:on_product_type]
+      on_product_id   = disbursement_attributes[:on_product_id]
+      by_counterparty_type = disbursement_attributes[:by_counterparty_type]
+      by_counterparty_id   = disbursement_attributes[:by_counterparty_id]
+      performed_at         = disbursement_attributes[:performed_at]
+      accounted_at         = disbursement_attributes[:accounted_at]
+      performed_by         = disbursement_attributes[:performed_by]
+      effective_on         = disbursement_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_DISBURSEMENT
+
+      @loan.total_loan_disbursed.should == @zero_money_amount
+      @payment_facade.record_payment(disbursement_money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+      @loan.reload
+      @loan.total_loan_disbursed.should == disbursement_money_amount
+      @loan.is_outstanding?.should be_true
+
+      @loan.total_received_till_date.should == @zero_money_amount
+
+      short_principal_amount = Money.new(10000, @loan.currency)
+      short_interest_amount  = Money.new(5100, @loan.currency)
+      preclosure_principal_amount = @loan.total_loan_disbursed - short_principal_amount
+      preclosure_interest_amount  = @loan.total_interest_applicable - short_interest_amount
+      total_preclosure_amount     = preclosure_principal_amount + preclosure_interest_amount
+      preclosed_on_date           = disbursed_on_date + 21
+
+      factory_init_attributes = @common_transaction_attributes
+      factory_init_attributes[:receipt_type] = @receipt_type
+      factory_init_attributes[:payment_towards] = Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
+      factory_init_attributes[:amount] = total_preclosure_amount
+      factory_init_attributes[:effective_on] = preclosed_on_date
+      repayment_attributes = Factory.attributes_for(:payment_transaction, factory_init_attributes)
+
+      receipt_type = repayment_attributes[:receipt_type]
+      payment_towards = repayment_attributes[:payment_towards]
+      on_product_type = repayment_attributes[:on_product_type]
+      on_product_id = repayment_attributes[:on_product_id]
+      by_counterparty_type = repayment_attributes[:by_counterparty_type]
+      by_counterparty_id   = repayment_attributes[:by_counterparty_id]
+      performed_at         = repayment_attributes[:performed_at]
+      accounted_at         = repayment_attributes[:accounted_at]
+      performed_by         = repayment_attributes[:performed_by]
+      effective_on         = repayment_attributes[:effective_on]
+      product_action       = Constants::Transaction::LOAN_PRECLOSURE
+
+      @payment_facade.record_payment(total_preclosure_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, true, preclosure_principal_amount, preclosure_interest_amount)
+      
+      @loan.reload
+      @loan.total_received_till_date.should == (preclosure_principal_amount + preclosure_interest_amount)
+      @loan.principal_received_till_date.should == preclosure_principal_amount
+      @loan.interest_received_till_date.should == preclosure_interest_amount
+
+      @loan.is_outstanding?.should be_false
+      loan_repaid_status = @loan.loan_repaid_status
+      loan_repaid_status.should_not be_nil
+      loan_repaid_status.repaid_nature.should == LoanLifeCycle::PRECLOSED
+      loan_repaid_status.closing_outstanding_principal_money_amount.should == short_principal_amount
+      loan_repaid_status.closing_outstanding_interest_money_amount.should == short_interest_amount
+    end
+  end
+
 =begin
   context "the date is the first scheduled repayment date on the loan" do
 
