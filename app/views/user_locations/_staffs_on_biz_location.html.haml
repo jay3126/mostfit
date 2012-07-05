@@ -29,7 +29,7 @@
         %td
           = staff_member.name
         %td
-          =# staff_member.designation.name
+          = staff_member.designation.name unless staff_member.designation.blank?
         %td
           = staff_posting.assigned_to_location.name
         %td
