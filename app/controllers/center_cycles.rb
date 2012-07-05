@@ -21,14 +21,16 @@ class CenterCycles < Application
     center_id = params[:child_location_id]
     @branch = location_facade.get_location(branch_id) if branch_id
     @center = location_facade.get_location(center_id) if center_id
-    @center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 
     # VALIDATION
     unless params[:flag] == 'true'
       @errors << "No branch was selected" if @branch.blank?
       @errors << "No center was selected" if @center.blank?
     end
-    @center_cycle = CenterCycle.first(:center_id => @center.id, :cycle_number => 1)
+    unless @center.blank?
+      @center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+      @center_cycle = CenterCycle.first(:center_id => @center.id, :cycle_number => 1)
+    end
     
     render :mark_cgt_grt
   end
