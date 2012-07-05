@@ -24,6 +24,7 @@
   - biz_location_branch = (params[report] and params[report][:biz_location_branch] and not params[report][:biz_location_branch].blank?) ? params[report][:biz_location_branch] : nil
   - branch_for_loan_application_report = (params[report] and params[report][:branch_for_loan_application_report] and not params[report][:branch_for_loan_application_report].blank?) ? params[report][:branch_for_loan_application_report] : nil
   - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
+  - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -107,6 +108,10 @@
       - if biz_location_branch
         Branch:
         = BizLocation.get(biz_location_branch).name
+      - if lending_product_id
+        |
+        Loan Product:
+        = LendingProduct.get(lending_product_id).name
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed':''}"}
@@ -163,6 +168,10 @@
             %td
               Year:
               = select(:chosen_year, :collection => ["2010", "2011"])
+          - if @report.respond_to?(:lending_product_id)
+            %td
+              Loan Product:
+              = select(:lending_product_id, :collection => LendingProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => lending_product_id)
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:loan_application_status)
