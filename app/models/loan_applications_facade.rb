@@ -163,7 +163,6 @@ class LoanApplicationsFacade < StandardFacade
 
   # Return all loan applications which has status suspected_duplicate
   def suspected_duplicate(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.suspected_duplicate(search_options)
   end
 
@@ -178,27 +177,22 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   def pending_credit_bureau_check(search_options = {})
-    search_options.merge!(:created_by_user_id => user_id)
     LoanApplication.pending_overlap_report_request_generation(search_options)
   end
 
   def pending_authorization(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_authorization(search_options)
   end
 
   def pending_CPV(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_CPV(search_options)
   end
 
   def recently_recorded_CPV(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.recently_recorded_client_verifications(search_options)
   end
 
   def pending_loan_file_generation(search_options = {})
-    search_options.merge!({:created_by_user_id => user_id})
     LoanApplication.pending_loan_file_generation(search_options)
   end
 
