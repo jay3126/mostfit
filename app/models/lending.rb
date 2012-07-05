@@ -344,6 +344,22 @@ class Lending
   # LOAN BALANCES QUERIES # ends
   #########################
 
+  ########
+  # Fees # begins
+  ########
+
+  def all_applicable_loan_fees
+    FeeInstance.get_all_fees_for_instance(self)
+  end
+  
+  def unpaid_loan_fees
+    FeeInstance.get_unpaid_fees_for_instance(self)
+  end
+
+  ########
+  # Fees # ends
+  ########
+
   ########################################################
   # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # begins
   ########################################################
@@ -516,6 +532,16 @@ class Lending
     self.approved_on_date  = approved_on_date
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
+    setup_fee_instances
+  end
+
+  def setup_fee_instances
+    loan_fee_product_map = get_loan_fee_product
+    if loan_fee_product_map
+      loan_fee_product_map.values.each {|loan_fee_product_instance|
+        FeeInstance.register_fee_instance(loan_fee_product_instance, self, self.administered_at_origin, self.accounted_at_origin, self.scheduled_disbursal_date)
+      }
+    end
   end
 
   def disburse(by_disbursement_transaction)
@@ -565,6 +591,10 @@ class Lending
   end
 
   private
+
+  def get_loan_fee_product
+    SimpleFeeProduct.get_applicable_fee_products_on_loan_product(self.lending_product.id)
+  end
 
   def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
       administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
@@ -671,7 +701,7 @@ class Lending
   end
 
   ##########
-  # Search #
+  # Search # begins
   ##########
 
   def self.search(q, per_page)
@@ -679,5 +709,9 @@ class Lending
       Lending.all(:conditions => {:id => q}, :limit => per_page)
     end
   end
+
+  ##########
+  # Search # ends
+  ##########
 
 end

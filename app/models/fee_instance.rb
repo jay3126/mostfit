@@ -29,5 +29,22 @@ class FeeInstance
     raise Errors::DataError, fee.errors.first.first unless fee.saved?
     fee
   end
- 
+
+  def self.all_unpaid_fees(search_options = {})
+    (all(search_options)).reject {|fee_instance| fee_instance.is_collected?}
+  end
+
+  def is_collected?
+    not (self.fee_receipt.nil?)
+  end
+
+  def self.get_all_fees_for_instance(fee_on_type)
+    fee_applied_on_type, fee_applied_on_type_id = Resolver.resolve_fee_applied_on(fee_on_type)
+    all(:fee_applied_on_type => fee_applied_on_type, :fee_applied_on_type_id => fee_applied_on_type_id)
+  end
+  
+  def self.get_unpaid_fees_for_instance(fee_on_type)
+    (get_all_fees_for_instance(fee_on_type)).reject {|fee_instance| fee_instance.is_collected?}
+  end
+
 end

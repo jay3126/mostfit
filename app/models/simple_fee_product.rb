@@ -45,6 +45,10 @@ class SimpleFeeProduct
     applicable_fee_products
   end
 
+  def self.get_applicable_loan_fee_product_on_loan_product(loan_product_id)
+    get_applicable_fee_products_on_loan_product(loan_product_id)[Constants::Transaction::FEE_CHARGED_ON_LOAN]
+  end
+
   def self.get_applicable_premium_on_insurance_product(insurance_product_id)
     applicable_premium_products = {}
     premium = first(:simple_insurance_product_id => insurance_product_id)
