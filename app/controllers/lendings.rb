@@ -4,6 +4,7 @@ class Lendings < Application
     @new_lendings      = Lending.all(:status => [:new_loan_status])
     @approve_lendings  = Lending.all(:status => [:approved_loan_status])
     @disburse_lendings = Lending.all(:status => [:disbursed_loan_status])
+    @fee_lendings      = @approve_lendings.blank? ? [] : @approve_lendings.collect{|al| al.unpaid_loan_fees}.flatten
     display @new_lendings
   end
 
@@ -176,7 +177,6 @@ class Lendings < Application
       lending_params.each do |key, value|
         if value.size == 2
           lending          = Lending.get key
-
           payment_amount   = MoneyManager.get_money_instance(value.last[:payment_amount])
           payment_by_staff = value.last[:payment_by_staff]
           payment_on_date  = value.last[:payment_on_date]
@@ -303,6 +303,32 @@ class Lendings < Application
     else
       redirect url("lendings/lending_preclose/#{@lending.id}"), :message => {:error => @errors.flatten.join(' ,')}
     end
+  end
+
+  def save_lendings_fee
+    @message       = {}
+    fee_payments   = []
+    fee_lending_params = params[:fee_lending]
+    begin
+      fee_lending_params.each do |key, value|
+        if value.size == 2
+          fee          = FeeInstance.get key
+          fee_by_staff = value.last[:fee_by_staff]
+          fee_payments << {:fee_instance => fee, :fee_by_staff => fee_by_staff }
+        end
+      end
+      @message = {:error => "Please select Fee for payment"} if fee_payments.blank?
+      if @message[:error].blank?
+        fee_payments.each do |payment|
+          fee_instance = payment[:fee_instance]
+          payment_facade.record_fee_payment()
+          @message = {:notice => "Loan fee payment done successfully."}
+        end
+      end
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+    redirect resource(:lendings), :message => @message
   end
 
 end

@@ -1,0 +1,50 @@
+- if @fee_lendings.blank?
+  %h3
+    No loan fee exists
+- else
+  = form_for(:lendings, :action => url(:controller => :lendings, :action => :save_lendings_fee)) do
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %th
+            id
+          %th
+            On Date
+          %th
+            Fee Type On
+          %th
+            Fee Type Id
+          %th
+            Accounted At
+          %th
+            Administered At
+          %th
+            Amount
+          %th
+            Collect
+          %th
+            By Staff
+      - @fee_lendings.each do |fee|
+        %tr
+          %td
+            = fee.id
+          %td
+            = fee.applied_on
+          %td
+            = fee.fee_applied_on_type
+          %td
+            = link_to_with_rights fee.fee_applied_on_type_id, url(:controller => :lendings, :action => :show, :id => fee.fee_applied_on_type_id)
+          %td
+            = fee.accounted_at_location.name
+          %td
+            = fee.administered_at_location.name
+          %td
+            = fee.effective_total_amount(get_effective_date).to_s
+          %td
+            = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id
+          %td
+            = select :name => "fee_lending[#{fee.id}][][fee_by_staff]", :collection => StaffMember.all.collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
+      %tfoot
+        %tr.org_total
+          %td{:colspan => 10}
+    = submit "save"

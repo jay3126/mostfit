@@ -14,6 +14,13 @@ class FeeInstance
   belongs_to :simple_fee_product
   has 1, :fee_receipt
 
+  def administered_at_location; BizLocation.get(self.administered_at); end
+  def accounted_at_location; BizLocation.get(self.accounted_at); end
+
+  def effective_total_amount(on_date)
+    self.simple_fee_product.effective_total_amount(on_date)
+  end
+
   def self.register_fee_instance(fee_product, fee_on_type, administered_at_id, accounted_at_id, applied_on)
     Validators::Arguments.not_nil?(fee_product, fee_on_type, administered_at_id, accounted_at_id, applied_on)
     fee_instance = {}

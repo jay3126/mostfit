@@ -8,13 +8,14 @@
       Approved Loans
     %li#disbursed_loans
       Disbursed Loans
+    %li#fee_loans
+      Fee Loans
   %div.tab
-    %div#new_loans
-      =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
+    =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
   %div.tab
-    %div#approve_loans
-      =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
+    =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
   %div.tab
-    %div#disburse_loans
-      =partial "lendings/disburse_loans", :lendings => @disburse_lendings
+    =partial "lendings/disburse_loans", :lendings => @disburse_lendings
+  %div.tab
+    =partial "lendings/fee_loans"
  
