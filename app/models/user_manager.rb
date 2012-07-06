@@ -93,7 +93,8 @@ class UserManager
   end
 
   def support_staff_at_location(location_id, on_date = Date.today)
-    StaffMember.all.select {|staff| staff.role == Constants::User::SUPPORT}
+    all_local_staff = all_staff_at_location(location_id, on_date)
+    all_local_staff.select {|staff_member| staff_member.is_support?}
   end
 
 end

@@ -10,4 +10,24 @@ class Designation
   belongs_to :location_level
   has n, :staff_members
 
+  def is_supervisor?
+    self.role_class == SUPERVISOR
+  end
+
+  def is_executive?
+    self.role_class == EXECUTIVE
+  end
+
+  def is_support?
+    self.role_class == SUPPORT
+  end
+
+  def is_finops?
+    self.role_class == FINOPS
+  end
+
+  def is_administrator?
+    self.role_class == ADMINISTRATOR
+  end
+
 end

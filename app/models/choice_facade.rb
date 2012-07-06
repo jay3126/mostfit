@@ -9,17 +9,22 @@ class ChoiceFacade < StandardFacade
     LocationLevel.levels_that_support_designations
   end
 
+  #TODO: move out of the facade
   def supervisors_and_executives_at_location(location_id, on_date = Date.today)
-    StaffMember.all
+    all_staff = all_staff_at_location(location_id, on_date)
+    all_staff.select {|staff_member| staff_member.is_supervisor_or_executive?}
   end
 
   def all_finops_and_supervisors_at_location(location_id, on_date = Date.today)
-    StaffMember.all
+    all_staff = all_staff_at_location(location_id, on_date)
+    all_staff.select {|staff_member| staff_member.is_finops_or_supervisor?}
   end
 
-  def all_finops(location_id = nil, on_date = Date.today)
-    StaffMember.all
+  def all_finops(location_id, on_date = Date.today)
+    all_staff = all_staff_at_location(location_id, on_date)
+    all_staff.select {|staff_member| staff_member.is_finops?}
   end
+
   # This is a list of staff members that are in the SUPPORT role at a given location on the specified date
   def support_staff_at_location(location_id, on_date = Date.today)
     user_facade.support_staff_at_location(location_id, on_date)

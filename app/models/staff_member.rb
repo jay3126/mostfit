@@ -46,6 +46,15 @@ class StaffMember
     self.designation ? self.designation.role_class : nil
   end
 
+  # tests for role class
+  def is_supervisor?; self.designation ? self.designation.is_supervisor? : false; end
+  def is_executive?; self.designation ? self.designation.is_executive? : false; end
+  def is_support?; self.designation ? self.designation.is_support? : false; end
+  def is_finops?; self.designation ? self.designation.is_finops? : false; end
+  def is_administrator?; self.designation ? self.designation.is_administrator? : false; end
+  def is_supervisor_or_executive?; (is_supervisor?) or (is_executive?); end
+  def is_finops_or_supervisor?; (is_finops?) or (is_supervisor?); end
+
   def self.search(q, per_page)
     if /^\d+$/.match(q)
       all(:conditions => {:id => q}, :limit => per_page)
