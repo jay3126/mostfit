@@ -11,9 +11,9 @@
           %th
             On Date
           %th
-            Fee Type On
+            Fee Type
           %th
-            Fee Type Id
+            Fee On
           %th
             Accounted At
           %th
@@ -31,7 +31,7 @@
           %td
             = fee.applied_on
           %td
-            = fee.fee_applied_on_type
+            = fee.fee_applied_on_type.humanize
           %td
             = link_to_with_rights fee.fee_applied_on_type_id, url(:controller => :lendings, :action => :show, :id => fee.fee_applied_on_type_id)
           %td

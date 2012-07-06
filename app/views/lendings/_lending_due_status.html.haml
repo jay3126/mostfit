@@ -4,6 +4,20 @@
       "bJQueryUI": true
     });
 %br
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr
+    %th.odd
+      On Date
+    %td
+      = get_effective_date
+    %th.odd
+      Due Status
+    %td
+      = @lending.due_status_from_outstanding(get_effective_date).humanize
+    %th.odd
+      Due Past Due
+    %td
+      = @lending.days_past_due_on_date(get_effective_date)
 - if @lending_due_statuses.blank?
   %p
     %i No Loan due status have been created yet.
@@ -14,26 +28,86 @@
         %th
           On Date
         %th
-          Loan Status
-        %th
           Due Status
+        %th
+          Schedule Principal Outstanding
+        %th
+          Schedule Interest Outstanding
+        %th
+          Schedule Total Outstanding
         %th
           Schedule Principal Due
         %th
           Schedule Interest Due
         %th
+          Schedule Total Due
+        %th
+          Actual Principal Outstanding
+        %th
+          Actual Interest Outstanding
+        %th
+          Actual Total Outstanding
+        %th
           Actual Total Due
+        %th
+          Principal Received On Date
+        %th
+          Interest Received On Date
+        %th
+          Principal Received Till Date
+        %th
+          Interest Receive Till Date
+        %th
+          Advance Received On Date
+        %th
+          Advance Adjusted On Date
+        %th
+          Advance Received Till Date
+        %th
+          Advance Adjusted Till Date
+        %th
+          Advance Balance
     - @lending_due_statuses.each do |lending_status|
       %tr
         %td
           = lending_status.on_date
         %td
-          = lending_status.loan_status.humanize
-        %td
           = lending_status.due_status.humanize
         %td
-          = lending_status.to_money[:scheduled_principal_due]
+          = lending_status.to_money[:scheduled_principal_outstanding].to_s
+        %td
+          = lending_status.to_money[:scheduled_interest_outstanding].to_s
+        %td
+          = lending_status.to_money[:scheduled_total_outstanding].to_s
+        %td
+          = lending_status.to_money[:scheduled_prinipal_due].to_s
         %td
           = lending_status.to_money[:scheduled_interest_due].to_s
         %td
+          = lending_status.to_money[:scheduled_total_due].to_s
+        %td
+          = lending_status.to_money[:actual_principal_outstanding].to_s
+        %td
+          = lending_status.to_money[:actual_interest_outstanding].to_s
+        %td
+          = lending_status.to_money[:actual_total_outstanding].to_s
+        %td
           = lending_status.to_money[:actual_total_due].to_s
+        %td
+          = lending_status.to_money[:principal_received_on_date].to_s
+        %td
+          = lending_status.to_money[:interest_received_on_date].to_s
+        %td
+          = lending_status.to_money[:principal_received_till_date].to_s
+        %td
+          = lending_status.to_money[:interest_received_till_date].to_s
+        %td
+          = lending_status.to_money[:advance_received_on_date].to_s
+        %td
+          = lending_status.to_money[:advance_adjusted_on_date].to_s
+        %td
+          = lending_status.to_money[:advance_received_till_date].to_s
+        %td
+          = lending_status.to_money[:advance_adjusted_till_date].to_s
+        %td
+          = lending_status.to_money[:advance_balance].to_s
