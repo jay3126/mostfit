@@ -20,7 +20,7 @@ class ChoiceFacade < StandardFacade
     all_staff.select {|staff_member| staff_member.is_finops_or_supervisor?}
   end
 
-  def all_finops(location_id, on_date = Date.today)
+  def all_finops(location_id = nil, on_date = Date.today)
     all_staff = user_facade.all_active_staff
     all_staff.select {|staff_member| staff_member.is_finops?}
   end
