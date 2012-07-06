@@ -37,14 +37,14 @@ class UserManager
     operator
   end
 
+  def all_active_staff
+    StaffMember.all(:active => true)
+  end
+
   def all_staff_at_location(location_id, on_date = Date.today)
-    StaffMember.all
-=begin
     staff_postings = StaffPosting.get_staff_assigned(location_id, on_date)
     return staff_postings if staff_postings.empty?
-
     staff_postings.collect {|posting| posting.staff_assigned}
-=end
   end
 
   def active_staff_not_currently_posted
