@@ -9,6 +9,7 @@ class Encumberances < Application
   def show(id)
     @encumberance = Encumberance.get(id)
     raise NotFound unless @encumberance
+    @lendings = loan_assignment_facade.get_loans_assigned(@encumberance)
     display @encumberance
   end
 
@@ -82,6 +83,14 @@ class Encumberances < Application
     @encumberance=Encumberance.get(id)
     @upload = Upload.new
     display @upload
+  end
+
+  def lona_for_encumberance_on_date
+    @encumberance = Encumberance.get(params[:id])
+    raise NotFound unless @encumberance
+    @date = params[:ecum_date].blank? ? get_effective_date : Date.parse(params[:ecum_date])
+    @lendings = loan_assignment_facade.get_loans_assigned(@encumberance)
+    render :template => 'encumberances/show', :layout => layout?
   end
 
 end # Encumberances
