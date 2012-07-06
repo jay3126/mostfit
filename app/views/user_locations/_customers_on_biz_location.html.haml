@@ -1,16 +1,24 @@
 :javascript
-  $('table.client_tab').dataTable({
-      "bPaginate": false,
-      "bJQueryUI": true
+  $(document).ready(function() {
+    $(function() {
+      $( "#sortable" ).sortable();
+      $( "#sortable" ).disableSelection();
     });
+  });
+  $('table.client_tab').dataTable({
+    "bPaginate": false,
+    "bJQueryUI": true
+  });
+
 .menu-strip
   = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
+
 %br
 - if @customers.count == 0
   %p
     %i No Client Mapping have been created yet.
 - else
-  %table.report.weeksheet.nojs.client_tab
+  %table{:style => "width:730px;"}
     %thead
       %tr
         %th
@@ -19,11 +27,16 @@
           Name
         %th
           Joining Date
-    - for customer in @customers
-      %tr
-        %td
-          = customer.id
-        %td
-          = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
-        %td
-          = customer.date_joined
+  %div{:class => "demo"}
+    %ul{:id => "sortable"}
+      - for customer in @customers
+        %li{:class => "ui-state-default"}
+          %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
+          %table.form
+            %tr
+              %td
+                = customer.id
+              %td
+                = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+              %td
+                = customer.date_joined
