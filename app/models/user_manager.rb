@@ -42,7 +42,15 @@ class UserManager
   end
 
   def all_staff_at_location(location_id, on_date = Date.today)
-    staff_postings = StaffPosting.get_staff_assigned(location_id, on_date)
+    posting_location_id = location_id
+    for_location = BizLocation.get(location_id)
+    raise Errors::InvalidConfigurationError, "No location was found for the ID: #{location_id}" unless for_location
+    if for_location.is_nominal_center?
+      parent_location = LocationLink.get_parent(for_location, on_date)
+      raise Errors::InvalidConfigurationError, "The center #{for_location.to_s} does not appear to have been assigned to a branch on date #{on_date}" unless parent_location
+      posting_location_id = parent_location.id
+    end
+    staff_postings = StaffPosting.get_staff_assigned(posting_location_id, on_date)
     return staff_postings if staff_postings.empty?
     staff_postings.collect {|posting| posting.staff_assigned}
   end
