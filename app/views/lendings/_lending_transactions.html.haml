@@ -5,35 +5,7 @@
     });
 
 .menu-strip
-  = link_to_with_rights 'Make Repayment', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
-  #meeting_div(style = "display : none")
-    - if @lending.status == :disbursed_loan_status
-      = form_for(@lending, :action => url(:controller => :lendings, :action => :create_repayment_on_lending, :id => @lending.id), :method => "POST", :class => "tall shaded") do
-        %table
-          %tr
-            %td
-              Payment Type
-            %td
-              = Constants::Transaction::RECEIPT.humanize
-              = hidden_field :name => "payment_type", :value => Constants::Transaction::RECEIPT
-          %tr
-            %td
-              Payment Date
-            %td
-              = date_select "payment_date", Date.today
-          %tr
-            %td
-              Payment Amount
-            %td
-              = text_field :name=> "payment_amount"
-          %tr
-            %td
-              Payment by Staff
-            %td
-              = select :name=> "payment_by_staff", :collection => choice_facade.all_staff_at_location(@location.id, get_effective_date()).collect{|s| [s.id, s.name]}
-        = submit 'Save Repayment', :class => "greenButton"
-    - else
-      This Action does support after loan's disbursement
+  = link_to_with_rights 'Make Repayment', url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add'
 - if @lending_transactions.blank?
   %h3
     No Loan Transactions exists

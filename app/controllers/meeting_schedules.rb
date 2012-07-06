@@ -4,6 +4,9 @@ class MeetingSchedules < Application
   end
 
   def new
+    @biz_location = BizLocation.get params[:biz_location_id]
+    @meeting_schedule = MeetingSchedule.new
+    render :template => 'meeting_schedules/new', :layout => layout?
   end
 
   def create

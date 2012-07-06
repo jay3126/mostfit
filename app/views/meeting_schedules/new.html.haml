@@ -1,3 +1,4 @@
-%h1
-  == New Center Meeting Schedule for center #{@center.name}
-= partial :list
+= form_for(@meeting_schedule, :action => url(:controller => :meeting_schedules,:action => :create, :biz_location_id => @biz_location.id), :method => "POST", :class => "tall shaded") do
+  = partial 'meeting_schedules/fields'
+  = submit 'Save', :class => "greenButton"
+  = link_to 'Cancel', params[:return], :class => "grey_button"

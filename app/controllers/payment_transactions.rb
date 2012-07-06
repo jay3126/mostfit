@@ -16,6 +16,12 @@ class PaymentTransactions < Application
     display @payment_transaction
   end
 
+  def payment_form_for_lending
+    @lending = Lending.get params[:lending_id]
+    @payment_transaction = PaymentTransaction.new
+    render :template => 'payment_transactions/payment_form_for_lending', :layout => layout?
+  end
+
   def weeksheet_payments
     @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
     @biz_location = BizLocation.get params[:biz_location_id]

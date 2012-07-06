@@ -25,7 +25,6 @@ class UserLocations < Application
     @biz_location = BizLocation.get params[:id]
     raise NotFound unless @biz_location
     @meeting_schedule_infos = meeting_facade.get_meeting_schedules(@biz_location)
-    @meeting_schedule = MeetingSchedule.new
     partial "user_locations/meeting_schedule_list"
   end
 

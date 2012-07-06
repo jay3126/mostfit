@@ -1,0 +1,18 @@
+%h1== Fee : <i>#{@fee_product.name}</i>
+.menu-strip
+  = link_to 'Add Amount', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Name
+    %td= @fee_product.name
+  %tr.odd
+    %th.odd Fee Charge Type
+    %td
+      = @fee_product.fee_charged_on_type.humanize
+  %tr.even
+    %th.even Created On
+    %td= @fee_product.created_on
+  %tr.odd
+    %th.odd Created At
+    %td= @fee_product.created_at
+= partial 'simple_fee_products/fee_timed_amount'

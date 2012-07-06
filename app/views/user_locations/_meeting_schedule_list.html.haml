@@ -4,11 +4,7 @@
       "bJQueryUI": true
     });
 .menu-strip
-  = link_to_with_rights 'Add Meeting Schedule', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
-#meeting_div(style = "display : none")
-  = form_for(@meeting_schedule, :action => url(:controller => :meeting_schedules,:action => :create, :biz_location_id => @biz_location.id), :method => "POST", :class => "tall shaded") do
-    = partial 'meeting_schedules/fields'
-    = submit 'Create Meeting Schedule', :class => "greenButton"
+  = link_to_with_rights 'Add Meeting Schedule', resource(:meeting_schedules, :new, :biz_location_id => @biz_location.id), :class => '_remote_ add'
 %br
 %table.report.weeksheet.nojs.center_meetings
   %thead
