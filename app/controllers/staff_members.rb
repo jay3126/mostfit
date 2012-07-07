@@ -82,7 +82,7 @@ class StaffMembers < Application
     @biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
     @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
     if params[:format] == "pdf"
-      file = @staff_member.generate_collection_pdf(@date)
+      file = @staff_member.generate_collection_pdf(session.user.id, @date)
       filename   = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, "collection_sheets", "collection_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
       if file
         send_data(File.read(filename), :filename => filename, :type => "application/pdf")

@@ -4,7 +4,7 @@ class Lendings < Application
     @new_lendings      = Lending.all(:status => [:new_loan_status])
     @approve_lendings  = Lending.all(:status => [:approved_loan_status])
     @disburse_lendings = Lending.all(:status => [:disbursed_loan_status])
-    @fee_lendings      = @approve_lendings.blank? ? [] : @approve_lendings.collect{|al| al.unpaid_loan_fees}.flatten
+    @fee_lendings      = Lending.all.collect{|al| al.unpaid_loan_fees}.flatten
     display @new_lendings
   end
 

@@ -1,7 +1,7 @@
 module Pdf
   module DaySheet
 
-    def generate_collection_pdf(date)
+    def generate_collection_pdf(user_id, date)
       folder   = File.join(Merb.root, "doc", "pdfs", "staff", self.name, "collection_sheets")
       FileUtils.mkdir_p(folder)
       filename = File.join(folder, "collection_#{self.id}_#{date.strftime('%Y_%m_%d')}.pdf")
@@ -17,7 +17,7 @@ module Pdf
       return nil if @biz_locations.empty?
       #days_absent = Attendance.all(:status => "absent", :center => centers).aggregate(:client_id, :all.count).to_hash
       #days_present = Attendance.all(:center => centers).aggregate(:client_id, :all.count).to_hash
-      weeksheets = CollectionsFacade.new(self.id).get_collection_sheet_for_staff(date)
+      weeksheets = CollectionsFacade.new(user_id).get_collection_sheet_for_staff(self.id, date)
       idx = 0
       weeksheets.each do |weeksheet|
         unless weeksheet.blank?
@@ -47,18 +47,15 @@ module Pdf
                   "Installment Number"           => ws.loan_installment_number,
                   "Schedule Date"                => ws.loan_schedule_date,
                   "Due Status"                   => ws.loan_due_status.to_s.humanize,
-                  "Days Past Due"                => ws.loan_days_past_due,
                   "Schedule Principal Due"       => ws.loan_schedule_principal_due.to_s,
-                  "Actual Principal Due"         => ws.loan_actual_principal_due.to_s,
                   "Actual Principal Outstanding" => ws.loan_actual_principal_outstanding.to_s,
                   "Schedule Interest Due"        => ws.loan_schedule_interest_due.to_s,
-                  "Actual Interest Due"          => ws.loan_actual_interest_due.to_s,
                   "Actual Interest Outstanding"  => ws.loan_actual_interest_outstanding.to_s,
                   "Advance Amount"               => ws.loan_advance_amount.to_s,
                   "Principal Receipts"           => ws.loan_principal_receipts.to_s,
                   "Interest Receipts"            => ws.loan_interest_receipts.to_s,
                   "Advance Receipts"             => ws.loan_advance_receipts.to_s,
-                  "Total Amount"                 => ws.total_amount_to_be_paid.to_s,
+                  "Total Amount"                 => ws.loan_actual_total_due.to_s,
                   "Signature" => "" })
               loan_row_count     += 1
               if loan_row_count==0
@@ -86,9 +83,9 @@ module Pdf
           #          })
           #table.column_order  = ["name", "loan id" , "amount", "outstanding", "status", "disbursed", "installment", "principal", "interest", "fee", "total due", "days absent/total", "signature"]
           table.column_order  = ["Name", "Loan Id" ,"Status","Disbursed Amount","Disbursed Date","Installment Number",
-            "Schedule Date","Due Status","Days Past Due","Schedule Principal Due",
-            "Actual Principal Due","Actual Principal Outstanding","Schedule Interest Due",
-            "Actual Interest Due","Actual Interest Outstanding","Advance Amount",
+            "Schedule Date","Due Status","Schedule Principal Due",
+            "Actual Principal Outstanding","Schedule Interest Due",
+            "Actual Interest Outstanding","Advance Amount",
             "Principal Receipts","Interest Receipts","Advance Receipts",
             "Total Amount", "Signature"]
           table.show_lines        = :all
