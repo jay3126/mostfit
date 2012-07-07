@@ -1,3 +1,17 @@
+class FeeReceiptInfo
+
+  attr_reader :fee_instance, :fee_money_amount, :performed_by_id, :effective_on
+  
+  def initialize(fee_instance, fee_money_amount, performed_by_id, effective_on)
+    Validators::Arguments.not_nil?(fee_instance, fee_money_amount, performed_by_id, effective_on)
+    @fee_instance     = fee_instance
+    @fee_money_amount = fee_money_amount
+    @performed_by_id  = performed_by_id
+    @effective_on     = effective_on
+  end
+
+end
+
 class FeeInstance
   include DataMapper::Resource
   include Constants::Properties
