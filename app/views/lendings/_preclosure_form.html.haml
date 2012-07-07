@@ -11,7 +11,13 @@
     = hidden_field :name => "on_product_id", :value => @lending.id
     = hidden_field :name => "payment_towards", :value => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
     = hidden_field :name => "product_action", :value => Constants::Transaction::LOAN_PRECLOSURE
+    = hidden_field :name => "effective_on", :value => preclose_on_date
     %table
+      %tr
+        %td
+          Preclosure date
+        %td
+          = preclose_on_date
       %tr
         %td
           Principal due
@@ -26,7 +32,7 @@
         %td
           Preclosure penalty
         %td
-          = text_field :name => "penalty_amount", :class => 'weeksheet_total', :value => '0.00', :onkeyup => "update_total_amount('INR');"
+          = text_field :name => "penalty_amount", :class => 'weeksheet_total', :value => @preclosure_penalty_amount, :readonly => true, :onkeyup => "update_total_amount('INR');"
       %tr
         %td
           Payment by Staff

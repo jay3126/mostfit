@@ -10,4 +10,4 @@
           = date_select :effective_on
           = submit "Go"
   - if params[:effective_on]
-    = partial :preclosure_form
+    = partial :preclosure_form, :preclose_on_date => params[:effective_on]
