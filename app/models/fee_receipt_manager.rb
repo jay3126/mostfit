@@ -13,7 +13,7 @@ class FeeReceiptManager
       fee_money_amount = fr_info.fee_money_amount
       effective_on     = fr_info.effective_on
       performed_by_id  = fr_info.performed_by_id
-      FeeReceiptInfo.record_fee_receipt(fee_instance, fee_money_amount, effective_on, performed_by_id, @recorded_by_id)
+      FeeReceipt.record_fee_receipt(fee_instance, fee_money_amount, effective_on, performed_by_id, @recorded_by_id)
     }
   end
 
