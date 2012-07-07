@@ -1,0 +1,44 @@
+.menu-strip
+  = form_for(@lending, :action => url(:controller => :lendings, :action => :record_lending_preclose)) do
+    = hidden_field :name => "loan_id", :value => @lending.id
+    = hidden_field :name => "performed_at", :value => @lending.administered_at_origin
+    = hidden_field :name => "accounted_at", :value => @lending.accounted_at_origin
+    = hidden_field :name => "recorded_by",  :value => @user.id
+    = hidden_field :name => "on_product_type", :value => 'lending'
+    = hidden_field :name => "receipt_type", :value => Constants::Transaction::RECEIPT
+    = hidden_field :name => "by_counterparty_type", :value => 'client'
+    = hidden_field :name => "by_counterparty_id", :value => @lending.loan_borrower.counterparty_id
+    = hidden_field :name => "on_product_id", :value => @lending.id
+    = hidden_field :name => "payment_towards", :value => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
+    = hidden_field :name => "product_action", :value => Constants::Transaction::LOAN_PRECLOSURE
+    %table
+      %tr
+        %td
+          Principal due
+        %td
+          = text_field :name => "specific_principal_amount", :value => @lending.actual_principal_outstanding.to_s, :readonly => true, :class => 'weeksheet_total'
+      %tr
+        %td
+          Interest due
+        %td
+          = text_field :name => "specific_interest_amount", :value => @lending.actual_interest_outstanding.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
+      %tr
+        %td
+          Preclosure penalty
+        %td
+          = text_field :name => "penalty_amount", :class => 'weeksheet_total', :value => '0.00', :onkeyup => "update_total_amount('INR');"
+      %tr
+        %td
+          Payment by Staff
+        %td
+          = select :name => "performed_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}
+      %tr
+        %td
+          %b= "Total:"
+        %td
+          #weeksheet_total_amount
+            %b= @lending.actual_principal_outstanding + @lending.actual_interest_outstanding
+      %tr
+        %td
+          = submit 'Preclose', :class => "greenButton"
+          = link_to 'Back', url("lendings/#{@lending.id}"), :class => "greenButton"

@@ -264,6 +264,11 @@ class Lendings < Application
     @lending = Lending.get lending_id
     display @lending
   end
+
+  def check_preclosure_date
+    @lending = Lending.get params[:loan_id]
+    render :template => "lendings/lending_preclose"
+  end
   
   def record_lending_preclose
     # INITIALIZATIONS
