@@ -2,6 +2,7 @@ class User
   include DataMapper::Resource
   include Constants::Properties
   include Constants::User
+  include Identified
 
   before :destroy, :prevent_destroying_admin
 
@@ -27,7 +28,9 @@ class User
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
-  
+
+  def name; self.login; end
+
   def role
     self.staff_member ? self.staff_member.role : nil
   end

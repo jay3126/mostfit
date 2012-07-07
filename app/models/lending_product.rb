@@ -1,6 +1,7 @@
 class LendingProduct
   include DataMapper::Resource
   include Constants::Properties, Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Transaction, MarkerInterfaces::Recurrence
+  include Identified
   
   property :id,                             Serial
   property :name,                           *NAME

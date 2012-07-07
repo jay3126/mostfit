@@ -1,6 +1,7 @@
 class Designation
   include DataMapper::Resource
   include Constants::Properties, Constants::User
+  include Identified
   
   property :id,         Serial
   property :name,       String, :nullable => false, :unique => true

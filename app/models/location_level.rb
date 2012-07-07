@@ -1,5 +1,6 @@
 class LocationLevel
   include DataMapper::Resource
+  include Identified
 
   NOMINAL_BRANCH_LEVEL = 1; NOMINAL_BRANCH_LEVEL_NAME = "Branch"
   NOMINAL_CENTER_LEVEL = 0; NOMINAL_CENTER_LEVEL_NAME = "Center"
