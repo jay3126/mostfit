@@ -1,0 +1,47 @@
+!!!
+%html
+  %head
+    %title CheckList
+    
+    %link{:href => stylesheet_path('master1.css'), :type => "text/css", :rel => "stylesheet"}
+    %link{:href => stylesheet_path('style.css'), :type => "text/css", :rel => "stylesheet"}
+
+    -# %link{:href=> stylesheet_path('style.less'), :type=>"text/css", :rel=>"stylesheet/less"}
+
+    -# %link{:href => stylesheet_path('screen.css'), :type => "text/css", :rel => "stylesheet"}
+    %link{:href => stylesheet_path('notify-osd.css'), :type => "text/css", :rel => "stylesheet"}
+    %link{:href => stylesheet_path('jquery-ui.css'), :type => "text/css", :rel => "stylesheet"}
+
+    %script{:src => "../javascripts/jquery.js", :type => "text/javascript"}
+    %script{:src => javascript_path('jquery.js'), :type => "text/javascript"}
+    %script{:src => javascript_path('master.js'), :type => "text/javascript"}
+    %script{:src => javascript_path('notify-osd.js'), :type => "text/javascript"}
+    %script{:src => javascript_path('jquery-ui.min.js'), :type => "text/javascript"}
+
+    %script{:src => javascript_path("application.js"), :type => "text/javascript"}
+
+
+  %body
+    #overlay
+    
+    #container
+      #desc
+        -if !@checklist.nil?
+          ="Checklist : #{@checklist.name}"
+        -else
+          ="Checklists"
+
+      #logout
+        %p.pc
+          == Welcome, #{session.user.login} ( as #{session.user.role})
+          |
+          %a{:href => "/logout", :title => "Logout"} Logout
+      #w
+
+      %div{:id=>"main"}
+      =catch_content :for_layout
+
+    #bottom-message-drawer
+      #bottom-message
+        #bottom-message-inside
+          %span

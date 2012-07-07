@@ -1,0 +1,16 @@
+%h1
+  ="Details of #{@checklist_type.name}"
+%p
+
+Id:
+%b
+
+  =@checklist_type.id
+%br
+Name:
+%b
+  =@checklist_type.name
+%br
+= link_to 'Edit',  url(:edit_checklist_type,  @checklist_type)
+|
+= link_to 'Back', url(:checklist_types)

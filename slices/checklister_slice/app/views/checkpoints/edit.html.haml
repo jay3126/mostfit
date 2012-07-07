@@ -1,0 +1,15 @@
+%h1
+  Checkpoints controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/checkpoints/edit.html.erb
+= error_messages_for @checkpoint
+
+= form_for(@checkpoint, :action => url(:checkpoint, @checkpoint)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:checkpoint, @checkpoint)
+|
+= link_to 'Back', url(:checkpoints)

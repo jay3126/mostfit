@@ -1,0 +1,13 @@
+%h1 Fillers controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/fillers/new.html.erb
+
+= error_messages_for @filler
+
+= form_for(@filler, :action => url(:fillers) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:fillers)

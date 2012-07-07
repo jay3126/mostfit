@@ -1,0 +1,15 @@
+%h1
+  ="Edit #{@checklist_type.name}"
+= error_messages_for @checklist_type
+
+= form_for(@checklist_type, :action => url(:checklist_type, @checklist_type)) do
+  %p
+    Name
+  %p
+    = text_field :name
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:checklist_type, @checklist_type)
+|
+= link_to 'Back', url(:checklist_types)

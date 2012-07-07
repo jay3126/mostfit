@@ -1,0 +1,15 @@
+%h1
+  Dropdownpoints controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/dropdownpoints/edit.html.erb
+= error_messages_for @dropdownpoint
+
+= form_for(@dropdownpoint, :action => url(:dropdownpoint, @dropdownpoint)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:dropdownpoint, @dropdownpoint)
+|
+= link_to 'Back', url(:dropdownpoints)

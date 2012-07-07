@@ -1,0 +1,13 @@
+%h1 Responses controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/responses/new.html.erb
+
+= error_messages_for @response
+
+= form_for(@response, :action => url(:responses) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:responses)

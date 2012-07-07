@@ -1,0 +1,15 @@
+%h1
+  DropdownpointFillings controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/dropdownpoint_fillings/edit.html.erb
+= error_messages_for @dropdownpoint_filling
+
+= form_for(@dropdownpoint_filling, :action => url(:dropdownpoint_filling, @dropdownpoint_filling)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:dropdownpoint_filling, @dropdownpoint_filling)
+|
+= link_to 'Back', url(:dropdownpoint_fillings)

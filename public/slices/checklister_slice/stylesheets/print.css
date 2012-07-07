@@ -1,0 +1,167 @@
+/* -------------------------------------------------------------- 
+  
+ Hartija Css Print  Framework
+   * Version:   0.8 (2008-03-10)
+   
+   * In use by BlueTripCSS
+	 
+-------------------------------------------------------------- */
+
+body { 
+width:100% !important;
+margin:0 !important;
+padding:0 !important;
+line-height: 1.4;
+word-spacing:1.1pt;
+letter-spacing:0.2pt; font-family: Garamond,"Times New Roman", serif; color: #000; background: none; font-size: 12pt; }
+
+/*Headings */
+h1,h2,h3,h4,h5,h6 { font-family: Helvetica, Arial, sans-serif; }
+h1{font-size:19pt;}
+h2{font-size:17pt;}
+h3{font-size:15pt;}
+h4,h5,h6{font-size:12pt;}
+
+code { font: 10pt Courier, monospace; } 
+blockquote { margin: 1.3em; padding: 1em;  font-size: 10pt; }
+hr { background-color: #ccc; }
+
+/* Images */
+img { float: left; margin: 1em 1.5em 1.5em 0; }
+a img { border: none; }
+
+/* Links */
+a:link, a:visited { background: transparent; font-weight: 700; text-decoration: underline;color:#333; }
+a:link[href^="http://"]:after, a[href^="http://"]:visited:after { content: " (" attr(href) ") "; font-size: 90%; }
+a[href^="http://"] {color:#000; }
+
+/* Table */
+table { margin: 1px; text-align:left; width: 100%}
+tr.branch { margin: 1px; background: #ddd; text-align: center; width: 100%}
+th { border-bottom: 1px solid #333;  font-weight: bold; }
+td { border-bottom: 1px solid #333; }
+th,td { padding: 4px 10px 4px 0; }
+tfoot { font-style: italic; }
+caption { background: #fff; margin-bottom:2em; text-align:left; }
+thead {display: table-header-group;}
+tr {page-break-inside: avoid;} 
+
+/*hide various parts from the site*/
+
+#header, #footer, #navigation, #rightSideBar, #leftSideBar 
+{display:none;}
+
+.container a.button, .container button {
+  display:none;
+}
+table.report{
+    width: 100%;
+    border: 1px solid;
+    text-align: right;
+    padding: 0px;
+}
+table.report tr{
+    border: 1px solid;
+    padding: 0px;
+}
+table.report th{
+    border: 1px solid black;
+    text-align: center;
+    font-size: 0.95em;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+table.report tbody{
+    overflow: scroll;
+}
+table.report td{
+    border: 1px solid;
+    border-color: #ccc;
+    font-size: 0.95em;
+}
+table.report tr.group td:first-child{
+    text-align: center; 
+    font-size: 0.95em;
+}
+table.report tr.branch{
+    text-align: center; 
+    font-size: 0.95em;
+}
+table.report tr.center{
+    border: 1px solid;
+    text-align: center;
+    font-size: 1em; 
+}
+table.report tr.group_total td:first-child{
+    text-align: center; 
+    background-color: #eee;    
+}
+table.report tr.center_total td:first-child{
+    text-align: center; 
+    background-color: #ddd;
+}
+table.report tr.branch_total td:first-child{
+    text-align: center; 
+    background-color: #ccc;    
+}
+table.report tr.align_left{
+    text-align: left;
+}
+table.report tr.total{
+    text-align: right;
+    font-weight: bold;
+}
+ul#tree li{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    list-style-type:none;
+}
+ul#tree li ul{
+    padding-right: 0px;
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-left: 11px;
+    list-style-type:none;
+}
+ul#tree li span{
+    position: absolute;
+}
+ul#tree li span{
+    line-height: 12px;
+}
+ul#tree li span.spacer1{
+    padding: 0px;
+    width: 300px;
+}
+ul#tree li span.spacer2{
+    left: 380px;
+}
+ul#tree li span.spacer2a{
+    left: 350px;
+}
+ul#tree li span.spacer2b{
+    left: 450px;
+}
+ul#tree li span.spacer3{
+    left: 600px;
+}
+ul#tree li span.spacer3a{
+    left: 550px;
+}
+ul#tree li span.spacer3b{
+    left: 650px;
+}
+ul#tree li span.spacer4{
+    left: 800px;
+}
+ul#tree li span.spacer4a{
+    left: 750px;
+}
+ul#tree li span.spacer4b{
+    left: 850px;
+}
+ul#tree li span.spacer5{
+    margin-left: 800px;
+}

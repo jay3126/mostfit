@@ -1,0 +1,16 @@
+%h1
+  Sections controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/sections/index.html.erb
+%table
+  %tr
+  - for section in @sections
+    %tr
+      %td
+        = link_to 'Show', url(:section, section)
+      %td
+        = link_to 'Edit', url(:edit_section,  section)
+
+= link_to 'New', url(:new_section)

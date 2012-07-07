@@ -1,0 +1,76 @@
+RushabhSlice
+============
+
+A slice for the Merb framework.
+
+------------------------------------------------------------------------------
+   
+
+To see all available tasks for RushabhSlice run:
+
+rake -T slices:rushabh_slice
+
+------------------------------------------------------------------------------
+
+Instructions for installation:
+
+file: config/init.rb
+
+# add the slice as a regular dependency
+
+dependency 'rushabh_slice'
+
+# if needed, configure which slices to load and in which order
+
+Merb::Plugins.config[:merb_slices] = { :queue => ["RushabhSlice", ...] }
+
+# optionally configure the plugins in a before_app_loads callback
+
+Merb::BootLoader.before_app_loads do
+  
+  Merb::Slices::config[:rushabh_slice][:option] = value
+  
+end
+
+file: config/router.rb
+
+# example: /rushabh_slice/:controller/:action/:id
+
+add_slice(:RushabhSlice)
+
+# example: /:lang/:controller/:action/:id
+
+add_slice(:RushabhSlice, :path => ':lang')
+
+# example: /:controller/:action/:id
+
+slice(:RushabhSlice)
+
+Normally you should also run the following rake task:
+
+rake slices:rushabh_slice:install
+
+------------------------------------------------------------------------------
+
+You can put your application-level overrides in:
+
+host-app/slices/rushabh_slice/app - controllers, models, views ...
+
+Templates are located in this order:
+
+1. host-app/slices/rushabh_slice/app/views/*
+2. gems/rushabh_slice/app/views/*
+3. host-app/app/views/*
+
+You can use the host application's layout by configuring the
+rushabh_slice slice in a before_app_loads block:
+
+Merb::Slices.config[:rushabh_slice] = { :layout => :application }
+
+By default :rushabh_slice is used. If you need to override
+stylesheets or javascripts, just specify your own files in your layout
+instead/in addition to the ones supplied (if any) in 
+host-app/public/slices/rushabh_slice.
+
+In any case don't edit those files directly as they may be clobbered any time
+rake rushabh_slice:install is run.

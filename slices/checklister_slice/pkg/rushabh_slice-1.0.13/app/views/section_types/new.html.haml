@@ -1,0 +1,13 @@
+%h1 SectionTypes controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/section_types/new.html.erb
+
+= error_messages_for @section_type
+
+= form_for(@section_type, :action => url(:section_types) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:section_types)

@@ -1,0 +1,13 @@
+%h1 TargetEntities controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/target_entities/new.html.erb
+
+= error_messages_for @target_entity
+
+= form_for(@target_entity, :action => url(:target_entities) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:target_entities)

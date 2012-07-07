@@ -1,0 +1,16 @@
+%h1
+  Checkpoints controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/checkpoints/index.html.erb
+%table
+  %tr
+  - for checkpoint in @checkpoints
+    %tr
+      %td
+        = link_to 'Show', url(:checkpoint, checkpoint)
+      %td
+        = link_to 'Edit', url(:edit_checkpoint,  checkpoint)
+
+= link_to 'New', url(:new_checkpoint)

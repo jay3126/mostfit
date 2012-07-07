@@ -1,0 +1,16 @@
+%h1
+  Fillers controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/fillers/index.html.erb
+%table
+  %tr
+  - for filler in @fillers
+    %tr
+      %td
+        = link_to 'Show', url(:filler, filler)
+      %td
+        = link_to 'Edit', url(:edit_filler,  filler)
+
+= link_to 'New', url(:new_filler)

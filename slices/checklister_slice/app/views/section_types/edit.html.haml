@@ -1,0 +1,15 @@
+%h1
+  SectionTypes controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/section_types/edit.html.erb
+= error_messages_for @section_type
+
+= form_for(@section_type, :action => url(:section_type, @section_type)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:section_type, @section_type)
+|
+= link_to 'Back', url(:section_types)

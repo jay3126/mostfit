@@ -1,0 +1,16 @@
+%h1
+  FreeTextFillings controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/free_text_fillings/index.html.erb
+%table
+  %tr
+  - for free_text_filling in @free_text_fillings
+    %tr
+      %td
+        = link_to 'Show', url(:free_text_filling, free_text_filling)
+      %td
+        = link_to 'Edit', url(:edit_free_text_filling,  free_text_filling)
+
+= link_to 'New', url(:new_free_text_filling)

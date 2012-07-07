@@ -34,6 +34,7 @@ Merb::BootLoader.before_app_loads do
                           :currency => { :format => '%u %n', :precision => 2, :delimiter => ',' } })
   Numeric::Transformer.change_default_format(:mostfit_default)
   require 'config/constants.rb'
+  require 'slices/checklister_slice/config/checklist_constants.rb'
   require 'lib/rules'
   require 'lib/reporting'
   require 'uuid'

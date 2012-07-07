@@ -1,0 +1,27 @@
+-if @responses.count==0
+  %h1.h1c
+    No Responses Yet
+-else
+  %h1.h1c
+    ="List Of responses for #{@checklist.name}"
+
+  -if !@responses.nil?
+
+    %table.form
+      %tr
+        %td
+          Serial Number
+        %td
+          Filler Name
+        -@responses.each_with_index do |response,index|
+          %tr
+            %td
+              =response.id
+            %td
+              =response.filler.name
+            %td
+              =link_to "View Response",url(:checklister_slice_view_response,response.filler,:checklist_id=>@checklist.id)
+
+%h4
+  =link_to "Back",url("browse/index")
+

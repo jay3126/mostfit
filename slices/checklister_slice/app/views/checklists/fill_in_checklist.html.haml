@@ -1,0 +1,145 @@
+
+%p
+  -if message
+    #flash-messages.span-17.prefix-5.suffix-5.last
+    -  message.each do |key, value|
+      .flash{ :class => key.to_s }
+        %p= value.gsub("\n", "<br/>")
+
+
+
+
+%script
+  $(function(){
+  $("select").datepicker();
+  });
+
+
+-if @checklist_type.name=="HealthCheck on Loan Files"
+  =partial "checklists/healthchecklist"
+-else
+
+
+  %h2.h2c
+    ="#{@checklist.checklist_type.name}"
+  %hr
+
+  .shaded
+    #form_section
+      = form(:action => url(:checklister_slice_capture_checklist_data) ) do
+
+        %table.form{:style => "width:100%;"}
+          %tr
+            %td
+              =label " Staff Member:"
+            %td
+              =text_field :name=>:filler_name ,:value=>params[:staff_name]
+            %td
+              =label params[:target_entity_type]
+            %td
+              =text_field :target_entity_name ,:value=>params[:target_entity_name]
+          %tr
+            %td
+            %td
+          %tr
+          %tr
+          %tr
+          %tr
+
+            %td
+              =label params[:loc1_type]
+            %td
+              =text_field :loc1,:value=>params[:loc1_name]
+
+            %td
+              =label params[:loc2_type]
+            %td
+              =text_field :loc2,:value=>params[:loc2_name]
+          %tr
+            %td
+            %td
+          %tr
+          %tr
+          %tr
+            %td
+              =label "Value Date"
+            %td
+              =date_select :value_date, Date.parse(params[:effective_date]), :max_date => Date.today
+
+        %p
+
+          -@sections.each do |section|
+            %hr
+            .section_block
+              %h2
+                %b{:style=>"color:black"}
+                  %u
+                    =section.name
+                %br
+              =section.instructions
+
+            =hidden_field :checklist_id, :value=>@checklist.id
+
+            =hidden_field :filler_type, :value=>"User"
+            =hidden_field :filler_id, :value=>@staff_id
+            =hidden_field :target_entity_type, :value=>params[:target_entity_type]
+            =hidden_field :target_entity_id, :value=>@target_entity_id
+
+            =hidden_field :loc1_id, :value=>@loc1_id
+            =hidden_field :loc2_id, :value=>@loc2_id
+            =hidden_field :loc1_type, :value=>params[:loc1_type]
+            =hidden_field :loc2_type, :value=>params[:loc2_type]
+            =hidden_field :no_of_applications, :value=>@no_of_applications
+            =hidden_field :effective_date, :value=>@effective_date
+
+
+
+
+            -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+            -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+            -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+            -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+              %table{:cellspacing=>"3px", :cellpadding=>"3px"}
+                %tr.question_cell
+
+                -if !checkpoint.nil?
+                  %td{:width=>"800px"}
+                    ="#{i+1} . #{checkpoint.name}"
+                  %td
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1
+                    Yes
+                  %td
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0
+                    No
+                -elsif !free_text.nil?
+                  %td{:width=>"800px"}
+                    ="#{i+1} .  #{free_text.name}"
+
+                    -if free_text.name.downcase=="date"
+                      %td
+                        =date_select "free_text_#{free_text.id}".to_sym, Date.today, :max_date => Date.today
+                    -else
+                      %tr
+
+                        %td
+                          =text_area :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
+                -elsif !dropdownpoint.nil?
+                  %td{:width=>"800px"}
+                    ="#{i+1} . #{dropdownpoint.name}"
+                  %td
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{ |x| [x.id, x.name]}, :prompt => "Select Value"
+
+
+
+
+
+
+
+
+        %p
+          = submit "Create"
+
+
+
+=link_to "Back",params[:referral_url]
+

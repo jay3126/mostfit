@@ -1,0 +1,16 @@
+%h1
+  DropdownpointFillings controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/dropdownpoint_fillings/index.html.erb
+%table
+  %tr
+  - for dropdownpoint_filling in @dropdownpoint_fillings
+    %tr
+      %td
+        = link_to 'Show', url(:dropdownpoint_filling, dropdownpoint_filling)
+      %td
+        = link_to 'Edit', url(:edit_dropdownpoint_filling,  dropdownpoint_filling)
+
+= link_to 'New', url(:new_dropdownpoint_filling)

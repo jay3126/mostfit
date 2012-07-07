@@ -1,0 +1,16 @@
+%h1
+  Responses controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/responses/index.html.erb
+%table
+  %tr
+  - for response in @responses
+    %tr
+      %td
+        = link_to 'Show', url(:response, response)
+      %td
+        = link_to 'Edit', url(:edit_response,  response)
+
+= link_to 'New', url(:new_response)

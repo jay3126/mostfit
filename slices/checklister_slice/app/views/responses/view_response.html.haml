@@ -1,0 +1,67 @@
+%h1.h1c
+  ="Response given by #{@filler.name}"
+
+%table.form
+  %tr
+    %td
+      Value Date:
+    %td
+      %b
+        =@response.value_date.strftime("%b %e")
+  %tr
+    %td
+      Location 1:
+    %td
+      %b
+        =@response.checklist_locations.first.name
+  %tr
+    %td
+      Location 2:
+    %td
+      %b
+        =@response.checklist_locations.last.name
+  %tr
+    %td
+      Target Entity:
+    %td
+      %b
+        =@response.target_entity.name
+
+
+
+
+
+-@sections.each do |section|
+  %hr
+    %p{:style=>"font-size:20px"}
+      %b
+        %u.section_block
+          =section.name
+      %br
+    %p
+      =section.instructions
+    %table.form
+      -section.checkpoints.each_with_index do |checkpoint,index|
+        %tr.question_cell
+          %td
+            -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+            =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
+          %td
+            =checkpoint.name
+    %table
+      -section.free_texts.each do |free_text|
+        %tr.question_cell
+          %td
+            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+            =free_text.name
+        %tr
+          %td
+            =text_area free_text_filling.comment,:disabled=>true, :class=>"full_width"
+
+
+
+
+
+
+%h4
+  =link_to "Back",url("browse/index")

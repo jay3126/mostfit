@@ -1,0 +1,16 @@
+%h1
+  Dropdownpoints controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/dropdownpoints/index.html.erb
+%table
+  %tr
+  - for dropdownpoint in @dropdownpoints
+    %tr
+      %td
+        = link_to 'Show', url(:dropdownpoint, dropdownpoint)
+      %td
+        = link_to 'Edit', url(:edit_dropdownpoint,  dropdownpoint)
+
+= link_to 'New', url(:new_dropdownpoint)

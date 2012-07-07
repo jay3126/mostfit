@@ -1,0 +1,13 @@
+%h1 ChecklistLocations controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/checklist_locations/new.html.erb
+
+= error_messages_for @checklist_location
+
+= form_for(@checklist_location, :action => url(:checklist_locations) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:checklist_locations)

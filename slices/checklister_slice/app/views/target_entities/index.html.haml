@@ -1,0 +1,16 @@
+%h1
+  TargetEntities controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/target_entities/index.html.erb
+%table
+  %tr
+  - for target_entity in @target_entities
+    %tr
+      %td
+        = link_to 'Show', url(:target_entity, target_entity)
+      %td
+        = link_to 'Edit', url(:edit_target_entity,  target_entity)
+
+= link_to 'New', url(:new_target_entity)

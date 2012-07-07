@@ -1,0 +1,15 @@
+%h1
+  Sections controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/sections/edit.html.erb
+= error_messages_for @section
+
+= form_for(@section, :action => url(:section, @section)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:section, @section)
+|
+= link_to 'Back', url(:sections)

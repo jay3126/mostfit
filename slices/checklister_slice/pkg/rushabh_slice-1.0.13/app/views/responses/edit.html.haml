@@ -1,0 +1,15 @@
+%h1
+  Responses controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/responses/edit.html.erb
+= error_messages_for @response
+
+= form_for(@response, :action => url(:response, @response)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:response, @response)
+|
+= link_to 'Back', url(:responses)

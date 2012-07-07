@@ -1,0 +1,23 @@
+%style
+  td{
+  border:1px solid black
+  }
+
+%h1
+  List of All Checklist Types
+%table{:style=>"border:1px solid black"}
+  %tr
+    %td
+      Name
+    %td
+      Links
+      - for checklist_type in @checklist_types
+        %tr
+          %td
+            = checklist_type.name
+          %td
+            = link_to 'Show', url(:checklist_type, checklist_type)
+          %td
+            = link_to 'Edit', url(:edit_checklist_type,  checklist_type)
+
+%a{:name => "New", :href => url(:new_rushabh_slice_checklist_type), :title => "New"}= "New"

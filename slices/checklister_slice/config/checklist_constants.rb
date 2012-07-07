@@ -1,0 +1,1 @@
+ROLE_MAPPER={:performer => "operator,staff", :viewer => "operator", :both => "operator"}

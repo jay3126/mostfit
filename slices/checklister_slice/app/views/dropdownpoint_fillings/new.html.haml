@@ -1,0 +1,13 @@
+%h1 DropdownpointFillings controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/dropdownpoint_fillings/new.html.erb
+
+= error_messages_for @dropdownpoint_filling
+
+= form_for(@dropdownpoint_filling, :action => url(:dropdownpoint_fillings) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:dropdownpoint_fillings)

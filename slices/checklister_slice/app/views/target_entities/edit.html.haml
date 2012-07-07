@@ -1,0 +1,15 @@
+%h1
+  TargetEntities controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/target_entities/edit.html.erb
+= error_messages_for @target_entity
+
+= form_for(@target_entity, :action => url(:target_entity, @target_entity)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:target_entity, @target_entity)
+|
+= link_to 'Back', url(:target_entities)

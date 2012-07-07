@@ -1,0 +1,13 @@
+%h1 FreeTextFillings controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/free_text_fillings/new.html.erb
+
+= error_messages_for @free_text_filling
+
+= form_for(@free_text_filling, :action => url(:free_text_fillings) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:free_text_fillings)

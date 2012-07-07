@@ -145,6 +145,7 @@ Merb::Router.prepare do
 
   # maintainer slice
   slice(:maintainer, :path_prefix => "maintain")
+  add_slice(:checklister_slice,:path_prefix=>"check")
 
   slice(:merb_auth_slice_password, :name_prefix => nil, :path_prefix => "")
   match('/search(/:action)').to(:controller => 'searches')

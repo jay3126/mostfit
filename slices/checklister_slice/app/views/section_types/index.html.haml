@@ -1,0 +1,16 @@
+%h1
+  SectionTypes controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/section_types/index.html.erb
+%table
+  %tr
+  - for section_type in @section_types
+    %tr
+      %td
+        = link_to 'Show', url(:section_type, section_type)
+      %td
+        = link_to 'Edit', url(:edit_section_type,  section_type)
+
+= link_to 'New', url(:new_section_type)

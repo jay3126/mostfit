@@ -1,0 +1,13 @@
+%h1 FreeTexts controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/free_texts/new.html.erb
+
+= error_messages_for @free_text
+
+= form_for(@free_text, :action => url(:free_texts) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:free_texts)

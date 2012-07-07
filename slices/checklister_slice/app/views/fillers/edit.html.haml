@@ -1,0 +1,15 @@
+%h1
+  Fillers controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/fillers/edit.html.erb
+= error_messages_for @filler
+
+= form_for(@filler, :action => url(:filler, @filler)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:filler, @filler)
+|
+= link_to 'Back', url(:fillers)

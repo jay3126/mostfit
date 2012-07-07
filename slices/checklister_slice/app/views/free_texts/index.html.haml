@@ -1,0 +1,16 @@
+%h1
+  FreeTexts controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/free_texts/index.html.erb
+%table
+  %tr
+  - for free_text in @free_texts
+    %tr
+      %td
+        = link_to 'Show', url(:free_text, free_text)
+      %td
+        = link_to 'Edit', url(:edit_free_text,  free_text)
+
+= link_to 'New', url(:new_free_text)

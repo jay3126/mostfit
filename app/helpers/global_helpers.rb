@@ -47,6 +47,40 @@ module Merb
       return link_to(text,path,params) if session.user.can_access?(route, params)
     end
 
+    # The function returns a url pointing to a checklist type
+    # @param [String]      name - name of the checklist
+    # @param [Object]      target_entity - object can be loan_file, bizlocation
+    # @param [BizLocation] location1 - location1 object equivalent of branch
+    # @param [BizLocation] location2 - location2 object equivalent of center
+    # @param [StaffMember] staff_member - staffmember object 
+    # @param [Date]        date - date when the checklist is supposed to be recorded
+    # @param [Hash]        local_params - the params available on the web page
+    # @param [Fixnum]      no of loan applications in case of a loan file
+    def url_for_checklist(name, target_entity, location1, location2, staff_member, date, local_params, no_of_applications = nil)
+      checklist_type = ChecklistType.first(:name => name)
+      raise NotFound if checklist_type.nil?
+      url(:checklister_slice_checklists,
+          :checklist_area           => checklist_type.name,
+          :checklist_type_id        => checklist_type.id,
+          :checklist_master_version => '1.0',
+          :target_entity_type       => target_entity.class.to_s,
+          :target_entity_name       => (target_entity.name if target_entity.send(:name)),
+          :target_entity_id         => target_entity.id,
+          :loc1_type                => "branch",
+          :loc1_name                => location1.name,
+          :loc1_id                  => location1.id,
+          :loc2_type                => "center",
+          :loc2_name                => location2.name,
+          :loc2_id                  => location2.id,
+          :staff_id                 => staff_member.id,
+          :staff_name               => staff_member.name,
+          :staff_role               => staff_member.user.role,
+          :no_of_applications       => no_of_applications,
+          :effective_date           => date.strftime("%Y-%m-%d"),
+          :referral_url             => url(local_params)
+          )
+    end
+    
     def url_for_loan(loan, action = '', opts = {})
       # this is to generate links to loans, as the resouce method doesn't work for descendant classes of Loan
       # it expects the whole context (@branch, @center, @client) to exist

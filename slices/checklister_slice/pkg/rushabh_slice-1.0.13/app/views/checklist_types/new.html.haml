@@ -1,0 +1,12 @@
+%h1
+  New CheckList Type
+
+= form_for(@checklist_type, :action => url(:rushabh_slice_checklist_types) ) do
+  %p
+    Name Of checklist
+
+  %p
+    = text_field :name
+  %p
+    = submit "Create"
+

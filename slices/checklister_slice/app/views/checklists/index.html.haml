@@ -1,0 +1,53 @@
+
+%h1.h1c
+  ="See All CheckLists for #{@checklist_type.name}"
+%h4
+  =#"To Be filled by #{params[:filler_record_id]}"
+
+%table.form
+  %tr
+  - for checklist in @checklists
+    %tr
+      %td{:width=>"240px"}
+        =checklist.name
+      %td{:width=>"150px"}
+        -parameter_hash=Hash.new
+        -parameter_hash[:loc1_type]=@loc1_type
+        -parameter_hash[:loc2_type]=@loc2_type
+        -parameter_hash[:loc2_name]=@loc2_name
+        -parameter_hash[:loc1_name]=@loc1_name
+
+        -parameter_hash[:loc1_id]=@loc1_id
+        -parameter_hash[:loc2_id]=@loc2_id
+
+        -parameter_hash[:target_entity_id]=@target_entity_id
+        -parameter_hash[:target_entity_type]=@target_entity_type
+        -parameter_hash[:target_entity_name]=@target_entity_name
+
+
+
+        -parameter_hash[:staff_id]=@staff_id
+        -parameter_hash[:staff_name]=@staff_name
+        -parameter_hash[:no_of_applications]=@no_of_applications
+        -parameter_hash[:effective_date]=@effective_date
+        -parameter_hash[:referral_url]=@referral_url
+
+
+
+
+        =perform_link(session.user.role,checklist,parameter_hash)
+
+      %td{:width=>"150px"}
+        =response_link(session.user.role,checklist)
+      %td{:width=>"150px"}
+
+
+=link_to "Back",params[:referral_url]
+
+
+%p
+  -if message
+    #flash-messages.span-17.prefix-5.suffix-5.last
+    -  message.each do |key, value|
+      .flash{ :class => key.to_s }
+        %p= value.gsub("\n", "<br/>")
