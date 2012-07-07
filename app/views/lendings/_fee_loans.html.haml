@@ -9,7 +9,7 @@
           %th
             id
           %th
-            On Date
+            Applied On
           %th
             Fee Type
           %th
@@ -22,6 +22,8 @@
             Amount
           %th
             Collect
+          %th
+            On Date
           %th
             By Staff
       - @fee_lendings.each do |fee|
@@ -42,6 +44,8 @@
             = fee.effective_total_amount(get_effective_date).to_s
           %td
             = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id
+          %td
+            = date_select "fee_lending[#{fee.id}][][fee_on_date]", fee.applied_on, {:id => "fee_#{fee.id}", :size=> "10", :min_date => fee.applied_on, :max_date => get_effective_date}
           %td
             = select :name => "fee_lending[#{fee.id}][][fee_by_staff]", :collection => StaffMember.all.collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
       %tfoot

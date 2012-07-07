@@ -306,24 +306,24 @@ class Lendings < Application
   end
 
   def save_lendings_fee
-    @message       = {}
-    fee_payments   = []
+    @message           = {}
+    fee_infos          = []
     fee_lending_params = params[:fee_lending]
     begin
       fee_lending_params.each do |key, value|
         if value.size == 2
           fee          = FeeInstance.get key
           fee_by_staff = value.last[:fee_by_staff]
-          fee_payments << {:fee_instance => fee, :fee_by_staff => fee_by_staff }
+          fee_on_date  = value.last[:fee_on_date]
+          fee_amt      = fee.effective_total_amount(get_effective_date)
+          fee_info     = FeeReceiptInfo.new(fee, fee_amt, fee_by_staff, fee_on_date)
+          fee_infos    << fee_info
         end
       end
-      @message = {:error => "Please select Fee for payment"} if fee_payments.blank?
+      @message = {:error => "Please select Fee for payment"} if fee_infos.blank?
       if @message[:error].blank?
-        fee_payments.each do |payment|
-          fee_instance = payment[:fee_instance]
-          payment_facade.record_fee_payment()
-          @message = {:notice => "Loan fee payment done successfully."}
-        end
+        payment_facade.record_fee_receipts(fee_infos)
+        @message = {:notice => "Loan fee payment done successfully."}
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
