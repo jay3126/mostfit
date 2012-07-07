@@ -356,6 +356,10 @@ class Lending
     FeeInstance.get_unpaid_fees_for_instance(self)
   end
 
+  def get_preclosure_penalty_product
+    SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
+  end
+
   ########
   # Fees # ends
   ########

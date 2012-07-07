@@ -46,7 +46,13 @@ class SimpleFeeProduct
   end
 
   def self.get_applicable_loan_fee_product_on_loan_product(loan_product_id)
-    get_applicable_fee_products_on_loan_product(loan_product_id)[Constants::Transaction::FEE_CHARGED_ON_LOAN]
+    fee_products = get_applicable_fee_products_on_loan_product(loan_product_id)
+    fee_products ? fee_products[Constants::Transaction::FEE_CHARGED_ON_LOAN] : nil
+  end
+
+  def self.get_applicable_preclosure_penalty(loan_product_id)
+    fee_products = get_applicable_fee_products_on_loan_product(loan_product_id)
+    fee_products ? fee_products[Constants::Transaction::PRECLOSURE_PENALTY_ON_LOAN] : nil
   end
 
   def self.get_applicable_premium_on_insurance_product(insurance_product_id)
