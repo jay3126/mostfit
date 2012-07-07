@@ -58,8 +58,8 @@ module Merb
     # @param [Fixnum]      no of loan applications in case of a loan file
     def url_for_checklist(name, target_entity, location1, location2, staff_member, date, local_params, no_of_applications = nil)
       checklist_type = ChecklistType.first(:name => name)
-      raise NotFound if checklist_type.nil?
-      url(:checklister_slice_checklists,
+      unless checklist_type.blank?
+        url(:checklister_slice_checklists,
           :checklist_area           => checklist_type.name,
           :checklist_type_id        => checklist_type.id,
           :checklist_master_version => '1.0',
@@ -78,7 +78,8 @@ module Merb
           :no_of_applications       => no_of_applications,
           :effective_date           => date.strftime("%Y-%m-%d"),
           :referral_url             => url(local_params)
-          )
+        )
+      end
     end
     
     def url_for_loan(loan, action = '', opts = {})
@@ -604,11 +605,11 @@ module Merb
         accounts.sort_by{|a| a.name}.each{|a| collection << [a.id.to_s, "!!!!!!!!!#{a.name}"] }
       end
       html = select(
-                    :collection   => collection,
-                    :name         => name,
-                    :id           => attrs[:id],
-                    :selected     => attrs[:selected],
-                    :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
+        :collection   => collection,
+        :name         => name,
+        :id           => attrs[:id],
+        :selected     => attrs[:selected],
+        :prompt       => (attrs[:prompt] or "&lt;select a account&gt;"))
       html.gsub('!!!', '&nbsp;')  # otherwise the &nbsp; entities get escaped
     end
     
@@ -731,9 +732,9 @@ module Merb
     # get all nominal centers
     def get_all_nominal_centers(branch_id)
       if branch_id
-      biz_location = BizLocation.get branch_id
-      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-      location_facade.get_children biz_location
+        biz_location = BizLocation.get branch_id
+        location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+        location_facade.get_children biz_location
       else
         []
       end
