@@ -17,10 +17,7 @@ class PaymentFacade < StandardFacade
   end
 
   def record_fee_receipts(fee_receipt_info_list)
-    fee_receipt_info_list { |fee_receipt_info|
-      # TODO record each fee instance received as a fee receipt
-      p fee_receipt_info
-    }
+    fee_receipt_manager.record_fee_receipts(*fee_receipt_info_list)
   end
 
   def record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
@@ -41,6 +38,10 @@ class PaymentFacade < StandardFacade
 
   def accounting_facade
     @accounting_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::ACCOUNTING_FACADE, self)
+  end
+
+  def fee_receipt_manager
+    @fee_receipt_manager ||= FeeReceiptManager.new(@for_user.id)
   end
 
 end
