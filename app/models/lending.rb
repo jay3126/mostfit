@@ -4,6 +4,7 @@ class Lending
   include Constants::Money, Constants::Loan, Constants::LoanAmounts, Constants::Properties, Constants::Transaction
   include Validators::Arguments
   include MarkerInterfaces::Recurrence
+  include LoanUtility
 
   property :id,                             Serial
   property :lan,                            *UNIQUE_ID
@@ -548,6 +549,10 @@ class Lending
     end
   end
 
+  def setup_insurance_policies
+    #TODO
+  end
+
   def disburse(by_disbursement_transaction)
     Validators::Arguments.not_nil?(by_disbursement_transaction)
 
@@ -598,6 +603,18 @@ class Lending
 
   def get_loan_fee_product
     SimpleFeeProduct.get_applicable_fee_products_on_loan_product(self.lending_product.id)
+  end
+
+  def get_insurance_products_and_premia
+    insurance_products_and_premia = {}
+    insurance_products_on_loan = self.lending_product.simple_insurance_products
+    insurance_products_on_loan.each { |insurance_product|
+      premium_map = SimpleFeeProduct.get_applicable_premium_on_insurance_product(insurance_product.id)
+      premium_fee_product = premium_map[Constants::Transaction::PREMIUM_COLLECTED_ON_INSURANCE]
+      raise Errors::InvalidConfigurationError, "An insurance premium has not been configured for the insurance product: #{insurance_product.to_s}" unless premium_fee_product
+      insurance_products_and_premia[insurance_product] = premium_fee_product
+    }
+    insurance_products_and_premia
   end
 
   def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
