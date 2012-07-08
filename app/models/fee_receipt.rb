@@ -17,6 +17,8 @@ class FeeReceipt
 
   belongs_to :fee_instance
 
+  def performed_by_staff; StaffMember.get self.performed_at; end;
+
   def money_amounts; [ :fee_amount ]; end
   
   def fee_money_amount; to_money_amount(:fee_amount); end

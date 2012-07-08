@@ -70,6 +70,8 @@
       Schedule
     %li#Transactions
       Transactions
+    %li#Fee_instance
+      Fee Instance
     %li#Accruals
       Accruals
     %li#due_status
@@ -81,6 +83,8 @@
       =partial "lendings/lending_schedule"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_transactions, :id => @lending.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :fee_instances, :action => :fee_instance_on_lending, :lending_id => @lending.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_accrual_transaction, :id => @lending.id)}
   %div.tab

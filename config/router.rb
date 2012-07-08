@@ -68,6 +68,7 @@ Merb::Router.prepare do
   resources :payment_transactions, :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get], :payment_form_for_lending => [:get]}
   resources :designations
   resources :user_roles
+  resources :fee_instances, :collection => {:fee_instance_on_lending => [:get]}
   resources :rules, :id => %r(\d+)
   resources :bookmarks
   resources :audit_items
