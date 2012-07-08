@@ -13,6 +13,7 @@ class SimpleInsuranceProducts < Application
 
     #GET-KEEPING
     name          = params[:simple_insurance_product][:name]
+    insured_type  = params[:simple_insurance_product][:insured_type]
     insurance_for = params[:simple_insurance_product][:insurance_for]
     created_on    = params[:simple_insurance_product][:created_on]
 
@@ -24,7 +25,7 @@ class SimpleInsuranceProducts < Application
     #PERFORM OPERTION
     begin
       if @message[:error].blank?
-        insurance = SimpleInsuranceProduct.new(:name => name, :insurance_for => insurance_for, :created_on => created_on)
+        insurance = SimpleInsuranceProduct.new(:name => name, :insured_type => insured_type, :insurance_for => insurance_for, :created_on => created_on)
         if insurance.save
           fee = SimpleFeeProduct.get params[:fee_product_id]
           fee.update(:simple_insurance_product_id => insurance.id) unless fee.blank?

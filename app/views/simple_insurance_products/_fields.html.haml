@@ -6,6 +6,11 @@
       = text_field :name
   %tr
     %td
+      Insurance Type
+    %td
+      = select :insured_type, :collection => Constants::Insurance::INSURANCE_TYPES.map{|f| [f.to_s]}
+  %tr
+    %td
       Insurance For
     %td
       = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|f| [f.to_s]}

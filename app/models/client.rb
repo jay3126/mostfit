@@ -46,7 +46,7 @@ class Client
   property :religion,                 Enum.send('[]', *RELIGION_CHOICE), :nullable => true, :default => DEFAULT_RELIGION
   property :created_by_staff_member_id,  Integer, :nullable => false
 
-  has n, :insurance_policies
+  has n, :simple_insurance_policies
   has n, :attendances
   has n, :claims
 

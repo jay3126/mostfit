@@ -725,6 +725,7 @@ FactoryGirl.define do
 
   factory :simple_insurance_product do
     name                { "#{Factory.next(:name)}" + " insurance product"}
+    insured_type        Constants::Insurance::LIFE_INSURANCE
     insurance_for       { Constants::Insurance::INSURED_CLIENT }
     created_on          { EARLIEST_DATE_CHOICE }
   end

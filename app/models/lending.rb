@@ -59,6 +59,7 @@ class Lending
   has n, :loan_status_changes
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
+  has n, :simple_insurance_policies
 
   # Creates a new loan
   def self.create_new_loan(
@@ -538,6 +539,7 @@ class Lending
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
     setup_fee_instances
+    setup_insurance_policies
   end
 
   def setup_fee_instances
@@ -550,7 +552,10 @@ class Lending
   end
 
   def setup_insurance_policies
-    #TODO
+    insurance_products = get_insurance_products_and_premia.keys
+    insurance_products.each { |product|
+      SimpleInsurancePolicy.setup_proposed_insurance(self.scheduled_disbursal_date, product, self.borrower, self)
+    }
   end
 
   def disburse(by_disbursement_transaction)
