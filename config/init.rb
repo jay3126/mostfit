@@ -269,13 +269,6 @@ Merb::BootLoader.after_app_loads do
     
   Mfi.activate
 
-  if defined?(PhusionPassenger)
-    PhusionPassenger.on_event(:starting_worker_process) do |forked|
-      if forked
-        DirtyLoan.start_thread
-      end
-    end
-  end
 
   # This is to save all the loan_products as we have changed loan_type ENUM to loan_type_string.
   begin
