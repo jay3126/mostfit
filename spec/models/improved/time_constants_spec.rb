@@ -163,4 +163,17 @@ describe Constants::Time do
 
   end
 
+  it "should order dates as expected" do
+    today = Date.today
+    day_before_yesterday = today - 2
+    day_after_tomorrow   = today + 2
+
+    Constants::Time.ordered_dates(today, day_before_yesterday).should == [day_before_yesterday, today]
+    Constants::Time.ordered_dates(today, today).should == [today, today]
+    Constants::Time.ordered_dates(day_before_yesterday, today).should == [day_before_yesterday, today]
+    Constants::Time.ordered_dates(day_after_tomorrow, day_after_tomorrow).should == [day_after_tomorrow, day_after_tomorrow]
+    Constants::Time.ordered_dates(day_after_tomorrow, today).should == [today, day_after_tomorrow]
+  
+  end
+
 end

@@ -72,6 +72,10 @@ module Constants
       from_date + number_of_days
     end
 
+    def self.ordered_dates(from_date, to_date)
+      [from_date, to_date].sort
+    end
+
     # Finds the date from the series of dates that immediately precedes the
     # specified date
     # If this date is on the series of dates, it returns the same date and not an earlier date

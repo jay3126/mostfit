@@ -22,7 +22,6 @@ class FeeReceipt
   def fee_money_amount; to_money_amount(:fee_amount); end
 
   def self.record_fee_receipt(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
-    debugger
     Validators::Arguments.not_nil?(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
     fee_receipt_values = {}
     

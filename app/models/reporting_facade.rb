@@ -201,6 +201,19 @@ class ReportingFacade < StandardFacade
     {:count => count, :total_amount => sum_money_amount}
   end
 
+  def aggregate_fee_receipts_by_branches_on_date(on_date, till_date = on_date, *at_branch_ids_ary)
+    debugger
+    from_date, to_date = Constants::Time.ordered_dates(on_date, till_date)
+    query = {:effective_on.gte => from_date, :effective_on.lte => to_date}
+    query[:accounted_at] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    query_results = FeeReceipt.all(query)
+
+    count = query_results.count
+    sum_amount = query_results.aggregate(:fee_amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
   def loans_by_centers_for_status_on_date(for_status, on_date, *at_center_ids_ary)
     loan_status, date_to_query, amount_to_sum = LoanLifeCycle::STATUSES_DATES_SUM_AMOUNTS[for_status]
     query = {:status => loan_status, date_to_query => on_date}
