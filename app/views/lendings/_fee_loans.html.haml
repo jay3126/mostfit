@@ -43,7 +43,7 @@
           %td
             = fee.effective_total_amount(get_effective_date).to_s
           %td
-            = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id
+            = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id, :disabled => !fee.loan_on_fee_instance.is_outstanding?
           %td
             = date_select "fee_lending[#{fee.id}][][fee_on_date]", fee.applied_on, {:id => "fee_#{fee.id}", :size=> "10", :min_date => fee.applied_on, :max_date => get_effective_date}
           %td
