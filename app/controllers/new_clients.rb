@@ -280,4 +280,10 @@ class NewClients < Application
     redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{loan_file_id}"), :message => message
   end
 
+  def client_insurance_policies
+    @client = Client.get params[:id]
+    @policies = @client.simple_insurance_policies
+    render :template => 'simple_insurance_policies/index', :layout => layout?
+  end
+
 end

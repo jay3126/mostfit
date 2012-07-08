@@ -1,0 +1,9 @@
+- @policy = @policy.blank? ? SimpleInsurancePolicy.new : @policy
+%h1 Insurance Policy
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
+= form_for(@policy, :action => :create) do
+  = partial :fields
+  = submit 'Save'
+  = link_to 'Cancel', request.referer, :class => "grey_button"

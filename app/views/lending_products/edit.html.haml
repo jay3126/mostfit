@@ -1,0 +1,8 @@
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
+%h1 Lending Product
+
+= form_for(@lending_product, :action => :update) do
+  = partial :fields
+  = submit "Update"

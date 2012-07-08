@@ -1,0 +1,36 @@
+:javascript
+  $('table.fee').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%h1 Insurance Policy
+= link_to "Add Insurance Policy", resource(:simple_insurance_policies, :new), :class => 'add grey_button'
+%br
+- if @policies.count == 0
+  %p
+    %i No Insurance Policy have been created yet.
+- else
+  %table.report.weeksheet.nojs.fee
+    %thead
+      %tr
+        %td
+          id
+        %td
+          Name
+        %td
+          Amount
+        %td
+          Expires On
+    - @policies.each do |policy|
+      %tr
+        %td
+          = policy.id
+        %td
+          = link_to_with_rights policy.insured_name, resource(policy)
+        %td
+          = policy.to_money[:insured_amount]
+        %td
+          = policy.expires_on
+    %tfoot
+      %tr
+        %td{ :colspan => 4 }

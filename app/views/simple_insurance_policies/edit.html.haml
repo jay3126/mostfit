@@ -1,0 +1,8 @@
+%h1 Insurance Policy
+- if @message && !@message[:error].blank?
+  .error
+    = @message[:error]
+= form_for(@policy, :action => url(:controller => :simple_insurance_policies, :action => :update, :id => @policy.id)) do
+  = partial :fields
+  = submit 'Update'
+  = link_to 'Cancel', request.referer, :class => "grey_button"

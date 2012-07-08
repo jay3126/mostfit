@@ -1,7 +1,7 @@
 class SimpleInsurancePolicy
   include DataMapper::Resource
   include Constants::Properties
-  include Constants::Insurance
+  include Constants::Insurance, Constants::Money
 
   property :id,            Serial
   property :insured_name,  String, :nullable => true
@@ -18,6 +18,8 @@ class SimpleInsurancePolicy
   belongs_to :simple_insurance_product
   belongs_to :client
   belongs_to :lending, :nullable => true
+
+  def money_amounts; [ :insured_amount ]; end
 
   def self.setup_proposed_insurance(proposed_on_date, from_insurance_product, on_client, on_loan = nil)
     Validators::Arguments.not_nil?(proposed_on_date, from_insurance_product, on_client)
