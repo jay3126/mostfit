@@ -37,17 +37,42 @@ class CenterCycles < Application
 
   def record_cgt
     @errors = []
+    all_three_dates = []
+    unique_dates = []
+
     # GATE-KEEPING
-    cgt_date_one = params[:cgt_date_one]
-    cgt_date_two = params[:cgt_date_two]
-    cgt_date_three = params[:cgt_date_three]
+    cgt_date_one_str = params[:cgt_date_one]
+    cgt_date_one = Date.parse(cgt_date_one_str)
+
+    cgt_date_two_str = params[:cgt_date_two]
+    cgt_date_two = Date.parse(cgt_date_two_str)
+    
+    cgt_date_three_str = params[:cgt_date_three]
+    cgt_date_three = Date.parse(cgt_date_three_str)
+
     cgt_performed_by_staff = params[:cgt_performed_by_staff]
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
-    
+
     # VALIDATIONS
+
+    # All three dates must be unique
+    all_three_dates = [cgt_date_one_str, cgt_date_two_str, cgt_date_three_str]
+    unique_dates = all_three_dates.uniq
+    @errors << "All three dates: CGT Date 1, CGT Date 2, CGT Date 3 must be different" unless all_three_dates.eql?(unique_dates)
+
+    # Future date validations
+    @errors << "CGT Date 1 must not be future date" if cgt_date_one > Date.today
+    @errors << "CGT Date 2 must not be future date" if cgt_date_two > Date.today
+    @errors << "CGT Date 3 must not be future date" if cgt_date_three > Date.today
+
+    # greater than and less than validations on all three dates
+    @errors << "CGT Date 2 must not be before CGT Date 1" if cgt_date_two < cgt_date_one
+    @errors << "CGT Date 3 must not be before CGT Date 2" if cgt_date_three < cgt_date_two
+    @errors << "CGT Date 3 must not be before CGT Date 1" if cgt_date_three < cgt_date_one
+
     @errors << "CGT recorded by must not be blank" if cgt_performed_by_staff.blank?
-    
+
     #OPERATIONS-PERFORMED
     if @errors.blank?
       begin
@@ -61,6 +86,8 @@ class CenterCycles < Application
       rescue => ex
         @errors << "An error has occurred: #{ex.message}"
       end
+    else
+      message = {:error => @errors.flatten.join(', ')}
     end
     redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
   end

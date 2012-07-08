@@ -1,11 +1,12 @@
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
-    .error
-      - @errors.keys.each do |lap_id|
-        - if @errors[lap_id]
-          = "#{@errors[lap_id]}"
-          %br
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
   - else
     - @errors.each do |error|
       .error
@@ -16,6 +17,12 @@
 
 %form{:action => url(:controller => :center_cycles, :action => :mark_cgt_grt), :method => :get}
   = partial "lib/biz_location_selector"
+
+- if @center
+  - if center_cycle_number.eql?(0)
+    %h3 No Center cycle currently exists for this center
+  - else
+    %h2= "Center Cycle Number: #{center_cycle_number}"
 
 - if @center_cycle
   - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil && @center_cycle.cgt_date_two == nil
