@@ -55,6 +55,10 @@
   %tr.odd
     %th.odd Accounted At
     %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
+  - unless @fee_instance.blank?
+    %tr.even
+      %th.even Fee Status
+      %td= @fee_instance.status(get_effective_date)
   - if @lending.is_outstanding_now?
     %tr.even
       %td

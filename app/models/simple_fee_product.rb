@@ -62,4 +62,8 @@ class SimpleFeeProduct
     applicable_premium_products
   end
 
+  def get_fee_instance_on_loan(loan_id)
+    self.fee_instances.first(:fee_applied_on_type => Constants::Fee::FEE_ON_LOAN, :fee_applied_on_type_id => loan_id)
+  end
+
 end

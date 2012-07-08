@@ -28,10 +28,16 @@ class FeeInstance
   belongs_to :simple_fee_product
   has 1, :fee_receipt
 
+  def status(on_date = Date.today)
+    amt = effective_total_amount(on_date).to_s
+    is_collected? ? "#{amt} Paid" : "#{amt} Unpaid"
+
+  end
+
   def administered_at_location; BizLocation.get(self.administered_at); end
   def accounted_at_location; BizLocation.get(self.accounted_at); end
 
-  def effective_total_amount(on_date)
+  def effective_total_amount(on_date = Date.today)
     self.simple_fee_product.effective_total_amount(on_date)
   end
 
