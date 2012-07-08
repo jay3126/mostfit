@@ -253,7 +253,31 @@ class NewClients < Application
     @center = BizLocation.get center_id
     @center_cycle_number = CenterCycle.get_current_center_cycle(center_id)
 
-    render
+    display @loan_file
+  end
+
+  def create_client_for_selected_loan_application
+    # INITIALIZATION
+    @errors = []
+
+    # GATE-KEEPING
+    loan_file_id = params[:loan_file_id]
+    loan_application_id = params[:loan_application_id]
+
+    # OPERATION PERFORMED
+    begin
+      loan_application = LoanApplication.get loan_application_id
+      loan_application.create_client
+      message = {:notice => "Successfully created client for Loan Application ID #{loan_application_id} as Client ID #{loan_application.client_id}"}
+    rescue => ex
+      @errors << "An error has occured for Loan Application ID #{loan_application_id}: #{ex.message}"
+    end
+    unless @errors.blank?
+      message = {:error => @errors.flatten.join(', ')}
+    end
+
+    # RE-DIRECT
+    redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{loan_file_id}"), :message => message
   end
 
 end
