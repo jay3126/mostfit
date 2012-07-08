@@ -243,4 +243,17 @@ class NewClients < Application
     redirect url(:controller => :new_clients, :action => :show, :id => id)
   end
 
+  def create_clients_for_loan_file
+    loan_file_id = params[:loan_file_id]
+    raise NotFound, "Loan file not found" if loan_file_id.blank?
+    @loan_file = LoanFile.get loan_file_id
+    branch_id = @loan_file.at_branch_id
+    @branch = BizLocation.get branch_id
+    center_id = @loan_file.at_center_id
+    @center = BizLocation.get center_id
+    @center_cycle_number = CenterCycle.get_current_center_cycle(center_id)
+
+    render
+  end
+
 end

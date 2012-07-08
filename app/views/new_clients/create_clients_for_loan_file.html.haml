@@ -1,0 +1,68 @@
+%h1
+  = "Create Clients from loan applications of Loan File #{@loan_file.loan_file_identifier}"
+.menu-strip
+  %h3
+    = "Branch: #{@branch.name}"
+    |
+    = "Center: #{@center.name}"
+    |
+    = "Status: #{@loan_file.health_check_status}"
+    |
+    = "Center Cycle Number: #{@center_cycle_number}"
+%hr
+
+.shaded
+  %h2 Loan Applications
+  - unless @loan_file.loan_applications.blank?
+    %table.dataTable.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "ID"
+          %th
+            = "Name"
+          %th
+            = "Guarantor Name"
+          %th
+            = "Applicant Birth Date"
+          %th
+            = "Ration Card No."
+          %th
+            = "Voter Card No."
+          %th
+            = "Amount"
+          %th
+            = "Address"
+          %th
+            = "State"
+          %th
+            = "Pincode"
+          %th
+            = "Status"
+      %tbody
+        - @loan_file.loan_applications.each do |lap|
+          %tr
+            %td
+              = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
+            %td
+              = lap.client_name
+            %td
+              = lap.client_guarantor_name
+            %td
+              = lap.client_dob
+            %td
+              = lap.client_reference1
+            %td
+              = lap.client_reference2
+            %td
+              = lap.loan_money_amount.to_s
+            %td
+              = lap.client_address
+            %td
+              = lap.client_state.humanize
+            %td
+              = lap.client_pincode
+            %td
+              = lap.status.humanize rescue nil
+  - else
+    %h3 No loan applications
