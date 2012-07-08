@@ -168,6 +168,31 @@ class ReportingFacade < StandardFacade
   def loans_disbursed_by_centers_on_date(on_date, *at_center_ids_ary)
     loans_by_centers_for_status_on_date(:disbursed, on_date, *at_center_ids_ary)
   end
+
+  def all_aggregate_fee_receipts_by_branches(on_date, till_date = on_date, *at_branch_ids_ary)
+    from_date, to_date = Constants::Time.ordered_dates(on_date, till_date)
+    query = {:effective_on.gte => from_date, :effective_on.lte => to_date}
+    query[:accounted_at] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    query_results = FeeReceipt.all(query)
+
+    count = query_results.count
+    sum_amount = query_results.aggregate(:fee_amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  def aggregate_fee_receipts_on_loans_by_branches(on_date, till_date = on_date, *at_branch_ids_ary)
+    from_date, to_date = Constants::Time.ordered_dates(on_date, till_date)
+    query = {:effective_on.gte => from_date, :effective_on.lte => to_date}
+    query[:fee_applied_on_type] = Constants::Fee::FEE_ON_LOAN
+    query[:accounted_at] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    query_results = FeeReceipt.all(query)
+
+    count = query_results.count
+    sum_amount = query_results.aggregate(:fee_amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
   
   private
 
@@ -197,19 +222,6 @@ class ReportingFacade < StandardFacade
 
     count = query_results.count
     sum_amount = query_results.aggregate(amount_to_sum)
-    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
-    {:count => count, :total_amount => sum_money_amount}
-  end
-
-  def aggregate_fee_receipts_by_branches_on_date(on_date, till_date = on_date, *at_branch_ids_ary)
-    debugger
-    from_date, to_date = Constants::Time.ordered_dates(on_date, till_date)
-    query = {:effective_on.gte => from_date, :effective_on.lte => to_date}
-    query[:accounted_at] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
-    query_results = FeeReceipt.all(query)
-
-    count = query_results.count
-    sum_amount = query_results.aggregate(:fee_amount.sum)
     sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
     {:count => count, :total_amount => sum_money_amount}
   end
