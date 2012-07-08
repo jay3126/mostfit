@@ -37,8 +37,28 @@ class SimpleInsurancePolicy
     proposed_insurance[:lending]                  = on_loan if on_loan
     insurance_policy = create(proposed_insurance)
     raise Errors::DataError, insurance_policy.errors.first.first unless insurance_policy.saved?
+    insurance_policy.setup_insurance_premium_fee
     insurance_policy
   end
 
+  def administered_at_id
+    administered_at = ClientAdministration.get_administered_at(self.client, self.proposed_on)
+    administered_at ? administered_at.id : nil
+  end
+
+  def accounted_at_id
+    accounted_at = ClientAdministration.get_registered_at(self.client, self.proposed_on)
+    accounted_at ? accounted_at.id : nil
+  end
+
+  def setup_insurance_premium_fee
+    get_insurance_premium_fee_product.values.each { |premium|
+      FeeInstance.register_fee_instance(premium, self, self.administered_at_id, self.accounted_at_id, self.proposed_on)
+    }
+  end
+
+  def get_insurance_premium_fee_product
+    SimpleFeeProduct.get_applicable_premium_on_insurance_product(self.simple_insurance_product.id)
+  end
 
 end
