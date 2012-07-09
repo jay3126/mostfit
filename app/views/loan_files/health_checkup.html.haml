@@ -63,6 +63,12 @@
       %table.narrow.form{:style => "width:100%;"}
         %tfoot
           %tr
+            %td
+              %b= "Approved by:"
+              = select :health_check_approved_by, :text_method => :name, :value_method => :id, :collection => choice_facade.all_staff_at_location(@center.id, get_effective_date), :prompt => "Select staff member"
+              %td
+                %b= "Approved on:"
+                = date_select :health_check_approved_on, Date.today
             %td{:style=>"text-align : right"}
               = submit "Save all"
               %input{:value => "Reset all", :type => "reset"}

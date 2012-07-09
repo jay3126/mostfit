@@ -151,34 +151,54 @@ class LoanFiles < Application
     # GATE-KEEPING
     branch_id = get_param_value(:parent_location_id)
     center_id = get_param_value(:child_location_id)
-
+    approved_by = params[:health_check_approved_by]
+    approved_on_str = params[:health_check_approved_on]
+    
     # VALIDATIONS
     unless params[:flag] == "true"
       @errors << "No branch selected" unless branch_id
       @errors << "No center selected" unless center_id
     end
+    
+    unless center_id.blank?
+      approved_on = Date.parse(approved_on_str) unless approved_on_str.blank?
+      @errors << "Approved by must not be blank" if approved_by && approved_by.blank?
+      @errors << "Approved on date must not be future date" if approved_on && approved_on > Date.today
+    end
 
     # FETCH RESPONSE VARIABLES FROM PRIVATE METHOD
     fetch_loan_files_for_branch_and_center(params)
-
     # OPERATION PERFORMED
     if @errors.blank? && !params[:loan_files].nil?
-      loan_files =  params[:loan_files]
-      loan_files.keys.each do |loan_file_id|
-        loan_file = LoanFile.get(loan_file_id)
-        remark_condition = loan_files[loan_file_id][:health_status_remark].blank? && !loan_file.health_status_remark.blank? || loan_files[loan_file_id][:health_status_remark]
-        health_remark = remark_condition ? loan_files[loan_file_id][:health_status_remark] : loan_file.health_status_remark
-        health_status = !loan_files[loan_file_id][:health_check_status].blank? ? loan_files[loan_file_id][:health_check_status] : loan_file.health_check_status
-        pending_or_new_status = health_status == Constants::Status::HEALTH_CHECK_PENDING || health_status == Constants::Status::NEW_STATUS
-        if pending_or_new_status
-          if health_remark.blank?
-            @errors << "Provide remark to Loan file pending for health checkup"
+      begin
+        loan_files =  params[:loan_files]
+        loan_files.keys.each do |loan_file_id|
+          loan_file = LoanFile.get(loan_file_id)
+          remark_condition = loan_files[loan_file_id][:health_status_remark].blank? && !loan_file.health_status_remark.blank? || loan_files[loan_file_id][:health_status_remark]
+          health_remark = remark_condition ? loan_files[loan_file_id][:health_status_remark] : loan_file.health_status_remark
+          health_status = !loan_files[loan_file_id][:health_check_status].blank? ? loan_files[loan_file_id][:health_check_status] : loan_file.health_check_status
+          pending_or_new_status = health_status == Constants::Status::HEALTH_CHECK_PENDING || health_status == Constants::Status::NEW_STATUS
+          if pending_or_new_status
+            loan_file.health_status_remark = health_remark
+            loan_file.health_check_approved_by = approved_by
+            loan_file.health_check_approved_on = approved_on_str
+            if health_remark.blank?
+              @errors << "Provide remark to Loan file pending for health checkup"
+            else
+              loan_file.health_check_status = Constants::Status::HEALTH_CHECK_PENDING
+              loan_file.save
+              params.delete(:health_check_approved_by)
+              params.delete(:health_check_approved_on)
+            end
           else
-            loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_PENDING, :health_status_remark => health_remark )
+            loan_file.health_check_status = Constants::Status::HEALTH_CHECK_APPROVED
+            loan_file.save
+            params.delete(:health_check_approved_by)
+            params.delete(:health_check_approved_on)
           end
-        else
-          loan_file.update(:health_check_status => Constants::Status::HEALTH_CHECK_APPROVED, :health_status_remark => health_remark )
         end
+      rescue => ex
+        @errors << ex.message
       end
     end
 

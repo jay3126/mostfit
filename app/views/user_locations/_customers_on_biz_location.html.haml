@@ -18,7 +18,7 @@
   %p
     %i No Client Mapping have been created yet.
 - else
-  %table{:style => "width:730px;"}
+  %table{:style => "width:100%;"}
     %thead
       %tr
         %th
@@ -28,7 +28,7 @@
         %th
           Joining Date
   %div{:class => "demo"}
-    %ul{:id => "sortable"}
+    %ul{:id => "sortable", :style => "width:100%;"}
       - for customer in @customers
         %li{:class => "ui-state-default"}
           %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
