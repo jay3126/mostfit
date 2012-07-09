@@ -20,7 +20,7 @@ module Constants
       }
     }
 
-    ROLES_THAT_CAN_VIEW_ALL_LOCATIONS = [FINOPS, READ_ONLY]
+    ROLES_THAT_CAN_VIEW_ALL_LOCATIONS = [OPERATOR]
 
     VIEW_ACTIONS = ["index", "show"]
     MODIFY_ACTIONS = ["create", "new", "edit", "update", "destroy"]
