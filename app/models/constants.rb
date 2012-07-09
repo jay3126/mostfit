@@ -168,6 +168,13 @@ module Constants
     ]
   end
 
+  module ReferenceFormatValidations
+
+    FORMAT_REFERENCE1 = /^[A-Za-z0-9]+$/;
+    FORMAT_REFERENCE2 = /^[A-Za-z0-9]+$/
+
+  end
+
   module Verification
 
     CPV1 = 'cpv1'; CPV2 = 'cpv2'
