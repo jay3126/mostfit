@@ -9,7 +9,9 @@
     %li#disbursed_loans
       Disbursed Loans
     %li#fee_loans
-      Loan Fees
+      Fee Loans
+    %li#insurance_fee
+      Insurance Loans
   %div.tab
     =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
   %div.tab
@@ -18,4 +20,6 @@
     =partial "lendings/disburse_loans", :lendings => @disburse_lendings
   %div.tab
     =partial "lendings/fee_loans"
+  %div.tab
+    =partial "lendings/insurance_fee_loans"
  

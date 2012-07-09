@@ -358,6 +358,13 @@ class Lending
     FeeInstance.get_unpaid_fees_for_instance(self)
   end
 
+  def unpaid_loan_insurance_fees
+    policies = self.simple_insurance_policies
+    fee_instances = []
+    policies.each{|policy| fee_instances << FeeInstance.get_unpaid_fees_for_instance(policy)}
+    fee_instances.flatten
+  end
+
   def get_preclosure_penalty_product
     SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
   end
@@ -492,11 +499,11 @@ class Lending
 
     allocation = nil
     case loan_action
-      when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
-      when LOAN_REPAYMENT then allocation = repay(payment_transaction)
-      when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
-      else
-        raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
+    when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
+    when LOAN_REPAYMENT then allocation = repay(payment_transaction)
+    when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
+    else
+      raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
     process_allocation(payment_transaction, loan_action, allocation)
   end
