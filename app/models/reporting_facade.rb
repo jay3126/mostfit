@@ -24,6 +24,10 @@ class ReportingFacade < StandardFacade
   def all_outstanding_loans_on_date(on_date = Date.today)
     Lending.all.select{|loan| loan.is_outstanding_on_date?(on_date)}
   end
+  
+  def all_outstanding_loan_IDs_on_date(on_date = Date.today)
+    get_ids(all_outstanding_loans_on_date(on_date))
+  end
 
   # Outstanding loan balances
 
