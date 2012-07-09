@@ -16,17 +16,17 @@
           Location No. Count
         %th
           Created On
-    - for location_level in @location_levels
-      - @biz_locations = location_level.biz_locations
-      - @biz_locations.each do |biz_location|
-        %tr
-          %td
-            = biz_location.id
-          %td
-            = link_to_with_rights(biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id))
-          %td
-            = location_level.name
-          %td
-            = location_facade.get_children(biz_location, get_effective_date).count
-          %td
-            = location_level.creation_date
+    - @location_levels.each do |location_level, biz_locations|
+      - unless location_level.level == 0
+        - biz_locations.each do |biz_location|
+          %tr
+            %td
+              = biz_location.id
+            %td
+              = link_to_with_rights(biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id))
+            %td
+              = location_level.name
+            %td
+              = location_facade.get_children(biz_location, get_effective_date).count
+            %td
+              = location_level.creation_date
