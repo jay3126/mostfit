@@ -12,7 +12,7 @@
       %th.odd
         Amount
       %td
-        = Money.new(@lending_product.amount.to_i,:INR).amount
+        = @lending_product.to_money[:amount]
     %tr.even
       %th.even
         Interest rate
@@ -25,38 +25,53 @@
         = @lending_product.repayment_frequency
     %tr.even
       %th.even
-        Currency
-      %td
-        = @lending_product.currency
-    %tr.odd
-      %th.odd
         Tenure
       %td
         = @lending_product.tenure
-- unless @lendings.blank?
+    %tr.odd
+      %th.odd
+        Repayment Allocation Strategy
+      %td
+        = @lending_product.repayment_allocation_strategy.humanize
+    - fee = @lending_product.loan_fee
+    %tr.even
+      %th.even
+        Fee Product
+      %td
+        = fee.name unless fee.blank?
+    - insurances = @lending_product.simple_insurance_products
+    %tr.odd
+      %th.odd
+        Insurance Product
+      %td
+        = insurances.map(&:name).join(', ') unless insurances.blank?
+    - penality = @lending_product.loan_preclosure_penalty
+    %tr.even
+      %th.even
+        Preclosure Penality
+      %td
+        = penality.name unless penality.blank?
+- schedule_template_items = @lending_product.loan_schedule_template.schedule_template_line_items
+- unless schedule_template_items.blank?
   %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %td
-          Loan Id
+          Installment
         %td
-          Applied Date
+          Payment Type
         %td
-          Schedule Disbursal Date
+          Principal Amount
         %td
-          Schedule First Repayment Date
-        %td
-          Staff
+          Interest Amount
     %tbody.form
-      - @lendings.each do |lending|
+      - schedule_template_items.each do |item|
         %tr
           %td
-            = link_to_with_rights lending.lan, resource(lending)
+            = item.installment
           %td
-            = lending.applied_on_date
+            = item.payment_type.humanize
           %td
-            = lending.scheduled_disbursal_date
+            = item.to_money[:principal_amount]
           %td
-            = lending.scheduled_first_repayment_date
-          %td
-            = StaffMember.get(lending.applied_by_staff).name
+            = item.to_money[:interest_amount]
