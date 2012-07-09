@@ -4,7 +4,6 @@
       "bJQueryUI": true
     });
 %h1 Insurance Policy
-= link_to "Add Insurance Policy", resource(:simple_insurance_policies, :new), :class => 'add grey_button'
 %br
 - if @policies.count == 0
   %p
@@ -24,7 +23,7 @@
     - @policies.each do |policy|
       %tr
         %td
-          = policy.id
+          = link_to_with_rights policy.id, resource(policy)
         %td
           = link_to_with_rights policy.insured_name, resource(policy)
         %td

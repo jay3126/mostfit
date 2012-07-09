@@ -9,18 +9,18 @@
       Insured Type
     %td
       %span.greytext
-      = select :insured_type, :collection => Constants::Insurance::INSURANCE_TYPES.map{|c| [c.to_s, c.to_s.humanize]}
+      = @policy.insured_type.humanize
   %tr
     %th
       Insurance For
     %td
-      = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|c| [c.to_s, c.to_s.humanize]}
+      =@policy.insurance_for.humanize
   %tr
     %th
       Proposed On
     %td
       %span.greytext
-      = date_select_for @policy, :proposed_on
+      = @policy.proposed_on
   %tr
     %th
       Insured On
@@ -37,13 +37,7 @@
     %th
       Insured Amount
     %td
-      = text_field :insured_amount
-  %tr
-    %th
-      Currency
-    %td
-      %span.greytext
-      = select :currency, :collection => Constants::Money::CURRENCIES.map {|currency| [currency]}
+      = @policy.to_money[:insured_amount]
   %tr
     %th
       Issued Status
@@ -53,9 +47,9 @@
     %th
       Client
     %td
-      = select :name => 'client_id', :collection => Client.all.map{|c| [c.id, c.name]}, :selected => "#{@policy.client.blank? ? '' : @policy.client.id}"
+      = @policy.client.blank? ? '' : @policy.client.name
   %tr
     %th
       Insurance Product
     %td
-      = select :name => 'simple_insurance_product_id', :collection => SimpleInsuranceProduct.all.map{|p| [p.id, p.name]}, :selected => "#{@policy.simple_insurance_product.blank? ? '' : @policy.simple_insurance_product.id}"
+      = @policy.simple_insurance_product.blank? ? '' : @policy.simple_insurance_product.name

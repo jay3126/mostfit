@@ -1,6 +1,6 @@
-%h2 Paid Fee
-= partial 'paid_fee_instance', :fee_lendings => @fee_lendings.select{|s| s.is_collected?}
-%br
-%hr
 %h2 Unpaid Fee
 = partial 'unpaid_fee_instance', :fee_lendings => @fee_lendings.select{|s| !s.is_collected?}
+%br
+%hr
+%h2 Paid Fee
+= partial 'paid_fee_instance', :fee_lendings => @fee_lendings.select{|s| s.is_collected?}

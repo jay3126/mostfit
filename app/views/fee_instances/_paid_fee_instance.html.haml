@@ -14,6 +14,8 @@
         %th
           id
         %th
+          Name
+        %th
           Applied On
         %th
           Amount
@@ -25,6 +27,8 @@
       %tr
         %td
           = fee.id
+        %td
+          = fee.simple_fee_product.name
         %td
           = fee.applied_on
         %td

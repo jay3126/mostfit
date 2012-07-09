@@ -80,7 +80,7 @@
           %td
             = select :name => "lending[#{lending.id}][][approved_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}
           %td
-            = text_field :name => "lending[#{lending.id}][][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;"
+            = text_field :name => "lending[#{lending.id}][][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
