@@ -18,6 +18,7 @@ class SimpleInsurancePolicy
   belongs_to :simple_insurance_product
   belongs_to :client
   belongs_to :lending, :nullable => true
+  has n, :insurance_claims
 
   def money_amounts; [ :insured_amount ]; end
 
