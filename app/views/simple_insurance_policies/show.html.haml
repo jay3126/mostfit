@@ -1,56 +1,89 @@
 = link_to "Edit", resource(@policy, :edit), :class => 'add grey_button'
-%table.shaded
-  %tr
-    %th
+- fee_instances = FeeInstance.get_all_fees_for_instance(@policy)
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even
       Name
     %td
       = @policy.insured_name
-  %tr
-    %th
+  %tr.odd
+    %th.odd
       Insured Type
     %td
-      %span.greytext
       = @policy.insured_type.humanize
-  %tr
-    %th
+  %tr.even
+    %th.even
       Insurance For
     %td
       = @policy.insurance_for.humanize
-  %tr
-    %th
+  %tr.odd
+    %th.odd
       Proposed On
     %td
-      %span.greytext
       = @policy.proposed_on
-  %tr
-    %th
+  %tr.even
+    %th.even
       Insured On
     %td
-      %span.greytext
       = @policy.insured_on
-  %tr
-    %th
+  %tr.odd
+    %th.odd
       Expires On
     %td
-      %span.greytext
       = @policy.expires_on
-  %tr
-    %th
+  %tr.even
+    %th.even
       Insured Amount
     %td
       = @policy.to_money[:insured_amount]
-  %tr
-    %th
+  %tr.odd
+    %th.odd
       Issued Status
     %td
       = @policy.issued_status.humanize
-  %tr
-    %th
+  %tr.even
+    %th.even
       Client
     %td
       = "#{@policy.client.blank? ? '' : @policy.client.name}"
-  %tr
-    %th
+  %tr.odd
+    %th.odd
       Insurance Product
     %td
       = "#{@policy.simple_insurance_product.blank? ? '' : @policy.simple_insurance_product.name}"
+
+%h1 Fee Detail
+%br
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Id
+      %td
+        Name
+      %td
+        Amount
+      %td
+        Administered At
+      %td
+        Accounted At
+      %td
+        Applied On
+      %td
+        Status
+  - fee_instances.each do |fee|
+    %tr
+      %td
+        = fee.id
+      %td
+        = fee.simple_fee_product.name unless fee.simple_fee_product.blank?
+      %td
+        = fee.effective_total_amount(get_effective_date)
+      %td
+        = fee.administered_at_location.name
+      %td
+        = fee.accounted_at_location.name
+      %td
+        = fee.applied_on
+      %td
+        = fee.status(get_effective_date)

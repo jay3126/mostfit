@@ -58,7 +58,7 @@
   - unless @fee_instance.blank?
     %tr.even
       %th.even Fee Status
-      %td= @fee_instance.status(get_effective_date)
+      %td= @fee_instance.map(&:status).join(', ')
   - if @lending.is_outstanding_now?
     %tr.even
       %td
