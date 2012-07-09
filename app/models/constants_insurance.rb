@@ -14,5 +14,12 @@ module Constants
     INSURANCE_PROPOSED = :insurance_proposed
     INSURANCE_ISSUED_STATUSES = [INSURANCE_PROPOSED]
 
+    CLAIM_FILED       = :claim_filed
+    CLAIM_HONOURED    = :claim_honored
+    CLAIM_DISHONOURED = :claim_dishonored
+    CLAIM_RECALLED    = :claim_recalled
+    INSURANCE_CLAIM_STATUSES = [CLAIM_FILED, CLAIM_HONOURED, CLAIM_DISHONOURED, CLAIM_RECALLED]
+    DEFAULT_INSURANCE_CLAIM_STATUS = CLAIM_FILED
+
   end
 end

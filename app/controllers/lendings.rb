@@ -80,7 +80,7 @@ class Lendings < Application
     @lending_product   = @lending.lending_product
     @effective_date    = get_effective_date
     @lending_schedules = @lending.loan_base_schedule.base_schedule_line_items
-    @fee_instance      = @lending_product.loan_fee.get_fee_instance_on_loan(@lending.id) unless @lending_product.loan_fee.blank?
+    @fee_instance      = FeeInstance.get_all_fees_for_instance(@lending)
     display @lending
   end
 

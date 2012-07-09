@@ -60,7 +60,9 @@ class NewClients < Application
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
 
-    # VALIDATIONS
+    # remove leading and trailing spaces from reference-1 and reference-2
+    reference = reference.strip unless reference.blank?
+    reference2 = reference2.strip unless reference2.blank?
 
     # OPERATIONS PERFORMED
     begin
@@ -139,7 +141,9 @@ class NewClients < Application
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
 
-    # VALIDATIONS
+    # remove leading and trailing spaces from reference-1 and reference-2
+    reference = reference.strip unless reference.blank?
+    reference2 = reference2.strip unless reference2.blank?
 
     # OPERATIONS PERFORMED
     begin

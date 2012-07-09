@@ -137,6 +137,20 @@ class LoanApplications < Application
     center_cycle_number = params[:center_cycle_number].to_i
     center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
     loan_amount_str = params[:loan_application][:amount]
+    
+    # Match format of client reference1 and reference2, it should allow only alphanumeric value
+    format_reference1 = /^[A-Za-z0-9]+$/
+    format_reference2 = /^[A-Za-z0-9]+$/
+
+    unless reference1.blank?
+      is_reference1_format_matched = format_reference1.match reference1.strip
+      @message[:error] << "Reference-1 must be alphanumeric(allowed only: a-z, A-Z, 0-9)" if is_reference1_format_matched.nil?
+    end
+
+    unless reference2.blank?
+      is_reference2_format_matched = format_reference2.match reference2.strip
+      @message[:error] << "Reference-2 must be alphanumeric(allowed only: a-z, A-Z, 0-9)" if is_reference2_format_matched.nil?
+    end
 
     # VALIDATIONS
     @message[:error] << "Applicant name must not be blank" if name.blank?
@@ -152,6 +166,7 @@ class LoanApplications < Application
     @message[:error] << "Created by name must not be blank" if created_by.blank?
     @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
+
     # OPERATIONS-PERFORMED
     if @message[:error].blank?
       if request.method == :post
@@ -160,6 +175,8 @@ class LoanApplications < Application
         loan_amount_currency = loan_money_amount.currency
         params[:loan_application][:amount] = loan_amount
         params[:loan_application][:currency] = loan_amount_currency
+        params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
+        params[:loan_application][:client_reference2] = params[:loan_application][:client_reference2].strip
         params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id, :created_by_user_id => session.user.id}
         @loan_application = LoanApplication.new(params[:loan_application])
 
@@ -256,6 +273,11 @@ class LoanApplications < Application
 
   def update
     @loan_application = LoanApplication.get(params[:id])
+
+    # remove leading and trailing spaces from reference-1 and reference-2
+    params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
+    params[:loan_application][:client_reference2] = params[:loan_application][:client_reference2].strip
+
     loan_application = @loan_application.update(params[:loan_application])
     if loan_application
       redirect resource(@loan_application), :message => {:notice => "Loan application updated succesfully"}

@@ -45,6 +45,21 @@ class LoanAssignment
     assignment
   end
 
+  def self.assign_on_date(loan_id, to_assignment, on_date, recorded_by)
+    new_assignment                     = {}
+    new_assignment[:loan_id]           = loan_id
+    assignment_nature, assignment_id   = Resolver.resolve_loan_assignment(to_assignment)
+    new_assignment[:assignment_nature] = assignment_nature
+    new_assignment[:assignment_id]     = assignment_id
+    new_assignment[:assignment_status] = ASSIGNED
+    new_assignment[:effective_on]      = on_date
+    new_assignment[:recorded_by]       = recorded_by
+
+    assignment = create(new_assignment)
+    raise Errors::DataError, assignment.errors.first.first unless assignment.saved?
+    assignment
+  end
+
   # Finds the most recent assignment for loan on the date
   def self.get_loan_assigned_to(for_loan_id, on_date)
     for_loan_on_date = {}

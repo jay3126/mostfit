@@ -47,6 +47,7 @@ class Client
   property :created_by_staff_member_id,  Integer, :nullable => false
 
   has n, :simple_insurance_policies
+  has n, :death_events, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
   has n, :attendances
   has n, :claims
 
