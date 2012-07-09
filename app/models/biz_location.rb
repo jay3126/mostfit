@@ -96,7 +96,10 @@ class BizLocation
   end
 
   def self.map_by_level(*locations)
+    raise ArgumentError, "#{locations} are not valid arguments" unless (locations and locations.is_a?(Array) and (not (locations.empty?)))
     location_map = {}
+    locations.flatten!
+    return location_map if locations.empty?
     locations.each {|biz_location|
       level = biz_location.location_level
       level_list = location_map[level] ||= []
