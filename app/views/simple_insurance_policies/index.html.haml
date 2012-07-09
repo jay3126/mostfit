@@ -20,6 +20,8 @@
           Amount
         %td
           Expires On
+        %td
+          Status
     - @policies.each do |policy|
       %tr
         %td
@@ -30,6 +32,9 @@
           = policy.to_money[:insured_amount]
         %td
           = policy.expires_on
+        %td
+          - fee_instance = FeeInstance.first(:fee_applied_on_type => 'fee_on_insurance', :fee_applied_on_type_id => policy.id)
+          = fee_instance.status unless fee_instance.blank?
     %tfoot
       %tr
-        %td{ :colspan => 4 }
+        %td{ :colspan => 5 }

@@ -32,7 +32,7 @@ class FeeInstance
 
   def status(on_date = Date.today)
     amt = effective_total_amount(on_date).to_s
-    is_collected? ? "#{amt} Paid" : "#{amt} Unpaid"
+    is_collected? ? "#{amt} Paid on #{self.fee_receipt.effective_on}" : "#{amt} Unpaid"
 
   end
 
