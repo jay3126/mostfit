@@ -290,4 +290,43 @@ class NewClients < Application
     render :template => 'simple_insurance_policies/index', :layout => layout?
   end
 
+  def register_death_event
+    client_id = params[:client_id]
+    @client = Client.get client_id
+    display @client
+  end
+
+  def record_death_event
+    # INITIALIZATION
+    @errors = []
+
+    # GATE-KEEPING
+    client_id = params[:client_id]
+    @client = Client.get client_id
+    deceased_name = params[:deceased_name]
+    relationship_to_client = params[:relationship_to_client]
+    date_of_death_str = params[:date_of_death]
+    date_of_death = Date.parse(date_of_death_str) unless date_of_death_str.blank?
+    reported_on_str = params[:reported_on]
+    reported_on = Date.parse(reported_on_str) unless reported_on_str.blank?
+    recorded_by = params[:recorded_by]
+    reported_by = params[:reported_by]
+
+    # VALIDATIONS
+    @errors << "Deceased name must not be blank" if deceased_name.blank?
+    @errors << "Relationship to client must not be blank" if relationship_to_client.blank?
+    @errors << "Date of death must not be future date" if date_of_death > Date.today
+    @errors << "Reported on date must not be future date" if reported_on > Date.today
+    @errors << "Recorded by must not be blank" if recorded_by.blank?
+    @errors << "Reported by must not be blank" if reported_by.blank?
+
+    # OPERATIONS PERFORMED
+    if @errors.blank?
+      DeathEvent.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, client_id)
+      redirect url("new_clients/register_death_event?client_id=#{client_id}")
+    else
+      render :register_death_event
+    end
+  end
+
 end

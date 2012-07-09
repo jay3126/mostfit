@@ -1,0 +1,53 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
+%h1 Register death event
+.shaded
+  = form_for(@client, :action => url(:controller => :new_clients, :action => :record_death_event)) do
+    = hidden_field :name => "client_id", :value => @client.id
+    %table
+      %tr
+        %td
+          Deceased name
+        %td
+          = text_field :name => "deceased_name"
+      %tr
+        %td
+          Relationship to client
+        %td
+          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s]}, :prompt => "Select"
+      %tr
+        %td
+          Date of death
+        %td
+          = date_select :date_of_death, Date.today
+      %tr
+        %td
+          Reported on
+        %td
+          = date_select :reported_on, Date.today
+      %tr
+        %td
+          Reported by
+        %td
+          = select :name => "reported_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
+      %tr
+        %td
+          Recorded by
+        %td
+          = select :name => "recorded_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
+      %tr
+        %td
+          = submit 'Submit', :class => "greenButton"
+          = link_to 'Back', url("new_clients/show/#{@client.id}"), :class => "greenButton"
