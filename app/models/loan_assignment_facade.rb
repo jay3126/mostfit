@@ -32,6 +32,10 @@ class LoanAssignmentFacade < StandardFacade
   def assign(loan_id, to_assignment)
     LoanAssignment.assign(loan_id, to_assignment, for_user.id)
   end
+  
+  def assign_on_date(loan_id, to_assignment, on_date)
+    LoanAssignment.assign(loan_id, to_assignment, on_date, for_user.id)
+  end
 
   def create_securitization(by_name, effective_on, for_third_parties, performed_by, for_user)
     #TODO
