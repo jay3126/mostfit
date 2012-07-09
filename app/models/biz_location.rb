@@ -94,5 +94,16 @@ class BizLocation
       BizLocation.all(:conditions => ["name=? or name like ?", q, q+'%'], :limit => per_page)
     end
   end
+
+  def self.map_by_level(*locations)
+    location_map = {}
+    locations.each {|biz_location|
+      level = biz_location.location_level
+      level_list = location_map[level] ||= []
+      level_list.push(biz_location)
+      location_map[level] = level_list
+    }
+    location_map
+  end
   
 end
