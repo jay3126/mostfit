@@ -26,12 +26,16 @@
       Ration Card
     %td
       = text_field :reference, :size => 40
+      %span.greytext
+        (allowed only: a-z, A-Z, 0-9)
       = hidden_field :reference_type, :value => Constants::Masters::RATION_CARD
   %tr
     %th
       ID Proof
     %td
       = text_field :reference2, :size => 40
+      %span.greytext
+        (allowed only: a-z, A-Z, 0-9)
   %tr
     %th
       ID Proof Type
