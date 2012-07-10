@@ -19,6 +19,11 @@
     %table
       %tr
         %td
+          Name of client
+        %td
+          = @client.name
+      %tr
+        %td
           Deceased name
         %td
           = text_field :name => "deceased_name"
@@ -26,7 +31,7 @@
         %td
           Relationship to client
         %td
-          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s]}, :prompt => "Select"
+          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s, x]}, :prompt => "Select"
       %tr
         %td
           Date of death
@@ -42,11 +47,6 @@
           Reported by
         %td
           = select :name => "reported_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
-      %tr
-        %td
-          Recorded by
-        %td
-          = select :name => "recorded_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
       %tr
         %td
           = submit 'Submit', :class => "greenButton"

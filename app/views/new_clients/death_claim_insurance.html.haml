@@ -1,0 +1,40 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
+%h1 Insurance claims
+.shaded
+  = form_for(@death_event, :action => url(:controller => :new_clients, :action => :record_death_claim_insurance)) do
+    = hidden_field :name => "death_event_id", :value => @death_event.id
+    = hidden_field :name => "accounted_at_id", :value => @accounted_at
+    = hidden_field :name => "client_id", :value => @client.id
+    %table
+      %tr
+        %td
+          Claim filed on
+        %td
+          = date_select :filed_on, Date.today
+      %tr
+        %td
+          Claim status
+        %td
+          = select :name => "claim_status", :collection => Constants::Insurance::INSURANCE_CLAIM_STATUSES.map{|x| [x.to_s, x]}, :prompt => "Select"
+      %tr
+        %td
+          Performed by
+        %td
+          = select :name => "performed_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
+      %tr
+        %td
+          = submit 'Submit', :class => "greenButton"
+          = link_to 'Back', url("new_clients/show/#{@client.id}"), :class => "greenButton"

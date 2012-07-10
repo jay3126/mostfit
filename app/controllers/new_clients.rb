@@ -284,12 +284,6 @@ class NewClients < Application
     redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{loan_file_id}"), :message => message
   end
 
-  def client_insurance_policies
-    @client = Client.get params[:id]
-    @policies = @client.simple_insurance_policies
-    render :template => 'simple_insurance_policies/index', :layout => layout?
-  end
-
   def register_death_event
     client_id = params[:client_id]
     @client = Client.get client_id
@@ -309,7 +303,7 @@ class NewClients < Application
     date_of_death = Date.parse(date_of_death_str) unless date_of_death_str.blank?
     reported_on_str = params[:reported_on]
     reported_on = Date.parse(reported_on_str) unless reported_on_str.blank?
-    recorded_by = params[:recorded_by]
+    recorded_by = session.user.id
     reported_by = params[:reported_by]
 
     # VALIDATIONS
@@ -317,15 +311,75 @@ class NewClients < Application
     @errors << "Relationship to client must not be blank" if relationship_to_client.blank?
     @errors << "Date of death must not be future date" if date_of_death > Date.today
     @errors << "Reported on date must not be future date" if reported_on > Date.today
-    @errors << "Recorded by must not be blank" if recorded_by.blank?
+    @errors << "Reported on date must not before Date of death" if reported_on < date_of_death
     @errors << "Reported by must not be blank" if reported_by.blank?
 
     # OPERATIONS PERFORMED
     if @errors.blank?
-      DeathEvent.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, client_id)
-      redirect url("new_clients/register_death_event?client_id=#{client_id}")
+      begin
+        is_saved = DeathEvent.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, client_id)
+        message = {:notice => "Death event successfully registered"} if is_saved
+      rescue => ex
+        @errors << "An error has occured: #{ex.message}"
+      end
+      redirect url("new_clients/show/#{client_id}"), :message => message
     else
       render :register_death_event
+    end
+  end
+
+  def client_insurance_policies
+    @client = Client.get params[:id]
+    @policies = @client.simple_insurance_policies
+    render :template => 'simple_insurance_policies/index', :layout => layout?
+  end
+
+  def death_claims
+    client_id = params[:client_id]
+    @client = Client.get client_id
+    partial "death_claims"
+  end
+
+  def death_claim_insurance
+    death_event_id = params[:death_event_id]
+    @death_event = DeathEvent.get death_event_id
+    client_id = @death_event.affected_client_id
+    date_for_accounted_at = @death_event.date_of_death
+    @client = Client.get client_id
+    @accounted_at = ClientAdministration.get_registered_at(@client, date_for_accounted_at).id
+    render
+  end
+
+  def record_death_claim_insurance
+    # INITIALIZATION
+    @errors = []
+    
+    # GATE-KEEPING
+    claim_status = params[:claim_status]
+    death_event_id = params[:death_event_id]
+    accounted_at_id = params[:accounted_at_id]
+    filed_on_date_str = params[:filed_on]
+    performed_by_id = params[:performed_by]
+    recorded_by_id = session.user.id
+    client_id = params[:client_id]
+    filed_on_date = Date.parse(filed_on_date_str) unless filed_on_date_str.blank?
+
+    # VALIDATIONS
+    @errors << "Claim status must not be blank" if claim_status.blank?
+    @errors << "Performed by must not be blank" if performed_by_id.blank?
+    @errors << "Claim filed on date must not be future date" if filed_on_date > Date.today
+    
+    # OPERATIONS PERFORMED
+    if @errors.blank?
+      begin
+      InsuranceClaim.file_insurance_claim_for_death_event(death_event_id, claim_status, on_insurance_policy, filed_on_date_str, accounted_at_id, performed_by_id, recorded_by_id)
+      message = {:notice => "Successfully saved insurance"}
+      rescue => ex
+        message = {:error => "An error has occured: #{ex.message}"}
+      end
+      redirect url("new_clients/show/#{client_id}"), :message => message
+    else
+     render :death_claim_insurance
     end
   end
 

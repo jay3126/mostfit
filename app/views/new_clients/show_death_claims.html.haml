@@ -1,0 +1,32 @@
+%h1 Death claims
+- client_death_events = @client.death_events
+- unless client_death_events.blank?
+  - client_death_events.each do |death_event|
+    %table
+      %tr
+        %td
+          Deceased name
+        %td
+          = death_event.deceased_name
+      %tr
+        %td
+          Relationship to client
+        %td
+          = death_event.relationship_to_client
+      %tr
+        %td
+          Date of death
+        %td
+          = death_event.date_of_death
+      %tr
+        %td
+          Reported on
+        %td
+          = death_event.reported_on
+      %tr
+        %td
+          Reported by
+        %td
+          = death_event.reported_by
+- else
+  No death claims found

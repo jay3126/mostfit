@@ -4,7 +4,6 @@
       "bJQueryUI": true
     });
 %h1 Insurance Policy
-%br
 - if @policies.count == 0
   %p
     %i No Insurance Policy have been created yet.
@@ -38,3 +37,6 @@
     %tfoot
       %tr
         %td{ :colspan => 5 }
+
+%br
+= partial "new_clients/death_claims"

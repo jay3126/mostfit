@@ -45,7 +45,9 @@
     %li#movement
       Movement
     %li#policy
-      Insurance Policy
+      Policy
+    %li#death_event
+      Death Claim
     %li#history
       History
   %div.tab
@@ -56,5 +58,7 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :client_movement, :id => @client.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :client_insurance_policies, :id => @client.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :new_clients, :action => :death_claims, :client_id => @client.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

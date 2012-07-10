@@ -1,0 +1,27 @@
+:javascript
+  $('table.death_claim').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+
+%h1 Death events
+- client_death_events = @client.death_events
+- unless client_death_events.blank?
+  %table.report.weeksheet.nojs.death_claim
+    %thead
+      %tr
+        %th S.no.
+        %th Deceased name
+        %th
+    %tbody
+      - death_claim_count = 0
+      - client_death_events.each do |death_event|
+        %tr
+          %td
+            = death_claim_count += 1
+          %td
+            = link_to death_event.deceased_name, '#'
+          %td
+            = link_to "Claim #{death_claim_count} >> ", url(:controller => :new_clients, :action => :death_claim_insurance, :death_event_id => death_event.id)
+- else
+  No death events found
