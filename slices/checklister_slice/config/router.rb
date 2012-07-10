@@ -1,6 +1,7 @@
 # This file is here so slice can be testing as a stand alone application.
 
 Merb::Router.prepare do
+  resources :rejection_reasons
   resources :dropdownpoint_fillings
   resources :dropdownpoints
   #resources :responses

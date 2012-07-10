@@ -148,8 +148,8 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     @target_entity=TargetEntity.create!(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
 
     @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today)
-    ChecklistLocation.create!(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1], :created_at => Date.today)
-    ChecklistLocation.create!(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2], :created_at => Date.today)
+    ChecklistLocation.create!(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
+    ChecklistLocation.create!(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2_name], :created_at => Date.today)
 
 
     begin
