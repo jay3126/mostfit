@@ -116,6 +116,11 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     #find for which checklist is data being captured
 
 
+
+
+    @checklist=Checklist.get(params[:checklist_id])
+    @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
+
     parameter_hash=Hash.new
     parameter_hash[:checklist_type_id]=@checklist_type.id
     parameter_hash[:checklist_area]= 'healthcheck'
@@ -135,10 +140,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:staff_name]= params[:filler_name]
     parameter_hash[:staff_role]= "support",
         parameter_hash[:referral_url]= params[:referral_url]
-
-
-    @checklist=Checklist.get(params[:checklist_id])
-    @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
     #find all sections of that checklist
     @sections=@checklist.sections
 
