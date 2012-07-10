@@ -341,6 +341,7 @@ class NewClients < Application
   end
 
   def death_claim_insurance
+    @simple_insurance_policy = params[:simple_insurance_policy]
     death_event_id = params[:death_event_id]
     @death_event = DeathEvent.get death_event_id
     client_id = @death_event.affected_client_id
@@ -362,24 +363,27 @@ class NewClients < Application
     performed_by_id = params[:performed_by]
     recorded_by_id = session.user.id
     client_id = params[:client_id]
+    on_insurance_policy_id = params[:simple_insurance_policy]
     filed_on_date = Date.parse(filed_on_date_str) unless filed_on_date_str.blank?
+    death_event = DeathEvent.get death_event_id
+    on_insurance_policy = SimpleInsurancePolicy.get on_insurance_policy_id
 
     # VALIDATIONS
     @errors << "Claim status must not be blank" if claim_status.blank?
     @errors << "Performed by must not be blank" if performed_by_id.blank?
     @errors << "Claim filed on date must not be future date" if filed_on_date > Date.today
-    
+
     # OPERATIONS PERFORMED
     if @errors.blank?
       begin
-      InsuranceClaim.file_insurance_claim_for_death_event(death_event_id, claim_status, on_insurance_policy, filed_on_date_str, accounted_at_id, performed_by_id, recorded_by_id)
-      message = {:notice => "Successfully saved insurance"}
+        InsuranceClaim.file_insurance_claim_for_death_event(death_event, claim_status, on_insurance_policy, filed_on_date_str, accounted_at_id, performed_by_id, recorded_by_id)
+        message = {:notice => "Successfully saved insurance"}
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
       end
       redirect url("new_clients/show/#{client_id}"), :message => message
     else
-     render :death_claim_insurance
+      render :death_claim_insurance
     end
   end
 

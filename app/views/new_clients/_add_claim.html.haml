@@ -1,0 +1,15 @@
+%h1 Add claim
+%form{:action => url(:controller => :new_clients, :action => :death_claim_insurance), :method => :get}
+  %table
+    %tr
+      %td
+        Select Insurance Policy:
+        = select :name => "simple_insurance_policy", :collection => SimpleInsurancePolicy.all.map{|x| [x.id, x.insured_type]}
+      %td
+        Select Death Event:
+        = select :name => "death_event_id", :collection => @client.death_events.map{|x| [x.id, x.deceased_name]}
+      %td
+        = submit "Add claim", :class => "greenButton"
+
+- unless params[:simple_insurance_policy].blank? && params[:death_event].blank?
+  = partial :death_claim_insurance
