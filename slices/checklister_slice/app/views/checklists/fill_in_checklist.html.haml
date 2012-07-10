@@ -33,7 +33,7 @@
             %td
               =label " Staff Member:"
             %td
-              =text_field :name=>:filler_name ,:value=>params[:staff_name]
+              =text_field :name=>:staff_name ,:value=>params[:staff_name]
             %td
               =label params[:target_entity_type]
             %td
@@ -64,7 +64,7 @@
             %td
               =label "Value Date"
             %td
-              =date_select :value_date, Date.parse(params[:effective_date]), :max_date => Date.today
+              =date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
 
         %p
 
@@ -83,14 +83,14 @@
             =hidden_field :filler_type, :value=>"User"
             =hidden_field :filler_id, :value=>@staff_id
             =hidden_field :target_entity_type, :value=>params[:target_entity_type]
-            =hidden_field :target_entity_id, :value=>@target_entity_id
+            =hidden_field :target_entity_id, :value=>params[:target_entity_id]
 
-            =hidden_field :loc1_id, :value=>@loc1_id
-            =hidden_field :loc2_id, :value=>@loc2_id
+            =hidden_field :loc1_id, :value=>params[:loc1_id]
+            =hidden_field :loc2_id, :value=>params[:loc2_id]
             =hidden_field :loc1_type, :value=>params[:loc1_type]
             =hidden_field :loc2_type, :value=>params[:loc2_type]
-            =hidden_field :no_of_applications, :value=>@no_of_applications
-            =hidden_field :effective_date, :value=>@effective_date
+            =hidden_field :no_of_applications, :value=>params[:no_of_applications]
+
             =hidden_field :referral_url, :value=>params[:referral_url]
 
 
@@ -107,10 +107,10 @@
                   %td{:width=>"800px"}
                     ="#{i+1} . #{checkpoint.name}"
                   %td
-                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
                     Yes
                   %td
-                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
                     No
                 -elsif !free_text.nil?
                   %td{:width=>"800px"}
@@ -123,12 +123,12 @@
                       %tr
 
                         %td
-                          =text_area :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
+                          =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
                 -elsif !dropdownpoint.nil?
                   %td{:width=>"800px"}
                     ="#{i+1} . #{dropdownpoint.name}"
                   %td
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{ |x| [x.id, x.name]}, :prompt => "Select Value"
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
 
 
 

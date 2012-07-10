@@ -137,7 +137,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:no_of_applications]= params[:no_of_applications]
     parameter_hash[:effective_date]= params[:effective_date]
     parameter_hash[:staff_id]= params[:staff_id]
-    parameter_hash[:staff_name]= params[:filler_name]
+    parameter_hash[:staff_name]= params[:staff_name]
     parameter_hash[:staff_role]= "support",
         parameter_hash[:referral_url]= params[:referral_url]
     #find all sections of that checklist
@@ -146,12 +146,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     begin
       #creating object for who filled the checklist
-      @filler=Filler.create!(:name => params[:filler_name], :role => session.user.role, :type => params[:filler_type], :model_record_id => params[:filler_id].to_i)
+      @filler=Filler.create!(:name => params[:staff_name], :role => session.user.role, :type => params[:filler_type], :model_record_id => params[:filler_id].to_i)
 
       #create target enitity
       @target_entity=TargetEntity.create!(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
 
-      @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:value_date]), :created_at => Date.today)
+      @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today)
       ChecklistLocation.create!(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1], :created_at => Date.today)
       ChecklistLocation.create!(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2], :created_at => Date.today)
 
@@ -187,7 +187,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       #message={:error=>"The Fields cannot be blank"}
       message[:error]="Fields cannot be blank"
       # render :fill_in_checklist, :message => message
-      redirect url(:checklister_slice_fill_in_checklist, @checklist, parameter_hash), :message => message
+      redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
     else
 
