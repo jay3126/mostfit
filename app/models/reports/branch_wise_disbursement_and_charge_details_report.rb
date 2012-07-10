@@ -1,20 +1,20 @@
 class BranchWiseDisbursementAndChargeDetailsReport < Report
 
-  attr_accessor :from_date, :to_date, :biz_location_branch, :lending_product_id
+  attr_accessor :date, :biz_location_branch, :lending_product_id
 
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
+    @date = (dates and dates[:date]) ? dates[:date] : Date.today
     @name = "Disbursement and Charge Details Report"
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
+    @lending_product_id = (params and params[:lending_rpoduct_id] and (not (params[:lending_product_id].empty?))) ? params[:lending_product_id] : LendingProduct.all.map{|lp| lp.id}
     get_parameters(params, user)
   end
 
   def name
-    "Disbursement and Charge Details Report from #{@from_date} to #{@to_date}"
+    "Disbursement and Charge Details Report for #{@date}"
   end
 
   def self.name
@@ -39,19 +39,20 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
     location_facade  = get_location_facade(@user)
     data = {}
 
-=begin
-columns required in this report are as follows:
-1. Disbursal Date
-2. Branch Name
-3. Disbursements of Each Lending Product (number)
-4. Amount of Disbursement of each Lending Product
-5. Upfront charges collected.
-6. Upfront charges due
-7. Total disbursements.
-8. Total amount disbursed.
-9. Total upfront charges due.
-10. Total upfront charges collected.
-=end
+    lending_product = @lending_product_id.is_a?(Array) ? @lending_product_id : [@lending_product_id]
 
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
+    at_branch_ids_ary.each do |branch_id|
+      branch = [branch_id]
+
+      loan_disbursals = reporting_facade.loans_disbursed_by_branches_on_date(@date, branch)
+      fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, *at_branch_ids_ary)
+
+      branch_data_map = {}
+      branch_data_map[:loan_disbursals] = loan_disbursals
+      branch_data_map[:fee_receipts] = fee_receipts
+      data[branch_id] = branch_data_map
+    end
+    data
   end
 end
