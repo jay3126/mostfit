@@ -3,7 +3,7 @@
     .notice{:style => "background: none; text-align: center;"}
       No designation
 - else
-  %table.narrow
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -16,12 +16,9 @@
         %th
           User Role
         %th
-          Created On
-        // %th
-        // Actions
-    %tr
-    - for designation in @designations
-      %tr{:class => cycle('odd','even')}
+          Created At
+    - @designations.each do |designation|
+      %tr
         %td
         %td
           = designation.id
@@ -33,5 +30,3 @@
           = designation.role_class.to_s.capitalize
         %td
           = designation.created_at
-        //%td
-        //= link_to_with_rights 'Assign Staff' ,'#'

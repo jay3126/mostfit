@@ -47,6 +47,20 @@ module Merb
       return link_to(text,path,params) if session.user.can_access?(route, params)
     end
 
+    def link_to_location(location)
+      location_levels = choice_facade.visible_locations(session.user.staff_member.id, get_effective_date)
+      locations = location_levels.values.flatten
+      if locations.include?(location)
+        if location.location_level == 0
+          link_to(location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => location.id))
+        else
+          link_to(location.name, url(:controller => :user_locations, :action => :show, :id => location.id))
+        end
+      else
+        location.name
+      end
+    end
+
     # The function returns a url pointing to a checklist type
     # @param [String]      name - name of the checklist
     # @param [Object]      target_entity - object can be loan_file, bizlocation

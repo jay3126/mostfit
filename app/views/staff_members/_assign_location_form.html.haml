@@ -43,10 +43,7 @@
         %td
           = location.id
         %td
-          - if location.location_level.level == 0
-            = link_to location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => location.id)
-          - else
-            = link_to location.name, url(:controller => :user_locations, :action => :show, :id => location.id)
+          = link_to_location location
         %td
           = location.location_level.name
         %td

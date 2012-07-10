@@ -1,7 +1,7 @@
 %h1
   Location Level
 - unless @location_levels.count == 0
-  %table.narrow
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -12,17 +12,16 @@
           Name
         %th
           Creation Date
-    %tr
-      - for location_level in @location_levels
-        %tr
-          %td
-            = location_level.id
-          %td
-            = location_level.level
-          %td
-            = location_level.name
-          %td
-            = location_level.creation_date
+    - for location_level in @location_levels
+      %tr
+        %td
+          = location_level.id
+        %td
+          = location_level.level
+        %td
+          = location_level.name
+        %td
+          = location_level.creation_date
 = link_to 'Add New Location Level', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
 #location_level{:style => "display : #{@location_levels.blank? ? false : 'none' }"}
   = form_for(@location_level, :action => url(:location_levels) ) do

@@ -32,7 +32,7 @@
           %td
             = fee.applied_on
           %td
-            = fee.fee_applied_on_type
+            = fee.fee_applied_on_type.humanize
           %td
             = link_to_with_rights fee.fee_applied_on_type_id, url(:controller => "#{status == 'Fee' ? 'lendings' : 'simple_insurance_policies'}", :action => :show, :id => fee.fee_applied_on_type_id)
           %td

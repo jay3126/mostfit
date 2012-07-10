@@ -1,7 +1,7 @@
-%h1  Users
+%h1 Users
 .menu-strip
   = link_to_with_rights 'create a new user', resource(:users, :new), :class => "add grey_button"
-%table.shaded{ :width => '100%' }
+%table.dataTable.report.weeksheet.nojs
   %thead
     %tr
       %th
@@ -10,10 +10,9 @@
       %th Staff member/Funder
       %th Status
       %th Action
-  %tbody
-  - for user in @users
+  - @users.each do |user|
     - next if user.role == :maintainer
-    %tr{ :class => cycle('odd','') }
+    %tr
       %td &nbsp;
       %td
         = user.id

@@ -22,7 +22,7 @@
   - unless @parent_biz_location.blank?
     %tr.even
       %th.even Reports to
-      %td= link_to @parent_biz_location.name, url(:controller => :user_locations, :action => :show, :id => @parent_biz_location.id)
+      %td= link_to_location @parent_biz_location
   %tr.odd
     %th.odd Managed By
     %td= managed_by_staff_member(@biz_location.id, get_effective_date)

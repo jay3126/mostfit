@@ -7,7 +7,7 @@
     = hidden_field :name => "child_biz_location", :value => params[:child_location_id]
     = hidden_field :name => "effective_date", :value => params[:effective_date]
     %br
-    %table{:class => 'narrow'}
+    %table.dataTable.report.weeksheet.nojs
       %thead
         %tr
           %th
@@ -24,22 +24,21 @@
             To Be Moved On
           %th
             Location
-      %tr
-        - @client_admins.each do |client_admin|
-          - client = client_admin.counterparty
-          %tr
-            %td
-              = client.id
-            %td
-              = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
-            %td
-              = client_admin.effective_on
-            %td
-              = radio_button :name => "client_id", :value => client.id
-            %td
-              = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
-            %td
-              = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}", :min_date => client_admin.effective_on+1}
-            %td
-              = select :name=>"client[#{client.id}][][biz_location]", :collection => @child_locations.collect{|b| [b.id, b.name] }
+      - @client_admins.each do |client_admin|
+        - client = client_admin.counterparty
+        %tr
+          %td
+            = client.id
+          %td
+            = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+          %td
+            = client_admin.effective_on
+          %td
+            = radio_button :name => "client_id", :value => client.id
+          %td
+            = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
+          %td
+            = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}", :min_date => client_admin.effective_on+1}
+          %td
+            = select :name=>"client[#{client.id}][][biz_location]", :collection => @child_locations.collect{|b| [b.id, b.name] }
     = submit "Save"
