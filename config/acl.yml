@@ -574,3 +574,4 @@ read_only :
 #  searches :
 #    - all
 accountant : all
+auditor : all
