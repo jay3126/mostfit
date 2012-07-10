@@ -116,6 +116,27 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     #find for which checklist is data being captured
 
 
+    parameter_hash=Hash.new
+    parameter_hash[:checklist_type_id]=@checklist_type.id
+    parameter_hash[:checklist_area]= 'healthcheck'
+    parameter_hash[:checklist_master_version]= '1.0'
+    parameter_hash[:target_entity_type] = params[:target_entity_type]
+    parameter_hash[:target_entity_name]= params[:target_entity_name]
+    parameter_hash[:target_entity_id]= params[:target_entity_id]
+    parameter_hash[:loc1_type]= params[:loc1_type]
+    parameter_hash[:loc1_name]= params[:loc1_name]
+    parameter_hash[:loc1_id]= params[:loc1_id]
+    parameter_hash[:loc2_type]= params[:loc2_type]
+    parameter_hash[:loc2_name]= params[:loc2_name]
+    parameter_hash[:loc2_id]= params[:loc2_id]
+    parameter_hash[:no_of_applications]= params[:no_of_applications]
+    parameter_hash[:effective_date]= params[:effective_date]
+    parameter_hash[:staff_id]= params[:staff_id]
+    parameter_hash[:staff_name]= params[:filler_name]
+    parameter_hash[:staff_role]= "support",
+        parameter_hash[:referral_url]= params[:referral_url]
+
+
     @checklist=Checklist.get(params[:checklist_id])
     @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
     #find all sections of that checklist
@@ -147,7 +168,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         #save all drop downs
 
         section.dropdownpoints.each do |drop_down|
-          #  @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id)
+            @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id)
         end
 
         section.checkboxpoints.each do |checkbox_point|
@@ -163,30 +184,11 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     rescue Exception => e
       #message={:error=>"The Fields cannot be blank"}
-      message[:error]=e.message#"Fields cannot be blank"
+      message[:error]="Fields cannot be blank"
       # render :fill_in_checklist, :message => message
-      redirect url(:rushabh_slice_fill_in_checklist, @checklist, params), :message => message
+      redirect url(:checklister_slice_fill_in_checklist, @checklist, parameter_hash), :message => message
 
     else
-      parameter_hash=Hash.new
-      parameter_hash[:checklist_type_id]=@checklist_type.id
-      parameter_hash[:checklist_area]= 'healthcheck'
-      parameter_hash[:checklist_master_version]= '1.0'
-      parameter_hash[:target_entity_type] = params[:target_entity_type]
-      parameter_hash[:target_entity_name]= params[:target_entity_name]
-      parameter_hash[:target_entity_id]= params[:target_entity_id]
-      parameter_hash[:loc1_type]= params[:loc1_type]
-      parameter_hash[:loc1_name]= params[:loc1_name]
-      parameter_hash[:loc1_id]= params[:loc1_id]
-      parameter_hash[:loc2_type]= params[:loc2_type]
-      parameter_hash[:loc2_name]= params[:loc2_name]
-      parameter_hash[:loc2_id]= params[:loc2_id]
-      parameter_hash[:no_of_applications]= params[:no_of_applications]
-      parameter_hash[:effective_date]= params[:effective_date]
-      parameter_hash[:staff_id]= params[:staff_id]
-      parameter_hash[:staff_name]= "somename"
-      parameter_hash[:staff_role]= "support",
-      parameter_hash[:referral_url]= "http://staging.suryoday.istpl.biz/user_locations/1"
 
 
       redirect url(:checklister_slice_checklists, parameter_hash)
