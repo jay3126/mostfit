@@ -8,9 +8,10 @@ module Constants
     EXECUTIVE = :executive; SUPERVISOR = :supervisor; SUPPORT = :support;
     READ_ONLY = :read_only;
     ACCOUNTANT = :accountant
-    AUDIROR    = :auditor
+    AUDITOR    = :auditor
+    TELECALLER = :telecaller
     ADMINISTRATOR = :administrator; OPERATOR = :operator; FINOPS = :finops;
-    ROLE_CLASSES = [ ADMINISTRATOR, OPERATOR , EXECUTIVE, SUPERVISOR, SUPPORT, FINOPS, READ_ONLY, ACCOUNTANT, AUDITOR]
+    ROLE_CLASSES = [ ADMINISTRATOR, OPERATOR , EXECUTIVE, SUPERVISOR, SUPPORT, FINOPS, READ_ONLY, ACCOUNTANT, AUDITOR, TELECALLER]
     EXECUTIVE_CAN_MODIFY = [:occupations]
     EXECUTIVE_CAN_VIEW = [:loan_purposes, :branches]
     ACCESS = {
