@@ -5,10 +5,11 @@ class Lending
   include Validators::Arguments
   include MarkerInterfaces::Recurrence
   include LoanUtility
+  include LoanValidations
 
   property :id,                             Serial
   property :lan,                            *UNIQUE_ID
-  property :applied_amount,                 *MONEY_AMOUNT
+  property :applied_amount,                 *MONEY_AMOUNT_NON_ZERO
   property :currency,                       *CURRENCY
   property :applied_on_date,                *DATE_NOT_NULL
   property :approved_amount,                *MONEY_AMOUNT_NULL
@@ -40,6 +41,8 @@ class Lending
   def money_amounts
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
+
+  validates_with_method *DATE_VALIDATIONS #see app/models/loan_validations.rb
 
   # TODO to be deprecated
   def disbursal_date_value
