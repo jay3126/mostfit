@@ -116,8 +116,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     #find for which checklist is data being captured
 
 
-
-
     @checklist=Checklist.get(params[:checklist_id])
     @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
 
@@ -140,23 +138,44 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:staff_name]= params[:staff_name]
     parameter_hash[:staff_role]= "support",
         parameter_hash[:referral_url]= params[:referral_url]
-    #find all sections of that checklist
-    @sections=@checklist.sections
+
+
+    #capturing meta-data
+    #creating object for who filled the checklist
+    @filler=Filler.create!(:name => params[:staff_name], :role => session.user.role, :type => params[:filler_type], :model_record_id => params[:filler_id].to_i)
+
+    #create target enitity
+    @target_entity=TargetEntity.create!(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
+
+    @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today)
+    ChecklistLocation.create!(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1], :created_at => Date.today)
+    ChecklistLocation.create!(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2], :created_at => Date.today)
 
 
     begin
-      #creating object for who filled the checklist
-      @filler=Filler.create!(:name => params[:staff_name], :role => session.user.role, :type => params[:filler_type], :model_record_id => params[:filler_id].to_i)
+      #find all sections of that checklist
+      @sections=@checklist.sections
 
-      #create target enitity
-      @target_entity=TargetEntity.create!(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
-
-      @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today)
-      ChecklistLocation.create!(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1], :created_at => Date.today)
-      ChecklistLocation.create!(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2], :created_at => Date.today)
 
       @sections.each do |section|
-        #save all the sections             -
+
+        #check for validations...
+        # an exception should be raised if any yes/no answers are blank
+        section.checkpoints.each do |checkpoint|
+          if params["checkpoint_#{checkpoint.id}".to_sym].blank?
+            raise Exception
+          end
+        end
+
+        section.dropdownpoints.each do |drop_down|
+          if params["drop_down_point_#{drop_down.id}".to_sym].blank?
+            raise Exception
+          end
+        end
+
+        #if the control comes here....the validations have passed.
+
+        #save all the yes/no questions             -
         section.checkpoints.each do |checkpoint|
           @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
 
@@ -169,23 +188,22 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         #save all drop downs
 
         section.dropdownpoints.each do |drop_down|
-            @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id)
+          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id)
         end
 
+        #save all checkbox points
         section.checkboxpoints.each do |checkbox_point|
           checkbox_point.checkboxpoint_options.each do |option|
             @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
-            end
+          end
         end
-
-
 
 
       end
 
     rescue Exception => e
-      #message={:error=>"The Fields cannot be blank"}
-      message[:error]="Fields cannot be blank"
+      message={:error => e.message}
+      #message[:error]="Fields cannot be blank"
       # render :fill_in_checklist, :message => message
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
