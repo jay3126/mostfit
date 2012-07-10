@@ -21,6 +21,15 @@ class SimpleInsurancePolicy
   has n, :insurance_claims
 
   def money_amounts; [ :insured_amount ]; end
+  
+  def created_on; self.proposed_on; end
+
+  validates_with_method :policy_proposed_after_client_joined?
+
+  def policy_proposed_after_client_joined?
+    return true if (self.client and self.created_on and (self.created_on >= self.client.created_on))
+    [false, "The policy created date: #{self.created_on} is before the date the client joined"]
+  end
 
   def self.setup_proposed_insurance(proposed_on_date, from_insurance_product, on_client, on_loan = nil)
     Validators::Arguments.not_nil?(proposed_on_date, from_insurance_product, on_client)
@@ -55,8 +64,11 @@ class SimpleInsurancePolicy
   end
 
   def setup_insurance_premium_fee
+    administered_at, accounted_at = self.administered_at_id, self.accounted_at_id
+    raise Errors::InvalidConfigurationError, "Locations that the client is registered at or administered at were not found" unless (administered_at and accounted_at)
+    proposed_on_date = self.proposed_on
     get_insurance_premium_fee_product.values.each { |premium|
-      FeeInstance.register_fee_instance(premium, self, self.administered_at_id, self.accounted_at_id, self.proposed_on)
+      FeeInstance.register_fee_instance(premium, self, administered_at, accounted_at, proposed_on_date)
     }
   end
 
