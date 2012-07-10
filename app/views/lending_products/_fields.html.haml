@@ -68,5 +68,5 @@
     %th
       Repayment Allocation Strategy
     %td
-      = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las.to_s]}
+      = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las.to_s.humanize]}
 
