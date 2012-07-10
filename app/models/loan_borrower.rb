@@ -16,6 +16,12 @@ class LoanBorrower
 
   def counterparty; Resolver.fetch_counterparty(self.counterparty_type, self.counterparty_id); end
 
+  validates_with_method :loan_applied_after_client_joined?
+
+  def loan_applied_after_client_joined?
+    Validators::Assignments.is_valid_assignment_date?(self.effective_on, self.counterparty)
+  end
+
   # Creates a record for a loan applied for a counterparty
   def self.assign_loan_borrower(to_counterparty, applied_on_date, administered_at_origin, accounted_at_origin, performed_by, recorded_by)
     Validators::Arguments.not_nil?(to_counterparty, applied_on_date, administered_at_origin, accounted_at_origin, performed_by, recorded_by)

@@ -44,10 +44,11 @@ class Lending
 
   validates_with_method *DATE_VALIDATIONS #see app/models/loan_validations.rb
 
-  # TODO to be deprecated
   def disbursal_date_value
     self.disbursal_date ? self.disbursal_date : self.scheduled_disbursal_date
   end
+
+  def created_on; self.applied_on_date; end
 
   # lending descriptions in one line
   def to_s
@@ -63,6 +64,8 @@ class Lending
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
   has n, :simple_insurance_policies
+  has n, :funds_sources
+  has n, :tranches, :through => :funds_sources
 
   # Creates a new loan
   def self.create_new_loan(

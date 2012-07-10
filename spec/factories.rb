@@ -112,16 +112,23 @@ FactoryGirl.define do
   end
 
   factory :client do
-    reference       { "XW000-2009.01.05.#{Time.new.usec}" }
+
+    name            { Factory.next(:name) }
+    address         { Factory.next(:province) }
+    pincode         { "411028" }
+    reference       { "RATION_ALLY_CARD.#{Time.new.usec}" }
     reference_type  Constants::Masters::DEFAULT_REFERENCE_TYPE
+    reference2      { "DRIVING_MAD_LICENSE.#{Time.new.usec}" }
     reference2_type Constants::Masters::DEFAULT_REFERENCE2_TYPE
     state           Constants::Masters::STATES.first
-    name            { Factory.next(:name) }
+    guarantor_name  { "Guarantor " + Factory.next(:name)}
+    guarantor_relationship {Constants::Masters::OTHER_RELATIONSHIP}
     active          true
     gender          Constants::Masters::DEFAULT_GENDER
     date_joined     { Date.parse('2000-01-01') }
 
     association     :created_by, :factory => :user
+    association     :created_by_staff, :factory => :staff_member
   end
 
   factory :client_type do
@@ -671,6 +678,7 @@ FactoryGirl.define do
   factory :location_level do
     level { Factory.next(:location_level) }
     name  { Factory.next(:location_name) }
+    creation_date Constants::Time::EARLIEST_DATE_OF_OPERATION
   end
 
   factory :biz_location do
