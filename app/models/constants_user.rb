@@ -6,9 +6,10 @@ module Constants
     ENABLE_ACL_DEBUG_MODE = true
 
     EXECUTIVE = :executive; SUPERVISOR = :supervisor; SUPPORT = :support;
-    READ_ONLY = :read_only; 
+    READ_ONLY = :read_only;
+    ACCOUNTANT = :accountant
     ADMINISTRATOR = :administrator; OPERATOR = :operator; FINOPS = :finops;
-    ROLE_CLASSES = [ ADMINISTRATOR, OPERATOR , EXECUTIVE, SUPERVISOR, SUPPORT, FINOPS, READ_ONLY]
+    ROLE_CLASSES = [ ADMINISTRATOR, OPERATOR , EXECUTIVE, SUPERVISOR, SUPPORT, FINOPS, READ_ONLY, ACCOUNTANT]
     EXECUTIVE_CAN_MODIFY = [:occupations]
     EXECUTIVE_CAN_VIEW = [:loan_purposes, :branches]
     ACCESS = {

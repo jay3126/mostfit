@@ -573,3 +573,4 @@ read_only :
 #    - get_date   
 #  searches :
 #    - all
+accountant : all
