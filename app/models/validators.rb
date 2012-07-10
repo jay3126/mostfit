@@ -4,8 +4,8 @@ module Validators
 
     # Validates that none of the arguments are nil
     def self.not_nil?(*args)
-      args.each { |argument|
-        raise ArgumentError, "#{argument} is null" if argument.nil?
+      args.each_with_index { |argument, idx|
+        raise ArgumentError, "Argument at position #{idx + 1} is null" if argument.nil?
       }
       true
     end
