@@ -50,6 +50,7 @@ class DailyReport < Report
       loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
       loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
       loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
+      loan_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, *at_branch_ids_ary)
 
       branch_data_map = {}
       branch_data_map[:loans_applied] = loans_applied
@@ -61,6 +62,7 @@ class DailyReport < Report
       branch_data_map[:loan_payments] = loan_payments
       branch_data_map[:loan_net_payments] = loan_net_payments
       branch_data_map[:loan_allocations] = loan_allocations
+      branch_data_map[:loan_receipts] = loan_receipts
 
       data[branch_id] = branch_data_map
     }    
