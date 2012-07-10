@@ -9,8 +9,22 @@ describe Validators::Arguments do
     lambda {Validators::Arguments.not_nil?(foo, bar)}.should_not raise_error
 
     lambda {Validators::Arguments.not_nil?(foo, bar, mel)}.should raise_error
-
     lambda {Validators::Arguments.not_nil?(foo, bar, kut)}.should raise_error
+  end
+
+  it "should validate an argument for whether it appears to be an ID as expected" do
+    ids = [1, 7, 9, 11, 37]
+    ids.each {|id|
+      Validators::Arguments.is_id?(id).should be_true
+    }
+
+    lambda{ Validators::Arguments.is_id?({}) }.should raise_error
+    lambda{ Validators::Arguments.is_id?([]) }.should raise_error
+    lambda{ Validators::Arguments.is_id?("some string") }.should raise_error
+    lambda{ Validators::Arguments.is_id?(-1) }.should raise_error
+    lambda{ Validators::Arguments.is_id?(0) }.should raise_error
+    lambda{ Validators::Arguments.is_id?(23.73) }.should raise_error
+
   end
 
 end

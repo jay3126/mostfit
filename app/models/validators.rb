@@ -3,9 +3,19 @@ module Validators
   module Arguments
 
     # Validates that none of the arguments are nil
-    def self.not_nil?(*arg)
-      arg.each { |argument|
+    def self.not_nil?(*args)
+      args.each { |argument|
         raise ArgumentError, "#{argument} is null" if argument.nil?
+      }
+      true
+    end
+
+    def self.is_id?(*args)
+      raise ArgumentError, "No arguments supplied" unless (args and (not(args.empty?)))
+      args.each { |argument|
+        unless (argument and (argument.is_a?(Fixnum)) and (argument > 0))
+          raise ArgumentError, "#{argument} does not appear to be a valid ID"
+        end
       }
       true
     end
