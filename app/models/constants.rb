@@ -101,6 +101,9 @@ module Constants
     OTHER_RELATIONSHIP = 'Other'
     DEFAULT_RELATIONSHIP = OTHER_RELATIONSHIP
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
+    SELF_RELATIONSHIP = :self_relationship
+    DECEASED_PERSON_RELATIONSHIPS = ([SELF_RELATIONSHIP] + RELATIONSHIPS).flatten
+    DEFAULT_DECEASED_PERSON_RELATIONSHIP = SELF_RELATIONSHIP
 
     RELATIONSHIP_NOT_SPECIFIED = :relationship_not_specified
     HUSBAND = "Husband"; FATHER = "Father"
@@ -163,6 +166,13 @@ module Constants
       "lakshadweep"        ,
       "pondicherry"
     ]
+  end
+
+  module ReferenceFormatValidations
+
+    FORMAT_REFERENCE1 = /^[A-Za-z0-9]+$/;
+    FORMAT_REFERENCE2 = /^[A-Za-z0-9]+$/
+
   end
 
   module Verification

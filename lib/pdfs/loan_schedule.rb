@@ -100,18 +100,26 @@ module Pdf
       return pdf
     end
 
-    def loan_file_generate_disbursement_pdf
-      center = Center.get(self.at_center_id)
+    def location_generate_disbursement_pdf(user_id, on_date)
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
+      lendings        = location_facade.get_loans_administered(self.id, on_date).compact
+      raise ArgumentError,"No loans for generate pdf" if lendings.blank?
       pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
-      return nil if center.blank?
+      return nil if lendings.blank?
       pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
       pdf.text "Disbursal Report and Acknowledgement", :font_size => 16, :justification => :center
       pdf.text("\n")
       table1 = PDF::SimpleTable.new
-      table1.data = [{"col1"=>"<b>Center</b>", "col2"=>"#{center.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{center.clients.count}"},
-        {"col1"=>"<b>R.O Name</b>", "col2"=>"#{center.manager.name}", "col3"=>"<b>Scheduled Disbursal Date</b>", "col4"=>"#{self.scheduled_disbursal_date}"},
-        {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{center.address}", "col3"=>"<b>Time</b>", "col4"=>"#{center.meeting_time_hours}:#{'%02d' % center.meeting_time_minutes}"}
+      clients_count = ClientAdministration.get_clients_administered(self.id, on_date).count
+      location_manage = location_facade.location_managed_by_staff(self.id, on_date)
+      staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
+      meeting        = meeting_facade.get_meeting(self, on_date)
+      meeting_status = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+      table1.data = [{"col1"=>"<b>Location</b>", "col2"=>"#{self.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{clients_count}"},
+        {"col1"=>"<b>R.O Name</b>", "col2"=>"#{staff_member_name}", "col3"=>"<b>Scheduled Disbursal Date</b>", "col4"=>"#{on_date}"},
+        {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{}", "col3"=>"<b>Time</b>", "col4"=>"#{meeting_status}"}
       ]
 
       table1.column_order  = ["col1", "col2", "col3","col4"]
@@ -128,18 +136,21 @@ module Pdf
       pdf.text("\n")
 
       #draw table for scheduled disbursals
-      loans_to_disburse = self.loan_applications.map(&:loan).compact
-      if loans_to_disburse.count > 0
+      if lendings.count > 0
         table = PDF::SimpleTable.new
         table.data = []
         tot_amount = 0
-        loans_to_disburse.each do |loan|
-          tot_amount += loan.amount
-          table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.amount.to_currency, "Name" => loan.client.name,
-              "Group" => (loan.client.client_group or Nothing).name
+        lendings.each do |loan|
+          client        = loan.borrower
+          client_name  = client.name unless client.blank?
+          client_group = client.client_group.blank? ? 'Nothing' : client.client_group.name
+          tot_amount += loan.to_money[:applied_amount].amount unless loan.to_money[:amount].blank?
+          table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.to_money[:disbursed_amount].to_s, "Name" => client_name,
+              "Group" => client_group
             })
         end
-        table.data.push({"Group"=>"Total=#{loans_to_disburse.count}","Disb. Amount" => tot_amount.to_currency})
+        total = MoneyManager.get_money_instance(tot_amount)
+        table.data.push({"Group"=>"Total=#{lendings.count}","Disb. Amount" => total.to_s})
         table.column_order  = ["LAN", "Name", "Group", "Disb. Amount"]
         table.show_lines    = :all
         table.shade_rows    = :none

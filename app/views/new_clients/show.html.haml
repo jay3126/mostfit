@@ -1,6 +1,6 @@
 %h1== Client Name: <i>#{@client.name}</i>
 .menu-strip
-  = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add'
+  = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
   - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
   =# link_to 'Customer Calling', url(:checklister_slice,:checklist_type_id=>@checklist_type.id,:filler=>session.user.login,:loc2=>@client_admin.administered_at,:target_entity_name=> @client.name,:loc2type=>"Center"), :class => 'add grey_button', :target => 'blank'
   = link_to 'Customer Calling', url_for_checklist('Customer Calling', @client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
@@ -32,6 +32,9 @@
   %tr.odd
     %th.odd Occupation
     %td= @client.occupation.name unless @client.occupation.blank?
+  %tr.even
+    %td
+      = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :client_id => @client.id), :class => "greenButton"
 
 %div.tab_container.shaded
   %ul.tabs

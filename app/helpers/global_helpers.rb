@@ -725,8 +725,9 @@ module Merb
 
     # get all nominal branches
     def get_all_nominal_branches
-      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-      location_facade.all_nominal_branches
+      location_levels = choice_facade.visible_locations(session.user.staff_member.id, get_effective_date)
+      branch_level    = LocationLevel.get_level_by_number(LocationLevel::NOMINAL_BRANCH_LEVEL)
+      location_levels.fetch(branch_level)
     end
 
     # get all nominal centers

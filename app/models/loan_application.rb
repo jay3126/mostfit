@@ -48,6 +48,7 @@ class LoanApplication
   include Constants::Properties
   include Comparable
   include CommonClient::Validations
+  include Constants::ReferenceFormatValidations
 
   property :id,                             Serial
   property :status,                         Enum.send('[]', *LOAN_APPLICATION_STATUSES), :nullable => false, :default => NEW_STATUS
@@ -91,9 +92,6 @@ class LoanApplication
   validates_length :client_name, :min => 3
   validates_present   :client_dob
   validates_with_method :client_dob, :method => :permissible_age_for_credit?
-  # this validation should be skip when client_id exist.
-  # validates_is_unique :client_reference1, :scope => :center_cycle_id
-  # validates_is_unique :client_reference2, :scope => :center_cycle_id
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def money_amounts; [:amount]; end

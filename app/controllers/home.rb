@@ -2,7 +2,7 @@ class Home < Application
 
   def index
     set_effective_date(Date.today) if session[:effective_date].blank?
-    @location_levels = LocationLevel.all(:level.not => 0)
+    @location_levels = choice_facade.visible_locations(session.user.staff_member.id, get_effective_date)
     display @location_levels
   end
 

@@ -121,10 +121,13 @@ class UserLocations < Application
     begin
       if pdf_type == 'disbursement_labels'
         file = biz_location.generate_disbursement_labels_pdf(session.user.id, date)
+      elsif(pdf_type == 'disbursement_loans')
+        file = biz_location.location_generate_disbursement_pdf(session.user.id, date)
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
     end
+    
     if file.blank?
       redirect request.referer, :message => @message
     else
