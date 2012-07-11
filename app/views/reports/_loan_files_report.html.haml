@@ -23,7 +23,6 @@
               = status.humanize rescue nil
             %td{:style => "text-align:center"}
               = value3
-              = link_to "View", url(:controller => :loan_files, :action => :loan_files_list, :at_branch_id => branch_id, :at_center_id => center_id, :status => status)
 - else
   .shaded
     %h3 No records found
