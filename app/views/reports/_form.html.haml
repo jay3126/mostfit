@@ -25,6 +25,8 @@
   - branch_for_loan_application_report = (params[report] and params[report][:branch_for_loan_application_report] and not params[report][:branch_for_loan_application_report].blank?) ? params[report][:branch_for_loan_application_report] : nil
   - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
   - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
+  -# claim_accounted_at = (params[report] and params[:report][:claim_accounted_at] and params[report][:claim_accounted_at].blank?) ? params[report][:claim_accounted_at] : nil
+  -# claim_filed_on = (params[report] and params[:report][:claim_filed_on] and params[report][:claim_filed_on].blank?) ? params[report][:claim_filed_on] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -174,6 +176,15 @@
               = select(:lending_product_id, :collection => LendingProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => lending_product_id)
       %table{:style => "padding-top: 0px;"}
         %tr
+          - if @report.respond_to?(:claim_accounted_at)
+            %br
+            %td
+              Branch
+              = select(:claim_accounted_at, :collection => get_all_nominal_branches.map{|x| [x.id, x.name]}, :include_blank => true)
+          - if @report.respond_to?(:claim_filed_on)
+            %td
+              On date
+              = date_select_for(@report, "claim_filed_on", :date => @report.claim_filed_on)
           - if @report.respond_to?(:loan_application_status)
             %td
               Loan Application Status:
