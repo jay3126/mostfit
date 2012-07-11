@@ -15,6 +15,8 @@ class LocationHoliday
 
   def to_s; "Holiday #{name} at #{biz_location.to_s} on #{on_date}"; end
 
+  def performed_by_staff; StaffMember.get(performed_by) end;
+
   validates_with_method :only_one_holiday_at_a_location_on_date?
 
   def only_one_holiday_at_a_location_on_date?

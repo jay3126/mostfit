@@ -41,6 +41,8 @@
       Meeting Schedule
     %li#pdf
       Pdf
+    %li#holiday
+      Holiday
     %li#History
       History
     %li#center_cycle
@@ -66,6 +68,8 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :meeting_schedule, :id => @biz_location.id)}
   %div.tab
     = partial 'user_locations/pdf_on_biz_location'
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :location_holidays, :action => :index, :biz_location_id => @biz_location.id)}
   %div.tab
   %div.tab
     = partial 'center_cycles/tab_center_cycle', :center_cycle => @center_cycle
