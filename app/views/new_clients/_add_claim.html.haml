@@ -39,8 +39,8 @@
           %td
             = claim.claim_status.humanize rescue nil
           %td
-            = claim.accounted_at
+            = BizLocation.get(claim.accounted_at).name rescue nil
           %td
-            = StaffMember.get(claim.performed_by).name
+            = StaffMember.get(claim.performed_by).name rescue nil
 - else
   No insurance claim found
