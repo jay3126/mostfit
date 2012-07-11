@@ -1,0 +1,22 @@
+= hidden_field :biz_location, :value => params[:biz_location_id]
+%table
+  %tr
+    %th
+      Name
+    %td
+      = text_field :name
+  %tr
+    %th
+      On Date
+    %td
+      = date_select_for @holiday, :on_date
+  %tr
+    %th
+      Move Date
+    %td
+      = date_select_for @holiday, :move_work_to_date
+  %tr
+    %th
+      By Staff Member
+    %td
+      = select :performed_by, :collection => StaffMember.all.map{|s| [s.id, s.name]}

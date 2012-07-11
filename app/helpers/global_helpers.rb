@@ -189,6 +189,10 @@ module Merb
       attrs.merge!(:nullable => opts[:nullable]) if opts.key?(:nullable)
       date_select_html(attrs) 
     end
+
+    def date_select_earliest(name, opts={})
+      date_select(name, Constants::Time::EARLIEST_DATE_OF_OPERATION, opts)
+    end
  
     def date_select_for(obj, col = nil, attrs = {})
       klass = obj.class
@@ -741,7 +745,7 @@ module Merb
     def get_all_nominal_branches
       location_levels = choice_facade.visible_locations(session.user.staff_member.id, get_effective_date)
       branch_level    = LocationLevel.get_level_by_number(LocationLevel::NOMINAL_BRANCH_LEVEL)
-      location_levels.fetch(branch_level)
+      location_levels[branch_level] || []
     end
 
     # get all nominal centers

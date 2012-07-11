@@ -1,0 +1,57 @@
+= partial :form
+- unless @data.blank?
+  %br
+  %br
+  %table{:class => "report nojs"}
+    %tr
+      %th
+        At location
+      %th
+        Affected client
+      %th
+        Relationship of deceased
+      %th
+        Date of death
+      %th
+        Death reported on
+      %th
+        Claim Filed Against Policy
+      %th
+        Claim Filed On
+      %th
+        Claim Filed At
+      %th
+        Filed By
+      %th
+        Claim Status
+    - @data.each do |claim|
+      - death_event = DeathEvent.get(claim.death_event_id)
+      %tr
+        %td{:style => "text-align:center"}
+          = BizLocation.get(claim.accounted_at).name
+        %td{:style => "text-align:center"}
+          = death_event.deceased_name
+        %td{:style => "text-align:center"}
+          = death_event.relationship_to_client
+        %td{:style => "text-align:center"}
+          = death_event.date_of_death
+        %td{:style => "text-align:center"}
+          = death_event.reported_on
+        %td{:style => "text-align:center"}
+          = SimpleInsurancePolicy.get(claim.simple_insurance_policy_id).insured_type
+        %td{:style => "text-align:center"}
+          = claim.filed_on
+        %td{:style => "text-align:center"}
+          = BizLocation.get(claim.accounted_at).name
+        %td{:style => "text-align:center"}
+          = StaffMember.get(claim.performed_by).name rescue nil
+        %td{:style => "text-align:center"}
+          = claim.claim_status.humanize rescue nil
+- else
+  .shaded
+    %h3 No records found
+
+
+
+
+  

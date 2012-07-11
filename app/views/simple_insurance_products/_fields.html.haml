@@ -8,12 +8,12 @@
     %td
       Insurance Type
     %td
-      = select :insured_type, :collection => Constants::Insurance::INSURANCE_TYPES.map{|f| [f.to_s]}
+      = select :insured_type, :collection => Constants::Insurance::INSURANCE_TYPES.map{|f| [f, f.to_s.humanize]}
   %tr
     %td
       Insurance For
     %td
-      = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|f| [f.to_s]}
+      = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|f| [f, f.to_s.humanize]}
   %tr
     %td
       Fee Product

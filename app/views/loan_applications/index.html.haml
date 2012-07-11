@@ -28,6 +28,11 @@
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-dupe
       = link_to_with_rights "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true'), :class => 'edit_small'
+    %td{:style => "padding: 15px;"}
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Loan File
+      = link_to_with_rights "Loan Files", url(:controller => :loan_files, :action => :show_loan_files, :flag => 'true'), :class => "edit_small"
   %tr
     %td
       %br

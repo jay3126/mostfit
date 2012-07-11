@@ -1,0 +1,30 @@
+:javascript
+  $('table.holiday').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%br
+- if @holidays.blank?
+  No holidays Mapping have been created yet.
+- else
+  %table.dataTable.report.weeksheet.nojs.holiday
+    %thead
+      %tr
+        %th
+          Holiday Name
+        %th
+          Date
+        %th
+          Move Date
+        %th
+          By Staff Member
+    - @holidays.each do |holiday|
+      %tr
+        %td
+          = holiday.name
+        %td
+          = holiday.on_date
+        %td
+          = holiday.move_work_to_date
+        %td
+          = holiday.performed_by_staff.name

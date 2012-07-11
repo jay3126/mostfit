@@ -48,7 +48,7 @@
       Repayment frequency
     %td
       %span.greytext
-      = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|frequency| [frequency.to_s]}
+      = select :name => "lending_product[repayment_frequency]", :collection => MarkerInterfaces::Recurrence::FREQUENCIES.map {|f| [f, f.to_s.humanize]}
   %tr
     %th
       Fee Product
@@ -68,5 +68,5 @@
     %th
       Repayment Allocation Strategy
     %td
-      = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las.to_s]}
+      = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las, las.to_s.humanize]}
 

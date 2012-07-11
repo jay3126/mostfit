@@ -94,12 +94,14 @@ class LoanFile
     loan_file ? loan_file.to_info : nil
   end
 
+  # this method is now no longer in use
   #is the loan file in the state that new clients can be created for loan applications which do not have any?
   def is_ready_for_client_creation?
     return true if self.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED
     return false
   end
 
+  # this method is now no longer in use
   #creates corresponding client instances for loan applications which do not have ones.
   def create_clients
     #are we ready to create clients for this loan file ?

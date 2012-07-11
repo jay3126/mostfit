@@ -7,7 +7,7 @@ Merb::Router.prepare do
   resources :bank_account_ledgers
   resources :accounting_rules
   resources :book_keeping
-  resources :vouchers
+  resources :vouchers, :id => %r(\d+)
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)
@@ -38,6 +38,7 @@ Merb::Router.prepare do
   end
   resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
   resources :holiday_calendars
+  resources :location_holidays
   resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
 
   resources :api_accesses

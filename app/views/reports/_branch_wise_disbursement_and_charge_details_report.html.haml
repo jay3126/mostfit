@@ -3,15 +3,12 @@
   %tr.header
     %th
       Branch Name
-    %th
-      Disbursal Date
     %th{:colspan => 2}
       Disbursement Details
     %th{:colspan => 2}
       Upfront Charges Details
 
   %tr.header
-    %th
     %th
     %th
       Number
@@ -22,11 +19,33 @@
     %th
       Collected
 
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - count = 0
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          %b
+            = BizLocation.get(branch).name
+        %td
+          = values[:loan_disbursals][:count]
+          - count += values[:loan_disbursals][:count]
+        %td
+          = values[:loan_disbursals][:total_amount]
+          - accumulate_row_values[:loan_disbursals] += values[:loan_disbursals][:total_amount]
+        %td
+          = values[:fee_receipts][:total_amount]
+          - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
+        %td
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tr.footer
     %th
       Total
     %td
+      = count
     %td
+      = total_rows[:loan_disbursals]
     %td
-    %td
+      = total_rows[:fee_receipts]
     %td
