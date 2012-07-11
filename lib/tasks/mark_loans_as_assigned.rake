@@ -13,15 +13,17 @@ Structure of the rake task:
   b) Test for file with the file name at the expected location
   # If the file is not found, raise an error and exit
 
-2) Read the file and collect all the Loan IDs supplied
+2) Read the file and collect all the Loan IDs, Effective On dates supplied
   # If an error occurs while reading the file and the Loan IDs, raise an error and exit
   # If the file was read successfully, create a data structure and another file to write out the results of processing the file
 
-3) Process the list of loan IDs, one at a time, and write out the results and errors. Write to the file as each loan is processed
-  # For each loan, invoke the LoanAssignmentFacade and try to assign the loan
+3) Process the list of pairs of loan IDs and Effective On dates, one at a time, and write out the results and errors. Write to the file as each loan is processed
+  # For each loan, invoke the LoanAssignmentFacade and try to assign the loan for that Effective Date
   # Record the success or error in the data structure against each loan
 
 =end
+
+require 'colored'
 
 namespace :mostfit do
   namespace :loan_assignment do
@@ -31,11 +33,14 @@ namespace :mostfit do
       require 'fastercsv'
 
       USAGE_TEXT = <<USAGE_TEXT
-rake mostfit:loan_assignment:mark_loans[<'assignment_type'>,<'assignment_name'>,<'file_name'>]. \
+USAGE:
+
+rake mostfit:loan_assignment:mark_loans[<'assignment_type'>,<'assignment_name'>,<'file_name'>].
+
 Assignment type should be either 'securitised' or 'encumbered'
 Assignment name should be the name of the securitization (or encumberance)
-Upload the file which contains list of loan IDs in public/upload directory and this rake task \
-The results will be written to a .csv in public/uploads directory \
+Upload the file which contains list of loan IDs in public/upload directory and this rake task
+The results will be written to a .csv in public/uploads directory
 with status of loan assignment as success or failure (with a failure error message)
 USAGE_TEXT
 
@@ -48,7 +53,8 @@ USAGE_TEXT
 
       file_path = File.join(Merb.root, 'public', 'uploads')
       LOAN_ID = "Loan ID"
-
+      EFFECTIVE_ON = "Effective On"
+      
       begin
         errors = []
 
@@ -73,30 +79,33 @@ USAGE_TEXT
         file_to_write = File.join(file_path, file_name + ".results.csv")
         file_options = {:headers => true}
 
-        loan_ids_array = []
+        loans_data = {}
         FasterCSV.foreach(fq_file_path, file_options) do |row|
+          puts "Processing #{row} \n".green
           loan_id_str = row[LOAN_ID]
+          effective_on_str = row[EFFECTIVE_ON]
           loan_id = loan_id_str.to_i
-          loan_ids_array << loan_id
+          effective_on_date = Date.strptime(effective_on_str,'%d-%m-%Y')
+          loans_data[loan_id] = effective_on_date
         end
 
         FasterCSV.open(file_to_write, "w"){ |fastercsv|
-          fastercsv << [ 'Loan ID', 'Status', 'Error' ]
-          loan_ids_array.each {|id|
+          fastercsv << [ 'Loan ID', 'Effective On','Status', 'Error' ]
+          loans_data.each {|id,date|
             loan_status, loan_error = "Not known", "Not known"
             begin
-              facade.assign(id, assignment_type_object)
+              facade.assign_on_date(id, assignment_type_object, date)
               loan_status, loan_error = "Success", ''
             rescue => ex
               loan_status, loan_error = 'Failure', ex.message
             end
-            fastercsv << [id, loan_status, loan_error]
+            fastercsv << [id, date, loan_status, loan_error]
           }
         }
 
       rescue => ex
-        p "Error message: #{ex.message}"
-        p USAGE_TEXT
+        puts "Error message: #{ex.message}\n".red
+        puts USAGE_TEXT.blue
       end
 
     end
