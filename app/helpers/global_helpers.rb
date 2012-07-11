@@ -189,6 +189,10 @@ module Merb
       attrs.merge!(:nullable => opts[:nullable]) if opts.key?(:nullable)
       date_select_html(attrs) 
     end
+
+    def date_select_earliest(name, opts={})
+      date_select(name, Constants::Time::EARLIEST_DATE_OF_OPERATION, opts)
+    end
  
     def date_select_for(obj, col = nil, attrs = {})
       klass = obj.class

@@ -8,7 +8,7 @@
     %td
       Fee Charge Type
     %td
-      = select :fee_charged_on_type, :collection => Constants::Transaction::FEE_CHARGED_ON_TYPES.map{|f| [f.to_s.humanize]}
+      = select :fee_charged_on_type, :collection => Constants::Transaction::FEE_CHARGED_ON_TYPES.map{|f| [f, f.to_s.humanize]}
   %tr
     %td
       Created On

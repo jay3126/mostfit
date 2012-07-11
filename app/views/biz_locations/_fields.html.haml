@@ -11,5 +11,5 @@
     %th
       Creation Date
     %td
-      = date_select 'biz_location[creation_date]', Date.today, {:id => "creation_date"}
+      = date_select_earliest 'biz_location[creation_date]', {:id => "creation_date"}
 
