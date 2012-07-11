@@ -77,8 +77,8 @@
           = payments[:interest_received]
           - accumulate_row_values[:interest_received] += payments[:interest_received]
         %td
-          = values[:loan_receipts][:total_amount]
-          - accumulate_row_values[:loan_receipts] += values[:loan_receipts][:total_amount]
+          = values[:fee_receipts][:total_amount]
+          - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
         %td
           = payments[:total_received]
           - accumulate_row_values[:total_received] += payments[:total_received]
@@ -137,7 +137,7 @@
     %td
       = total_rows[:interest_received]
     %td
-      = total_rows[:loan_receipts]
+      = total_rows[:fee_receipts]
     %td
       = total_rows[:total_received]
     %td

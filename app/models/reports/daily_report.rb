@@ -40,17 +40,17 @@ class DailyReport < Report
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
 
-      loans_applied = reporting_facade.loans_applied_by_branches_on_date(@date, *at_branch_ids_ary)
-      loans_approved = reporting_facade.loans_approved_by_branches_on_date(@date, *at_branch_ids_ary)
-      loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(@date, *at_branch_ids_ary)
-      loans_disbursed = reporting_facade.loans_disbursed_by_branches_on_date(@date, *at_branch_ids_ary)
+      loans_applied = reporting_facade.loans_applied_by_branches_on_date(@date, *branch_id)
+      loans_approved = reporting_facade.loans_approved_by_branches_on_date(@date, *branch_id)
+      loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(@date, *branch_id)
+      loans_disbursed = reporting_facade.loans_disbursed_by_branches_on_date(@date, *branch_id)
 
-      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *at_branch_ids_ary)
-      loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-      loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-      loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-      loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-      loan_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, *at_branch_ids_ary)
+      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *branch_id)
+      loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
+      loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
+      loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
+      loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *branch_id)
+      fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
 
       branch_data_map = {}
       branch_data_map[:loans_applied] = loans_applied
@@ -62,7 +62,7 @@ class DailyReport < Report
       branch_data_map[:loan_payments] = loan_payments
       branch_data_map[:loan_net_payments] = loan_net_payments
       branch_data_map[:loan_allocations] = loan_allocations
-      branch_data_map[:loan_receipts] = loan_receipts
+      branch_data_map[:fee_receipts] = fee_receipts
 
       data[branch_id] = branch_data_map
     }    
