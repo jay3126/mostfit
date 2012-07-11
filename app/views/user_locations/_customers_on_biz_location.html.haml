@@ -30,7 +30,7 @@
   %div{:class => "demo"}
     %ul{:id => "sortable", :style => "width:100%;"}
       - for customer in @customers
-        %li{:class => "ui-state-default"}
+        %li{:class => "ui-state-default", :id => "client_#{customer.id}"}
           %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
           %table.form
             %tr
