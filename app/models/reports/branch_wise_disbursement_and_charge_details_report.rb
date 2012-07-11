@@ -43,10 +43,9 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
 
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each do |branch_id|
-      branch = [branch_id]
 
-      loan_disbursals = reporting_facade.loans_disbursed_by_branches_on_date(@date, branch)
-      fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, *at_branch_ids_ary)
+      loan_disbursals = reporting_facade.loans_disbursed_by_branches_on_date(@date, *branch_id)
+      fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, @date, *branch_id)
 
       branch_data_map = {}
       branch_data_map[:loan_disbursals] = loan_disbursals
