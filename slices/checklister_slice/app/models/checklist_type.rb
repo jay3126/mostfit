@@ -201,9 +201,9 @@ class ChecklistType
     #Cash book/pity cash book maintenance
 
     #@checklist=Checklist.create!(:name => "Cash book/pity cash book maintenance", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Cash book/petty cash book maintenance", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Cash book/petty cash book maintenance", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Cash book/petty cash book maintenance", :model_name => "CashBookValue", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Cash book/petty cash book maintenance", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Cash book/petty cash book maintenance", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Cash book/petty cash book maintenance", :model_name => "CashBookValue", :sequence_number => 5, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Cash book/petty cash book maintenance is very good with all enteries posted and proper authentication obtained", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Cash book/petty cash book maintenance is Ok but needs few corrections and improvements", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Cash book/petty cash book maintenance is Not Ok and needs lot of correction and improvement", :sequence_number => 3, :created_at => Date.today)
@@ -214,16 +214,16 @@ class ChecklistType
 
 
     #stock register maintanence
-    @section_type4=SectionType.create!(:name => "Stock Register maintenance", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Stock Register maintenance", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => " Stock Register maintenance", :model_name => "StockRegisterValue", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Stock Register maintenance", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Stock Register maintenance", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => " Stock Register maintenance", :model_name => "StockRegisterValue", :sequence_number => 6, :created_at => Date.today)
 
     #Register maintenance
 
     #@checklist=Checklist.create!(:name => "Register maintenance", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Register maintenance", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Register maintenance", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Register maintenance", :model_name => "RegisterMaintanenceValue", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Register maintenance", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Register maintenance", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Register maintenance", :model_name => "RegisterMaintanenceValue", :sequence_number => 7, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Register maintained and daily entries are regularly updated in the register", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Register maintained but entries are not regularly updated on a daily basis. Few enteries are made in the register at some long intervals ", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Register is maintained but no entries are made in it", :sequence_number => 3, :created_at => Date.today)
@@ -233,9 +233,9 @@ class ChecklistType
     #comments On cleanliness
 
     #@checklist=Checklist.create!(:name => "comments On cleanliness", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Comments on cleanliness", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Comments on cleanliness ", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Comments on cleanliness ", :model_name => "CleanlinessCommentValue", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Comments on cleanliness", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Comments on cleanliness ", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Comments on cleanliness ", :model_name => "CleanlinessCommentValue", :sequence_number => 8, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Unnecessary items not seen at all in the branch", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Unnecessary items partially seen in the branch", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Unnecessary items seen all over the branch", :sequence_number => 3, :created_at => Date.today)
@@ -243,9 +243,9 @@ class ChecklistType
     #Cash and collection report
 
     #@checklist=Checklist.create!(:name => "Cash and collection report", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Cash and collection report", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Cash and collection report", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Cash and Collection Reports ", :model_name => "CashAndCollectionReport", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Cash and collection report", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Cash and collection report", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Cash and Collection Reports ", :model_name => "CashAndCollectionReport", :sequence_number => 9, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Are RO's are coming back iin time after last meeting", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Cash collected and deposited in bank in time", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Pending cash kept in safe and reported properly", :sequence_number => 3, :created_at => Date.today)
@@ -255,9 +255,9 @@ class ChecklistType
 #Due sheets file
 
    # @checklist=Checklist.create!(:name => "Due sheets file", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Due sheets file")
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Due sheets file", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Due Sheet File Value", :model_name => "DueSheetFileValue", :sequence_number => 1, :created_at => Date.today)
+   # @section_type4=SectionType.create!(:name => "Due sheets file")
+   # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Due sheets file", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Due Sheet File Value", :model_name => "DueSheetFileValue", :sequence_number => 10, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "5 box files maintained and reports filed regularly", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "5 box files maintained and reports NOT filed regularly", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Box files not maintained", :sequence_number => 3, :created_at => Date.today)
@@ -266,9 +266,9 @@ class ChecklistType
 #Camera and photos
 
     #@checklist=Checklist.create!(:name => "Camera and photos", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Camera and photos", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Camera and photos", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Camera and photos  ", :model_name => "PhotoValue", :sequence_number => 1, :created_at => Date.today)
+    #@section_type4=SectionType.create!(:name => "Camera and photos", :created_at => Date.today)
+    #@section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Camera and photos", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Camera and photos  ", :model_name => "PhotoValue", :sequence_number => 11, :created_at => Date.today)
 
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "2 photos taken and updated to picasa site", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "2 photos taken and not updated to picasa site", :sequence_number => 2, :created_at => Date.today)
@@ -279,9 +279,9 @@ class ChecklistType
     #Display of charts/boards/infrastructure in the branch
 
    # @checklist=Checklist.create!(:name => "Display of charts/boards/infrastructure", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-    @section_type4=SectionType.create!(:name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
-    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Display of charts/boards/infrastructure in the branch", :model_name => "InfrastructureValue", :sequence_number => 1, :created_at => Date.today)
+   # @section_type4=SectionType.create!(:name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
+   # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
+    @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Display of charts/boards/infrastructure in the branch", :model_name => "InfrastructureValue", :sequence_number => 12, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "RBI registration certificate/Shop Act/Company registration", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Area survey chart/ branch approval", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "RO capacity chart", :sequence_number => 3, :created_at => Date.today)
