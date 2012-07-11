@@ -13,8 +13,8 @@ class LoanAssignmentFacade < StandardFacade
     LoanAssignment.get_loan_assigned_to(for_loan_id, on_date)
   end
 
-  def get_loans_assigned(to_loan_assignment)
-    LoanAssignment.get_loans_assigned(to_loan_assignment)
+  def get_loans_assigned(to_loan_assignment, on_date)
+    LoanAssignment.get_loans_assigned(to_loan_assignment, on_date)
   end
 
   def get_loan_information(for_loan_id)

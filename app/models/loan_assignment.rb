@@ -70,12 +70,23 @@ class LoanAssignment
     first(for_loan_on_date)
   end
 
-  # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance
-  def self.get_loans_assigned(to_assignment)
-    assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)    
-    all(:assignment_nature => assignment_nature, :assignment_id => assignment_id, :assignment_status => ASSIGNED).collect { |assignment|
-      assignment.loan_id
-    }
+  # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance, on a specific date
+  # 
+  def self.get_loans_assigned(to_assignment, on_date=nil)
+    assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)
+    if assignment_nature == :encumbered and effective_on.nil?
+        raise ArgumentError, "Effective On date must be supplied for Encumberance"
+    end
+    if assignment_nature == :encumbered
+        all(:assignment_nature => assignment_nature,
+            :assignment_id => assignment_id,
+            :effective_on.lte => on_date,
+            :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
+    else
+        all(:assignment_nature => assignment_nature,
+            :assignment_id => assignment_id,
+            :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
+    end
   end
 
   # Indicates the loan assignment status on a specified date
