@@ -13,9 +13,8 @@
       = "Status: #{@loan_file.health_check_status.humanize rescue nil}"
     |
     = "Center Cycle Number: #{center_cycle_number}"
-    - unless @loan_file.is_healthcheck_complete?
-      |
-      = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files', @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button', :target => 'blank'
+    |
+    = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files', @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button', :target => 'blank'
 
 %br
 %hr
@@ -81,7 +80,6 @@
 .shaded
   %h2
     = "Actions"
-  - if @loan_file.is_healthcheck_complete?
-    = link_to_with_rights "Create clients", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'grey_button'
-    - if @loan_file.loan_applications.count > 0 && (@loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil)) && @loan_file.loan_applications.collect{|x| x.loan.nil?}.include?(true)
-      = link_to_with_rights "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
+  = link_to_with_rights "Create clients", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'grey_button'
+  - if @loan_file.loan_applications.count > 0 && (@loan_file.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil)) && @loan_file.loan_applications.collect{|x| x.loan.nil?}.include?(true)
+    = link_to_with_rights "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'

@@ -121,10 +121,5 @@ class LoanFile
 
     return_status
   end
-  
-  def is_healthcheck_complete?
-    return true if self.health_check_status == Constants::Status::HEALTH_CHECK_APPROVED || self.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT
-    return false
-  end
 
 end
