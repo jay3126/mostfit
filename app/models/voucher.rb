@@ -26,6 +26,8 @@ class Voucher
       true
   end
 
+  def voucher_type; "RECEIPT"; end
+
   def self.create_generated_voucher(total_amount, currency, effective_on, postings, notation = nil)
     create_voucher(total_amount, currency, effective_on, notation, postings, GENERATED_VOUCHER)
   end
@@ -70,6 +72,58 @@ class Voucher
 
   def self.sort_chronologically(vouchers)
     vouchers.sort {|v1, v2| (v1.effective_on - v2.effective_on == 0) ? (v1.created_at - v2.created_at) : (v1.effective_on - v2.effective_on)}
+  end
+
+  def self.get_voucher_list(search_options = {})
+    all(search_options)
+  end
+
+  def self.to_tally_xml(voucher_list, xml_file = nil)
+    xml_file ||= '/tmp/voucher.xml'
+    f = File.open(xml_file,"w")
+    x = Builder::XmlMarkup.new(:target => f,:indent => 1)
+    x.ENVELOPE{
+      x.HEADER {
+        x.VERSION "1"
+        x.TALLYREQUEST "Import"
+        x.TYPE "Data"
+        x.ID "Vouchers"
+      }
+
+      x.BODY {
+        x.DESC{
+        }
+        x.DATA{
+          x.TALLYMESSAGE{
+            voucher_list.each do |voucher|
+              debit_postings, credit_postings = voucher.ledger_postings.group_by{ |ledger_posting| ledger_posting.effect }.values
+              x.VOUCHER{
+                x.DATE voucher.effective_on.strftime("%Y%m%d")
+                x.NARRATION voucher.narration
+                x.VOUCHERTYPENAME voucher.voucher_type
+                x.VOUCHERNUMBER voucher.id
+                x.REMOTEID voucher.guid
+                credit_postings.each do |credit_posting|
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME(credit_posting.ledger.name)
+                    x.ISDEEMEDPOSITIVE("No")
+                    x.AMOUNT(credit_posting.to_balance.to_regular_amount)
+                  end
+                end
+                debit_postings.each do |debit_posting|
+                  x.tag! 'ALLLEDGERENTRIES.LIST' do
+                    x.LEDGERNAME(debit_posting.ledger.name)
+                    x.ISDEEMEDPOSITIVE("Yes")
+                    x.AMOUNT(debit_posting.to_balance.to_regular_amount)
+                  end
+                end
+              }
+            end
+          }
+        }
+      }
+    }
+    f.close
   end
 
   private

@@ -72,7 +72,7 @@ class Vouchers < Application
     @voucher = Voucher.get(id)
     raise NotFound unless @voucher
     if @voucher.update(voucher)
-       redirect resource(@voucher)
+      redirect resource(@voucher)
     else
       display @voucher, :edit
     end
@@ -88,4 +88,19 @@ class Vouchers < Application
     end
   end
 
+  def tally_download
+    if params[:from_date] and params[:to_date]
+      search_options = {}
+      from_date = Date.parse(params[:from_date])
+      to_date   = Date.parse(params[:to_date])
+      file   = File.join("/", "tmp", "voucher_#{from_date.strftime('%Y-%m-%d')}_#{to_date.strftime('%Y-%m-%d')}_#{Time.now.to_i}.xml")
+      search_options = {:effective_on.gte => from_date, :effective_on.lte => to_date}
+      voucher_list = Voucher.get_voucher_list(search_options)
+      Voucher.to_tally_xml(voucher_list, file)
+      send_data(File.read(file), :filename => file)
+    else
+      render :layout => layout?
+    end
+  end
+  
 end # Vouchers
