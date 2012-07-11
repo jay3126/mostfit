@@ -1,7 +1,7 @@
 - if @message && !@message[:error].blank?
   .error
     = @message[:error]
-%h1 Lending Product
+%h1 Loan Product
 
 = form_for(@lending_product, :action => :create) do
   = partial :fields
