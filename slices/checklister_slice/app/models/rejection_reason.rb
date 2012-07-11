@@ -2,7 +2,7 @@ class RejectionReason
   include DataMapper::Resource
 
   property :id, Serial
-  property :name, String
+  property :name, Text
   property :created_at, DateTime
   property :deleted_at, DateTime
 

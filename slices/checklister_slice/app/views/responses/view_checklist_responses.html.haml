@@ -3,25 +3,57 @@
     No Responses Yet
 -else
   %h1.h1c
-    ="List Of responses for #{@checklist.name}"
+    ="List of responses for #{@checklist.name}"
 
   -if !@responses.nil?
 
-    %table.form
-      %tr
-        %td
-          Serial Number
-        %td
-          Filler Name
-        -@responses.each_with_index do |response,index|
-          %tr
-            %td
-              =response.id
-            %td
-              =response.filler.name
-            %td
-              =link_to "View Response",url(:checklister_slice_view_response,response.filler,:checklist_id=>@checklist.id)
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %td
+            Serial Number
+          %td
+            Filler Name
+          %td
+            Filled On
+          %td
+            Filled for date
+          %td
+            Target Entity
+          %td
+            Completion Status
+          %td
+            Result Staus
+
+          %td
+
+            links
+      - @responses.each_with_index do |response,index|
+        %tr
+          %td
+            =response.id
+          %td
+            =response.filler.name
+          %td
+            =response.created_at.strftime("%b %e %Y")
+          %td
+            =response.value_date.strftime("%b %e %Y")
+          %td
+            =response.target_entity.name
+          %td
+            =response.completion_status
+          %td
+            =response.result_status
+          %td
+            =link_to "View Response",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
 
 %h4
-  =link_to "Back",url("browse/index")
+  =link_to "Back",params[:referral_url],:class=>'greenButton'
 
+
+%p
+  -if message
+    #flash-messages.span-17.prefix-5.suffix-5.last
+    -  message.each do |key, value|
+      .flash{ :class => key.to_s }
+        %p= value.gsub("\n", "<br/>")
