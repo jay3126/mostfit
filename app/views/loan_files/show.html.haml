@@ -14,7 +14,7 @@
     |
     = "Center Cycle Number: #{center_cycle_number}"
     |
-    = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files', @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button', :target => 'blank'
+    = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files', @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button'
 
 %br
 %hr
