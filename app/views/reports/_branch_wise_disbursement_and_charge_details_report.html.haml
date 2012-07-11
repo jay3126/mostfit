@@ -34,6 +34,8 @@
           = values[:loan_disbursals][:total_amount]
           - accumulate_row_values[:loan_disbursals] += values[:loan_disbursals][:total_amount]
         %td
+          = values[:fee_dues][:total_amount]
+          - accumulate_row_values[:fee_dues] += values[:fee_dues][:total_amount]
         %td
           = values[:fee_receipts][:total_amount]
           - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
@@ -47,5 +49,6 @@
     %td
       = total_rows[:loan_disbursals]
     %td
+      = total_rows[:fee_dues]
     %td
       = total_rows[:fee_receipts]
