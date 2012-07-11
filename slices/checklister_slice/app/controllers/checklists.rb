@@ -4,36 +4,54 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
   def index
     # @perform_checklist_link=generate_perform_checklist_link(session.user.role)
     #extracting data from parameters we get....
-    @checklist_type=ChecklistType.get(params[:checklist_type_id].to_i)
+
+    # check if required parameters are passed or not...
+    begin
+      verify_parameters(params)
 
 
-    @target_entity_id=params[:target_entity_id]
-    @target_entity_type=params[:target_entity_type]
-    @target_entity_name=params[:target_entity_name]
-    @loc1_type=params[:loc1_type]
-    @loc2_type=params[:loc2_type]
-    @loc1_id=params[:loc1_id]
-    @loc2_id=params[:loc2_id]
-    @loc2_name=params[:loc2_name]
-    @loc1_name=params[:loc1_name]
+      @checklist_type=ChecklistType.get(params[:checklist_type_id].to_i)
 
-    @no_of_applications=params[:no_of_applications]
-    @effective_date=params[:effective_date]
-    @staff_id=params[:staff_id]
-    @staff_name=params[:staff_name]
-    @referral_url=params[:referral_url]
 
-    @checklists = @checklist_type.checklists
-    #check if required parameters are passed or not...
-    #if !are_parameters_correct?(params)
-    #  message = {:error => "The URL is broken. Please contact your administrator."}
-    #  redirect url("browse/index"), :message => message
-    #
-    #end
+      @target_entity_id=params[:target_entity_id]
+      @target_entity_type=params[:target_entity_type]
+      @target_entity_name=params[:target_entity_name]
+      @loc1_type=params[:loc1_type]
+      @loc2_type=params[:loc2_type]
+      @loc1_id=params[:loc1_id]
+      @loc2_id=params[:loc2_id]
+      @loc2_name=params[:loc2_name]
+      @loc1_name=params[:loc1_name]
 
-    #@checklists=Checklist.all
+      @no_of_applications=params[:no_of_applications]
+      @effective_date=params[:effective_date]
+      @staff_id=params[:staff_id]
+      @staff_name=params[:staff_name]
+      @referral_url=params[:referral_url]
 
-    display @checklists
+      @checklists = @checklist_type.checklists
+
+      #@checklists=Checklist.all
+
+      display @checklists
+    rescue TargetEntityNotFoundException => e
+      message={:error => e.message}
+      redirect params[:referral_url], :message => message
+
+    rescue StaffNotFoundException => e
+      message={:error => e.message}
+      redirect params[:referral_url], :message => message
+
+    rescue LocationNotFoundException => e
+      message={:error => e.message}
+      redirect params[:referral_url], :message => message
+
+    rescue UrlNotFoundException => e
+
+      message={:error => e.message}
+      redirect url("browse/index"), :message => message
+
+    end
 
 
   end
@@ -149,15 +167,15 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     if !params[:result_status].blank?
       if params[:result_status].to_i==1
-      @result_status="cleared"
+        @result_status="cleared"
       else
         @result_status="pending"
-          end
+      end
     else
       @result_status="cleared"
 
     end
-    @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today,:completion_status=>"complete",:result_status=>@result_status.to_s)
+    @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
     ChecklistLocation.first_or_create(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
     ChecklistLocation.first_or_create(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2_name], :created_at => Date.today)
 
@@ -189,30 +207,30 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         section.checkpoints.each do |checkpoint|
 
           if !params["checkpoint_#{checkpoint.id}".to_sym].blank?
-          @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
-            end
+            @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
+          end
 
         end
         #save all the free texts
         section.free_texts.each do |free_text|
           if !params["free_text_#{free_text.id}".to_sym].blank?
-          @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
-            end
+            @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
+          end
         end
 
         #save all drop downs
 
         section.dropdownpoints.each do |drop_down|
 
-          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id,:model_record_name=>Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
+          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id, :model_record_name => Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
         end
 
         #save all checkbox points
         section.checkboxpoints.each do |checkbox_point|
           checkbox_point.checkboxpoint_options.each do |option|
             if !params["option#{option.id}".to_sym].blank?
-            @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
-              end
+              @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
+            end
           end
         end
 
@@ -220,10 +238,10 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       end
 
     rescue Exception => e
-     # message={:error => e.message}
-      message={:error => params[:result_status]}
-      #message[:error]="Fields cannot be blank"
-       render :fill_in_checklist, :message => message
+      # message={:error => e.message}
+     # message={:error => params[:result_status]}
+      message[:error]="Fields cannot be blank"
+      render :fill_in_checklist, :message => message
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
     else

@@ -1,19 +1,19 @@
 module Merb::ChecklisterSlice::ChecklistsHelper
-  def perform_link(role,checklist,parameter_hash)
+  def perform_link(role, checklist, parameter_hash)
     if ROLE_MAPPER[checklist.checklist_type.name][:performer].include?(role.to_s)
 
-      link_to 'Respond to checklist', url(:checklister_slice_fill_in_checklist,checklist ,parameter_hash),:class=>"greenButton"
+      link_to 'Respond to checklist', url(:checklister_slice_fill_in_checklist, checklist, parameter_hash), :class => "greenButton"
     end
 
   end
 
-  def response_link(role,checklist,referral_url)
+  def response_link(role, checklist, referral_url)
     if checklist.responses.count>0
-    if ROLE_MAPPER[checklist.checklist_type.name][:viewer].include?(role.to_s)
-      link_to 'See all responses', url(:checklister_slice_view_checklist_responses,checklist,:referral_url=>referral_url),:class=>"greenButton"
-    else
-      "<span class=''>Not Authorized</span>"
-    end
+      if ROLE_MAPPER[checklist.checklist_type.name][:viewer].include?(role.to_s)
+        link_to 'See all responses', url(:checklister_slice_view_checklist_responses, checklist, :referral_url => referral_url), :class => "greenButton"
+      else
+        "<span class=''>Not Authorized</span>"
+      end
 
     else
       "<span class=''>No responses yet</span>"
@@ -21,11 +21,16 @@ module Merb::ChecklisterSlice::ChecklistsHelper
   end
 
 
-  def are_parameters_correct?(parameter_hash)
-    if parameter_hash[:filler_record_id].nil? or parameter_hash[:filler_model].nil? parameter_hash[:target_entity_record_id].nil? or parameter_hash[:target_entity_model].nil?
-       false
-    else
-      true
+  def verify_parameters(parameter_hash)
+    if parameter_hash[:staff_name].blank? or parameter_hash[:staff_id].blank?
+      raise StaffNotFoundException, "Staff Member Parameters are wrong."
+
+    elsif parameter_hash[:target_entity_name].blank? or parameter_hash[:target_entity_type].blank? or parameter_hash[:target_entity_id].blank?
+      raise TargetEntityNotFoundException, "Target entity parameters are wrong."
+    elsif parameter_hash[:loc1_type].blank? or parameter_hash[:loc1_name].blank? or parameter_hash[:loc1_id].blank?
+      raise LocationNotFoundException, "Location Parameters are wrong."
+    elsif parameter_hash[:referral_url].blank?
+      raise UrlNotFoundException, "Referral URL is wrong."
     end
   end
 

@@ -20,5 +20,11 @@ module Errors
 
   # Raised when an attempt is made to set the state on an object to one that is not permitted
   class InvalidStateChangeError < StandardError; end
+
+  #raised when checklist is called with target_entity_name/type/id blank
+  class Merb::ChecklisterSlice::ChecklistsHelper::TargetEntityNotFoundException < StandardError;end
+
+  #raised when checklist is called with staff name/id blank.
+  class Merb::ChecklisterSlice::ChecklistsHelper::TargetEntityNotFoundException < StandardError;end
     
 end
