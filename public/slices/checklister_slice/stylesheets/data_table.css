@@ -61,6 +61,8 @@
 	width: 50%;
 	float: right;
 	text-align: right;
+    padding:5px;
+    padding-right:140px
 }
 
 .dataTables_info {

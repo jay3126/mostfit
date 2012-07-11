@@ -44,7 +44,7 @@
         %td{:style => "text-align:center"}
           = BizLocation.get(claim.accounted_at).name
         %td{:style => "text-align:center"}
-          = claim.performed_by
+          = StaffMember.get(claim.performed_by).name rescue nil
         %td{:style => "text-align:center"}
           = claim.claim_status.humanize rescue nil
 - else

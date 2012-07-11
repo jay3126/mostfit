@@ -122,9 +122,10 @@ h1.logo span{
 }
 
 table.form{
-  border: 0px;
+  border: 1px solid #000000;
   font-family: Helvetica;
   padding: 10px;
+
 }
 
 .shaded {
@@ -140,12 +141,19 @@ thead tr.shaded {
   background: #CDD3FE;
 }
 
+
 table.form tr:hover {
   background: #efefef;
+
 }
 
 table.form td{
-  border: 0px;
+  border-right: 1px solid #000000;
+  vertical-align: middle;
+    padding: 10px
+}
+table.form tr{
+  border: 1px solid #000000;
   vertical-align: middle;
 }
 
@@ -1656,3 +1664,38 @@ table.moreinfo thead th {
  {
   background: #C6CCF5;
 }
+.greenButton {
+    -moz-box-shadow:inset 0px 1px 0px 0px #c1ed9c;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #c1ed9c;
+    box-shadow:inset 0px 1px 0px 0px #c1ed9c;
+    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #9dce2c), color-stop(1, #8cb82b) );
+    background:-moz-linear-gradient( center top, #9dce2c 5%, #8cb82b 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#9dce2c', endColorstr='#8cb82b');
+    background-color:#9dce2c;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    border:1px solid #83c41a;
+    display:inline-block;
+    color:#ffffff;
+    font-family:arial;
+    font-size:15px;
+    font-weight:bold;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:1px 1px 0px #689324;
+}
+.greenButton:hover  {
+    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #8cb82b), color-stop(1, #9dce2c) );
+    background:-moz-linear-gradient( center top, #8cb82b 5%, #9dce2c 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8cb82b', endColorstr='#9dce2c');
+    background-color:#8cb82b;
+}
+.greenButton:active  {
+    position:relative;
+    top:1px;
+}
+.greenButton a {
+    color: white;
+}
+

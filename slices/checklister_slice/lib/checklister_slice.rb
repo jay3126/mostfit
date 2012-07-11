@@ -71,7 +71,7 @@ if defined?(Merb::Plugins)
 
       scope.match('/checklists/fill_in_checklist/:id').to(:controller => 'checklists', :action => 'fill_in_checklist').name(:fill_in_checklist)
       scope.match('/checklists/capture_checklist_data').to(:controller => 'checklists', :action => 'capture_checklist_data').name(:capture_checklist_data)
-      scope.match('/responses/view_response/:id/').to(:controller => 'responses', :action => 'view_response').name(:view_response)
+      scope.match('/responses/view_response/:id').to(:controller => 'responses', :action => 'view_response').name(:view_response)
 
 
      # example of a named route

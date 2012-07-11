@@ -228,11 +228,22 @@ class LoanFiles < Application
     end
   end
 
-  def loan_files_list
-    @loan_files = LoanFile.all(:at_branch_id => params[:at_branch_id], :at_center_id => params[:at_center_id], :health_check_status => params[:status])
-    render :index
+  def show_loan_files
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    @errors = []
+    unless params[:flag] == 'true'
+      if branch_id.blank?
+        @errors << "No branch selected"
+      elsif center_id.blank?
+        @errors << "No center selected"
+      end
+    end
+    @loan_files = LoanFile.all(:at_branch_id => branch_id, :at_center_id => center_id)
+    render
   end
-
 
   private
 

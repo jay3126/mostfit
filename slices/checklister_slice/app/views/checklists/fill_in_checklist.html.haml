@@ -33,11 +33,13 @@
             %td
               =label " Staff Member:"
             %td
-              =text_field :name=>:staff_name ,:value=>params[:staff_name]
+              =text_field :name=>:staff_name ,:value=>params[:staff_name] ,:disabled=>true
+              =hidden_field :staff_name ,:value=>params[:staff_name]
             %td
               =label params[:target_entity_type]
             %td
-              =text_field :target_entity_name ,:value=>params[:target_entity_name]
+              =text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
+              =hidden_field :target_entity_name ,:value=>params[:target_entity_name]
           %tr
             %td
             %td
@@ -49,12 +51,14 @@
             %td
               =label params[:loc1_type]
             %td
-              =text_field :loc1_name,:value=>params[:loc1_name]
+              =text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
+              =hidden_field :loc1_name,:value=>params[:loc1_name]
 
             %td
               =label params[:loc2_type]
             %td
-              =text_field :loc2_name,:value=>params[:loc2_name]
+              =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+              =hidden_field :loc2_name,:value=>params[:loc2_name]
           %tr
             %td
             %td
@@ -81,7 +85,7 @@
             =hidden_field :checklist_id, :value=>@checklist.id
 
             =hidden_field :filler_type, :value=>"User"
-            =hidden_field :filler_id, :value=>@staff_id
+            =hidden_field :staff_id, :value=>@staff_id
             =hidden_field :target_entity_type, :value=>params[:target_entity_type]
             =hidden_field :target_entity_id, :value=>params[:target_entity_id]
 
@@ -128,9 +132,10 @@
                   %td{:width=>"800px"}
                     ="#{i+1} . #{dropdownpoint.name}"
                   %td
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
-
-
+                    -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
+                      =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
+                    -else
+                      =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value"
 
 
 
@@ -142,5 +147,8 @@
 
 
 
-=link_to "Back",params[:referral_url]
+%br
+%br
+%br
+=link_to "Back","#",:class=>"greenButton",:onclick=>"history.go(-1)"
 

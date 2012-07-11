@@ -7,7 +7,7 @@ Merb::Router.prepare do
   resources :bank_account_ledgers
   resources :accounting_rules
   resources :book_keeping
-  resources :vouchers
+  resources :vouchers, :id => %r(\d+)
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)

@@ -189,6 +189,10 @@ module Merb
       attrs.merge!(:nullable => opts[:nullable]) if opts.key?(:nullable)
       date_select_html(attrs) 
     end
+
+    def date_select_earliest(name, opts={})
+      date_select(name, Constants::Time::EARLIEST_DATE_OF_OPERATION, opts)
+    end
  
     def date_select_for(obj, col = nil, attrs = {})
       klass = obj.class
@@ -311,7 +315,7 @@ module Merb
           crums << link_to(I18n.t("breadcrumb.#{part}", :default => part.gsub('_', ' ')), url) unless ['centers','clients'].include?(part) # add the resource name
         end
       end
-      ['<a href="/">Home  </a>', crums].join(' Â» ')   # fancy separator
+      ['<a href="/">Home  </a>', crums].join(' » ')   # fancy separator
     end
 
     def format_currency(i)

@@ -63,12 +63,15 @@ class ChecklisterSlice::Responses < ChecklisterSlice::Application
   end
 
 
-  def view_response(id,checklist_id)
+  def view_response(id, response_id)
     @filler=Filler.get(id)
-    @checklist=Checklist.get(params[:checklist_id])
-    @response=Response.all(:filler_id=>@filler.id,:checklist_id=>@checklist.id).first
+
+    @response=Response.get(params[:response_id])
+    @checklist=@response.checklist
     @sections=@checklist.sections
-    @responses=@filler.responses
     display @responses
+  end
+  def view_report
+
   end
 end # Responses

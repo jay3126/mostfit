@@ -4,13 +4,35 @@
 %h4
   =#"To Be filled by #{params[:filler_record_id]}"
 
-%table.form
-  %tr
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        <b>Checklist Name</b>
+      %th
+        %b
+          =params[:target_entity_type]
+      %th
+        <b>Filled By</b>
+      %th
+        <b>For-Date</b>
+      %th
+        <b>Links</b>
+      %th
+        link
+
+
   - for checklist in @checklists
     %tr
-      %td{:width=>"240px"}
+      %td
         =checklist.name
-      %td{:width=>"150px"}
+      %td
+        =params[:target_entity_name]
+      %td
+        =params[:staff_name]
+      %td
+        =params[:effective_date]
+      %td
         -parameter_hash=Hash.new
         -parameter_hash[:loc1_type]=@loc1_type
         -parameter_hash[:loc2_type]=@loc2_type
@@ -32,17 +54,23 @@
         -parameter_hash[:effective_date]=@effective_date
         -parameter_hash[:referral_url]=@referral_url
 
-
-
-
         =perform_link(session.user.role,checklist,parameter_hash)
 
-      %td{:width=>"150px"}
-        =response_link(session.user.role,checklist)
-      %td{:width=>"150px"}
 
 
-=link_to "Back",params[:referral_url]
+
+
+
+      %td{:width=>"150px"}
+        =response_link(session.user.role,checklist,params[:referral_url].to_s)
+
+
+
+%br
+%br
+%br
+=link_to "Back",params[:referral_url],:class=>"greenButton"
+
 
 
 %p

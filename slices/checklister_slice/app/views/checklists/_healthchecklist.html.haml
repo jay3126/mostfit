@@ -11,12 +11,15 @@
           %td
             =label " Staff Member:"
           %td
-            =text_field :name=>:staff_name ,:value=>params[:staff_name]
+            =text_field :name=>:staff_name ,:value=>params[:staff_name] ,:disabled=>true
+            =hidden_field :staff_name ,:value=>params[:staff_name]
           %td
             =label params[:target_entity_type]
           %td
-            =text_field :target_entity_name ,:value=>params[:target_entity_name]
+            =text_field :target_entity_name ,:value=>params[:target_entity_name]        ,:disabled=>true
+            =hidden_field :target_entity_name ,:value=>params[:target_entity_name]
         %tr
+
           %td
           %td
         %tr
@@ -27,12 +30,14 @@
           %td
             =label params[:loc1_type]
           %td
-            =text_field :loc1_name,:value=>params[:loc1_name]
+            =text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
+            =hidden_field :loc1_name,:value=>params[:loc1_name]
 
           %td
             =label params[:loc2_type]
           %td
-            =text_field :loc2_name,:value=>params[:loc2_name]
+            =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+            =hidden_field :loc2_name,:value=>params[:loc2_name]
         %tr
           %td
           %td
@@ -43,6 +48,10 @@
             =label "Value Date"
           %td
             =date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
+          %td
+            Member Count
+          %td
+            =params[:no_of_applications]
 
       %p
 
@@ -150,7 +159,10 @@
                 %td
                   =" #{dropdownpoint.name}"
                 %td
-                  =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name, :selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
+                  -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name, :selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
+                  -else
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:prompt=>"Select A Value From"
 
 
             -count=count+1
@@ -161,6 +173,10 @@
 
 
       %p
+        =check_box :name=>"result_status",:boolean=>true,:checked=>false
+        Cleared?
+        %br
+        %br
         = submit "Create"
 
 

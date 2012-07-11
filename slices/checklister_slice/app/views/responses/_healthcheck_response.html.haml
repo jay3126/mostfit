@@ -1,0 +1,94 @@
+%p
+  -count=1
+  -@sections.each do |section|
+    %hr
+    %table{:cellspacing=>"3px", :cellpadding=>"2px",:border=>" 2"}
+      -if count==2
+        %tr
+          %td
+            Name
+          %td
+            Address Proof
+          %td
+            ID Proof
+          %td
+            Age
+          %td
+            Ration Card
+          %td
+            Extra Photo
+          %td
+            Member/Guarantor sign
+          %td
+            BM/RO/AO sign
+          %td
+            Term sheet
+          %td
+            DPN
+          %td
+            DeDupe
+          %td
+            Remark
+      -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
+        -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+        -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+        -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+        -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+
+
+        -if count==1 or count==3
+          -if i%3==0
+            %tr.question_cell
+
+        -else
+          -if i%2==0
+            %tr.question_cell
+
+        -if !checkpoint.nil?
+          %td
+            =" #{checkpoint.name}"
+          %td
+            -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+            -if checkpoint_filling.nil?
+              Not Attempted
+            -else
+              =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
+        -if !checkboxpoint.nil?
+          %td
+            ="#{checkboxpoint.name}"
+            -checkboxpoint.checkboxpoint_options.each do |option|
+              %td
+                =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>true
+
+
+        -if !free_text.nil?
+          -if count!=2
+            %td{:width=>"70px"}
+
+              =" #{free_text.name}"
+
+          -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+          -if free_text_filling.nil?
+            -@comment="----NA----"
+          -else
+            -@comment=free_text_filling.comment
+          -if free_text.name.downcase=="date"
+            %td
+              =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+          -else
+            %td
+
+              =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+        -if !dropdownpoint.nil?
+          %td
+            =" #{dropdownpoint.name}"
+          %td
+            =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+
+      -count=count+1
+
+
+
+
+
+
