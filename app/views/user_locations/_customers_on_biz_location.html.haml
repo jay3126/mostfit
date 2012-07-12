@@ -10,9 +10,7 @@
     "bJQueryUI": true
   });
 
-.menu-strip
-  = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
-
+= link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => "add grey_button"
 %br
 - if @customers.count == 0
   %p
