@@ -143,7 +143,6 @@ module Pdf
         lendings.each do |loan|
           client        = loan.borrower
           client_name  = client.name unless client.blank?
-          debugger
           client_group = client.client_group.blank? ? 'Nothing' : client.client_group.name
           tot_amount = tot_amount + loan.to_money[:applied_amount] unless loan.to_money[:applied_amount].blank?
           table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.to_money[:applied_amount].to_s, "Name" => client_name,
