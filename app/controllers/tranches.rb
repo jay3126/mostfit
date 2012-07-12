@@ -28,7 +28,7 @@ class Tranches < Application
   end	
 
   def index
-	
+    render @tranches	
   end
   
   def new(id)
@@ -78,6 +78,32 @@ class Tranches < Application
       message[:error] = @errors.flatten.join(', ')
       render :new  # error messages will show
     end
+  end
+
+  def show
+    #GATEKEEPING
+    @errors = []
+    debugger
+
+    @tranch = Tranch.get(params[:id])
+    raise NotFound unless @tranch
+    @date = params[:tranch_date].blank? ? get_effective_date : Date.parse(params[:tranch_date])
+    @lendings = loan_assignment_facade.get_loans_assigned_to_tranch(@tranch, @date)
+      
+    do_calculations
+
+    render :template => 'tranches/show', :layout => layout?
+  end
+
+  def do_calculations
+    money_hash_list = []
+    @lendings.each do |lending|
+      lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
+      money_hash_list << lds.to_money
+    end 
+    
+    in_currency = MoneyManager.get_default_currency
+    @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
   end
 
 end
