@@ -181,9 +181,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       #find all sections of that checklist
       @sections=@checklist.sections
 
-
       @sections.each do |section|
-
         #check for validations...
         # an exception should be raised if any yes/no answers are blank
         #section.checkpoints.each do |checkpoint|
@@ -197,11 +195,17 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
             raise Exception
           end
         end
-        #if the control comes here....the validations have passed.
-        @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
-        ChecklistLocation.first_or_create(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
-        ChecklistLocation.first_or_create(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2_name], :created_at => Date.today)
 
+      end
+
+      @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
+      ChecklistLocation.first_or_create(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
+      ChecklistLocation.first_or_create(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2_name], :created_at => Date.today)
+
+      @sections.each do |section|
+
+
+        #if the control comes here....the validations have passed.
 
 
         #save all the yes/no questions
@@ -240,7 +244,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     rescue Exception => e
       # message={:error => e.message}
-     # message={:error => params[:result_status]}
+      # message={:error => params[:result_status]}
       message[:error]="Fields cannot be blank"
       render :fill_in_checklist, :message => message
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
