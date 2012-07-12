@@ -273,7 +273,7 @@ class Lendings < Application
     @lending = Lending.get lending_id
     preclosure_penalty_product = @lending.get_preclosure_penalty_product
     @preclosure_penalty_amount = preclosure_penalty_product ? preclosure_penalty_product.effective_total_amount(preclose_on_date) :
-        MoneyManager.default_zero_money
+      MoneyManager.default_zero_money
     render :template => "lendings/lending_preclose"
   end
   
@@ -300,12 +300,16 @@ class Lendings < Application
     specific_interest_amount = params[:specific_interest_amount]
     specific_interest_money_amount =  MoneyManager.get_money_instance(specific_interest_amount)
     total_money_amount = specific_principal_money_amount + specific_interest_money_amount
+    fee_amount = params[:penalty_amount]
+    fee_money_amount = MoneyManager.get_money_instance(fee_amount)
+    fee_product = @lending.get_preclosure_penalty_product
 
     # VALIDATIONS
     @errors << "Preclosure date must not be future date" if Date.parse(effective_on) > Date.today
     # OPERATIONS
     if @errors.blank?
       begin
+        payment_facade.record_ad_hoc_fee_receipt(fee_money_amount, fee_product, effective_on, @lending, performed_by) unless fee_money_amount.amount == 0
         payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
         message = {:notice => "Succesfully preclosed"}
       rescue => ex
