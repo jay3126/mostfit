@@ -17,10 +17,11 @@
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
         %td
-          %a{:href => url(:controller => 'encumberances', :id => encumberance.id, :action => 'loan_for_encumberance_on_date')}
+          %a{:href => url(:controller => 'encumberances', :id => encumberance.id, :action => 'loans_for_encumberance_on_date')}
             = encumberance.id
         %td
-          = encumberance.name
+          %a{:href => url(:controller => 'encumberances', :id => encumberance.id, :action => 'loans_for_encumberance_on_date')}
+            = encumberance.name
         %td
           = encumberance.assigned_value_money_amount
         %td
