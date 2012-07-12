@@ -70,18 +70,18 @@
           = values[:loans_disbursed][:total_amount]
           - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
         %td
-          -# - payments = values[:loan_allocations].values[0]
-          -# = payments[:principal_received]
-          -# - accumulate_row_values[:principal_received] += payments[:principal_received]
+          - payments = values[:loan_allocations].values[0]
+          = payments[:principal_received]
+          - accumulate_row_values[:principal_received] += payments[:principal_received]
         %td
-          -# = payments[:interest_received]
-          -# - accumulate_row_values[:interest_received] += payments[:interest_received]
+          = payments[:interest_received]
+          - accumulate_row_values[:interest_received] += payments[:interest_received]
         %td
           = values[:fee_receipts][:total_amount]
           - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
         %td
-          -# = payments[:total_received]
-          -# - accumulate_row_values[:total_received] += payments[:total_received]
+          = payments[:total_received]
+          - accumulate_row_values[:total_received] += payments[:total_received]
   -#      %td
   -#         - outstandings = values[:loan_balances].values[0]
   -#         = outstandings[:actual_principal_outstanding]
@@ -133,13 +133,13 @@
     %td
       = total_rows[:loans_disbursed]
     %td
-    -#  = total_rows[:principal_received]
+      = total_rows[:principal_received]
     %td
-    -#  = total_rows[:interest_received]
+      = total_rows[:interest_received]
     %td
       = total_rows[:fee_receipts]
     %td
-    -#  = total_rows[:total_received]
+      = total_rows[:total_received]
   -#   %td
   -#     = total_rows[:actual_principal_outstanding]
   -#   %td

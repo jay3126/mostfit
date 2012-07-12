@@ -7,6 +7,11 @@ class ReportingFacade < StandardFacade
     total_loan_allocation_receipts_at_locations_on_value_date(on_date, TRANSACTION_ACCOUNTED_AT, at_location_ids_ary)
   end
 
+  #this method is to find out total loan allocation accounted at a particular location for a date range specified.
+  def total_loan_allocation_receipts_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
+    total_loan_allocation_receipts_at_locations_for_date_range(on_date, till_date, TRANSACTION_ACCOUNTED_AT, at_location_ids_ary)
+  end
+
   def total_loan_allocation_receipts_performed_at_locations_on_value_date(on_date, *at_location_ids_ary)
     total_loan_allocation_receipts_at_locations_on_value_date(on_date, TRANSACTION_PERFORMED_AT, at_location_ids_ary)
   end
@@ -338,6 +343,17 @@ class ReportingFacade < StandardFacade
     property_sym = TRANSACTION_LOCATIONS[performed_or_accounted_choice]
     at_location_ids_ary.each { |at_location_id|
       all_loan_receipts_at_location = LoanReceipt.all(:effective_on => on_date, property_sym => at_location_id)
+      total_loan_allocation_receipts_grouped_by_location[at_location_id] = LoanReceipt.add_up(all_loan_receipts_at_location)
+    }
+    total_loan_allocation_receipts_grouped_by_location
+  end
+
+  #this method is to find out total loan allocation receipts at locations in a specified date range.
+  def total_loan_allocation_receipts_at_locations_for_date_range(on_date, till_date, performed_or_accounted_choice, *at_location_ids_ary)
+    total_loan_allocation_receipts_grouped_by_location = {}
+    property_sym = TRANSACTION_LOCATIONS[performed_or_accounted_choice]
+    at_location_ids_ary.each { |at_location_id|
+      all_loan_receipts_at_location = LoanReceipt.all(:effective_on.gte => on_date, :effective_on.lte => till_date, property_sym => at_location_id)
       total_loan_allocation_receipts_grouped_by_location[at_location_id] = LoanReceipt.add_up(all_loan_receipts_at_location)
     }
     total_loan_allocation_receipts_grouped_by_location
