@@ -120,6 +120,16 @@ class ReportingFacade < StandardFacade
     {:count => count, :total_amount => sum_money_amount}
   end
 
+  #this method is to find out loan_receipts accounted at location for a specified date range.
+  def all_receipts_on_loans_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
+    location_ids_array = *at_location_ids_ary.to_a
+    query = PaymentTransaction.all(:effective_on.gte => on_date, :effective_on.lte => till_date, :receipt_type => RECEIPT, :on_product_type => LENDING, :accounted_at => location_ids_array)
+    count = query.count
+    sum_amount = query.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
   def all_payments_on_loans_performed_at_locations_on_value_date(on_date, *at_location_ids_ary)
     location_ids_array = *at_location_ids_ary.to_a
     query = PaymentTransaction.all(:effective_on => on_date, :receipt_type => PAYMENT, :on_product_type => LENDING, :performed_at => location_ids_array)
@@ -132,6 +142,16 @@ class ReportingFacade < StandardFacade
   def all_payments_on_loans_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
     location_ids_array = *at_location_ids_ary.to_a
     query = PaymentTransaction.all(:effective_on => on_date, :receipt_type => PAYMENT, :on_product_type => LENDING, :accounted_at => location_ids_array)
+    count = query.count
+    sum_amount = query.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  #this method is to find out payments on loans accounted_at locations in a specified date range.
+  def all_payments_on_loans_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
+    location_ids_array = *at_location_ids_ary.to_a
+    query = PaymentTransaction.all(:effective_on.gte => on_date, :effective_on.lte => till_date, :receipt_type => PAYMENT, :on_product_type => LENDING, :accounted_at => location_ids_array)
     count = query.count
     sum_amount = query.aggregate(:amount.sum)
     sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
@@ -153,6 +173,19 @@ class ReportingFacade < StandardFacade
   def net_payments_on_loans_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
     payments = all_payments_on_loans_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
     receipts = all_receipts_on_loans_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
+
+    total_payments_amount = payments[:total_amount]; total_receipts_amount = receipts[:total_amount]
+    net_transaction_type = total_payments_amount > total_receipts_amount ? PAYMENT : RECEIPT
+    net_amount = Money.net_amount(total_payments_amount, total_receipts_amount)
+    total_count = payments[:count] + receipts[:count]
+
+    {:count => total_count, :total_amount => net_amount}
+  end
+
+  #this method is for calculating new payments on loans accounted at locations in a specified date range.
+  def net_payments_on_loans_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
+    payments = all_payments_on_loans_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
+    receipts = all_receipts_on_loans_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
 
     total_payments_amount = payments[:total_amount]; total_receipts_amount = receipts[:total_amount]
     net_transaction_type = total_payments_amount > total_receipts_amount ? PAYMENT : RECEIPT

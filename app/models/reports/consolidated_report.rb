@@ -47,9 +47,9 @@ class ConsolidatedReport < Report
 
       #loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
       fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@from_date, @to_date, *branch_id)
-    #   loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-    #   loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
-    #   loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_on_value_date(@date, *at_branch_ids_ary)
+      loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
       loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
 
       branch_data_map = {}
@@ -59,9 +59,9 @@ class ConsolidatedReport < Report
       branch_data_map[:loans_disbursed] = loans_disbursed
     #  branch_data_map[:loan_balances] = loan_balances
       branch_data_map[:fee_receipts] = fee_receipts
-    #   branch_data_map[:loan_receipts] = loan_receipts
-    #   branch_data_map[:loan_payments] = loan_payments
-    #   branch_data_map[:loan_net_payments] = loan_net_payments
+      branch_data_map[:loan_receipts] = loan_receipts
+      branch_data_map[:loan_payments] = loan_payments
+      branch_data_map[:loan_net_payments] = loan_net_payments
       branch_data_map[:loan_allocations] = loan_allocations
 
       data[branch_id] = branch_data_map
