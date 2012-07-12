@@ -13,16 +13,16 @@
 #     - <action1>
 #     - <action3>
 # <rolename2> : all
-      
+
 operator : all
 ################
 administrator :
-  home : 
+  home :
     - all
   browse :
     - all
   admin :
-    - all  
+    - all
   audit_trails:
     - index
     - show
@@ -40,15 +40,15 @@ administrator :
   loan_purposes :
     - all
   searches :
-    - all  
+    - all
 ################
 executive :
-  home : 
+  home :
     - all
 #  admin :
 #    - index
   browse :
-    - all	
+    - all
   attendances :
     - index
     - create
@@ -65,14 +65,21 @@ executive :
     - all
   clients :
     - index
-#    - new
-#    - create
+    - new
+    - create
     - bulk_entry
     - show
 #    - edit
     - update
   new_clients :
     - show
+    - new
+    - create
+    - edit
+    - update
+#    - register_death_event
+#    - record_death_event
+    - client_insurance_policies
   documents :
     - all
   loan_applications :
@@ -88,7 +95,7 @@ executive :
 #   - all
 #  loan_files :
 #    - index
-#    - show  
+#    - show
 #    - get_data
 #    - generate_disbursement_sheet
 #    - generate_disbursement_labels
@@ -98,7 +105,7 @@ executive :
 #   - all
   lendings :
 #    - all
-    - index  
+    - index
     - create
     - create_repayment_on_lending
     - show
@@ -109,34 +116,53 @@ executive :
     - payment_on_disburse_loan
     - lending_due_statuses
     - lending_status_history
+    - lending_preclose
+    - check_preclosure_date
+    - record_lending_preclose
+    - save_lendings_fee
   searches :
     - all
   user_locations :
     - all
-#  lending_products :
-#    - index
-#    - show
+  lending_products :
+    - index
+    - show
+    - create
   reports :
     - all
+  fee_instances :
+     - fee_instance_on_lending
+     - index
   payment_transactions :
     - index
     - new
     - weeksheet_payments
-    - create_group_payments  
+    - create_group_payments
+    - payment_form_for_lending
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
+    - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
-#    - record_grt     
-################    
+#    - record_grt
+################
 supervisor :
   home :
-    - all	
+    - all
   browse :
     - all
   admin :
-    - index	 
+    - index
 #  asset_register :
-#    - index  
+#    - index
 #    - new
 #    - create
 #    - edit
@@ -157,7 +183,7 @@ supervisor :
 #    - index
     - biz_location_clients
     - biz_location_form
-    - centers_for_selector    	
+    - centers_for_selector
   center_cycles :
     - all
   client_groups :
@@ -181,8 +207,8 @@ supervisor :
   holidays :
     - all
   lendings :
-    - all 
-#    - index  
+    - all
+#    - index
 #    - create
 #   - create_repayment_on_lending
 #    - show
@@ -194,12 +220,15 @@ supervisor :
 #    - lending_transactions
 #    - payment_on_disburse_loan
 #    - lending_due_statuses
+  fee_instances :
+     - fee_instance_on_lending
+     - index
   loan_applications :
      - index
      - show
      - bulk_create_loan_applicant
      - bulk_create
-     - list 
+     - list
      - bulk_new
      - edit
      - update
@@ -212,7 +241,7 @@ supervisor :
      - all
   loan_files :
      - index
-     - show  
+     - show
      - get_data
      - generate_disbursement_sheet
      - generate_disbursement_labels
@@ -224,19 +253,34 @@ supervisor :
 #  overlap_report_requests:
 #    - all
 #  overlap_report_responses:
-#    - all  
+#    - all
+  meeting_schedules :
+    - all
+
   user_locations :
-    - all  
+    - all
   searches :
     - all
-#  lending_products :
-#    - index
-#    - show
+  lending_products :
+#    - all
+     - index
+     - show
+#     - create
+#     - new
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
   reports :
     - show
     - create
     - edit
- #   - all
+    - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
@@ -246,25 +290,27 @@ supervisor :
     - new
     - weeksheet_payments
     - create_group_payments
+    - payment_form_for_lending
  # book_keeping :
  #   - all
- # ledgers :
+  ledgers :
  #   - all
+    - show
   money_deposits :
-     - index
-     - create
+    - index
+    - create
 #     - mark_verification
 #     - record_verification
-     - get_bank_branches
-     - get_bank_accounts
+    - get_bank_branches
+    - get_bank_accounts
   location_holidays :
-    - all 
+    - all
 #################
 support :
   admin :
     - index
     - show
-  home : 
+  home :
     - all
   browse :
     - all
@@ -272,14 +318,14 @@ support :
     - index
     - show
   asset_register :
-#     - all		 
-    - index  
+#     - all
+    - index
     - new
     - create
     - edit
     - update
     - show
-    
+
   attendances :
     - index
     - create
@@ -289,8 +335,8 @@ support :
     - show
   book_keeping :
     - all
-  center_cycles :
-    - all
+#  center_cycles :
+#    - all
   client_groups :
     - all
   client_verifications :
@@ -309,7 +355,7 @@ support :
 #    - index
 #   - show
   lendings :
-    - index  
+    - index
     - create
     - create_repayment_on_lending
     - show
@@ -333,7 +379,7 @@ support :
 #   - all
   loan_files :
     - index
-    - show  
+    - show
     - get_data
     - generate_disbursement_sheet
     - generate_disbursement_labels
@@ -345,31 +391,51 @@ support :
 #    - index
     - show
     - get_dates
-    - get_date   
+    - get_date
   searches :
     - all
   user_locations :
     - all
   biz_locations :
-    - centers_for_selector  
-################    
+    - centers_for_selector
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
+################
 finops :
-  home : 
+  home :
     - all
   browse :
     - all
-  accounting_rules :
-    - all
+  admin :
     - index
-    - show
+#  accounting_rules :
+#    - all
+#    - index
+#    - show
   ledgers :
     - all
-  asset_register :
-    - index  
-    - new
-    - create
-    - edit
-    - update
+#  vouchers :
+#    - all
+#  cost_centers :
+#    - all
+#  transaction_summaries :
+#    - all
+#  accounting_rules :
+#    - all
+
+#  asset_register :
+#    - index
+#    - new
+#    - create
+#    - edit
+#    - update
     - show
 #  attendances :
 #    - index
@@ -384,14 +450,17 @@ finops :
 #    - update
 #    - show
     - centers_for_selector
-  book_keeping :
-    - all
+ # book_keeping :
+ #   - all
 #  center_cycles :
 #    - all
   client_groups :
     - all
 #  client_verifications :
 #    - all
+  new_clients :
+ #    - index
+     - show
   clients :
     - index
 #    - new
@@ -399,29 +468,34 @@ finops :
 #    - bulk_entry
     - show
 #    - edit
-    - update
-  designations :
-    - all
-  document_types :
-    - all
+#    - update
+#  designations :
+#    - all
+#  document_types :
+#    - all
   documents :
-    - all  
+    - all
   funders :
-    - all  
-  funding_lines :
-    - all
-#  ledgers :
-#    - index
-#    - show
-  lending_products :
-    - all
-  lendings :
-    - index  
-    - create
-    - create_repayment_on_lending
+    - index
     - show
-    - edit
-    - update
+    - funding_lines
+
+  funding_lines :
+    - index
+    - show
+    - redirect_to_show
+    - get_context
+  lending_products :
+ #   - index
+    - show
+
+  lendings :
+#    - index
+#    - create
+#    - create_repayment_on_lending
+    - show
+#    - edit
+#    - update
   loan_applications :
     - index
     - show
@@ -435,21 +509,18 @@ finops :
     - suspected_duplicates
     - get_de_dupe_loan_applications
     - record_suspected_duplicates
-#  loan_applications :
-#    - all
-#    - edit
-#    - update
+
   overlap_report_requests:
     - all
   overlap_report_responses:
-    - all 
-  loan_purposes :
     - all
+#  loan_purposes :
+#    - all
   searches :
-    - all  
+    - all
   loan_files :
 #    - index
-    - show  
+    - show
 #    - get_data
     - generate_disbursement_sheet
     - generate_disbursement_labels
@@ -461,51 +532,60 @@ finops :
 #  loan_authorizations :
 #    - all
   reports :
-#    - all 
+    - all
 #    - index
-    - show
-    - get_dates
-    - get_date
+#    - show
+#    - get_dates
+#    - get_date
   center_cycles :
     - record_cgt
     - mark_cgt_grt
-#    - record_grt 
+#    - record_grt
   user_locations :
     - all
-  money_deposits :
-     - index
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
+#  money_deposits :
+#    - index
 #     - create
-     - mark_verification
-     - record_verification
+#    - mark_verification
+#    - record_verification
 #     - get_bank_branches
-#     - get_bank_accounts  
-################        
+#     - get_bank_accounts
+################
 read_only :
-  home : 
+  home :
     - all
   browse :
     - all
-#  accounting_rules :
-#    - index
-#    - show
-#  asset_register :
-#     - all		 
-#    - index  
+  accounting_rules :
+    - index
+    - show
+  asset_register :
+#     - all
+    - index
 #    - new
 #    - create
 #    - edit
 #    - update
-#    - show
-    
+    - show
+
 #  attendances :
 #    - index
 #    - create
-#  audit_trails:
+  audit_trails:
 #    - all
-#    - index
-#    - show
+    - index
+    - show
 #  biz_locations:
-#    - all    
+#    - all
 #  book_keeping :
 #    - all
 #  center_cycles :
@@ -515,7 +595,7 @@ read_only :
 #  client_verifications :
 #    - all
   new_clients :
-    - show  
+    - show
   clients :
     - index
 #    - new
@@ -524,16 +604,25 @@ read_only :
     - show
   user_locations :
     - all
-#  documents :
-#    - all
+  documents :
+    - all
 #  holiday_calendars :
 #    - all
 #  ledgers :
 #    - index
 #   - show
   lendings :
-    - index  
-  
+    - index
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
+
 #    - create
 #    - create_repayment_on_lending
     - show
@@ -558,7 +647,7 @@ read_only :
 #   - all
 #  loan_files :
 #    - index
-#    - show  
+#    - show
 #    - get_data
 #    - generate_disbursement_sheet
 #    - generate_disbursement_labels
@@ -570,19 +659,19 @@ read_only :
 #    - index
 #    - show
 #    - get_dates
-#    - get_date   
-#  searches :
-#    - all
+#    - get_date
+  searches :
+    - all
 ##########3
-accountant : 
+accountant :
   home :
-    - all	
+    - all
   browse :
     - all
 #  admin :
-#    - index	 
+#    - index
   asset_register :
-    - index  
+    - index
     - new
     - create
     - edit
@@ -603,7 +692,7 @@ accountant :
 #    - index
     - biz_location_clients
     - biz_location_form
-    - centers_for_selector    	
+    - centers_for_selector
 #  center_cycles :
 #    - all
 #  client_groups :
@@ -633,8 +722,8 @@ accountant :
 #  holidays :
 #    - all
   lendings :
-#    - all 
-#    - index  
+#    - all
+#    - index
 #    - create
 #   - create_repayment_on_lending
     - show
@@ -653,7 +742,7 @@ accountant :
 #     - show
 #     - bulk_create_loan_applicant
 #     - bulk_create
-#     - list 
+#     - list
 #     - bulk_new
 #     - edit
 #     - update
@@ -666,7 +755,7 @@ accountant :
 #     - all
 #  loan_files :
 #     - index
-#     - show  
+#     - show
 #     - get_data
 #     - generate_disbursement_sheet
 #     - generate_disbursement_labels
@@ -678,7 +767,7 @@ accountant :
 #  overlap_report_requests:
 #    - all
 #  overlap_report_responses:
-#    - all  
+#    - all
   user_locations :
 #    - all
     - index
@@ -691,7 +780,7 @@ accountant :
 #    - biz_location_list
     - staffs_on_biz_location
     - location_eod_summary
-#    - pdf_on_biz_location  
+#    - pdf_on_biz_location
   searches :
     - all
 #  lending_products :
@@ -723,23 +812,33 @@ accountant :
     - all
   accounting_rules :
     - all
+  users :
+#     - index
+    - show
+    - edit
+    - update
+     - change_password
+#    - new
+    - admin_change_password
+    - preferred_locale
   money_deposits :
-     - index
+    - index
 #     - create
-     - mark_verification
-     - record_verification
+    - mark_verification
+    - record_verification
 #     - get_bank_branches
 #     - get_bank_accounts
+
 ##########
 auditor :
   home :
-    - all	
+    - all
   browse :
     - all
 #  admin :
-#    - index	 
+#    - index
   asset_register :
-    - index  
+    - index
     - new
     - create
     - edit
@@ -760,7 +859,7 @@ auditor :
 #    - index
     - biz_location_clients
     - biz_location_form
-    - centers_for_selector    	
+    - centers_for_selector
 #  center_cycles :
 #    - all
 #  client_groups :
@@ -783,15 +882,15 @@ auditor :
     - show_accounts
     - show
 #    - new
-#  documents :
-#    - all
+  documents :
+    - all
 #  holiday_calendars :
 #    - all
 #  holidays :
 #    - all
   lendings :
-#    - all 
-#    - index  
+#    - all
+#    - index
 #    - create
 #   - create_repayment_on_lending
     - show
@@ -810,7 +909,7 @@ auditor :
 #     - show
 #     - bulk_create_loan_applicant
 #     - bulk_create
-#     - list 
+#     - list
 #     - bulk_new
 #     - edit
 #     - update
@@ -823,7 +922,7 @@ auditor :
 #     - all
 #  loan_files :
 #     - index
-#     - show  
+#     - show
 #     - get_data
 #     - generate_disbursement_sheet
 #     - generate_disbursement_labels
@@ -835,7 +934,7 @@ auditor :
 #  overlap_report_requests:
 #    - all
 #  overlap_report_responses:
-#    - all  
+#    - all
   user_locations :
 #    - all
     - index
@@ -848,7 +947,7 @@ auditor :
 #    - biz_location_list
     - staffs_on_biz_location
     - location_eod_summary
-#    - pdf_on_biz_location  
+#    - pdf_on_biz_location
   searches :
     - all
 #  lending_products :
@@ -880,17 +979,26 @@ auditor :
     - all
   accounting_rules :
     - all
+  users :
+#     - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
   money_deposits :
-     - index
+    - index
 #     - create
-     - mark_verification
-     - record_verification
+    - mark_verification
+    - record_verification
 #     - get_bank_branches
 #     - get_bank_accounts
 #########
-telecaller : 
+telecaller :
 
-  home : 
+  home :
     - all
   browse :
     - all
@@ -898,14 +1006,14 @@ telecaller :
 #    - index
 #    - show
 #  asset_register :
-#     - all		 
-#    - index  
+#     - all
+#    - index
 #    - new
 #    - create
 #    - edit
 #    - update
 #    - show
-    
+
 #  attendances :
 #    - index
 #    - create
@@ -914,7 +1022,7 @@ telecaller :
 #    - index
 #    - show
 #  biz_locations:
-#    - all    
+#    - all
 #  book_keeping :
 #    - all
 #  center_cycles :
@@ -924,7 +1032,7 @@ telecaller :
 #  client_verifications :
 #    - all
   new_clients :
-    - show  
+    - show
   clients :
     - index
 #    - new
@@ -933,16 +1041,25 @@ telecaller :
     - show
   user_locations :
     - all
-#  documents :
-#    - all
+  documents :
+    - all
 #  holiday_calendars :
 #    - all
 #  ledgers :
 #    - index
 #   - show
   lendings :
-    - index  
-  
+    - index
+  users :
+#   - index
+    - show
+    - edit
+    - update
+    - change_password
+#     - new
+    - admin_change_password
+    - preferred_locale
+
 #    - create
 #    - create_repayment_on_lending
     - show
@@ -967,7 +1084,7 @@ telecaller :
 #   - all
 #  loan_files :
 #    - index
-#    - show  
+#    - show
 #    - get_data
 #    - generate_disbursement_sheet
 #    - generate_disbursement_labels
@@ -979,6 +1096,6 @@ telecaller :
 #    - index
 #    - show
 #    - get_dates
-#    - get_date   
-#  searches :
-#    - all
+#    - get_date
+  searches :
+    - all
