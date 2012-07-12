@@ -16,7 +16,7 @@
   });
 
 
--if @checklist_type.name=="HealthCheck on Loan Files"
+-if @checklist_type.is_hc_checklist?
   =partial "checklists/healthchecklist"
 -else
 

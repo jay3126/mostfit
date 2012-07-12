@@ -252,18 +252,18 @@ class ChecklistType
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Cash report send by AO", :sequence_number => 4, :created_at => Date.today)
 
 
-#Due sheets file
+    #Due sheets file
 
-   # @checklist=Checklist.create!(:name => "Due sheets file", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-   # @section_type4=SectionType.create!(:name => "Due sheets file")
-   # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Due sheets file", :created_at => Date.today)
+    # @checklist=Checklist.create!(:name => "Due sheets file", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
+    # @section_type4=SectionType.create!(:name => "Due sheets file")
+    # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Due sheets file", :created_at => Date.today)
     @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Due Sheet File Value", :model_name => "DueSheetFileValue", :sequence_number => 10, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "5 box files maintained and reports filed regularly", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "5 box files maintained and reports NOT filed regularly", :sequence_number => 2, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Box files not maintained", :sequence_number => 3, :created_at => Date.today)
 
 
-#Camera and photos
+    #Camera and photos
 
     #@checklist=Checklist.create!(:name => "Camera and photos", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
     #@section_type4=SectionType.create!(:name => "Camera and photos", :created_at => Date.today)
@@ -278,9 +278,9 @@ class ChecklistType
 
     #Display of charts/boards/infrastructure in the branch
 
-   # @checklist=Checklist.create!(:name => "Display of charts/boards/infrastructure", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
-   # @section_type4=SectionType.create!(:name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
-   # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
+    # @checklist=Checklist.create!(:name => "Display of charts/boards/infrastructure", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
+    # @section_type4=SectionType.create!(:name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
+    # @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Display of charts/boards/infrastructure in the branch", :created_at => Date.today)
     @dropdownpoint1=Dropdownpoint.create!(:section_id => @section1.id, :name => "Display of charts/boards/infrastructure in the branch", :model_name => "InfrastructureValue", :sequence_number => 12, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "RBI registration certificate/Shop Act/Company registration", :sequence_number => 1, :created_at => Date.today)
     #@checkpoint9=Checkpoint.create!(:section_id => @section1.id, :name => "Area survey chart/ branch approval", :sequence_number => 2, :created_at => Date.today)
@@ -511,6 +511,74 @@ class ChecklistType
     RegisterMaintanenceValue.generate_seed_data
     StockRegisterValue.generate_seed_data
 
+  end
+
+
+  #####these are methods to get different type of checklists#####
+
+  def self.get_scv_checklist
+    ChecklistType.all(:name => "Surprise Center Visit").first
+  end
+
+  def self.get_ba_checklist
+    ChecklistType.all(:name => "Business Audit").first
+
+  end
+
+  def self.get_pa_checklist
+    ChecklistType.all(:name => "Process Audit").first
+  end
+
+  def self.get_hc_checklist
+    ChecklistType.all(:name => "HealthCheck on Loan Files").first
+
+  end
+
+  def self.get_cc_checklist
+    ChecklistType.all(:name => "Customer Calling").first
+  end
+
+
+
+  #################these are instance methods which return true or false####################################
+  def is_hc_checklist?
+    if self.name=="HealthCheck on Loan Files"
+      true
+    else
+      false
+    end
+  end
+
+  def is_scv_checklist?
+    if self.name=="Surprise Center Visit"
+      true
+    else
+      false
+    end
+  end
+
+  def is_ba_checklist?
+    if self.name=="Business Audit"
+      true
+    else
+      false
+    end
+  end
+
+  def is_cc_checklist?
+    if self.name=="Customer Calling"
+      true
+    else
+      false
+    end
+  end
+
+  def is_pa_checklist?
+    if self.name=="Process Audit"
+      true
+    else
+      false
+    end
   end
 
 

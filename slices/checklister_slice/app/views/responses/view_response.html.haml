@@ -35,46 +35,61 @@
 
 
 
--if @checklist.checklist_type.name=="HealthCheck on Loan Files"
+-if @checklist.checklist_type.is_hc_checklist?
   =partial "responses/healthcheck_response"
 -else
 
 
   -@sections.each do |section|
     %hr
-      %p{:style=>"font-size:20px"}
-        %b
-          %u.section_block
+    .section_block
+      %h2
+        %b{:style=>"color:black"}
+          %u
             =section.name
         %br
-      %p
-        =section.instructions
-      %table.form
-        -section.checkpoints.each_with_index do |checkpoint,index|
-          %tr.question_cell
-            %td
+      =section.instructions
 
-              -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
-              -if checkpoint_filling.nil?
-                Not Attempted
+    -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+    -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+    -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+    -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+      %table{:cellspacing=>"3px", :cellpadding=>"3px"}
+        %tr.question_cell
+
+        -if !checkpoint.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} . #{checkpoint.name}"
+          %td
+            -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+            -if checkpoint_filling.nil?
+              Not Attempted
+            -else
+              =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
+        -elsif !free_text.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} .  #{free_text.name}"
+
+            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+            -if free_text_filling.nil?
+              -@comment="----NA----"
+            -else
+              -@comment=free_text_filling.comment
+              -if free_text.name.downcase=="date"
+                %td
+                  =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
               -else
-                =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
-                =@response.id
-            %td
-              =checkpoint.name
-      %table
-        -section.free_texts.each do |free_text|
-          %tr.question_cell
-            %td
-              -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-              =free_text.name
-          %tr
-            %td
-              -if free_text_filling.nil?
-                -@comment="----NA-----"
-              -else
-                -@comment=free_text_filling.comment
-              =text_area @comment,:disabled=>true, :class=>"full_width"
+                %td
+
+                  =text_area @comment ,:name=>"free_text_#{free_text.id}".to_sym,:disabled=>true
+
+
+
+        -elsif !dropdownpoint.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} . #{dropdownpoint.name}"
+          %td
+            =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
 
 
 

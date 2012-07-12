@@ -71,7 +71,11 @@ class ChecklisterSlice::Responses < ChecklisterSlice::Application
     @sections=@checklist.sections
     display @responses
   end
-  def view_report
+  def view_report(response_id,checklist_id)
+    @checklist=Checklist.get(checklist_id)
+    @response=Response.get(response_id)
+
+
 
   end
 end # Responses
