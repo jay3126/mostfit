@@ -49,29 +49,30 @@
             = "Status"
       %tbody
         - @loan_file.loan_applications.each do |lap|
-          %tr
-            %td
-              = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
-            %td
-              = lap.client_name
-            %td
-              = lap.client_guarantor_name
-            %td
-              = lap.client_dob
-            %td
-              = lap.client_reference1
-            %td
-              = lap.client_reference2
-            %td
-              = lap.loan_money_amount.to_s
-            %td
-              = lap.client_address
-            %td
-              = lap.client_state.humanize
-            %td
-              = lap.client_pincode
-            %td
-              = lap.status.humanize rescue nil
+          - if lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS
+            %tr
+              %td
+                = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
+              %td
+                = lap.client_name
+              %td
+                = lap.client_guarantor_name
+              %td
+                = lap.client_dob
+              %td
+                = lap.client_reference1
+              %td
+                = lap.client_reference2
+              %td
+                = lap.loan_money_amount.to_s
+              %td
+                = lap.client_address
+              %td
+                = lap.client_state.humanize
+              %td
+                = lap.client_pincode
+              %td
+                = lap.status.humanize rescue nil
   - else
     %h3 No loan applications
 %br
