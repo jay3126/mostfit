@@ -6,13 +6,6 @@ class Encumberances < Application
     display @encumberances
   end
 
-  def show(id)
-    @encumberance = Encumberance.get(id)
-    raise NotFound unless @encumberance
-    @lendings = loan_assignment_facade.get_loans_assigned(@encumberance)
-    display @encumberance
-  end
-
   def new
     only_provides :html
     @encumberance = Encumberance.new
@@ -85,12 +78,35 @@ class Encumberances < Application
     display @upload
   end
 
-  def lona_for_encumberance_on_date
+  def loan_for_encumberance_on_date
     @encumberance = Encumberance.get(params[:id])
     raise NotFound unless @encumberance
-    @date = params[:ecum_date].blank? ? get_effective_date : Date.parse(params[:ecum_date])
-    @lendings = loan_assignment_facade.get_loans_assigned(@encumberance)
+    @date = params[:encu_date].blank? ? get_effective_date : Date.parse(params[:encu_date])
+    @lendings = loan_assignment_facade.get_loans_assigned(@encumberance,@date)
+    
+    #calculate various things to show about the encumberance    
+    do_calculations
+
     render :template => 'encumberances/show', :layout => layout?
   end
+
+  def do_calculations
+    money_hash_list = []
+    @lendings.each do |lending| 
+      lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
+      money_hash_list << lds.to_money
+    end 
+    
+    in_currency = MoneyManager.get_default_currency
+    @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
+    if @total_money[:actual_total_outstanding] < @encumberance.to_money[:assigned_value]
+      @shortfall_or_excess = "Shortfall"
+    else
+      @shortfall_or_excess = "Excess"
+    end
+     
+    @difference = Money.net_amount(@total_money[:actual_total_outstanding], @encumberance.to_money[:assigned_value])
+  end
+
 
 end # Encumberances

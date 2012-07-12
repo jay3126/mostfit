@@ -165,6 +165,10 @@ class ReportingFacade < StandardFacade
     aggregate_loans_by_branches_for_status_on_date(:disbursed, on_date, *at_branch_ids_ary)
   end
 
+  def loans_disbursed_by_branches_and_lending_products_on_date(on_date, lending_product_list, *at_branch_ids_ary)
+    aggregate_loans_by_branches_and_lending_products_for_status_on_date(:disbursed, on_date, lending_product_list, *at_branch_ids_ary)
+  end
+
   def individual_loans_disbursed_by_centers_on_date(on_date, *at_center_ids_ary)
     individual_loans_by_centers_for_status_on_date(:disbursed, on_date, *at_center_ids_ary)
   end
@@ -197,6 +201,21 @@ class ReportingFacade < StandardFacade
     sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
     {:count => count, :total_amount => sum_money_amount}
   end
+
+  def all_aggregate_fee_dues_by_branches(on_date, till_date = on_date, *at_branch_ids_ary)
+    from_date, to_date = Constants::Time.ordered_dates(on_date, till_date)
+    query = {:applied_on.gte => from_date, :applied_on.lte => to_date}
+    query[:accounted_at] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    query_results = FeeInstance.all(query)
+
+    count = query_results.count
+    sum_amount = MoneyManager.default_zero_money
+    query_results.each do |x|
+      sum_amount += x.effective_total_amount(on_date)
+    end
+    sum_money_amount = sum_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
   
   private
 
@@ -221,6 +240,18 @@ class ReportingFacade < StandardFacade
   def aggregate_loans_by_branches_for_status_on_date(for_status, on_date, *at_branch_ids_ary)
     loan_status, date_to_query, amount_to_sum = LoanLifeCycle::STATUSES_DATES_SUM_AMOUNTS[for_status]
     query = {:status => loan_status, date_to_query => on_date}
+    query[:accounted_at_origin] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    query_results = Lending.all(query)
+
+    count = query_results.count
+    sum_amount = query_results.aggregate(amount_to_sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  def aggregate_loans_by_branches_and_lending_products_for_status_on_date(for_status, on_date, lending_product_list, *at_branch_ids_ary)
+    loan_status, date_to_query, amount_to_sum = LoanLifeCycle::STATUSES_DATES_SUM_AMOUNTS[for_status]
+    query = {:status => loan_status, date_to_query => on_date, :lending_product_id => lending_product_list}
     query[:accounted_at_origin] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
     query_results = Lending.all(query)
 

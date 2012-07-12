@@ -110,5 +110,22 @@ class BizLocation
     }
     location_map
   end
+
+  def location_eod_summary(on_date = Date.today)
+    location_ids = self.location_level.level == LocationLevel::NOMINAL_BRANCH_LEVEL ? [self.id] : LocationLink.get_children(self, on_date).map(&:id)
+    reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, on_date)
+    total_new_loan_application       = ''
+    loans_pending_approval           = reporting_facade.loans_applied_by_branches_on_date(on_date, *location_ids)
+    loans_approved_today             = reporting_facade.loans_approved_by_branches_on_date(on_date, *location_ids)
+    loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(on_date, *location_ids)
+    loans_disbursed_today            = reporting_facade.loans_disbursed_by_branches_on_date(on_date, *location_ids)
+
+    t_repayment_due                  = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(on_date, *location_ids)
+    t_repayment_received             = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(on_date, *location_ids)
+    t_outstanding                    = reporting_facade.all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *location_ids)
+
+    EodSummary.new(total_new_loan_application, loans_pending_approval, loans_approved_today, loans_scheduled_for_disbursement, loans_disbursed_today,
+                  t_repayment_due, t_repayment_received, t_outstanding).summary
+  end
   
 end
