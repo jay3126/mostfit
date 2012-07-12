@@ -73,3 +73,9 @@
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan File
       = link_to_with_rights "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
+:javascript
+  jQuery('table#data_entry_index tr').each(function(){
+    if($(this).find('td a').length ==0){
+      $(this).remove();
+    }
+  });
