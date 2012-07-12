@@ -16,10 +16,13 @@ class FeeInstance
   include DataMapper::Resource
   include Constants::Properties
   include Constants::Fee
+  include Constants::Transaction
 
   property :id,                     Serial
   property :fee_applied_on_type,    Enum.send('[]', *FEE_APPLIED_ON_TYPES), :nullable => false
   property :fee_applied_on_type_id, *INTEGER_NOT_NULL
+  property :by_counterparty_type,   Enum.send('[]', *COUNTERPARTIES), :nullable => false
+  property :by_counterparty_id,     *INTEGER_NOT_NULL
   property :administered_at,        *INTEGER_NOT_NULL
   property :accounted_at,           *INTEGER_NOT_NULL
   property :applied_on,             *DATE_NOT_NULL
@@ -48,6 +51,12 @@ class FeeInstance
     fee_instance = {}
     fee_applied_on_type, fee_applied_on_type_id = Resolver.resolve_fee_applied_on(fee_on_type)
 
+    for_counterparty = fee_on_type.counterparty
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(for_counterparty)
+    raise Errors::InvalidConfigurationError, "No counterparty was available for the fee instance" unless for_counterparty
+
+    fee_instance[:by_counterparty_id]  = by_counterparty_id
+    fee_instance[:by_counterparty_type] = by_counterparty_type
     fee_instance[:fee_applied_on_type] = fee_applied_on_type
     fee_instance[:fee_applied_on_type_id] = fee_applied_on_type_id
     fee_instance[:administered_at] = administered_at_id

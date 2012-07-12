@@ -37,6 +37,14 @@ class Lending
   def administered_at_origin_location; BizLocation.get(self.administered_at_origin); end
   def accounted_at_origin_location; BizLocation.get(self.accounted_at_origin); end
 
+  def administered_at(on_date)
+    LoanAdministration.get_administered_at(self.id, on_date)
+  end
+
+  def accounted_at(on_date)
+    LoanAdministration.get_accounted_at(self.id, on_date)
+  end
+
   # Lists the properties that are money amounts
   def money_amounts
     [:applied_amount, :approved_amount, :disbursed_amount]
@@ -201,6 +209,8 @@ class Lending
 
   # Gets the instance of borrower
   def borrower; self.loan_borrower ? self.loan_borrower.counterparty : nil; end
+
+  def counterparty; self.borrower; end
 
   ############
   # Borrower # ends
@@ -551,6 +561,7 @@ class Lending
     self.approved_on_date  = approved_on_date
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
+    debugger
     setup_fee_instances
     setup_insurance_policies
   end

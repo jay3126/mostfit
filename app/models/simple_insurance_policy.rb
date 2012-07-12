@@ -23,6 +23,7 @@ class SimpleInsurancePolicy
   def money_amounts; [ :insured_amount ]; end
   
   def created_on; self.proposed_on; end
+  def counterparty; self.client; end
 
   validates_with_method :policy_proposed_after_client_joined?
 

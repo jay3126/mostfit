@@ -4,7 +4,7 @@
     "bJQueryUI": true
   });
 
-- unless @client.death_events.insurance_claims.blank? || @client.death_events.blank?
+- unless @client.simple_insurance_policies.blank? || @client.death_events.blank?
   %h1 Add claim
   = form(:action => url(:controller => :new_clients, :action => :death_claim_insurance), :method => :get, :class =>"add_claim") do
     %table
