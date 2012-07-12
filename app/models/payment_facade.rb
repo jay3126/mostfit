@@ -12,8 +12,12 @@ class PaymentFacade < StandardFacade
 
   # UPDATES
 
-  def is_loan_payment_permitted?(payment_transaction)
+  def is_loan_payment_permitted?(payment_transaction)    
     loan_facade.is_loan_payment_permitted?(payment_transaction)
+  end
+
+  def record_ad_hoc_fee_receipt(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id)
+    FeeReceipt.record_ad_hoc_fee(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id, for_user.id)
   end
 
   def record_fee_receipts(fee_receipt_info_list)

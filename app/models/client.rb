@@ -84,6 +84,7 @@ class Client
   validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
 
   def created_on; self.date_joined; end
+  def counterparty; self; end
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
