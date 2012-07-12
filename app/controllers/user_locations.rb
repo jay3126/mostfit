@@ -69,6 +69,11 @@ class UserLocations < Application
 
   def set_center_leader
     @biz_location = BizLocation.get params[:biz_location_id]
+    # recent center leader
+    center_leader_client = CenterLeaderClient.first(:biz_location.id, get_effective_date)
+    client_id = center_leader_client.first.client_id
+    @client = Client.get client_id
+
     @errors = []
     begin
       if @biz_location.location_level.level == 0
