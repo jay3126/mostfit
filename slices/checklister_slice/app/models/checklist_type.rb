@@ -192,7 +192,7 @@ class ChecklistType
     #branch visit details
     #@checklist=Checklist.create!(:name => "Branch visit Details", :checklist_type_id => @checklist_type.id, :created_at => Date.today)
     @section_type4=SectionType.create!(:name => "Branch visit details", :created_at => Date.today)
-    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Branch visit details", :created_at => Date.today)
+    @section1=Section.create!(:section_type_id => @section_type4.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Branch visit details", :created_at => Date.today,:has_score=>true)
     @free_text1=FreeText.create!(:section_id => @section1.id, :name => "Name of the visitor", :sequence_number => 1, :created_at => Date.today)
     @free_text1=FreeText.create!(:section_id => @section1.id, :name => "Designation", :sequence_number => 2, :created_at => Date.today)
     @free_text1=FreeText.create!(:section_id => @section1.id, :name => "Date and time he reached office", :sequence_number => 3, :created_at => Date.today)

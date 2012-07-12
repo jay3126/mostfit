@@ -71,11 +71,12 @@ class ChecklisterSlice::Responses < ChecklisterSlice::Application
     @sections=@checklist.sections
     display @responses
   end
-  def view_report(response_id,checklist_id)
+  def view_report(id,response_id,checklist_id)
     @checklist=Checklist.get(checklist_id)
     @response=Response.get(response_id)
+    @sections=@checklist.sections.all(:has_score=>true)
 
-
+     display @response
 
   end
 end # Responses
