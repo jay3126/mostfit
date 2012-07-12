@@ -25,6 +25,6 @@ module Errors
   class Merb::ChecklisterSlice::ChecklistsHelper::TargetEntityNotFoundException < StandardError;end
 
   #raised when checklist is called with staff name/id blank.
-  class Merb::ChecklisterSlice::ChecklistsHelper::TargetEntityNotFoundException < StandardError;end
+  class Merb::ChecklisterSlice::ChecklistsHelper::StaffNotFoundException < StandardError;end
     
 end
