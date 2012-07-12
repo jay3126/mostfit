@@ -16,9 +16,11 @@
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
         %td
-          = securitization.id
+          %a{:href => url(:controller => 'securitizations', :id => securitization.id, :action => 'show')}
+            = securitization.id
         %td
-          = securitization.name
+          %a{:href => url(:controller => 'securitizations', :id => securitization.id, :action => 'show')}
+            = securitization.name
         %td
           = securitization.effective_on
     %tfoot

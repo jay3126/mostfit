@@ -3,8 +3,9 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-.menu-strip
-  = link_to_with_rights 'Add Meeting Schedule', resource(:meeting_schedules, :new, :biz_location_id => @biz_location.id), :class => '_remote_ add'
+
+%br
+= link_to_with_rights 'Add Meeting Schedule', resource(:meeting_schedules, :new, :biz_location_id => @biz_location.id), :class => "_remote_ add grey_button"
 %br
 %table.report.weeksheet.nojs.center_meetings
   %thead

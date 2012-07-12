@@ -65,15 +65,18 @@
           =hidden_field :checklist_id, :value=>@checklist.id
 
           =hidden_field :filler_type, :value=>"User"
-          =hidden_field :filler_id, :value=>@staff_id
+          =hidden_field :staff_id, :value=>@staff_id
           =hidden_field :target_entity_type, :value=>params[:target_entity_type]
-          =hidden_field :target_entity_id, :value=>@target_entity_id
+          =hidden_field :target_entity_id, :value=>params[:target_entity_id]
 
           =hidden_field :loc1_id, :value=>params[:loc1_id]
           =hidden_field :loc2_id, :value=>params[:loc2_id]
           =hidden_field :loc1_type, :value=>params[:loc1_type]
           =hidden_field :loc2_type, :value=>params[:loc2_type]
-          =hidden_field :no_of_applications, :value=>@no_of_applications
+          =hidden_field :no_of_applications, :value=>params[:no_of_applications]
+
+          =hidden_field :referral_url, :value=>params[:referral_url]
+
 
 
 

@@ -1,0 +1,65 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+%h1 Set center leader
+.shaded
+  - if @customers.blank?
+    %p
+      %i No Client Mapping have been created yet.
+  - else
+    %h3= "Current Center Leader: Client ID = #{@client_.id}, Client Name = #{@client.name}" unless @client.blank?
+    = form(:action => url(:controller => :user_locations, :action => :record_center_leader)) do
+      = hidden_field :name => "biz_location_id", :value => @biz_location.id
+      %table.dataTable.form{:style => "width:100%;"}
+        %thead
+          %tr
+            %th
+              Select
+            %th
+              Client ID
+            %th
+              Name
+            %th
+              Date of birth
+            %th
+              Date Joined
+            %th
+              Address
+            %th
+              State
+            %th
+              Pincode
+        %tbody
+          - @customers.each do |customer|
+            %tr
+              %td
+                = radio_button :name => "client_id", :value => customer.id
+                - if CenterLeaderClient.is_center_leader?(customer.id, get_effective_date)
+                  %span.greytext
+                    CENTER LEADER
+              %td
+                = customer.id
+              %td
+                = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+              %td
+                = customer.date_of_birth
+              %td
+                = customer.date_joined
+              %td
+                = customer.address
+              %td
+                = customer.state
+              %td
+                = customer.pincode
+      = submit "Save", :class => "greenButton"
+      = link_to 'Back', url("user_locations/weeksheet_collection/#{@biz_location.id}"), :class => "greenButton"

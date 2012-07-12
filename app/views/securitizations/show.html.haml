@@ -3,20 +3,15 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-= form_for(@encumberance, :action => url(:controller => :encumberances, :action => :loan_for_encumberance_on_date, :id => @encumberance.id)) do
+= form_for(@securitization, :action => url(:controller => :securitizations, :action => :loans_for_securitization_on_date, :id => @securitization.id)) do
   %h1
-    Encumberances
+    Securitizations
   %table
     %tr
       %th
         Name
       %td
-        = @encumberance.name
-    %tr
-      %th
-        Assigned Value
-      %td
-        = @encumberance.to_money[:assigned_value].to_s
+        = @securitization.name
     - unless @total_money.blank?
       %tr
         %th
@@ -28,16 +23,11 @@
           Portfolio actual value
         %td
           = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
-      %tr
-        %th
-          = "#{@shortfall_or_excess}"
-        %td
-          = "#{@difference}"
     %tr
       %th
         Date
       %td
-        = date_select 'encu_date', @date.blank? ? get_effective_date : @date, :min_date => @encumberance.effective_on, :max_date => Date.today
+        = date_select 'secu_date', @date.blank? ? get_effective_date : @date, :min_date => @securitization.effective_on, :max_date => Date.today
 
   = submit 'Go'
 

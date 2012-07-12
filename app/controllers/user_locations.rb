@@ -8,6 +8,7 @@ class UserLocations < Application
   def show
     @biz_location = BizLocation.get params[:id]
     @date         = get_effective_date
+    @eod_date     = params[:eod_date]
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     level = @biz_location.location_level.level
     if level == 0
@@ -53,12 +54,65 @@ class UserLocations < Application
 
   def customers_on_biz_location
     @biz_location = BizLocation.get params[:id]
-    if @biz_location.location_level.level == 0
-      @customers = ClientAdministration.get_clients_administered(@biz_location.id, session[:effective_date])
-    else
-      @customers = ClientAdministration.get_clients_registered(@biz_location.id, session[:effective_date])
+    @errors = []
+    begin
+      if @biz_location.location_level.level == 0
+        @customers = ClientAdministration.get_clients_administered(@biz_location.id, session[:effective_date])
+      else
+        @customers = ClientAdministration.get_clients_registered(@biz_location.id, session[:effective_date])
+      end
+    rescue => ex
+      @errors << ex.message
     end
     partial 'customers_on_biz_location'
+  end
+
+  def set_center_leader
+    @biz_location = BizLocation.get params[:biz_location_id]
+    # recent center leader
+    center_leader_client = CenterLeaderClient.first(:biz_location_id => @biz_location.id, :date_assigned => get_effective_date)
+    unless center_leader_client.blank?
+      client_id = center_leader_client.client_id
+      @client = Client.get client_id
+    end
+
+    @errors = []
+    begin
+      if @biz_location.location_level.level == 0
+        @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+      else
+        @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+      end
+    rescue => ex
+      @errors << ex.message
+    end
+    display @customers
+  end
+
+  def record_center_leader
+    # INITIALIZATION
+    @errors = []
+
+    # GATE-KEEPING
+    client_id = params[:client_id]
+    at_location_id = params[:biz_location_id]
+    on_effective_date = get_effective_date
+
+    #VALIDATIONS
+    @errors << "Select any client as center leader" if client_id.blank?
+
+    # OPERATION PERFORMED
+    if @errors.blank?
+      begin
+        CenterLeaderClient.set_center_leader(client_id, at_location_id, on_effective_date)
+        message = {:notice => "Client ID: #{client_id} has set as Center Leader"}
+      rescue => ex
+        message = {:error => ex.message}
+      end
+    else
+      message = {:error => @errors.to_a.flatten.join(', ')}
+    end
+    redirect url("user_locations/set_center_leader?biz_location_id=#{at_location_id}"), :message => message
   end
 
   def loans_on_biz_location
@@ -93,10 +147,10 @@ class UserLocations < Application
 
   def location_eod_summary
     @biz_location_eod = {}
-    @date = params[:date].blank? ? get_effective_date : params[:date]
+    @date = params[:eod_date].blank? ? get_effective_date : Date.parse(params[:eod_date])
     @biz_location = BizLocation.get params[:id]
     @eod_summary = @biz_location.location_eod_summary(@date)
-    partial 'location_eod_summary'
+    render :template => 'user_locations/location_eod_summary', :layout => layout?
   end
 
   def pdf_on_biz_location
@@ -122,4 +176,21 @@ class UserLocations < Application
       send_data(file.to_s, :filename => "disbursement_labels_#{biz_location.name}.pdf")
     end
   end
+
+  def record_seating_order
+    list_of_clients = []
+    @biz_location = BizLocation.get(params[:biz_location_id])
+    client_sequence = params[:clients].split("&")
+    if @biz_location.location_level.level == 0
+      @clients = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+    else
+      @clients = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+    end
+    list_of_clients = @clients.each_with_index do |client,index|
+      split_string = client_sequence[index].split("customer")[1]
+      client_position = split_string.split("=")[1]
+      #      SeatingOrder.assign_seating_order(list_of_clients, at_location_id)
+    end
+  end
+
 end

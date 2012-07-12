@@ -139,18 +139,17 @@ module Pdf
       if lendings.count > 0
         table = PDF::SimpleTable.new
         table.data = []
-        tot_amount = 0
+        tot_amount = MoneyManager.get_money_instance(0)
         lendings.each do |loan|
           client        = loan.borrower
           client_name  = client.name unless client.blank?
           client_group = client.client_group.blank? ? 'Nothing' : client.client_group.name
-          tot_amount += loan.to_money[:applied_amount].amount unless loan.to_money[:amount].blank?
-          table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.to_money[:disbursed_amount].to_s, "Name" => client_name,
+          tot_amount = tot_amount + loan.to_money[:applied_amount] unless loan.to_money[:applied_amount].blank?
+          table.data.push({"LAN"=> loan.id,"Disb. Amount" => loan.to_money[:applied_amount].to_s, "Name" => client_name,
               "Group" => client_group
             })
         end
-        total = MoneyManager.get_money_instance(tot_amount)
-        table.data.push({"Group"=>"Total=#{lendings.count}","Disb. Amount" => total.to_s})
+        table.data.push({"Group"=>"Total=#{lendings.count}","Disb. Amount" => tot_amount.to_s})
         table.column_order  = ["LAN", "Name", "Group", "Disb. Amount"]
         table.show_lines    = :all
         table.shade_rows    = :none

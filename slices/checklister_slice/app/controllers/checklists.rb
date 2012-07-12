@@ -246,7 +246,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       # message={:error => e.message}
       # message={:error => params[:result_status]}
       message[:error]="Fields cannot be blank"
-      render :fill_in_checklist, :message => message
+    #  render :fill_in_checklist, :message => message
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
     else
