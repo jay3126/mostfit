@@ -62,7 +62,7 @@
             = select :name => "loan_application[created_by_staff_id]", :text_method => :name, :value_method => :id, :collection => choice_facade.supervisors_and_executives_at_location(@center.id, get_effective_date), :prompt => "Select staff member", :selected => (params[:loan_application] and params[:loan_application][:created_by_staff_id])
           %td
             %b Created on
-            = date_select :created_on, (params[:created_on] || Date.today)
+            = date_select :created_on, (params[:created_on] || Date.today), :max_date => Date.today
           %td
             = submit 'Create and Continue'
           %td
