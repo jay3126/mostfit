@@ -12,16 +12,17 @@
         Name
       %td
         = @securitization.name
-    %tr
-      %th
-        Portfolio scheduled value
-      %td
-        = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
-    %tr
-      %th 
-        Portfolio actual value
-      %td
-        = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
+    - unless @total_money.blank?
+      %tr
+        %th
+          Portfolio scheduled value
+        %td
+          = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
+      %tr
+        %th 
+          Portfolio actual value
+        %td
+          = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
     %tr
       %th
         Date

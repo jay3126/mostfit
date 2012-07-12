@@ -17,21 +17,22 @@
         Assigned Value
       %td
         = @encumberance.to_money[:assigned_value].to_s
-    %tr
-      %th
-        Portfolio scheduled value
-      %td
-        = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
-    %tr
-      %th 
-        Portfolio actual value
-      %td
-        = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
-    %tr
-      %th
-        = "#{@shortfall_or_excess}"
-      %td
-        = "#{@difference}"
+    - unless @total_money.blank?
+      %tr
+        %th
+          Portfolio scheduled value
+        %td
+          = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
+      %tr
+        %th 
+          Portfolio actual value
+        %td
+          = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
+      %tr
+        %th
+          = "#{@shortfall_or_excess}"
+        %td
+          = "#{@difference}"
     %tr
       %th
         Date
