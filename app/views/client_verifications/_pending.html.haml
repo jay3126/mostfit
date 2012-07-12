@@ -58,7 +58,7 @@
                       %td
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
                       %td
-                        = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
+                        = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                       %td
                         = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.supervisors_and_executives_at_location(@center_id,get_effective_date), :prompt => "Select staff member"
                     - else
@@ -79,7 +79,7 @@
                       %td
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
                       %td
-                        = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
+                        = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                       %td
                         = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.support_staff_at_location(@center_id, get_effective_date), :prompt => "Select staff member"
                     - else

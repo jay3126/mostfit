@@ -5,7 +5,7 @@
     %p.menu-strip
       = 'Start New Center Cycle'
       = hidden_field :name => :center_id, :value => params[:id]
-      = date_select "initiated_date", Date.today, :id => "cycle_date", :min_date => (@center_cycle.blank? ? nil : @center_cycle.initiated_on)
+      = date_select "initiated_date", Date.today, :max_date => Date.today, :id => "cycle_date", :min_date => (@center_cycle.blank? ? nil : @center_cycle.initiated_on)
       = submit "Start"
 %hr
 - if center_cycle
