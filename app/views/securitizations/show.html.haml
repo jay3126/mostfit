@@ -1,0 +1,94 @@
+:javascript
+  $('table.loan_ecum').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+= form_for(@securitization, :action => url(:controller => :securitizations, :action => :loans_for_securitization_on_date, :id => @securitization.id)) do
+  %h1
+    Securitizations
+  %table
+    %tr
+      %th
+        Name
+      %td
+        = @securitization.name
+    %tr
+      %th
+        Portfolio scheduled value
+      %td
+        = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
+    %tr
+      %th 
+        Portfolio actual value
+      %td
+        = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
+    %tr
+      %th
+        Date
+      %td
+        = date_select 'secu_date', @date.blank? ? get_effective_date : @date, :min_date => @securitization.effective_on, :max_date => Date.today
+
+  = submit 'Go'
+
+- if @lendings.blank?
+  %h3
+    No loan exists
+- else
+  %table.report.weeksheet.nojs.loan_ecum
+    %thead
+      %tr
+        %th
+        %th
+          id
+        %th
+          Applied Amount
+        %th
+          Borrower
+        %th
+          Applied Date
+        %th
+          First Repayment Date
+        %th
+          Scheduled Disbursal Date
+        %th
+          Repayment Frequency
+        %th
+          Tenure
+        %th
+          Administered At
+        %th
+          Accounted At
+        %th
+          Status
+    - loan_row_count = 1
+    - @lendings.each do |lending|
+      - lending = lending.class == Lending ? lending : Lending.get(lending)
+      %tr
+        %td
+          = loan_row_count
+        %td
+          = link_to_with_rights lending.id, resource(lending)
+        %td
+          = lending.to_money[:applied_amount].to_s
+        %td
+          = link_to lending.borrower.name, url(:controller => :new_clients, :action => :show, :id => lending.borrower.id)
+        %td
+          = lending.applied_on_date
+        %td
+          = lending.scheduled_first_repayment_date
+        %td
+          = lending.scheduled_disbursal_date
+        %td
+          = lending.repayment_frequency
+        %td
+          = lending.tenure
+        %td
+          = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+        %td
+          = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+        %td
+          = lending.status.humanize
+        - loan_row_count = loan_row_count + 1
+    %tfoot
+      %tr.org_total
+        %td{:colspan => 13}
