@@ -38,6 +38,7 @@ class StaffMember
   has n, :staff_member_attendances
 
   has 1, :user
+  has n, :visit_schedules
 
   validates_length :name, :min => 3
 

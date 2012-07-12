@@ -16,6 +16,7 @@ class BizLocation
   has n, :location_holidays
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
+  has n, :visit_schedules
 
   validates_with_method :location_level_precedes_biz_location?
 
