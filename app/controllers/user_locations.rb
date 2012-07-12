@@ -8,6 +8,7 @@ class UserLocations < Application
   def show
     @biz_location = BizLocation.get params[:id]
     @date         = get_effective_date
+    @eod_date     = params[:eod_date]
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     level = @biz_location.location_level.level
     if level == 0
@@ -93,10 +94,10 @@ class UserLocations < Application
 
   def location_eod_summary
     @biz_location_eod = {}
-    @date = params[:date].blank? ? get_effective_date : params[:date]
+    @date = params[:eod_date].blank? ? get_effective_date : Date.parse(params[:eod_date])
     @biz_location = BizLocation.get params[:id]
     @eod_summary = @biz_location.location_eod_summary(@date)
-    partial 'location_eod_summary'
+    render :template => 'user_locations/location_eod_summary', :layout => layout?
   end
 
   def pdf_on_biz_location

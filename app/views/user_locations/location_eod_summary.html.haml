@@ -5,9 +5,9 @@
     });
 %br
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
-  = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id), :method => :get, :class => '_remote_', :remote => true) do
+  = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :show, :id => @biz_location.id, :eod => true)+'#branch_eod_summary', :method => :get) do
     Change date
-    = date_select "date", @date
+    = date_select "eod_date", params[:eod_date]
     = submit "Go"
 %br
 %h1 LOCATION EOD SUMMARY
