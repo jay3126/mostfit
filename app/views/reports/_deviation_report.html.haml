@@ -26,6 +26,6 @@
           %td
             =data.value_date.strftime("%b %e")
           %td
-            =data.checklist.sections.first.dropdownpoints.first.dropdownpoint_fillings.all(:response_id=>data.id).first.model_record_name
+            =data.get_deviation_type
 
 
