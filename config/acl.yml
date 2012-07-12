@@ -258,7 +258,9 @@ supervisor :
      - get_bank_branches
      - get_bank_accounts
   location_holidays :
-    - all 
+    - all
+  checklists :
+    - all
 #################
 support :
   admin :
