@@ -63,7 +63,7 @@ class ReportingFacade < StandardFacade
     all_outstanding_loans_balances_at_locations_on_date(on_date, Constants::Loan::ACCOUNTED_AT, at_location_ids_ary)
   end
 
-  #method for date range.
+  #method to get all outstanding loan_balances accounted_at locations for date range.
   def all_outstanding_loans_balances_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
     all_outstanding_loans_balances_at_locations_for_date_range(on_date, till_date, Constants::Loan::ACCOUNTED_AT, at_location_ids_ary)
   end
@@ -73,6 +73,17 @@ class ReportingFacade < StandardFacade
   end
 
   def loan_balances_for_loan_ids_on_date(on_date, *for_loan_ids_ary)
+    loan_ids_array = *for_loan_ids_ary.to_a
+    loan_balances_by_loan_id = {}
+    loan_ids_array.each { |for_loan_id|
+      due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
+      loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+    }
+    loan_balances_by_loan_id
+  end
+
+  #this method id to find out loan_balances for loan_ids for a date range.
+  def loan_balances_for_loan_ids_for_date_range(on_date, *for_loan_ids_ary)
     loan_ids_array = *for_loan_ids_ary.to_a
     loan_balances_by_loan_id = {}
     loan_ids_array.each { |for_loan_id|
@@ -342,28 +353,37 @@ class ReportingFacade < StandardFacade
     all_loan_balances_grouped_by_location
   end
 
+  #main query to get outstanding loan_balances at locations for a date range.
   def all_outstanding_loans_balances_at_locations_for_date_range(on_date, till_date, accounted_or_administered_choice, *at_location_ids_ary)
     location_ids_array = *at_location_ids_ary.to_a
     all_loan_balances_grouped_by_location = {}
     all_loans_grouped_by_location = all_outstanding_loan_ids_at_locations_for_date_range(on_date, till_date, accounted_or_administered_choice, *at_location_ids_ary)
-    all_loans_grouped_by_location.each { |at_location_id, for_loan_ids_ary|
-      all_loan_balances_grouped_by_location[at_location_id] = loan_balances_for_loan_ids_on_date(on_date, for_loan_ids_ary)
-    }
+    for date in on_date..till_date
+      all_loans_grouped_by_location.each { |at_location_id, for_loan_ids_ary|
+        all_loan_balances_grouped_by_location[at_location_id] = loan_balances_for_loan_ids_for_date_range(date, for_loan_ids_ary)
+      }
+    end
     all_loan_balances_grouped_by_location
   end
 
-  #method for date range
+  #method to get outstanding loan_ids for date range
   def all_outstanding_loan_ids_at_locations_for_date_range(on_date, till_date, accounted_or_administered_choice, *at_location_ids_ary)
     location_ids_array = *at_location_ids_ary.to_a
     all_loan_ids_grouped_by_location = {}
     location_ids_array.each { |at_location_id|
       all_loans_at_location = []
+      all_outstanding_loans_at_location = []
       case accounted_or_administered_choice
       when Constants::Loan::ACCOUNTED_AT then all_loans_at_location = LoanAdministration.get_loans_accounted_for_date_range(at_location_id, on_date, till_date)
       when Constants::Loan::ADMINISTERED_AT then all_loans_at_location = LoanAdministration.get_loans_administered_for_date_range(at_location_id, on_date, till_date)
       else raise ArgumentError, "Please specify whether loans accounted or loans administered are needed"
       end
-      all_outstanding_loans_at_location = all_loans_at_location.select {|loan| loan.is_outstanding_on_date?(on_date)}
+      for date in on_date..till_date
+        all_loans_at_location.each do |loan|
+          next if loan.applied_on_date > date
+          all_outstanding_loans_at_location.push(loan) if loan.is_outstanding_on_date?(date)
+        end
+      end
       all_loan_ids_grouped_by_location[at_location_id] = get_ids(all_outstanding_loans_at_location)
     }
     all_loan_ids_grouped_by_location
