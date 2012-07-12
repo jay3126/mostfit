@@ -25,6 +25,7 @@
   - branch_for_loan_application_report = (params[report] and params[report][:branch_for_loan_application_report] and not params[report][:branch_for_loan_application_report].blank?) ? params[report][:branch_for_loan_application_report] : nil
   - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
   - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
+
   -# claim_accounted_at = (params[report] and params[:report][:claim_accounted_at] and params[report][:claim_accounted_at].blank?) ? params[report][:claim_accounted_at] : nil
   -# claim_filed_on = (params[report] and params[:report][:claim_filed_on] and params[report][:claim_filed_on].blank?) ? params[report][:claim_filed_on] : nil
   - if params[:submit]
@@ -174,6 +175,12 @@
             %td
               Loan Product:
               = select(:lending_product_id, :collection => LendingProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => lending_product_id)
+          - if @report.respond_to?(:target_entity)
+            %td
+              Target Entity
+              = select(:target_entity, :collection => TargetEntity.all.map{|x| [x.id, x.type]}, :include_blank => true)
+
+
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:claim_accounted_at)
@@ -279,6 +286,7 @@
           - if @report.respond_to?(:effective_date)
             %td
               %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
+
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:loan_cycle)
