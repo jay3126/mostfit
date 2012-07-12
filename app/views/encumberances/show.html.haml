@@ -36,7 +36,7 @@
       %th
         Date
       %td
-        = date_select 'encu_date', @date.blank? ? get_effective_date : @date, :min_date => @encumberance.effective_on
+        = date_select 'encu_date', @date.blank? ? get_effective_date : @date, :min_date => @encumberance.effective_on, :max_date => Date.today
 
   = submit 'Go'
 
