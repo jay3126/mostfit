@@ -50,25 +50,25 @@
     %th
       Total
 
-  -#   - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
-  -#   - @default_currency ||= MoneyManager.get_default_currency
-  -#   - @data.sort_by{|branch| branch}.each do |branch, values|
-  -#     %tr
-  -#       %td
-  -#         %b
-  -#           = BizLocation.get(branch).name
-  -#       %td
-  -#         = values[:loans_applied][:total_amount]
-  -#         - accumulate_row_values[:loans_applied] += values[:loans_applied][:total_amount]
-  -#       %td
-  -#         = values[:loans_approved][:total_amount]
-  -#         - accumulate_row_values[:loans_approved] += values[:loans_approved][:total_amount]
-  -#       %td
-  -#         = values[:loans_scheduled_for_disbursement][:total_amount]
-  -#         - accumulate_row_values[:loans_scheduled_for_disbursement] += values[:loans_scheduled_for_disbursement][:total_amount]
-  -#       %td
-  -#         = values[:loans_disbursed][:total_amount]
-  -#         - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          %b
+            = BizLocation.get(branch).name
+        %td
+          = values[:loans_applied][:total_amount]
+          - accumulate_row_values[:loans_applied] += values[:loans_applied][:total_amount]
+        %td
+          = values[:loans_approved][:total_amount]
+          - accumulate_row_values[:loans_approved] += values[:loans_approved][:total_amount]
+        %td
+          = values[:loans_scheduled_for_disbursement][:total_amount]
+          - accumulate_row_values[:loans_scheduled_for_disbursement] += values[:loans_scheduled_for_disbursement][:total_amount]
+        %td
+          = values[:loans_disbursed][:total_amount]
+          - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
   -#       %td
   -#         - payments = values[:loan_allocations].values[0]
   -#         = payments[:principal_received]
@@ -118,18 +118,18 @@
   -#           = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
   -#         - accumulate_row_values[:total_overdue] += total_overdue
 
-  -# - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-  -# %tr.footer
-  -#   %th
-  -#     Total
-  -#   %td
-  -#     = total_rows[:loans_applied]
-  -#   %td
-  -#     = total_rows[:loans_approved]
-  -#   %td
-  -#     = total_rows[:loans_scheduled_for_disbursement]
-  -#   %td
-  -#     = total_rows[:loans_disbursed]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tr.footer
+    %th
+      Total
+    %td
+      = total_rows[:loans_applied]
+    %td
+      = total_rows[:loans_approved]
+    %td
+      = total_rows[:loans_scheduled_for_disbursement]
+    %td
+      = total_rows[:loans_disbursed]
   -#   %td
   -#     = total_rows[:principal_received]
   -#   %td
