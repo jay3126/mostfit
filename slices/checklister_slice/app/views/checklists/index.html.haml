@@ -62,7 +62,7 @@
 
 
       %td{:width=>"150px"}
-        =response_link(session.user.role,checklist,params[:referral_url].to_s)
+        =response_link(session.user.role,checklist,request.full_uri+"/?"+request.query_string.to_s)
 
 
 

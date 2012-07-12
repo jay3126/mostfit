@@ -52,6 +52,7 @@
             =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>@checklist.id),:class=>"greenButton"  unless !@checklist.checklist_type.is_ba_checklist?
 
 %h4
+
   =link_to "Back",params[:referral_url],:class=>'greenButton'
 
 

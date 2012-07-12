@@ -66,6 +66,18 @@
           %td{:width=>"800px"}
             ="#{i+1} .  #{free_text.name}"
 
+            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+            -if free_text_filling.nil?
+              -@comment=""
+            -else
+              -@comment=free_text_filling.comment
+            -if free_text.name.downcase=="date"
+              %td
+                =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+            -else
+              %td
+                =text_area @comment ,:name=>"free_text_#{free_text.id}".to_sym,:disabled=>true
+
 
         -elsif !dropdownpoint.nil?
           %td{:width=>"400px"}
@@ -76,7 +88,6 @@
             -max_score=max_score+Kernel.const_get(dropdownpoint.model_name).max(:marks)
             -score=Kernel.const_get(dropdownpoint.model_name).all(:name=>dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name).first.marks.to_i
             =score
-            -total_score=total_score+score
 
 
 
@@ -85,4 +96,4 @@
 
 %h4
   =#link_to "Back",params[:referral_url]
-  =link_to "Back","#",:class=>"greenButton",:onclick=>"history.go(-1)"
+  =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
