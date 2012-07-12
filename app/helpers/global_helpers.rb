@@ -137,6 +137,10 @@ module Merb
              :selected => selected)
     end
 
+    def staff_members_on_location(on_date, location_id=nil)
+      location_id.blank? ? StaffMember.all : choice_facade.all_staff_at_location(location_id.to_i, on_date)
+    end
+
     def managed_by_staff_member(location_id, on_date)
       location_manage = location_facade.location_managed_by_staff(location_id, on_date)
       if location_manage.blank?
