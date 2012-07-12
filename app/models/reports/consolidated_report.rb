@@ -1,4 +1,4 @@
-class NewConsolidatedReport < Report
+class ConsolidatedReport < Report
   attr_accessor :from_date, :to_date, :biz_location_branch
 
   def initialize(params, dates, user)
@@ -13,11 +13,11 @@ class NewConsolidatedReport < Report
   end
 
   def name
-    "New Consolidated Report from #{@from_date} to #{@to_date}"
+    "Consolidated Report from #{@from_date} to #{@to_date}"
   end
 
   def self.name
-    "New Consolidated Report"
+    "Consolidated Report"
   end
 
   def get_reporting_facade(user)
