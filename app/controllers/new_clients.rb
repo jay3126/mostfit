@@ -179,6 +179,9 @@ class NewClients < Application
     @client_admin = client_facade.get_administration_on_date(@client, client_administration_on_date)
     @biz_location = @client_admin.administered_at_location
     @lendings     = LoanBorrower.get_all_loans_for_counterparty(@client).compact
+    #generate cc route
+    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:cc_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    @cc_route = Merb::Router.match(request)[1] rescue nil
     display @client
   end
 

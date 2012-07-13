@@ -3,7 +3,9 @@
   = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
   - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
   =# link_to 'Customer Calling', url(:checklister_slice,:checklist_type_id=>@checklist_type.id,:filler=>session.user.login,:loc2=>@client_admin.administered_at,:target_entity_name=> @client.name,:loc2type=>"Center"), :class => 'add grey_button', :target => 'blank'
-  = link_to_with_rights 'Customer Calling', url_for_checklist('Customer Calling', @client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
+
+  -if check_checklist_parameters(@client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil)
+    = link_to 'Customer Calling', url_for_checklist('Customer Calling', @client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name

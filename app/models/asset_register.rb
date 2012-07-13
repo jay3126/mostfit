@@ -6,7 +6,7 @@ class AssetRegister
   property :name, String, :length => 100, :nullable => false, :index => true
   #property :asset_type,      String,  :length => 100,         :nullable => false
   property :issue_date, Date, :default => Date.today, :nullable => false
-  property :returned_date,   Date,    :nullable => true
+  property :returned_date, Date, :nullable => true
   property :issued_by, String, :length => 100
 
 
@@ -60,24 +60,22 @@ class AssetRegister
     #if @branch.nil?
     #  @branch=Branch.create!(:name=>argument_array[0])
     #end
-    object_hash[:branch_id]=1
-    object_hash[:biz_location_id]=1
-    asset_category=AssetCategory.first(:name=>argument_array[1])
+
+    object_hash[:biz_location_id]=BizLocation.all(:name => argument_array[0]).first.id
+    asset_category=AssetCategory.first(:name => argument_array[1])
     if asset_category.nil?
-      asset_category=AssetCategory.create(:name=>argument_array[1])
+      asset_category=AssetCategory.create(:name => argument_array[1])
     end
-    asset_sub_category=AssetSubCategory.first(:name=>argument_array[2],:asset_category_id=>asset_category.id)
+    asset_sub_category=AssetSubCategory.first(:name => argument_array[2], :asset_category_id => asset_category.id)
     if asset_sub_category.nil?
-      asset_sub_category=AssetSubCategory.create(:name=>argument_array[2],:asset_category_id=>asset_category.id)
+      asset_sub_category=AssetSubCategory.create(:name => argument_array[2], :asset_category_id => asset_category.id)
 
     end
-    asset_type=AssetType.first(:name=>argument_array[3],:asset_sub_category_id=>asset_sub_category.id)
+    asset_type=AssetType.first(:name => argument_array[3], :asset_sub_category_id => asset_sub_category.id)
     if asset_type.nil?
-      asset_type=AssetType.create!(:name=>argument_array[3],:asset_sub_category_id=>asset_sub_category.id)
+      asset_type=AssetType.create!(:name => argument_array[3], :asset_sub_category_id => asset_sub_category.id)
 
     end
-
-
 
 
     object_hash[:asset_category_id]=asset_category.id
