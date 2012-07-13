@@ -13,7 +13,7 @@ class DeviationReport < Report
   end
 
   def self.name
-    "static name"
+    "Deviation Report"
   end
 
   def generate
