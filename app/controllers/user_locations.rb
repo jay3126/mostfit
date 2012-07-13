@@ -178,7 +178,7 @@ class UserLocations < Application
   end
 
   def record_seating_order
-    list_of_clients = []
+    client_ids = []
     @biz_location = BizLocation.get(params[:biz_location_id])
     client_sequence = params[:clients].split("&")
     if @biz_location.location_level.level == 0
@@ -186,11 +186,13 @@ class UserLocations < Application
     else
       @clients = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
     end
-    list_of_clients = @clients.each_with_index do |client,index|
+    @clients.each_with_index do |client,index|
       split_string = client_sequence[index].split("customer")[1]
       client_position = split_string.split("=")[1]
-      #      SeatingOrder.assign_seating_order(list_of_clients, at_location_id)
+      client_ids << client_position.to_i
     end
+    @position = SeatingOrder.assign_seating_order(client_ids, @biz_location.id)
+    partial "arranged_customers_on_bizlocation"
   end
 
 end
