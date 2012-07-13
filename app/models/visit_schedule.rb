@@ -9,12 +9,16 @@ class VisitSchedule
   property :created_at, *CREATED_AT
 
   belongs_to :staff_member
-  belongs_to :biz_location #at a branch
+  belongs_to :biz_location #this is a center
 
   MAX_SCHEDULED_PER_DAY_AT_BRANCH = 7
 
+  SYMBOLIC_DESIGNATION_TO_ROLE_CLASSES_MAP = {
+    :branch_manager => Constants::User::SUPERVISOR, :audit_officer => Constants::User::SUPPORT
+  }
+
   COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION = {
-    :branch_manager => 3, :audit_officer => 2, :area_manager => 1, :district_manager => 1
+    :branch_manager => 3, :audit_officer => 2
   }
 
   def self.schedule_visits(under_branch_id, on_date)    
@@ -22,6 +26,7 @@ class VisitSchedule
     return unless existing_visit_count_on_date == 0
 
     history_of_visits = visit_history_at_branch(under_branch_id, on_date)
+    return if history_of_visits.empty?
     scheduler = MyVisitScheduler.new
     visits_to_schedule = scheduler.schedule_visit(on_date, COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION, history_of_visits)
     staff_members = get_staff_member_ids(COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION.keys, under_branch_id, on_date)
@@ -30,7 +35,7 @@ class VisitSchedule
       staff_member = staff_members[staff_member_designation]
       next unless staff_member
       center_ids_to_visit.each { |center_id|
-        VisitSchedule.create(
+        VisitSchedule.first_or_create(
           :was_visited => false,
           :visit_scheduled_date => on_date,
           :staff_member_id => staff_member.id,
@@ -41,17 +46,17 @@ class VisitSchedule
   end
 
   def self.get_staff_member_ids(for_designations, under_branch_id, on_date)
-    #TODO must be replaced by the actual list of staff members
-    first_staff_member = StaffMember.first
-    first_id = first_staff_member.id
     staff_members_for_designations = {}
+    user_facade = FacadeFactory.instance.get_instance(FacadeFactory::USER_FACADE, nil)
+    operator = user_facade.get_operator
+    raise Errors::InvalidConfigurationError, "An operator user was not found" unless operator
+
+    choice_facade = FacadeFactory.instance.get_instance(FacadeFactory::CHOICE_FACADE, operator)
+
     for_designations.each_with_index { |designation, idx|
-      staff_member = StaffMember.get(first_id)
-      if (staff_member)
-        staff_members_for_designations[designation] = staff_member
-        first_id += 1
-      end
-      break if (idx > for_designations.length)
+      role_class = SYMBOLIC_DESIGNATION_TO_ROLE_CLASSES_MAP[designation]
+      staff_members = choice_facade.get_staff_members_for_role_class(role_class, under_branch_id, on_date)
+      staff_members_for_designations[designation] = staff_members.first if (staff_members and staff_members.first)
     }
     staff_members_for_designations
   end

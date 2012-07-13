@@ -9,6 +9,13 @@ class ChoiceFacade < StandardFacade
     LocationLevel.levels_that_support_designations
   end
 
+  def get_staff_members_for_role_class(for_role_class, at_location_id, on_date)
+    all_staff = all_staff_at_location(at_location_id, on_date)
+    all_staff.select { |staff_member|
+      staff_member.role == for_role_class
+    }
+  end
+
   #TODO: move out of the facade
   def supervisors_and_executives_at_location(location_id, on_date = Date.today)
     all_staff = all_staff_at_location(location_id, on_date)
