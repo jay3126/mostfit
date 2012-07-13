@@ -19,18 +19,15 @@ class Checklist
   end
 
   def self.get_result_status(target_entity_type,target_entity_id)
-    @target_enity=TargetEntity.all(:type=>target_entity_type.to_s,:model_record_id=>target_entity_id).first
+    @target_entity=TargetEntity.all(:type=>target_entity_type.to_s,:name=>target_entity_id).first
     @healthcheck_checklist=ChecklistType.all(:name => "HealthCheck on Loan Files").first
-    @responses=@healthcheck_checklist.checklists.first.responses.all(:target_entity_id=>@target_enity.id)
-    if @responses.all(:result_status => "cleared").count>0
-      return true
+    return false if @target_entity.nil? or @healthcheck_checklist.nil?
 
-    else
-      return false
-    end
+    @responses=@healthcheck_checklist.checklists.first.responses.all(:target_entity_id=>@target_entity.id)
+    
+    return true if @responses.all(:result_status => "cleared").count>0
 
-
+    return false
   end
-
 
 end
