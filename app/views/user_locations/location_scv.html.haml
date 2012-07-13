@@ -1,0 +1,41 @@
+:javascript
+  $('table.scv').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+%br
+%div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :show, :id => @biz_location.id)+'#scv', :method => :get) do
+    Change date
+    = date_select "date", params[:date]||get_effective_date
+    = submit "Go"
+%br
+%br
+- if @scv.blank?
+  %p
+    %i No SCV have been created yet.
+- else
+  = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :save_location_scv, :id => @biz_location.id)) do
+    %table.report.weeksheet.nojs.scv
+      %thead
+        %tr
+          %th
+            id
+          %th
+            Location Name
+          %th
+            Staff Member
+          %th
+            Was Visited
+      - @scv.each do |scv|
+        %tr
+          %td
+            = scv.id
+          %td
+            = scv.biz_location.name
+          %td
+            = scv.staff_member.name
+          %td
+            = check_box :name => "was_visited[]", :value => scv.id, :checked => scv.was_visited
+            = hidden_field :name => "visit_ids[]", :value => scv.id
+    = submit 'Save'

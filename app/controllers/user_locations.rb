@@ -7,8 +7,7 @@ class UserLocations < Application
 
   def show
     @biz_location = BizLocation.get params[:id]
-    @date         = get_effective_date
-    @eod_date     = params[:eod_date]
+    @date         = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     level = @biz_location.location_level.level
     if level == 0
@@ -162,7 +161,7 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
 
   def location_eod_summary
     @biz_location_eod = {}
-    @date = params[:eod_date].blank? ? get_effective_date : Date.parse(params[:eod_date])
+    @date = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
     @biz_location = BizLocation.get params[:id]
     @eod_summary = @biz_location.location_eod_summary(@date)
     render :template => 'user_locations/location_eod_summary', :layout => layout?
@@ -225,4 +224,46 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
     render :set_seating_order
   end
 
+  def location_scv
+    @date            = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
+    @biz_location    = BizLocation.get params[:id]
+    @child_locations = LocationLink.get_children(@biz_location, @date)
+    @scv             = VisitSchedule.all(:biz_location_id => @child_locations.map(&:id), :visit_scheduled_date => @date)
+    render :template => 'user_locations/location_scv', :layout => layout?
+  end
+
+  def save_location_scv
+    # INITIALIZATION
+    @errors = []
+    @message = {}
+
+    # GATE-KEEPING
+    at_location_id = params[:id]
+    check_visit_ids = params[:was_visited]
+    total_visit_ids = params[:visit_ids]
+
+    #VALIDATIONS
+    @errors << "Location cannot be blank" if at_location_id.blank?
+    @errors << "Please select Was Visited checkbox" if check_visit_ids.blank?
+
+    # OPERATION PERFORMED
+    if @errors.blank?
+      begin
+        visit_schedules = total_visit_ids.collect{|c| VisitSchedule.get c}
+        visit_schedules.each do |visit|
+          v = check_visit_ids.include?(visit.id.to_s)
+          visit.update(:was_visited => v)
+        end
+        @message = {:notice => "SCV update successfully"}
+      rescue => ex
+        @message = {:error => ex.message}
+      end
+    else
+      @message = {:error => @errors.to_a.flatten.join(', ')}
+    end
+
+    #REDIRECT/RENDER
+    redirect url(:controller => :user_locations, :action => :show, :id => at_location_id), :message => @message
+  end
+  
 end
