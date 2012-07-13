@@ -10,20 +10,8 @@
       = select :biz_location_id, :collection => BizLocation.all.map{ |x| [x.id, x.name]}, :prompt => "Select Biz Location"
 
 
-  %tr
-    %td
-      Branch
-    %td
-      - if @branch
-        = @branch.name
-        = hidden_field(:branch_id, :value => @branch.id)
-      - else
-        = select :branch_id, :collection => Branch.all.map{ |x| [x.id, x.name]}, :prompt => "Select Branch"
-  -#%tr
-  -#  %td
-  -#    Asset Type
-  -#  %td
-  -#    = text_field :asset_type
+
+  -
   %tr
     %td
       Issue To

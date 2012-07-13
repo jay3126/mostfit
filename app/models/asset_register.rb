@@ -8,8 +8,6 @@ class AssetRegister
   property :issue_date, Date, :default => Date.today, :nullable => false
   property :returned_date,   Date,    :nullable => true
   property :issued_by, String, :length => 100
-  #property :branch_name,     String,  :nullable => true,      :index => true
-  property :branch_id, Integer, :nullable => false, :index => true
 
 
   #---- done by ptotem team
@@ -34,7 +32,6 @@ class AssetRegister
   #---------------
 
   belongs_to :manager, :child_key => [:manager_staff_id], :model => 'StaffMember'
-  belongs_to :branch, :child_key => [:branch_id], :model => 'Branch'
 
   #belongs_to :asset_type
 
