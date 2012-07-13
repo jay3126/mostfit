@@ -30,8 +30,10 @@
     - if @biz_location.is_nominal_branch?
       %li#money_deposits
         Money Deposits
-      %li#branch_eod_summary
-        EOD Summary
+      %li#scv
+        SCV
+    %li#branch_eod_summary
+      EOD Summary
     %li#holiday
       Holiday
     %li#history
@@ -49,7 +51,9 @@
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
     %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id, :eod_date => @eod_date)}
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_scv, :id => @biz_location.id, :date => @date)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id, :date => @date)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :location_holidays, :action => :index, :biz_location_id => @biz_location.id)}
   %div.tab
