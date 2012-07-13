@@ -9,7 +9,7 @@
         = report_type.to_s.camelcase(' ')
       - reports.each do |report|
         = link_to_with_rights(report.name, url(:show_report, :report_type => report), :class => "report_links")
-.reports
-  %h2 Custom
-  .report
-    = link_to_with_rights("Custom reports", resource(:bookmarks, :type => "custom_reports"))
+-# .reports
+-#   %h2 Custom
+-#   .report
+-#     = link_to_with_rights("Custom reports", resource(:bookmarks, :type => "custom_reports"))

@@ -1,13 +1,17 @@
 class Reports < Application
   include DateParser
   Types = {
-    :periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
-    :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport], 
-    :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance], 
-    :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
-    :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport,DeviationReport],
-    :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
-    :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
+    :periodic     => [DailyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport],
+    #:periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
+    :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
+   # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
+    :registers    => [InsuranceClaimReport],
+    :statistics => [DeviationReport]    
+   # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance], 
+  #  :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
+  #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
+  #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
+  #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout
