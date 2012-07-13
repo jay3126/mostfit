@@ -305,14 +305,8 @@ supervisor :
     - get_bank_accounts
   location_holidays :
     - all
-
-
-  checklister :
-    - surprise_center_visit_checklist
-
   simple_insurance_policies :
     - all
-
 #################
 support :
   admin :
@@ -325,14 +319,14 @@ support :
   accounting_rules :
     - index
     - show
-  asset_register :
+#  asset_register :
 #     - all
-    - index
-    - new
-    - create
-    - edit
-    - update
-    - show
+#    - index
+#    - new
+#    - create
+#    - edit
+#    - update
+#   - show
 
   attendances :
     - index
@@ -469,6 +463,7 @@ finops :
   new_clients :
  #    - index
      - show
+     - create_clients_for_loan_file
   clients :
     - index
 #    - new
@@ -577,6 +572,8 @@ read_only :
   accounting_rules :
     - index
     - show
+  admin :
+    - index
   asset_register :
 #     - all
     - index
@@ -677,15 +674,16 @@ accountant :
     - all
   browse :
     - all
-#  admin :
-#    - index
-  asset_register :
+  admin :
     - index
-    - new
-    - create
-    - edit
-    - update
-    - show
+  asset_register :
+     - all
+#    - index
+#    - new
+#    - create
+#    - edit
+#    - update
+#    - show
 #  attendances :
 #    - index
 #    - create
@@ -846,13 +844,13 @@ auditor :
     - all
 #  admin :
 #    - index
-  asset_register :
-    - index
-    - new
-    - create
-    - edit
-    - update
-    - show
+#  asset_register :
+#    - index
+#    - new
+#    - create
+#    - edit
+#    - update
+#    - show
 #  attendances :
 #    - index
 #    - create
@@ -1106,5 +1104,5 @@ telecaller :
 #    - show
 #    - get_dates
 #    - get_date
-  searches :
-    - all
+#  searches :
+#    - all
