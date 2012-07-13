@@ -306,8 +306,8 @@ supervisor :
   location_holidays :
     - all
 
-  checklists :
-    - all
+  checklister :
+    - surprise_center_visit_checklist
 #################
 support :
   admin :

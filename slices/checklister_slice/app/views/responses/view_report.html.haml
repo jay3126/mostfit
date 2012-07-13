@@ -86,8 +86,9 @@
             =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
           %td
             -max_score=max_score+Kernel.const_get(dropdownpoint.model_name).max(:marks)
+
             -score=Kernel.const_get(dropdownpoint.model_name).all(:name=>dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name).first.marks.to_i
-            =score
+            -total_score=total_score+score
 
 
 
