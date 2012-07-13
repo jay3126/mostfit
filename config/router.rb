@@ -7,6 +7,8 @@ Merb::Router.prepare do
     end
   end
 
+
+
   #book-keeping from bk begins
   resources :home, :collection => {:effective_date => [:get]}
   resources :ledgers
@@ -21,6 +23,7 @@ Merb::Router.prepare do
   resources :overlap_report_responses, :id => %r(\d+)
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
   resources :user_locations, :id => %r(\d+), :member => {:weeksheet_collection => [:get]}
+
   #book-keeping from bk ends
 
   resources :auth_override_reasons
@@ -273,6 +276,17 @@ Merb::Router.prepare do
   match('/accounts/:account_id/accounting_periods/:accounting_period_id/account_balances/:id/verify').to(:controller => 'account_balances', :action => 'verify').name(:verify_account_balance)
   match('/accounting_periods/:id/close').to(:controller => 'accounting_periods', :action => 'close').name(:close_accounting_period)
   match("/accounting_periods/:id/period_balances").to(:controller => "accounting_periods", :action => "period_balances").name(:period_balances)
+
+
+  resources :checklister
+  match("/checklister/surprise_center_visit_checklist").to(:controller => "checklister", :action => "surprise_center_visit_checklist").name(:scv_checklist)
+  match("/checklister/business_audit_checklist").to(:controller => "checklister", :action => "business_audit_checklist").name(:ba_checklist)
+  match("/checklister/process_audit_checklist").to(:controller => "checklister", :action => "process_audit_checklist").name(:pa_checklist)
+  match("/checklister/customer_audit_checklist").to(:controller => "checklister", :action => "customer_audit_checklist").name(:cc_checklist)
+  match("/checklister/healthcheck_checklist").to(:controller => "checklister", :action => "healthcheck_checklist").name(:hc_checklist)
   default_routes
   match('/').to(:controller => 'entrance', :action =>'root')
+
+
+
 end

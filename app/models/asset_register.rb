@@ -60,8 +60,8 @@ class AssetRegister
     #if @branch.nil?
     #  @branch=Branch.create!(:name=>argument_array[0])
     #end
-    object_hash[:branch_id]=1
-    object_hash[:biz_location_id]=1
+
+    object_hash[:biz_location_id]=
     asset_category=AssetCategory.first(:name=>argument_array[1])
     if asset_category.nil?
       asset_category=AssetCategory.create(:name=>argument_array[1])

@@ -49,6 +49,21 @@ class UserLocations < Application
       @previous_meeting = meeting_facade.get_previous_meeting(@biz_location, @date)
       @weeksheet = collections_facade.get_collection_sheet(@biz_location.id, @date)
     end
+    #generate scv route
+    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:scv_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    @scv_route = Merb::Router.match(request)[1] rescue nil
+    #generate ba route
+request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:ba_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    @ba_route = Merb::Router.match(request)[1] rescue nil
+    #generate  pa route
+request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:pa_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    @pa_route = Merb::Router.match(request)[1] rescue nil
+    #generate hc route
+request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    @hc_route = Merb::Router.match(request)[1] rescue nil
+
+
+
     display @weeksheet
   end
 

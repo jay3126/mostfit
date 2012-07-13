@@ -10,8 +10,10 @@
 .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
 
   -if check_checklist_parameters(@biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil)
+
     =link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', @biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button'
   -else
+
     =link_to 'Surprise Center Visit Not Available',"#", :class => 'add grey_button',:disabled=>true
   -if check_checklist_parameters(@biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil)
     = link_to 'Business Audit', url_for_checklist('Business Audit', @biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button'
