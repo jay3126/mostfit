@@ -82,7 +82,7 @@
   %h1 Actions
   %hr
   %h2 Create Clients
-  - healthcheck_is_clear = Checklist.is_healthcheck_complete?(@loan_file.loan_file_identifier)
+  - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
   - if healthcheck_is_clear
     = link_to_with_rights "Create clients", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'grey_button'
   - else

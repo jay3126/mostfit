@@ -7,3 +7,4 @@
   = link_to_with_rights "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true')
   = link_to_with_rights "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true')
   = link_to_with_rights "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation)
+  = link_to_with_rights "Loan Files", url(:controller => :loan_files, :action => :show_loan_files, :flag => 'true')

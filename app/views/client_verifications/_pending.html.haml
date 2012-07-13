@@ -1,3 +1,4 @@
+- staffmember = [session.user.staff_member]
 - total_columns = 14
 - center_text = "text-align: center"
 
@@ -60,7 +61,7 @@
                       %td
                         = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                       %td
-                        = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.supervisors_and_executives_at_location(@center_id,get_effective_date), :prompt => "Select staff member"
+                        = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else
                       %td{:colspan => 4, :style => center_text}
                         %b
@@ -81,7 +82,7 @@
                       %td
                         = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                       %td
-                        = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.support_staff_at_location(@center_id, get_effective_date), :prompt => "Select staff member"
+                        = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else
                       %td{:colspan => 4, :style => center_text}
                         %b

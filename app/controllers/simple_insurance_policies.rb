@@ -77,20 +77,20 @@ class SimpleInsurancePolicies < Application
     #GET-KEEPING
     insured_name       = params[:simple_insurance_policy][:insured_name]
     insured_on         = params[:simple_insurance_policy][:insured_on]
-    insured_status     = params[:simple_insurance_policy][:insured_status]
+    issued_status     = params[:simple_insurance_policy][:issued_status]
     expires_on         = params[:simple_insurance_policy][:expires_on]
 
     # VALIDATIONS
     @message[:error] = "Insurance Name cannot blank" if insured_name.blank?
     @message[:error] = "Insured On cannot blank" if insured_on.blank?
-    @message[:error] = "Insured Status cannot blank" if insured_status.blank?
+    @message[:error] = "Issued Status cannot blank" if issued_status.blank?
     @message[:error] = "Expires On cannot blank" if expires_on.blank?
     @policy = SimpleInsurancePolicy.get(params[:id])
 
     # PERFORM OPERATION
     if @message[:error].blank?
       begin
-        @policy.attributes = {:insured_name => insured_name, :insured_on => insured_on, :insured_status => insured_status, :expires_on => expires_on}
+        @policy.attributes = {:insured_name => insured_name, :insured_on => insured_on, :issued_status => issued_status, :expires_on => expires_on}
         if @policy.save
           @message[:notice] = "Insurance Policy created successfully"
         else

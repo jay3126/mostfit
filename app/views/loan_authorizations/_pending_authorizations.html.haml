@@ -65,7 +65,8 @@
             %tr
               %td
                 %b By
-                = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => choice_facade.all_finops_and_supervisors_at_location(@center_id, get_effective_date), :prompt => "Select staff member"
+                - staffmember = [session.user.staff_member]
+                = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => staffmember
               %td
                 %b On
                 = date_select("performed_on", Date.today, :max_date => Date.today, :id => "performed_on", :size => 8)

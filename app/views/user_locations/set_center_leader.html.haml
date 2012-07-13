@@ -58,7 +58,7 @@
               %td
                 = customer.address
               %td
-                = customer.state
+                = customer.state.humanize rescue nil
               %td
                 = customer.pincode
       = submit "Save", :class => "greenButton"

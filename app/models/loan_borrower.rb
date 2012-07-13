@@ -74,7 +74,7 @@ class LoanBorrower
     borrower_instances[:counterparty_type] = counterparty_type
     borrower_instances[:effective_on.lte]  = on_date
     borrowers = all(borrower_instances)
-    loans = (borrowers.collect {|borrower| borrower.lending}).uniq
+    loans = (borrowers.collect {|borrower| borrower.lending}).uniq.compact
   end
 
   def self.number_of_loans_for_counterparty_till_date(counterparty, on_date = Date.today)
