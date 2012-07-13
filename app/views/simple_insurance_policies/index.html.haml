@@ -39,6 +39,6 @@
         %td{ :colspan => 5 }
 
 %br
-= partial "new_clients/death_claims"
-
-= partial "new_clients/add_claim", :client => @client
+- unless @client.blank?
+  = partial "new_clients/death_claims"
+  = partial "new_clients/add_claim", :client => @client
