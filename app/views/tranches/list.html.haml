@@ -17,9 +17,11 @@
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
         %td
-          = tranch.id
+          %a{:href => url(:controller => 'tranches', :id => tranch.id, :action => 'show')}
+            = tranch.id
         %td
-          = tranch.name
+          %a{:href => url(:controller => 'tranches', :id => tranch.id, :action => 'show')}
+            = tranch.name
         %td
           = tranch.date_of_commencement
     %tfoot

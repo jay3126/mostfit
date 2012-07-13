@@ -83,7 +83,20 @@ class Tranches < Application
   def show
     #GATEKEEPING
     @errors = []
-    debugger
+
+    @tranch = Tranch.get(params[:id])
+    raise NotFound unless @tranch
+    @date = params[:tranch_date].blank? ? get_effective_date : Date.parse(params[:tranch_date])
+    @lendings = loan_assignment_facade.get_loans_assigned_to_tranch(@tranch, @date)
+      
+    do_calculations
+
+    render :template => 'tranches/show', :layout => layout?
+  end
+
+  def loans_for_tranch_on_date
+    #GATEKEEPING
+    @errors = []
 
     @tranch = Tranch.get(params[:id])
     raise NotFound unless @tranch
