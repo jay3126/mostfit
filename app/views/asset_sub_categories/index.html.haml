@@ -1,0 +1,16 @@
+-#%h1
+-#  AssetSubCategories controller, index action
+-#%p
+-#  Edit this file in
+-#  %tt
+-#    app/views/asset_sub_categories/index.html.erb
+%table
+  %tr
+  - for asset_sub_category in @asset_sub_categories
+    %tr
+      %td
+        = link_to 'Show', url(:asset_sub_category, asset_sub_category)
+      %td
+        = link_to 'Edit', url(:edit_asset_sub_category,  asset_sub_category)
+
+= link_to 'New', url(:new_asset_sub_category)

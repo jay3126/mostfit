@@ -1,0 +1,39 @@
+%h1
+  = "Asset Type :- #{@asset_type.name}"
+-#.shaded
+-#  .menu-strip
+-#    = link_to_with_rights 'Add Asset Type',resource(:money_deposits), :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+-#    = #partial 'bank_accounts/form'
+-#%br
+-#%hr
+-#
+-#.shaded
+-#  %h2
+-#    = "Bank Account Deposites"
+-#  %table.form{:style => "width:100%;"}
+-#    %thead
+-#      %tr
+-#        %th
+-#          = "ID"
+-#        %th
+-#          = "Amount"
+-#        %th
+-#          = "Created By User"
+-#        %th
+-#          = "Manage By Staff"
+-#        %th
+-#          = "Created Date"
+-#    %tbody
+-#      - @money_deposits.each do |md|
+-#        %tr
+-#          %td
+-#            = md.id
+-#          %td
+-#            = md.amount
+-#          %td
+-#            = md.user.name
+-#          %td
+-#            = md.staff_member.name
+-#          %td
+-#            = md.created_at.strftime('%d/%m/%Y')
+-#%br

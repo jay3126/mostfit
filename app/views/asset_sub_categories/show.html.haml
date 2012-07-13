@@ -1,0 +1,37 @@
+%h1
+  = "Asset Sub-category :- #{@asset_sub_category.name}"
+.shaded
+  #bank{:style=>"width:auto", :class => 'menu-strip'}
+    = link_to_with_rights 'Add Asset Type','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+    %br
+    %br
+    = partial 'asset_types/form'
+%br
+%hr
+
+.shaded
+  %h2
+    = "Asset Types"
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "ID"
+        %th
+          = "Name"
+        -#%th
+        -#  = "Account No."
+        -#%th
+        -#  = "Created Date"
+    %tbody
+      - @asset_types.each do |ast|
+        %tr
+          %td
+            = ast.id
+          %td
+            = link_to ast.name, resource(@asset_sub_category.asset_category, @asset_sub_category, ast)
+          -#%td
+          -#  = ba.account_no
+          -#%td
+          -#  = ba.created_at.strftime('%d/%m/%Y')
+%br

@@ -1,18 +1,17 @@
 %table
   %tr
     %td
-      Branch
+      Biz Location
     %td
-      - if @branch
-        = @branch.name
-        = hidden_field(:branch_id, :value => @branch.id)
+      - if @biz_location
+        = @biz_location.name
+        = hidden_field(:biz_location_id, :value => @biz_location.id)
       - else
-        = select :branch_id, :collection => Branch.all.map{ |x| [x.id, x.name]}, :prompt => "Select Branch"
-  %tr
-    %td
-      Asset Type
-    %td
-      = text_field :asset_type
+      = select :biz_location_id, :collection => BizLocation.all.map{ |x| [x.id, x.name]}, :prompt => "Select Biz Location"
+
+
+
+  -
   %tr
     %td
       Issue To
@@ -33,3 +32,85 @@
       - else
         = select_staff_member_for @asset_register, :manager, {}, true
       %span.greytext select the person who has issued the asset
+
+  %tr
+    %td
+
+    %td
+      = hidden_field(:asset_type_id, :value => @asset_type.id)
+
+  %tr
+    %td
+      Asset Category
+    %td
+      - if @asset_category
+        = @asset_category.name
+        = hidden_field(:asset_category_id, :value => @asset_category.id)
+      - else
+        = select :asset_category_id, :collection => AssetCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Category"
+
+  %tr
+    %td
+      Asset Sub-category
+    %td
+      - if @asset_sub_category
+        = @asset_sub_category.name
+        = hidden_field(:asset_sub_category_id, :value => @asset_sub_category.id)
+      - else
+        = select :asset_sub_category_id, :collection => AssetSubCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Sub-category"
+
+  %tr
+    %td
+      Asset Type
+    %td
+      - if @asset_type
+        = @asset_type.name
+        = hidden_field(:asset_type_id, :value => @asset_type.id)
+      - else
+        = select :asset_type_id, :collection => AssetType.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Type"
+
+  %tr
+    %td
+      Name of the item
+    %td
+      = text_field :name_of_the_item
+  %tr
+    %td
+      Tag number
+    %td
+      = text_field :tag_no
+  %tr
+    %td
+      Name of the vendor
+    %td
+      = text_field :name_of_the_vendor
+  %tr
+    %td
+      Invoice number
+    %td
+      = text_field :invoice_number
+  %tr
+    %td
+      Invoice date
+    %td
+      = date_select_for @asset_register, :invoice_date
+  %tr
+    %td
+      Make
+    %td
+      = text_field :make
+  %tr
+    %td
+      Model
+    %td
+      = text_field :asset_model
+  %tr
+    %td
+      Serial number
+    %td
+      = text_field :serial_no
+  %tr
+    %td
+      Date
+    %td
+      = date_select_for @asset_register, :date

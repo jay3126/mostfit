@@ -15,7 +15,7 @@
 # <rolename2> : all
 
 operator : all
-################
+
 administrator :
   home :
     - all
@@ -304,6 +304,9 @@ supervisor :
     - get_bank_branches
     - get_bank_accounts
   location_holidays :
+    - all
+
+  checklists :
     - all
 #################
 support :

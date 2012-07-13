@@ -1,0 +1,5 @@
+#new_form{:style => "#{@asset_categories.blank? ? 'display : true' : 'display : none'}"}
+  %form{:action => url(:controller => :asset_categories, :action => :create), :method => :post}
+    Name
+    = text_field :name
+    = submit "Save"

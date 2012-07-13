@@ -1,0 +1,27 @@
+%h1
+  = "Asset Categories"
+.shaded
+  .menu-strip
+    = link_to_with_rights 'Add Asset Category','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+    %br
+    %br
+    = partial 'form'
+  - if @asset_categories && !@asset_categories.empty?
+    %table.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th
+            = "ID"
+          %th
+            = "Name"
+      %tbody
+        - @asset_categories.each do |ac|
+          %tr
+            %td
+              = ac.id
+            %td
+              = link_to ac.name , resource(ac)
+  - else
+    No Asset Categories found.
+
+%br

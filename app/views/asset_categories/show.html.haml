@@ -1,0 +1,29 @@
+%h1
+  = "Asset Category :- #{@asset_category.name}"
+.shaded
+  .menu-strip
+    = link_to_with_rights 'Add Asset Sub-category','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+    %br
+    %br
+    = partial 'asset_sub_categories/form'
+%br
+%hr
+
+.shaded
+  %h2
+    = "Asset Sub-categories"
+  %table.form{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          = "ID"
+        %th
+          = "Name"
+    %tbody
+      - @asset_sub_categories.each do |asbc|
+        %tr
+          %td
+            = asbc.id
+          %td
+            = link_to asbc.name, resource(@asset_category,asbc)
+%br
