@@ -79,6 +79,9 @@
         %td
         %td
         %td
+          - payments = values[:loan_allocations].values[0]
+          = payments[:total_received]
+          - accumulate_row_values[:total_received] += payments[:total_received]
         %td
         %td
 
@@ -104,5 +107,6 @@
     %td
     %td
     %td
+      = total_rows[:total_received]
     %td
     %td
