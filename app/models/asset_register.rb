@@ -15,7 +15,7 @@ class AssetRegister
   property :tag_no, String, :nullable => false
 
   property :name_of_the_item, Text
-  property :name_of_the_vendor, String
+  property :name_of_the_vendor, Text
 
   property :invoice_number, String
   property :invoice_date, Date
@@ -91,7 +91,7 @@ class AssetRegister
     object_hash[:asset_model]=argument_array[10]
     object_hash[:serial_no]=argument_array[11]
     object_hash[:date]=argument_array[12]
-    object_hash[:issue_date]=argument_array[13]
+    object_hash[:issue_date]=Date.today#argument_array[13]
     object_hash[:name]="somename"
     object_hash[:manager_staff_id]=1
 
