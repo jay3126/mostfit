@@ -45,11 +45,12 @@
             - if status == 'Fee'
               = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id, :disabled => !fee.loan_on_fee_instance.is_outstanding?
             - else
-              = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id
+              - fee_lending = fee.policy_on_fee_instance.lending
+              = check_box :name => "fee_lending[#{fee.id}][]" ,:value => fee.id, :disabled => !fee_lending.is_outstanding?
           %td
             = date_select "fee_lending[#{fee.id}][][fee_on_date]", fee.applied_on, {:id => "fee_#{fee.id}", :size=> "10", :min_date => fee.applied_on, :max_date => get_effective_date}
           %td
-            = select :name => "fee_lending[#{fee.id}][][fee_by_staff]", :collection => StaffMember.all.collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
+            = select :name => "fee_lending[#{fee.id}][][fee_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
       %tfoot
         %tr.org_total
           %td{:colspan => 10}

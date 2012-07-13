@@ -32,6 +32,7 @@ class FeeInstance
   has 1, :fee_receipt
 
   def loan_on_fee_instance; Lending.get fee_applied_on_type_id; end
+  def policy_on_fee_instance; SimpleInsurancePolicy.get fee_applied_on_type_id; end
 
   def status(on_date = Date.today)
     amt = effective_total_amount(on_date).to_s

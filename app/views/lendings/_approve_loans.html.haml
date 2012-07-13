@@ -83,7 +83,7 @@
             = lending.scheduled_disbursal_date
             = hidden_field :name => "lending[#{lending.id}][][disbursal_date]", :value => lending.scheduled_disbursal_date
           %td
-            = select :name => "lending[#{lending.id}][][disbursed_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
+            = select :name => "lending[#{lending.id}][][disbursed_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
           %td
             = text_field :name => "lending[#{lending.id}][][disbursed_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;"
           - loan_row_count = loan_row_count + 1

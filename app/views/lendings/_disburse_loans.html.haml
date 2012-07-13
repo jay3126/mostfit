@@ -82,7 +82,7 @@
           %td
             = date_select "lending[#{lending.id}][][payment_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10"}
           %td
-            = select :name => "lending[#{lending.id}][][payment_by_staff]", :collection => StaffMember.all(:id.not => lending.applied_by_staff).collect{|staff| [staff.id, staff.name]}, :style => "width:125px;"
+            = select :name => "lending[#{lending.id}][][payment_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
           %td
             = text_field :name => "lending[#{lending.id}][][payment_amount]", :style => "width:70px;"
           - loan_row_count = loan_row_count + 1
