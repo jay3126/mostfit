@@ -1,0 +1,11 @@
+%table
+  %tr
+    %th
+      Name
+    %td
+      = text_field :name
+  %tr
+    %th
+      Effective on
+    %td
+      = date_select_for @securitization, :effective_on

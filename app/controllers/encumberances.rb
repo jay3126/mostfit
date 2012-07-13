@@ -78,7 +78,7 @@ class Encumberances < Application
     display @upload
   end
 
-  def loan_for_encumberance_on_date
+  def loans_for_encumberance_on_date
     @encumberance = Encumberance.get(params[:id])
     raise NotFound unless @encumberance
     @date = params[:encu_date].blank? ? get_effective_date : Date.parse(params[:encu_date])
