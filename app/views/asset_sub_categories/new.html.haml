@@ -1,0 +1,13 @@
+-#%h1 AssetSubCategories controller, new action
+-#
+-#%p
+-#  Edit this file in
+-#  %tt app/views/asset_sub_categories/new.html.erb
+
+= error_messages_for @asset_sub_category
+
+= form_for(@asset_sub_category, :action => url(:asset_sub_categories) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:asset_sub_categories)

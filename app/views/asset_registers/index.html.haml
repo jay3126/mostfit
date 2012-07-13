@@ -10,12 +10,27 @@
     %thead
       %tr
         %th Id
+        %th Biz Location
         %th Branch
         %th Issued To
-        %th Asset Type
+        -# %th Asset Type
         %th Issue Date
         %th Issued By
         %th Returned On
+
+        %th Asset Category
+        %th Asset Sub-category
+        %th Asset Type
+        %th Name of the item
+        %th Tag number
+        %th Name of the vendor
+        %th Invoice number
+        %th Invoice date
+        %th Make
+        %th Model
+        %th Serial number
+        %th Date
+
         %th Edit/Delete
 
     %tbody
@@ -24,19 +39,49 @@
         %td
           = asset_register.id
         %td
-          = link_to_with_rights asset_register.branch.name, url(:quick_link, "branches", asset_register.branch_id)
+          = asset_register.biz_location
+        %td
+          = link_to asset_register.branch_id, url(:quick_link, "branches", asset_register.branch_id)
         %td
           = asset_register.name
-        %td
-          = asset_register.asset_type
+        -#%td
+        -#  = asset_register.asset_type
         %td
           = asset_register.issue_date
         %td
-          = link_to_with_rights asset_register.manager.name, url(:quick_link, "staff_members", asset_register.manager_staff_id)
+          = link_to asset_register.manager_staff_id, url(:quick_link, "staff_members", asset_register.manager_staff_id)
         %td
           = asset_register.returned_date
+
+
         %td
-          = link_to_with_rights 'edit', resource(asset_register, :edit)
+          = asset_register.asset_category.name
+        %td
+          = asset_register.asset_sub_category.name
+        %td
+          = asset_register.asset_type.name
+
+        %td
+          = asset_register.name_of_the_item
+        %td
+          = asset_register.tag_no
+        %td
+          = asset_register.name_of_the_vendor
+        %td
+          = asset_register.invoice_number
+        %td
+          = asset_register.invoice_date
+        %td
+          = asset_register.make
+        %td
+          = asset_register.asset_model
+        %td
+          = asset_register.serial_no
+        %td
+          = asset_register.date
+
+        %td
+          = link_to 'edit', resource(asset_register, :edit)
 
     %tfoot
       %tr
@@ -44,6 +89,6 @@
 
   = paginate @asset_registers
   - if @branch
-    = link_to_with_rights 'Back', url(:quick_link, "branches", asset_register.branch_id)
+    = link_to 'Back', url(:quick_link, "branches", asset_register.branch_id)
   - else
-    = link_to_with_rights 'Back', url(:asset_registers)
+    = link_to 'Back', url(:asset_registers)

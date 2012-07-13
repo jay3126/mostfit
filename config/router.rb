@@ -1,6 +1,12 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
 
+  resources :asset_categories do
+    resources :asset_sub_categories do
+      resources :asset_types
+    end
+  end
+
   #book-keeping from bk begins
   resources :home, :collection => {:effective_date => [:get]}
   resources :ledgers

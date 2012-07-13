@@ -5,10 +5,10 @@ class AssetRegisters < Application
 
   def index
     if request.xhr? and params[:branch_id]
-      @asset_registers = AssetRegister.all(:branch_id => params[:branch_id]).paginate(:page => params[:page], :per_page => 15, :order => [:issue_date.desc])
+      @asset_registers = AssetRegister.all(:branch_id=>params[:branch_id]).paginate(:page => 1, :per_page => 15, :order => [:issue_date.desc])
       display @asset_registers, :layout => layout?
     else
-      @asset_registers = (@asset_registers || AssetRegister.all).paginate(:page => params[:page], :per_page => 15)
+      @asset_registers = (@asset_registers || AssetRegister.all).paginate(:page => 1, :per_page => 15)
       display @asset_registers, :layout => layout?
     end
   end
@@ -37,7 +37,7 @@ class AssetRegisters < Application
   def create(asset_register)
     @asset_register = AssetRegister.new(asset_register)
     if @asset_register.save
-      redirect(params[:return] ||resource(@asset_register.branch), :message => {:notice => "Asset entry was successfully entered"})
+      redirect(params[:return] ||resource(@asset_register), :message => {:notice => "Asset entry was successfully entered"})
     else
       message[:error] = "Asset entry failed to be entered"
       render :new #error message will show                                                                                                                              
@@ -48,7 +48,7 @@ class AssetRegisters < Application
     @asset_register = AssetRegister.get(id)
     raise NotFound unless @asset_register
     if @asset_register.update(asset_register)
-      redirect(params[:return] ||resource(@asset_register.branch), :message => {:notice => "Asset entry was successfully updated"})
+      redirect(params[:return] ||resource(@asset_register), :message => {:notice => "Asset entry was successfully updated"})
     else
       display @asset_register, :edit
     end
@@ -58,7 +58,7 @@ class AssetRegisters < Application
     @asset_register = AssetRegister.get(id)
     raise NotFound unless @asset_register
     if @asset_register.destroy
-      redirect(params[:return] ||resource(@asset_register.branch), :message => {:notice => "Asset entry was successfully deleted"})
+      redirect(params[:return] ||resource(@asset_register), :message => {:notice => "Asset entry was successfully deleted"})
     else
       raise InternalServerError
     end

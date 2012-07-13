@@ -1,0 +1,15 @@
+-#%h1
+-#  AssetCategories controller, edit action
+-#%p
+-#  Edit this file in
+-#  %tt
+-#    app/views/asset_categories/edit.html.erb
+= error_messages_for @asset_category
+
+= form_for(@asset_category, :action => url(:asset_category, @asset_category)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:asset_category, @asset_category)
+|
+= link_to 'Back', url(:asset_categories)
