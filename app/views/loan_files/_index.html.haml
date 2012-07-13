@@ -17,8 +17,6 @@
             = "Number of applications"
           %th
             = "Health check status"
-          %th
-            = "Remark"
       %tbody
         - @loan_files.each do |lf|
           - unless lf.health_check_status == "pending"
@@ -34,9 +32,8 @@
               %td
                 = lf.loan_applications.count
               %td
-                = lf.health_check_status.humanize rescue nil
-              %td
-                = lf.health_status_remark
+                - healthcheck_is_clear = Checklist.is_healthcheck_complete?(lf.loan_file_identifier)
+                = healthcheck_is_clear ? "Cleared" : "Pending"
     
   - else
     %h3 No Loan Files found.
