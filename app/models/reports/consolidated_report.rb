@@ -1,139 +1,73 @@
 class ConsolidatedReport < Report
-  attr_accessor :from_date, :to_date, :branch, :center, :funder, :branch_id, :center_id, :staff_member_id, :loan_product_id, :funder_id, :report_by_loan_disbursed, :funding_line, :funding_line_id, :loan_cycle
-  attr_reader   :data
-
-  include Mostfit::Reporting
-
-  column :'branch / center'
-  column :loan_amount         => [:applied,   :sanctioned, :disbursed         ]
-  column :repayment           => [:principal, :interest,   :fee,        :total]
-  column :balance_outstanding => [:principal, :interest,   :total             ]
-  column :balance_overdue     => [:principal, :interest,   :total             ]
-  column :advance_repayment   => [:collected, :adjusted,   :balance           ]
-
-  validates_with_method :from_date, :date_should_not_be_in_future
+  attr_accessor :from_date, :to_date, :biz_location_branch
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
-    @name   = "Report from #{@from_date} to #{@to_date}"
+    @name = "Consolidated Report from #{@from_date} to #{@to_date}"
+    @user = user
+    location_facade = get_location_facade(@user)
+    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
+    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
     get_parameters(params, user)
   end
-  
+
   def name
     "Consolidated Report from #{@from_date} to #{@to_date}"
   end
-  
+
   def self.name
-    "Consolidated report"
+    "Consolidated Report"
   end
-  
+
+  def get_reporting_facade(user)
+    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
+  end
+
+  def get_location_facade(user)
+    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
+  end
+
+  def default_currency
+    @default_currency = MoneyManager.get_default_currency
+  end
+
   def generate
-    branches, centers, data, clients, loans = {}, {}, {}, {}, {}
-    extra, funder_loan_ids = get_extra
 
-    grouper = [:branch]    
-    grouper.push(:center)       if self.branch_id
-    grouper.push(:client_group) if self.center_id
-    group_by_column = (grouper.last.to_s + "_id").to_sym
+    reporting_facade = get_reporting_facade(@user)
+    location_facade  = get_location_facade(@user)
+    data = {}
     
-    histories = (LoanHistory.sum_outstanding_grouped_by(self.to_date, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
-    advances  = (LoanHistory.sum_advance_payment(self.from_date, self.to_date, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
-    balances  = (LoanHistory.advance_balance(self.to_date, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
-    old_balances = (LoanHistory.advance_balance(self.from_date-1, grouper, extra)||{}).group_by{|x| x.send(group_by_column)}
-    defaults   = LoanHistory.defaulted_loan_info_by(grouper, @to_date, extra).group_by{|x| x.send(group_by_column)}.map{|cid, row| [cid, row[0]]}.to_hash
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
+    at_branch_ids_ary.each { |branch_id|
+      loans_applied = reporting_facade.loans_applied_by_branches_for_date_range(@from_date, @to_date, *branch_id)
+      loans_approved = reporting_facade.loans_approved_by_branches_for_date_range(@from_date, @to_date, *branch_id)
+      loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_for_date_range(@from_date, @to_date, *branch_id)
+      loans_disbursed = reporting_facade.loans_disbursed_by_branches_for_date_range(@from_date, @to_date, *branch_id)
+
+      #loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@from_date, @to_date, *branch_id)
+      loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+      loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
+
+      branch_data_map = {}
+      branch_data_map[:loans_applied] = loans_applied
+      branch_data_map[:loans_approved] = loans_approved
+      branch_data_map[:loans_scheduled_for_disbursement] = loans_scheduled_for_disbursement
+      branch_data_map[:loans_disbursed] = loans_disbursed
+    #  branch_data_map[:loan_balances] = loan_balances
+      branch_data_map[:fee_receipts] = fee_receipts
+      branch_data_map[:loan_receipts] = loan_receipts
+      branch_data_map[:loan_payments] = loan_payments
+      branch_data_map[:loan_net_payments] = loan_net_payments
+      branch_data_map[:loan_allocations] = loan_allocations
+
+      data[branch_id] = branch_data_map
+    }    
+    data
     
-    @center.each{|c| centers[c.id] = c} if self.branch_id
-
-    if self.center_id
-      groups = {}
-      @center = Center.get(center_id)
-      @center.client_groups.each{|g|
-        groups[g.id] = g
-      }
-    end
-
-    @branch.each{|b|
-      branches[b.id] = b
-      
-      if self.branch_id
-        data[b]||= {}
-        b.centers.each{|c|
-          next unless centers.key?(c.id)
-          centers[c.id]  = c
-          if self.center_id
-            data[b][c]||= {}
-            c.client_groups.each{|g|
-              add_outstanding_to(data[b][c], g, histories, advances, balances, old_balances, defaults)
-            }
-          else
-            add_outstanding_to(data[b], c, histories, advances, balances, old_balances, defaults)
-          end
-        }
-      else
-        #0              1                 2                3              4              5     6                  7         8    9,10,11     12       
-        #amount_applied,amount_sanctioned,amount_disbursed,outstanding(p),outstanding(i),total,principal_paidback,interest_,fee_,shortfalls, #defaults
-        add_outstanding_to(data, b, histories, advances, balances, old_balances, defaults)
-      end
-    }
-
-    froms, extra_condition = get_payment_extra_and_froms(centers, funder_loan_ids)
-    group_by_query = grouper.map{|x| "#{x.to_s}_id"}.join(", ")
-    repository.adapter.query(%Q{
-                               SELECT p.received_by_staff_id staff_id, c.branch_id branch_id, type ptype, SUM(p.amount) amount, #{group_by_query}
-                               FROM #{froms}
-                               WHERE p.received_on >='#{from_date.strftime('%Y-%m-%d')}' and p.received_on <= '#{to_date.strftime('%Y-%m-%d')}'AND p.deleted_at is NULL
-                                     AND cl.center_id=c.id AND cl.deleted_at is NULL AND p.client_id=cl.id #{extra_condition}
-                               GROUP BY #{group_by_query}, p.type
-                             }).each{|p|      
-      if branch = branches[p.branch_id] 
-        if self.branch_id and center = centers[p.center_id]
-          if self.center_id
-            group = groups[p.client_group_id]
-            add_payments_to(data[branch][center], group, p)
-          else
-            add_payments_to(data[branch], center, p)
-          end
-        else
-          add_payments_to(data, branch, p)
-        end
-      end
-    }
-
-    # Applied on, Approved on, Disbursed on
-    {:applied_on => [:amount_applied_for, 0], :approved_on => [:amount_sanctioned, 1], :disbursal_date => [:amount, 2]}.each do |event, cols|
-      hash = {event.gte => from_date, event.lte => to_date}
-      hash[:loan_product_id] = self.loan_product_id if self.loan_product_id
-      hash["l.id"]           = funder_loan_ids if funder_loan_ids and funder_loan_ids.length > 0      
-      hash["l.cycle_number"] = @loan_cycle if @loan_cycle and not @loan_cycle.nil?
-      group_by_query = ["c.branch_id"]
-      group_by_query.push("cl.center_id") if self.branch_id
-      group_by_query.push("cl.client_group_id") if self.center_id
-      
-      group_loans(group_by_query.join(", "), "sum(if(#{cols[0]}>0, #{cols[0]}, amount)) amount", hash).group_by{|x| 
-        x.branch_id
-      }.each{|branch_id, rows|
-        next if not branches.key?(branch_id)
-        branch = branches[branch_id]
-        
-        if self.branch_id and not self.center_id
-          rows.group_by{|x| x.center_id}.each{|center_id, row|
-            next if not centers.key?(center_id)
-            center = centers[center_id]
-            add_to_result(data[branch], center, cols[1], row[0].amount) if row[0] and row[0].amount
-          }
-        elsif self.branch_id and self.center_id
-          rows.group_by{|x| x.client_group_id}.each{|client_group_id, row|
-            group = groups[client_group_id]
-            next if not centers.key?(row[0].center_id)
-            center = centers[center_id]    
-            add_to_result(data[branch][center], group, cols[1], row[0].amount) if row[0] and row[0].amount
-          }
-        else
-          add_to_result(data, branch, cols[1], rows[0].amount) if rows[0] and rows[0].amount
-        end
-      }
-    end
-    @data = data
   end
+
 end

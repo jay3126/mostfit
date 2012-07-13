@@ -27,8 +27,7 @@
           %span.greytext (password fields must be filled to complete user profile)
     %p
       = submit "Save changes"
-      
-  = link_to_with_rights 'Back', url(:users)
+      = link_to_with_rights 'Back', url(:users), :class => "greenButton"
 
   %p
     %br/

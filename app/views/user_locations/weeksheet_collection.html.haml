@@ -38,6 +38,8 @@
   %tr.odd
     %th.odd Managed By
     %td= managed_by_staff_member(@biz_location.id, get_effective_date)
+  %tr.even
+    %td= link_to "Set center leader", url(:controller => "user_locations", :action => "set_center_leader", :biz_location_id => @biz_location.id), :class => "greenButton"
 
 %div.tab_container.shaded
   %ul.tabs
@@ -55,10 +57,10 @@
       Pdf
     %li#holiday
       Holiday
-    %li#History
-      History
     %li#center_cycle
       Center cycle
+    %li#History
+      History
   %div.tab
     %div#location_list
       %br
@@ -83,5 +85,5 @@
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :location_holidays, :action => :index, :biz_location_id => @biz_location.id)}
   %div.tab
-  %div.tab
     = partial 'center_cycles/tab_center_cycle', :center_cycle => @center_cycle
+  %div.tab

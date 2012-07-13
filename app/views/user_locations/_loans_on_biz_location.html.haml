@@ -3,8 +3,7 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-.menu-strip
-  = link_to_with_rights 'Add Loan', resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => 'add'
+= link_to_with_rights 'Add Loan', resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => "add grey_button"
 %br
 - if @lendings.blank?
   %p

@@ -4,8 +4,8 @@
       "bJQueryUI": true
     });
 
-.menu-strip
-  = link_to_with_rights 'Make Repayment', url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add'
+
+= link_to_with_rights 'Make Repayment', url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add grey_button'
 - if @lending_transactions.blank?
   %h3
     No Loan Transactions exists
