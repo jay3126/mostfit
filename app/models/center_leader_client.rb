@@ -22,7 +22,7 @@ class CenterLeaderClient
 
 
   def self.is_center_leader?(client_id, on_effective_date)
-    center_leader = first(:client_id => client_id, :date_assigned => on_effective_date)
+    center_leader = first(:client_id => client_id, :date_assigned.lte => on_effective_date, :order => [:date_assigned.desc])
     return true if center_leader
     return false
   end
