@@ -30,7 +30,7 @@ class AssetRegisters < Application
     only_provides :html
     @asset_register = AssetRegister.get(id)
     raise NotFound unless @asset_register
-    @branch = @asset_register.branch if @asset_register.branch_id
+
     display @asset_register, :layout => layout?
   end
 
@@ -48,7 +48,7 @@ class AssetRegisters < Application
     @asset_register = AssetRegister.get(id)
     raise NotFound unless @asset_register
     if @asset_register.update(asset_register)
-      redirect(params[:return] ||resource(@asset_register), :message => {:notice => "Asset entry was successfully updated"})
+      redirect(params[:return] ||url(:asset_registers), :message => {:notice => "Asset entry was successfully updated"})
     else
       display @asset_register, :edit
     end
