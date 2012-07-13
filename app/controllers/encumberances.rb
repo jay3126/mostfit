@@ -91,21 +91,27 @@ class Encumberances < Application
   end
 
   def do_calculations
+    @errors = []
     money_hash_list = []
-    @lendings.each do |lending| 
-      lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
-      money_hash_list << lds.to_money
-    end 
-    
-    in_currency = MoneyManager.get_default_currency
-    @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
-    if @total_money[:actual_total_outstanding] < @encumberance.to_money[:assigned_value]
-      @shortfall_or_excess = "Shortfall"
-    else
-      @shortfall_or_excess = "Excess"
+
+    begin 
+      @lendings.each do |lending| 
+        lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
+        money_hash_list << lds.to_money
+      end 
+        
+      in_currency = MoneyManager.get_default_currency
+      @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
+      if @total_money[:actual_total_outstanding] < @encumberance.to_money[:assigned_value]
+        @shortfall_or_excess = "Shortfall"
+      else
+        @shortfall_or_excess = "Excess"
+      end
+         
+      @difference = Money.net_amount(@total_money[:actual_total_outstanding], @encumberance.to_money[:assigned_value])
+    rescue => ex
+      @errors << ex.message
     end
-     
-    @difference = Money.net_amount(@total_money[:actual_total_outstanding], @encumberance.to_money[:assigned_value])
   end
 
 
