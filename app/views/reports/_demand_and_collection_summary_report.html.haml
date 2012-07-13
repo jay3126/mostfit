@@ -50,6 +50,37 @@
     %th
       Difference
 
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          %b
+            = BizLocation.get(branch).name
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+          = values[:fee_dues][:total_amount]
+          - accumulate_row_values[:fee_dues] += values[:fee_dues][:total_amount]
+        %td
+          = values[:loan_fee_receipts][:total_amount]
+          - accumulate_row_values[:loan_fee_receipts] += values[:loan_fee_receipts][:total_amount]
+        %td
+          = values[:all_fee_receipts][:total_amount]
+          - accumulate_row_values[:all_fee_receipts] += values[:all_fee_receipts][:total_amount]
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tr.footer
     %th
       Total
@@ -61,8 +92,11 @@
     %td
     %td
     %td
+      = total_rows[:fee_dues]
     %td
+      = total_rows[:loan_fee_receipts]
     %td
+      = total_rows[:all_fee_receipts]
     %td
     %td
     %td

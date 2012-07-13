@@ -38,6 +38,21 @@ class DemandAndCollectionSummaryReport < Report
     location_facade  = get_location_facade(@user)
     data = {}
 
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
+    at_branch_ids_ary.each { |branch_id|
+      loan_fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, @date, *branch_id)
+      all_fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
+      fee_dues = reporting_facade.all_aggregate_fee_dues_by_branches(@date, @date, *branch_id)
+
+      branch_data_map = {}
+      branch_data_map[:loan_fee_receipts] = loan_fee_receipts
+      branch_data_map[:all_fee_receipts] = all_fee_receipts
+      branch_data_map[:fee_dues] = fee_dues
+
+      data[branch_id] = branch_data_map
+    }
+    data
+
 =begin
 Columns required in this report are as follows:
 1. Branch Name
