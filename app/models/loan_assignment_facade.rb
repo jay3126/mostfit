@@ -17,6 +17,10 @@ class LoanAssignmentFacade < StandardFacade
     LoanAssignment.get_loans_assigned(to_loan_assignment, on_date)
   end
 
+  def get_loans_assigned_to_tranch(to_tranch,on_date)
+    FundsSource.get_loans_assigned(to_tranch, on_date)
+  end
+
   def get_loan_information(for_loan_id)
     #TODO
   end
@@ -35,6 +39,10 @@ class LoanAssignmentFacade < StandardFacade
   
   def assign_on_date(loan_id, to_assignment, on_date)
     LoanAssignment.assign_on_date(loan_id, to_assignment, on_date, for_user.id)
+  end
+
+  def assign_to_tranch_on_date(loan_id, to_tranch, on_date)
+    FundsSource.assign_to_tranch_on_date(loan_id, to_tranch, on_date)
   end
 
   def create_securitization(by_name, effective_on, for_third_parties, performed_by, for_user)
