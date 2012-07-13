@@ -139,16 +139,16 @@ executive :
     - weeksheet_payments
     - create_group_payments
     - payment_form_for_lending
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
-    - all
+#    - admin_change_password
+#    - preferred_locale
+#    - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
@@ -267,20 +267,20 @@ supervisor :
      - show
 #     - create
 #     - new
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
   reports :
     - show
     - create
     - edit
-    - all
+  #  - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
@@ -305,8 +305,7 @@ supervisor :
     - get_bank_accounts
   location_holidays :
     - all
-
-  checklists :
+  simple_insurance_policies :
     - all
 #################
 support :
@@ -401,15 +400,15 @@ support :
     - all
   biz_locations :
     - centers_for_selector
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
 ################
 finops :
   home :
@@ -519,8 +518,8 @@ finops :
     - all
 #  loan_purposes :
 #    - all
-  searches :
-    - all
+#  searches :
+#    - all
   loan_files :
 #    - index
     - show
@@ -546,15 +545,15 @@ finops :
 #    - record_grt
   user_locations :
     - all
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
 #  money_deposits :
 #    - index
 #     - create
@@ -616,15 +615,15 @@ read_only :
 #   - show
   lendings :
     - index
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
 
 #    - create
 #    - create_repayment_on_lending
@@ -633,7 +632,7 @@ read_only :
 #    - update
 #   - update_lending_approve_to_disburse
 #    - update_lending_new_to_approve
-    - lending_accrual_transaction
+#    - lending_accrual_transaction
 #  loan_applications :
 #   - index
 #    - show
@@ -815,15 +814,15 @@ accountant :
     - all
   accounting_rules :
     - all
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-     - change_password
+#    - show
+#    - edit
+#    - update
+#     - change_password
 #    - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
   money_deposits :
     - index
 #     - create
@@ -982,15 +981,15 @@ auditor :
     - all
   accounting_rules :
     - all
-  users :
+#  users :
 #     - index
-    - show
-    - edit
-    - update
-    - change_password
+#    - show
+#    - edit
+#    - update
+#    - change_password
 #     - new
-    - admin_change_password
-    - preferred_locale
+#    - admin_change_password
+#    - preferred_locale
   money_deposits :
     - index
 #     - create
@@ -1051,21 +1050,21 @@ telecaller :
 #  ledgers :
 #    - index
 #   - show
+  
+#  users :
+#   - index
+#    - show
+#    - edit
+#    - update
+#    - change_password
+#     - new
+#    - admin_change_password
+#    - preferred_locale
   lendings :
     - index
-  users :
-#   - index
-    - show
-    - edit
-    - update
-    - change_password
-#     - new
-    - admin_change_password
-    - preferred_locale
-
 #    - create
 #    - create_repayment_on_lending
-    - show
+#    - show
 #    - edit
 #    - update
 #   - update_lending_approve_to_disburse
