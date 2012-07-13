@@ -17,11 +17,6 @@
       = @lending_product.to_money[:amount].to_s
   %tr
     %th
-      Currency
-    %td
-      = @lending_product.currency
-  %tr
-    %th
       Repayment Frequency
     %td
       = @lending_product.repayment_frequency
@@ -48,7 +43,7 @@
     %th
       by
     %td
-      = select :applied_by_staff, :collection => StaffMember.all.collect{|staff| [staff.id, staff.name]}
+      = select :applied_by_staff, :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, params[:biz_location_id])
   %tr
     %th
       Schedule Disbursal Date

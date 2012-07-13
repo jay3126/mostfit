@@ -14,7 +14,6 @@ class Lendings < Application
     @loan_borrower    = Client.get params[:client_id]
     @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
     @location         = BizLocation.get params[:biz_location_id] unless params[:biz_location_id].blank?
-    client_facade     = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, session.user.id)
     @clients          = @location.blank? ? Client.all(:id => @counterparty_ids) : client_facade.get_clients_administered(@location.id, get_effective_date)
     @lending          = @lending_product.lendings.new
     display @lending_product

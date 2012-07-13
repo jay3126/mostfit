@@ -21,7 +21,7 @@
         %td
           Payment by Staff
         %td
-          = select :name=> "payment_by_staff", :collection => choice_facade.all_staff_at_location(@location.id, get_effective_date()).collect{|s| [s.id, s.name]}
+          = select :name=> "payment_by_staff", :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, @lending.accounted_at_origin)
     = submit 'Save Repayment', :class => "greenButton"
     = link_to 'Cancel', params[:return], :class => "grey_button"
 - else
