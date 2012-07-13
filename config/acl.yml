@@ -537,6 +537,7 @@ finops :
     - get_param_value
     - record_health_check_status
     - generate_loans
+    - show_loan_files
 #  loan_authorizations :
 #    - all
   reports :
