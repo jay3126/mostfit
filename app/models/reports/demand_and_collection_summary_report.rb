@@ -43,11 +43,13 @@ class DemandAndCollectionSummaryReport < Report
       loan_fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, @date, *branch_id)
       all_fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
       fee_dues = reporting_facade.all_aggregate_fee_dues_by_branches(@date, @date, *branch_id)
+      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *branch_id)
 
       branch_data_map = {}
       branch_data_map[:loan_fee_receipts] = loan_fee_receipts
       branch_data_map[:all_fee_receipts] = all_fee_receipts
       branch_data_map[:fee_dues] = fee_dues
+      branch_data_map[:loan_balances] = loan_balances
 
       data[branch_id] = branch_data_map
     }

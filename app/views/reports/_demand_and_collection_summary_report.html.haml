@@ -74,6 +74,8 @@
           = values[:all_fee_receipts][:total_amount]
           - accumulate_row_values[:all_fee_receipts] += values[:all_fee_receipts][:total_amount]
         %td
+          = values[:loan_balances].values[0][:advance_received_on_date]
+          - accumulate_row_values[:advance_collected] += values[:loan_balances].values[0][:advance_received_on_date]
         %td
         %td
         %td
@@ -98,6 +100,7 @@
     %td
       = total_rows[:all_fee_receipts]
     %td
+      = total_rows[:advance_collected]
     %td
     %td
     %td
