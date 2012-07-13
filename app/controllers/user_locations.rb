@@ -85,7 +85,7 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
   def set_center_leader
     @biz_location = BizLocation.get params[:biz_location_id]
     # recent center leader
-    center_leader_client = CenterLeaderClient.first(:biz_location_id => @biz_location.id, :date_assigned => get_effective_date)
+    center_leader_client = CenterLeaderClient.first(:biz_location_id => @biz_location.id, :date_assigned.lte => get_effective_date, :order => [:date_assigned.desc])
     unless center_leader_client.blank?
       client_id = center_leader_client.client_id
       @client = Client.get client_id
@@ -192,6 +192,17 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
     end
   end
 
+
+  def set_seating_order
+    @biz_location = BizLocation.get(params[:biz_location_id])
+    if @biz_location.location_level.level == 0
+      @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+    else
+      @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+    end
+    render
+  end
+
   def record_seating_order
     client_ids = []
     @biz_location = BizLocation.get(params[:biz_location_id])
@@ -206,8 +217,12 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
       client_position = split_string.split("=")[1]
       client_ids << client_position.to_i
     end
-    @position = SeatingOrder.assign_seating_order(client_ids, @biz_location.id)
-    partial "arranged_customers_on_bizlocation"
+    position = SeatingOrder.assign_seating_order(client_ids, @biz_location.id)
+    @customers = []
+    position.each do |position|
+      @customers << Client.get(position)
+    end
+    render :set_seating_order
   end
 
 end
