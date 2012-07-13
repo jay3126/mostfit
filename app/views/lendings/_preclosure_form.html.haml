@@ -27,9 +27,12 @@
         %td
           Interest due
         %td
-          = text_field :name => "specific_interest_amount", :value => @lending.actual_interest_outstanding.to_s, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
+          - from_date = @lending.most_recent_payment_transaction_on_date
+          - to_date = Date.parse(preclose_on_date)
+          - actual_interest = @lending.accrued_interim_interest(from_date, to_date)
+          = text_field :name => "specific_interest_amount", :value => actual_interest, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
           %span.greytext
-            = @lending.actual_interest_outstanding.to_s
+            = actual_interest
       %tr
         %td
           Preclosure penalty
