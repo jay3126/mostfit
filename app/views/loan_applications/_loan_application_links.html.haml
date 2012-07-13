@@ -1,5 +1,3 @@
-%br
-%br
 %table#data_entry_index
   %tr
   %tr
@@ -9,18 +7,18 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan Applications
-      = link_to "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true'), :class => 'add_small'
+      = link_to_with_rights "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true'), :class => 'add_small'
       %br
-      = link_to "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
+      = link_to_with_rights "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new), :class => 'add_small'
     %td{:style => "padding: 15px;"}
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Reports
-      = link_to "Loan Application Report", "/reports/LoanApplicationsReport", :class => "edit_small"
+      = link_to_with_rights "Loan Application Report", "/reports/LoanApplicationsReport", :class => "edit_small"
       %br
-      = link_to "Credit Bureau Report", "/reports/CreditBureauReport", :class => "edit_small"
+      = link_to_with_rights "Credit Bureau Report", "/reports/CreditBureauReport", :class => "edit_small"
       %br
-      = link_to "Loan File Report", "/reports/LoanFilesReport", :class => "edit_small"
+      = link_to_with_rights "Loan File Report", "/reports/LoanFilesReport", :class => "edit_small"
   %tr
     %td
       %br
@@ -28,7 +26,12 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-dupe
-      = link_to "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true'), :class => 'edit_small'
+      = link_to_with_rights "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true'), :class => 'edit_small'
+    %td{:style => "padding: 15px;"}
+    %td
+      %h3{:style => "border-bottom: dotted 1px #999"}
+        Loan File
+      = link_to_with_rights "Loan Files", url(:controller => :loan_files, :action => :show_loan_files, :flag => 'true'), :class => "edit_small"
   %tr
     %td
       %br
@@ -36,9 +39,9 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Credit Bureau
-      = link_to "Download request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
+      = link_to_with_rights "Download request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
       %br
-      = link_to "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
+      = link_to_with_rights "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
   %tr
     %td
       %br
@@ -47,7 +50,7 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Authorization
-      = link_to "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true'), :class => 'add_small'
+      = link_to_with_rights "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true'), :class => 'add_small'
   %tr
     %td
       %br
@@ -57,9 +60,9 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Center formation
-      = link_to "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
+      = link_to_with_rights "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
       %br
-      = link_to "Record CGT, GRT", '#', :class => 'add_small'
+      = link_to_with_rights "Record CGT, GRT", url(:controller => :center_cycles, :action => :mark_cgt_grt, :flag => 'true'), :class => 'add_small'
   %tr
     %td
       %br
@@ -69,6 +72,10 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan File
-      = link_to "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
-      %br
-      = link_to "Health check on loan files", url(:controller => :loan_files, :action => :record_health_check_status, :flag => 'true'), :class => 'edit_small'
+      = link_to_with_rights "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
+:javascript
+  jQuery('table#data_entry_index tr').each(function(){
+    if($(this).find('td a').length ==0){
+      $(this).remove();
+    }
+  });

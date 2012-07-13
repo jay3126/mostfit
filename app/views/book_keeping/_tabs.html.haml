@@ -11,3 +11,8 @@
       = link_to 'Transaction Summaries', resource(:transaction_summaries)
     %li#categories_and_rules
       = link_to 'Categories and rules', resource(:accounting_rules)
+%div.box
+  %h1
+    %a{:class => "_remote_", :href => url(:controller =>  :vouchers, :action => :tally_download), :id => "tally"}
+      %h7 Tally download
+  #container_tally
