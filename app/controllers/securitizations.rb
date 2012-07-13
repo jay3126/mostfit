@@ -58,14 +58,19 @@ class Securitizations < Application
   end
 
   def do_calculations
+     @errors = []
     money_hash_list = []
-    @lendings.each do |lending|
-      lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
-      money_hash_list << lds.to_money
-    end 
-    
-    in_currency = MoneyManager.get_default_currency
-    @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
+    begin 
+      @lendings.each do |lending|
+        lds = LoanDueStatus.most_recent_status_record_on_date(lending, @date)
+        money_hash_list << lds.to_money
+      end 
+        
+      in_currency = MoneyManager.get_default_currency
+      @total_money = Money.add_money_hash_values(in_currency, *money_hash_list)
+    rescue => ex
+      @errors << ex.message
+    end
   end
 
 end
