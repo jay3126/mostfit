@@ -19,4 +19,4 @@
     %th
       By Staff Member
     %td
-      = select :performed_by, :collection => StaffMember.all.map{|s| [s.id, s.name]}
+      = select :performed_by, :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, params[:biz_location_id])

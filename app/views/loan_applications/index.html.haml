@@ -1,4 +1,3 @@
-
 %table#data_entry_index
   %tr
   %tr
@@ -74,5 +73,9 @@
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan File
       = link_to_with_rights "Create loan files", url(:controller => :loan_files, :action => :loan_file_generation), :class => 'add_small'
-      %br
-      = link_to_with_rights "Health check on loan files", url(:controller => :loan_files, :action => :record_health_check_status, :flag => 'true'), :class => 'edit_small'
+:javascript
+  jQuery('table#data_entry_index tr').each(function(){
+    if($(this).find('td a').length ==0){
+      $(this).remove();
+    }
+  });

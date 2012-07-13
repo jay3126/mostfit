@@ -14,7 +14,6 @@ class SeatingOrder
   belongs_to :client
 
   def self.assign_seating_order(list_of_clients, at_location_id)
-    seating_order_list = []
     list_of_clients.each_with_index { |client_id, index|
       group_number = (index / GROUP_SIZE) + 1
       position_within_group = (index % GROUP_SIZE ) + 1

@@ -5,38 +5,49 @@
       $( "#sortable" ).disableSelection();
     });
   });
+
   $('table.client_tab').dataTable({
     "bPaginate": false,
     "bJQueryUI": true
   });
 
+  $('form').submit(function(){
+    var sortable_params= $("#sortable").sortable('serialize');
+    $("#seat").attr("value",sortable_params);
+  });
+
+
 .menu-strip
   = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
 
 %br
-- if @customers.count == 0
+- if @customers.blank?
   %p
     %i No Client Mapping have been created yet.
 - else
-  %table{:style => "width:100%;"}
-    %thead
-      %tr
-        %th
-          id
-        %th
-          Name
-        %th
-          Joining Date
-  %div{:class => "demo"}
-    %ul{:id => "sortable", :style => "width:100%;"}
-      - for customer in @customers
-        %li{:class => "ui-state-default", :id => "client_#{customer.id}"}
-          %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
-          %table.form
-            %tr
-              %td
-                = customer.id
-              %td
-                = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
-              %td
-                = customer.date_joined
+  = form(:action => url(:controller => :user_locations, :action => :record_seating_order)) do
+    = hidden_field :name=>"clients", :id => "seat"
+    = hidden_field :name => "biz_location_id", :value => @biz_location.id
+    %table{:style => "width:100%;"}
+      %thead
+        %tr
+          %th{:style => "width:33%;"}
+            id
+          %th{:style => "width:33%;"}
+            Name
+          %th{:style => "width:33%;"}
+            Joining Date
+    %div{:class => "demo"}
+      %ul{:id => "sortable", :style => "width:100%;"}
+        - @customers.each do |customer|
+          %li{:class => "ui-state-default", :id => "customer_#{customer.id}"}
+            %table{:style => "width:100%;"}
+              %tr
+                %td{:style => "width:33%;"}
+                  %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
+                  = customer.id
+                %td{:style => "width:33%;"}
+                  = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+                %td{:style => "width:33%;"}
+                  = customer.date_joined
+    = submit "Save order"

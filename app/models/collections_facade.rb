@@ -44,7 +44,7 @@ class CollectionsFacade < StandardFacade
           loan_schedule_status               = '' #TODO
           #loan_days_past_due                = loan_facade.get_days_past_due_on_date(client_loan.id, on_date) || 0
           loan_principal_due                 = ''
-          loan_schedule_items                = loan_schedule_items.compact.first if loan_schedule_items.class == Array && loan_schedule_items.compact.size == 1
+          loan_schedule_items                = loan_schedule_items.compact if loan_schedule_items.class == Array
           if loan_schedule_items.size > 1
             if loan_due_status == :overdue
               loan_schedule_item = loan_schedule_items.first.first
@@ -52,7 +52,7 @@ class CollectionsFacade < StandardFacade
               loan_schedule_item = loan_schedule_items.last.first
             end
           else
-            loan_schedule_item = loan_schedule_items.first
+            loan_schedule_item = loan_schedule_items.class == Array ? loan_schedule_items.first.first : loan_schedule_items.first
           end
           loan_schedule_date                  = loan_schedule_item.first.last
          

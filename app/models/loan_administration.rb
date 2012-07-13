@@ -74,9 +74,19 @@ class LoanAdministration
     get_loans_at_location(ADMINISTERED_AT, at_location_id, on_date)
   end
 
+  # Returns an (empty) list of loans administered at a location for a date range.
+  def self.get_loans_administered(at_location_id, on_date = Date.today, till_date = on_date)
+    get_loans_at_location_for_date_range(ADMINISTERED_AT, at_location_id, on_date, till_date)
+  end
+
   # Returns an (empty) list of loans accounted at a location
   def self.get_loans_accounted(at_location_id, on_date = Date.today)
     get_loans_at_location(ACCOUNTED_AT, at_location_id, on_date)
+  end
+
+  # Returns an (empty) list of loans accounted at a location for a date range.
+  def self.get_loans_accounted_for_date_range(at_location_id, on_date = Date.today, till_date = on_date)
+    get_loans_at_location_for_date_range(ACCOUNTED_AT, at_location_id, on_date, till_date)
   end
 
   private
@@ -87,6 +97,29 @@ class LoanAdministration
     locations                                   = { }
     locations[administered_or_accounted_choice] = given_location_id
     locations[:effective_on.lte]                = on_date
+    administration                              = all(locations)
+    given_location                              = BizLocation.get(given_location_id)
+    administration.each { |each_admin|
+      loan = each_admin.loan
+
+      if administered_or_accounted_choice == ADMINISTERED_AT
+        loans.push(loan) if (given_location == each_admin.administered_at_location)
+      end
+
+      if administered_or_accounted_choice == ACCOUNTED_AT
+        loans.push(loan) if (given_location == each_admin.accounted_at_location)
+      end
+    }
+    loans.uniq
+  end
+
+  # Returns the locations (per administered/accounted choice) at the given location (by id) for a date range.
+  def self.get_loans_at_location_for_date_range(administered_or_accounted_choice, given_location_id, on_date = Date.today, till_date = on_date)
+    loans                                       = []
+    locations                                   = { }
+    locations[administered_or_accounted_choice] = given_location_id
+    locations[:effective_on.gte]                = on_date
+    locations[:effective_on.lte]                = till_date
     administration                              = all(locations)
     given_location                              = BizLocation.get(given_location_id)
     administration.each { |each_admin|

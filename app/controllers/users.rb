@@ -128,19 +128,20 @@ class Users < Application
     raise NotFound unless @user
 
     @status = false
-    if session.user.role == :admin and request.method==:put and user.key?(:password) and 
-        user.key?(:password_confirmation) and not user[:password].blank? and not user[:password_confirmation].blank?
-      @user.transaction do |t|
-        old_crypt = @user.crypted_password
-        @user.password = user[:password]
-        @user.password_confirmation = user[:password]
-        @user.password_changed_at   = DateTime.now
-        @status = @user.save
-        t.rollback if not status
-        if (@user.crypted_password == old_crypt)
-          t.rollback
-          @status = false
-          @user.errors.add(:password, "Same as old password")
+    if session.user.role == :administrator or session.user.role == :operator or session.user.id == @user.id
+      if request.method==:put and user.key?(:password) and user.key?(:password_confirmation) and not user[:password].blank? and not user[:password_confirmation].blank?
+        @user.transaction do |t|
+          old_crypt = @user.crypted_password
+          @user.password = user[:password]
+          @user.password_confirmation = user[:password]
+          @user.password_changed_at   = DateTime.now
+          @status = @user.save
+          t.rollback if not @status
+          if (@user.crypted_password == old_crypt)
+            t.rollback
+            @status = false
+            @user.errors.add(:password, "Same as old password")
+          end
         end
       end
     end

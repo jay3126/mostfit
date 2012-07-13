@@ -1,0 +1,31 @@
+.menu-strip
+  = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
+
+%br
+= form(:action => url(:controller => :user_locations, :action => :record_seating_order)) do
+  = hidden_field :name=>"clients", :id => "seat"
+  = hidden_field :name => "biz_location_id", :value => @biz_location.id
+  %table{:style => "width:100%;"}
+    %thead
+      %tr
+        %th
+          id
+        %th
+          Name
+        %th
+          Joining Date
+  %div{:class => "demo"}
+    %ul{:id => "sortable", :style => "width:100%;"}
+      - @position.each do |p|
+        - client = Client.get(p)
+        %li{:class => "ui-state-default", :id => "customer_#{client.id}"}
+          %span{:class => "ui-icon ui-icon-arrowthick-2-n-s"}
+          %table.form
+            %tr
+              %td
+                = client.id
+              %td
+                = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+              %td
+                = client.date_joined
+  = submit "Save order"

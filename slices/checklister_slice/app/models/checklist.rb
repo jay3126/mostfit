@@ -14,6 +14,10 @@ class Checklist
   belongs_to :checklist_type
 
 
+  def self.is_healthcheck_complete?(loan_file_identifier)
+    get_result_status("LoanFile", loan_file_identifier)
+  end
+
   def self.get_result_status(target_entity_type,target_entity_id)
     @target_enity=TargetEntity.all(:type=>target_entity_type.to_s,:model_record_id=>target_entity_id).first
     @healthcheck_checklist=ChecklistType.all(:name => "HealthCheck on Loan Files").first
