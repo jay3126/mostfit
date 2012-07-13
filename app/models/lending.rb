@@ -332,6 +332,16 @@ class Lending
     actual_principal_outstanding + actual_interest_outstanding
   end
 
+  def accrued_interim_interest(from_date, to_date)
+    return zero_money_amount if from_date == to_date
+    raise ArgumentError, "The from date: #{from_date} must precede to date: #{to_date}" if from_date > to_date
+    scheduled_interest_outstanding_from_date = scheduled_interest_outstanding(from_date)
+    most_recent_schedule_date = Constants::Time.get_immediately_earlier_date(to_date, *schedule_dates)
+    recent_scheduled_interest_outstanding = scheduled_interest_outstanding(most_recent_schedule_date)
+
+    scheduled_interest_outstanding_from_date > recent_scheduled_interest_outstanding ? (scheduled_interest_outstanding_from_date - recent_scheduled_interest_outstanding) : zero_money_amount
+  end
+
   def broken_period_interest_due(on_date)
     return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
     return zero_money_amount if schedule_date?(on_date)
