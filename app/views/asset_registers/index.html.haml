@@ -11,9 +11,7 @@
       %tr
         %th Id
         %th Biz Location
-        %th Branch
         %th Issued To
-        -# %th Asset Type
         %th Issue Date
         %th Issued By
         %th Returned On
@@ -40,12 +38,9 @@
           = asset_register.id
         %td
           = asset_register.biz_location
-        %td
-          = link_to asset_register.branch_id, url(:quick_link, "branches", asset_register.branch_id)
+
         %td
           = asset_register.name
-        -#%td
-        -#  = asset_register.asset_type
         %td
           = asset_register.issue_date
         %td

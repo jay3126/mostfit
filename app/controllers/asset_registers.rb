@@ -37,7 +37,7 @@ class AssetRegisters < Application
   def create(asset_register)
     @asset_register = AssetRegister.new(asset_register)
     if @asset_register.save
-      redirect(params[:return] ||resource(@asset_register), :message => {:notice => "Asset entry was successfully entered"})
+      redirect(params[:return] ||url(:asset_registers), :message => {:notice => "Asset entry was successfully entered"})
     else
       message[:error] = "Asset entry failed to be entered"
       render :new #error message will show                                                                                                                              

@@ -55,7 +55,7 @@ module VisitScheduler
 
     scheduling=Hash.new
     map_of_assignees.each do |key, value|
-      if list_of_unvisited_locations.length.to_i > value.to_i
+      if list_of_unvisited_locations.length.to_i >= value.to_i
         selected_locations=select_randomly(list_of_unvisited_locations, value)
 
       else
@@ -65,6 +65,7 @@ module VisitScheduler
 
       list_of_unvisited_locations=list_of_unvisited_locations-selected_locations
       list_of_visited_locations=(list_of_visited_locations+selected_locations)
+
 
       scheduling[key]=selected_locations
 
