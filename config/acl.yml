@@ -464,6 +464,7 @@ finops :
  #    - index
      - show
      - create_clients_for_loan_file
+     - create_client_for_selected_loan_application
   clients :
     - index
 #    - new
