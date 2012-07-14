@@ -137,6 +137,7 @@ class Lendings < Application
     @message       = {}
     lendings       = []
     lending_params = params[:lending]
+    disbursement_errors = []
     begin
       lending_params.each do |key, value|
         if value.size == 2
@@ -156,15 +157,16 @@ class Lendings < Application
       if @message[:error].blank?
         lendings.each do |lending|
           payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, lending.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
-          if lending.is_outstanding?
-            @message = {:notice => "Loans disbursed successfully."}
-          else
-            @message = {:error => "Loan disbursement failed."}
-          end
+          disbursement_errors.push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
         end
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
+    end
+    if disbursement_errors.empty?
+      @message = {:notice => "Loans were disbursed successfully."}
+    else
+      @message = {:error => "Loan disbursement failed with errors: " + disbursement_errors.join(", ")}
     end
 
     redirect resource(:lendings) , :message => @message
