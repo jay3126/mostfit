@@ -91,10 +91,10 @@
       %li
         = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
 
-    %h2 API Use
-    %ul
-      %li
-        =# link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
+    -# %h2 API Use
+    -# %ul
+    -#   %li
+    -#     =# link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
 :javascript
   jQuery('.admin-box').each(function(){
     if($(this).find('li a').length ==0){
