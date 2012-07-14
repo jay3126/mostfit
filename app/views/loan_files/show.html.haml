@@ -1,4 +1,4 @@
-- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+- center_cycle_number = CenterCycle.get_current_center_cycle(@loan_file.at_center_id)
 - branch = BizLocation.get(@loan_file.at_branch_id)
 - center = BizLocation.get(@loan_file.at_center_id)
 %h1
@@ -6,14 +6,11 @@
 .menu-strip
   %h3
     = "Branch: #{branch.name}"
-    |
+    %br
     = "Center: #{center.name}"
-    - unless @loan_file.health_check_status.blank?
-      |
-      = "Status: #{@loan_file.health_check_status.humanize rescue nil}"
-    |
+    %br
     = "Center Cycle Number: #{center_cycle_number}"
-    |
+    %br
     = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files', @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button'
 
 %br
