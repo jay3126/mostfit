@@ -75,7 +75,7 @@ class LoanAdministration
   end
 
   # Returns an (empty) list of loans administered at a location for a date range.
-  def self.get_loans_administered(at_location_id, on_date = Date.today, till_date = on_date)
+  def self.get_loans_administered_for_date_range(at_location_id, on_date = Date.today, till_date = on_date)
     get_loans_at_location_for_date_range(ADMINISTERED_AT, at_location_id, on_date, till_date)
   end
 
