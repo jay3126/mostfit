@@ -16,16 +16,6 @@
     =# css_include_tag 'jquery.dataTable'
     = js_include_tag :jquery, :application, :swfobject, "jquery.highlight.js", "jquery.floatheader.min.js", "jquery-ui.min.js", "chosen/chosen/chosen.jquery.js", "less.js", "jquery.dataTables.js"
   %body
-    - if session.authenticated?
-      .bookmark
-        = form_for(Bookmark.new, :action => url(:controller => :bookmarks, :action => :system), :class => "_remote_", :onsubmit => "javascript: $('#bookmark_route').val(window.location.pathname+window.location.hash);") do
-          = hidden_field :title, :value => page_title_str
-          %input{:type => 'hidden', :name => "_target_", :value => "bookmark_form_container"}
-          = hidden_field :name, :value => page_title_str
-          = hidden_field :type, :value => :system
-          = hidden_field :route, :value => :system
-          = submit "Bookmarks"
-    #bookmark_form_container
     #header
       %h1.logo
         - if mfi = Mfi.first
