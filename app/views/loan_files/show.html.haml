@@ -2,7 +2,7 @@
 - branch = BizLocation.get(@loan_file.at_branch_id)
 - center = BizLocation.get(@loan_file.at_center_id)
 %h1
-  = "Loan File #{@loan_file.id}"
+  = "Loan File #{@loan_file.loan_file_identifier}"
 .menu-strip
   %h3
     = "Branch: #{branch.name}"
