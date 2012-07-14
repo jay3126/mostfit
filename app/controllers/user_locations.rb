@@ -52,13 +52,13 @@ class UserLocations < Application
     request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:scv_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @scv_route = Merb::Router.match(request)[1] rescue nil
     #generate ba route
-request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:ba_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:ba_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @ba_route = Merb::Router.match(request)[1] rescue nil
     #generate  pa route
-request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:pa_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:pa_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @pa_route = Merb::Router.match(request)[1] rescue nil
     #generate hc route
-request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @hc_route = Merb::Router.match(request)[1] rescue nil
 
 
@@ -194,10 +194,18 @@ request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb
 
   def set_seating_order
     @biz_location = BizLocation.get(params[:biz_location_id])
-    if @biz_location.location_level.level == 0
-      @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+    position = SeatingOrder.get_complete_seating_order(@biz_location.id)
+    if position.blank?
+      if @biz_location.location_level.level == 0
+        @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+      else
+        @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+      end
     else
-      @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+      @customers = []
+      position.each do |position|
+        @customers << Client.get(position)
+      end
     end
     render
   end

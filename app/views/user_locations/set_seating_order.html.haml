@@ -50,3 +50,4 @@
                 %td{:style => "width:33%;"}
                   = customer.date_joined
     = submit "Save order"
+    = link_to_with_rights "Back", url("user_locations/weeksheet_collection/#{@biz_location.id}"), :class => "greenButton"
