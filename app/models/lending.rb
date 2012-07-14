@@ -571,9 +571,20 @@ class Lending
     self.approved_on_date  = approved_on_date
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
-    debugger
+    setup_on_approval
+  end
+
+  def setup_on_approval
     setup_fee_instances
     setup_insurance_policies
+    setup_product_accounting
+  end
+
+  def setup_product_accounting
+    accounts_chart_for_borrower = AccountsChart.get_counterparty_accounts_chart(self.borrower)
+    ledger_base_currency = self.currency
+    ledger_open_date = self.borrower.created_on
+    Ledger.setup_product_ledgers(accounts_chart_for_borrower, ledger_base_currency, ledger_open_date, Constants::Products::LENDING, self.id)
   end
 
   def setup_fee_instances

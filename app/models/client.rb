@@ -5,6 +5,7 @@ class Client
   include ClientValidations, PeopleValidations
   include Constants::Masters
   include CommonClient::Validations
+  include Identified
 
   before :valid?, :convert_blank_to_nil
 
@@ -165,6 +166,7 @@ class Client
     performed_by = new_client.created_by_staff_member_id
     recorded_by  = new_client.created_by_user_id
     ClientAdministration.assign(administered_at, registered_at, new_client, performed_by, recorded_by, effective_on)
+    AccountsChart.setup_counterparty_accounts_chart(new_client)
     
     new_client
   end
@@ -179,6 +181,7 @@ class Client
     raise Errors::DataError, valid.last unless valid == true
     client.save
     ClientAdministration.assign(admin_location, reg_location , client, client.created_by_staff_member_id, client.created_by_user_id, client.date_joined)
+    AccountsChart.setup_counterparty_accounts_chart(client)
     client
   end
 
