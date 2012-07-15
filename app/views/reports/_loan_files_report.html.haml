@@ -1,4 +1,5 @@
 = partial :form
+
 - unless @data.blank?
   %br
   %table{:class => "report nojs"}
@@ -11,18 +12,19 @@
         Status
       %th
         count
-    - @data.each do |branch_id, value1|
-      - value1.each do |center_id, value2|
-        - value2.each do |status, value3|
-          %tr
-            %td{:style => "text-align:center"}
-              = BizLocation.get(branch_id).name
-            %td{:style => "text-align:center"}
-              = BizLocation.get(center_id).name
-            %td{:style => "text-align:center"}
-              = status.humanize rescue nil
-            %td{:style => "text-align:center"}
-              = value3
+    - @data.each do |s_no, value|
+      - value.each do |branch_id, value1|
+        - value1.each do |center_id, value2|
+          - value2.each do |status, value3|
+            %tr
+              %td{:style => "text-align:center"}
+                = BizLocation.get(branch_id).name
+              %td{:style => "text-align:center"}
+                = BizLocation.get(center_id).name
+              %td{:style => "text-align:center"}
+                = status.humanize rescue ''
+              %td{:style => "text-align:center"}
+                = value3
 - else
   .shaded
     %h3 No records found

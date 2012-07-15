@@ -19,16 +19,18 @@ class LoanFilesReport < Report
   end
 
   def generate
-    condition_hash =  {}
-    loan_app = {}
+    condition_hash = {}
+    loan_file = {}
+    count = 1
     condition_hash.merge!(:health_check_status => @loan_file_status) unless @loan_file_status.blank?
     condition_hash.merge!(:at_center_id => @center_id) unless @center_id.blank?
     condition_hash.merge!(:at_branch_id => @branch_id) unless @branch_id.blank?
     loan_files = LoanFile.all(condition_hash)
-    branches = BizLocation.all(:id => loan_files.map(&:at_branch_id))
-    centers = BizLocation.all(:id => loan_files.map(&:at_center_id))
-    loan_files.group_by{|x| [x.at_branch_id,x.at_center_id,x.health_check_status]}.collect{|c| loan_app.merge!(branches.find{|x| x.id == c[0][0]}.id => { centers.find{|x| x.id == c[0][1]}.id => { c[0][2] => c[1].count}})}
-    loan_app
+    loan_files.group_by{|x| [x.at_branch_id,x.at_center_id,x.health_check_status]}.each do |c, value|
+      loan_file.merge!(count => {c[0] => { c[1] => { c[2] => value.count}}})
+      count = count + 1
+    end
+    loan_file
   end
   
 end
