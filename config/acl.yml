@@ -277,10 +277,10 @@ supervisor :
 #    - admin_change_password
 #    - preferred_locale
   reports :
-    - show
-    - create
-    - edit
-  #  - all
+#    - show
+#    - create
+#    - edit
+     - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
@@ -306,7 +306,8 @@ supervisor :
   location_holidays :
     - all
   simple_insurance_policies :
-    - all
+#    - all
+    - show
 #################
 support :
   admin :
@@ -795,10 +796,10 @@ accountant :
 #    - index
 #    - show
   reports :
-    - show
+#    - show
 #    - create
 #    - edit
- #   - all
+    - all
 #  center_cycles :
 #    - record_cgt
 #    - mark_cgt_grt
@@ -962,10 +963,10 @@ auditor :
 #    - index
 #    - show
   reports :
-    - show
+#    - show
 #    - create
 #    - edit
- #   - all
+    - all
 #  center_cycles :
 #    - record_cgt
 #    - mark_cgt_grt
