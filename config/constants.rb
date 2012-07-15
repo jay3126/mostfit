@@ -31,7 +31,7 @@ STATUSES = [:applied_in_future, :applied, :rejected, :approved, :disbursed, :out
 EPSILON  = 0.01
 INACTIVE_REASONS = ['', 'no_further_loans', 'death_of_client', 'death_of_spouse']
 ModelsWithDocuments = ['Area', 'Region', 'Branch', 'Center', 'Client', 'Loan', 'ClientGroup', 'StaffMember', 'User', 'Mfi', 'Funder', 
-                       'InsuranceCompany', 'InsurancePolicy', 'Claim']
+                       'InsuranceCompany', 'InsurancePolicy', 'Claim', 'BizLocation']
 CLAIM_DOCUMENTS = [:death_certificate, :center_declaration_form, :kyc_document]
 LOANS_NOT_PAYABLE = [nil, :repaid, :pending, :written_off, :claim_settlement, :preclosed]
 DUMP_FOLDER      = "db/daily"

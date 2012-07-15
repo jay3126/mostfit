@@ -31,8 +31,8 @@ class Documents < Application
     @document.parent_model = @parent.class
     @document.parent_id    = @parent.id
     if @document.save
-      notice = "Document was successfully created"
-      redirect((@document.parent ? resource(@document.parent)+"#documents" : resource(:documents)), :message => {:notice => notice})
+      message = {:notice => "Document was successfully created"}
+      redirect url("user_locations/weeksheet_collection/#{@parent.id}"), :message => message
     else
       message[:error] = "Document failed to be created"
       render :new
@@ -43,8 +43,8 @@ class Documents < Application
     @document = Document.get(id)
     raise NotFound unless @document
     if @document.update(document)
-      notice = "Document was successfully created"
-      redirect((@document.parent ? resource(@document.parent)+"#documents" : resource(:documents)), :message => {:notice => notice})
+      message = {:notice => "Document was successfully created"}
+      redirect url("user_locations/weeksheet_collection/#{@document.parent.id}"), :message => message
     else
       display(@document.parent ? @document.parent : :documents)
     end
@@ -60,7 +60,7 @@ class Documents < Application
     end
   end
 
-private
+  private
   def get_parent
     if params[:parent_model] and params[:parent_id]
       @parent = Kernel.const_get(params[:parent_model]).get(params[:parent_id])

@@ -63,6 +63,8 @@
       Holiday
     %li#center_cycle
       Center cycle
+    %li#documents
+      Documents
     %li#History
       History
   %div.tab
@@ -90,4 +92,6 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :location_holidays, :action => :index, :biz_location_id => @biz_location.id)}
   %div.tab
     = partial 'center_cycles/tab_center_cycle', :center_cycle => @center_cycle
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => resource(:documents, :parent_id => @biz_location.id, :parent_model => BizLocation)}
   %div.tab
