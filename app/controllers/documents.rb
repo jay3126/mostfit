@@ -34,7 +34,6 @@ class Documents < Application
       message = {:notice => "Document was successfully created"}
       redirect url("user_locations/weeksheet_collection/#{@parent.id}"), :message => message
     else
-      message[:error] = "Document failed to be created"
       render :new
     end
   end
