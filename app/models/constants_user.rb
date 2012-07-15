@@ -1,6 +1,11 @@
 module Constants
   module User
 
+    PRESENT_ATTENDANCE_STATUS = :present_attendance_status; ABSENT_ATTENDANCE_STATUS = :absent_attendance_status
+    ATTENDANCE_STATUS_NOT_KNOWN = :attendance_status_not_known
+    DEFAULT_ATTENDANCE_STATUS = ATTENDANCE_STATUS_NOT_KNOWN
+    ATTENDANCE_STATUSES = [ATTENDANCE_STATUS_NOT_KNOWN, PRESENT_ATTENDANCE_STATUS, ABSENT_ATTENDANCE_STATUS]
+
     # When the ACL_DEBUG_MODE is set to true, a link that should be unavailable to the user
     # will still display as text, and not vanish altogether
     ENABLE_ACL_DEBUG_MODE = true
