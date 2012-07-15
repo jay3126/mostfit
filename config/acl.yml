@@ -344,6 +344,8 @@ support :
     - all
   client_verifications :
     - all
+  new_clients :
+   - show
   clients :
     - index
     - new
