@@ -2,8 +2,8 @@ class StaffMembers < Application
   include DateParser
   layout :determine_layout
   provides :xml
+
   def index
-    per_page = 25
     @date = params[:date] ? parse_date(params[:date]) : Date.today
     @branch = Branch.get(params[:branch_id]) if params[:branch_id]
     hash = get_staff_members_hash
@@ -14,8 +14,7 @@ class StaffMembers < Application
     else
       hash[:active] = true
     end
-    @staff_members = (@staff_members ? @staff_members : StaffMember.all.paginate(:page => params[:page], :per_page => per_page))
-    # @staff_members = (@staff_members ? @staff_members : StaffMember.all(hash)).paginate(:page => params[:page], :per_page => per_page)
+    @staff_members = @staff_members ? @staff_members : StaffMember.all
     set_staff_member_counts
     display @staff_members
   end
