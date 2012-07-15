@@ -303,7 +303,47 @@ class ReportingFacade < StandardFacade
     sum_money_amount = sum_amount
     {:count => count, :total_amount => sum_money_amount}
   end
-  
+
+  def total_money_deposited_on_date_at_locations(on_date, *at_location_id)
+    query = {:created_on => on_date, :at_location_id => at_location_id}
+    all_money_deposits = MoneyDeposit.all(query)
+    
+    count = all_money_deposits.count
+    sum_amount = all_money_deposits.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  def total_money_deposited_pending_verification_until_date_at_locations(on_date, *at_location_id)
+    query = {:created_on.lte => on_date, :at_location_id => at_location_id, :verification_status => Constants::MoneyDepositVerificationStatus::PENDING_VERIFICATION}
+    all_money_deposits = MoneyDeposit.all(query)
+
+    count = all_money_deposits.count
+    sum_amount = all_money_deposits.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  def total_money_deposited_verified_confirmed_on_date_at_locations(on_date, *at_location_id)
+    query = {:created_on => on_date, :at_location_id => at_location_id, :verification_status => Constants::MoneyDepositVerificationStatus::VERIFIED_CONFIRMED}
+    all_money_deposits = MoneyDeposit.all(query)
+
+    count = all_money_deposits.count
+    sum_amount = all_money_deposits.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
+  def total_money_deposited_verified_rejected_on_date_at_locations(on_date, *at_location_id)
+    query = {:created_on => on_date, :at_location_id => at_location_id, :verification_status => Constants::MoneyDepositVerificationStatus::VERIFIED_REJECTED}
+    all_money_deposits = MoneyDeposit.all(query)
+
+    count = all_money_deposits.count
+    sum_amount = all_money_deposits.aggregate(:amount.sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
+  end
+
   private
 
   def individual_loans_by_branches_for_status_on_date(for_status, on_date, *at_branch_ids_ary)

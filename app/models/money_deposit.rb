@@ -14,7 +14,7 @@ class MoneyDeposit
   property :verified_by_staff_id,   Integer, :nullable => true
   property :verified_on,            *DATE
   property :verified_by_user_id,    Integer, :nullable => true
-  property :at_location_id,         Integer, :nullable => false
+  property :at_location_id,         *INTEGER_NOT_NULL
 
   belongs_to :bank_account
   belongs_to :user, :child_key => [:created_by_user_id], :model => 'User'
@@ -46,6 +46,5 @@ class MoneyDeposit
     return true if created_on and (created_on<=Date.today)
     [false, "Deposit cannot be done on future dates"]
   end
-
 
 end
