@@ -74,26 +74,26 @@
         %td
           = nil # no of installments remaining
         %td
-          = loan.actual_principal_outstanding(from_date)
+          = loan.actual_principal_outstanding
         %td
           = loan.scheduled_principal_due(to_date) - loan.scheduled_principal_due(from_date)
         %td
           = nil #principal paid during period
         %td
-          = loan.actual_principal_due(Date.today)
+          = #loan.actual_principal_due(Date.today)
         %td
           = nil #no of days principal overdue
         %td
-          = loan.actual_principal_outstanding(Date.today)
+          = loan.actual_principal_outstanding
         %td
-          = loan.actual_interest_outstanding(from_date)
+          = loan.actual_interest_outstanding
         %td
           = loan.scheduled_interest_due(to_date) - loan.scheduled_interest_due(from_date)
         %td
           = nil # interest paid during period
         %td
-          = loan.actual_interest_due(Date.today)
+          = #loan.actual_interest_due(Date.today)
         %td
           = nil #no of days interest outstanding
         %td
-          = loan.actual_interest_outstanding(Date.today)
+          = loan.actual_interest_outstanding
