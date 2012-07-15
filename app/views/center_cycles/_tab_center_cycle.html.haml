@@ -1,3 +1,5 @@
+- center = BizLocation.get(center_id)
+- center_created_at = center.creation_date
 - if (!(center_cycle.blank?) && center_cycle.is_open?)
   %h2= "Center Cycle no: #{center_cycle.cycle_number}"
 - else
@@ -5,7 +7,7 @@
     %p.menu-strip
       = 'Start New Center Cycle'
       = hidden_field :name => :center_id, :value => params[:id]
-      = date_select "initiated_date", Date.today, :max_date => Date.today, :id => "cycle_date", :min_date => (@center_cycle.blank? ? nil : @center_cycle.initiated_on)
+      = date_select "initiated_date", Date.today, :max_date => Date.today, :id => "cycle_date", :min_date => center_created_at
       = submit "Start"
 %hr
 - if center_cycle
