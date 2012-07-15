@@ -6,12 +6,12 @@
         Branch
       %th{:colspan => "1"}
         Disbursement
-      %th{:colspan => "5"}
+      %th{:colspan => "4"}
         Cash Collection
       %th{:colspan => "3"}
         Cash Foreclosure
       %th{:colspan => "3"}
-        VAR Adjusted
+        Advances
       %th{:colspan => "3"}
         Death Settlement
       %th{:colspan => "3"}
@@ -27,8 +27,6 @@
       %th
         Fee
       %th
-        VAR
-      %th
         Total
       %th
         Principal
@@ -37,101 +35,94 @@
       %th
         Total
       %th
-        Principal
+        Collected
       %th
-        Interest 
+        Adjusted
       %th
-        Total
-      %th
-        Principal
-      %th
-        Interest 
-      %th
-        Total
+        Balance
       %th
         Principal
       %th
         Interest 
       %th
         Total
+      %th
+        Principal
+      %th
+        Interest 
+      %th
+        Total
+
   %tbody
-    - branch_id = nil
-    - length = 19
-    - org_total = []
-    - branch_total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    - @data.sort_by{|branch, data| branch.name}.each do |branch, data|
-      - if data.length > 0
-        %tr
-          %td
-            %b 
-              = branch.name
-          - data.each_with_index do |d, idx|
-            - if idx==0
-              %td
-                = d.to_currency
-                - branch_total[0] += d
-            - elsif idx == 1
-              %td
-                = d[:principal].to_currency
-                - branch_total[1] += d[:principal]
-              %td
-                = d[:interest].to_currency
-                - branch_total[2] += d[:interest]
-              %td
-                = d[:fees].to_currency
-                - branch_total[3] += d[:fees]
-              %td
-                = d[:var].to_currency
-                - branch_total[4] += d[:var]
-              %td
-                = d[:total].to_currency
-                - branch_total[5] += d[:total]
-            - elsif idx == 2
-              %td
-                = d[:principal].to_currency
-                - branch_total[6] += d[:principal]
-              %td
-                = d[:interest].to_currency
-                - branch_total[7] += d[:interest]
-              %td
-                = d[:total].to_currency
-                - branch_total[8] += d[:total]
-            - elsif idx == 3
-              %td
-                = d[:principal].to_currency
-                - branch_total[9] += d[:principal]
-              %td
-                = d[:interest].to_currency
-                - branch_total[10] += d[:interest]
-              %td
-                = d[:total].to_currency
-                - branch_total[11] += d[:total]
-            - elsif idx == 4
-              %td
-                = d[:principal].to_currency
-                - branch_total[12] += d[:principal]
-              %td
-                = d[:interest].to_currency
-                - branch_total[13] += d[:interest]
-              %td
-                = d[:total].to_currency
-                - branch_total[14] += d[:total]
-            - elsif idx == 5
-              %td
-                = d[:principal].to_currency
-                - branch_total[15] += d[:principal]
-              %td
-                = d[:interest].to_currency
-                - branch_total[16] += d[:interest]
-              %td
-                = d[:total].to_currency
-                - branch_total[17] += d[:total]
-      - org_total.push(branch_total)
-  %tfoot
-    %tr.org_total
-      %td
-        %b==Total
-      - branch_total.each do |ele|
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
         %td
           %b
-            = ele.to_currency
+            = BizLocation.get(branch).name
+        %td
+          = values[:loans_disbursed][:total_amount]
+          - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
+        %td
+          - payments = values[:loan_allocations].values[0]
+          = payments[:principal_received]
+          - accumulate_row_values[:principal_received] += payments[:principal_received]
+        %td
+          = payments[:interest_received]
+          - accumulate_row_values[:interest_received] += payments[:interest_received]
+        %td
+          = values[:fee_receipts][:total_amount]
+          - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
+        %td
+          = payments[:total_received]
+          - accumulate_row_values[:total_received] += payments[:total_received]
+        %td
+        %td
+        %td
+        %td
+          - outstandings = values[:loan_balances].values[0]
+          = outstandings[:advance_received_on_date]
+          - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
+        %td
+          = outstandings[:advance_adjusted_on_date]
+          - accumulate_row_values[:advance_adjusted_on_date] += outstandings[:advance_adjusted_on_date]
+        %td
+          = outstandings[:advance_balance]
+          - accumulate_row_values[:advance_balance] += outstandings[:advance_balance]
+        %td
+        %td
+        %td
+        %td
+        %td
+        %td
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+        = total_rows[:loans_disbursed]
+      %td
+        = total_rows[:principal_received]
+      %td
+        = total_rows[:interest_received]
+      %td
+        = total_rows[:fee_receipts]
+      %td
+        = total_rows[:total_received]
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:advance_received_on_date]
+      %td
+        = total_rows[:advance_adjusted_on_date]
+      %td
+        = total_rows[:advance_balance]
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
