@@ -15,9 +15,16 @@
     %td
       = @lending.due_status_from_outstanding(get_effective_date).humanize
     %th.odd
-      Due Past Due
+      Days Past Due
     %td
       = @lending.days_past_due_on_date(get_effective_date)
+    %th.odd
+      Has Claim
+    %td
+      - if @lending.has_loan_claim?
+        = @lending.has_loan_claim_since
+      - else
+        No Claim
 - if @lending_due_statuses.blank?
   %p
     %i No Loan due status have been created yet.
@@ -30,17 +37,17 @@
         %th
           Due Status
         %th
-          Schedule Principal Outstanding
+          Scheduled Principal Outstanding
         %th
-          Schedule Interest Outstanding
+          Scheduled Interest Outstanding
         %th
-          Schedule Total Outstanding
+          Scheduled Total Outstanding
         %th
-          Schedule Principal Due
+          Scheduled Principal Due
         %th
-          Schedule Interest Due
+          Scheduled Interest Due
         %th
-          Schedule Total Due
+          Scheduled Total Due
         %th
           Actual Principal Outstanding
         %th
@@ -70,7 +77,11 @@
     - @lending_due_statuses.each do |lending_status|
       %tr
         %td
-          = lending_status.on_date
+          - if lending_status.has_loan_claim_since.blank?
+            = lending_status.on_date
+          - else
+            %p{:style => 'background:orange'}
+              %b= lending_status.on_date
         %td
           = lending_status.due_status.humanize
         %td
@@ -80,7 +91,7 @@
         %td
           = lending_status.to_money[:scheduled_total_outstanding].to_s
         %td
-          = lending_status.to_money[:scheduled_prinipal_due].to_s
+          = lending_status.to_money[:scheduled_principal_due].to_s
         %td
           = lending_status.to_money[:scheduled_interest_due].to_s
         %td
