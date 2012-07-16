@@ -1,31 +1,39 @@
--if  @data.length==0
-  %h1
-    No Reports to Be displayed
+-if @data=="Validation"
+  From Date cannot be greater than to date
 -else
-%br
-%br
-%br
-  %table.dataTable.report.weeksheet.nojs
-    %thead
-      %tr
-        %td
-          Center
-        %td
-          Checklist Id
-        %td
-          Date
-        %td
-          Deviation Type
-    -@data.each do |data|
-      -if data.checklist.checklist_type.is_pa_checklist?
+
+  -if  @data.length==0
+    %h1
+      No Reports to Be displayed
+  -else
+  %br
+  %br
+  %br
+    %table.dataTable.report.weeksheet.nojs
+      %thead
         %tr
           %td
-            =data.checklist_locations.last.name
+            Center
           %td
-            =data.checklist.id
+            Checklist Id
           %td
-            =data.value_date.strftime("%b %e")
+            Date
           %td
-            =data.get_deviation_type
+            Deviation Type
+      -@data.each do |data|
+        -if data.checklist.checklist_type.is_pa_checklist?
+          %tr
+            %td
+              =data.checklist_locations.last.name
+            %td
+              =data.checklist.id
+            %td
+              =data.value_date.strftime("%b %e")
+            %td
+              =data.get_deviation_type
 
 
+
+
+%h3
+  =link_to "Back",url(:reports),:class=>"greenButton"
