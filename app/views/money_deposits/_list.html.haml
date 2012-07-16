@@ -1,46 +1,7 @@
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxcommon.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_filter.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_srnd.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_start.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgridcell.js"}
-:javascript
-  var mygrid;
-  function doInitGrid() {
-        mygrid = new dhtmlXGridFromTable("dhtmlxtable");
-
-        mygrid.setSkin("light");
-        mygrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter,#text_filter");
-        mygrid.enableAutoWidth(true);
-        mygrid.enableAutoHeight(true);
-        mygrid.setSizes();
-
-        mygrid.setColWidth(0, 140);
-        mygrid.setColWidth(1, 140);
-        mygrid.setColWidth(2, 140);
-        mygrid.setColWidth(3, 140);
-        mygrid.setColWidth(4, 200);
-        mygrid.setColWidth(5, 140);
-        mygrid.setColWidth(6, 260);
-
-
-        //mygrid.init();
-        //mygrid.loadXML("/assets/sample_data.xml");
-
-
-    }
-
-
-   $(function () {
-        doInitGrid();
-
-
-  });
-
 %h2
   = "Recently added"
 - unless @money_deposits.blank?
-  %table.form{:style => "width:100%;",:id=>"dhtmlxtable"}
+  %table.dataTable.form{:style => "width:100%;"}
     %thead
       %tr
         %th
@@ -59,7 +20,8 @@
           = "Date"
     %tbody
       - s_no = 0
-      - @money_deposits.each do |md|
+      - money_deposits = @money_deposits.sort_by {|deposit| deposit.created_at}.reverse
+      - money_deposits.each do |md|
         %tr
           %td
             = md.bank_account.bank_branch.bank.name
