@@ -1,7 +1,13 @@
+:javascript
+  $('table.money_deposits').dataTable({
+    "bPaginate": false,
+    "bJQueryUI": true
+  });
+
 %h2
   = "Recently added"
 - unless @money_deposits.blank?
-  %table.dataTable.form{:style => "width:100%;"}
+  %table.report.weeksheet.nojs.money_deposits
     %thead
       %tr
         %th
