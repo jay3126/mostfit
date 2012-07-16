@@ -43,7 +43,7 @@ class Checklist
     @responses=@scv_checklist.checklists.first.responses.all(:target_entity_id => @target_entity.id,:value_date=>on_date)
 
     required_information_array=Array.new
-     if @responses.all(:result_status => "cleared").count>0
+     if @responses.all(:completed_status => "completed").count>0
        response=@responses.first
        filler=Filler.get(response.filler_id)
        required_information_array=[true,filler.model_record_id]
