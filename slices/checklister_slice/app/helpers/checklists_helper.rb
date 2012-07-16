@@ -2,7 +2,7 @@ module Merb::ChecklisterSlice::ChecklistsHelper
   def perform_link(role, checklist, parameter_hash)
     if ROLE_MAPPER[checklist.checklist_type.name][:performer].include?(role.to_s)
 
-      link_to 'Respond to checklist', url(:checklister_slice_fill_in_checklist, checklist, parameter_hash), :class => "greenButton"
+      link_to "Perform #{checklist.checklist_type.name}", url(:checklister_slice_fill_in_checklist, checklist, parameter_hash), :class => "greenButton"
     end
 
   end
@@ -10,7 +10,7 @@ module Merb::ChecklisterSlice::ChecklistsHelper
   def response_link(role, checklist, referral_url)
     if checklist.responses.count>0
       if ROLE_MAPPER[checklist.checklist_type.name][:viewer].include?(role.to_s)
-        link_to 'See all responses', url(:checklister_slice_view_checklist_responses, checklist, :referral_url => referral_url), :class => "greenButton"
+        link_to "View Completed #{checklist.checklist_type.name}", url(:checklister_slice_view_checklist_responses, checklist, :referral_url => referral_url), :class => "greenButton"
       else
         "<span class=''>Not Authorized</span>"
       end
