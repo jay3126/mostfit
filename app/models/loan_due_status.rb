@@ -18,6 +18,7 @@ class LoanDueStatus
   property SCHEDULED_INTEREST_DUE,          *MONEY_AMOUNT
   property SCHEDULED_TOTAL_DUE,             *MONEY_AMOUNT
   property ACTUAL_PRINCIPAL_OUTSTANDING,    *MONEY_AMOUNT
+  property PRINCIPAL_AT_RISK,               *MONEY_AMOUNT
   property ACTUAL_INTEREST_OUTSTANDING,     *MONEY_AMOUNT
   property ACTUAL_TOTAL_OUTSTANDING,        *MONEY_AMOUNT
   property ACTUAL_TOTAL_DUE,                *MONEY_AMOUNT
@@ -91,7 +92,8 @@ class LoanDueStatus
     due_status = {}
     due_status[:lending_id]      = for_loan_id
     due_status[:loan_status]     = loan.current_loan_status
-    due_status[:due_status]      = loan.due_status_from_outstanding(on_date)
+    loan_due_status = loan.due_status_from_outstanding(on_date)
+    due_status[:due_status]      = loan_due_status
     due_status[:administered_at] = administered_at_id
     due_status[:accounted_at]    = accounted_at_id
     due_status[:on_date]         = on_date
@@ -111,7 +113,9 @@ class LoanDueStatus
     due_status_amounts[SCHEDULED_PRINCIPAL_DUE]         = loan.scheduled_principal_due(on_date)
     due_status_amounts[SCHEDULED_INTEREST_DUE]          = loan.scheduled_interest_due(on_date)
     due_status_amounts[SCHEDULED_TOTAL_DUE]             = loan.scheduled_total_due(on_date)
-    due_status_amounts[ACTUAL_PRINCIPAL_OUTSTANDING]    = loan.actual_principal_outstanding
+    actual_principal_outstanding = loan.actual_principal_outstanding
+    due_status_amounts[ACTUAL_PRINCIPAL_OUTSTANDING]    = actual_principal_outstanding
+    due_status_amounts[PRINCIPAL_AT_RISK]               = (loan_due_status == OVERDUE) ? (actual_principal_outstanding) : MoneyManager.default_zero_money
     due_status_amounts[ACTUAL_INTEREST_OUTSTANDING]     = loan.actual_interest_outstanding
     due_status_amounts[ACTUAL_TOTAL_OUTSTANDING]        = loan.actual_total_outstanding
     due_status_amounts[ACTUAL_TOTAL_DUE]                = loan.actual_total_due(on_date)
@@ -164,6 +168,7 @@ class LoanDueStatus
       SCHEDULED_INTEREST_DUE,
       SCHEDULED_TOTAL_DUE,
       ACTUAL_PRINCIPAL_OUTSTANDING,
+      PRINCIPAL_AT_RISK,
       ACTUAL_INTEREST_OUTSTANDING,
       ACTUAL_TOTAL_OUTSTANDING,
       ACTUAL_TOTAL_DUE,

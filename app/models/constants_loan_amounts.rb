@@ -72,6 +72,7 @@ module Constants
     TOTAL_RECEIVED                                             = :total_received
     ADVANCE_ADJUSTED                                           = :advance_adjusted
     ACTUAL_PRINCIPAL_OUTSTANDING                               = :actual_principal_outstanding
+    PRINCIPAL_AT_RISK                                          = :principal_at_risk
     ACTUAL_INTEREST_OUTSTANDING                                = :actual_interest_outstanding
     ACTUAL_TOTAL_OUTSTANDING                                   = :actual_total_outstanding
     ACTUAL_PRINCIPAL_DUE                                       = :actual_principal_due
