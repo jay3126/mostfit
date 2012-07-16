@@ -100,6 +100,7 @@ Merb::Router.prepare do
       resources :branches
     end
   end
+  resources :staff_attendances
   resources :areas
   resources :targets, :id => %r(\d+)
   resources :holidays
