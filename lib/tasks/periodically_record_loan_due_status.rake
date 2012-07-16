@@ -1,15 +1,15 @@
 namespace :mostfit do
-  namespace :record_loan_due_status do
+  namespace :periodic do
     require 'fastercsv'
 
     desc "To be run each day on loans"
-    task :periodically_record_loan_due_status, :on_date do |t, args|
+    task :record_loan_due_status, :on_date do |t, args|
       USAGE_TEXT = <<USAGE_TEXT
 rake mostfit:periodic:record_loan_due_status[<'yyyy-mm-dd'>]
 Record the loan due status for all the outstanding loans,
 USAGE_TEXT
 
-      MY_TASK_NAME = Constants::Tasks::PERIODICALLY_RECORD_LOAN_DUE_STATUS_TASK
+      MY_TASK_NAME = Constants::Tasks::RECORD_LOAN_DUE_STATUS_TASK
       begin
         on_date_str = args[:on_date]
         raise ArgumentError, "Date was not specified" unless (on_date_str and not(on_date_str.empty?))
@@ -23,14 +23,10 @@ USAGE_TEXT
         reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, operator)
         all_outstanding_loans_on_date = reporting_facade.all_outstanding_loans_on_date(on_date)
 
-        errors = []
-       
-        ld = LoanDueStatus.new
+        errors = []       
         all_outstanding_loans_on_date.each {|loan|
           begin
-            p loan.is_outstanding?
-            @for_loan_id = loan.id
-            ld.generate_loan_due_status(@for_loan_id, on_date)
+            LoanDueStatus.generate_loan_due_status(loan.id, on_date)
           rescue => ex
             errors << [loan.id, ex.message]
           end
