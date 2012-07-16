@@ -51,6 +51,8 @@
         %th
           Actual Principal Outstanding
         %th
+          Principal At Risk
+        %th
           Actual Interest Outstanding
         %th
           Actual Total Outstanding
@@ -98,6 +100,8 @@
           = lending_status.to_money[:scheduled_total_due].to_s
         %td
           = lending_status.to_money[:actual_principal_outstanding].to_s
+        %td
+          = lending_status.to_money[:principal_at_risk].to_s
         %td
           = lending_status.to_money[:actual_interest_outstanding].to_s
         %td
