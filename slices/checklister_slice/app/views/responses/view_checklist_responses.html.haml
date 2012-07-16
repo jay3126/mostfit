@@ -19,7 +19,7 @@
           %td
             Filled for date
           %td
-            Target Entity
+            =@responses.first.target_entity.type
           %td
             Completion Status
           -if @checklist.checklist_type.is_hc_checklist?
