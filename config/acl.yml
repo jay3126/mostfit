@@ -52,6 +52,7 @@ executive :
   attendances :
     - index
     - create
+  staff_attendances :
   audit_trails :
     - index
     - show
@@ -168,6 +169,8 @@ supervisor :
 #    - edit
 #    - update
 #    - show
+  staff_attendances :
+    - create
   attendances :
     - index
     - create
@@ -332,6 +335,7 @@ support :
   attendances :
     - index
     - create
+  staff_attendances :
   audit_trails:
     - all
     - index
@@ -394,7 +398,7 @@ support :
     - get_param_value
 #   - all
   reports :
-#    - index
+    - index
     - show
     - get_dates
     - get_date
@@ -404,6 +408,7 @@ support :
     - all
   biz_locations :
     - centers_for_selector
+    - show
 #  users :
 #     - index
 #    - show
@@ -446,6 +451,7 @@ finops :
 #  attendances :
 #    - index
 #    - create
+  staff_attendances :
   audit_trails :
     - index
     - show
@@ -524,8 +530,8 @@ finops :
     - all
 #  loan_purposes :
 #    - all
-#  searches :
-#    - all
+  searches :
+    - all
   loan_files :
 #    - index
     - show
@@ -591,12 +597,13 @@ read_only :
 #  attendances :
 #    - index
 #    - create
+  staff_attendances :
   audit_trails:
 #    - all
     - index
     - show
-#  biz_locations:
-#    - all
+  biz_locations:
+    - show
 #  book_keeping :
 #    - all
 #  center_cycles :
@@ -667,8 +674,8 @@ read_only :
 #    - get_param_value
 #   - all
   reports :
-#    - index
-#    - show
+    - index
+    - show
 #    - get_dates
 #    - get_date
   searches :
@@ -692,6 +699,7 @@ accountant :
 #  attendances :
 #    - index
 #    - create
+  staff_attendances :
   audit_trails:
     - index
     - show
@@ -859,6 +867,7 @@ auditor :
 #  attendances :
 #    - index
 #    - create
+  staff_attendances :
   audit_trails:
     - index
     - show
@@ -1033,8 +1042,8 @@ telecaller :
 #    - all
 #    - index
 #    - show
-#  biz_locations:
-#    - all
+  biz_locations:
+    - show
 #  book_keeping :
 #    - all
 #  center_cycles :
@@ -1051,6 +1060,7 @@ telecaller :
 #    - create
 #    - bulk_entry
     - show
+  staff_attendances :
   user_locations :
     - all
   documents :
