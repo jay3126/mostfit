@@ -124,8 +124,14 @@ class BizLocation
     t_repayment_received             = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(on_date, *location_ids)
     t_outstanding                    = reporting_facade.all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *location_ids)
 
+    t_money_deposits_recorded_today       = reporting_facade.total_money_deposited_on_date_at_locations(on_date, *location_ids)
+    t_money_deposits_verified_confirmed   = reporting_facade.total_money_deposited_verified_confirmed_on_date_at_locations(on_date, *location_ids)
+    t_money_deposits_verified_rejected    = reporting_facade.total_money_deposited_verified_rejected_on_date_at_locations(on_date, *location_ids)
+    t_money_deposits_pending_verification = reporting_facade.total_money_deposited_pending_verification_until_date_at_locations(on_date, *location_ids)
+
     EodSummary.new(total_new_loan_application, loans_pending_approval, loans_approved_today, loans_scheduled_for_disbursement, loans_disbursed_today,
-                  t_repayment_due, t_repayment_received, t_outstanding).summary
+                  t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
+                  t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
   end
   
 end

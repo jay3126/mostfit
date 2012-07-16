@@ -23,6 +23,7 @@
       %th
         Count
   - @eod_summary.each do |key, value|
+    - next if value.blank?
     %tr
       %td
         = key.humanize
