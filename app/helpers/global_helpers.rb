@@ -70,7 +70,7 @@ module Merb
     # @param [Date]        date - date when the checklist is supposed to be recorded
     # @param [Hash]        local_params - the params available on the web page
     # @param [Fixnum]      no of loan applications in case of a loan file
-    def url_for_checklist(name, target_entity, location1, location2, staff_member, date, local_params, no_of_applications = nil)
+    def url_for_checklist(name,target_entity_type, target_entity, location1, location2, staff_member, date, local_params, no_of_applications = nil)
       checklist_type = ChecklistType.first(:name => name)
 
       unless checklist_type.blank?
@@ -78,8 +78,8 @@ module Merb
             :checklist_area => checklist_type.name,
             :checklist_type_id => checklist_type.id,
             :checklist_master_version => '1.0',
-            :target_entity_type => target_entity.class.to_s,
-            :target_entity_name => (target_entity.name if target_entity.send(:name)),
+            :target_entity_type => target_entity_type ,
+            :target_entity_name => target_entity.name ,
             :target_entity_id => target_entity.id,
             :loc1_type => "branch",
             :loc1_name => location1.name,
