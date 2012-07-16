@@ -9,5 +9,15 @@ module LoanUtility
 
     payment_date ? (receipt_date ? [payment_date, receipt_date].max : payment_date) : nil
   end
+
+  def has_loan_claim?
+    self.loan_claims and (not (self.loan_claims.empty?))
+  end
+
+  def has_loan_claim_since
+    return nil unless self.has_loan_claim?
+    earliest_claim = self.loan_claims.sort.first
+    earliest_claim.created_on
+  end
     
 end

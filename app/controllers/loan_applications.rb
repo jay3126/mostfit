@@ -211,8 +211,6 @@ class LoanApplications < Application
     unless params[:flag] == 'true'
       if branch_id.blank?
         @errors << "No branch selected"
-      elsif center_id.blank?
-        @errors << "No center selected"
       end
     end
     get_de_dupe_loan_applications
@@ -258,7 +256,11 @@ class LoanApplications < Application
  
       end
       # RENDER/RE-DIRECT
-      redirect resource(:loan_applications, :suspected_duplicates, :parent_location_id => @branch.id, :child_location_id => @center.id), :message => message
+      if @center.blank?
+        redirect resource(:loan_applications, :suspected_duplicates, :parent_location_id => @branch.id), :message => message
+      else
+        redirect resource(:loan_applications, :suspected_duplicates, :parent_location_id => @branch.id, :child_location_id => @center.id), :message => message
+      end
     else
       render :suspected_duplicates
     end
@@ -301,12 +303,16 @@ class LoanApplications < Application
 
   # Fetch suspected loan applicants also fetch cleared or confirmed duplicate loan applicants
   def get_de_dupe_loan_applications
+    search_options = {}
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
     @branch = location_facade.get_location(branch_id) if branch_id
     @center = location_facade.get_location(center_id) if center_id
-    @suspected_duplicates = loan_applications_facade.suspected_duplicate({:at_branch_id => @branch.id, :at_center_id => @center.id}) if @center
-    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
+    search_options.merge!(:at_branch_id => @branch.id) unless branch_id.blank?
+    search_options.merge!(:at_center_id => @center.id) unless center_id.blank?
+
+    @suspected_duplicates = loan_applications_facade.suspected_duplicate(search_options) unless branch_id.blank?
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center(search_options) unless branch_id.blank?
   end
 
 end # LoanApplications

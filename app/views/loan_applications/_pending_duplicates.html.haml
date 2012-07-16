@@ -47,7 +47,7 @@
                   %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm }
                   Confirm
                   = hidden_field :name => 'parent_location_id', :value => @branch.id
-                  = hidden_field :name => 'child_location_id', :value => @center.id
+                  = hidden_field :name => 'child_location_id', :value => @center.id unless @center.blank?
                 %td
                   = link_to loan_application.client_reference1_type, url(:controller => :searches, :action => :index, :query => "#{loan_application.client_reference1}", :search_on => 'reference'), :target => 'blank'
                   = link_to loan_application.client_reference2_type, url(:controller => :searches, :action => :index, :query => "#{loan_application.client_reference2}", :search_on => 'reference'), :target => 'blank'
