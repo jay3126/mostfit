@@ -11,7 +11,7 @@
       %thead
         %tr
           %td
-            Serial Number
+            ID
           %td
             Filler Name
           %td
@@ -19,11 +19,12 @@
           %td
             Filled for date
           %td
-            Target Entity
+            =@responses.first.target_entity.type
           %td
             Completion Status
-          %td
-            Result Staus
+          -if @checklist.checklist_type.is_hc_checklist?
+            %td
+              Result Status
 
           %td
             links
@@ -44,12 +45,15 @@
             =response.target_entity.name
           %td
             =response.completion_status
+          -if @checklist.checklist_type.is_hc_checklist?
+            %td
+              =response.result_status
           %td
-            =response.result_status
-          %td
-            =link_to "View Response",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
-          %td
-            =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>@checklist.id),:class=>"greenButton"  unless !@checklist.checklist_type.is_ba_checklist?
+
+            =link_to "View completed #{@checklist.checklist_type.name} checklist",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
+          -if @checklist.checklist_type.is_ba_checklist?
+            %td
+              =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>@checklist.id),:class=>"greenButton"
 
 %h4
 
