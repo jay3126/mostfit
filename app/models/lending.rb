@@ -361,7 +361,7 @@ class Lending
     ios_earlier = scheduled_interest_outstanding(previous_schedule_date)
     ios_later = scheduled_interest_outstanding(next_schedule_date)
 
-    Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, previous_schedule_date, next_schedule_date, on_date)
+    Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, previous_schedule_date, next_schedule_date, on_date, self.repayment_frequency)
   end
   
   def get_scheduled_amortization(on_date)

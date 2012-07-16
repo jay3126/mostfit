@@ -3,6 +3,9 @@ require File.join( File.dirname(__FILE__), '..', '..', "spec_helper" )
 describe Lending do
 
   before(:all) do
+    @weekly_frequency = MarkerInterfaces::Recurrence::WEEKLY
+    @biweekly_frequency = MarkerInterfaces::Recurrence::BIWEEKLY
+
     @ios_begin_weekly = Money.new(24900, :INR)
     @ios_end_weekly   = Money.new(20000, :INR)
 
@@ -43,13 +46,13 @@ describe Lending do
 
   it "should calculate the broken period interest as expected for weekly intervals" do
     @this_month_and_next_dates_weekly.each { |dates, amount|
-      Allocation::Common.calculate_broken_period_interest(@ios_begin_weekly, @ios_end_weekly, dates.first, dates.last, Date.parse('2012-05-31')).should == amount
+      Allocation::Common.calculate_broken_period_interest(@ios_begin_weekly, @ios_end_weekly, dates.first, dates.last, Date.parse('2012-05-31'), @weekly_frequency).should == amount
     }
   end
 
   it "should calculate the broken period interest as expected for biweekly intervals" do
     @this_month_and_next_dates_biweekly.each { |dates, amount|
-      Allocation::Common.calculate_broken_period_interest(@ios_begin_biweekly, @ios_end_biweekly, dates.first, dates.last, Date.parse('2012-05-31')).should == amount
+      Allocation::Common.calculate_broken_period_interest(@ios_begin_biweekly, @ios_end_biweekly, dates.first, dates.last, Date.parse('2012-05-31'), @biweekly_frequency).should == amount
     }
   end
 
