@@ -54,13 +54,11 @@
         -parameter_hash[:effective_date]=@effective_date
         -parameter_hash[:referral_url]=@referral_url
 
-        -if @checklist_type.is_hc_checklist? and !Checklist.is_healthcheck_complete?(params[:target_entity_name])
+        -if @checklist_type.is_hc_checklist?
+          - if !Checklist.is_healthcheck_complete?(params[:target_entity_name])
+            =perform_link(session.user.role,checklist,parameter_hash)
+        -else
           =perform_link(session.user.role,checklist,parameter_hash)
-
-
-
-
-
 
       %td{:width=>"150px"}
         =response_link(session.user.role,checklist,request.full_uri+"/?"+request.query_string.to_s)
