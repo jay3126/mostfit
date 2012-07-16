@@ -19,22 +19,23 @@
     = hidden_field :name => "accounted_at_id", :value => @accounted_at
     = hidden_field :name => "client_id", :value => @client.id
     = hidden_field :name => "simple_insurance_policy", :value => @simple_insurance_policy
+    = hidden_field :name => "claim_status", :value => Constants::Insurance::CLAIM_FILED
     %table
       %tr
         %td
           Claim filed on
         %td
-          = date_select :filed_on, Date.today
+          = date_select :filed_on, Date.today, :min_date => @death_event.reported_on, :max_date => Date.today
       %tr
         %td
           Claim status
         %td
-          = select :name => "claim_status", :collection => Constants::Insurance::INSURANCE_CLAIM_STATUSES.map{|x| [x.to_s, x]}, :prompt => "Select"
+          = Constants::Insurance::CLAIM_FILED.humanize
       %tr
         %td
           Performed by
         %td
-          = select :name => "performed_by", :collection => StaffMember.all.map{|x| [x.id, x.name]}, :prompt => "Select"
+          = select :name => "performed_by", :collection => choice_facade.all_finops.map{|x| [x.id, x.name]}
       %tr
         %td
           = submit 'Submit', :class => "greenButton"
