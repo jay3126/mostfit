@@ -72,8 +72,16 @@ class Lending
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
   has n, :simple_insurance_policies
+  has n, :loan_claims, 'LoanClaimProcessing'
   has n, :funds_sources
   has n, :tranches, :through => :funds_sources
+
+  def register_loan_claim(for_death_event, on_date)
+    Validators::Arguments.not_nil?(for_death_event, on_date)
+    raise Errors::BusinessValidationError, "The death event does not affect the borrower on this loan" unless (for_death_event.affected_client == self.borrower)
+    raise Errors::BusinessValidationError, "Cannot register a claim on a loan that is not outstanding" unless self.is_outstanding_on_date?(on_date)
+    LoanClaimProcessing.register_loan_claim(for_death_event, self, on_date)
+  end
 
   # Creates a new loan
   def self.create_new_loan(

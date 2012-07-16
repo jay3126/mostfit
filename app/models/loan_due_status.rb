@@ -9,6 +9,8 @@ class LoanDueStatus
   property :administered_at,                *INTEGER_NOT_NULL
   property :accounted_at,                   *INTEGER_NOT_NULL
   property :on_date,                        *DATE_NOT_NULL
+  property :has_loan_claim,                 Boolean, :default => false
+  property :has_loan_claim_since,           *DATE
   property SCHEDULED_PRINCIPAL_OUTSTANDING, *MONEY_AMOUNT
   property SCHEDULED_INTEREST_OUTSTANDING,  *MONEY_AMOUNT
   property SCHEDULED_TOTAL_OUTSTANDING,     *MONEY_AMOUNT
@@ -93,6 +95,14 @@ class LoanDueStatus
     due_status[:administered_at] = administered_at_id
     due_status[:accounted_at]    = accounted_at_id
     due_status[:on_date]         = on_date
+    
+    if loan.has_loan_claim?
+      loan_claim_since = loan.has_loan_claim_since
+      if (loan_claim_since and (on_date >= loan_claim_since))
+        due_status[:has_loan_claim]       = true
+        due_status[:has_loan_claim_since] = loan_claim_since
+      end
+    end
 
     due_status_amounts = {}
     due_status_amounts[SCHEDULED_PRINCIPAL_OUTSTANDING] = loan.scheduled_principal_outstanding(on_date)
