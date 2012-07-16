@@ -155,6 +155,7 @@ class UserLocations < Application
   end
 
   def staffs_on_biz_location
+    @biz_location   = BizLocation.get params[:id]
     @staff_postings = StaffPosting.get_staff_assigned(params[:id].to_i, get_effective_date)
     partial 'staffs_on_biz_location'
   end
