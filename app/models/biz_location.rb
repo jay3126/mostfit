@@ -111,14 +111,17 @@ class BizLocation
     location_map
   end
 
-  def location_eod_summary(on_date = Date.today)
+  def location_eod_summary(user, on_date = Date.today)
     location_ids = self.location_level.level == LocationLevel::NOMINAL_BRANCH_LEVEL ? [self.id] : LocationLink.get_children(self, on_date).map(&:id)
-    reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, on_date)
+    reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
     total_new_loan_application       = ''
     loans_pending_approval           = reporting_facade.loans_applied_by_branches_on_date(on_date, *location_ids)
     loans_approved_today             = reporting_facade.loans_approved_by_branches_on_date(on_date, *location_ids)
     loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(on_date, *location_ids)
     loans_disbursed_today            = reporting_facade.loans_disbursed_by_branches_on_date(on_date, *location_ids)
+    t_fee_collect                    = reporting_facade.all_aggregate_fee_receipts_by_branches(on_date, on_date, *location_ids)
+    advance_values                   = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *location_ids)
+    #t_advance_adjusted               = advance_values[]
 
     t_repayment_due                  = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(on_date, *location_ids)
     t_repayment_received             = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(on_date, *location_ids)
