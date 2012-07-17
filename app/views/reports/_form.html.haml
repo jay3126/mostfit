@@ -191,7 +191,7 @@
           - if @report.respond_to?(:claim_filed_on)
             %td
               On date
-              = date_select_for(@report, "claim_filed_on", :date => @report.claim_filed_on)
+              = date_select_for(@report, "claim_filed_on", :date => params[:insurance_claim_report] && params[:insurance_claim_report][:claim_filed_on] ? params[:insurance_claim_report][:claim_filed_on] : Date.today)
           - if @report.respond_to?(:loan_application_status)
             %td
               Loan Application Status:
