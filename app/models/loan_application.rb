@@ -574,13 +574,13 @@ class LoanApplication
 
   def id_type
     @id_type ||= {
-      "Passport"           => "ID01",
-      "Voter ID"           => "ID02",
-      "UID"                => "ID03",
+      :passport            => "ID01",
+      :voter_id            => "ID02",
+      :uid                 => "ID03",
       "Others"             => "ID04",
-      "Ration Card"        => "ID05",
-      "Driving Licence No" => "ID06",
-      "Pan"                => "ID07"
+      :ration_card         => "ID05",
+      :driving_licence_no  => "ID06",
+      :pan                 => "ID07"
     }
   end
 
