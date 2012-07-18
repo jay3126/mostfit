@@ -56,9 +56,9 @@
           %tfoot
             %tr
               %td
-                %b
-                  Created by
-                = select :name => :staff_member_id, :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, @center.id), :prompt => "Select staff member"
+                %b Created By:
+                = get_session_user_name
+                = hidden_field :name => 'staff_member_id', :value => get_session_user_id
               %td
                 %b
                   Created on

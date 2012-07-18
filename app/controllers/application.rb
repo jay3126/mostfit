@@ -155,7 +155,16 @@ class Application < Merb::Controller
     session[:effective_date] == date
   end
 
+  def get_session_user_name
+    session.user.staff_member.name
+  end
+
+  def get_session_user_id
+    session.user.staff_member.id
+  end
+
   private 
+
   def layout?
     return(request.xhr? ? false : :application)
   end
@@ -240,4 +249,5 @@ class Application < Merb::Controller
     raise NotFound unless var
     instance_variable_set("@#{var}", @funder.send(var))
   end
+
 end
