@@ -41,7 +41,7 @@ namespace :mostfit do
       guarantor_id = guarantor.id
       guarantor_name = guarantor.name
       guarantor_date_of_birth = guarantor.date_of_birth
-      guarantor_relation_to_client = guarantor.relation_to_client
+      guarantor_relation_to_client = guarantor.relationship_to_client
 
       center_id = loan.client.center.id
       center_name = loan.client.center.name
