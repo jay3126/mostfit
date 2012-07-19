@@ -58,8 +58,9 @@
               = "Scheduled First Payment"
               = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)
             %td
-              = "Staff Member"
-              = select :name => "created_by_staff_id", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => choice_facade.staff_managing_location(@center.id, get_effective_date), :prompt => "Select staff member"
+              %b By:
+              = get_session_user_name
+              = hidden_field :name => 'created_by_staff_id', :value => get_session_user_id
             %td
               = submit "Generate Loan File"
   - else

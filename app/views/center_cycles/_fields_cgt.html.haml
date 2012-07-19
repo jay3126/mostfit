@@ -23,6 +23,7 @@
             %tr
               %td
                 %b CGT recorded by:
-                = select :cgt_performed_by_staff, :text_method => :name, :value_method => :id, :collection => choice_facade.supervisors_and_executives_at_location(@center.id, get_effective_date), :prompt => "Select staff member"
+                = get_session_user_name
+                = hidden_field :name => 'cgt_performed_by_staff', :value => get_session_user_id
               %td
                 = submit 'Save', :class => "grey_button"

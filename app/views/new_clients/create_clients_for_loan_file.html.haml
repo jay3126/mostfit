@@ -3,12 +3,14 @@
 .menu-strip
   %h3
     = "Branch: #{@branch.name}"
-    |
+    %br
     = "Center: #{@center.name}"
-    |
-    = "Status: #{@loan_file.health_check_status}"
-    |
+    %br
     = "Center Cycle Number: #{@center_cycle_number}"
+    %br
+    - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
+    Healthcheck status:
+    = healthcheck_is_clear ? "Cleared" : "Pending"
 %hr
 
 .shaded
