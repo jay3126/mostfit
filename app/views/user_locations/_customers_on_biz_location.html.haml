@@ -4,15 +4,14 @@
     "bJQueryUI": true
   });
 
-.menu-strip
-  = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => 'add'
+= link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => "add grey_button"
 
 %br
 - if @customers.blank?
   %p
     %i No Client Mapping have been created yet.
 - else
-  %table.client_tab{:style => "width:100%;"}
+  %table.report.weeksheet.client_tab
     %thead
       %tr
         %th

@@ -19,7 +19,7 @@ Merb::Router.prepare do
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)
-  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get]}
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get], :duplicate_record => [:get]}
   resources :overlap_report_responses, :id => %r(\d+)
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
   resources :user_locations, :id => %r(\d+), :member => {:weeksheet_collection => [:get]}
@@ -72,9 +72,8 @@ Merb::Router.prepare do
     end
   end
   resources :location_levels
-  resources :biz_locations, :id => %r(\d+), :collection => {:map_locations => [:get]}, :member => {:biz_location_clients => [:get], :centers_for_selector => [:get], :biz_location_form => [:get]} do
-    resources :new_clients, :id => %r(\d+)
-  end
+  resources :biz_locations, :id => %r(\d+), :collection => {:map_locations => [:get]}, :member => {:biz_location_clients => [:get], :centers_for_selector => [:get], :biz_location_form => [:get]}
+  resources :new_clients
   resources :simple_insurance_policies
   resources :payment_transactions, :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get], :payment_form_for_lending => [:get]}
   resources :designations
@@ -108,7 +107,7 @@ Merb::Router.prepare do
   resources :verifications
   resources :ledger_entries
   resources :loan_products
-  resources :users, :id => %r(\d+)
+  resources :users
   resources :staff_members, :id => %r(\d+) do
     resources :staff_member_attendances
   end

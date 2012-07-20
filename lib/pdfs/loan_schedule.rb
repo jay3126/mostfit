@@ -72,8 +72,8 @@ module Pdf
       raise ArgumentError,"No loans for generate labels pdf" if lendings.blank?
 
       pdf            = PDF::QuickRef.new("LETTER", 2)
-      pdf.body_font_size  = 12
-      pdf.h1_font_size = 11
+      pdf.body_font_size  = 8
+      pdf.h1_font_size = 8
       count   = 0
       meeting = meeting_facade.get_meeting(self, on_date)
       lendings.each do |la|

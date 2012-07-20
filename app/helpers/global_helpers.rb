@@ -39,12 +39,13 @@ module Merb
       method = method.to_s.upcase || "GET"
       uri_path = path.nil? ? '' : uri.path
       uri_query = path.nil? ? '' : uri.query
+      show_text = params[:show_text] == true ? text : ''
       request = Merb::Request.new(
           Merb::Const::REQUEST_PATH => uri_path,
           Merb::Const::REQUEST_METHOD => method,
           Merb::Const::QUERY_STRING => uri_query)
       route = Merb::Router.match(request)[1] rescue nil
-      return link_to(text, path, params) if session.user.can_access?(route, params)
+      session.user.can_access?(route, params) ? link_to(text, path, params) : show_text
     end
 
     def link_to_location(location)
@@ -329,7 +330,7 @@ module Merb
           crums << link_to(I18n.t("breadcrumb.#{part}", :default => part.gsub('_', ' ')), url) unless ['centers', 'clients'].include?(part) # add the resource name
         end
       end
-      ['<a href="/">Home  </a>', crums].join(' » ') # fancy separator
+      ['<a href="/">Home  </a>', crums].join(' ï¿½ ') # fancy separator
     end
 
     def format_currency(i)

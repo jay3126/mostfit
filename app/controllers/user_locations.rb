@@ -174,7 +174,7 @@ class UserLocations < Application
     @message = {}
     pdf_type = params[:pdf_type]
     biz_location = BizLocation.get params[:id]
-    date         = params[:date].blank?? get_effective_date : params[:date]
+    date         = params[:on_date].blank?? get_effective_date : params[:on_date]
     raise NotFound unless biz_location
     begin
       if pdf_type == 'disbursement_labels'

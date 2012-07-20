@@ -292,6 +292,20 @@ class LoanApplications < Application
     @loan_applications = LoanApplication.all(:at_branch_id => params[:at_branch_id], :at_center_id => params[:at_center_id], :status => params[:status])
     render :loan_application_list
   end
+
+  def duplicate_record
+    @loan_application  = LoanApplication.get params[:id]
+    reference1         =  @loan_application.client_reference1
+    reference2         = @loan_application.client_reference2
+    no_reference1      = reference1.gsub(/[^0-9]/, '')
+    no_reference2      = reference2.gsub(/[^0-9]/, '')
+    
+    @clients           = Client.all(:conditions => ["reference IN ? or reference2 IN ?", [reference1, reference2], [reference1, reference2]])
+    @clients           = Client.all(:conditions => ["reference IN ? or reference2 IN ?", [no_reference1, no_reference2], [no_reference1, no_reference2]]) if @clients.blank?
+    loan_app_condition = {:conditions => ["client_reference1 IN ? or client_reference2 IN ?",[reference1, reference2], [reference1, reference2]]}
+    @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition) - [@loan_application]
+    display @loan_applicaion
+  end
   
   private
 

@@ -1,0 +1,103 @@
+%h1 Duplicate Search Result
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Id
+    %td= @loan_application.id
+  %tr.odd
+    %th.odd Name
+    %td= @loan_application.client_name
+  %tr.even
+    %th.even Guarantor name
+    %td= @loan_application.client_guarantor_name
+  %tr.odd
+    %th.odd Relationship
+    %td= @loan_application.client_guarantor_relationship
+  %tr.even
+    %th.even Date Of Birth
+    %td= @loan_application.client_dob
+  %tr.odd
+    %th.odd Address
+    %td= @loan_application.client_address
+  %tr.even
+    %th.even= "Reference (#{@loan_application.client_reference1_type.humanize})"
+    %td= @loan_application.client_reference1
+  %tr.odd
+    %th.odd= "Reference (#{@loan_application.client_reference2_type.humanize})"
+    %td= @loan_application.client_reference2
+%h2 Clients
+- if @clients.blank?
+  No Client match for duplicate
+- else
+  %table.report.weeksheet.nojs
+    %thead
+      %th
+        Id
+      %th
+        Name
+      %th
+        Reference first type
+      %th
+        Reference first value
+      %th
+        Reference second type
+      %th
+        Reference second value
+    - @clients.each do |client|
+      %tr
+        %td
+          = client.id
+        %td
+          = client.name
+        %td
+          = client.reference_type
+        %td
+          = client.reference
+        %td
+          = client.reference2_type
+        %td
+          = client.reference2
+%br
+%hr
+%h2 Loan Applicants
+- if @loan_applications.blank?
+  No Loan Application match for duplicate
+- else
+  %table.report.weeksheet.nojs.center_loan
+    %thead
+      %th
+        Id
+      %th
+        Name
+      %th
+        Reference first type
+      %th
+        Reference first value
+      %th
+        Reference second type
+      %th
+        Reference second value
+    - @loan_applications.each do |la|
+      %tr
+        %td
+          = la.id
+        %td
+          = la.client_name
+        %td
+          = la.client_reference1_type
+        %td
+          = la.client_reference1
+        %td
+          = la.client_reference2_type
+        %td
+          = la.client_reference2
+
+:javascript
+  jQuery('table td').each(function(){
+    val = jQuery(this).text();
+    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference2}"){
+      jQuery(this).css('background','LightSeaGreen');
+    }
+    if(jQuery.trim(val) == "#{@loan_application.client_reference2}"){
+      jQuery(this).css('background','Orchid');
+    }
+  })
