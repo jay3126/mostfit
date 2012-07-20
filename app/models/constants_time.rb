@@ -26,6 +26,9 @@ module Constants
 
     EARLIEST_DATE_OF_OPERATION = Date.parse('2009-01-01')
 
+    EARLIEST_BUSINESS_DATE_EACH_MONTH = 1
+    LAST_BUSINESS_DATE_EACH_MONTH = 26
+
     # Returns the constant in the application for the day of the week
     def self.get_week_day(on_date)
       DAYS_OF_THE_WEEK[on_date.wday]
