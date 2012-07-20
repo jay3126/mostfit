@@ -1,7 +1,14 @@
+:javascript
+  $('table.unsortable').dataTable({
+    "sPaginationType": "full_numbers",
+    "bSort": false,
+    "bJQueryUI": true
+   });
+
 .shaded
   %h2 All loan applications
   - if @all_loan_applications and not @all_loan_applications.empty?
-    %table.form.unsortable
+    %table.report.weeksheet.nojs.unsortable
       %thead
         %tr
           %th ID

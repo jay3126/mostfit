@@ -27,16 +27,16 @@ function addFloater(link, form){
 }
 
 function dataTables(){
-  if ($('table').hasClass('weeksheet')){
-    $('table.weeksheet').dataTable({
-      "bPaginate": false,
-      "bJQueryUI": true
-    });
-  }
-  else if ($('table').hasClass('unsortable')){
+  if ($('table').hasClass('unsortable')){
     $('table.unsortable').dataTable({
       "sPaginationType": "full_numbers",
       "bSort": false,
+      "bJQueryUI": true
+    });
+  }
+  else if ($('table').hasClass('weeksheet')){
+    $('table.weeksheet').dataTable({
+      "bPaginate": false,
       "bJQueryUI": true
     });
   }

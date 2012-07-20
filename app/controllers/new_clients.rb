@@ -288,7 +288,7 @@ class NewClients < Application
   end
 
   def register_death_event
-    client_id = params[:client_id]
+    client_id = params[:id]
     @client = Client.get client_id
     display @client
   end
@@ -345,12 +345,12 @@ class NewClients < Application
 
   def death_claim_insurance
     @simple_insurance_policy = params[:simple_insurance_policy]
-    death_event_id = params[:death_event_id]
-    @death_event = DeathEvent.get death_event_id
-    client_id = @death_event.affected_client_id
-    date_for_accounted_at = @death_event.date_of_death
-    @client = Client.get client_id
-    @accounted_at = ClientAdministration.get_registered_at(@client, date_for_accounted_at).id
+    death_event_id           = params[:death_event_id]
+    @death_event             = DeathEvent.get death_event_id
+    client_id                = @death_event.affected_client_id
+    date_for_accounted_at    = @death_event.date_of_death
+    @client                  = Client.get client_id
+    @accounted_at            = ClientAdministration.get_registered_at(@client, date_for_accounted_at).id
     render
   end
 

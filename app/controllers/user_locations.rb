@@ -275,5 +275,11 @@ class UserLocations < Application
     #REDIRECT/RENDER
     redirect url(:controller => :user_locations, :action => :show, :id => at_location_id), :message => @message
   end
+
+  def loan_applications_on_biz_location
+    @biz_location = BizLocation.get params[:id]
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_center_id => @biz_location.id})
+    partial 'loan_applications/all_loan_applications'
+  end
   
 end

@@ -36,7 +36,7 @@
     %td= @client.occupation.name unless @client.occupation.blank?
   %tr.even
     %td
-      = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :client_id => @client.id), :class => "greenButton"
+      = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
 
 %div.tab_container.shaded
   %ul.tabs

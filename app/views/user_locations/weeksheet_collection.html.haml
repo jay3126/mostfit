@@ -51,6 +51,8 @@
       Collections
     %li#client
       Clients
+    %li#loan_applicants
+      Applicants
     %li#Loan
       Loans
     %li#Meeting
@@ -80,6 +82,8 @@
           = partial "user_locations/weeksheet_collection_list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :loan_applications_on_biz_location, :id => @biz_location.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :loans_on_biz_location, :id => @biz_location.id)}
   %div.tab
