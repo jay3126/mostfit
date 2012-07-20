@@ -1,7 +1,7 @@
 %h1
   = "Biz-Location :-  #{@biz_location.name}"
 .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-  = link_to_with_rights 'Add Client', resource(@biz_location, :new_clients, :new), :class => "add"
+  = link_to_with_rights 'Add Client', resource(:new_clients, :new, :biz_location_id => @biz_location.id), :class => "add"
 - if @clients.count == 0
   %p
     %i No Client Mapping have been created yet.

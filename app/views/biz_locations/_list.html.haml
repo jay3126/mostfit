@@ -44,7 +44,7 @@
               = biz_location_link.creation_date.strftime("%Y-%m-%d")
             %td
               - if biz_location_level.first == 0
-                = link_to_with_rights "Add Client", resource(biz_location,:new_clients,:new)
+                = link_to_with_rights "Add Client", resource(:new_clients,:new,:biz_location_id => biz_location.id)
                 |
                 = link_to_with_rights "Show Clients", resource(biz_location, :biz_location_clients)
               - else

@@ -20,10 +20,10 @@
     %td= @loan_application.client_address
   %tr.even
     %th.even= "Reference (#{@loan_application.client_reference1_type.humanize})"
-    %td= @loan_application.client_reference1
+    %td.reference1= @loan_application.client_reference1
   %tr.odd
     %th.odd= "Reference (#{@loan_application.client_reference2_type.humanize})"
-    %td= @loan_application.client_reference2
+    %td.reference2= @loan_application.client_reference2
 %h2 Clients
 - if @clients.blank?
   No Client match for duplicate
@@ -92,12 +92,23 @@
           = la.client_reference2
 
 :javascript
-  jQuery('table td').each(function(){
+  jQuery('table.report td').each(function(){
+    reference1 = false
+    reference2 = false
     val = jQuery(this).text();
-    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference2}"){
+    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference1.gsub(/[^0-9]/, '')}"){
       jQuery(this).css('background','LightSeaGreen');
+      reference1 = true
     }
-    if(jQuery.trim(val) == "#{@loan_application.client_reference2}"){
+    if(jQuery.trim(val) == "#{@loan_application.client_reference2}" || jQuery.trim(val) == "#{@loan_application.client_reference2.gsub(/[^0-9]/, '')}"){
       jQuery(this).css('background','Orchid');
+      reference2 = true
     }
+    if(reference1 == true){
+      jQuery('table.loan td.reference1').css('background', 'LightSeaGreen');
+    }
+    if(reference2 == true){
+      jQuery('table.loan td.reference2').css('background','Orchid');
+    }
+
   })
