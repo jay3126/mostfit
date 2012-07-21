@@ -791,16 +791,6 @@ FactoryGirl.define do
     account_type    { Factory.next(:account_type) }
   end
 
-  factory :bank_account_ledger do
-    association              :accounts_chart
-    name                     'Bank 1'
-    account_type             Constants::Accounting::ASSETS
-    open_on                  ACCOUNTING_DATE_BEGINS
-    opening_balance_amount   0
-    opening_balance_currency Constants::Money::DEFAULT_CURRENCY
-    opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
-  end
-
   factory :ledger do
     name                     { Factory.next(:asset_ledger_name) }
     account_type             Constants::Accounting::ASSETS
