@@ -14,6 +14,7 @@ class BizLocation
   has 1, :address
   has n, :permitted_pin_codes, 'AddressPinCode'
   has n, :location_holidays
+  has 1, :cost_center
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
   has n, :visit_schedules

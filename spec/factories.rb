@@ -782,8 +782,7 @@ FactoryGirl.define do
   end
 
   factory :cost_center do
-    name            { self.branch.name }
-    association           :branch
+    association           :biz_location
   end
 
   factory :account_group do
