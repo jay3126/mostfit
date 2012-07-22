@@ -27,13 +27,8 @@ class LedgerPosting
   end
   
   def self.all_postings_on_ledger(ledger, to_date = Date.today, from_date = nil)
-    date_predicates = effective_on_date_predicates(to_date, from_date)
-    query_voucher_value = Voucher.all(date_predicates)
-
-    predicates = {}
+    predicates = effective_on_date_predicates(to_date, from_date)
     predicates[:ledger] = ledger
-    predicates[:voucher] = query_voucher_value
-    predicates.merge!(date_predicates)
     all(predicates)
   end
 

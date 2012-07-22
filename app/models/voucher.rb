@@ -36,7 +36,7 @@ class Voucher
     create_voucher(total_money_amount.amount, total_money_amount.currency, effective_on, notation, postings, MANUAL_VOUCHER)
   end
 
-  def self.get_postings(ledger, cost_center = nil, to_date = Date.today, from_date = nil)
+  def self.get_postings(ledger, to_date = Date.today, from_date = nil)
     LedgerPosting.all_postings_on_ledger(ledger, to_date, from_date)
   end
 
@@ -51,11 +51,12 @@ class Voucher
   end
 
   def postings_are_each_valid?
+    result, message = true, ""
     ledger_postings.each { |posting|
-      valid, message = LedgerBalance.valid_balance_obj?(posting)
-      return [valid, message] unless valid
+      result, message = LedgerBalance.valid_balance_obj?(posting)
+      break unless result
     }
-    true
+    result ? true : [result, message]
   end
 
   def postings_are_valid_together?

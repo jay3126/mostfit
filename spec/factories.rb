@@ -797,6 +797,7 @@ FactoryGirl.define do
     opening_balance_amount   0
     opening_balance_currency Constants::Money::DEFAULT_CURRENCY
     opening_balance_effect   Constants::Accounting::DEBIT_EFFECT
+    manual_voucher_permitted true
     association              :accounts_chart
   end
 

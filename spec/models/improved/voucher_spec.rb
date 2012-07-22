@@ -5,21 +5,22 @@ describe Voucher do
   before(:all) do
     @open_on = ACCOUNTING_DATE_BEGINS
     @accounts_chart = Factory(:accounts_chart)
-    
+
+    ledger_attributes = Factory.attributes_for(:ledger)
     #ASSETS
-    @cash = Ledger.new(:accounts_chart => @accounts_chart, :name => "Cash", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
-    @loans_made = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans made", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
-    @bank_account = Ledger.new(:accounts_chart => @accounts_chart, :name => "Bank Account", :account_type => Constants::Accounting::ASSETS, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @cash = Factory.create(:ledger, ledger_attributes.merge(:name => "Cash", :account_type => Constants::Accounting::ASSETS, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT))
+    @loans_made = Factory.create(:ledger, ledger_attributes.merge(:name => "Loans made", :account_type => Constants::Accounting::ASSETS, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT))
+    @bank_account = Factory.create(:ledger, ledger_attributes.merge(:name => "Bank Account", :account_type => Constants::Accounting::ASSETS, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT))
 
     #INCOMES
-    @interest_income = Ledger.new(:accounts_chart => @accounts_chart, :name => "Interest income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
-    @fee_income = Ledger.new(:accounts_chart => @accounts_chart, :name => "Fee income", :account_type => Constants::Accounting::INCOMES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
+    @interest_income = Factory.create(:ledger, ledger_attributes.merge(:name => "Interest income", :account_type => Constants::Accounting::INCOMES, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT))
+    @fee_income = Factory.create(:ledger, ledger_attributes.merge(:name => "Fee income", :account_type => Constants::Accounting::INCOMES, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT))
 
     #EXPENSES
-    @salaries = Ledger.new(:accounts_chart => @accounts_chart, :name => "Salaries", :account_type => Constants::Accounting::EXPENSES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT)
+    @salaries = Factory.create(:ledger, ledger_attributes.merge(:name => "Salaries", :account_type => Constants::Accounting::EXPENSES, :opening_balance_effect => Constants::Accounting::DEBIT_EFFECT))
     
     #LIABILITIES
-    @loans_taken = Ledger.new(:accounts_chart => @accounts_chart, :name => "Loans taken", :account_type => Constants::Accounting::LIABILITIES, :open_on => @open_on, :opening_balance_amount => 0, :opening_balance_currency => :INR, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT)
+    @loans_taken = Factory.create(:ledger, ledger_attributes.merge(:name => "Loans taken", :account_type => Constants::Accounting::LIABILITIES, :opening_balance_effect => Constants::Accounting::CREDIT_EFFECT))
   end
 
   before(:each) do
