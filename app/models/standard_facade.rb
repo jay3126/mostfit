@@ -15,5 +15,9 @@ class StandardFacade
   def user_id
     for_user.id
   end
+
+  def native_performed_by_id
+    for_user.staff_member.id
+  end
   
 end

@@ -156,6 +156,10 @@ class LoanFacade < StandardFacade
     loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
   end
 
+  def adjust_advance(on_date, on_loan_id)
+    loan_manager.adjust_advance(on_date, on_loan_id, native_performed_by_id, payment_facade)
+  end
+
   def assign_locations_for_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)
     LoanAdministration.assign(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on)
   end
@@ -184,5 +188,9 @@ class LoanFacade < StandardFacade
 
   # LoanManager instance
   def loan_manager; @loan_manager ||= LoanManager.new; end
+
+  def payment_facade
+    @payment_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::PAYMENT_FACADE, self)
+  end
 
 end

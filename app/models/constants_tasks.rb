@@ -3,7 +3,9 @@ module Constants
     
     ACCRUE_ON_LOANS_TASK = :accrue_on_loans_task
     RECORD_LOAN_DUE_STATUS_TASK = :record_loan_due_status_task
-    ALL_TASKS = [ACCRUE_ON_LOANS_TASK, RECORD_LOAN_DUE_STATUS_TASK]
+    ADJUST_ADVANCES_ON_LOANS_TASK = :adjust_advances_on_loans_task
+
+    ALL_TASKS = [ACCRUE_ON_LOANS_TASK, RECORD_LOAN_DUE_STATUS_TASK, ADJUST_ADVANCES_ON_LOANS_TASK]
 
     def self.error_file_name(task_name, on_date, date_time = DateTime.now)
       raise Errors::InvalidConfigurationError, "Task name: #{task_name} does not match known tasks" unless 

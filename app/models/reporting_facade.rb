@@ -1,6 +1,22 @@
 class ReportingFacade < StandardFacade
   include Constants::Transaction, Constants::Products
 
+  # Loans scheduled to repay on date
+
+  def all_outstanding_loans_scheduled_on_date(on_date = Date.today)
+    outstanding_loans = all_outstanding_loans_on_date(on_date)
+    outstanding_loans.select {|loan| loan.schedule_date?(on_date)}
+  end
+
+  def all_oustanding_loans_scheduled_on_date_with_advance_balances(on_date = Date.today)
+    outstanding_scheduled_on_date = all_outstanding_loans_scheduled_on_date(on_date)
+    outstanding_scheduled_on_date.select {|loan| (loan.advance_balance(on_date) > loan.zero_money_amount)}
+  end
+
+  def all_oustanding_loan_IDs_scheduled_on_date_with_advance_balances(on_date = Date.today)
+    get_ids(all_oustanding_loans_scheduled_on_date_with_advance_balances(on_date))
+  end
+
   # Allocations
 
   def total_loan_allocation_receipts_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)

@@ -154,10 +154,10 @@ class Lending
     end
 
     #receipts
-    if transaction_receipt_type == RECEIPT
+    if ([RECEIPT, CONTRA].include?(transaction_receipt_type))
       return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
       
-      maximum_receipt_to_accept = actual_total_outstanding_net_advance_balance
+      maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding : actual_total_outstanding_net_advance_balance
       if (maximum_receipt_to_accept < transaction_money_amount)
         return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
       end
@@ -326,7 +326,15 @@ class Lending
     scheduled_outstanding = scheduled_total_outstanding(on_date)
 
     (net_outstanding > scheduled_outstanding) ? (net_outstanding - scheduled_outstanding) :
-      zero_money_amount
+        zero_money_amount
+  end
+
+  def actual_total_due_ignoring_advance_balance(on_date)
+    _scheduled_total_outstanding = scheduled_total_outstanding(on_date)
+    _actual_total_outstanding    = actual_total_outstanding
+
+    (_actual_total_outstanding > _scheduled_total_outstanding) ? (_actual_total_outstanding - _scheduled_total_outstanding) :
+        zero_money_amount
   end
 
   def actual_total_outstanding_net_advance_balance
@@ -427,6 +435,7 @@ class Lending
   def principal_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[PRINCIPAL_RECEIVED]; end
   def interest_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[INTEREST_RECEIVED]; end
   def advance_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[ADVANCE_RECEIVED]; end
+  def advance_adjusted_on_date(on_date = Date.today); amounts_received_on_date(on_date)[ADVANCE_ADJUSTED]; end
 
   def total_received_on_date(on_date = Date.today)
     principal_received_on_date(on_date) + interest_received_on_date(on_date) + advance_received_on_date(on_date)
@@ -443,14 +452,13 @@ class Lending
   def principal_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[PRINCIPAL_RECEIVED]; end
   def interest_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[INTEREST_RECEIVED]; end
   def advance_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[ADVANCE_RECEIVED]; end
+  def advance_adjusted_till_date(on_date = Date.today); amounts_received_till_date(on_date)[ADVANCE_ADJUSTED]; end
 
   def total_received_till_date
     principal_received_till_date + interest_received_till_date + advance_received_till_date
   end
 
-  def advance_adjusted_till_date(on_date = Date.today); zero_money_amount; end
-  def advance_adjusted_on_date(on_date = Date.today); zero_money_amount; end
-  def advance_balance(on_date = Date.today); zero_money_amount; end
+  def advance_balance(on_date = Date.today); advance_received_till_date(on_date) - advance_adjusted_till_date(on_date); end
 
   ########################################################
   # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # ends
@@ -491,7 +499,7 @@ class Lending
   def due_status_from_outstanding(on_date)
     return NOT_APPLICABLE unless is_outstanding_on_date?(on_date)
     return NOT_DUE if (on_date < self.scheduled_first_repayment_date)
-    (actual_total_outstanding_net_advance_balance > scheduled_total_outstanding(on_date)) ? OVERDUE : DUE
+    (actual_total_outstanding_net_advance_balance > sum_of_outstanding_and_due_total(on_date)) ? OVERDUE : DUE
   end
 
   def get_loan_due_status_record(on_date)
@@ -518,6 +526,10 @@ class Lending
   def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
 
+    is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
+      [true, nil]
+    raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
+
     if (make_specific_allocation)
       raise ArgumentError, "A principal and interest amount to allocate must be specified" unless (specific_principal_amount and specific_interest_amount)
       
@@ -527,15 +539,12 @@ class Lending
       end
     end
 
-    is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
-      [true, nil]
-    raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
-
     allocation = nil
     case loan_action
     when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
     when LOAN_REPAYMENT then allocation = repay(payment_transaction)
     when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
+    when LOAN_ADVANCE_ADJUSTMENT then allocation = adjust_advance(payment_transaction)
     else
       raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
@@ -640,6 +649,12 @@ class Lending
     update_for_payment(by_receipt, make_specific_allocation, principal_money_amount, interest_money_amount)
   end
 
+  def adjust_advance(by_contra)
+    make_specific_allocation = false; specific_principal_money_amount = nil; specific_interest_money_amount = nil
+    adjust_advance = true
+    update_for_payment(by_contra, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance)
+  end
+
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
@@ -703,19 +718,19 @@ class Lending
   end
 
   # All actions required to update the loan for the payment
-  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
+  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
     performed_at = payment_transaction.performed_at
     accounted_at = payment_transaction.accounted_at
-    payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+    payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance)
     loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
     payment_allocation
   end
 
   # Record an allocation on the loan for the given total amount
   def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false)
-    payment_currency = total_amount.currency
+    raise ArgumentError, "Cannot allocate zero amount" unless (total_amount > zero_money_amount)
 
     resulting_allocation = adjust_advance ? {ADVANCE_RECEIVED => zero_money_amount} : {ADVANCE_ADJUSTED => zero_money_amount}
 
@@ -726,20 +741,25 @@ class Lending
       resulting_allocation[PRINCIPAL_RECEIVED] = specific_principal_money_amount
       resulting_allocation[INTEREST_RECEIVED]  = specific_interest_money_amount
       resulting_allocation[ADVANCE_RECEIVED]   = zero_money_amount
-      resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
-      return resulting_allocation
+      return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     end
 
+    _current_due_status = (on_date < self.scheduled_first_repayment_date) ? NOT_DUE : current_due_status
+
     #allocate when not due
-    if (current_due_status == NOT_DUE and (not (adjust_advance)))
-      resulting_allocation[ADVANCE_RECEIVED] = total_amount
-      resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
-      return resulting_allocation
+    unless (adjust_advance)
+      if (_current_due_status == NOT_DUE)
+        resulting_allocation[ADVANCE_RECEIVED] = total_amount
+        resulting_allocation[PRINCIPAL_RECEIVED] = zero_money_amount
+        resulting_allocation[INTEREST_RECEIVED]  = zero_money_amount
+        return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
+      end
     end
 
     #TODO handle scenario where repayment is received between schedule dates
 
-    _actual_total_due = self.actual_total_due(on_date)
+    _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) :
+        self.actual_total_due(on_date)
     only_principal_and_interest = [_actual_total_due, total_amount].min
 
     advance_to_allocate = zero_money_amount

@@ -98,4 +98,29 @@ class LoanManager
     get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
   end
 
+  def adjust_advance(on_date, on_loan_id, performed_by_id, using_payment_facade)
+    loan = get_loan(on_loan_id)
+
+    is_schedule_date = loan.schedule_date?(on_date)
+    raise Errors::BusinessValidationError, "Advance cannot be adjusted on date: #{on_date} as the same is not a schedule date for the loan" unless is_schedule_date
+
+    _advance_balance = loan.advance_balance(on_date)
+    raise Errors::BusinessValidationError, "Advance balance is not available on the loan on the date: #{on_date}" unless (_advance_balance > loan.zero_money_amount)
+    _actual_total_due = loan.actual_total_due_ignoring_advance_balance(on_date)
+
+    money_amount = [_advance_balance, _actual_total_due].min
+    receipt_type = Constants::Transaction::CONTRA
+    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT
+    on_product_type = Constants::Products::LENDING
+    on_product_id   = on_loan_id
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+    performed_at = (loan.administered_at(on_date)).id
+    accounted_at = (loan.accounted_at(on_date)).id
+    performed_by = performed_by_id
+    effective_on = on_date
+    product_action = Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT
+
+    using_payment_facade.record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+  end
+
 end

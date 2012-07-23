@@ -112,7 +112,8 @@ module Constants
     PRODUCT_ACTIONS_FOR_TRANSACTIONS = {
       Constants::Products::LENDING => {
         Constants::Transaction::RECEIPT => Constants::Transaction::LOAN_REPAYMENT,
-        Constants::Transaction::PAYMENT => Constants::Transaction::LOAN_DISBURSEMENT
+        Constants::Transaction::PAYMENT => Constants::Transaction::LOAN_DISBURSEMENT,
+        Constants::Transaction::CONTRA  => Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT
       }
     }
 

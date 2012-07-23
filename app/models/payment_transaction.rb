@@ -43,7 +43,7 @@ class PaymentTransaction
   property :receipt_type,         Enum.send('[]', *Constants::Transaction::RECEIVED_OR_PAID), :nullable => false
   property :payment_towards,      Enum.send('[]', *Constants::Transaction::PAYMENT_TOWARDS_TYPES), :nullable => false
   property :on_product_type,      Enum.send('[]', *Constants::Transaction::TRANSACTED_PRODUCTS), :nullable => false
-  property :on_product_id,        Integer, :nullable => false
+  property :on_product_id,        *INTEGER_NOT_NULL
   property :by_counterparty_type, Enum.send('[]', *Constants::Transaction::COUNTERPARTIES), :nullable => false
   property :by_counterparty_id,   *INTEGER_NOT_NULL
   property :performed_at,         *INTEGER_NOT_NULL
@@ -78,6 +78,8 @@ class PaymentTransaction
 
   def self.record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     Validators::Arguments.not_nil?(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
+    # TO BE INTRODUCED
+    # Validators::Arguments.is_id?(on_product_id, by_counterparty_id, performed_at, accounted_at, performed_by, recorded_by)
     payment = to_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     recorded_payment = create(payment)
     raise Errors::DataError, recorded_payment.errors.first.first unless recorded_payment.saved?
