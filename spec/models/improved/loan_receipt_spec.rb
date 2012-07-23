@@ -48,10 +48,10 @@ describe LoanReceipt do
     LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @performed_at_id, @accounted_at_id, @lending, thirty_first)
 
     first_sum = LoanReceipt.sum_on_date(first)
-    first_sum[:principal_received].amount.should == first_principal
-    first_sum[:interest_received].amount.should == first_interest
-    first_sum[:advance_received].amount.should == first_advance
-    first_sum[:advance_adjusted].amount.should == first_adjust_advance_adjusted
+    first_sum[:principal_received].amount.should == (first_principal + first_adjust_principal)
+    first_sum[:interest_received].amount.should == (first_interest + first_adjust_interest)
+    first_sum[:advance_received].amount.should == (first_advance + first_adjust_advance)
+    first_sum[:advance_adjusted].amount.should == (first_advance_adjusted + first_adjust_advance_adjusted)
     first_sum[:principal_received].currency.should == MoneyManager.get_default_currency
 
     thirty_first_sum = LoanReceipt.sum_on_date(thirty_first)
@@ -83,9 +83,9 @@ describe LoanReceipt do
     LoanReceipt.record_allocation_as_loan_receipt(thirty_first_allocation_values, @performed_at_id, @accounted_at_id, @lending, thirty_first)
 
     first_sum = LoanReceipt.sum_till_date(first)
-    first_sum[:principal_received].amount.should == (first_principal + thirty_first_principal)
-    first_sum[:interest_received].amount.should == (first_interest + thirty_first_interest)
-    first_sum[:advance_received].amount.should == (first_advance + thirty_first_advance)
+    first_sum[:principal_received].amount.should == (first_principal + first_adjust_principal + thirty_first_principal)
+    first_sum[:interest_received].amount.should == (first_interest + first_adjust_interest + thirty_first_interest)
+    first_sum[:advance_received].amount.should == (first_advance + first_adjust_advance + thirty_first_advance)
     first_sum[:advance_adjusted].amount.should == (first_advance_adjusted + first_adjust_advance_adjusted + thirty_first_advance_adjusted)
     first_sum[:principal_received].currency.should == MoneyManager.get_default_currency
 

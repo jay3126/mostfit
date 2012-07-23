@@ -67,22 +67,18 @@ class LoanReceipt
     totals[ADVANCE_ADJUSTED]   = zero_money
 
     unless receipts.empty?
-      all_receipts_only_advance_adjusted = receipts.select {|receipt| receipt.is_advance_adjusted}
-      hsh_all_receipts_only_advance_adjusted = all_receipts_only_advance_adjusted.collect {|receipt| receipt.to_money}
+      all_money_receipts = receipts.collect { |receipt| receipt.to_money }
 
-      all_receipts_not_advance_adjusted = receipts - all_receipts_only_advance_adjusted
-      hsh_all_receipts_not_advance_adjusted = all_receipts_not_advance_adjusted.collect {|receipt| receipt.to_money}
-
-      all_principal_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
+      all_principal_amounts = all_money_receipts.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
       totals[PRINCIPAL_RECEIVED] = all_principal_amounts.reduce(:+) unless all_principal_amounts.empty?
 
-      all_interest_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[INTEREST_RECEIVED] }
+      all_interest_amounts = all_money_receipts.collect { |receipt| receipt[INTEREST_RECEIVED] }
       totals[INTEREST_RECEIVED] = all_interest_amounts.reduce(:+) unless all_interest_amounts.empty?
 
-      all_advance_received_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[ADVANCE_RECEIVED] }
+      all_advance_received_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_RECEIVED] }
       totals[ADVANCE_RECEIVED] = all_advance_received_amounts.reduce(:+) unless all_advance_received_amounts.empty?
 
-      all_advance_adjusted_amounts = hsh_all_receipts_only_advance_adjusted.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
+      all_advance_adjusted_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
       totals[ADVANCE_ADJUSTED] = all_advance_adjusted_amounts.reduce(:+) unless all_advance_adjusted_amounts.empty?
     end
 
