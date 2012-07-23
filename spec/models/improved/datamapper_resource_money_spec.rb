@@ -10,6 +10,8 @@ class MoneyAmountsModel
   property :empty_money_amount, *MONEY_AMOUNT_NULL
   property :currency,           *CURRENCY
 
+  validates_with_method :not_all_amounts_are_zero
+
   def money_amounts; [:foo_money_amount, :bar_money_amount, :empty_money_amount]; end
 end
 
@@ -21,6 +23,14 @@ class NotMoneyAmountModel
 end
 
 describe DataMapper::Resource do
+
+  it "should raise a validation error when all money amounts are zero and not otherwise" do
+    invalid_instance = MoneyAmountsModel.new(:foo_money_amount => 0, :bar_money_amount => 0, :empty_money_amount => 0, :currency => :INR)
+    invalid_instance.valid?.should be_false
+
+    valid_instance = MoneyAmountsModel.new(:foo_money_amount => 0, :bar_money_amount => 23, :empty_money_amount => 0, :currency => :INR)
+    valid_instance.valid?.should be_true
+  end
 
   it "model instance that stores money amounts should return a hash with the amounts when to_money is called" do
     foo_amount = 100; bar_amount = 1200; currency = Constants::Money::DEFAULT_CURRENCY

@@ -33,5 +33,17 @@ module DataMapper
       cache[self.currency] ||= Money.zero_money_amount(self.currency)
     end
 
+    # This is a model validation that can be included when not all amounts should be zero
+    def not_all_amounts_are_zero
+      all_money_amounts = to_money.values
+      sum_all_money_amounts = all_money_amounts.reduce(:+)
+      if sum_all_money_amounts
+        (sum_all_money_amounts == zero_money_amount) ? [false, "Not all monetary values can be zero"] :
+            true
+      else
+        true
+      end
+    end
+
   end
 end

@@ -37,6 +37,11 @@ describe LoanReceipt do
 
     LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
 
+    first_adjust_principal = 12; first_adjust_interest = 73; first_adjust_advance = 0; first_adjust_advance_adjusted = (12 + 73)
+    first_adjust_allocation_values = Money.money_amounts_hash_to_money({:principal_received => first_adjust_principal, :interest_received => first_adjust_interest, :advance_received => first_adjust_advance, :advance_adjusted => first_adjust_advance_adjusted}, MoneyManager.get_default_currency)
+
+    LoanReceipt.record_allocation_as_loan_receipt(first_adjust_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
+
     thirty_first_principal = 1243; thirty_first_interest = 1896; thirty_first_advance = 723; thirty_first_advance_adjusted = 0
     thirty_first_allocation_values = Money.money_amounts_hash_to_money({ :principal_received => thirty_first_principal, :interest_received => thirty_first_interest, :advance_received => thirty_first_advance, :advance_adjusted => thirty_first_advance_adjusted }, MoneyManager.get_default_currency)
 
@@ -46,7 +51,7 @@ describe LoanReceipt do
     first_sum[:principal_received].amount.should == first_principal
     first_sum[:interest_received].amount.should == first_interest
     first_sum[:advance_received].amount.should == first_advance
-    first_sum[:advance_adjusted].amount.should == first_advance_adjusted
+    first_sum[:advance_adjusted].amount.should == first_adjust_advance_adjusted
     first_sum[:principal_received].currency.should == MoneyManager.get_default_currency
 
     thirty_first_sum = LoanReceipt.sum_on_date(thirty_first)
@@ -67,6 +72,11 @@ describe LoanReceipt do
 
     LoanReceipt.record_allocation_as_loan_receipt(first_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
 
+    first_adjust_principal = 12; first_adjust_interest = 73; first_adjust_advance = 0; first_adjust_advance_adjusted = (12 + 73)
+    first_adjust_allocation_values = Money.money_amounts_hash_to_money({:principal_received => first_adjust_principal, :interest_received => first_adjust_interest, :advance_received => first_adjust_advance, :advance_adjusted => first_adjust_advance_adjusted}, MoneyManager.get_default_currency)
+
+    LoanReceipt.record_allocation_as_loan_receipt(first_adjust_allocation_values, @performed_at_id, @accounted_at_id, @lending, first)
+
     thirty_first_principal = 1243; thirty_first_interest = 1896; thirty_first_advance = 723; thirty_first_advance_adjusted = 0
     thirty_first_allocation_values = Money.money_amounts_hash_to_money({ :principal_received => thirty_first_principal, :interest_received => thirty_first_interest, :advance_received => thirty_first_advance, :advance_adjusted => thirty_first_advance_adjusted}, MoneyManager.get_default_currency)
 
@@ -76,7 +86,7 @@ describe LoanReceipt do
     first_sum[:principal_received].amount.should == (first_principal + thirty_first_principal)
     first_sum[:interest_received].amount.should == (first_interest + thirty_first_interest)
     first_sum[:advance_received].amount.should == (first_advance + thirty_first_advance)
-    first_sum[:advance_adjusted].amount.should == (first_advance_adjusted + thirty_first_advance_adjusted)
+    first_sum[:advance_adjusted].amount.should == (first_advance_adjusted + first_adjust_advance_adjusted + thirty_first_advance_adjusted)
     first_sum[:principal_received].currency.should == MoneyManager.get_default_currency
 
     thirty_first_sum = LoanReceipt.sum_till_date(thirty_first)

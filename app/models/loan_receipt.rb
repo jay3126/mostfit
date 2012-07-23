@@ -2,22 +2,25 @@ class LoanReceipt
   include DataMapper::Resource
   include Constants::Properties, Constants::LoanAmounts
 
-  property :id,                Serial
-  property PRINCIPAL_RECEIVED, *MONEY_AMOUNT
-  property INTEREST_RECEIVED,  *MONEY_AMOUNT
-  property ADVANCE_RECEIVED,   *MONEY_AMOUNT
-  property ADVANCE_ADJUSTED,   *MONEY_AMOUNT
-  property :currency,          *CURRENCY
-  property :performed_at,      *INTEGER_NOT_NULL
-  property :accounted_at,      *INTEGER_NOT_NULL
-  property :effective_on,      *DATE_NOT_NULL
-  property :created_at,        *CREATED_AT
+  property :id,                  Serial
+  property PRINCIPAL_RECEIVED,   *MONEY_AMOUNT
+  property INTEREST_RECEIVED,    *MONEY_AMOUNT
+  property ADVANCE_RECEIVED,     *MONEY_AMOUNT
+  property ADVANCE_ADJUSTED,     *MONEY_AMOUNT
+  property :is_advance_adjusted, Boolean, :default => lambda {|obj, p| (obj.advance_adjusted > 0)}
+  property :currency,            *CURRENCY
+  property :performed_at,        *INTEGER_NOT_NULL
+  property :accounted_at,        *INTEGER_NOT_NULL
+  property :effective_on,        *DATE_NOT_NULL
+  property :created_at,          *CREATED_AT
+
+  belongs_to :lending
+
+  validates_with_method :not_all_amounts_are_zero
 
   def money_amounts
     [PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED]
   end
-
-  belongs_to :lending
 
   # Record the principal, interest, and advance amounts received on a loan on the specified value date
   # @param [Hash] allocation_values such as {:principal_received => principal_received_money_obj, :interest_received => interest_received_money_obj, :advance_received => advance_received_money_obj}
@@ -62,20 +65,24 @@ class LoanReceipt
     totals[INTEREST_RECEIVED]  = zero_money
     totals[ADVANCE_RECEIVED]   = zero_money
     totals[ADVANCE_ADJUSTED]   = zero_money
-    
-    unless receipts.empty?
-      all_money_receipts = receipts.collect { |receipt| receipt.to_money }
 
-      all_principal_amounts = all_money_receipts.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
+    unless receipts.empty?
+      all_receipts_only_advance_adjusted = receipts.select {|receipt| receipt.is_advance_adjusted}
+      hsh_all_receipts_only_advance_adjusted = all_receipts_only_advance_adjusted.collect {|receipt| receipt.to_money}
+
+      all_receipts_not_advance_adjusted = receipts - all_receipts_only_advance_adjusted
+      hsh_all_receipts_not_advance_adjusted = all_receipts_not_advance_adjusted.collect {|receipt| receipt.to_money}
+
+      all_principal_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
       totals[PRINCIPAL_RECEIVED] = all_principal_amounts.reduce(:+) unless all_principal_amounts.empty?
 
-      all_interest_amounts = all_money_receipts.collect { |receipt| receipt[INTEREST_RECEIVED] }
+      all_interest_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[INTEREST_RECEIVED] }
       totals[INTEREST_RECEIVED] = all_interest_amounts.reduce(:+) unless all_interest_amounts.empty?
 
-      all_advance_received_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_RECEIVED] }
+      all_advance_received_amounts = hsh_all_receipts_not_advance_adjusted.collect { |receipt| receipt[ADVANCE_RECEIVED] }
       totals[ADVANCE_RECEIVED] = all_advance_received_amounts.reduce(:+) unless all_advance_received_amounts.empty?
 
-      all_advance_adjusted_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
+      all_advance_adjusted_amounts = hsh_all_receipts_only_advance_adjusted.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
       totals[ADVANCE_ADJUSTED] = all_advance_adjusted_amounts.reduce(:+) unless all_advance_adjusted_amounts.empty?
     end
 
