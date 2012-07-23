@@ -101,7 +101,7 @@ class ConfigurationFacade
   end
 
   def regulation_total_oustanding_allowed
-    50000
+    @regulation_total_outstanding_allowed ||= Money.new(5000000, Constants::Money::INR)
   end
 
   def available_loan_products(on_date = Date.today)  
