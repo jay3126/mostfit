@@ -343,6 +343,22 @@ class ReportingFacade < StandardFacade
     sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
     {:count => count, :total_amount => sum_money_amount}
   end
+  
+  def outstanding_loans_exceeding_days_past_due(days_past_due)
+    outstanding_loans = all_outstanding_loans_on_date
+    raise ArgumentError, "Days past due: #{days_past_due} must be a valid number of days" unless (days_past_due and (days_past_due > 0))
+    outstanding_loans.select {|loan| (loan.days_past_due >= days_past_due)}
+  end
+
+  def loans_eligible_for_write_off
+    days_past_due_eligible_for_writeoff = configuration_facade.days_past_due_eligible_for_writeoff
+    raise Errors::InvalidConfigurationError, "Days past due for write off has not been configured" unless days_past_due_eligible_for_writeoff
+    [days_past_due_eligible_for_writeoff, loans_past_due(days_past_due_eligible_for_writeoff)]
+  end
+
+  def loans_past_due(by_number_of_days = 1)
+    outstanding_loans_exceeding_days_past_due(by_number_of_days)
+  end
 
   private
 
@@ -515,6 +531,10 @@ class ReportingFacade < StandardFacade
 
   def location_facade
     @location_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::LOCATION_FACADE, self)
+  end
+
+  def configuration_facade
+    @configuration_facade ||= FacadeFactory.instance.get_other_facade(FacadeFactory::CONFIGURATION_FACADE, self)
   end
 
   def get_ids(collection)

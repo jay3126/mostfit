@@ -87,7 +87,7 @@ class ConfigurationFacade
     Constants::Money::DEFAULT_LOCALE
   end
 
-   def get_age_limit_for_credit
+  def get_age_limit_for_credit
     [18, 55]
   end
 
@@ -107,5 +107,12 @@ class ConfigurationFacade
   def available_loan_products(on_date = Date.today)  
     LendingProduct.all
   end
-  
+
+  DAYS_PAST_DUE_FOR_WRITE_OFF = 180
+
+  # Number of days that a loan has been overdue that it is eligible for writeoff as per GAAP
+  def days_past_due_eligible_for_writeoff
+    DAYS_PAST_DUE_FOR_WRITE_OFF
+  end
+
 end
