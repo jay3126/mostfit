@@ -714,9 +714,10 @@ class Lending
   end
 
   # Record an allocation on the loan for the given total amount
-  def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
+  def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false)
     payment_currency = total_amount.currency
-    resulting_allocation = {ADVANCE_ADJUSTED => zero_money_amount}
+
+    resulting_allocation = adjust_advance ? {ADVANCE_RECEIVED => zero_money_amount} : {ADVANCE_ADJUSTED => zero_money_amount}
 
     if (make_specific_allocation)
       raise ArgumentError, "Specific principal amount was not available" unless (specific_principal_money_amount and (specific_principal_money_amount.is_a?(Money)))
@@ -730,7 +731,7 @@ class Lending
     end
 
     #allocate when not due
-    if current_due_status == NOT_DUE
+    if (current_due_status == NOT_DUE and (not (adjust_advance)))
       resulting_allocation[ADVANCE_RECEIVED] = total_amount
       resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       return resulting_allocation
@@ -738,18 +739,28 @@ class Lending
 
     #TODO handle scenario where repayment is received between schedule dates
 
-    only_principal_and_interest = [self.actual_total_due(on_date), total_amount].min
-    advance_to_allocate = (total_amount > only_principal_and_interest) ?
-      (total_amount - only_principal_and_interest) : zero_money_amount
+    _actual_total_due = self.actual_total_due(on_date)
+    only_principal_and_interest = [_actual_total_due, total_amount].min
+
+    advance_to_allocate = zero_money_amount
+    unless adjust_advance
+      advance_to_allocate = (total_amount > only_principal_and_interest) ?
+        (total_amount - only_principal_and_interest) : zero_money_amount
+    end
 
     fresh_allocation = allocate_principal_and_interest(only_principal_and_interest, on_date)
 
     resulting_allocation[PRINCIPAL_RECEIVED] = fresh_allocation[:principal]
-    resulting_allocation[INTEREST_RECEIVED] = fresh_allocation[:interest]
-    advance_to_allocate += fresh_allocation[:amount_not_allocated]
+    resulting_allocation[INTEREST_RECEIVED]  = fresh_allocation[:interest]
+    total_principal_and_interest_allocated   = fresh_allocation[:principal] + fresh_allocation[:interest]
+
+    advance_to_allocate += fresh_allocation[:amount_not_allocated] unless adjust_advance
     resulting_allocation[ADVANCE_RECEIVED] = advance_to_allocate
-    resulting_allocation = Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
-    resulting_allocation
+    
+    advance_adjusted = adjust_advance ? total_principal_and_interest_allocated : zero_money_amount
+    resulting_allocation[ADVANCE_ADJUSTED] = advance_adjusted
+
+    Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
   end
 
   def allocate_principal_and_interest(total_money_amount, on_date)
