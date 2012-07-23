@@ -49,28 +49,19 @@
     %thead
       %tr
         %th
+          S.No.
         %th
-          id
+          Loan ID
         %th
-          Applied Amount
+          Loan Amount
         %th
           Borrower
         %th
-          Applied Date
+          Disbursed On
         %th
-          First Repayment Date
+          Scheduled Total Outstanding
         %th
-          Scheduled Disbursal Date
-        %th
-          Repayment Frequency
-        %th
-          Tenure
-        %th
-          Administered At
-        %th
-          Accounted At
-        %th
-          Status
+          Actual Total Outstanding
     - loan_row_count = 1
     - @lendings.each do |lending|
       - lending = lending.class == Lending ? lending : Lending.get(lending)
@@ -84,22 +75,12 @@
         %td
           = link_to lending.borrower.name, url(:controller => :new_clients, :action => :show, :id => lending.borrower.id)
         %td
-          = lending.applied_on_date
-        %td
-          = lending.scheduled_first_repayment_date
-        %td
           = lending.scheduled_disbursal_date
         %td
-          = lending.repayment_frequency
+          = lending.scheduled_total_outstanding(@date)
         %td
-          = lending.tenure
-        %td
-          = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
-        %td
-          = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
-        %td
-          = lending.status.humanize
+          = lending.actual_total_outstanding
         - loan_row_count = loan_row_count + 1
     %tfoot
       %tr.org_total
-        %td{:colspan => 13}
+        %td{:colspan => 7}
