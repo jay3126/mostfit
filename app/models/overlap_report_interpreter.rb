@@ -7,8 +7,8 @@ module OverlapReportInterpreter
     if reported_no_of_active_loans
       return RATED_NEGATIVE if (reported_no_of_active_loans + 1) > total_loans_allowed
     end
-
-    loan_amount_applied_for = self.respond_to?(:applied_for_amount) ? Money.new(self.applied_for_amount.to_i, Constants::Money::INR) : nil
+    
+    loan_amount_applied_for = self.applied_for_amount
     raise StandardError, "Unable to determine the loan amount applied for" unless loan_amount_applied_for
 
     total_outstanding_allowed = ConfigurationFacade.instance.regulation_total_oustanding_allowed

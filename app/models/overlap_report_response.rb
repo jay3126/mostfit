@@ -53,7 +53,7 @@ class OverlapReportResponse
   def applied_for_amount
     return nil unless self.loan_application_id
     loan_application = LoanApplication.get(self.loan_application_id)
-    (loan_application and loan_application.amount) ? loan_application.amount : nil
+    (loan_application and loan_application.amount) ? Money.new(loan_application.amount.to_i, Constants::Money::INR) : nil
   end
 
 end
