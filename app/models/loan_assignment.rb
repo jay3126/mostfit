@@ -14,15 +14,23 @@ class LoanAssignment
   property :created_at,        *CREATED_AT
   property :deleted_at,        *DELETED_AT
 
-  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?
+  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?
 
   def cannot_both_sell_and_encumber
-    LoanAssignment.get_loan_assigned_to(self.loan_id, self.effective_on).nil? ? true :
-      [false, "There is currently an assignment for the loan with ID #{self.loan_id} that is in effect on #{self.effective_on}"]
+    if self.new?
+      LoanAssignment.get_loan_assigned_to(self.loan_id, self.effective_on).nil? ? true :
+        [false, "There is currently an assignment for the loan with ID #{self.loan_id} that is in effect on #{self.effective_on}"]
+    end
+    true
   end
 
   def loan_exists?
-    Lending.get(loan_id) ? true : [false, "There is no loan with ID: #{loan_id}"]
+    Lending.get(self.loan_id) ? true : [false, "There is no loan with ID: #{self.loan_id}"]
+  end
+
+  def is_loan_outstanding_on_date?
+    loan = Lending.get(self.loan_id)
+    loan.is_outstanding_on_date?(self.effective_on) ? true : [false, "The loan with ID: #{self.loan_id} is not oustanding on requested date: #{self.effective_on}"]
   end
 
   def loan_assignment_instance
@@ -74,38 +82,32 @@ class LoanAssignment
   # 
   def self.get_loans_assigned(to_assignment, on_date=nil)
     assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)
-    if assignment_nature == :encumbered and effective_on.nil?
-        raise ArgumentError, "Effective On date must be supplied for Encumberance"
+    if ((assignment_nature == Constants::LoanAssignment::ENCUMBERED) and (on_date.nil?))
+      raise ArgumentError, "Effective date must be supplied for encumberance"
     end
-    if assignment_nature == :encumbered
-        all(:assignment_nature => assignment_nature,
-            :assignment_id => assignment_id,
-            :effective_on.lte => on_date,
-            :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
-    else
-        all(:assignment_nature => assignment_nature,
-            :assignment_id => assignment_id,
-            :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
-    end
+    loan_assignments = []
+    query = {}
+    query[:assignment_nature] = assignment_nature
+    query[:assignment_id]     = assignment_id
+    query[:effective_on.lte]  = on_date if on_date
+    query[:assignment_status] = ASSIGNED
+    loan_assignments = all(query)
+    loan_assignments.collect {|assignment| assignment.loan_id}
   end
 
   # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance, for a date range.
   def self.get_loans_assigned_in_date_range(to_assignment, on_date, till_date)
+    earlier_date, later_date = on_date <= till_date ? [on_date, till_date] : [till_date, on_date]
+    loan_assignments = []
+    query = {}
     assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)
-    if assignment_nature == :encumbered and effective_on.nil?
-      raise ArgumentError, "Effective On date must be supplied for Encumberance"
-    end
-    if assignment_nature == :encumbered
-      all(:assignment_nature => assignment_nature,
-          :assignment_id => assignment_id,
-          :effective_on.gte => on_date,
-          :effective_on.lte => till_date,
-          :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
-    else
-      all(:assignment_nature => assignment_nature,
-          :assignment_id => assignment_id,
-          :assignment_status => ASSIGNED).collect { |assignment| assignment.loan_id }
-    end
+    query[:assignment_nature] = assignment_nature
+    query[:assignment_id]     = assignment_id
+    query[:effective_on.gte]  = earlier_date if earlier_date
+    query[:effective_on.lte]  = later_date if later_date
+    query[:assignment_status] = ASSIGNED
+    loan_assignments = all(query)
+    loan_assignments.collect {|assignment| assignment.loan_id}
   end
 
   # Indicates the loan assignment status on a specified date
