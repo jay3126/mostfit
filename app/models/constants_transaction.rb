@@ -9,14 +9,15 @@ module Constants
     COUNTERPARTY_ADMINISTERED_AT = :administered_at
     COUNTERPARTY_REGISTERED_AT   = :registered_at
 
-    RECEIPT = :receipt; PAYMENT = :payment
-    RECEIVED_OR_PAID = [RECEIPT, PAYMENT]
+    RECEIPT = :receipt; PAYMENT = :payment; CONTRA = :contra
+    RECEIVED_OR_PAID = [RECEIPT, PAYMENT, CONTRA]
 
-    LOAN_DISBURSEMENT = :loan_disbursement; 
-    LOAN_REPAYMENT    = :loan_repayment;
+    LOAN_DISBURSEMENT = :loan_disbursement 
+    LOAN_REPAYMENT    = :loan_repayment
+    LOAN_ADVANCE_ADJUSTMENT = :loan_advance_adjustment
     LOAN_ACCRUAL      = :loan_accrual
     LOAN_PRECLOSURE   = :loan_preclosure
-    PRODUCT_ACTIONS   = [LOAN_DISBURSEMENT, LOAN_REPAYMENT, LOAN_ACCRUAL, LOAN_PRECLOSURE]
+    PRODUCT_ACTIONS   = [LOAN_DISBURSEMENT, LOAN_REPAYMENT, LOAN_ADVANCE_ADJUSTMENT, LOAN_ACCRUAL, LOAN_PRECLOSURE]
 
     FEE_CHARGED_ON_CLIENT = :fee_charged_on_client; FEE_CHARGED_ON_LOAN = :fee_charged_on_loan
     PREMIUM_COLLECTED_ON_INSURANCE = :premium_collected_on_insurance
@@ -34,11 +35,13 @@ module Constants
 
     PAYMENT_TOWARDS_LOAN_DISBURSEMENT = :payment_towards_loan_disbursement
     PAYMENT_TOWARDS_LOAN_REPAYMENT    = :payment_towards_loan_repayment
+    PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT = :payment_towards_loan_advance_adjustment
     PAYMENT_TOWARDS_LOAN_PRECLOSURE   = :payment_towards_loan_preclosure
     PAYMENT_TOWARDS_FEE_RECEIPT       = :payment_towards_fee_receipt
     PAYMENT_TOWARDS_TYPES = [
       PAYMENT_TOWARDS_LOAN_DISBURSEMENT,
       PAYMENT_TOWARDS_LOAN_REPAYMENT,
+      PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT,
       PAYMENT_TOWARDS_LOAN_PRECLOSURE,
       PAYMENT_TOWARDS_FEE_RECEIPT
     ]

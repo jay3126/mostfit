@@ -6,14 +6,15 @@ class LoanReceipt
   property PRINCIPAL_RECEIVED, *MONEY_AMOUNT
   property INTEREST_RECEIVED,  *MONEY_AMOUNT
   property ADVANCE_RECEIVED,   *MONEY_AMOUNT
+  property ADVANCE_ADJUSTED,   *MONEY_AMOUNT
   property :currency,          *CURRENCY
   property :performed_at,      *INTEGER_NOT_NULL
   property :accounted_at,      *INTEGER_NOT_NULL
   property :effective_on,      *DATE_NOT_NULL
   property :created_at,        *CREATED_AT
 
-  def money_amounts;
-    [PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED]
+  def money_amounts
+    [PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED]
   end
 
   belongs_to :lending
@@ -55,29 +56,30 @@ class LoanReceipt
 
   # Add up the money amounts on receipt and return a hash with the correct keys
   def self.add_up(receipts)
+    zero_money = MoneyManager.default_zero_money
     totals                     = { }
-    totals[PRINCIPAL_RECEIVED] = MoneyManager.default_zero_money
-    totals[INTEREST_RECEIVED]  = MoneyManager.default_zero_money
-    totals[ADVANCE_RECEIVED]   = MoneyManager.default_zero_money
+    totals[PRINCIPAL_RECEIVED] = zero_money
+    totals[INTEREST_RECEIVED]  = zero_money
+    totals[ADVANCE_RECEIVED]   = zero_money
+    totals[ADVANCE_ADJUSTED]   = zero_money
     
-    if receipts.empty?
-      totals = Money.add_total_to_map(totals, :total_received)
-      return totals
+    unless receipts.empty?
+      all_money_receipts = receipts.collect { |receipt| receipt.to_money }
+
+      all_principal_amounts = all_money_receipts.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
+      totals[PRINCIPAL_RECEIVED] = all_principal_amounts.reduce(:+) unless all_principal_amounts.empty?
+
+      all_interest_amounts = all_money_receipts.collect { |receipt| receipt[INTEREST_RECEIVED] }
+      totals[INTEREST_RECEIVED] = all_interest_amounts.reduce(:+) unless all_interest_amounts.empty?
+
+      all_advance_received_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_RECEIVED] }
+      totals[ADVANCE_RECEIVED] = all_advance_received_amounts.reduce(:+) unless all_advance_received_amounts.empty?
+
+      all_advance_adjusted_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
+      totals[ADVANCE_ADJUSTED] = all_advance_adjusted_amounts.reduce(:+) unless all_advance_adjusted_amounts.empty?
     end
 
-    all_money_receipts = receipts.collect { |receipt| receipt.to_money }
-
-    all_principal_amounts = all_money_receipts.collect { |receipt| receipt[PRINCIPAL_RECEIVED] }
-    totals[PRINCIPAL_RECEIVED] = all_principal_amounts.reduce(:+) unless all_principal_amounts.empty?
-
-    all_interest_amounts = all_money_receipts.collect { |receipt| receipt[INTEREST_RECEIVED] }
-    totals[INTEREST_RECEIVED] = all_interest_amounts.reduce(:+) unless all_interest_amounts.empty?
-
-    all_advance_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_RECEIVED] }
-    totals[ADVANCE_RECEIVED] = all_advance_amounts.reduce(:+) unless all_advance_amounts.empty?
-
-    totals = Money.add_total_to_map(totals, :total_received)
-    totals
+    Money.add_total_to_map(totals, :total_received)
   end
 
 end

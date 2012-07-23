@@ -40,11 +40,11 @@ class PaymentTransaction
   property :id,                   Serial
   property :amount,               *MONEY_AMOUNT_NON_ZERO
   property :currency,             *CURRENCY
-  property :receipt_type,         Enum.send('[]', *RECEIVED_OR_PAID), :nullable => false
-  property :payment_towards,      Enum.send('[]', *PAYMENT_TOWARDS_TYPES), :nullable => false
-  property :on_product_type,      Enum.send('[]', *TRANSACTED_PRODUCTS), :nullable => false
+  property :receipt_type,         Enum.send('[]', *Constants::Transaction::RECEIVED_OR_PAID), :nullable => false
+  property :payment_towards,      Enum.send('[]', *Constants::Transaction::PAYMENT_TOWARDS_TYPES), :nullable => false
+  property :on_product_type,      Enum.send('[]', *Constants::Transaction::TRANSACTED_PRODUCTS), :nullable => false
   property :on_product_id,        Integer, :nullable => false
-  property :by_counterparty_type, Enum.send('[]', *COUNTERPARTIES), :nullable => false
+  property :by_counterparty_type, Enum.send('[]', *Constants::Transaction::COUNTERPARTIES), :nullable => false
   property :by_counterparty_id,   *INTEGER_NOT_NULL
   property :performed_at,         *INTEGER_NOT_NULL
   property :accounted_at,         *INTEGER_NOT_NULL

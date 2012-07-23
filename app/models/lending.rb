@@ -716,7 +716,7 @@ class Lending
   # Record an allocation on the loan for the given total amount
   def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
     payment_currency = total_amount.currency
-    resulting_allocation = Hash.new(zero_money_amount)
+    resulting_allocation = {ADVANCE_ADJUSTED => zero_money_amount}
 
     if (make_specific_allocation)
       raise ArgumentError, "Specific principal amount was not available" unless (specific_principal_money_amount and (specific_principal_money_amount.is_a?(Money)))
