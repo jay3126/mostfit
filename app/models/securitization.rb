@@ -9,6 +9,8 @@ class Securitization
 
   has n,:third_parties, :through => Resource
 
+  def created_on; self.effective_on; end
+
   def to_s
     "Securitization: #{name} effective #{effective_on}"
   end

@@ -16,6 +16,7 @@ class Encumberance
   def money_amounts; [:assigned_value]; end
   
   def assigned_value_money_amount; to_money_amount(:assigned_value); end
+  def created_on; self.effective_on; end
 
   def to_s
     "Encumberance: #{name} effective on #{effective_on}"

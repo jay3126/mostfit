@@ -14,7 +14,7 @@ class LoanAssignment
   property :created_at,        *CREATED_AT
   property :deleted_at,        *DELETED_AT
 
-  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?
+  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?, :effective_after_assignment_date?
 
   def cannot_both_sell_and_encumber
     if self.new?
@@ -31,6 +31,16 @@ class LoanAssignment
   def is_loan_outstanding_on_date?
     loan = Lending.get(self.loan_id)
     loan.is_outstanding_on_date?(self.effective_on) ? true : [false, "The loan with ID: #{self.loan_id} is not oustanding on requested date: #{self.effective_on}"]
+  end
+
+  def effective_after_assignment_date?
+    validation = true
+    assignment = self.loan_assignment_instance
+    if (assignment)
+      validation = (self.effective_on >= assignment.created_on) ? true :
+        [false, "Loan assignment date: #{self.effective_on} cannot precede the date of creation of #{assignment.to_s}"]
+    end
+    validation
   end
 
   def loan_assignment_instance
