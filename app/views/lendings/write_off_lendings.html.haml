@@ -1,0 +1,77 @@
+%h1 Write Off Loans
+%h2= "Days Past Dues For #{@due_days} days and above"
+- if @lendings.blank?
+  %h3
+    No loan exists
+- else
+  = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_write_off_lendings)) do
+    %table.report.weeksheet.nojs
+      %thead
+        %tr
+          %th
+          %th
+            id
+          %th
+            Administered At
+          %th
+            Accounted At
+          %th
+            Borrower Name
+          %th
+            Loan Amount
+          %th
+            Loan Disbursed On
+          %th
+            Scheduled outstanding principal
+          %th
+            Scheduled outstanding interest
+          %th
+            Scheduled total outstating
+          %th
+            Actual outstanding principal
+          %th
+            Actual outstanding interest
+          %th
+            Actual total outstanding
+          %th
+            Days past due
+          %th
+            Check Write off
+      - loan_row_count = 1
+      - @lendings.each do |lending|
+        %tr
+          %td
+            = loan_row_count
+          %td
+            = link_to_with_rights lending.id, resource(lending)
+          %td
+            = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+          %td
+            = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+          %td
+            = lending.loan_borrower.counterparty.name
+          %td
+            = lending.total_loan_disbursed.to_s
+          %td
+            = lending.disbursal_date
+          %td
+            = lending.scheduled_principal_outstanding(get_effective_date)
+          %td
+            = lending.scheduled_interest_outstanding(get_effective_date)
+          %td
+            = lending.scheduled_total_outstanding(get_effective_date)
+          %td
+            = lending.actual_principal_outstanding
+          %td
+            = lending.actual_interest_outstanding
+          %td
+            = lending.actual_total_outstanding
+          %td
+            = lending.days_past_due_on_date(get_effective_date)
+          %td
+            = check_box :name => "write_off_lendings[]" ,:value => lending.id
+          - loan_row_count = loan_row_count + 1
+      %tfoot
+        %tr.org_total
+          %td{:colspan => 15}
+    = submit "Write Off Save"

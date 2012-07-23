@@ -348,4 +348,29 @@ class Lendings < Application
     redirect resource(:lendings), :message => @message
   end
 
+  def write_off_lendings
+    @write_off = reporting_facade.loans_eligible_for_write_off
+    @lendings  = @write_off.last
+    @due_days  = @write_off.first
+    display @lendings
+  end
+
+  def update_write_off_lendings
+    @message = {}
+    lendings = []
+    lending_params = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
+    begin
+      lending_params.each do |value|
+        lendings << Lending.get(value)
+      end
+      @message = {:error => "Please select Loan for write off"} if lendings.blank?
+      if @message[:error].blank?
+        @message = {:notice => "Loan Write Off done successfully."}
+      end
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+    redirect resource(:lendings, :write_off_lendings), :message => @message
+  end
+
 end

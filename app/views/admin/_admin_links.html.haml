@@ -56,6 +56,8 @@
       %li
         = link_to_with_rights 'Loans', resource(:lendings), :class => 'loan icon'
       %li
+        = link_to_with_rights 'Write Off Loans', resource(:lendings, :write_off_lendings), :class => 'loan icon'
+      %li
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
       %li
         =# link_to_with_rights 'Insurance companies & products', url(:action => :insurance), :class => 'insurance icon'

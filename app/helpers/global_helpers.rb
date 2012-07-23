@@ -201,7 +201,7 @@ module Merb
       attrs.merge!(:size => opts[:size]||20)
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
-      attrs.merge!(:nullable => opts[:nullable]) if opts.key?(:nullable)
+      attrs.merge!(:nullable => (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable))
       date_select_html(attrs)
     end
 
