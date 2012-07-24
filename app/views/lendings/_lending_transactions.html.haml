@@ -5,7 +5,7 @@
     });
 
 
-= link_to_with_rights 'Make Repayment', url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add grey_button'
+= link_to_with_rights "Make #{@lending.is_written_off? ? 'Recovery' : 'Repayment'}", url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add grey_button'
 - if @lending_transactions.blank?
   %h3
     No Loan Transactions exists
@@ -20,6 +20,8 @@
           Amount
         %th
           Payment Type
+        %th
+          Payment Towards
         %th
           Client
         %th
@@ -45,6 +47,8 @@
           = lt.to_money[:amount].to_s
         %td
           = lt.receipt_type
+        %td
+          = lt.payment_towards.humanize
         %td
           = lt.by_counterparty.name
         %td

@@ -14,9 +14,13 @@
       %th.odd Closing outstanding interest
       %td= repaid.to_money[:closing_outstanding_interest]
   - elsif @lending.is_written_off?
+    - recovery = @lending.loan_recovery_till_date
     %tr.odd
       %th.odd On Date
       %td= @lending_status.effective_on
+    %tr.even
+      %th.even Recovery
+      %td= recovery.to_s
   - else
     %tr.odd
       %th.odd On Date

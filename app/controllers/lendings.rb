@@ -220,9 +220,15 @@ class Lendings < Application
     @lending         = Lending.get params[:id]
     payment_amount   = params[:payment_amount]
     payment_type     = params[:payment_type]
-    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
     payment_date     = params[:payment_date]
     payment_by_staff = params[:payment_by_staff]
+    if @lending.is_written_off?
+      payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY
+      product_action   = Constants::Transaction::LOAN_RECOVERY
+    else
+      payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+      product_action   = Constants::Transaction::LOAN_REPAYMENT
+    end
 
     #VALIDATION
     @message[:error] = "Payment amount cannot be blank" if payment_amount.blank?
@@ -232,8 +238,13 @@ class Lendings < Application
     if @message[:error].blank?
       begin
         money_amount    = MoneyManager.get_money_instance(payment_amount)
-        payment_facade.record_payment(money_amount, payment_type, payment_towards, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, Constants::Transaction::LOAN_REPAYMENT)
-        @message = {:notice => "Loan payment saved successfully."}
+        valid = @lending.is_payment_transaction_permitted?(money_amount, payment_date, payment_by_staff, session.user.id)
+        if valid == true
+          payment_facade.record_payment(money_amount, payment_type, payment_towards, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, product_action)
+          @message = {:notice => "Loan payment saved successfully."}
+        else
+          @message = {:error => valid.last}
+        end
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}
       end
@@ -359,17 +370,20 @@ class Lendings < Application
   def update_write_off_lendings
     @message  = {}
     lendings  = []
-    @date     = params[:date].blank? ? Date.today : Date.parse(params[:date])
     @staff_id = session.user.staff_member.id
     lending_params = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
     begin
-      lending_params.each do |value|
-        lendings << Lending.get(value)
+      lending_params.each do |key, value|
+        if value.size == 2
+          lending  = Lending.get key.to_i
+          on_date  = Date.parse(value.last[:on_date])
+          lendings << {:lending => lending, :on_date => on_date}
+        end
       end
       @message = {:error => "Please select Loan for write off"} if lendings.blank?
       if @message[:error].blank?
-        lendings.each do |lending|
-          lending.write_off(@date, @staff_id)
+        lendings.each do |lending_obj|
+          lending_obj[:lending].write_off(lending_obj[:on_date], @staff_id)
         end
         @message = {:notice => "Loan Write Off done successfully."}
       end

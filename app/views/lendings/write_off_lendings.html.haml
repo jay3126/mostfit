@@ -9,7 +9,6 @@
       %thead
         %tr
           %th
-          %th
             id
           %th
             Administered At
@@ -37,11 +36,10 @@
             Days past due
           %th
             Check Write off
-      - loan_row_count = 1
+          %th
+            On Date
       - @lendings.each do |lending|
         %tr
-          %td
-            = loan_row_count
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
@@ -69,8 +67,10 @@
           %td
             = lending.days_past_due_on_date(get_effective_date)
           %td
-            = check_box :name => "write_off_lendings[]" ,:value => lending.id
-          - loan_row_count = loan_row_count + 1
+            = check_box :name => "write_off_lendings[#{lending.id}][]" ,:value => lending.id
+          %td
+            - min_date = lending.most_recent_payment_transaction_on_date
+            = date_select "write_off_lendings[#{lending.id}][][on_date]", get_effective_date, {:id => "lending_#{lending.id}", :size=> "10" , :min_date => min_date}
       %tfoot
         %tr.org_total
           %td{:colspan => 15}

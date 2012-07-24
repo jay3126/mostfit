@@ -1,4 +1,4 @@
-- if @lending.status == :disbursed_loan_status
+- if @lending.is_outstanding? || @lending.is_written_off?
   = form_for(@lending, :action => url(:controller => :lendings, :action => :create_repayment_on_lending, :id => @lending.id), :method => "POST", :class => "tall shaded") do
     %table
       %tr
@@ -22,7 +22,7 @@
           Payment by Staff
         %td
           = select :name=> "payment_by_staff", :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, @lending.accounted_at_origin)
-    = submit 'Save Repayment', :class => "greenButton"
+    = submit "Save #{@lending.is_written_off? ? 'Recovery' : 'Repayment'}", :class => "greenButton"
     = link_to 'Cancel', params[:return], :class => "grey_button"
 - else
   This Action does support after loan's disbursement

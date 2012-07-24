@@ -180,6 +180,26 @@ class Lending
     true
   end
 
+  def is_payment_transaction_permitted?(money_amount, on_date, for_staff_id, user_id)
+    payment_towards = self.is_written_off? ? PAYMENT_TOWARDS_LOAN_RECOVERY : Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+    cp_type      = 'Client'
+    cp_id        = self.loan_borrower.counterparty.id
+    product_type = self.class.name
+    product_id   = self.id
+    performed_at = self.administered_at_origin
+    accounted_at = self.accounted_at_origin
+    performed_by = for_staff_id
+    recorded_by  = user_id
+    receipt      = 'receipt'
+    payment_transaction = PaymentTransaction.new(:amount => money_amount.amount,:currency => 'INR',
+      :on_product_type => product_type, :on_product_id => product_id,
+      :performed_at => performed_at, :accounted_at => accounted_at,
+      :performed_by => performed_by, :recorded_by => recorded_by,
+      :by_counterparty_type => cp_type, :by_counterparty_id => cp_id,
+      :receipt_type => receipt, :payment_towards => payment_towards, :effective_on => on_date)
+    self.is_payment_permitted?(payment_transaction)
+  end
+
   #############
   # Validations # ends
   #############
