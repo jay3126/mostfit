@@ -19,6 +19,7 @@ class Lending
   property :approved_on_date,               *DATE
   property :disbursal_date,                 *DATE
   property :repaid_on_date,                 *DATE
+  property :write_off_on_date,              *DATE
   property :repayment_frequency,            *FREQUENCY
   property :tenure,                         *TENURE
   property :administered_at_origin,         *INTEGER_NOT_NULL
@@ -26,6 +27,7 @@ class Lending
   property :applied_by_staff,               *INTEGER_NOT_NULL
   property :approved_by_staff,              Integer
   property :disbursed_by_staff,             Integer
+  property :written_off_by_staff,           Integer
   property :recorded_by_user,               *INTEGER_NOT_NULL
   property :repayment_allocation_strategy,  Enum.send('[]', *LOAN_REPAYMENT_ALLOCATION_STRATEGIES), :nullable => false
   property :status,                         Enum.send('[]', *LOAN_STATUSES), :nullable => false, :default => STATUS_NOT_SPECIFIED
@@ -471,6 +473,7 @@ class Lending
   # Obtain the loan status as on a particular date
   def historical_loan_status_on_date(on_date)
     status_in_force_on_date = self.loan_status_changes.status_in_force(on_date)
+    raise Errors::InvalidOperationError, "A loan status cannot be requested on the date: #{on_date}" unless status_in_force_on_date
     status_in_force_on_date.to_status
   end
 
@@ -589,6 +592,17 @@ class Lending
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
     setup_on_approval
+  end
+
+  def write_off(write_off_on_date, written_off_by_staff)
+    Validators::Arguments.not_nil?(write_off_on_date, written_off_by_staff)
+    Validators::Arguments.is_id?(written_off_by_staff)
+    raise Errors::BusinessValidationError, "A loan cannot be written off on a future date: #{write_off_on_date}" if (Date.today < write_off_on_date)
+    raise Errors::InvalidStateChangeError, "Only a loan that is outstanding can be written off" unless self.is_outstanding?
+
+    self.write_off_on_date    = write_off_on_date
+    self.written_off_by_staff = written_off_by_staff
+    set_status(WRITTEN_OFF_LOAN_STATUS, write_off_on_date)
   end
 
   def setup_on_approval
