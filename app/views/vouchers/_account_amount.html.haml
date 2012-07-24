@@ -5,11 +5,15 @@
   %td
     = select_accounts("#{account_type.to_s}[][account_id]", @branch, @journal_type, :selected => account[:account_id])
   %td
+    Cost Center
+  %td
+    = select :name => "#{account_type.to_s}[][cost_center_id]", :collection => choice_facade.get_premitted_cost_centers(session.user.staff_member.id, get_effective_date), :text_method => 'name', :value_method => 'id'
+  %td
     Amount
   %td
     = text_field :name => "#{account_type.to_s}[][amount]", :value => account[:amount]
   - if last_account
     %td
-      %a{:href => url(:controller => :journals, :action => :add_account, :account_type => account_type, :branch_id => (@branch ? @branch.id : ""), :journal_type_id => (@journal_type ? @journal_type.id : nil)), :class => "_remote_", :id => "account_row_#{random}"}
+      %a{:href => url(:controller => :journals, :action => :add_account, :account_type => account_type, :branch_id => "#{@branch ? @branch.id : ''}", :journal_type_id => "#{@journal_type ? @journal_type.id : nil}"), :class => "_remote_", :id => "account_row_#{random}"}
         = "add another debit entry" if account_type == :debit_accounts
         = "add another credit entry" if account_type == :credit_accounts

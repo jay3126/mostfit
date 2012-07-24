@@ -5,6 +5,10 @@
   %td
     = select_accounts("#{account_type.to_s}[][account_id]", @branch, @journal_type, :selected => account[:account_id])
   %td
+    Cost Center
+  %td
+    = select :name => "#{account_type.to_s}[][cost_center_id]", :collection => choice_facade.get_premitted_cost_centers(session.user.staff_member.id, get_effective_date), :text_method => 'name', :value_method => 'id'
+  %td
     Amount
   %td
     = text_field :name => "#{account_type.to_s}[][amount]", :value => account[:amount]

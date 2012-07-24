@@ -7,7 +7,7 @@
       = link_to 'Vouchers', resource(:vouchers)
     %li#cost_centers
       = link_to 'Cost Centers', resource(:cost_centers)
-    %li#transaction_summaries
+    %li#transaction_summaries{:style => 'display:none'}
       = link_to 'Transaction Summaries', resource(:transaction_summaries)
     %li#categories_and_rules
       = link_to 'Categories and rules', resource(:accounting_rules)

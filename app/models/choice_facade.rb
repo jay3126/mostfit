@@ -75,6 +75,9 @@ class ChoiceFacade < StandardFacade
     configuration_facade.available_loan_products(on_date)
   end
 
+  def get_premitted_cost_centers(for_staff_id, on_date = Date.today)
+    CostCenter.all
+  end
   private
 
   def location_facade
