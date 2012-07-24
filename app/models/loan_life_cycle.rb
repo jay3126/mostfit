@@ -73,7 +73,8 @@ module LoanLifeCycle
 
   REPAYMENT_ACTIONS_AND_REPAID_NATURES = {
     Constants::Transaction::LOAN_REPAYMENT => REPAID_IN_FULL,
-    Constants::Transaction::LOAN_PRECLOSURE => PRECLOSED
+    Constants::Transaction::LOAN_PRECLOSURE => PRECLOSED,
+    Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT => REPAID_IN_FULL
   }
 
   STATUSES_DATES_SUM_AMOUNTS = {

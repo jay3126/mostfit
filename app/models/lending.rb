@@ -562,7 +562,7 @@ class Lending
 
   def process_status_change(payment_transaction, loan_action, allocation)
     if payment_transaction.receipt_type == RECEIPT
-      if loan_action == LOAN_REPAYMENT
+      if ([LOAN_ADVANCE_ADJUSTMENT, LOAN_REPAYMENT].include?(loan_action))
         if (actual_total_outstanding == zero_money_amount)
           repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
           raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
