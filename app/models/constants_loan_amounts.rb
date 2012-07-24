@@ -68,6 +68,7 @@ module Constants
     ADVANCE_TO_ALLOCATE                                        = :advance_to_allocate
     PRINCIPAL_RECEIVED                                         = :principal_received
     INTEREST_RECEIVED                                          = :interest_received
+    LOAN_RECOVERY                                              = :loan_recovery
     ADVANCE_RECEIVED                                           = :advance_received
     TOTAL_RECEIVED                                             = :total_received
     ADVANCE_ADJUSTED                                           = :advance_adjusted
@@ -79,7 +80,7 @@ module Constants
     ACTUAL_INTEREST_DUE                                        = :actual_interest_due
     ACTUAL_TOTAL_DUE                                           = :actual_total_due
 
-    LOAN_PRODUCT_AMOUNTS = [LOAN_DISBURSED, PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, TOTAL_RECEIVED, TOTAL_PAID]
+    LOAN_PRODUCT_AMOUNTS = [LOAN_DISBURSED, PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, TOTAL_RECEIVED, TOTAL_PAID, LOAN_RECOVERY]
 
     #PRINCIPAL_OUTSTANDING is ACTUAL_PRINCIPAL_OUTSTANDING when loan is NOT overdue
     #PRINCIPAL_AT_RISK is ACTUAL_PRINCIPAL_OUTSTANDING when loan is OVERDUE

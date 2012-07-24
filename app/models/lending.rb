@@ -438,6 +438,7 @@ class Lending
   def interest_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[INTEREST_RECEIVED]; end
   def advance_received_on_date(on_date = Date.today); amounts_received_on_date(on_date)[ADVANCE_RECEIVED]; end
   def advance_adjusted_on_date(on_date = Date.today); amounts_received_on_date(on_date)[ADVANCE_ADJUSTED]; end
+  def loan_recovery_on_date(on_date = Date.today); amounts_received_on_date(on_date)[LOAN_RECOVERY]; end
 
   def total_received_on_date(on_date = Date.today)
     principal_received_on_date(on_date) + interest_received_on_date(on_date) + advance_received_on_date(on_date)
@@ -455,9 +456,10 @@ class Lending
   def interest_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[INTEREST_RECEIVED]; end
   def advance_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[ADVANCE_RECEIVED]; end
   def advance_adjusted_till_date(on_date = Date.today); amounts_received_till_date(on_date)[ADVANCE_ADJUSTED]; end
+  def loan_recovery_till_date(on_date = Date.today); amounts_received_till_date(on_date)[LOAN_RECOVERY]; end
 
   def total_received_till_date
-    principal_received_till_date + interest_received_till_date + advance_received_till_date
+    principal_received_till_date + interest_received_till_date + advance_balance + loan_recovery_till_date
   end
 
   def advance_balance(on_date = Date.today); advance_received_till_date(on_date) - advance_adjusted_till_date(on_date); end
@@ -548,6 +550,7 @@ class Lending
     when LOAN_REPAYMENT then allocation = repay(payment_transaction)
     when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
     when LOAN_ADVANCE_ADJUSTMENT then allocation = adjust_advance(payment_transaction)
+    when LOAN_RECOVERY then allocation = recover_on_loan(payment_transaction)
     else
       raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
@@ -669,6 +672,12 @@ class Lending
     update_for_payment(by_contra, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance)
   end
 
+  def recover_on_loan(by_receipt)
+    make_specific_allocation = false; specific_principal_money_amount = nil; specific_interest_money_amount = nil
+    adjust_advance = false; recover_on_loan = true
+    update_for_payment(by_receipt, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
+  end
+
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
@@ -732,21 +741,36 @@ class Lending
   end
 
   # All actions required to update the loan for the payment
-  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false)
+  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false, recover_on_loan = false)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
     performed_at = payment_transaction.performed_at
     accounted_at = payment_transaction.accounted_at
-    payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance)
+    payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
     loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
     payment_allocation
   end
 
+  def init_allocation
+    {
+      PRINCIPAL_RECEIVED => zero_money_amount,
+      INTEREST_RECEIVED  => zero_money_amount,
+      ADVANCE_RECEIVED   => zero_money_amount,
+      ADVANCE_ADJUSTED   => zero_money_amount,
+      LOAN_RECOVERY      => zero_money_amount
+    }
+  end
+
   # Record an allocation on the loan for the given total amount
-  def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false)
+  def make_allocation(total_amount, on_date, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false, recover_on_loan = false)
     raise ArgumentError, "Cannot allocate zero amount" unless (total_amount > zero_money_amount)
 
-    resulting_allocation = adjust_advance ? {ADVANCE_RECEIVED => zero_money_amount} : {ADVANCE_ADJUSTED => zero_money_amount}
+    resulting_allocation = init_allocation
+
+    if (recover_on_loan)
+      resulting_allocation[LOAN_RECOVERY] = total_amount
+      return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
+    end
 
     if (make_specific_allocation)
       raise ArgumentError, "Specific principal amount was not available" unless (specific_principal_money_amount and (specific_principal_money_amount.is_a?(Money)))
@@ -754,7 +778,6 @@ class Lending
 
       resulting_allocation[PRINCIPAL_RECEIVED] = specific_principal_money_amount
       resulting_allocation[INTEREST_RECEIVED]  = specific_interest_money_amount
-      resulting_allocation[ADVANCE_RECEIVED]   = zero_money_amount
       return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     end
 
@@ -764,8 +787,6 @@ class Lending
     unless (adjust_advance)
       if (_current_due_status == NOT_DUE)
         resulting_allocation[ADVANCE_RECEIVED] = total_amount
-        resulting_allocation[PRINCIPAL_RECEIVED] = zero_money_amount
-        resulting_allocation[INTEREST_RECEIVED]  = zero_money_amount
         return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
       end
     end

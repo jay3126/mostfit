@@ -7,6 +7,7 @@ class LoanReceipt
   property INTEREST_RECEIVED,    *MONEY_AMOUNT
   property ADVANCE_RECEIVED,     *MONEY_AMOUNT
   property ADVANCE_ADJUSTED,     *MONEY_AMOUNT
+  property LOAN_RECOVERY,        *MONEY_AMOUNT
   property :is_advance_adjusted, Boolean, :default => lambda {|obj, p| (obj.advance_adjusted > 0)}
   property :currency,            *CURRENCY
   property :performed_at,        *INTEGER_NOT_NULL
@@ -19,7 +20,7 @@ class LoanReceipt
   validates_with_method :not_all_amounts_are_zero
 
   def money_amounts
-    [PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED]
+    [PRINCIPAL_RECEIVED, INTEREST_RECEIVED, ADVANCE_RECEIVED, ADVANCE_ADJUSTED, LOAN_RECOVERY]
   end
 
   # Record the principal, interest, and advance amounts received on a loan on the specified value date
@@ -65,6 +66,7 @@ class LoanReceipt
     totals[INTEREST_RECEIVED]  = zero_money
     totals[ADVANCE_RECEIVED]   = zero_money
     totals[ADVANCE_ADJUSTED]   = zero_money
+    totals[LOAN_RECOVERY]      = zero_money
 
     unless receipts.empty?
       all_money_receipts = receipts.collect { |receipt| receipt.to_money }
@@ -80,6 +82,9 @@ class LoanReceipt
 
       all_advance_adjusted_amounts = all_money_receipts.collect { |receipt| receipt[ADVANCE_ADJUSTED] }
       totals[ADVANCE_ADJUSTED] = all_advance_adjusted_amounts.reduce(:+) unless all_advance_adjusted_amounts.empty?
+
+      all_loan_recovery_amounts = all_money_receipts.collect { |receipt| receipt[LOAN_RECOVERY] }
+      totals[LOAN_RECOVERY] = all_loan_recovery_amounts.reduce(:+) unless all_loan_recovery_amounts.empty?
     end
 
     Money.add_total_to_map(totals, :total_received)
