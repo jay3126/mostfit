@@ -52,6 +52,7 @@ class ConsolidatedReport < Report
       loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
       loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
 
+      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_for_date_range(@from_date, @to_date, *branch_id)
       branch_data_map = {}
       branch_data_map[:loans_applied] = loans_applied
       branch_data_map[:loans_approved] = loans_approved
@@ -63,6 +64,7 @@ class ConsolidatedReport < Report
       branch_data_map[:loan_payments] = loan_payments
       branch_data_map[:loan_net_payments] = loan_net_payments
       branch_data_map[:loan_allocations] = loan_allocations
+      branch_data_map[:loan_balances] = loan_balances
 
       data[branch_id] = branch_data_map
     }    
