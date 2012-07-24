@@ -17,11 +17,13 @@ class LoanAssignment
   validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?, :effective_after_assignment_date?
 
   def cannot_both_sell_and_encumber
+    validate_value = true
     if self.new?
-      LoanAssignment.get_loan_assigned_to(self.loan_id, self.effective_on).nil? ? true :
-        [false, "There is currently an assignment for the loan with ID #{self.loan_id} that is in effect on #{self.effective_on}"]
+      any_loan_assignment = LoanAssignment.first(:loan_id => self.loan_id)
+      validate_value = (any_loan_assignment.nil?) ? true :
+        [false, "There is already an assignment for the loan with ID #{self.loan_id} in effect"]
     end
-    true
+    validate_value
   end
 
   def loan_exists?
