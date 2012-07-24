@@ -356,8 +356,10 @@ class Lendings < Application
   end
 
   def update_write_off_lendings
-    @message = {}
-    lendings = []
+    @message  = {}
+    lendings  = []
+    @date     = params[:date].blank? ? Date.today : Date.parse(params[:date])
+    @staff_id = session.usre.staff_member.id
     lending_params = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
     begin
       lending_params.each do |value|
@@ -365,6 +367,9 @@ class Lendings < Application
       end
       @message = {:error => "Please select Loan for write off"} if lendings.blank?
       if @message[:error].blank?
+        lendings.each do |lending|
+          lending.write_off(@date, @staff_id)
+        end
         @message = {:notice => "Loan Write Off done successfully."}
       end
     rescue => ex

@@ -366,10 +366,9 @@ class ReportingFacade < StandardFacade
     outstanding_loans.select {|loan| (loan.days_past_due >= days_past_due)}
   end
 
-  def loans_eligible_for_write_off
-    days_past_due_eligible_for_writeoff = configuration_facade.days_past_due_eligible_for_writeoff
-    raise Errors::InvalidConfigurationError, "Days past due for write off has not been configured" unless days_past_due_eligible_for_writeoff
-    [days_past_due_eligible_for_writeoff, loans_past_due(days_past_due_eligible_for_writeoff)]
+  def loans_eligible_for_write_off(days_past_due = configuration_facade.days_past_due_eligible_for_writeoff)
+    raise Errors::InvalidConfigurationError, "Days past due for write off has not been configured" unless days_past_due
+    [days_past_due, loans_past_due(days_past_due)]
   end
 
   def loans_past_due(by_number_of_days = 1)
