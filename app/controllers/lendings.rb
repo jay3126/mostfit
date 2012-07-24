@@ -359,7 +359,7 @@ class Lendings < Application
     @message  = {}
     lendings  = []
     @date     = params[:date].blank? ? Date.today : Date.parse(params[:date])
-    @staff_id = session.usre.staff_member.id
+    @staff_id = session.user.staff_member.id
     lending_params = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
     begin
       lending_params.each do |value|
