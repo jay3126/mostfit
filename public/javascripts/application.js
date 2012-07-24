@@ -788,6 +788,9 @@ $(document).ready(function(){
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
   //Handling targets form
+  jQuery('form').live('submit', function(){
+    return date_validation();
+  });
   $("select#target_attached_to").change(function(){
     $.ajax({
       url: "/targets/all/"+$(this).val()+".json",
@@ -1193,4 +1196,29 @@ function update_total_amount(currency){
     total = parseFloat(total) + f_value;
   });
   jQuery('div#weeksheet_total_amount').html(total.toFixed(2) + ' ' + currency);
+}
+
+function date_validation(){
+  dates_fields = jQuery('input.hasDatepicker');
+  text = ''
+  value = ''
+  message = ''
+  jQuery.each(dates_fields, function(index, date){
+    text = jQuery(date).parent().prev().html().trim();
+    value = jQuery(date).val();
+    if(value == ''){
+      message = text + ' cannot be blank'
+    }else{
+      if(isNaN(Date.parse(value))){
+        message = text + ' is not valid'
+      }
+    }
+  })
+
+  if(message==''){
+    return true
+  }else{
+    alert(message);
+    return false;
+  }
 }

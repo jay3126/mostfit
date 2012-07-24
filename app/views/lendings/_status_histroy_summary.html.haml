@@ -1,0 +1,23 @@
+%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even{:style => 'width:50%'} Status
+    %td= @lending.status.humanize
+  - if @lending.is_repaid?
+    - repaid = @lending.loan_repaid_status
+    %tr.odd
+      %th.odd Nature
+      %td= "#{repaid.repaid_nature.humanize} on #{repaid.repaid_on_date}"
+    %tr.even
+      %th.even Closing outstanding principal
+      %td= repaid.to_money[:closing_outstanding_principal]
+    %tr.odd
+      %th.odd Closing outstanding interest
+      %td= repaid.to_money[:closing_outstanding_interest]
+  - elsif @lending.is_written_off?
+    %tr.odd
+      %th.odd On Date
+      %td= @lending_status.effective_on
+  - else
+    %tr.odd
+      %th.odd On Date
+      %td= @lending_status.effective_on

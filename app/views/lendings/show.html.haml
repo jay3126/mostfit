@@ -63,7 +63,7 @@
     %tr.even
       %td
         = link_to_with_rights "Preclose", url(:controller => :lendings, :action => :lending_preclose, :id => @lending.id), :class => "greenButton"
-
+= partial 'lendings/status_histroy_summary'
 %div.tab_container.shaded
   %ul.tabs
     %li#Schedule
