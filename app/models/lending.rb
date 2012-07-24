@@ -147,6 +147,7 @@ class Lending
     transaction_receipt_type = payment_transaction.receipt_type
     transaction_effective_on = payment_transaction.effective_on
     transaction_money_amount = payment_transaction.payment_money_amount
+    transaction_towards_type = payment_transaction.payment_towards
     
     Validators::Arguments.not_nil?(transaction_receipt_type, transaction_effective_on, transaction_money_amount)
 
@@ -157,14 +158,25 @@ class Lending
 
     #receipts
     if ([RECEIPT, CONTRA].include?(transaction_receipt_type))
-      return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
+      if ([PAYMENT_TOWARDS_LOAN_REPAYMENT, PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT, PAYMENT_TOWARDS_LOAN_PRECLOSURE].include?(transaction_towards_type))
+        return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
+
+        maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding : actual_total_outstanding_net_advance_balance
+        if (maximum_receipt_to_accept < transaction_money_amount)
+          return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
+        end
+      end
       
-      maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding : actual_total_outstanding_net_advance_balance
-      if (maximum_receipt_to_accept < transaction_money_amount)
-        return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
+      if (transaction_towards_type == PAYMENT_TOWARDS_LOAN_RECOVERY)
+        return [false, "Loan recovery is only permitted on written-off loans"] unless is_written_off?
+
+        _maximum_to_be_collected = maximum_to_be_collected
+        if (_maximum_to_be_collected < transaction_money_amount)
+          return [false, "Recovery cannot exceed #{_maximum_to_be_collected.to_s}"]
+        end
       end
     end
-
+    
     true
   end
 
@@ -243,6 +255,15 @@ class Lending
   def total_interest_applicable
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan" unless self.loan_base_schedule
     self.loan_base_schedule.total_interest_applicable_money_amount
+  end
+
+  def total_loan_disbursed_and_interest_applicable
+    (total_loan_disbursed || zero_money_amount) + (total_interest_applicable || zero_money_amount)
+  end
+
+  def maximum_to_be_collected
+    (total_loan_disbursed_and_interest_applicable > total_received_till_date) ? (total_loan_disbursed_and_interest_applicable - total_received_till_date) :
+        zero_money_amount
   end
 
   ################
