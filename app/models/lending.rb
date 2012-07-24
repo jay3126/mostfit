@@ -422,12 +422,12 @@ class Lending
   ########################################################
 
   def current_advance_available
-    historical_advance_available(Date.today)
+    advance_balance
   end
 
   def historical_advance_available(on_date)
     # TODO implement using accounting facade
-    advance_received_till_date(on_date)
+    advance_received_till_date(on_date) - advance_adjusted_till_date(on_date)
   end
 
   def amounts_received_on_date(on_date = Date.today)
