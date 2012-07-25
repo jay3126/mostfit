@@ -1204,7 +1204,11 @@ function date_validation(){
   value = ''
   message = ''
   jQuery.each(dates_fields, function(index, date){
+    if(jQuery(date).parents('th').size()!=0)
     text = jQuery(date).parent().prev().html().trim();
+    if(text.length>30 || text.length == 0){
+      text = 'Date'
+    }
     value = jQuery(date).val();
     if(value == ''){
       message = text + ' cannot be blank'

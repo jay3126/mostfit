@@ -361,7 +361,8 @@ class Lendings < Application
   end
 
   def write_off_lendings
-    @write_off = reporting_facade.loans_eligible_for_write_off
+    on_days    = params[:on_days]
+    @write_off = on_days.blank? ? reporting_facade.loans_eligible_for_write_off : reporting_facade.loans_eligible_for_write_off(on_days.to_i)
     @lendings  = @write_off.last
     @due_days  = @write_off.first
     display @lendings

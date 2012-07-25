@@ -1,3 +1,9 @@
+%br
+%div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:lendings, :action => url(:controller => :lendings, :action => :write_off_lendings), :method => :get) do
+    Days Past Dues
+    = text_field :name => "on_days", :value => @due_days
+    = submit "Go"
 %h1 Write Off Loans
 %h2= "Days Past Dues For #{@due_days} days and above"
 - if @lendings.blank?
@@ -70,7 +76,7 @@
             = check_box :name => "write_off_lendings[#{lending.id}][]" ,:value => lending.id
           %td
             - min_date = lending.most_recent_payment_transaction_on_date
-            = date_select "write_off_lendings[#{lending.id}][][on_date]", get_effective_date, {:id => "lending_#{lending.id}", :size=> "10" , :min_date => min_date}
+            = date_select "write_off_lendings[#{lending.id}][][on_date]", get_effective_date, {:id => "lending_#{lending.id}", :size=> "10" , :min_date => min_date, :text => 'date_select'}
       %tfoot
         %tr.org_total
           %td{:colspan => 15}
