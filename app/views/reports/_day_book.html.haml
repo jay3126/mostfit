@@ -1,8 +1,8 @@
 = partial :form
 - unless @data.blank?
   - currency = MoneyManager.get_default_currency
-  - sum_of_credits = LedgerBalance.zero_debit_balance(currency)
-  - sum_of_debits = LedgerBalance.zero_credit_balance(currency)
+  - sum_of_debits = LedgerBalance.zero_debit_balance(currency)
+  - sum_of_credits = LedgerBalance.zero_credit_balance(currency)
   - vouchers = @data
   %table.report.nojs
     %tr.header
@@ -22,14 +22,11 @@
         Debit
       %th
         Credit
-      %th
-        Net credit
-      %th
-        Net debit
     - vouchers.each do |voucher|
       - count = 0
       - postings_count = voucher.ledger_postings.count
       - voucher.ledger_postings.each do |p|
+        - balance = p.to_balance
         - unless count > 0
           %tr
             %td{:rowspan => postings_count}
@@ -44,20 +41,45 @@
               = #voucher.cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?
-            %td
-              = p.to_balance if p.effect == :debit
-            %td
-              = p.to_balance if p.effect == :credit
+            %td{:style => "text-align:center;"}
+              - if balance.is_debit_balance?
+                - sum_of_debits += balance
+                = balance.to_s
+              - else
+                = "-"
+            %td{:style => "text-align:center;"}
+              - if balance.is_credit_balance?
+                - sum_of_credits += balance
+                = balance.to_s
+              - else
+                = "-"
             - count += 1
         - else
           %tr
             %td
               = p.ledger.name unless p.ledger.nil?
-            %td
-              = p.to_balance if p.effect == :debit
-            %td
-              = p.to_balance if p.effect == :credit
+            %td{:style => "text-align:center;"}
+              - if balance.is_debit_balance?
+                - sum_of_debits += balance
+                = balance.to_s
+              - else
+                = "-"
+            %td{:style => "text-align:center;"}
+              - if balance.is_credit_balance?
+                - sum_of_credits += balance
+                = balance.to_s
+              - else
+                = "-"
             - count += 1
+    %tfoot
+      %tr
+        %th{:colspan => "6"}
+          Totals
+        %th
+          = sum_of_debits
+        %th
+          = sum_of_credits
+
 - else
   .shaded
     %h3= "No records found"
