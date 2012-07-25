@@ -21,12 +21,12 @@
       %th
         Opening balance
       %td
-        = opening_balance
+        = "#{opening_balance} as on #{open_date}"
     %tr
       %th
         Current Balance
       %td
-        = @accounting_facade.get_current_ledger_balance(@ledger.id)
+        = "#{@accounting_facade.get_current_ledger_balance(@ledger.id)} as on #{Date.today}"
     %tr
       %th
         Balance as on

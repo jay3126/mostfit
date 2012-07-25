@@ -789,7 +789,7 @@ $(document).ready(function(){
   $('button.add').addClass("greenButton");
   //Handling targets form
   jQuery('form').live('submit', function(){
-    return date_validation();
+//    return date_validation();
   });
   $("select#target_attached_to").change(function(){
     $.ajax({
@@ -1213,6 +1213,9 @@ function date_validation(){
     if(value == ''){
       message = text + ' cannot be blank'
     }else{
+      date1 = value.split('/')
+      date2 = value.split('-')
+      date3 = value.split('.')
       if(isNaN(Date.parse(value))){
         message = text + ' is not valid'
       }
