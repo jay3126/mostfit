@@ -283,7 +283,12 @@
           - if @report.respond_to?(:effective_date)
             %td
               %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
-
+          - if @report.respond_to?(:ledger_list)
+            %td
+              Ledger:
+              -# primary_chart_of_accounts = accounting_facade.get_primary_chart_of_accounts
+              -# ledgers = primary_chart_of_accounts.ledgers
+              = select(:ledger_list, :collection => Ledger.all.uniq, :value_method => :id, :text_method => :name, :include_blank => true)
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:loan_cycle)

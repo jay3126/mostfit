@@ -1,59 +1,62 @@
 = partial :form
-- currency = MoneyManager.get_default_currency
-- total_debit_balance = LedgerBalance.zero_debit_balance(currency)
-- total_credit_balance = LedgerBalance.zero_credit_balance(currency)
-- table_width = 3
-- figures_column_width = "10%"
-
-%table.report.nojs
-  %thead
-    %tr.header
-      %th
-        Ledger
-      %th{:width => figures_column_width}
-        Debit balance
-      %th{:width => figures_column_width}
-        Credit balance
-  %tbody
-    - @data.group_by{|data| [data.account_type]}.each do |account_type, ledgers|
-      %tr
-        %th{:colspan => table_width}
-          = account_type
-      - type_debit_balance = LedgerBalance.zero_debit_balance(currency)
-      - type_credit_balance = LedgerBalance.zero_credit_balance(currency)
-      - ledgers.each do |ledger|
-        - balance = ledger.balance(Date.today)
+- unless @data.blank?
+  - currency = MoneyManager.get_default_currency
+  - total_debit_balance = LedgerBalance.zero_debit_balance(currency)
+  - total_credit_balance = LedgerBalance.zero_credit_balance(currency)
+  - table_width = 3
+  - figures_column_width = "10%"
+  %table.report.nojs
+    %thead
+      %tr.header
+        %th
+          Ledger
+        %th{:width => figures_column_width}
+          Debit balance
+        %th{:width => figures_column_width}
+          Credit balance
+    %tbody
+      - @data.group_by{|data| [data.account_type]}.each do |account_type, ledgers|
         %tr
-          %td
-            = ledger.name
-          %td{:style => "text-align:center;"}
-            - if balance.is_debit_balance?
-              - debit_balance = balance.get_debit_balance
-              - type_debit_balance += debit_balance
-              = debit_balance.to_s
-            - else
-              = "-"
-          %td{:style => "text-align:center;"}
-            - if balance.is_credit_balance?
-              - credit_balance = balance.get_credit_balance
-              - type_credit_balance += credit_balance
-              = credit_balance.to_s
-            - else
-              = "-"
+          %th{:colspan => table_width}
+            = account_type
+        - type_debit_balance = LedgerBalance.zero_debit_balance(currency)
+        - type_credit_balance = LedgerBalance.zero_credit_balance(currency)
+        - ledgers.each do |ledger|
+          - balance = ledger.balance(Date.today)
+          %tr
+            %td
+              = ledger.name
+            %td{:style => "text-align:center;"}
+              - if balance.is_debit_balance?
+                - debit_balance = balance.get_debit_balance
+                - type_debit_balance += debit_balance
+                = debit_balance.to_s
+              - else
+                = "-"
+            %td{:style => "text-align:center;"}
+              - if balance.is_credit_balance?
+                - credit_balance = balance.get_credit_balance
+                - type_credit_balance += credit_balance
+                = credit_balance.to_s
+              - else
+                = "-"
+        %tr
+          %th
+            = "Total balances for #{account_type}"
+          %th
+            = type_debit_balance.to_s
+          %th
+            = type_credit_balance.to_s
+            - total_debit_balance += type_debit_balance
+            - total_credit_balance += type_credit_balance
+    %tfoot
       %tr
         %th
-          = "Total balances for #{account_type}"
+          Totals
         %th
-          = type_debit_balance.to_s
+          = total_debit_balance.to_s
         %th
-          = type_credit_balance.to_s
-          - total_debit_balance += type_debit_balance
-          - total_credit_balance += type_credit_balance
-  %tfoot
-    %tr
-      %th
-        Totals
-      %th
-        = total_debit_balance.to_s
-      %th
-        = total_credit_balance.to_s
+          = total_credit_balance.to_s
+- else
+  .shaded
+    %h3 No records found
