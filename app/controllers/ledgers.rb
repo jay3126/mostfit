@@ -31,7 +31,7 @@ class Ledgers < Application
   def create(ledger)
     @ledger = Ledger.new(ledger)
     if @ledger.save
-      redirect resource(:ledgers), :message => {:notice => "Ledger '#{@ledger.name}' was successfully created"}
+      redirect resource(:@ledger), :message => {:notice => "Ledger '#{@ledger.name}' was successfully created"}
     else
       message[:error] = "Ledger failed to be created"
       render :new

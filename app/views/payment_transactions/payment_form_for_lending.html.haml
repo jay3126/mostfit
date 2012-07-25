@@ -9,9 +9,14 @@
           = hidden_field :name => "payment_type", :value => Constants::Transaction::RECEIPT
       %tr
         %td
+          Maximum Amount
+        %td
+          = @lending.maximum_to_be_collected
+      %tr
+        %td
           Payment Date
         %td
-          = date_select "payment_date", Date.today
+          = date_select "payment_date", get_effective_date
       %tr
         %td
           Payment Amount
