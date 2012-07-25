@@ -159,7 +159,7 @@ namespace :mostfit do
 
     sl_no = 0
 
-    f = File.open("tmp/mas_financials_#{DateTime.now.to_s}.csv", "w")
+    f = File.open("tmp/mas_financials_second_term_loan_#{DateTime.now.to_s}.csv", "w")
     f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Date of Birth\", \"Caste\", \"Residence Address\", \"Residence Pin Code\", \"State\", \"Residence Phone Number\", \"Name of Assets\", \"Gross Income\", \"Gender\", \"Name of Marketing Executive\", \"Loan Id\", \"Purpose of Loans\", \"Category of Loanee\", \"Cycle Number\", \"Date of Disbursement\", \"Disbursement Mode\", \"Disbursement Cheque Number\", \"First Installment Date\", \"Last Installment Date\", \"Outstanding Principal\", \"Outstanding Interest\", \"Days Since Disbursal\", \"Scheme IRR (%)\", \"Amount Financed\", \"Upfront Fees Amount in Rs.\", \"Insurance Charges\", \"Any Other Charges\", \"Installment Amount\", \"Tenure in Weeks\", \"Advance EMI\", \"No. Of Installment\", \"EMI Frequency\", \"Seasoning\", \"OD. Inst.\", \"Od. Amt. Rs.\", \"SD Amt. Rs.\", \"SD. Refund / Scheme Refund\", \"Mode of Repayment\", \"KYC Detail\", \"Future Capital O/S Amt. Rs.\", \"Future O/S Installment\", \"Future Receivable Amt. Rs.\", \"Cash Flow in March 2012\", \"Cash Flow in April 2012\", \"Cash Flow in May 2012\", \"Cash Flow in June 2012\", \"Cash Flow in July 2012\", \"Cash Flow in August 2012\", Cash Flow in September 2012, \"Cash Flow in October 2012\", \"Cash Flow in November 2012\", \"Cash Flow in December 2012\", \"Cash Flow in January 2013\", \"Cash Flow in February 2013\", \"Cash Flow in March 2013\", \"Cash Flow in April 2013\", \"Cash Flow in May 2013\", \"Cash Flow in June 2013\", \"Cash Flow in July 2013\", \"Cash Flow in August 2013\", \"Cash Flow in September 2013\", \"Cash Flow in October 2013\", \"Cash Flow in November 2013\", \"Cash Flow in December 2013\", \"Cash Flow in January 2014\", \"Cash Flow in February 2014\", \"Cash Flow in March 2014\", \"Cash Flow in April 2014\", \"Cash Flow in May 2014\", \"Cash Flow in June 2014\", \"Cash Flow in July 2014\", \"Cash Flow in August 2014\"")
 
     Loan.all(:client_id => client_ids, :disbursal_date => disbursal_dates).each do |loan|
@@ -208,6 +208,138 @@ namespace :mostfit do
       loan_outstanding_interest = loan.actual_outstanding_interest_on(date)
       loan_days_since_disbursal = date - loan.disbursal_date
         
+      loan_scheme_irr = (loan.irr * 100)
+      loan_product_name = loan.loan_product.name
+      loan_amount_financed = loan.amount
+      loan_upfront_fees = loan.applicable_fees[0].amount
+      loan_insurance_charges = loan.applicable_fees[1].amount
+      loan_any_other_charges = "NA"
+      loan_installment_amount = (loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1))
+      loan_tenure = loan.number_of_installments
+      loan_advance_emi = ""
+      loan_number_of_installments = loan.number_of_installments
+      loan_installment_frequency = loan.installment_frequency.to_s.capitalize
+      loan_seasoning = "NA"
+      loan_overdue_installment = 0
+      loan_overdue_amount = 0
+      loan_sd_amount = "NA"
+      loan_sd_refund = "NA"
+      loan_mode_of_repayment = "Cash"
+      loan_kyc_details = "Yes"
+      loan_future_outstanding_amount = loan.scheduled_outstanding_total_on(date)
+      loan_future_outstanding_installment = (loan.number_of_installments - loan.number_of_installments_before(date))
+      loan_future_receivable_amount = (loan.total_to_be_received - loan.total_received_up_to(date))
+
+      if (loan.scheduled_first_payment_date >= from_dates[0] and loan.scheduled_first_payment_date <= to_dates[0])
+        monthly_cash_flow_march_2012 = (loan.scheduled_principal_for_installment(1) + loan.scheduled_interest_for_installment(1))
+      else
+        monthly_cash_flow_march_2012 = 0
+      end
+      monthly_cash_flow_april_2012 = (loan.scheduled_outstanding_total_on(from_dates[1]) - loan.scheduled_outstanding_total_on(to_dates[1]))
+      monthly_cash_flow_may_2012 = (loan.scheduled_outstanding_total_on(from_dates[2]) - loan.scheduled_outstanding_total_on(to_dates[2]))
+      monthly_cash_flow_june_2012 = (loan.scheduled_outstanding_total_on(from_dates[3]) - loan.scheduled_outstanding_total_on(to_dates[3]))
+      monthly_cash_flow_july_2012 = (loan.scheduled_outstanding_total_on(from_dates[4]) - loan.scheduled_outstanding_total_on(to_dates[4]))
+      monthly_cash_flow_august_2012 = (loan.scheduled_outstanding_total_on(from_dates[5]) - loan.scheduled_outstanding_total_on(to_dates[5]))
+      monthly_cash_flow_september_2012 = (loan.scheduled_outstanding_total_on(from_dates[6]) - loan.scheduled_outstanding_total_on(to_dates[6]))
+      monthly_cash_flow_october_2012 = (loan.scheduled_outstanding_total_on(from_dates[7]) - loan.scheduled_outstanding_total_on(to_dates[7]))
+      monthly_cash_flow_november_2012 = (loan.scheduled_outstanding_total_on(from_dates[8]) - loan.scheduled_outstanding_total_on(to_dates[8]))
+      monthly_cash_flow_december_2012 = (loan.scheduled_outstanding_total_on(from_dates[9]) - loan.scheduled_outstanding_total_on(to_dates[9]))
+
+      monthly_cash_flow_january_2013 = (loan.scheduled_outstanding_total_on(from_dates[10]) - loan.scheduled_outstanding_total_on(to_dates[10]))
+      monthly_cash_flow_february_2013 = (loan.scheduled_outstanding_total_on(from_dates[11]) - loan.scheduled_outstanding_total_on(to_dates[11]))
+      monthly_cash_flow_march_2013 = (loan.scheduled_outstanding_total_on(from_dates[12]) - loan.scheduled_outstanding_total_on(to_dates[12]))
+      monthly_cash_flow_april_2013 = (loan.scheduled_outstanding_total_on(from_dates[13]) - loan.scheduled_outstanding_total_on(to_dates[13]))
+      monthly_cash_flow_may_2013 = (loan.scheduled_outstanding_total_on(from_dates[14]) - loan.scheduled_outstanding_total_on(to_dates[14]))
+      monthly_cash_flow_june_2013 = (loan.scheduled_outstanding_total_on(from_dates[15]) - loan.scheduled_outstanding_total_on(to_dates[15]))
+      monthly_cash_flow_july_2013 = (loan.scheduled_outstanding_total_on(from_dates[16]) - loan.scheduled_outstanding_total_on(to_dates[16]))
+      monthly_cash_flow_august_2013 = (loan.scheduled_outstanding_total_on(from_dates[17]) - loan.scheduled_outstanding_total_on(to_dates[17]))
+      monthly_cash_flow_september_2013 = (loan.scheduled_outstanding_total_on(from_dates[18]) - loan.scheduled_outstanding_total_on(to_dates[18]))
+      monthly_cash_flow_october_2013 = (loan.scheduled_outstanding_total_on(from_dates[19]) - loan.scheduled_outstanding_total_on(to_dates[19]))
+      monthly_cash_flow_november_2013 = (loan.scheduled_outstanding_total_on(from_dates[20]) - loan.scheduled_outstanding_total_on(to_dates[20]))
+      monthly_cash_flow_december_2013 = (loan.scheduled_outstanding_total_on(from_dates[21]) - loan.scheduled_outstanding_total_on(to_dates[21]))
+
+      monthly_cash_flow_january_2014 = (loan.scheduled_outstanding_total_on(from_dates[22]) - loan.scheduled_outstanding_total_on(to_dates[22]))
+      monthly_cash_flow_february_2014 = (loan.scheduled_outstanding_total_on(from_dates[23]) - loan.scheduled_outstanding_total_on(to_dates[23]))
+      monthly_cash_flow_march_2014 = (loan.scheduled_outstanding_total_on(from_dates[24]) - loan.scheduled_outstanding_total_on(to_dates[24]))
+      monthly_cash_flow_april_2014 = (loan.scheduled_outstanding_total_on(from_dates[25]) - loan.scheduled_outstanding_total_on(to_dates[25]))
+      monthly_cash_flow_may_2014 = (loan.scheduled_outstanding_total_on(from_dates[26]) - loan.scheduled_outstanding_total_on(to_dates[26]))
+      monthly_cash_flow_june_2014 = (loan.scheduled_outstanding_total_on(from_dates[27]) - loan.scheduled_outstanding_total_on(to_dates[27]))
+      monthly_cash_flow_july_2014 = (loan.scheduled_outstanding_total_on(from_dates[28]) - loan.scheduled_outstanding_total_on(to_dates[28]))
+      monthly_cash_flow_august_2014 = (loan.scheduled_outstanding_total_on(from_dates[29]) - loan.scheduled_outstanding_total_on(to_dates[29]))
+      
+      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", #{client_date_of_birth}, \"#{client_caste}\", \"#{client_address}\", #{client_address_pin_code}, \"#{client_state}\", #{client_phone_number}, \"#{client_name_of_assets}\", #{client_gross_income}, \"#{client_gender}\", \"#{client_marketing_executive}\", #{loan_id}, \"#{loan_purpose}\", \"#{loan_category}\", #{loan_cycle_number}, #{loan_disbursal_date}, \"#{loan_disbursement_mode}\", \"#{loan_disbursement_cheque_number}\", #{loan_first_installment_date}, #{loan_last_installment_date}, #{loan_outstanding_principal}, #{loan_outstanding_interest}, #{loan_days_since_disbursal}, \"#{loan_scheme_irr}\", #{loan_amount_financed}, #{loan_upfront_fees}, #{loan_insurance_charges}, #{loan_any_other_charges}, #{loan_installment_amount}, #{loan_tenure}, #{loan_advance_emi}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_seasoning}\", #{loan_overdue_installment}, #{loan_overdue_amount}, \"#{loan_sd_amount}\", \"#{loan_sd_refund}\", \"#{loan_mode_of_repayment}\", \"#{loan_kyc_details}\", #{loan_future_outstanding_amount}, #{loan_future_outstanding_installment}, #{loan_future_receivable_amount}, #{monthly_cash_flow_march_2012}, #{monthly_cash_flow_april_2012}, #{monthly_cash_flow_may_2012}, #{monthly_cash_flow_june_2012}, #{monthly_cash_flow_july_2012}, #{monthly_cash_flow_august_2012}, #{monthly_cash_flow_september_2012}, #{monthly_cash_flow_october_2012}, #{monthly_cash_flow_november_2012}, #{monthly_cash_flow_december_2012}, #{monthly_cash_flow_january_2013}, #{monthly_cash_flow_february_2013}, #{monthly_cash_flow_march_2013}, #{monthly_cash_flow_april_2013}, #{monthly_cash_flow_may_2013}, #{monthly_cash_flow_june_2013}, #{monthly_cash_flow_july_2013}, #{monthly_cash_flow_august_2013}, #{monthly_cash_flow_september_2013}, #{monthly_cash_flow_october_2013}, #{monthly_cash_flow_november_2013}, #{monthly_cash_flow_december_2013}, #{monthly_cash_flow_january_2014}, #{monthly_cash_flow_february_2014}, #{monthly_cash_flow_march_2014}, #{monthly_cash_flow_april_2014}, #{monthly_cash_flow_may_2014}, #{monthly_cash_flow_june_2014}, #{monthly_cash_flow_july_2014}, #{monthly_cash_flow_august_2014}")
+
+    end
+    f.close
+  end
+
+  desc "Generates report of MAS financials for Intellecash for third term loan"
+  task :mas_financials_third_term_loan do
+
+    client_ids = [18726,18727,18728,18729,18730,18731,18732,18733,18734,18735,18736,18737,18739,18740,18741,18707,18708,18709,18710,18711,18702,18703,18704,18705,18706,18721,18722,18723,18724,18725,18712,18713,18714,18715,18716,18717,18718,18719,18720,18738,18677,18678,18679,18680,18681,18682,18683,18684,18685,18686,18692,18693,18694,18695,18696,18697,18698,18699,18700,18701,13751,13752,13753,13755,13759,13754,13756,13757,13758,18742,18743,18744,18745,18746,18747,18748,18749,18750,18751,18752,18753,18754,18755,18756,18803,18793,18794,18795,18796,18797,18798,18799,18800,18801,18802,18757,18758,18759,18760,18761,18762,18763,18764,18765,18766,18767,18768,18769,18770,18771,18814,18815,18816,18817,18818,18819,18820,18821,18822,18823,18824,18825,18826,18827,18828,18777,18778,18779,18780,18781,18772,18773,18774,18775,18776,18804,18805,18806,18807,18808,18809,18810,18811,18812,18813,18787,18788,18789,18790,18791,7955,7964,7947,7966,7949,18782,18783,18784,18785,18786,18829,18830,18831,18832,18833,18834,18835,18836,18837,18838,7940,7928,7924,7920,7918,7941,7939,18839,18840,7917,18792,18843,18844,18845,18846,18847,18848,18849,18850,18851,18852,18853,18854,18855,18856,18842,8627,8749,8623,8626,8624,8625,8747,8750,18841,7782,7790,8337,8343,7779,7867,7864,7866,7861,7859,7857,7868,7863,18857,18858,18869,18870,18871,18872,18873,18919,18920,18921,18922,18923,18924,18925,18926,18962,18963,18859,18860,18861,18862,18863,18864,18865,18866,18867,18868,18899,18900,18901,18902,18903,18904,18905,18906,18907,18908,18874,18875,18876,18877,18878,18879,18880,18881,18882,18883,18909,18910,18911,18912,18913,18914,18915,18916,18917,18918,18884,18885,18886,18887,18888,18889,18890,18891,18892,18893,18894,18895,18896,18897,18898,18969,18970,18971,18972,18973,18974,18975,18976,18977,18978,18930,18927,18928,18929,18931,18952,18953,18954,18955,18956,18957,18958,18959,18960,18961,18964,18965,18966,18967,18968,18979,18980,18981,18982,18983,18984,18985,18986,18987,18988,18989,18990,18991,18992,18993,18994,18995,18996,18997,18998,18999,19000,19001,19002,19003,19004,19005,19006,19007,19008,19009,19010,19011,19012,19013,19014,19015,19016,19017,19018,19019,19020,19021,19022,19024,19025,19028,19030,19031,19033,19023,19026,19027,19029,19032,19060,19061,19062,19064,19065,19066,19069,19071,19074,19078,19034,19037,19038,19039,19040,19049,19050,19051,19052,19053,19054,19055,19056,19057,19058,19035,19036,19041,19042,19043,19044,19045,19046,19047,19048,19084,19085,19086,19087,19088,19089,19090,19091,19092,19093,19099,19100,19101,19102,19103,19067,19068,19072,19073,19075,19077,19079,19080,19082,19083,18932,18933,18934,18935,18936,18937,18938,18939,18940,18941,18942,18943,18944,18945,18946,18947,18948,18949,18950,18951,19119,19120,19141,19142,19143,19104,19105,19106,19107,19108,19109,19110,19111,19112,19113,19114,19115,19116,19117,19118,19094,19095,19096,19097,19098,8421,8419,8422,8427,8428,8115,8109,8104,8106,8105,8108,8101,8102,8103,8098,8100,8116,8118,8111,8113,6898,6895,6901,19169,19170,19059,19063,19070,19076,19081,8227,8231,8228,8229,8219,8218,8221,8225,8223,8233,8240,8238,8235,8241,19197,7242,7845,7853,7234,19196,19159,19160,19161,19172,19174,19162,19177,19179,19182,19163,19186,19187,19188,19189,19190,19191,19192,19193,19194,19195,19171,19173,19175,19176,19178,19180,19181,19183,19184,19185,7960,7956,7961,7954,7963,19202,19201,19144,19145,19146,19147,19148,19149,19150,19151,19152,19153,8071,8070,8065,19203,8052,8053,8055,8059,8063,8066,19199,19154,19200,19155,19204,19156,19157,19158,19164,19165,19166,19167,19168,19208,19209,19121,19205,19122,19123,19124,19125,19126,19127,19206,19128,19129,19207,19130,19131,19132,19133,19134,19135,19136,19137,19138,19139,19140,9102,9114,9128,9126,9107,9123,9121,9119,19211,19210,8731,8344,8727,8347,8341,8330,8332,8346,8328,8338,8629,8622,8630,8631,19221,8951,8945,8947,8942,8949,19225,19223,19222,19224,19226,8189,8181,8193,8187,19265,7540,7544,7547,7546,19264,7545,7543,7541,7548,19266,7974,7975,7972,8033,8039,9252,9250,19227,19228,19229,19230,19231,19232,19233,19234,9249,9251,19235,9248,19236,19198,19212,19213,19214,19215,19271,19216,19272,19217,19273,19274,19275,19218,19219,19220,19276,19277,9246,9245,9247,144,19257,114,19258,143,19259,112,19260,113,19261,146,118,19262,145,139,19263,142,19267,140,116,19268,115,19269,11252,19270,19237,19238,19239,19240,19241,19242,8656,8661,8662,8658,8657,8663,19278,19279,8659,19280,8247,8248,8251,8249,8250,19243,19244,19245,19246,19247,19248,19249,19250,19251,19252,19253,19254,19255,19256,19287,8209,19288,8212,19289,19290,8204,19292,8217,19295,8224,8222,19298,8226,19303,8201,8216,19306,19286,8205,8964,8962,8960,8963,8957,7929,7938,7936,7935,7933,19346,7537,7535,7536,7538,7704,7528,5818,19353,19352,8183,19354,19355,19356,19357,19347,19348,19349,19350,19351,19358,19359,19360,19361,19362,174,175,173,7895,172,178,7896,194,19380,19378,704,696,706,690,713,679,681,680,682,19396,9536,9535,9537,9530,9532,9533,9529,9534,19371,19408,19406,19377,19366,19382,19384,19388,19391,19394,19398,19400,19405,19409,19410,19411,19412,8642,8644,89,90,88]
+
+    loan_ids = [23384,23385,23386,23387,23388,23389,23390,23391,23392,23393,23394,23395,23396,23397,23398,23399,23400,23401,23402,23403,23404,23405,23406,23407,23408,23409,23410,23411,23412,23413,23414,23415,23416,23417,23418,23419,23420,23421,23422,23423,23424,23425,23426,23427,23428,23429,23430,23431,23432,23433,23434,23435,23436,23437,23438,23439,23440,23441,23442,23443,23444,23445,23446,23447,23448,23449,23450,23451,23452,23453,23454,23455,23456,23457,23458,23459,23460,23461,23462,23463,23464,23465,23466,23467,23468,23469,23470,23471,23472,23473,23474,23475,23476,23477,23478,23479,23480,23481,23482,23483,23484,23485,23486,23487,23488,23489,23490,23491,23492,23493,23494,23495,23496,23497,23498,23499,23500,23501,23502,23503,23504,23505,23506,23507,23508,23509,23510,23511,23512,23513,23514,23515,23516,23517,23518,23519,23520,23521,23522,23523,23524,23525,23526,23527,23528,23529,23530,23531,23532,23533,23534,23535,23536,23537,23538,23539,23540,23541,23542,23543,23544,23545,23546,23547,23548,23549,23550,23551,23552,23553,23554,23555,23556,23557,23558,23559,23560,23561,23562,23563,23564,23565,23566,23567,23568,23569,23570,23571,23572,23573,23574,23575,23576,23577,23578,23579,23580,23581,23582,23583,23584,23585,23586,23587,23588,23589,23590,23591,23592,23593,23594,23595,23596,23597,23598,23599,23600,23601,23602,23603,23604,23605,23606,23607,23608,23609,23610,23611,23612,23613,23614,23615,23616,23617,23618,23619,23620,23621,23622,23623,23624,23625,23626,23627,23628,23629,23630,23631,23632,23633,23634,23635,23636,23637,23638,23639,23640,23641,23642,23643,23644,23645,23646,23647,23648,23649,23650,23651,23652,23653,23654,23655,23656,23657,23658,23659,23660,23661,23662,23663,23664,23665,23666,23667,23668,23669,23670,23671,23672,23673,23674,23675,23676,23677,23678,23679,23680,23681,23682,23683,23684,23685,23686,23687,23688,23689,23690,23691,23692,23693,23694,23695,23696,23697,23698,23699,23700,23701,23702,23703,23704,23705,23706,23707,23708,23709,23710,23711,23712,23713,23714,23715,23716,23717,23718,23719,23720,23721,23722,23723,23724,23725,23726,23727,23728,23729,23730,23731,23732,23733,23734,23735,23736,23737,23738,23739,23740,23741,23742,23743,23744,23745,23746,23747,23748,23749,23750,23751,23752,23753,23754,23755,23756,23757,23758,23759,23760,23761,23762,23763,23764,23765,23766,23767,23768,23769,23770,23771,23772,23773,23774,23775,23776,23777,23778,23779,23780,23781,23782,23783,23784,23785,23786,23787,23788,23789,23790,23791,23792,23793,23794,23795,23796,23797,23798,23799,23800,23801,23802,23803,23804,23805,23806,23807,23808,23809,23810,23811,23812,23813,23814,23815,23816,23817,23818,23819,23820,23821,23822,23823,23824,23825,23826,23827,23828,23829,23830,23831,23832,23833,23834,23835,23836,23837,23838,23839,23840,23841,23842,23843,23844,23845,23846,23847,23848,23849,23850,23851,23852,23853,23854,23855,23856,23857,23858,23859,23860,23861,23862,23863,23864,23865,23866,23867,23868,23869,23870,23871,23872,23873,23874,23875,23876,23877,23878,23879,23880,23881,23882,23883,23884,23885,23886,23887,23888,23889,23890,23891,23892,23893,23894,23895,23896,23897,23898,23899,23900,23901,23902,23903,23904,23905,23906,23907,23908,23909,23910,23911,23912,23913,23914,23915,23916,23917,23918,23919,23920,23921,23922,23923,23924,23925,23926,23927,23928,23929,23930,23931,23932,23933,23934,23935,23936,23937,23938,23939,23940,23941,23942,23943,23944,23945,23946,23947,23948,23949,23950,23951,23952,23953,23954,23955,23956,23957,23958,23959,23960,23961,23962,23963,23964,23965,23966,23967,23968,23969,23970,23971,23972,23973,23974,23975,23976,23977,23978,23979,23980,23981,23982,23983,23984,23985,23986,23987,23988,23989,23991,23992,23993,23994,23995,23996,23997,23998,23999,24000,24001,24002,24003,24004,24005,24006,24007,24008,24009,24010,24011,24012,24013,24014,24015,24016,24017,24018,24019,24020,24021,24022,24023,24024,24025,24026,24027,24028,24029,24030,24031,24032,24033,24034,24035,24036,24037,24038,24039,24040,24041,24042,24043,24044,24045,24046,24047,24048,24049,24050,24051,24052,24053,24054,24055,24056,24057,24058,24059,24060,24061,24062,24063,24064,24065,24066,24067,24068,24069,24070,24071,24072,24073,24074,24075,24076,24077,24078,24079,24080,24081,24082,24083,24084,24085,24086,24087,24088,24089,24090,24091,24092,24093,24094,24095,24096,24097,24098,24099,24100,24101,24102,24103,24104,24105,24106,24107,24108,24109,24110,24111,24112,24113,24114,24115,24116,24117,24118,24119,24120,24121,24122,24123,24124,24125,24126,24127,24128,24129,24130,24131,24132,24133,24134,24135,24136,24137,24138,24139,24140,24141,24142,24143,24144,24145,24146,24147,24148,24149,24150,24151,24152,24153,24154,24155,24156,24157,24158,24159,24160,24161,24162,24163,24164,24165,24166,24167,24168,24169,24170,24171,24172,24173,24174,24175,24176,24177,24178,24179,24190,24192,24194,24197,24209,24210,24211,24212,24213,24214,24215,24216,24217,24218,24219,24220,24221,24222,24223,24224,24225,24226,24227,24228,24229,24245,24246,24247,24248,24249,24250,24251,24252,24253,24254,24255,24256,24257,24258,24259,24260,24261,24262,24273,24274,24275,24276,24277,24278,24279,24280,24281,24282,24283,24284,24285,24286,24287,24288,24289,24290,24291,24292,24293,24294,24295,24296,24297,24298,24299,24300,24301,24302,24303,24304,24315,24316,24317,24318,24319,24330,24331,24332,24333,24335]
+
+    disbursal_dates = [Date.new(2012, 06, 01), Date.new(2012, 06, 04), Date.new(2012, 06, 05), Date.new(2012, 06, 06), Date.new(2012, 06, 07), Date.new(2012, 06, 8), Date.new(2012, 06, 9), Date.new(2012, 06, 14), Date.new(2012, 06, 15), Date.new(2012, 06, 16), Date.new(2012, 05, 28), Date.new(2012, 05, 29), Date.new(2012, 05, 30), Date.new(2012, 03, 23), Date.new(2012, 03, 26), Date.new(2012, 03, 27), Date.new(2012, 03, 28), Date.new(2012, 03, 29), Date.new(2012, 03, 30)]
+
+    date = Date.new(2012, 06, 30)
+
+    #following are the various dates on which monthly cash flows is being calculated.
+    from_dates = [Date.new(2012, 03, 01), Date.new(2012, 04, 01), Date.new(2012, 05, 01), Date.new(2012, 06, 01), Date.new(2012, 07, 01), Date.new(2012, 8, 01), Date.new(2012, 9, 01), Date.new(2012, 10, 01), Date.new(2012, 11, 01), Date.new(2012, 12, 01), Date.new(2013, 01, 01), Date.new(2013, 02, 01), Date.new(2013, 03, 01), Date.new(2013, 04, 01), Date.new(2013, 05, 01), Date.new(2013, 06, 01), Date.new(2013, 07, 01), Date.new(2013, 8, 01), Date.new(2013, 9, 01), Date.new(2013, 10, 01), Date.new(2013, 11, 01), Date.new(2013, 12, 01), Date.new(2014, 01, 01), Date.new(2014, 02, 01), Date.new(2014, 03, 01), Date.new(2014, 04, 01), Date.new(2014, 05, 01), Date.new(2014, 06, 01), Date.new(2014, 07, 01), Date.new(2014, 8, 01)]
+
+    to_dates = [Date.new(2012, 03, 31), Date.new(2012, 04, 30), Date.new(2012, 05, 31), Date.new(2012, 06, 30), Date.new(2012, 07, 31), Date.new(2012, 8, 31), Date.new(2012, 9, 30), Date.new(2012, 10, 31), Date.new(2012, 11, 30), Date.new(2012, 12, 31), Date.new(2013, 01, 31), Date.new(2013, 02, 28), Date.new(2013, 03, 31), Date.new(2013, 04, 30), Date.new(2013, 05, 31), Date.new(2013, 06, 30), Date.new(2013, 07, 31), Date.new(2013, 8, 31), Date.new(2013, 9, 30), Date.new(2013, 10, 31), Date.new(2013, 11, 30), Date.new(2013, 12, 31), Date.new(2014, 01, 01), Date.new(2014, 02, 28), Date.new(2014, 03, 31), Date.new(2014, 04, 30), Date.new(2014, 05, 31), Date.new(2014, 06, 30), Date.new(2014, 07, 31), Date.new(2014, 8, 31)]
+
+    sl_no = 0
+
+    f = File.open("tmp/mas_financials_third_term_loan_#{DateTime.now.to_s}.csv", "w")
+    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Date of Birth\", \"Caste\", \"Residence Address\", \"Residence Pin Code\", \"State\", \"Residence Phone Number\", \"Name of Assets\", \"Gross Income\", \"Gender\", \"Name of Marketing Executive\", \"Loan Id\", \"Purpose of Loans\", \"Category of Loanee\", \"Cycle Number\", \"Date of Disbursement\", \"Disbursement Mode\", \"Disbursement Cheque Number\", \"First Installment Date\", \"Last Installment Date\", \"Outstanding Principal\", \"Outstanding Interest\", \"Days Since Disbursal\", \"Scheme IRR (%)\", \"Amount Financed\", \"Upfront Fees Amount in Rs.\", \"Insurance Charges\", \"Any Other Charges\", \"Installment Amount\", \"Tenure in Weeks\", \"Advance EMI\", \"No. Of Installment\", \"EMI Frequency\", \"Seasoning\", \"OD. Inst.\", \"Od. Amt. Rs.\", \"SD Amt. Rs.\", \"SD. Refund / Scheme Refund\", \"Mode of Repayment\", \"KYC Detail\", \"Future Capital O/S Amt. Rs.\", \"Future O/S Installment\", \"Future Receivable Amt. Rs.\", \"Cash Flow in March 2012\", \"Cash Flow in April 2012\", \"Cash Flow in May 2012\", \"Cash Flow in June 2012\", \"Cash Flow in July 2012\", \"Cash Flow in August 2012\", Cash Flow in September 2012, \"Cash Flow in October 2012\", \"Cash Flow in November 2012\", \"Cash Flow in December 2012\", \"Cash Flow in January 2013\", \"Cash Flow in February 2013\", \"Cash Flow in March 2013\", \"Cash Flow in April 2013\", \"Cash Flow in May 2013\", \"Cash Flow in June 2013\", \"Cash Flow in July 2013\", \"Cash Flow in August 2013\", \"Cash Flow in September 2013\", \"Cash Flow in October 2013\", \"Cash Flow in November 2013\", \"Cash Flow in December 2013\", \"Cash Flow in January 2014\", \"Cash Flow in February 2014\", \"Cash Flow in March 2014\", \"Cash Flow in April 2014\", \"Cash Flow in May 2014\", \"Cash Flow in June 2014\", \"Cash Flow in July 2014\", \"Cash Flow in August 2014\"")
+
+    Loan.all(:client_id => client_ids, :disbursal_date => disbursal_dates).each do |loan|
+
+      sl_no += 1
+
+      client = Client.get(loan.client_id)
+      client_id = client.id
+      client_name = client.name
+      client_date_of_birth = client.date_of_birth
+      client_caste = client.caste
+      client_address = ""
+      client_address_pin_code = client.address_pin
+      client_state = "Bihar"
+      if client.phone_number
+        client_phone_number = client.phone_number
+      else
+        client_phone_number = "Not Specified"
+      end
+      client_name_of_assets = "NA"
+      client_gross_income = client.total_income
+      client_gender = client.gender.capitalize
+      client_marketing_executive = client.center.manager.name
+
+      center_id = client.center.id
+      center_name = client.center.name
+
+      branch_id = client.center.branch.id
+      branch_name = client.center.branch.name
+
+      loan_id = loan.id
+      loan_cycle_number = loan.cycle_number
+      loan_category = "NA"
+      loan_purpose = (loan.occupation ? loan.occupation.name : "Not specified")
+      loan_disbursal_date = loan.disbursal_date
+      if loan.cheque_number.empty?
+        loan_disbursement_mode = "Cash"
+        loan_disbursement_cheque_number = "NA"
+      else
+        loan_disbursement_mode = "Cheque"
+        loan_disbursement_cheque_number = loan.cheque_number
+      end
+      loan_first_installment_date = loan.scheduled_first_payment_date
+      loan_last_installment_date = loan.loan_history.max(:date, :conditions => ['principal_due_today != ?', 0.0], :conditions => ['interest_due_today != ?', 0.0])
+      loan_outstanding_principal = loan.actual_outstanding_principal_on(date)
+      loan_outstanding_interest = loan.actual_outstanding_interest_on(date)
+      loan_days_since_disbursal = date - loan.disbursal_date
+      
       loan_scheme_irr = (loan.irr * 100)
       loan_product_name = loan.loan_product.name
       loan_amount_financed = loan.amount
