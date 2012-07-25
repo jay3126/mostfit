@@ -4,14 +4,13 @@
   %p
     %i No securitizations have been created yet.
 - else
-  %table.narrow.form{ :width => '100%' }
+  %table.narrow.form.dataTable{ :width => '100%' }
     %thead
       %tr
         %th
         %th id
         %th name
         %th date of commencement
-    %tbody
     - for securitization in @securitizations
       %tr{ :class => cycle('odd','') }
         %td &nbsp;

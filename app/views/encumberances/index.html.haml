@@ -4,7 +4,7 @@
   %p
     %i No encumberances have been created yet.
 - else
-  %table.narrow.form{ :width => '100%' }
+  %table.narrow.dataTable.form{ :width => '100%' }
     %thead
       %tr
         %th
@@ -12,7 +12,6 @@
         %th name
         %th amount
         %th date of commencement
-    %tbody
     - for encumberance in @encumberances
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
