@@ -19,24 +19,26 @@ class ProductAccountingRule
       debits.each { |product_amount, ledger_classification_text|
         ledger_classification = LedgerClassification.resolve(ledger_classification_text)
         raise Errors::InvalidConfigurationError, "No ledger classification was found for #{ledger_classification_text}" unless ledger_classification
-        ProductPostingRule.first_or_create(
+        debit_posting_rule = ProductPostingRule.first_or_create(
             :effect => DEBIT_EFFECT,
             :product_amount => product_amount.to_sym,
             :ledger_classification => ledger_classification,
             :product_accounting_rule => product_accounting_rule
         )
+        raise Errors::InvalidConfigurationError, debit_posting_rule.errors.first.first unless (debit_posting_rule and (not (debit_posting_rule.id.nil?)))
       }
 
       credits = accounting['credit']
       credits.each { |product_amount, ledger_classification_text|
         ledger_classification = LedgerClassification.resolve(ledger_classification_text)
         raise Errors::InvalidConfigurationError, "No ledger classification was found for #{ledger_classification_text}" unless ledger_classification
-        ProductPostingRule.first_or_create(
+        credit_posting_rule = ProductPostingRule.first_or_create(
             :effect => CREDIT_EFFECT,
             :product_amount => product_amount.to_sym,
             :ledger_classification => ledger_classification,
             :product_accounting_rule => product_accounting_rule
         )
+        raise Errors::InvalidConfigurationError, credit_posting_rule.errors.first.first unless (credit_posting_rule and (not (credit_posting_rule.id.nil?)))
       }
     }
   end

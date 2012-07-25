@@ -71,7 +71,7 @@ class PaymentTransaction
   def recorded_by_user; User.get(self.recorded_by); end
 
   def product_action
-    PRODUCT_ACTIONS_FOR_TRANSACTIONS[self.on_product_type][self.receipt_type]
+    PRODUCT_ACTIONS_FOR_PAYMENT_TRANSACTIONS[self.on_product_type][self.receipt_type][self.payment_towards]
   end
 
   # UPDATES

@@ -10,6 +10,8 @@ class Voucher
   property :effective_on,   *DATE_NOT_NULL
   property :narration,      String, :length => 1024
   property :generated_mode, Enum.send('[]', *VOUCHER_MODES), :nullable => false
+  property :mode_of_accounting, Enum.send('[]', *ACCOUNTING_MODES), :nullable => false, :default => PRODUCT_ACCOUNTING
+  property :accounted_at,   Integer
   property :created_at,     *CREATED_AT
 
   has n, :ledger_postings
@@ -148,7 +150,9 @@ class Voucher
       ledger_postings.push(posting)
     }
     values[:ledger_postings] = ledger_postings
-    create(values)
+    voucher = create(values)
+    raise Errors::DataError, voucher.errors.first.first unless voucher.saved?
+    voucher
   end  
 
 end
