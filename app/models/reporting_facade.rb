@@ -375,6 +375,10 @@ class ReportingFacade < StandardFacade
     outstanding_loans_exceeding_days_past_due(by_number_of_days)
   end
 
+  def all_accrual_transactions_recorded_on_date(on_date)
+    AccrualTransaction.all(:created_at.gt => on_date, :created_at.lt => (on_date + 1))
+  end
+
   private
 
   def individual_loans_by_branches_for_status_on_date(for_status, on_date, *at_branch_ids_ary)

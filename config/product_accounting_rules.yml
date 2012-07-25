@@ -43,3 +43,8 @@ loan_accrue_broken_period_interest:
     total_accrued: customer_loan_debtors
   credit:
     total_accrued: customer_loan_interest_receipt
+loan_accrue_broken_period_interest_reversal:
+  debit:
+    total_accrued: customer_loan_interest_receipt
+  credit:
+    total_accrued: customer_loan_debtors

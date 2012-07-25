@@ -40,4 +40,8 @@ class LedgerPosting
     date_predicates
   end
 
+  def ledger_classification
+    self.ledger.ledger_classification
+  end
+
 end

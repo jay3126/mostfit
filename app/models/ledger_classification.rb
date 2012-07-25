@@ -1,6 +1,7 @@
 class LedgerClassification
   include DataMapper::Resource
   include Constants::Accounting
+  include Comparable
 
   property :id,               Serial
   property :account_type,     Enum.send('[]', *ACCOUNT_TYPES), :nullable => false
@@ -30,6 +31,10 @@ class LedgerClassification
   # Given a string, returns the corresponding ledger classification 
   def self.resolve(ledger_classification_string)
     first(:account_purpose => ledger_classification_string.to_sym)
+  end
+
+  def <=>(other)
+    other.is_a?(LedgerClassification) ? (self.id <=> other.id) : nil
   end
 
 end

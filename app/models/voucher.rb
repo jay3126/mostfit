@@ -19,7 +19,7 @@ class Voucher
   def money_amounts; [ :total_amount ]; end
 
   validates_present :effective_on
-  validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?, :validate_all_post_to_unique_accounts?
+  validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?#OOO, :validate_all_post_to_unique_accounts?
   validates_with_method :manual_voucher_permitted?
   
   def manual_voucher_permitted?
@@ -127,6 +127,25 @@ class Voucher
       }
     }
     f.close
+  end
+
+  def ledger_classifications
+    (self.ledger_postings.collect {|ledger_posting| ledger_posting.ledger_classification}).compact.sort
+  end
+
+  def is_similar?(other_voucher)
+    (self.mode_of_accounting == other_voucher.mode_of_accounting) and 
+      (self.ledger_classifications == other_voucher.ledger_classifications)
+  end
+
+  def self.aggregate_similar_product_vouchers_on_value_date(on_date)
+    all_product_vouchers = all_product_vouchers_on_value_date(on_date)
+    grouped_by_ledger_classification = all_product_vouchers.group_by {|voucher| voucher.ledger_classifications}
+    grouped_by_ledger_classification.values
+  end
+
+  def self.all_product_vouchers_on_value_date(on_date)
+    all(:mode_of_accounting => PRODUCT_ACCOUNTING, :effective_on => on_date)
   end
 
   private
