@@ -789,8 +789,8 @@ $(document).ready(function(){
   $('button.add').addClass("greenButton");
   //Handling targets form
   jQuery('form').live('submit', function(){
-//    return date_validation();
-  });
+    //    return date_validation();
+    });
   $("select#target_attached_to").change(function(){
     $.ajax({
       url: "/targets/all/"+$(this).val()+".json",
@@ -1205,7 +1205,7 @@ function date_validation(){
   message = ''
   jQuery.each(dates_fields, function(index, date){
     if(jQuery(date).parents('th').size()!=0)
-    text = jQuery(date).parent().prev().html().trim();
+      text = jQuery(date).parent().prev().html().trim();
     if(text.length>30 || text.length == 0){
       text = 'Date'
     }
@@ -1216,6 +1216,16 @@ function date_validation(){
       date1 = value.split('/')
       date2 = value.split('-')
       date3 = value.split('.')
+      if(date1.length == 3){
+        date = date1
+      }
+      if(date2.length == 3){
+        date = date2
+      }
+      if(date3.length == 3){
+        date = date3
+      }
+
       if(isNaN(Date.parse(value))){
         message = text + ' is not valid'
       }

@@ -1,6 +1,6 @@
-%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+%table.loan{ :style => "border: solid 1px #cfcfcf; margin: 5px;" }
   %tr.even
-    %th.even{:style => 'width:50%'} Status
+    %th.even Status
     %td= @lending.status.humanize
   - if @lending.is_repaid?
     - repaid = @lending.loan_repaid_status

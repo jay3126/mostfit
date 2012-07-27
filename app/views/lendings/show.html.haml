@@ -1,69 +1,68 @@
 - facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
 %h1== Loan Name: <i>#{@lending_product.name}</i>
-%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
-  %tr.even
-    %th.even Borrower
-    %td
-      = link_to_with_rights @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
-  %tr.odd
-    %th.odd Amount
-    %td
-      %b= @lending.to_money[:applied_amount].to_s
-  %tr.even
-    %th.even Frequency
-    %td
-      = @lending.repayment_frequency
-  - if @lending.is_outstanding_now?
-    %tr.odd
-      %th.odd Disbursed On
+%div{:style => 'display:table; width:100%;'}
+  %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+    %tr.even
+      %th.even Borrower
       %td
-        = @lending.disbursal_date
-    %tr.even
-      %th.even Scheduled first Repayment Date
-      %td= @lending.scheduled_first_repayment_date
+        = link_to_with_rights @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)
     %tr.odd
-      %th.odd Loan Due Status
-      %td= @lending.current_due_status.humanize
-  %tr.even
-    %th.even Loan Product
-    %td
-      = @lending_product.name
-  %tr.odd
-    %th.odd Loan Purpose
-    %td
-      = @lending.loan_purpose unless @lending.loan_purpose.blank?
-  %tr.even
-    %th.even Loan Status
-    %td= @lending.status.humanize
-  %tr.odd
-    %th.odd Loan outstanding Principal
-    %td= "#{@lending.actual_principal_outstanding} as on #{@effective_date}"
-  %tr.even
-    %th.even Loan outstanding Interest
-    %td= "#{@lending.actual_interest_outstanding} as on #{@effective_date}"
-  %tr.odd
-    %th.odd Loan assignment status
-    %td
-      - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
-      - if loan_assigned_to.nil?
-        = "Not Assigned"
-      - else
-        = loan_assigned_to.loan_assignment_instance.to_s
-  %tr.even
-    %th.even Administered At
-    %td= link_to_with_rights @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
-  %tr.odd
-    %th.odd Accounted At
-    %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
-  - unless @fee_instance.blank?
-    %tr.even
-      %th.even Fee Status
-      %td= @fee_instance.map(&:status).join(', ')
-  - if @lending.is_outstanding_now?
-    %tr.even
+      %th.odd Amount
       %td
-        = link_to_with_rights "Preclose", url(:controller => :lendings, :action => :lending_preclose, :id => @lending.id), :class => "greenButton"
-= partial 'lendings/status_histroy_summary'
+        %b= @lending.to_money[:applied_amount].to_s
+    %tr.even
+      %th.even Frequency
+      %td
+        = @lending.repayment_frequency
+    - if @lending.is_outstanding_now?
+      %tr.odd
+        %th.odd Disbursed On
+        %td
+          = @lending.disbursal_date
+      %tr.even
+        %th.even Scheduled first Repayment Date
+        %td= @lending.scheduled_first_repayment_date
+      %tr.odd
+        %th.odd Loan Due Status
+        %td= @lending.current_due_status.humanize
+    %tr.even
+      %th.even Loan Product
+      %td
+        = @lending_product.name
+    %tr.odd
+      %th.odd Loan Purpose
+      %td
+        = @lending.loan_purpose unless @lending.loan_purpose.blank?
+    %tr.even
+      %th.even Loan outstanding Principal
+      %td= "#{@lending.actual_principal_outstanding} as on #{@effective_date}"
+    %tr.odd
+      %th.odd Loan outstanding Interest
+      %td= "#{@lending.actual_interest_outstanding} as on #{@effective_date}"
+    %tr.even
+      %th.even Loan assignment status
+      %td
+        - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
+        - if loan_assigned_to.nil?
+          = "Not Assigned"
+        - else
+          = loan_assigned_to.loan_assignment_instance.to_s
+    %tr.odd
+      %th.odd Administered At
+      %td= link_to_with_rights @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
+    %tr.even
+      %th.even Accounted At
+      %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
+    - unless @fee_instance.blank?
+      %tr.odd
+        %th.odd Fee Status
+        %td= @fee_instance.map(&:status).join(', ')
+    - if @lending.is_outstanding_now?
+      %tr
+        %td
+          = link_to_with_rights "Preclose", url(:controller => :lendings, :action => :lending_preclose, :id => @lending.id), :class => "greenButton"
+  %div{:style => "display:table-cell;"}
+    = partial 'lendings/status_histroy_summary'
 %div.tab_container.shaded
   %ul.tabs
     %li#Schedule
