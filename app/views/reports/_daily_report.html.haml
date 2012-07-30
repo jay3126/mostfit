@@ -1,55 +1,58 @@
 = partial :form
-%table.report.nojs
-  %tr.header
-    %th{:rowspan => 2}
-      Branch Name
-    %th{:colspan => 4}
-      Loan Amount
-    %th{:colspan => 4}
-      Repayment
-    %th{:colspan => 3}
-      Balance Outstanding
-    %th{:colspan => 3}
-      Advances
-    %th{:colspan => 3}
-      Balance Overdue
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th{:colspan => 4}
+        Loan Amount
+      %th{:colspan => 4}
+        Repayment
+      %th{:colspan => 3}
+        Balance Outstanding
+      %th{:colspan => 3}
+        Advances
+      %th{:colspan => 3}
+        Balance Overdue
 
-  %tr.header
-    %th
-      Applied
-    %th
-      Approved
-    %th
-      Scheduled to disburse
-    %th
-      Disbursed
-    %th
-      Principal
-    %th
-      Interest
-    %th
-      Fees
-    %th
-      Total
-    %th
-      Principal
-    %th
-      Interest
-    %th
-      Total
-    %th
-      Collected
-    %th
-      Adjusted
-    %th
-      Balance
-    %th
-      Principal
-    %th
-      Interest
-    %th
-      Total
+    %tr
+      %th
+      %th
+        Applied
+      %th
+        Approved
+      %th
+        Scheduled to disburse
+      %th
+        Disbursed
+      %th
+        Principal
+      %th
+        Interest
+      %th
+        Fees
+      %th
+        Total
+      %th
+        Principal
+      %th
+        Interest
+      %th
+        Total
+      %th
+        Collected
+      %th
+        Adjusted
+      %th
+        Balance
+      %th
+        Principal
+      %th
+        Interest
+      %th
+        Total
 
+  %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
     - @data.sort_by{|branch| branch}.each do |branch, values|
@@ -121,40 +124,41 @@
           - accumulate_row_values[:total_overdue] += total_overdue
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-  %tr.footer
-    %th
-      Total
-    %td
-      = total_rows[:loans_applied]
-    %td
-      = total_rows[:loans_approved]
-    %td
-      = total_rows[:loans_scheduled_for_disbursement]
-    %td
-      = total_rows[:loans_disbursed]
-    %td
-      = total_rows[:principal_received]
-    %td
-      = total_rows[:interest_received]
-    %td
-      = total_rows[:fee_receipts]
-    %td
-      = total_rows[:total_received]
-    %td
-      = total_rows[:actual_principal_outstanding]
-    %td
-      = total_rows[:actual_interest_outstanding]
-    %td
-      = total_rows[:actual_total_outstanding]
-    %td
-      = total_rows[:advance_received_on_date]
-    %td
-      = total_rows[:advance_adjusted_on_date]
-    %td
-      = total_rows[:advance_balance]
-    %td
-      = total_rows[:principal_overdue]
-    %td
-      = total_rows[:interest_overdue]
-    %td
-      = total_rows[:total_overdue]
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+        = total_rows[:loans_applied]
+      %td
+        = total_rows[:loans_approved]
+      %td
+        = total_rows[:loans_scheduled_for_disbursement]
+      %td
+        = total_rows[:loans_disbursed]
+      %td
+        = total_rows[:principal_received]
+      %td
+        = total_rows[:interest_received]
+      %td
+        = total_rows[:fee_receipts]
+      %td
+        = total_rows[:total_received]
+      %td
+        = total_rows[:actual_principal_outstanding]
+      %td
+        = total_rows[:actual_interest_outstanding]
+      %td
+        = total_rows[:actual_total_outstanding]
+      %td
+        = total_rows[:advance_received_on_date]
+      %td
+        = total_rows[:advance_adjusted_on_date]
+      %td
+        = total_rows[:advance_balance]
+      %td
+        = total_rows[:principal_overdue]
+      %td
+        = total_rows[:interest_overdue]
+      %td
+        = total_rows[:total_overdue]
