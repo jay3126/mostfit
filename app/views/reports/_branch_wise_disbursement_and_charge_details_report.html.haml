@@ -1,24 +1,26 @@
 = partial :form
-%table.report.nojs
-  %tr.header
-    %th
-      Branch Name
-    %th{:colspan => 2}
-      Disbursement Details
-    %th{:colspan => 2}
-      Upfront Charges Details
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th{:colspan => 2}
+        Disbursement Details
+      %th{:colspan => 2}
+        Upfront Charges Details
 
-  %tr.header
-    %th
-    %th
-      Number
-    %th
-      Amount
-    %th
-      Due
-    %th
-      Collected
+    %tr
+      %th
+      %th
+        Number
+      %th
+        Amount
+      %th
+        Due
+      %th
+        Collected
 
+  %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - count = 0
     - @default_currency ||= MoneyManager.get_default_currency
@@ -41,14 +43,15 @@
           - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-  %tr.footer
-    %th
-      Total
-    %td
-      = count
-    %td
-      = total_rows[:loan_disbursals]
-    %td
-      = total_rows[:fee_dues]
-    %td
-      = total_rows[:fee_receipts]
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+        = count
+      %td
+        = total_rows[:loan_disbursals]
+      %td
+        = total_rows[:fee_dues]
+      %td
+        = total_rows[:fee_receipts]
