@@ -239,6 +239,7 @@ supervisor :
      - suspected_duplicates
      - get_de_dupe_loan_applications
      - record_suspected_duplicates
+     - duplicate_record
 #     - all
   loan_authorizations :
      - all
@@ -386,6 +387,7 @@ support :
     - suspected_duplicates
     - get_de_dupe_loan_applications
     - record_suspected_duplicates
+    - duplicate_record
 #   - all
   loan_files :
     - index
@@ -523,7 +525,7 @@ finops :
     - suspected_duplicates
     - get_de_dupe_loan_applications
     - record_suspected_duplicates
-
+    - duplicate_record
   overlap_report_requests:
     - all
   overlap_report_responses:
