@@ -38,6 +38,12 @@
     %th.odd Occupation
     %td= @client.occupation.name unless @client.occupation.blank?
   %tr.even
+    %th.even Priority Sector List
+    %td= @client.priority_sector_list.name if @client.priority_sector_list
+  %tr.odd
+    %th.odd PSL Sub-category
+    %td= @client.psl_sub_category.name if @client.psl_sub_category
+  %tr.even
     %td
       = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
 %div.tab_container.shaded
