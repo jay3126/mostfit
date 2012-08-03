@@ -617,6 +617,19 @@ function fillCenters(){
   });
 }
 
+function fillPslSubCategories(){
+    $("#psl_selector").change(function(){
+	$.ajax({
+	    type: "GET",
+	    url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
+	    success: function(data){
+		$("#psl_sub_category_selector").html(data);
+		$("#psl_sub_category_selector").trigger("liszt:updated");
+	    }
+	});
+    });
+}
+
 function fillComboBranches(){
   $("#area_selector").change(function(){
     $.ajax({
@@ -783,6 +796,7 @@ $(document).ready(function(){
   fillFundingLines();
   fillCashAccounts();
   fillBankAccounts();
+  fillPslSubCategories();
   getAllNominalCenters();
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");

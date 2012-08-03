@@ -14,7 +14,6 @@
       %h2 Manage geographical locations
       %ul.icon_links
         %li
-          //= link_to_with_rights 'Location Level', resource(:location_levels), :class => 'org icon'
           = link_to_with_rights 'Location Level', url(:controller => "location_levels", :action => "index"), :class => 'org icon'
         %li
           = link_to_with_rights 'Biz Location', resource(:biz_locations), :class => 'org icon'
@@ -69,6 +68,10 @@
         = link_to_with_rights 'Loan Purposes', resource(:loan_purposes), :class => 'edit'
       %li
         = link_to_with_rights 'Occupations', resource(:occupations), :class => 'edit'
+      %li
+        = link_to_with_rights 'Priority Sector Lists', resource(:priority_sector_lists), :class => 'edit'
+      %li
+        = link_to_with_rights 'PSL Sub-categories', resource(:psl_sub_categories), :class => 'edit'
       %li
         = link_to_with_rights 'Document Types', resource(:document_types), :class => 'icon documents'
       %li

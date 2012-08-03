@@ -1,0 +1,29 @@
+%h1
+  = I18n.t "psl_sub_category.index.title", :default => "PSL Sub-Category"
+= link_to I18n.t("psl_sub_category.index.add_an_psl_sub_category", :default => "Add a PSL Sub-Category"), url(:new_psl_sub_category), :class => 'add grey_button'
+%table.narrow
+  %thead
+    %tr
+      %th
+        = I18n.t "psl_sub_category.index.id", :default => "Id"
+      %th
+        = I18n.t "psl_sub_category.index.psl_sub_category", :default => "PSL Sub-Category"
+      %th
+        = I18n.t "psl_sub_category.index.priority_sector_list", :default => "Priority Sector List"
+      %th
+        = I18n.t "psl_sub_category.index.actions", :default => "Actions"
+
+  - for psl_sub_category in @psl_sub_categories
+    %tr{:class => cycle('odd', '')}
+      %td
+        = link_to psl_sub_category.id, url(:psl_sub_category, psl_sub_category.id)
+      %td
+        = link_to psl_sub_category.name, url(:psl_sub_category, psl_sub_category.id)
+      %td
+        = link_to psl_sub_category.priority_sector_list.name, resource(psl_sub_category.priority_sector_list)
+      %td
+        = link_to I18n.t("psl_sub_category.index.show", :default => "Show"), url(:psl_sub_category, psl_sub_category)
+        &nbsp;&nbsp;
+        |
+        &nbsp;&nbsp;
+        = link_to I18n.t("psl_sub_category.index.edit", :default => "Edit"), url(:edit_psl_sub_category,  psl_sub_category)

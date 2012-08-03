@@ -7,7 +7,8 @@ Merb::Router.prepare do
     end
   end
 
-
+  resources :psl_sub_categories
+  resources :priority_sector_lists
 
   #book-keeping from bk begins
   resources :home, :collection => {:effective_date => [:get]}

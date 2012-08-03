@@ -1,0 +1,12 @@
+%h1 Create a new Priority Sector List
+= error_messages_for(@priority_sector_list)
+
+= form_for(@priority_sector_list, :action => url(:priority_sector_lists) ) do
+  = partial :fields
+  %br
+  = submit 'Create this Priority Sector List'
+  &nbsp;&nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Cancel', url(params[:return]), :class => "grey_button"
