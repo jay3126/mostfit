@@ -64,31 +64,37 @@ class NewClients < Application
     reference = reference.strip unless reference.blank?
     reference2 = reference2.strip unless reference2.blank?
 
+    # VALIDATIONS
+    @message[:error] = "Date joined must not be future date" if date_joined && Date.parse(date_joined) > Date.today
+
     # OPERATIONS PERFORMED
-    begin
-      @biz_location = BizLocation.get biz_location_id
-      parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
-      fields = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
-        :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
-        :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
-        :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
-        :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
-        :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff,
-        :created_by_user_id => created_by}
+    fields = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
+      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
+      :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
+      :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
+      :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
+      :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff,
+      :created_by_user_id => created_by}
+    @client = Client.new(fields)
 
-      @client     = Client.new(fields)
-      @client_new = Client.create_client(fields, biz_location_id, parent_biz_location.id)
+    if @message[:error].blank?
+      begin
+        @biz_location = BizLocation.get biz_location_id
+        parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
 
-      if @client_new.new?
-        @message = {:error => "Client creation fail"}
-      else
-        @message = {:notice => "Client created successfully"}
+
+        @client_new = Client.create_client(fields, biz_location_id, parent_biz_location.id)
+
+        if @client_new.new?
+          @message = {:error => "Client creation fail"}
+        else
+          @message = {:notice => "Client created successfully"}
         
+        end
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
       end
-    rescue => ex
-      @message = {:error => "An error has occured: #{ex.message}"}
     end
-
     # REDIRECT/RENDER
     if @message[:error].blank?
       redirect url(:controller => :new_clients, :action => :show, :id => @client_new.id), :message => @message
@@ -145,23 +151,28 @@ class NewClients < Application
     reference = reference.strip unless reference.blank?
     reference2 = reference2.strip unless reference2.blank?
 
+    # VALIDATIONS
+    @message[:error] = "Date joined must not be future date" if date_joined && Date.parse(date_joined) > Date.today
+
     # OPERATIONS PERFORMED
-    begin
-      @client = Client.get client_id
-      @client.attributes = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
-        :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
-        :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
-        :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
-        :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
-        :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff,
-        :created_by_user_id => created_by}
-      if @client.save
-        @message = {:notice => "Client updated successfully"}
-      else
-        @message = { :error => @client.errors.collect{|error| error}.flatten.join(', ')}
+    @client = Client.get client_id
+    @client.attributes = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
+      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
+      :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
+      :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
+      :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
+      :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff,
+      :created_by_user_id => created_by}
+    if @message[:error].blank?
+      begin
+        if @client.save
+          @message = {:notice => "Client updated successfully"}
+        else
+          @message = { :error => @client.errors.collect{|error| error}.flatten.join(', ')}
+        end
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
       end
-    rescue => ex
-      @message = {:error => "An error has occured: #{ex.message}"}
     end
 
     # REDIRECT/RENDER
