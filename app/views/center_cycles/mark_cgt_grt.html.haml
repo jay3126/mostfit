@@ -23,9 +23,9 @@
     %h3 No Center cycle currently exists for this center
   - else
     %h2= "Center Cycle Number: #{center_cycle_number}"
-.shaded
-  - if @center_cycle
-    - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil && @center_cycle.cgt_date_two == nil
-      = partial :fields_cgt
-    - else
-      = partial :fields_grt
+
+- if @center_cycle
+  - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil && @center_cycle.cgt_date_two == nil
+    = partial :fields_cgt
+  - else
+    = partial :fields_grt
