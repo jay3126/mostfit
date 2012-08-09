@@ -1,5 +1,21 @@
 %h1
   = "Biz-Location :-  #{@biz_location.name}"
+- unless @biz_location.new?
+  %div{:style => 'display:table; width:100%;'}
+    %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+      %tr.even
+        %th.even Location Level
+        %td
+          = @biz_location.level_name
+      %tr.odd
+        %th.odd Location Name
+        %td
+          %b= @biz_location.name
+      %tr.even
+        %th.even Location Created On
+        %td
+          = @biz_location.creation_date
+
 - if @biz_locations.count == 0
   %p
     %i No Location Mapping have been created yet.
@@ -16,8 +32,9 @@
         - unless @biz_location.new?
           %th
             Effective On
-        %th
-          Created On
+        - else
+          %th
+            Location Created On
         %th
           Action
     %tr
@@ -40,8 +57,9 @@
             - unless biz_location_link.class == BizLocation
               %td
                 = biz_location_link.effective_on.strftime("%Y-%m-%d")
-            %td
-              = biz_location_link.creation_date.strftime("%Y-%m-%d")
+            - else
+              %td
+                = biz_location_link.creation_date.strftime("%Y-%m-%d")
             %td
               - if biz_location_level.first == 0
                 = link_to_with_rights "Add Client", resource(:new_clients,:new,:biz_location_id => biz_location.id)
