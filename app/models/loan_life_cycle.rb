@@ -77,6 +77,14 @@ module LoanLifeCycle
     Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT => REPAID_IN_FULL
   }
 
+  STATUSES_DATES_FOR_WRITE_OFF = {
+    :written_off_loan_status => [WRITTEN_OFF_LOAN_STATUS, :write_off_on_date]
+  }
+
+  STATUSES_DATES_FOR_PRE_CLOSURE = {
+    :repaid_loan_status => [REPAID_LOAN_STATUS]
+  }
+
   STATUSES_DATES_SUM_AMOUNTS = {
     :applied => [NEW_LOAN_STATUS, :applied_on_date, :applied_amount.sum],
     :approved => [APPROVED_LOAN_STATUS, :approved_on_date, :approved_amount.sum],

@@ -32,12 +32,7 @@ class DailyTransactionSummary < Report
   end
   
   def generate
-=begin
-Columns left in this report are as follows:
-Cash Foreclosure :- Principal, Interest, Total
-Death Settlements :- Principal, INterest, Total
-Write-offs :- Principal, INterest, Total
-=end
+
     reporting_facade = get_reporting_facade(@user)
     location_facade  = get_location_facade(@user)
     data = {}
@@ -49,12 +44,16 @@ Write-offs :- Principal, INterest, Total
       loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *branch_id)
       fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
       loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *branch_id)
+      loan_written_off_values = reporting_facade.aggregate_loans_by_branches_for_written_off_status_on_date(:written_off_loan_status, @date, *branch_id)
+      loan_preclosures = reporting_facade.aggregate_loans_by_branches_for_pre_closure_status_on_date(:repaid_loan_status, @date, *branch_id)
 
       branch_data_map = {}
       branch_data_map[:loans_disbursed] = loans_disbursed
       branch_data_map[:loan_balances] = loan_balances
       branch_data_map[:loan_allocations] = loan_allocations
       branch_data_map[:fee_receipts] = fee_receipts
+      branch_data_map[:loan_written_off_values] = loan_written_off_values
+      branch_data_map[:loan_preclosures] = loan_preclosures
 
       data[branch_id] = branch_data_map
     }

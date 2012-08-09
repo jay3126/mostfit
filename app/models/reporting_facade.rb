@@ -385,6 +385,42 @@ class ReportingFacade < StandardFacade
     AccrualTransaction.all(:created_at.gt => on_date, :created_at.lt => (on_date + 1))
   end
 
+  #this function gives back the total amount paid towards written-off status for loan.
+  def aggregate_loans_by_branches_for_written_off_status_on_date(for_status, on_date, *at_branch_ids_ary)
+    loan_status, date_to_query = LoanLifeCycle::STATUSES_DATES_FOR_WRITE_OFF[for_status]
+    loan_query = {:status => loan_status, date_to_query => on_date}
+    loan_query[:accounted_at_origin] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    loan_ids = Lending.all(loan_query).aggregate(:id)
+
+    query = {:effective_on => on_date, :lending_id => loan_ids}
+    query_results = LoanReceipt.all(query)
+
+    sum_amount = (query_results and (not query_results.empty?)) ? query_results.aggregate(:loan_recovery.sum) : 0
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:total_amount => sum_money_amount}
+  end
+
+  #this function gives back the total amount paid towards pre-closure status for loan.
+  def aggregate_loans_by_branches_for_pre_closure_status_on_date(for_status, on_date, *at_branch_ids_ary)
+    loan_status = LoanLifeCycle::STATUSES_DATES_FOR_PRE_CLOSURE[for_status]
+    loan_query = {:status => loan_status}
+    loan_query[:accounted_at_origin] = at_branch_ids_ary if (at_branch_ids_ary and (not (at_branch_ids_ary.empty?)))
+    loan_ids = Lending.all(loan_query).aggregate(:id)
+
+    status_change_query = {:to_status => loan_status, :lending_id => loan_ids, :effective_on => on_date}
+    status_change_loan_ids = (LoanStatusChange.all(status_change_query) and (not LoanStatusChange.all(status_change_query).empty?)) ? LoanStatusChange.all(status_change_query).aggregate(:lending_id) : []
+
+    query = {:effective_on => on_date, :lending_id => status_change_loan_ids}
+    query_results = LoanReceipt.all(query)
+
+    sum_principal_received = (query_results and (not query_results.empty?)) ? query_results.aggregate(:principal_received.sum) : 0
+    sum_interest_received = (query_results and (not query_results.empty?)) ? query_results.aggregate(:interest_received.sum) : 0
+    sum_principal_received_money_amount = sum_principal_received ? to_money_amount(sum_principal_received) : zero_money_amount
+    sum_interest_received_money_amount = sum_interest_received ? to_money_amount(sum_interest_received) : zero_money_amount
+    total_amount_received = sum_principal_received_money_amount + sum_interest_received_money_amount
+    {:principal_received => sum_principal_received_money_amount, :interest_received => sum_interest_received_money_amount, :total_received => total_amount_received}
+  end
+
   private
 
   def individual_loans_by_branches_for_status_on_date(for_status, on_date, *at_branch_ids_ary)
@@ -459,7 +495,8 @@ class ReportingFacade < StandardFacade
     total_loan_allocation_receipts_grouped_by_location = {}
     property_sym = TRANSACTION_LOCATIONS[performed_or_accounted_choice]
     at_location_ids_ary.each { |at_location_id|
-      all_loan_receipts_at_location = LoanReceipt.all(:effective_on => on_date, property_sym => at_location_id)
+      params = {:effective_on => on_date, property_sym => at_location_id, :loan_recovery => 0, :"lending.status.not" => :repaid_loan_status}
+      all_loan_receipts_at_location = LoanReceipt.all(params)
       total_loan_allocation_receipts_grouped_by_location[at_location_id] = LoanReceipt.add_up(all_loan_receipts_at_location)
     }
     total_loan_allocation_receipts_grouped_by_location
