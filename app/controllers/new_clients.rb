@@ -282,14 +282,20 @@ class NewClients < Application
     loan_file_id = params[:loan_file_id]
     loan_application_id = params[:loan_application_id]
 
+    # VALIDATIONS
+    @errors << "Select atleast one loan application" if loan_application_id.blank?
+
     # OPERATION PERFORMED
-    begin
-      loan_application = LoanApplication.get loan_application_id
-      loan_application.create_client
-      message = {:notice => "Successfully created client for Loan Application ID #{loan_application_id} as Client ID #{loan_application.client_id}"}
-    rescue => ex
-      @errors << "An error has occured for Loan Application ID #{loan_application_id}: #{ex.message}"
+    if @errors.blank?
+      begin
+        loan_application = LoanApplication.get loan_application_id
+        loan_application.create_client
+        message = {:notice => "Successfully created client for Loan Application ID #{loan_application_id} as Client ID #{loan_application.client_id}"}
+      rescue => ex
+        @errors << "An error has occured for Loan Application ID #{loan_application_id}: #{ex.message}"
+      end
     end
+
     unless @errors.blank?
       message = {:error => @errors.flatten.join(', ')}
     end
