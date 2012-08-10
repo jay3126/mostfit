@@ -507,7 +507,8 @@ class ReportingFacade < StandardFacade
     total_loan_allocation_receipts_grouped_by_location = {}
     property_sym = TRANSACTION_LOCATIONS[performed_or_accounted_choice]
     at_location_ids_ary.each { |at_location_id|
-      all_loan_receipts_at_location = LoanReceipt.all(:effective_on.gte => on_date, :effective_on.lte => till_date, property_sym => at_location_id)
+      params = {:effective_on.gte => on_date, :effective_on.lte => till_date, property_sym => at_location_id, :loan_recovery => 0, :"lending.status.not" => :repaid_loan_status}
+      all_loan_receipts_at_location = LoanReceipt.all(params)
       total_loan_allocation_receipts_grouped_by_location[at_location_id] = LoanReceipt.add_up(all_loan_receipts_at_location)
     }
     total_loan_allocation_receipts_grouped_by_location
