@@ -7,6 +7,7 @@ class OverlapReportResponse
   property :created_at,          DateTime
   property :created_by_user_id,  Integer
   property :total_outstanding,   Integer
+  property :overdue_amount,      Integer
   property :no_of_active_loans,  Integer
   property :loan_application_id, Integer
   property :not_matched,         Boolean, :nullable => false
@@ -37,6 +38,9 @@ class OverlapReportResponse
       active_loans_number = 0 
       responses.each{|x| existing_loans_amount += x["LOAN_DETAILS"]["DISBURSED_AMT"].to_f}
       self.not_matched = false
+      overdue_amount = 0
+      responses.each{|x| overdue_amount += x["LOAN_DETAILS"]["OVERDUE_AMT"].to_f}
+      self.overdue_amount = overdue_amount
     else
       self.not_matched = true
     end
