@@ -1,5 +1,14 @@
 %h1
-  = "Biz-Location :-  #{@biz_location.name}"
+  - if params[:action] == "index"
+    = "Biz-Locations"
+  - else
+    = "Biz-Location :-  #{@biz_location.name}"
+- if params[:action] == "index"
+  .menu-strip{:style => "width : 1160px"}
+    = form_for(@biz_location, :action => url(:biz_locations) ) do
+      = partial :fields
+      = submit 'Save'
+      = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
 - unless @biz_location.new?
   %div{:style => 'display:table; width:100%;'}
     %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
@@ -20,6 +29,7 @@
   %p
     %i No Location Mapping have been created yet.
 - else
+  %br
   %table.narrow
     %thead
       %tr
