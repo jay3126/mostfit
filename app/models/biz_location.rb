@@ -20,6 +20,7 @@ class BizLocation
   has n, :visit_schedules
 
   validates_with_method :location_level_precedes_biz_location?
+  validates_is_unique :name
 
   def location_level_precedes_biz_location?
     Validators::Assignments.is_valid_assignment_date?(self.creation_date, self, self.location_level)

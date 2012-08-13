@@ -15,24 +15,29 @@
       )
   %tr.even
     %th.even
+      Employee Id
+    %td
+      = @staff_member.employee_id if @staff_member.employee_id
+  %tr.odd
+    %th.odd
       Designation
     %td
       = @staff_member.designation.name if @staff_member.designation 
-  %tr.odd
-    %th.odd
+  %tr.even
+    %th.even
       Mobile Number
     %td
       = @staff_member.mobile_number
-  %tr.even
-    %th.even
+  %tr.odd
+    %th.odd
       Joining Date
     %td
       = @staff_member.creation_date
       (
       = @staff_member.creation_date.strftime('%A')
       )
-  %tr.odd
-    %th.odd
+  %tr.even
+    %th.even
       Status
     %td
       %span{:class => "#{@staff_member.active? ? '' : 'red'}"}

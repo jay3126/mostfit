@@ -8,6 +8,13 @@
       %span.greytext the screen name of the staff member
   %tr
     %td
+      Employee Id
+    %td
+      = text_field :employee_id, :size => 20
+      %br/
+      %span.greytext employee id of staff as given by MFI
+  %tr
+    %td
       Designation
     %td
       = select :designation_id, :collection => Designation.all.map{|d| [d.id.to_s, d.name]}

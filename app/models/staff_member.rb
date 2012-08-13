@@ -11,7 +11,7 @@ class StaffMember
   property :father_name,   String, :length => 100, :nullable => true
   property :gender,        Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
   property :active,        Boolean, :default => true, :nullable => false
-  #  property :gender,     Enum[:male, :female]  #commenting out this line as gender is already there in staff_member model.
+  property :employee_id,   String, :length => 15, :nullable => false
 
   # no designations, they are derived from the relations it has
   belongs_to :designation
@@ -41,6 +41,7 @@ class StaffMember
   has n, :visit_schedules
 
   validates_length :name, :min => 3
+  validates_is_unique :employee_id
 
   def created_on; creation_date; end
   def role
