@@ -18,6 +18,12 @@ module OverlapReportInterpreter
       return RATED_NEGATIVE if (reported_total_outstanding + loan_amount_applied_for) > total_outstanding_allowed
     end
 
+    total_overdue_money = MoneyManager.get_money_instance(self.overdue_amount)
+    reported_total_overdue = self.respond_to?(:overdue_amount) ? total_overdue_money : nil
+    if reported_total_overdue
+      return RATED_NEGATIVE if reported_total_overdue > MoneyManager.default_zero_money
+    end
+
     RATED_POSITIVE
   end
     
