@@ -46,8 +46,8 @@
         %td
           Reported by
         %td
-          - registered_at = ClientAdministration.get_registered_at(@client, get_effective_date).id
-          = select :name => "reported_by", :collection => choice_facade.supervisors_and_executives_at_location(registered_at, get_effective_date).map{|x| [x.id, x.name]}, :prompt => "Select"
+          = get_session_user_name
+          = hidden_field :name => 'reported_by', :value => get_session_user_id
       %tr
         %td
           = submit 'Submit', :class => "greenButton"
