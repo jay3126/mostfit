@@ -11,7 +11,7 @@ class StaffMember
   property :father_name,   String, :length => 100, :nullable => true
   property :gender,        Enum.send('[]', *[:female, :male]), :nullable => true, :lazy => true, :default => :male
   property :active,        Boolean, :default => true, :nullable => false
-  property :employee_id,   String, :length => 15, :nullable => false
+  property :employee_id,   String, :length => 15, :nullable => true
 
   # no designations, they are derived from the relations it has
   belongs_to :designation
