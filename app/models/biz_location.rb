@@ -21,6 +21,7 @@ class BizLocation
 
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name
+  validates_present :name
 
   def location_level_precedes_biz_location?
     Validators::Assignments.is_valid_assignment_date?(self.creation_date, self, self.location_level)
