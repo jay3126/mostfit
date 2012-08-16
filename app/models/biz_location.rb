@@ -139,5 +139,21 @@ class BizLocation
                   t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
                   t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
   end
+
+  #################
+  # Search Begins #
+  #################
+
+  def self.search(q, per_page)
+    if /^\d+$/.match(q)
+      BizLocation.all(:conditions => {:id => q}, :limit => per_page)
+    else
+      BizLocation.all(:conditions => ["name=? or name like ?", q, q+'%'], :limit => per_page)
+    end
+  end
+
+  ###############
+  # Search Ends #
+  ###############
   
 end
