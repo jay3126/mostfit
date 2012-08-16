@@ -3,15 +3,16 @@ class OverlapReportResponse
   include Constants::Masters
   include OverlapReportInterpreter
   
-  property :id,                  Serial
-  property :created_at,          DateTime
-  property :created_by_user_id,  Integer
-  property :total_outstanding,   Integer
-  property :overdue_amount,      Integer
-  property :no_of_active_loans,  Integer
-  property :loan_application_id, Integer
-  property :not_matched,         Boolean, :nullable => false
-  property :response_text,       Text # Marshal.dump of response hash
+  property :id,                   Serial
+  property :created_at,           DateTime
+  property :created_by_user_id,   Integer
+  property :total_outstanding,    Integer
+  property :overdue_amount,       Integer
+  property :no_of_active_loans,   Integer
+  property :no_of_mfis,           Integer
+  property :loan_application_id,  Integer
+  property :not_matched,          Boolean, :nullable => false
+  property :response_text,        Text # Marshal.dump of response hash
 
   after :save, :update_loan_application_status
 
@@ -25,22 +26,31 @@ class OverlapReportResponse
   def process_response
     unless self.response_text.blank?
       r = JSON::parse(response_text)
-      check = nil
-      no_of_active_accounts = r["HEADER"]["SUMMARY"]["NO_OF_ACTIVE_ACCOUNTS"].to_i
-      no_of_mfis = r["HEADER"]["SUMMARY"]["NO_OF_OTHER_MFIS"].to_i
-      self.no_of_active_loans = r["HEADER"]["SUMMARY"]["NO_OF_ACTIVE_ACCOUNTS"].to_i
       responses = [r["RESPONSES"]["RESPONSE"]].flatten rescue []
+      
+      # Check no. of active loans of member
+      no_of_active_accounts = r["HEADER"]["SUMMARY"]["NO_OF_ACTIVE_ACCOUNTS"].to_i
+      self.no_of_active_loans = no_of_active_accounts
+
+      # Check relationship of member with number of MFIs
+      no_of_mfis = r["HEADER"]["SUMMARY"]["NO_OF_OTHER_MFIS"].to_i
+      self.no_of_mfis = no_of_mfis
+
+      # Check total outstanding of member
       sum = 0
       responses.each{|x| sum += x["LOAN_DETAILS"]["CURRENT_BAL"].to_i}
       self.total_outstanding = sum
+
       existing_loans_amount = 0
       responses.each{|x| existing_loans_amount += x["LOAN_DETAILS"]["DISBURSED_AMT"].to_f}
-      active_loans_number = 0 
-      responses.each{|x| existing_loans_amount += x["LOAN_DETAILS"]["DISBURSED_AMT"].to_f}
+
       self.not_matched = false
+
+      # Check overdue amount of member
       overdue_amount = 0
       responses.each{|x| overdue_amount += x["LOAN_DETAILS"]["OVERDUE_AMT"].to_f}
       self.overdue_amount = overdue_amount
+
     else
       self.not_matched = true
     end

@@ -27,6 +27,7 @@
         %th Address
         %th Response 
         %th Status
+        %th Rejection Reason
       %tbody
         - @responses.each do |response|
           - loan_application = LoanApplication.get(response.loan_application_id)
@@ -42,6 +43,7 @@
             %td
               = link_to_with_rights response.id, resource(response)
             %td
-              - response_status = 'Not rated'
-              - begin; response_status = response.status; rescue; response_status = 'Error'; end
-              = response_status      
+              = loan_application.credit_bureau_status.humanize rescue nil
+            %td
+              - rejection_reason = loan_application.credit_bureau_rejection_reason.blank? ? 'N/A' : loan_application.credit_bureau_rejection_reason
+              = rejection_reason

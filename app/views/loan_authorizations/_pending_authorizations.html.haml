@@ -26,7 +26,9 @@
               %td
                 = "Address"
               %td
-                = "Rating"
+                = "Credit Bureau Rating"
+              %td
+                = "Credit Bureau Rejection Reason"
               %td{:colspan => 2, :align => "center"}
                 = "Loan Authorization"
               %td{:colspan => 2}
@@ -49,6 +51,9 @@
                 %td
                   = lpa.credit_bureau_status.humanize rescue nil
                   %input{:type => :hidden, :value => lpa.credit_bureau_status, :name => 'credit_bureau_status'}
+                %td
+                  - rejection_reason = lpa.credit_bureau_rejection_reason.blank? ? 'N/A' : lpa.credit_bureau_rejection_reason
+                  = rejection_reason
                 %td
                   - selected_approved = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_APPROVED ? "checked" : nil
                   %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED, :checked => selected_approved}

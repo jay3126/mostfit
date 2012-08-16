@@ -1,16 +1,17 @@
 #In-memory class for storing a LoanApplication's total information to be passed around
 class LoanApplicationInfo
   include Comparable
-  attr_reader :loan_application_id, :client_name, :client_dob, :client_address, :credit_bureau_status
+  attr_reader :loan_application_id, :client_name, :client_dob, :client_address, :credit_bureau_status, :credit_bureau_rejection_reason
   attr_reader :amount, :status
   attr_reader :authorization_info
   attr_reader :cpv1
   attr_reader :cpv2
 
-  def initialize(loan_application_id, client_name, client_dob, client_address, credit_bureau_status, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
+  def initialize(loan_application_id, client_name, client_dob, client_address, credit_bureau_status, credit_bureau_rejection_reason, amount, status, authorization_info = nil, cpv1 = nil, cpv2 = nil)
     @loan_application_id = loan_application_id
     @client_name = client_name; @client_dob = client_dob; @client_address = client_address
     @credit_bureau_status = credit_bureau_status
+    @credit_bureau_rejection_reason = credit_bureau_rejection_reason
     @amount = amount; @status = status
     @authorization_info = authorization_info if authorization_info
     @cpv1 = cpv1 if cpv1
@@ -63,6 +64,7 @@ class LoanApplication
   property :currency,                       *CURRENCY
   property :credit_bureau_status,           Enum.send('[]', *CREDIT_BUREAU_STATUSES), :default => Constants::CreditBureau::NO_MATCH
   property :credit_bureau_rated_at,         DateTime
+  property :credit_bureau_rejection_reason, String, :length => 300
   
   #basic client info
   property :client_id,                      Integer,  :nullable => true
@@ -261,11 +263,19 @@ class LoanApplication
     return status
   end
 
-  def record_credit_bureau_response(credit_bureau_status)
+  def record_credit_bureau_response(credit_bureau_rejection_reason)
+    if credit_bureau_rejection_reason.blank?
+      credit_bureau_status = RATED_POSITIVE
+    else
+      credit_bureau_status = RATED_NEGATIVE
+    end
     status = nil
     LoanApplication.transaction do |t|
       status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
-      self.update(:credit_bureau_status => credit_bureau_status, :credit_bureau_rated_at => DateTime.now)
+      self.credit_bureau_status = credit_bureau_status
+      self.credit_bureau_rated_at = DateTime.now
+      self.credit_bureau_rejection_reason = credit_bureau_rejection_reason
+      save
       t.rollback unless status == true
     end
     return status
@@ -473,6 +483,7 @@ class LoanApplication
       self.client_dob,
       self.client_address,
       self.credit_bureau_status,
+      self.credit_bureau_rejection_reason,
       self.loan_money_amount,
       self.get_status,
       authorization_info,
