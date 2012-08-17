@@ -1,7 +1,7 @@
 - loan_application = @loan_app
 %table.form{:style => "text-align:left;"}
   %h2
-    Loan application details:
+    Loan Application Details:
     = link_to_with_rights "Edit", resource(loan_application, :edit), :class => 'edit'
 
   %tr
@@ -81,7 +81,70 @@
       = StaffMember.get(loan_application.created_by_staff_id).name rescue nil
 
   %tr
+    %th Credit bureau status
+    %td
+      = loan_application.credit_bureau_status.humanize rescue nil
+
+  %tr
+    %th Credit bureau rejection reason
+    %td
+      = loan_application.credit_bureau_rejection_reason rescue nil
+
+  %tr
+    %th Credit bureau rated at
+    %td
+      = loan_application.credit_bureau_rated_at rescue nil
+
+  %tr
     %th Created on
     %td
       = loan_application.created_on
+
+- if loan_application.to_info && loan_application.to_info.authorization_info
+  - loan_authorization = loan_application.to_info.authorization_info
+  %hr
+  %h3 Loan Application Authorization Info:
+  %table.form{:style => "text-align:left;"}
+    %tr
+      %th Loan authorization status
+      %td
+        = loan_authorization.status.humanize rescue nil
+    %tr
+      %th Loan authorization performed by
+      %td
+        = StaffMember.get(loan_authorization.performed_by_staff_id).name rescue nil
+    %tr
+      %th Loan authorization override reason
+      %td
+        = loan_authorization.override_reason rescue nil
+    %tr
+      %th Loan authorization performed on
+      %td
+        = loan_authorization.performed_on rescue nil
+
+- unless loan_application.client_verifications.blank?
+  - client_verifications = loan_application.client_verifications
+  %hr
+  %h3 Loan Application Verification Info:
+  %table.form{:style => "text-align:left;"}
+    - client_verifications.each do |cv|
+      %tr
+        %th Verification type
+        %td
+          = cv.verification_type rescue nil
+      %tr
+        %th Verification status
+        %td
+          = cv.verification_status.humanize rescue nil
+      %tr
+        %th Verified by
+        %td
+          = StaffMember.get(cv.verified_by_staff_id).name rescue nil
+
+      %tr
+        %th Verified on
+        %td
+          = cv.verified_on_date rescue nil
+          %br
+
 =# link_to_with_rights '<< Back', request.env['HTTP_REFERER']
