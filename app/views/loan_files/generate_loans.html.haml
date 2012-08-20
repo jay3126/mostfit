@@ -118,4 +118,5 @@
       %th
         Loan Purpose
   = submit "Go"
+  = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
   %hr

@@ -77,5 +77,6 @@
                 %td
                   = lap.status.humanize rescue nil
       = submit "Create client" unless count == 0
+      = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
   - else
     %h3 No loan applications
