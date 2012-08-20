@@ -9,7 +9,7 @@
       %th
         Center
       %th
-        Status
+        Healthcheck status
       %th
         count
     - @data.each do |s_no, value|
@@ -22,14 +22,11 @@
               %td{:style => "text-align:center"}
                 = BizLocation.get(center_id).name
               %td{:style => "text-align:center"}
-                = status.humanize rescue ''
+                - loan_file = LoanFile.first(:at_branch_id => branch_id, :at_center_id => center_id)
+                - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+loan_file.loan_file_identifier.to_s)
+                = healthcheck_is_clear ? "Cleared" : "Pending"
               %td{:style => "text-align:center"}
                 = value3
 - else
   .shaded
     %h3 No records found
-
-
-
-
-  
