@@ -61,6 +61,57 @@ class ReportingFacade < StandardFacade
     sum_of_balances_by_location
   end
 
+  #this function will give the total amount outstanding for loans disbursed till date.
+  def sum_all_outstanding_loans
+    loan_ids = Lending.all(:disbursal_date.lte => Date.today).aggregate(:id)
+    outstanding_amount = MoneyManager.default_zero_money
+    loan_ids.each do |l|
+      loan = Lending.get(l)
+      next unless loan.is_outstanding?
+      outstanding_amount += loan.actual_total_outstanding
+    end
+    outstanding_amount
+  end
+
+  #this functions gives the repayments details till date.
+  def sum_all_repayments
+    result = {}
+    params = {:effective_on.lt => Date.today, :loan_recovery => 0.0, "lending.status.not" => :repaid_loan_status}
+    principal_received = LoanReceipt.all(params).aggregate(:principal_received.sum)
+    interest_received = LoanReceipt.all(params).aggregate(:interest_received.sum)
+    advance_received = LoanReceipt.all(params).aggregate(:advance_received.sum)
+    advance_adjusted = LoanReceipt.all(params).aggregate(:advance_adjusted.sum)
+    total_received = principal_received + interest_received
+    principal_money_amount_received = Money.new(principal_received.to_i, :INR).to_s
+    interest_money_amount_received = Money.new(interest_received.to_i, :INR).to_s
+    advance_money_amount_received = Money.new(advance_received.to_i, :INR).to_s
+    advance_money_amount_adjusted = Money.new(advance_adjusted.to_i, :INR).to_s
+    total_money_amount_received = Money.new(total_received.to_i, :INR).to_s
+    result = {:principal_received => principal_money_amount_received, :interest_received => interest_money_amount_received, :advance_received => advance_money_amount_received, :advance_adjusted => advance_money_amount_adjusted, :total_received => total_money_amount_received}
+  end
+
+  #this function gives the fee payments.
+  def sum_all_fee_receipts
+    params = {:effective_on.lt => Date.today}
+    fee_receipt = FeeReceipt.all(params).aggregate(:fee_amount.sum)
+    fee_money_amount_receipt = Money.new(fee_receipt.to_i, :INR).to_s
+    result = {:fee_receipt => fee_money_amount_receipt}
+  end
+
+  #this function gives all the pre-closures and write-off's values.
+  def sum_all_pre_closure_and_write_off_payments
+    result = {}
+    written_off_params = {:effective_on.lt => Date.today, "lending.status" => :written_off_loan_status}
+    pre_closure_params = {:effective_on.lt => Date.today, "lending.status" => :repaid_loan_status}
+    written_off_amount = LoanReceipt.all(written_off_params).aggregate(:loan_recovery.sum)
+    principal_received = LoanReceipt.all(pre_closure_params).aggregate(:principal_received.sum)
+    interest_received = LoanReceipt.all(pre_closure_params).aggregate(:interest_received.sum)
+    pre_closure_amount = principal_received + interest_received
+    written_off_money_amount = Money.new(written_off_amount.to_i, :INR).to_s
+    pre_closure_money_amount = Money.new(pre_closure_amount.to_i, :INR).to_s
+    result = {:written_off_amount => written_off_money_amount, :pre_closure_amount => pre_closure_money_amount}
+  end
+
   #this is the method to find out outstanding loans_balances for a date range.
   def sum_all_outstanding_loans_balances_accounted_at_locations_for_date_range(on_date, till_date, *at_location_ids_ary)
     balances_grouped_by_location = all_outstanding_loans_balances_accounted_at_locations_for_date_range(on_date, till_date, at_location_ids_ary)
@@ -419,6 +470,18 @@ class ReportingFacade < StandardFacade
     sum_interest_received_money_amount = sum_interest_received ? to_money_amount(sum_interest_received) : zero_money_amount
     total_amount_received = sum_principal_received_money_amount + sum_interest_received_money_amount
     {:principal_received => sum_principal_received_money_amount, :interest_received => sum_interest_received_money_amount, :total_received => total_amount_received}
+  end
+
+  #this function gives loan amounts and count for various statuses.
+  def aggregate_loans_for_status(for_status, on_date)
+    loan_status, date_to_query, amount_to_sum = LoanLifeCycle::STATUSES_DATES_SUM_AMOUNTS[for_status]
+    query = {:status => loan_status, date_to_query.lt => on_date}
+    query_results = Lending.all(query)
+
+    count = query_results.count
+    sum_amount = query_results.aggregate(amount_to_sum)
+    sum_money_amount = sum_amount ? to_money_amount(sum_amount) : zero_money_amount
+    {:count => count, :total_amount => sum_money_amount}
   end
 
   private

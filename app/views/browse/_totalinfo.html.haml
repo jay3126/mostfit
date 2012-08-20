@@ -1,23 +1,24 @@
 %div.totalinfo
   %h1
-    At one glance
-  - lh = LoanHistory.sum_outstanding_for(Mfi)
-  - lh = lh ? lh.first : nil
+    = Mfi.first.name
+    At a glance
   .numbers
+    - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
+    - reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, User.first)
     .number
-      = Branch.count
+      = LocationLevel.first.biz_locations.count
       %span.label
-        branches
+        = LocationLevel.first.name.pluralize
     .number
-      = Center.count
+      = LocationLevel.get(2).biz_locations.count
       %span.label
-        centers
+        = LocationLevel.get(2).name.pluralize
     .number  
       = Client.count
       %span.label
         clients
     .number
-      = (l = Loan.count(:disbursal_date.not => nil, :rejected_on => nil))
+      = Lending.count
       %span.label
         loans
   %br
@@ -26,33 +27,69 @@
       %td
         Active clients
       %td
-        = lh.clients_count if lh
-    %tr
-      %td
-        Attendance % 
-      %td{:colspan => 3}
-        - absent_count = Attendance.all(:status => "absent").count.to_f
-        - total_count = Attendance.all.count.to_f
-        - attendance = (1 - (absent_count/total_count))*100
-        - if attendance > 0
-          = (attendance).round(2)
-        - else
-          = "-"
+        = Client.all(:active => true).count
     %tr
       %td
         Closed/repaid loans (number)
       %td{:colspan => 3}
-        = (l - lh.loans_count) if lh
+        = Lending.all(:status => [:written_off_loan_status, :repaid_loan_status]).count
+
     %tr
       %td
-        Loans disbursed (amount)
+        Loans Applied
       %td{:colspan => 3}
-        = Loan.all(:disbursal_date.not => nil, :rejected_on => nil).aggregate(:amount.sum).to_currency
+        %table
+          %tr
+            %td.text
+              Count
+            %td.number
+              - loans_applied = reporting_facade.aggregate_loans_for_status(:applied, Date.today)
+              = loans_applied[:count]
+          %tr
+            %td.text
+              Amount
+            %td.number
+              = loans_applied[:total_amount]
+
+    %tr
+      %td
+        Loans Approved
+      %td{:colspan => 3}
+        %table
+          %tr
+            %td.text
+              Count
+            %td.number
+              - loans_approved = reporting_facade.aggregate_loans_for_status(:approved, Date.today)
+              = loans_approved[:count]
+          %tr
+            %td.text
+              Amount
+            %td.number
+              = loans_approved[:total_amount]
+
+    %tr
+      %td
+        Loans Disbursed
+      %td{:colspan => 3}
+        %table
+          %tr
+            %td.text
+              Count
+            %td.number
+              - loans_disbursed = reporting_facade.aggregate_loans_for_status(:disbursed, Date.today)
+              = loans_disbursed[:count]
+          %tr
+            %td.text
+              Amount
+            %td.number
+              = loans_disbursed[:total_amount]
     %tr
       %td
         Amount outstanding
       %td{:colspan => 3}
-        = lh.actual_outstanding_principal.to_currency if lh
+        - amount_outstanding = reporting_facade.sum_all_outstanding_loans
+        = amount_outstanding.to_s
     %tr
       %td
         Receipts
@@ -62,40 +99,66 @@
             %td.text
               Principal
             %td.number
-              - principal_repaid = Payment.all(:type => :principal).aggregate(:amount.sum) || 0
-              = principal_repaid.to_currency 
+              - repayments = reporting_facade.sum_all_repayments
+              = repayments[:principal_received]
           %tr
             %td.text
               Interest
             %td.number
-              - interest = Payment.all(:type => :interest).aggregate(:amount.sum) || 0
-              = interest.to_currency
+              = repayments[:interest_received]
           %tr
             %td.text
               Fees
             %td.number
-              - fees = Payment.all(:type => :fees).aggregate(:amount.sum) || 0
-              = fees.to_currency 
+              - fee_received = reporting_facade.sum_all_fee_receipts
+              = fee_received[:fee_receipt]
           %tr
             %td.text
-              Total receipts
+              Total
             %td.number
-              = (principal_repaid + interest + fees).to_currency
+              = repayments[:total_received]
+    %tr
+      %td
+        Advances
+      %td{:colspan => 3}
+        %table
+          %tr
+            %td.text
+              Received
+            %td.number
+              = repayments[:advance_received]
+          %tr
+            %td.text
+              Adjusted
+            %td.number
+              = repayments[:advance_adjusted]
+    %tr
+      %td
+        Write-Off Amounts
+      %td
+        - amounts = reporting_facade.sum_all_pre_closure_and_write_off_payments
+        = amounts[:written_off_amount]
+
+    %tr
+      %td
+        Pre-Closure Amounts
+        %td
+          = amounts[:pre_closure_amount]
+              
     %tr
       %td
         Staff count
       %td
         = StaffMember.all(:active => true).count
-    %tr
-      %td
-        Regions
-      %td{:colspan => 3}
-        = Region.count
-    %tr
-      %td
-        Areas
-      %td{:colspan => 3}        
-        = Area.count
+
+    - if LocationLevel.count > 2
+      - last_location_level_id = LocationLevel.last.id
+      - for location_level in (3..last_location_level_id)
+        %tr
+          %td
+            = LocationLevel.get(location_level).name.pluralize
+          %td{:colspan => 3}
+            = (LocationLevel.get(location_level) and LocationLevel.get(location_level).biz_locations) ? LocationLevel.get(location_level).biz_locations.count : "Not Specified"
 
   %span.greytext{:style => "float: right"}
-    as of yesterday
+    %b as of yesterday

@@ -1,31 +1,10 @@
 %h1 Home
-%div.tab_container.shaded
-  %ul.tabs
-    %li#Locations
-      Locations
-    %li#sourcing
-      Sourcing
-    %li#Loans
-      Loans
-    %li#Collections
-      Collections
-    %li#Accounting
-      Accounting
-    %li#Reports
-      Reports
-    %li#Configuration
-      Configuration
-  %div.tab
-    %div#location_list
+%table
+  %tr
+    %td{:width => "65%"}
       = partial "user_locations/list"
-  %div.tab
-    = partial "loan_applications/loan_application_links"
-  %div.tab
-  %div.tab
-  %div.tab
-    %div#accounts
-      = partial "book_keeping/tabs"
-  %div.tab
-    = partial "reports/report_links"
-  %div.tab
-    = partial "admin/admin_links"
+    %td
+      %div.result
+      %script
+        $.get("/browse/hq_tab", function(data){$('.result').html(data);})
+      %br
