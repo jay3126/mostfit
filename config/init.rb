@@ -269,4 +269,27 @@ Merb::BootLoader.after_app_loads do
     
   Mfi.activate
 
+
+  # This is to save all the loan_products as we have changed loan_type ENUM to loan_type_string.
+  begin
+    LoanProduct.all.each{ |l| 
+      if l.loan_type.nil? or l.loan_type_string.nil?
+        l.save
+      end
+    } 
+  rescue
+  end
+  $holidays_list = []
+  begin
+    Holiday.all.each{|h| $holidays_list << [h.date.day, h.date.month, h.date.strftime('%y')]}
+  rescue
+  end
+
+  #this is to create an Organization if it is not created.
+  begin
+    if Organization.all.empty?
+      Organization.create(:name => "Mostfit", :org_guid => UUID.generate)
+    end
+  rescue
+  end
 end
