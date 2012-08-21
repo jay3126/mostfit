@@ -49,7 +49,6 @@ Merb::Router.prepare do
   resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
   resources :holiday_calendars
   resources :location_holidays
-  resources :cachers, :id => %r(\d+), :collection => {:consolidate => [:get], :rebuild => [:get], :split => [:get], :missing => [:get], :reallocate => [:get]}
 
   resources :api_accesses
   resources :monthly_targets
@@ -63,8 +62,6 @@ Merb::Router.prepare do
   resources :accounting_periods
   resources :journals, :id => %r(\d+)
   resources :loan_utilizations
-  resources :rule_books, :id => %r(\d+)
-  resources :applicable_fees
   resources :account_types
   resources :meeting_schedules
   resources :accounts, :id => %r(\d+) do
@@ -96,12 +93,9 @@ Merb::Router.prepare do
   resources :lending_products
   resources :lendings, :id => %r(\d+), :member => {:record_lending_preclose => [:put]}, :collection => {:write_off_lendings => [:get]}
   resources :staff_attendances
-  resources :targets, :id => %r(\d+)
   resources :holidays
-  resources :fees
   resources :verifications
   resources :ledger_entries
-  resources :loan_products
   resources :users
   resources :staff_members, :id => %r(\d+) do
     resources :staff_member_attendances
@@ -197,7 +191,6 @@ Merb::Router.prepare do
     match('/users/:id.:format').to(:controller => 'users', :action => 'show')
     match('/staff_members.:format').to(:controller => 'staff_members', :action =>'index')
     match('/staff_members/:id.:format').to(:controller => 'staff_members', :action =>'show')
-    match('/data_entry/payments/by_center.:format').to(:controller => 'data_entry/payments', :action =>'by_center')
     match('/transaction_logs.:format').to(:controller => 'transaction_logs', :action =>'index')
     match('/transaction_logs/:id.:format').to(:controller => 'transaction_logs', :action =>'show')
     match('/model_event_logs.:format').to(:controller => 'model_event_logs', :action =>'index')
@@ -205,8 +198,6 @@ Merb::Router.prepare do
     match('/client_groups.:format', :method => "get").to(:controller => 'client_groups', :action =>'index')
     match('/client_groups/:id.:format').to(:controller => 'client_groups', :action =>'show')
     match('/users.:format').to(:controller => 'users', :action =>'index')
-    match('/loan_products.:format').to(:controller => 'loan_products', :action =>'index')
-    match('/loan_products/:id.:format').to(:controller => 'loan_products', :action =>'show')
     match('/attendance.:format', :method => "post").to(:controller => 'attendances', :action =>'create')
     match('/client_groups.:format', :method => "post").to(:controller => 'client_groups', :action =>'create')
     match('/holidays.:format', :method => "get").to(:controller => 'holidays', :action =>'index')
