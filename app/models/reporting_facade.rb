@@ -81,7 +81,7 @@ class ReportingFacade < StandardFacade
     interest_received = LoanReceipt.all(params).aggregate(:interest_received.sum)
     advance_received = LoanReceipt.all(params).aggregate(:advance_received.sum)
     advance_adjusted = LoanReceipt.all(params).aggregate(:advance_adjusted.sum)
-    total_received = principal_received + interest_received
+    total_received = (principal_received || 0) + (interest_received || 0)
     principal_money_amount_received = Money.new(principal_received.to_i, :INR).to_s
     interest_money_amount_received = Money.new(interest_received.to_i, :INR).to_s
     advance_money_amount_received = Money.new(advance_received.to_i, :INR).to_s
