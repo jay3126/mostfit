@@ -1,8 +1,0 @@
-%h1
-  == Editing loan ##{@loan.id} for 
-  %i= link_to_with_rights @loan.client.name, resource(@branch, @center, @client)
-
-= error_messages_for @loan
-
-= form_for(@loan, :action => url_for_loan(@loan), :class => 'loan', :onsubmit => "javascript:return confirm_for(o);") do
-  = partial :fields, :submit_text => "Save changes", :cancel_link => url_for_loan(@loan)
