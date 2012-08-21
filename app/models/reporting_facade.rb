@@ -106,7 +106,7 @@ class ReportingFacade < StandardFacade
     written_off_amount = LoanReceipt.all(written_off_params).aggregate(:loan_recovery.sum)
     principal_received = LoanReceipt.all(pre_closure_params).aggregate(:principal_received.sum)
     interest_received = LoanReceipt.all(pre_closure_params).aggregate(:interest_received.sum)
-    pre_closure_amount = principal_received + interest_received
+    pre_closure_amount = (principal_received || 0) + (interest_received || 0)
     written_off_money_amount = Money.new(written_off_amount.to_i, :INR).to_s
     pre_closure_money_amount = Money.new(pre_closure_amount.to_i, :INR).to_s
     result = {:written_off_amount => written_off_money_amount, :pre_closure_amount => pre_closure_money_amount}
