@@ -18,7 +18,6 @@ class FundingLine
   property :reference,           String, :unique => true
 
   belongs_to :funder
-  has n, :loans
   has n, :tranches
   validates_with_method  :disbursal_date,       :method => :disbursed_before_first_payment?
   validates_with_method  :first_payment_date,   :method => :disbursed_before_first_payment?

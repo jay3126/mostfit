@@ -16,7 +16,6 @@ class BranchDiary
   property :branch_id,               Integer,                :nullable => false,   :index => true
 
   belongs_to  :manager,   :child_key =>[:manager_staff_id], :model => 'StaffMember'
-  belongs_to  :branch,    :child_key =>[:branch_id],        :model => 'Branch'
 
   validates_present       :manager
   validates_with_method   :manager,    :method => :manager_is_an_active_staff_member?

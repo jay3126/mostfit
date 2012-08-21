@@ -23,7 +23,6 @@ class Checker
   property :ok,             Boolean, :default => false
 
   belongs_to :upload
-  belongs_to :loan
 
   def self.check_unchecked
     self.all(:checked => false).map{|c| c.check}

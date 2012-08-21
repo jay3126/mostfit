@@ -17,9 +17,6 @@ class HolidayCalendar
   property :area_id,   Integer, :nullable => true
   property :deleted_at, ParanoidDateTime
 
-  belongs_to :region
-  belongs_to :area
-  belongs_to :branch
 
   has n, :holidays_fors
 

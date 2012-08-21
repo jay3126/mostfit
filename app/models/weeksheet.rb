@@ -12,7 +12,6 @@ class Weeksheet
 
   has n, :weeksheet_rows
   belongs_to :staff_member
-  belongs_to :center
 
   #Get weeksheet of center 
   def self.get_center_weeksheet(center, date, option = nil)

@@ -116,25 +116,11 @@ Merb::Router.prepare do
     resources :cgts
   end
   resources :payments
-  resources :branches, :id => %r(\d+)  do    
-    resources :journals
-    resources :centers, :id => %r(\d+) do
-      resources :client_groups
-      resources :clients do
-        resources :payments
-        resources :comments        
-        resources :loans do
-          resources :payments
-        end
-      end
-    end
-  end
   resources :funding_lines
   resources :funders do    
     resources :portfolios
     resources :funding_lines
   end
-  resources :center_meeting_days
   resources :repayment_styles
 
   resources :uploads, :member => {:continue => [:get], :reset => [:get], :show_csv => [:get], :reload => [:get], :extract => [:get], :stop => [:get]} do

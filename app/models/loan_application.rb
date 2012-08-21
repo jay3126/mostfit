@@ -89,7 +89,7 @@ class LoanApplication
 
   has n, :client_verifications
   has 1, :loan_authorization
-  has 1, :loan
+  has 1, :lending
 
   validates_length :client_name, :min => 3
   validates_present   :client_dob

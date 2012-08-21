@@ -18,8 +18,6 @@ class InsurancePolicy
 
   belongs_to :insurance_product
   belongs_to :client
-  belongs_to :loan, :nullable => true
-  has n, :applicable_fees,    :child_key => [:applicable_id], :applicable_type => "InsurancePolicy"
   after  :save,   :levy_fees
 
   before :valid?, :set_status

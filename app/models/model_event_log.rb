@@ -4,8 +4,8 @@ class ModelEventLog
   ACCOUNTING_ACTIONS = [:create, :allow_posting, :disallow_posting, :no_change]
   MODEL_CHANGES = [:create, :update, :destroy]
   # class.to_s.downcase.to_sym
-  OBSERVED_MODELS = [:client, :loan, :loanproduct, :fee, :branch, :funder, :fundingline]
-  MODELS_UNDER_OBSERVATION = [Loan, LoanProduct, Branch]
+  OBSERVED_MODELS = [:client, :funder, :fundingline]
+  MODELS_UNDER_OBSERVATION = [LendingProduct]
 
   property :id,                                     Serial
   property :event_guid,                             String, :default => lambda{ |obj, p| UUID.generate }

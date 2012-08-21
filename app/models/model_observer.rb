@@ -1,7 +1,7 @@
 class ModelObserver
   include DataMapper::Observer
   
-  ANOMALIES = [Client, Loan]
+  ANOMALIES = [Client]
   
   observe *ModelEventLog::MODELS_UNDER_OBSERVATION
   

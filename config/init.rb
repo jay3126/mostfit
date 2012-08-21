@@ -108,8 +108,6 @@ Merb::BootLoader.after_app_loads do
   # Activate SSL Support
   Net::SMTP.enable_tls(OpenSSL::SSL::VERIFY_NONE)
  
-  loan_types = Loan.descendants
-
   begin; $holidays = Holiday.all.map{|h| [h.date, h]}.to_hash; rescue; end
 
   # Starting the logger takes time, so turn it off during development
@@ -126,16 +124,6 @@ Merb::BootLoader.after_app_loads do
     end
   end
 
-  Misfit::LoanValidators.instance_methods.map{|m| m.to_sym}.each do |s|
-    clause = Proc.new{|t| t.loan_product.loan_validations.include?(s)}
-    Loan.descendants.each do |loan|
-      if DataMapper::VERSION == "0.10.1"
-        loan.add_validator_to_context({:context =>  :default, :if => clause}, [s], DataMapper::Validate::MethodValidator)
-      elsif DataMapper::VERSION == "0.10.2"
-        loan.send(:add_validator_to_context,{:context => [:default], :if => clause}, [s], DataMapper::Validate::MethodValidator)
-      end
-    end
-  end
 
   # set the rights
   require 'config/misfit'
@@ -269,16 +257,6 @@ Merb::BootLoader.after_app_loads do
     
   Mfi.activate
 
-
-  # This is to save all the loan_products as we have changed loan_type ENUM to loan_type_string.
-  begin
-    LoanProduct.all.each{ |l| 
-      if l.loan_type.nil? or l.loan_type_string.nil?
-        l.save
-      end
-    } 
-  rescue
-  end
   $holidays_list = []
   begin
     Holiday.all.each{|h| $holidays_list << [h.date.day, h.date.month, h.date.strftime('%y')]}

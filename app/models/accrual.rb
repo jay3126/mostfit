@@ -26,7 +26,6 @@ class Accrual
   property :created_at,         DateTime, :nullable => false, :default => DateTime.now
   property :created_by_user_id, Integer, :nullable => false
 
-  belongs_to :loan, :nullable => true
   belongs_to :created_by, :child_key => [:created_by_user_id], :model => 'User'
 
   ACCRUE_SIMPLE_INTEREST_RECEIVABLE = { :accrual_type => ACCRUE_INTEREST_RECEIVABLE, :is_penalty => false }

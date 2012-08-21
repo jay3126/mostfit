@@ -10,7 +10,6 @@ class Attendance
   property :origin,              String, :default => DEFAULT_ORIGIN
 
   belongs_to :client
-  belongs_to :center
 
   validates_present  :client,:date
   validates_with_method :date, :method=>:not_in_future? 

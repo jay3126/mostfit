@@ -5,7 +5,6 @@ class ApiAccess
   property :origin, String, :nullable => false
   property :description, String, :nullable => false
 
-  belongs_to :branch
 
   validates_is_unique   :origin
 end

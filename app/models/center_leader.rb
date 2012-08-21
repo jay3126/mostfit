@@ -8,6 +8,5 @@ class CenterLeader
   property :date_deassigned, Date, :nullable => true, :index => true
   property :current, Boolean, :nullable => true, :index => true, :default => true
   
-  belongs_to :center
   belongs_to :client
 end

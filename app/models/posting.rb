@@ -19,7 +19,6 @@ class Posting
   belongs_to :journal
   belongs_to :account
   belongs_to :currency
-  belongs_to :fee,        Fee, :nullable => true
   validates_with_method :journal_date_of_posting_is_after_account_opening_date
 
   def reverse(journal_id)

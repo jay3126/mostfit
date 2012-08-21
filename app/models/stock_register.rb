@@ -10,12 +10,8 @@ class StockRegister
   property :bill_number,      String,                     :nullable => false,  :index => true
   property :bill_date,        Date,                       :nullable => false
   property :date_of_entry,    Date,      :default => Date.today, :nullable => false
-  property :branch_name,      String,    :nullable => true,     :index => true
-  property :branch_id,        Integer,   :nullable => false,    :index => true
-
 
   belongs_to  :manager,  :child_key => [:manager_staff_id],  :model => 'StaffMember'
-  belongs_to  :branch,   :child_key => [:branch_id],         :model => 'Branch'
 
   validates_present       :manager
   validates_with_method   :manager,   :manager_is_an_active_staff_member?

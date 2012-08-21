@@ -5,7 +5,6 @@ class ClientType
 
   property :type, String
 
-  has n, :fees, :through => Resource
 
   def name
     type

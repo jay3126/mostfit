@@ -18,20 +18,9 @@ class StaffMember
 
   belongs_to :origin_home_location, :model => 'BizLocation', :child_key => [:origin_home_location_id], :nullable => true
 
-  has n, :branches,          :child_key => [:manager_staff_id]
   has n, :branch_diaries,    :child_key => [:manager_staff_id]
   has n, :stock_registers,   :child_key => [:manager_staff_id]
   has n, :asset_registers,   :child_key => [:manager_staff_id]
-  has n, :centers,           :child_key => [:manager_staff_id]
-  has n, :regions,           :child_key => [:manager_id]
-  has n, :areas,             :child_key => [:manager_id]
-  has n, :approved_loans,    :child_key => [:approved_by_staff_id],    :model => 'Loan'
-  has n, :applied_loans,     :child_key => [:applied_by_staff_id],     :model => 'Loan'
-  has n, :rejected_loans,    :child_key => [:rejected_by_staff_id],    :model => 'Loan'
-  has n, :disbursed_loans,   :child_key => [:disbursed_by_staff_id],   :model => 'Loan'
-  has n, :written_off_loans, :child_key => [:written_off_by_staff_id], :model => 'Loan'
-  has n, :suggested_written_off_loans, :child_key => [:suggested_written_off_by_staff_id], :model => 'Loan'
-  has n, :write_off_rejected_loans,    :child_key => [:write_off_rejected_by_staff_id],    :model => 'Loan'
   has n, :payments, :child_key  => [:received_by_staff_id]
   has n, :monthly_targets
   has n, :weeksheets

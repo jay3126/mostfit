@@ -27,7 +27,6 @@ class Portfolio
 
   belongs_to :funder
   has n, :portfolio_loans
-  has n, :loans, :through => :portfolio_loans
   belongs_to :created_by,  :child_key => [:created_by_user_id],   :model => 'User'
 
   validates_is_unique :name

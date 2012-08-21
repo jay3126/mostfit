@@ -16,7 +16,7 @@ class MoneyCategory
   property :is_reversed,             Boolean, :nullable => false
 
   has 1, :accounting_rule
-  has n, :transaction_summaries
+#  has n, :transaction_summaries
 
   validates_with_method :account_type_category_was_set?
 

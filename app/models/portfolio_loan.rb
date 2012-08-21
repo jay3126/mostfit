@@ -12,6 +12,5 @@ class PortfolioLoan
   property :active,         Boolean, :index => true, :default => true, :nullable => false
 
   belongs_to :portfolio
-  belongs_to :loan
 
 end

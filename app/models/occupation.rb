@@ -10,6 +10,5 @@ class Occupation
   validates_is_unique :code
 
   has n, :clients
-  has n, :loans
   default_scope(:default).update(:order => [:name])
 end
