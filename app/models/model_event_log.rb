@@ -5,7 +5,7 @@ class ModelEventLog
   MODEL_CHANGES = [:create, :update, :destroy]
   # class.to_s.downcase.to_sym
   OBSERVED_MODELS = [:client, :funder, :fundingline]
-  MODELS_UNDER_OBSERVATION = [LendingProduct]
+  MODELS_UNDER_OBSERVATION = [Account]
 
   property :id,                                     Serial
   property :event_guid,                             String, :default => lambda{ |obj, p| UUID.generate }
