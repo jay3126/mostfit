@@ -27,14 +27,10 @@ class LocationManager
 
   def self.all_locations_that_can_meet
     locations = []
-    MEETINGS_SUPPORTED_AT.each { |location_type|
-      klass = Constants::Space.to_klass(location_type)
-      next unless klass
-      location_level = LocationLevel.first :name => klass
-      next unless location_level.has_meeting
-      locations = location_level.biz_locations
+    LocationLevel.all(:has_meeting => true).each { |location_level|
+      locations << location_level.biz_locations
     }
-    locations
+    locations.flatten
   end
 
   def all_location_levels
