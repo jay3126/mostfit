@@ -5,17 +5,7 @@ class StaffMembers < Application
 
   def index
     @date = params[:date] ? parse_date(params[:date]) : Date.today
-    @branch = Branch.get(params[:branch_id]) if params[:branch_id]
-    hash = get_staff_members_hash
-    
-    # check box for inactive staff members
-    if params[:show_disabled] and params[:show_disabled].to_i == 1
-      hash[:active] = [true, false]
-    else
-      hash[:active] = true
-    end
     @staff_members = @staff_members ? @staff_members : StaffMember.all
-    set_staff_member_counts
     display @staff_members
   end
 
@@ -44,6 +34,7 @@ class StaffMembers < Application
     @defaulted     = LoanHistory.defaulted_loan_info_for(@center, @to_date)
     render :file => 'branches/moreinfo', :layout => false
   end
+
   def show_branches(id)
     @staff_member = StaffMember.get(id)
     raise NotFound unless @staff_member
@@ -231,57 +222,4 @@ class StaffMembers < Application
     return "printer" if params[:layout] and params[:layout]=="printer"
   end
   
-  def get_staff_members_hash
-    if session.user.role == :staff_member or session.user.staff_member
-      st = session.user.staff_member
-      ids = []
-      [st.areas.branches, st.regions.areas.branches, st.branches, st.centers.branches].flatten.uniq.each{|branch|        
-        staff_members = StaffMember.related_to(branch)
-        ids += ([staff_members, branch.manager.id] << branch.centers.manager.map{|x| x.id}).flatten.uniq        
-      }
-      return {:id => ids}
-    elsif params[:branch_id] and not params[:branch_id].blank?
-      branch = Branch.get(params[:branch_id])
-      staff_members = StaffMember.related_to(branch)
-      ids = ([staff_members, branch.manager.id] << branch.centers.manager.map{|x| x.id}).flatten.uniq
-      return {:id => ids}
-    else
-      return {}
-    end
-  end
-
-  def set_staff_member_counts
-    first_of_this_month = Date.new(@date.year, @date.month, 1)
-    end_of_this_month   = @date
-    client_ids = @branch.client_ids if @branch
-    { 
-      :branch_managers => Branch, :center_managers => Center, :applied_loans => Loan, :approved_loans => Loan, 
-      :rejected_loans  => Loan, :disbursed_loans => Loan, :written_off_loans => Loan
-    }.each{|type, klass|
-      if klass==Branch or klass==Center
-        aggregate_by   = :manager_staff_id
-        overall_cond   = {:creation_date.lte => @date}
-        thismonth_cond = {:creation_date.lte => @date, :creation_date.gte => first_of_this_month}        
-        if @branch
-          sym = (klass==Branch ? :id : :branch_id)
-          overall_cond[sym]   = @branch.id
-          thismonth_cond[sym] = @branch.id
-        end
-      else
-        name           = (type.to_s.split('_')-["loans"]).join("_")
-        aggregate_by   = (name + "_by_staff_id").to_sym
-        date_key       = name=="disbursed" ? :disbursal_date : (name+"_on").to_sym
-        overall_cond   = {date_key.lte => @date}
-        thismonth_cond = {date_key.lte => @date, date_key.gte => first_of_this_month}
-        if @branch
-          branch_cond     = {:client_id => client_ids}
-          overall_cond   += branch_cond
-          thismonth_cond += branch_cond
-        end
-      end
-      
-      instance_variable_set("@#{type}_overall",   klass.all(overall_cond).aggregate(aggregate_by, :all.count))
-      instance_variable_set("@#{type}_thismonth", klass.all(thismonth_cond).aggregate(aggregate_by, :all.count))      
-    }
-  end
 end # StaffMembers

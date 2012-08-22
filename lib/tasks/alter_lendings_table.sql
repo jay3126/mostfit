@@ -1,0 +1,1 @@
+ALTER TABLE `lendings` DROP COLUMN `loan_application_id`;

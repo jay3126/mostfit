@@ -74,62 +74,6 @@ class StaffMember
     [obj.save, obj]
   end
 
-  def clients(hash={}, owner_type = :created)
-    if owner_type == :created
-      hash[:created_by_staff_member_id] = self.id
-    else
-      hash["center.manager_staff_id"] = self.id
-    end
-    Client.all(hash)
-  end
-
-  def loans(hash={}, owner_type = :created)
-    if owner_type == :created
-      Loan.all(hash + {:applied_by_staff_id => self.id}) +
-        Loan.all(hash + {:approved_by_staff_id => self.id}) +
-        Loan.all(hash + {:disbursed_by_staff_id => self.id})
-    else
-      hash["client.center.manager_staff_id"] = self.id
-      Loan.all(hash)
-    end
-  end
-
-  def client_groups(hash, owner_type = nil)
-    if owner_type == :created
-      hash[:created_by_staff_member_id] = self.id
-    else
-      hash["center.manager_staff_id"] = self.id
-    end
-    ClientGroup.all(hash)
-  end
-
-  def related_branches
-    [self.branches, self.areas.branches, self.regions.areas.branches].flatten
-  end
-
-  def related_centers
-    [self.centers, self.branches.centers, self.areas.branches.centers, self.regions.areas.branches.centers].flatten
-  end
-
-  def self.related_to(obj)
-    staff_members = []
-    [:applied_by_staff_id, :approved_by_staff_id, :rejected_by_staff_id, :disbursed_by_staff_id, :written_off_by_staff_id, :suggested_written_off_by_staff_id].each{|type|
-      staff_members << if obj.class==Branch
-                         repository.adapter.query(%Q{SELECT distinct(#{type}) FROM branches b, centers c, clients cl, loans l
-                                                    WHERE b.id=#{obj.id} and c.branch_id=b.id and cl.center_id=c.id and l.client_id=cl.id})
-                       elsif obj.class==Center
-                         repository.adapter.query(%Q{SELECT distinct(#{type}) FROM centers c, clients cl, loans l
-                                                    WHERE c.id=#{obj.id} and cl.center_id=c.id and l.client_id=cl.id})
-                       elsif obj.class==Client
-                         repository.adapter.query(%Q{SELECT distinct(#{type}) FROM centers c, clients cl, loans l
-                                                    WHERE cl.id=#{obj.id} and l.client_id=cl.id})
-                       end
-    }
-    staff_members = staff_members.flatten.uniq.compact
-    staff_members.delete(0)
-    return staff_members
-  end
-
   def generate_sheets(date)
     c_pdf = generate_collection_pdf(date)
     d_pdf = generate_disbursement_pdf(date)
