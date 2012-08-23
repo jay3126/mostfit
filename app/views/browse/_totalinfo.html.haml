@@ -6,19 +6,21 @@
     - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
     - reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, User.first)
     .number
-      = LocationLevel.first.biz_locations.count
+      - first_location_level = LocationLevel.all(:level => 0).first
+      = (first_location_level and first_location_level.biz_locations) ? first_location_level.biz_locations.count : 0
       %span.label
-        = LocationLevel.first.name.pluralize
+        = (first_location_level and first_location_level.name) ? first_location_level.name.pluralize : "N/A"
     .number
-      = LocationLevel.get(2).biz_locations.count
+      - second_location_level = LocationLevel.all(:level => 1).first
+      = (second_location_level and second_location_level.biz_locations) ? second_location_level.biz_locations.count : 0
       %span.label
-        = LocationLevel.get(2).name.pluralize
+        = (second_location_level and second_location_level.name) ? second_location_level.name.pluralize : "N/A"
     .number  
-      = Client.count
+      = Client.count || 0
       %span.label
         clients
     .number
-      = Lending.count
+      = Lending.count || 0
       %span.label
         loans
   %br
@@ -27,12 +29,12 @@
       %td
         Active clients
       %td
-        = Client.all(:active => true).count
+        = Client.all(:active => true).count || 0
     %tr
       %td
         Closed/repaid loans (number)
       %td{:colspan => 3}
-        = Lending.all(:status => [:written_off_loan_status, :repaid_loan_status]).count
+        = Lending.all(:status => [:written_off_loan_status, :repaid_loan_status]).count || 0
 
     %tr
       %td
@@ -152,8 +154,9 @@
         = StaffMember.all(:active => true).count
 
     - if LocationLevel.count > 2
+      - location_level_id = LocationLevel.all(:level => 3).first.id
       - last_location_level_id = LocationLevel.last.id
-      - for location_level in (3..last_location_level_id)
+      - for location_level in (location_level_id..last_location_level_id)
         %tr
           %td
             = LocationLevel.get(location_level).name.pluralize
