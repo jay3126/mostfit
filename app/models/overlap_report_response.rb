@@ -48,7 +48,7 @@ class OverlapReportResponse
 
       # Check overdue amount of member
       overdue_amount = 0
-      responses.each{|x| overdue_amount += x["LOAN_DETAILS"]["OVERDUE_AMT"].to_f}
+      responses.each{|x| overdue_amount += x["LOAN_DETAILS"]["OVERDUE_AMT"].to_f.abs}
       self.overdue_amount = overdue_amount
 
     else
