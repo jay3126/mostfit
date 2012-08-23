@@ -20,12 +20,4 @@ class PaymentObserver
     self.parent_org_guid = (Organization.get_organization(self.received_on) || Nothing).org_guid or "0000-0000"
   end
   
-  after :create do
-    PaymentObserver.make_transaction_entry(self, :create) if Mfi.first.transaction_logging_enabled
-  end
-
-  after :update do
-    PaymentObserver.make_transaction_entry(self, :delete) if Mfi.first.transaction_logging_enabled
-  end
-  
 end
