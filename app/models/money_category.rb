@@ -64,7 +64,7 @@ class MoneyCategory
   end
 
   def self.create_money_categories_for_fee_receipts
-    Fee.all.each { |fee| create_category_for_other_fee_received(fee.id) }
+    SimpleFeeProduct.all.each { |fee| create_category_for_other_fee_received(fee.id) }
   end
 
   def self.resolve_money_category(by_transaction_type, asset_type_id = nil, income_type_id = nil)
