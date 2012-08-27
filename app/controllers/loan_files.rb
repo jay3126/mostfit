@@ -45,7 +45,7 @@ class LoanFiles < Application
     @loan_file.loan_applications.each do |l|
       client = Client.get(l.client_id)
       not_eligible_client = client_facade.get_all_loans_for_counterparty(client)
-      @clients << client if not_eligible_client.blank?
+      @clients << client if not_eligible_client.compact.blank?
     end
 
     sc = clients.map{|k,v| k if v[:chosen]}.compact if clients
