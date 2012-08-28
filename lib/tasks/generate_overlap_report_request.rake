@@ -7,6 +7,7 @@ if (local_gem_dir = File.join(File.dirname(__FILE__), '..', '..', 'gems')) && $B
 end
 
 require "merb-core"
+require 'colored'
 
 # this loads all plugins required in your init file so don't add them
 # here again, Merb will do it for you
@@ -38,6 +39,8 @@ namespace :mostfit do
           errors[:save_status_errors][loan_application.id] = loan_application.errors unless loan_application.save or loan_application.generate_credit_bureau_request
         end        
       end
+
+      p "There are some loan applications which are either in new status or suspected duplicate" if loan_applications.blank?
       
       log_folder = File.join(Merb.root, "log","highmark","requests")
       FileUtils.mkdir_p log_folder
