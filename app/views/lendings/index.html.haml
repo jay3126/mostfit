@@ -1,25 +1,28 @@
 %h1
   Loans
-%div.tab_container.shaded
-  %ul.tabs
-    %li#apply_loans
-      Applied Loans
-    %li#approved_Loans
-      Approved Loans
-    %li#disbursed_loans
-      Disbursed Loans
-    %li#fee_loans
-      Fee Loans
-    %li#insurance_premium
-      Insurance Premium
-  %div.tab
-    =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
-  %div.tab
-    =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
-  %div.tab
-    =partial "lendings/disburse_loans", :lendings => @disburse_lendings
-  %div.tab
-    =partial "lendings/fee_loans"
-  %div.tab
-    =partial "lendings/insurance_fee_loans"
+= form_for(:lendings, :action => url(:controller => :lendings, :action => :index)) do
+  = partial 'lib/biz_location_selector'
+- unless params[:parent_location_id].nil?
+  %div.tab_container.shaded
+    %ul.tabs
+      %li#apply_loans
+        Applied Loans
+      %li#approved_Loans
+        Approved Loans
+      %li#disbursed_loans
+        Disbursed Loans
+      %li#fee_loans
+        Fee Loans
+      %li#insurance_premium
+        Insurance Premium
+    %div.tab
+      =partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
+    %div.tab
+      =partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
+    %div.tab
+      =partial "lendings/disburse_loans", :lendings => @disburse_lendings
+    %div.tab
+      =partial "lendings/fee_loans"
+    %div.tab
+      =partial "lendings/insurance_fee_loans"
  

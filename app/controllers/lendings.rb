@@ -1,11 +1,18 @@
 class Lendings < Application
 
   def index
-    @new_lendings      = Lending.all(:status => [:new_loan_status])
-    @approve_lendings  = Lending.all(:status => [:approved_loan_status])
-    @disburse_lendings = Lending.all(:status => [:disbursed_loan_status])
-    @fee_lendings      = Lending.all.collect{|al| al.unpaid_loan_fees}.flatten
-    @insurance_fees    = Lending.all.collect{|al| al.unpaid_loan_insurance_fees}.flatten
+    @lending, @new_lendings, @approve_lendings, @disburse_lendings = []
+    unless params[:parent_location_id].nil?
+      search             = {:status => [:new_loan_status, :approved_loan_status, :disbursed_loan_status]}
+      search.merge!(:accounted_at_origin => params[:parent_location_id]) unless params[:parent_location_id].blank?
+      search.merge!(:administered_at_origin => params[:child_location_id]) unless params[:child_location_id].blank?
+      @lendings          = Lending.all(search)
+      @new_lendings      = @lendings.select{|l| l.status == :new_loan_status}
+      @approve_lendings  = @lendings.select{|l| l.status == :approved_loan_status}
+      @disburse_lendings = @lendings.select{|l| l.status == :disbursed_loan_status}
+      @fee_lendings      = @disburse_lendings.collect{|al| al.unpaid_loan_fees}.flatten
+      @insurance_fees    = @disburse_lendings.collect{|al| al.unpaid_loan_insurance_fees}.flatten
+    end
     display @new_lendings
   end
 
@@ -138,7 +145,7 @@ class Lendings < Application
       end
     end
 
-    redirect resource(:lendings) , :message => @message
+    redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]) , :message => @message
   end
 
   def update_lending_approve_to_disburse
@@ -185,7 +192,7 @@ class Lendings < Application
       @message = {:error => "Loan disbursement failed with errors: " + disbursement_errors.join(", ")}
     end
 
-    redirect resource(:lendings) , :message => @message
+    redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]) , :message => @message
   end
 
   def payment_on_disburse_loan
@@ -217,7 +224,7 @@ class Lendings < Application
     if @message[:error].blank?
       redirect resource(:payment_transactions, :lending_ids => payments.collect{|p| p[:lending].id} ) , :message => @message
     else
-      redirect resource(:lendings), :message => @message
+      redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]), :message => @message
     end
   end
 
