@@ -92,38 +92,45 @@ class Lendings < Application
   end
 
   def update_lending_new_to_approve
-    @message       = {}
-    lendings       = []
-    save_lendings  = 0
-    lending_params = params[:lending]
-    begin
-      lending_params.each do |key, value|
-        if value.size == 2
-          lending                   = Lending.get key
-          approve_amount            = MoneyManager.get_money_instance(value.last[:approved_amount])
-          lending.approved_amount   = approve_amount.amount
-          lending.approved_by_staff = value.last[:approved_by_staff]
-          lending.approved_on_date  = value.last[:approved_on_date]
-          if lending.valid?
-            lendings << lending
-          else
-            @message = {:error => "#{lending.id}= #{lending.errors.first.join(', ')}"}
+    @message          = {}
+    lendings          = []
+    save_lendings     = 0
+    lending_params    = params[:lending]
+    approved_by_staff = params[:approved_by_staff]
+    approved_on_date  = Date.parse params[:approved_on_date]
+
+    @message[:error] = "Please select Staff Member" if approved_by_staff.blank?
+    @message[:error] = "Approve Date cannot blank" if approved_on_date.blank?
+    if @message[:error].blank?
+      begin
+        lending_params.each do |key, value|
+          if value.size == 2
+            lending                   = Lending.get key
+            approve_amount            = MoneyManager.get_money_instance(value.last[:approved_amount])
+            lending.approved_amount   = approve_amount.amount
+            lending.approved_by_staff = approved_by_staff
+            lending.approved_on_date  = approved_on_date
+            if lending.valid?
+              lendings << lending
+            else
+              @message = {:error => "#{lending.id}= #{lending.errors.first.join(', ')}"}
+            end
           end
         end
-      end
-      if @message[:error].blank?
-        lendings.each do |lending|
-          params[:submit] == 'Reject' ? lending.reject() : lending.approve(lending.to_money[:approved_amount], lending.approved_on_date, lending.approved_by_staff)
-          save_lendings = save_lendings +  1 if lending.reload.is_approved?
+        if @message[:error].blank?
+          lendings.each do |lending|
+            params[:submit] == 'Reject' ? lending.reject() : lending.approve(lending.to_money[:approved_amount], approved_on_date, approved_by_staff)
+            save_lendings = save_lendings +  1 if lending.reload.is_approved?
+          end
         end
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
       end
-    rescue => ex
-      @message = {:error => "An error has occured: #{ex.message}"}
     end
 
     if @message.blank?
       if lendings.blank?
-        @message = {:error => "Please select loan for approve/reject"}
+        @message = {:error => "Please select loan for approve"}
       elsif lendings.count != save_lendings
         @message = {:error => "Loan #{params[:submit].downcase}ed fail."}
       else
@@ -135,36 +142,44 @@ class Lendings < Application
   end
 
   def update_lending_approve_to_disburse
-    @message       = {}
-    lendings       = []
-    lending_params = params[:lending]
+    @message            = {}
+    lendings            = []
     disbursement_errors = []
-    begin
-      lending_params.each do |key, value|
-        if value.size == 2
-          lending                    = Lending.get key
-          disbursed_amount           = MoneyManager.get_money_instance(value.last[:disbursed_amount])
-          lending.disbursed_amount   = disbursed_amount.amount
-          lending.disbursed_by_staff = value.last[:disbursed_by_staff]
-          lending.disbursal_date     = value.last[:disbursal_date]
-          if lending.valid?
-            lendings << lending
-          else
-            @message = {:error => "#{lending.id}= #{lending.errors.first.join(', ')}"}
+    lending_params      = params[:lending]
+    disbursed_by_staff  = params[:disbursed_by_staff]
+    disbursal_date      = Date.parse params[:disbursal_date]
+
+    disbursement_errors << "Please select Staff Member" if disbursed_by_staff.blank?
+    disbursement_errors << "Disbursal Date cannot blank" if disbursal_date.blank?
+    
+    if disbursement_errors.blank?
+      begin
+        lending_params.each do |key, value|
+          if value.size == 2
+            lending                    = Lending.get key
+            disbursed_amount           = MoneyManager.get_money_instance(value.last[:disbursed_amount])
+            lending.disbursed_amount   = disbursed_amount.amount
+            lending.disbursed_by_staff = disbursed_by_staff
+            lending.disbursal_date     = disbursal_date
+            if lending.valid?
+              lendings << lending
+            else
+              disbursement_errors << "#{lending.id}= #{lending.errors.first.join(', ')}"
+            end
           end
         end
-      end
-      @message = {:error => "Please select loan for disburse"} if lendings.blank?
-      if @message[:error].blank?
-        lendings.each do |lending|
-          payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, lending.disbursed_by_staff, lending.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
-          disbursement_errors.push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
+        disbursement_errors << "Please select loan for disburse" if lendings.blank?
+        if disbursement_errors.blank?
+          lendings.each do |lending|
+            payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+            disbursement_errors.push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
+          end
         end
+      rescue => ex
+        disbursement_errors << "An error has occured: #{ex.message}"
       end
-    rescue => ex
-      @message = {:error => "An error has occured: #{ex.message}"}
     end
-    if disbursement_errors.empty?
+    if disbursement_errors.blank?
       @message = {:notice => "Loans were disbursed successfully."}
     else
       @message = {:error => "Loan disbursement failed with errors: " + disbursement_errors.join(", ")}
