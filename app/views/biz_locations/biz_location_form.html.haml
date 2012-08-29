@@ -12,6 +12,11 @@
         Creation Date
       %td
         = date_select 'creation_date'
+    %tr
+      %th
+        Address
+      %td
+        = text_area :biz_location_address, :row => 6, :cols => 38
     - if @child_location_level.level == 0
       %tr
         %th

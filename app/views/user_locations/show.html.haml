@@ -15,7 +15,10 @@
     %th.odd Managed By
     %td= managed_by_staff_member(@biz_location.id, get_effective_date)
   %tr.even
-    %th.even= "No. Of #{@location_level.name}"
+    %th.even Address
+    %td= @biz_location.biz_location_address
+  %tr.odd
+    %th.odd= "No. Of #{@location_level.name}"
     %td= @biz_locations.count
 
 %div.tab_container.shaded

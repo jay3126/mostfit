@@ -44,6 +44,9 @@
     %th.even Disbursal Date for Loans
     %td= @biz_location.center_disbursal_date
   %tr.odd
+    %th.odd Address
+    %td= @biz_location.biz_location_address
+  %tr.even
     %td= link_to "Set center leader", url(:controller => "user_locations", :action => "set_center_leader", :biz_location_id => @biz_location.id), :class => "greenButton"
     %td= link_to "Set seating order", url(:controller => "user_locations", :action => "set_seating_order", :biz_location_id => @biz_location.id), :class => "greenButton"
 

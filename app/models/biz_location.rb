@@ -9,6 +9,7 @@ class BizLocation
   property :creation_date, Date, :nullable => false, :default => Date.today
   property :deleted_at, ParanoidDateTime
   property :center_disbursal_date, Date, :nullable => true
+  property :biz_location_address, String, :nullable => true
 
   belongs_to :location_level
   has n, :meeting_schedules, :through => Resource
