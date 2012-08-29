@@ -41,8 +41,10 @@
     %th.odd Managed By
     %td= managed_by_staff_member(@biz_location.id, get_effective_date)
   %tr.even
+    %th.even Disbursal Date for Loans
+    %td= @biz_location.center_disbursal_date
+  %tr.odd
     %td= link_to "Set center leader", url(:controller => "user_locations", :action => "set_center_leader", :biz_location_id => @biz_location.id), :class => "greenButton"
-  %tr.even
     %td= link_to "Set seating order", url(:controller => "user_locations", :action => "set_seating_order", :biz_location_id => @biz_location.id), :class => "greenButton"
 
 %div.tab_container.shaded

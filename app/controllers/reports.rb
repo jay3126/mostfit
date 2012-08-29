@@ -5,7 +5,7 @@ class Reports < Application
     #:periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
     :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
     # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
-    :registers    => [InsuranceClaimReport],
+    :registers    => [InsuranceClaimReport, CenterList],
     :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
     #  :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],

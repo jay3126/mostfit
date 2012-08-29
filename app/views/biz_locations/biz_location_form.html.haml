@@ -12,5 +12,13 @@
         Creation Date
       %td
         = date_select 'creation_date'
+    - if @child_location_level.level == 0
+      %tr
+        %th
+          Default Disbursal Date
+        %td
+          = date_select 'center_disbursal_date'
+  %br
   = submit "Save", :class => "grey_button"
+  &nbsp;&nbsp;
   = link_to 'Cancel', params[:return], :class => "grey_button"

@@ -1,10 +1,19 @@
+:javascript
+  $('select.location').live('change', function(){
+      if(jQuery(this).val()=='0'){
+        jQuery('.date').show();
+      }else{
+        jQuery('.date').hide();
+      }
+    });
+
 %h2 Create a New Biz Location
 %table.form
   %tr
     %th
       Location Level
     %td
-      = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Please Select Location Level", :class => "chosen"
+      = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Please Select Location Level", :class => "chosen location"
     %th
       Name
     %th
@@ -13,4 +22,10 @@
       Creation Date
     %td
       = date_select_earliest 'biz_location[creation_date]', {:id => "creation_date"}
+  %tr
+    %th.date{:style => 'display:none'}
+      Default Disbursal Date
+    %td.date{:style => 'display:none'}
+      = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+      
 

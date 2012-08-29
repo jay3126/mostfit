@@ -1,0 +1,46 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th
+        Agent Name
+      %th
+        Center Id
+      %th
+        Center Name
+      %th
+        Meeting Day
+      %th
+        Meeting Time
+      %th
+        Meeting Frequency
+      %th
+        Disbursal Date
+
+  %tbody
+    - @data.sort_by{|center| center}.each do |center, values|
+      %tr
+        %td
+          %b
+            = values[:branch_id]
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:agent_name]
+        %td
+          = values[:center_id]
+        %td
+          = values[:center_name]
+        %td
+          = values[:meeting_day]
+        %td
+          = values[:meeting_time]
+        %td
+          = values[:meeting_frequency]
+        %td
+          = values[:center_disbursal_date]
