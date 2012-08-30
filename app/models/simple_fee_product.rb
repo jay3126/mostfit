@@ -9,6 +9,7 @@ class SimpleFeeProduct
   property :created_at,          *CREATED_AT
 
   has n, :timed_amounts
+  has n, :fee_administrations
   belongs_to :simple_insurance_product, :nullable => true
   belongs_to :lending_product_for_fee, 'LendingProduct', :nullable => true, :parent_key => [:id], :child_key => [:loan_fee_id]
   belongs_to :lending_product_for_penalty, 'LendingProduct', :nullable => true, :parent_key => [:id], :child_key => [:loan_preclosure_penalty_id]

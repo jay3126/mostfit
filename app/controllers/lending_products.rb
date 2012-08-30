@@ -26,12 +26,15 @@ class LendingProducts < Application
     tenure               = params[:lending_product][:tenure]
     interest_rate        = params[:lending_product][:interest_rate]
     repayment_allocation = params[:lending_product][:repayment_allocation_strategy]
-    fee_product_id       = params[:loan_fee_id]
     insurance_product_id = params[:insurance_product_id]
-    penalty_fee_id       = params[:loan_preclosure_penalty_id]
+    fee_product_ids      = params[:fee_product_ids].blank? ? [] : params[:fee_product_ids]
+    penalty_fee_ids      = params[:loan_preclosure_penalty_ids].blank? ? [] : params[:loan_preclosure_penalty_ids]
     interest_amount      = params[:lending_product_template][:interest_amount]
     principal_schedule   = params[:lending_product_template][:principal_schedule]
     interest_schedule    = params[:lending_product_template][:interest_schedule]
+
+    user_id              = session.user.id
+    staff_id             = session.user.staff_member.id
     @lending_product     = LendingProduct.new(params[:lending_product])
 
     # VALIDATIONS
@@ -52,10 +55,9 @@ class LendingProducts < Application
         money_interest_amount           = MoneyManager.get_money_instance(interest_amount)
         money_principal_schedule_amount = MoneyManager.get_money_instance(*principal_schedule.split(','))
         money_interest_schedule_amount  = MoneyManager.get_money_instance(*interest_schedule.split(','))
-        fee_product                     = SimpleFeeProduct.get fee_product_id unless fee_product_id.blank?
-        penalty_fee                     = SimpleFeeProduct.get penalty_fee_id unless penalty_fee_id.blank?
+        fee_product_ids                 = fee_product_ids + penalty_fee_ids unless penalty_fee_ids.blank?
         insurance_product               = SimpleInsuranceProduct.get insurance_product_id unless insurance_product_id.blank?
-        lending_product                 = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount, fee_product, insurance_product, penalty_fee)
+        lending_product                 = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount, user_id, staff_id, fee_product_ids, insurance_product)
 
         if lending_product.new?
           @message[:error] = lending_product.error.first.join(', ')

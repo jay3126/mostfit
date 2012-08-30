@@ -283,7 +283,7 @@ class Lending
 
   def maximum_to_be_collected
     (total_loan_disbursed_and_interest_applicable > total_received_till_date) ? (total_loan_disbursed_and_interest_applicable - total_received_till_date) :
-        zero_money_amount
+      zero_money_amount
   end
 
   ################
@@ -369,7 +369,7 @@ class Lending
     scheduled_outstanding = scheduled_total_outstanding(on_date)
 
     (net_outstanding > scheduled_outstanding) ? (net_outstanding - scheduled_outstanding) :
-        zero_money_amount
+      zero_money_amount
   end
 
   def actual_total_due_ignoring_advance_balance(on_date)
@@ -377,7 +377,7 @@ class Lending
     _actual_total_outstanding    = actual_total_outstanding
 
     (_actual_total_outstanding > _scheduled_total_outstanding) ? (_actual_total_outstanding - _scheduled_total_outstanding) :
-        zero_money_amount
+      zero_money_amount
   end
 
   def actual_total_outstanding_net_advance_balance
@@ -664,8 +664,8 @@ class Lending
 
   def setup_fee_instances
     loan_fee_product_map = get_loan_fee_product
-    if loan_fee_product_map
-      loan_fee_product_map.values.each {|loan_fee_product_instance|
+    unless loan_fee_product_map.blank?
+      loan_fee_product_map.each {|loan_fee_product_instance|
         FeeInstance.register_fee_instance(loan_fee_product_instance, self, self.administered_at_origin, self.accounted_at_origin, self.scheduled_disbursal_date)
       }
     end
@@ -739,7 +739,8 @@ class Lending
   private
 
   def get_loan_fee_product
-    SimpleFeeProduct.get_applicable_fee_products_on_loan_product(self.lending_product.id)
+    FeeAdministration.get_fee_products(self.lending_product)
+    #SimpleFeeProduct.get_applicable_fee_products_on_loan_product(self.lending_product.id)
   end
 
   def get_insurance_products_and_premia
@@ -835,7 +836,7 @@ class Lending
     #TODO handle scenario where repayment is received between schedule dates
 
     _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) :
-        self.actual_total_due(on_date)
+      self.actual_total_due(on_date)
     only_principal_and_interest = [_actual_total_due, total_amount].min
 
     advance_to_allocate = zero_money_amount

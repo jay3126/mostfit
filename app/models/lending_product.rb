@@ -30,19 +30,20 @@ class LendingProduct
 
   # Create a loan product, and the corresponding loan schedule template
   def self.create_lending_product(
-    name,
-    standard_loan_money_amount,
-    total_interest_applicable_money_amount,
-    annual_interest_rate,
-    repayment_frequency,
-    tenure,
-    repayment_allocation_strategy,
-    principal_amounts,
-    interest_amounts,
-    fee_product = nil,
-    insurance_product = nil,
-    penalty_fee = nil
-  )
+      name,
+      standard_loan_money_amount,
+      total_interest_applicable_money_amount,
+      annual_interest_rate,
+      repayment_frequency,
+      tenure,
+      repayment_allocation_strategy,
+      principal_amounts,
+      interest_amounts,
+      by_user,
+      by_staff,
+      fee_products = [],
+      insurance_product = nil
+    )
     Validators::Amortization.is_valid_amortization?(tenure, standard_loan_money_amount, total_interest_applicable_money_amount, principal_amounts, interest_amounts)
 
     product = {}
@@ -53,14 +54,17 @@ class LendingProduct
     product[:repayment_frequency] = repayment_frequency
     product[:tenure] = tenure
     product[:repayment_allocation_strategy] = repayment_allocation_strategy
-    product[:loan_fee] = fee_product unless fee_product.blank?
-    product[:loan_preclosure_penalty] = penalty_fee unless penalty_fee.blank?
     product[:simple_insurance_products] = [insurance_product] unless insurance_product.blank?
     new_product = first_or_create(product)
     raise Errors::DataError, new_product.errors.first.first unless new_product.saved?
 
     principal_and_interest_amounts = assemble_amortization(tenure, principal_amounts, interest_amounts)
     LoanScheduleTemplate.create_schedule_template(name, standard_loan_money_amount, total_interest_applicable_money_amount, tenure, repayment_frequency, new_product, principal_and_interest_amounts)
+    unless fee_products.blank?
+      fee_products.each do |fee_id|
+        FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, by_staff, by_user)
+      end
+    end
     new_product
   end
 
@@ -79,8 +83,8 @@ class LendingProduct
     amortization = {}
     1.upto(tenure).each { |installment|
       amortization[installment] = {
-          PRINCIPAL_AMOUNT => principal_amounts[installment - 1],
-          INTEREST_AMOUNT  => interest_amounts[installment - 1]
+        PRINCIPAL_AMOUNT => principal_amounts[installment - 1],
+        INTEREST_AMOUNT  => interest_amounts[installment - 1]
       }
     }
     amortization

@@ -33,24 +33,25 @@
         Repayment Allocation Strategy
       %td
         = @lending_product.repayment_allocation_strategy.humanize
-    - fee = @lending_product.loan_fee
+    - fees = FeeAdministration.get_fee_products(@lending_product)
+    - fee_products = fees.select{|f| f.fee_charged_on_type==Constants::Transaction::FEE_CHARGED_ON_LOAN}
+    - fee_penalities = fees.select{|f| f.fee_charged_on_type==Constants::Transaction::PRECLOSURE_PENALTY_ON_LOAN}
     %tr.even
       %th.even
         Fee Product
       %td
-        = fee.name unless fee.blank?
+        = fee_products.map(&:name).join(',') unless fee_products.blank?
     - insurances = @lending_product.simple_insurance_products
     %tr.odd
       %th.odd
         Insurance Product
       %td
         = insurances.map(&:name).join(', ') unless insurances.blank?
-    - penality = @lending_product.loan_preclosure_penalty
     %tr.even
       %th.even
         Preclosure Penality
       %td
-        = penality.name unless penality.blank?
+        = fee_penalities.map(&:name).join(',') unless fee_penalities.blank?
 - schedule_template_items = @lending_product.loan_schedule_template.schedule_template_line_items
 - unless schedule_template_items.blank?
   %table.dataTable.report.weeksheet.nojs
