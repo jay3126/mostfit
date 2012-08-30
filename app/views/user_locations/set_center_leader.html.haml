@@ -42,12 +42,8 @@
         %tbody
           - @customers.each do |customer|
             %tr
-              - client_loans = client_facade.get_all_loans_for_counterparty(customer)
-              - active_loan = 0
-              - unless client_loans.blank?
-                - client_loans.compact.each do |loan|
-                  - active_loan += 1 if loan.is_outstanding?
-              - if client_loans.blank? || active_loan == 0
+              - has_outstanding = customer.client_has_outstanding_loan?(customer)
+              - unless has_outstanding
                 %td
                   %span.greytext
                     Client does not have active loan
