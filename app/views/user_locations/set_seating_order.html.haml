@@ -17,13 +17,14 @@
     "bJQueryUI": true
   });
 
-
-
+%h1 Set seating order
 %br
 - if @customers.blank?
   %p
     %i No Client Mapping have been created yet.
 - else
+  %i
+    Note: These are the clients which have active loans
   = form(:action => url(:controller => :user_locations, :action => :record_seating_order), :id => "form_id") do
     = hidden_field :name=>"clients", :id => "seat"
     = hidden_field :name => "biz_location_id", :value => @biz_location.id
@@ -49,5 +50,6 @@
                   = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
                 %td{:style => "width:33%;"}
                   = customer.date_joined
+
     = submit "Save order"
     = link_to_with_rights "Back", url("user_locations/weeksheet_collection/#{@biz_location.id}"), :class => "greenButton"

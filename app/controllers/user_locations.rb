@@ -198,15 +198,11 @@ class UserLocations < Application
     @biz_location = BizLocation.get(params[:biz_location_id])
     position = SeatingOrder.get_complete_seating_order(@biz_location.id)
     if position.blank?
-      if @biz_location.location_level.level == 0
-        @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
-      else
-        @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
-      end
+      get_seating_order_data
     else
       @customers = []
-      position.each do |position|
-        @customers << Client.get(position)
+      position.each do |p|
+        @customers << Client.get(p)
       end
     end
     render
@@ -216,20 +212,16 @@ class UserLocations < Application
     client_ids = []
     @biz_location = BizLocation.get(params[:biz_location_id])
     client_sequence = params[:clients].split("&")
-    if @biz_location.location_level.level == 0
-      @clients = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
-    else
-      @clients = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
-    end
-    @clients.each_with_index do |client,index|
+    get_seating_order_data
+    @customers.each_with_index do |client,index|
       split_string = client_sequence[index].split("customer")[1]
       client_position = split_string.split("=")[1]
       client_ids << client_position.to_i
     end
     position = SeatingOrder.assign_seating_order(client_ids, @biz_location.id)
     @customers = []
-    position.each do |position|
-      @customers << Client.get(position)
+    position.each do |p|
+      @customers << Client.get(p)
     end
     render :set_seating_order
   end
@@ -281,5 +273,23 @@ class UserLocations < Application
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_center_id => @biz_location.id})
     partial 'loan_applications/all_loan_applications'
   end
-  
+
+  private
+
+  def get_seating_order_data
+    if @biz_location.location_level.level == 0
+      @customers_at_location = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+    else
+      @customers_at_location = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+    end
+    unless @customers_at_location.blank?
+      @customers = []
+      @customers_at_location.compact.each do |customer|
+        has_outstanding = customer.client_has_outstanding_loan?(customer)
+        @customers << customer if has_outstanding
+      end
+    end
+    @customers = @customers || @customers_at_location
+  end
+
 end

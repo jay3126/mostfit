@@ -17,6 +17,8 @@
     %p
       %i No Client Mapping have been created yet.
   - else
+    %i
+      Note: The clients which do not have active loans are not eligible for center leader
     %h3= "Current Center Leader: Client ID = #{@client.id}, Client Name = #{@client.name}" unless @client.blank?
     = form(:action => url(:controller => :user_locations, :action => :record_center_leader)) do
       = hidden_field :name => "biz_location_id", :value => @biz_location.id
@@ -46,7 +48,7 @@
               - unless has_outstanding
                 %td
                   %span.greytext
-                    Client does not have active loan
+                    Client not eligible for center leader
               - else
                 %td
                   = radio_button :name => "client_id", :value => customer.id
