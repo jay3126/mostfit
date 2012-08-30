@@ -569,7 +569,7 @@ class Lending
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################
 
-  def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil)
+  def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil, fee_instance_id = nil)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
 
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
@@ -592,6 +592,7 @@ class Lending
     when LOAN_PRECLOSURE then allocation = preclose(payment_transaction, specific_principal_amount, specific_interest_amount)
     when LOAN_ADVANCE_ADJUSTMENT then allocation = adjust_advance(payment_transaction)
     when LOAN_RECOVERY then allocation = recover_on_loan(payment_transaction)
+    when LOAN_FEE_RECEIPT then allocation = fee_payment_on_loan(payment_transaction, fee_instance_id)
     else
       raise Errors::OperationNotSupportedError, "Operation #{loan_action} is currently not supported"
     end
@@ -719,6 +720,12 @@ class Lending
     update_for_payment(by_receipt, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
   end
 
+  def fee_payment_on_loan(by_receipt, fee_instance_id)
+    make_specific_allocation = false; specific_principal_money_amount = nil; specific_interest_money_amount = nil
+    adjust_advance = false; recover_on_loan = true
+    update_for_payment(by_receipt, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan, fee_instance_id)
+  end
+
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # ends
   ###########################
@@ -783,13 +790,19 @@ class Lending
   end
 
   # All actions required to update the loan for the payment
-  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false, recover_on_loan = false)
+  def update_for_payment(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, adjust_advance = false, recover_on_loan = false, fee_instance_id = nil)
     payment_amount = payment_transaction.payment_money_amount
     effective_on = payment_transaction.effective_on
     performed_at = payment_transaction.performed_at
     accounted_at = payment_transaction.accounted_at
     payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
-    loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
+    if payment_transaction.product_action == LOAN_FEE_RECEIPT
+      fee_instance = FeeInstance.get(fee_instance_id)
+      fee_receipt = FeeReceipt.record_fee_receipt(fee_instance, payment_amount, effective_on, performed_at, accounted_at) unless fee_instance.blank?
+    else
+      loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
+    end
+    
     payment_allocation
   end
 

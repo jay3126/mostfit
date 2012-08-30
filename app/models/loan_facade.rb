@@ -152,8 +152,8 @@ class LoanFacade < StandardFacade
     loan_manager.is_payment_permitted?(payment_transaction)
   end
 
-  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
-    loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, fee_instance_id = nil)
+    loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
   end
 
   def adjust_advance(on_date, on_loan_id)

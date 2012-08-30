@@ -140,7 +140,8 @@ module Constants
           { 
             Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT  => Constants::Transaction::LOAN_REPAYMENT,
             Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE => Constants::Transaction::LOAN_PRECLOSURE,
-            Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY   => Constants::Transaction::LOAN_RECOVERY
+            Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY   => Constants::Transaction::LOAN_RECOVERY,
+            Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT    => Constants::Transaction::LOAN_FEE_RECEIPT
           },
 
         Constants::Transaction::PAYMENT =>

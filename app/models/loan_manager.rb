@@ -94,8 +94,8 @@ class LoanManager
     payment_on_loan.is_payment_permitted?(payment_transaction)
   end
 
-  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
-    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
+    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
   end
 
   def adjust_advance(on_date, on_loan_id, performed_by_id, using_payment_facade)

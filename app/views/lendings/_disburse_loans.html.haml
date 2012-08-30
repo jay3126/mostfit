@@ -89,4 +89,6 @@
       %tfoot
         %tr.org_total
           %td{:colspan => 18}
+    = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
+    = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
     = submit "Save Payment"

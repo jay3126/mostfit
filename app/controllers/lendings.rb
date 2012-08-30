@@ -178,7 +178,11 @@ class Lendings < Application
         disbursement_errors << "Please select loan for disburse" if lendings.blank?
         if disbursement_errors.blank?
           lendings.each do |lending|
+            fee_instances = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
             payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+              fee_instances.each do |fee_instance|
+              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
+            end
             disbursement_errors.push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
           end
         end

@@ -1,7 +1,7 @@
 class FeeReceiptInfo
 
   attr_reader :fee_instance, :fee_money_amount, :performed_by_id, :effective_on
-  
+
   def initialize(fee_instance, fee_money_amount, performed_by_id, effective_on)
     Validators::Arguments.not_nil?(fee_instance, fee_money_amount, performed_by_id, effective_on)
     @fee_instance     = fee_instance
@@ -37,6 +37,7 @@ class FeeInstance
   def status(on_date = Date.today)
     amt = effective_total_amount(on_date).to_s
     is_collected? ? "#{self.simple_fee_product.name.humanize} (#{amt}) Paid on #{self.fee_receipt.effective_on}" : "#{self.simple_fee_product.name.humanize} (#{amt}) Unpaid"
+
   end
 
   def administered_at_location; BizLocation.get(self.administered_at); end
@@ -72,6 +73,10 @@ class FeeInstance
     (all(search_options)).reject {|fee_instance| fee_instance.is_collected?}
   end
 
+  def self.all_unpaid_loan_fee_instance(lending_id)
+    all_unpaid_fees(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_id).select{|fee_instance| fee_instance.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
+  end
+
   def is_collected?
     not (self.fee_receipt.nil?)
   end
@@ -80,7 +85,7 @@ class FeeInstance
     fee_applied_on_type, fee_applied_on_type_id = Resolver.resolve_fee_applied_on(fee_on_type)
     all(:fee_applied_on_type => fee_applied_on_type, :fee_applied_on_type_id => fee_applied_on_type_id)
   end
-  
+
   def self.get_unpaid_fees_for_instance(fee_on_type)
     (get_all_fees_for_instance(fee_on_type)).reject {|fee_instance| fee_instance.is_collected?}
   end
