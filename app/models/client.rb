@@ -185,6 +185,18 @@ class Client
     client
   end
 
+  def client_has_outstanding_loan?(client)
+    facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, User.first)
+    client_loans = facade.get_all_loans_for_counterparty(client)
+    active_loan = 0
+    unless client_loans.blank?
+      client_loans.compact.each do |loan|
+        active_loan += 1 if loan.is_outstanding?
+      end
+    end
+    return (client_loans.blank? || active_loan == 0) ? false : true
+  end
+
   private
   def convert_blank_to_nil
     self.attributes.each{|k, v|

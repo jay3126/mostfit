@@ -42,11 +42,17 @@
         %tbody
           - @customers.each do |customer|
             %tr
-              %td
-                = radio_button :name => "client_id", :value => customer.id
-                - if CenterLeaderClient.is_center_leader?(customer.id, get_effective_date)
+              - has_outstanding = customer.client_has_outstanding_loan?(customer)
+              - unless has_outstanding
+                %td
                   %span.greytext
-                    CENTER LEADER
+                    Client does not have active loan
+              - else
+                %td
+                  = radio_button :name => "client_id", :value => customer.id
+                  - if CenterLeaderClient.is_center_leader?(customer.id, get_effective_date)
+                    %span.greytext
+                      CENTER LEADER
               %td
                 = customer.id
               %td
