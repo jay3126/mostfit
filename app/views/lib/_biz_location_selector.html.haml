@@ -12,11 +12,12 @@
         %td
           %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
           = submit "Go"
-  - unless params[:child_location_id].blank?
+  - unless params[:parent_location_id].blank?
     .menu-strip
       %h3
         Branch:
         = BizLocation.get(params[:parent_location_id]).name
-        %br
-        Center:
-        = BizLocation.get(params[:child_location_id]).name
+        - unless params[:child_location_id].blank?
+          %br
+          Center:
+          = BizLocation.get(params[:child_location_id]).name

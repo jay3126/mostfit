@@ -53,7 +53,7 @@
     %th
       Fee Product
     %td
-      = select :name => 'loan_fee_id', :collection => SimpleFeeProduct.all(:fee_charged_on_type => Constants::Transaction::FEE_CHARGED_ON_LOAN).map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee"
+      = select :name => 'loan_fee_id', :collection => SimpleFeeProduct.all(:fee_charged_on_type => Constants::Transaction::FEE_CHARGED_ON_LOAN).map{|fee| [fee.id, fee.name]}, :prompt => "Select Fee", :class => 'multiple'
   %tr
     %th
       Insurance Products

@@ -618,16 +618,16 @@ function fillCenters(){
 }
 
 function fillPslSubCategories(){
-    $("#psl_selector").change(function(){
-	$.ajax({
-	    type: "GET",
-	    url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
-	    success: function(data){
-		$("#psl_sub_category_selector").html(data);
-		$("#psl_sub_category_selector").trigger("liszt:updated");
-	    }
-	});
+  $("#psl_selector").change(function(){
+    $.ajax({
+      type: "GET",
+      url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
+      success: function(data){
+        $("#psl_sub_category_selector").html(data);
+        $("#psl_sub_category_selector").trigger("liszt:updated");
+      }
     });
+  });
 }
 
 function fillComboBranches(){
@@ -801,6 +801,7 @@ $(document).ready(function(){
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
+  $("select.multiple").multiSelect();
   //Handling targets form
   jQuery('form').live('submit', function(){
     //    return date_validation();
