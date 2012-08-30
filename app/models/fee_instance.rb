@@ -36,8 +36,7 @@ class FeeInstance
 
   def status(on_date = Date.today)
     amt = effective_total_amount(on_date).to_s
-    is_collected? ? "#{amt} Paid on #{self.fee_receipt.effective_on}" : "#{amt} Unpaid"
-
+    is_collected? ? "#{self.simple_fee_product.name.humanize} (#{amt}) Paid on #{self.fee_receipt.effective_on}" : "#{self.simple_fee_product.name.humanize} (#{amt}) Unpaid"
   end
 
   def administered_at_location; BizLocation.get(self.administered_at); end
