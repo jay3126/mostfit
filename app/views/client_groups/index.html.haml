@@ -1,20 +1,32 @@
 %h1
-  Groups
-%table{:width => "60%"}
-  %tr
-    %th
-      Group
-    %th
-      Center
-    %th
-      
-  %tr
-  - for client_group in @client_groups
-    %tr
-      %td
-        = client_group.name
-      %td
-        = client_group.center.name
-      %td
-        = link_to_with_rights('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
+  Client Groups
 
+.menu-strip{:style => "width:20%"}
+  = link_to_with_rights "Create a new Client Group", resource(:client_groups, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+  %br
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Group Name
+      %th
+        No. Of Clients
+      %th
+        Action
+
+  %tbody
+    - count = 1
+    - for client_group in @client_groups
+      %tr
+        %td
+          = count
+          - count += 1
+        %td
+          = link_to_with_rights client_group.name, resource(client_group)
+        %td
+          = client_group.clients.count
+        %td
+          = link_to_with_rights('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
+          

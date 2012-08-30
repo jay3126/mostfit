@@ -6,7 +6,7 @@
       = select :created_by_staff_member_id, :collection => StaffMember.all.collect{|sm| [sm.id, sm.name]}
   %tr
     %td
-      Group Number:
+      Group Name:
     %td
       = text_field :name
   %tr
@@ -25,8 +25,9 @@
     %td
     %td
       = submit submit_text
+      &nbsp;&nbsp;
       - if request.xhr?
         %a{:href => "#", :onclick => "$('#new_client_group_form').html('')"}
-          cancel
-      -else
-        = link_to_with_rights 'cancel', cancel_link
+          Cancel
+      - else
+        = link_to_with_rights 'Cancel', cancel_link, :class => "grey_button"

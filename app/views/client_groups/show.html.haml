@@ -1,26 +1,35 @@
 %h1 
-  == Clients for #{@client_group.name}
-  = link_to_with_rights("[Edit]", resource(@client_group, :edit), :class => "edit")
-%h2 Clients
-%table.narrow
+  == Clients for : #{@client_group.name}
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights("Edit group details", resource(@client_group, :edit), :class => "grey_button")
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", resource(:client_groups), :class => "grey_button"
+
+%table.loan{ :style => "width: 31%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.odd
+    %th.odd
+      Group Name
+    %td
+      = @client_group.name
+  %tr.even
+    %th.even
+      Group Code
+    %td
+      = @client_group.code
+    
+%h2 Clients under this Group
+%table.narrow{:style => "width: 30%;"}
   %tr
     %thead
       %th
+      %th
         id
       %th
-        Name
+        Client Name
   - Client.all(:client_group => @client_group).each do |client|
     %tr{:class => cycle('odd','even')}
       %td
+      %td
         = client.id
       %td
-        = link_to_with_rights client.name, resource(client)
-  
-  
-%h1 CGTs
-= link_to_with_rights 'Manage CGTs', resource(@client_group, :cgts, :return => @return), :class => 'edit'
-= partial 'cgts/cgts'
-
-%h1 GRTs
-= link_to_with_rights 'Manage GRTs', resource(@client_group, :grts, :return => @return), :class => 'edit'
-= partial 'grts/grts'
+        = link_to_with_rights client.name, url(:controller => :new_clients, :id => client.id)

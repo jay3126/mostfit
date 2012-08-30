@@ -17,7 +17,9 @@
         %th
           id
         %th
-          Name
+          Client Name
+        %th
+          Client Group
         %th
           Joining Date
     %tbody
@@ -27,5 +29,10 @@
             = customer.id
           %td
             = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
+          %td
+            - if (customer and customer.client_group)
+              = link_to_with_rights customer.client_group.name, resource(customer.client_group)
+            - else
+              = "Not Attached to any group"
           %td
             = customer.date_joined

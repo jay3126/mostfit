@@ -3,32 +3,19 @@ class ClientGroups < Application
   before :get_context, :only => ['edit', 'update', 'index']
 
   def index
-    if @center
-      @client_groups = @center.client_groups
-    elsif @branch
-      @client_groups = @branch.center.client_groups
-    else
-      @client_groups = ClientGroup.all
-    end
+    @client_groups = ClientGroup.all
     display @client_groups
   end
 
   def show(id)
     @client_group = ClientGroup.get(id)
     raise NotFound unless @client_group
-    @cgts = Cgt.all(:client_group => @client_group)
-    @grts = Grt.all(:client_group => @client_group)
     display @client_group
   end
 
   def new
     only_provides :html
     @client_group = ClientGroup.new      
-    if params[:center_id]
-      @client_group.center_id = params[:center_id]
-      @center  = Center.get(params[:center_id])
-      @branch  = @center.branch 
-    end
     request.xhr? ? display([@client_group], "client_groups/new", :layout => false) : display([@client_group], "client_groups/new")
   end
 
@@ -36,10 +23,6 @@ class ClientGroups < Application
     only_provides :html
     @client_group = ClientGroup.get(id)
     raise NotFound unless @client_group
-    if @client_group.center
-      @center  = @client_group.center
-      @branch  = @center.branch 
-    end
     display @client_group
   end
 
@@ -66,13 +49,12 @@ class ClientGroups < Application
     @client_group = ClientGroup.get(id)
     raise NotFound unless @client_group
     @client_group.attributes = client_group
-    @client_group.center = Center.get(client_group[:center_id])
     if @client_group.save
       message  = {:notice => "Group was successfully edited"}      
       if params[:return] and not params[:return].blank?
         redirect(params[:return], :message => message)
       else
-        (@branch and @center) ? redirect(resource(@client_group.center.branch, @client_group.center), :message => message) : redirect(resource(@client_group), :message => message)
+        (@client) ? redirect(resource(@client_group.client), :message => message) : redirect(resource(@client_group), :message => message)
       end
     else
       display @client_group, :edit
@@ -94,12 +76,6 @@ class ClientGroups < Application
     if params[:id]
       @client_group = ClientGroup.get(params[:id])
       raise NotFound unless @client_group
-      @branch = @client_group.center.branch
-      @center = @client_group.center
-    elsif params[:branch_id] and params[:center_id] 
-      @branch = Branch.get(params[:branch_id]) 
-      @center = Center.get(params[:center_id]) 
-      raise NotFound unless @branch and @center
     end
   end
 end # ClientGroups
