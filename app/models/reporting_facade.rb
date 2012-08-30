@@ -377,6 +377,18 @@ class ReportingFacade < StandardFacade
     {:count => count, :total_amount => sum_money_amount}
   end
 
+  #following function is to find out the fees due per loan.
+  def all_fees_due_per_loan(loan_id, on_date)
+    fee_amount = MoneyManager.default_zero_money
+    loan = Lending.get(loan_id)
+    unpaid_loan_fee_instances = loan.unpaid_loan_fees.map{|fi| fi.simple_fee_product_id}
+    unpaid_loan_fee_instances.each do |ulfi|
+      simple_fee_product = SimpleFeeProduct.get(ulfi)
+      fee_amount += simple_fee_product.effective_total_amount(on_date)
+    end
+    fee_amount
+  end
+
   def total_money_deposited_on_date_at_locations(on_date, *at_location_id)
     query = {:created_on => on_date, :at_location_id => at_location_id}
     all_money_deposits = MoneyDeposit.all(query)

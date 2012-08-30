@@ -1,0 +1,141 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Member Name
+      %th
+        Guarantor Name
+      %th
+        Center Id
+      %th
+        Center Name
+      %th
+        Meeting Address
+      %th
+        Meeting Day
+      %th
+        Meeting Time
+      %th
+        Loan Id
+      %th
+        Loan Status
+      %th
+        Disbursal Date
+      %th
+        Loan Start Date
+      %th
+        Loan Account Number
+      %th
+        EWI Start Date
+      %th
+        EWI End Date
+      %th
+        Loan Amount
+      %th
+        Total Processing/Upfront Fees Due
+      %th
+        EWI Amount Due
+      %th
+        District Id
+      %th
+        District Name
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th
+        Group Name
+      %th
+        RO Name
+      %th
+        Purpose Of Loan
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:member_name]
+        %td
+          = values[:guarantor_name]
+        %td
+          = values[:center_id]
+        %td
+          = values[:center_name]
+        %td
+          = values[:meeting_address]
+        %td
+          = values[:meeting_day]
+        %td
+          = values[:meeting_time]
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_status]
+        %td
+          = values[:disbursal_date]
+        %td
+          = values[:loan_start_date]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:ewi_start_date]
+        %td
+          = values[:ewi_end_date]
+        %td
+          = values[:loan_amount]
+          - accumulate_row_values[:total_loan_amount] += values[:loan_amount]
+        %td
+          = values[:processing_or_upfornt_fee_due]
+          - accumulate_row_values[:total_fees_due] += values[:processing_or_upfornt_fee_due]
+        %td
+          = values[:ewi_amount_due]
+          - accumulate_row_values[:total_ewi_amount_due] += values[:ewi_amount_due]
+        %td
+          = values[:district_id]
+        %td
+          = values[:district_name]
+        %td
+          = values[:branch_id]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:group_name]
+        %td
+          = values[:ro_name]
+        %td
+          = values[:purpose_of_loan]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:total_loan_amount]
+      %td
+        = total_rows[:total_fees_due]
+      %td
+        = total_rows[:total_ewi_amount_due]
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
