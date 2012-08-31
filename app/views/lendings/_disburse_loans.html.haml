@@ -12,8 +12,11 @@
       %thead
         %tr
           %th
+            S.No.
           %th
-            id
+            Check for Payment
+          %th
+            Loan ID
           %th
             Applied Amount
           %th
@@ -39,8 +42,6 @@
           %th
             Disbursed Date
           %th
-            Payment
-          %th
             Payment Date
           %th
             Payment By Staff
@@ -51,6 +52,8 @@
         %tr
           %td
             = loan_row_count
+          %td
+            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
@@ -77,8 +80,6 @@
             = link_to StaffMember.get(lending.disbursed_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff)
           %td
             = lending.disbursal_date
-          %td
-            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
           %td
             = date_select "lending[#{lending.id}][][payment_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10"}
           %td

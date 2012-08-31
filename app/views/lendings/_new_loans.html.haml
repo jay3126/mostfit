@@ -12,8 +12,11 @@
       %thead
         %tr
           %th
+            S.No.
           %th
-            id
+            Check for Approve
+          %th
+            Loan ID
           %th
             Applied Amount
           %th
@@ -37,14 +40,17 @@
           %th
             Created Date
           %th
-            Check for Approve
-          %th
             Approve Amount
       - loan_row_count = 1
       - lendings.each do |lending|
         %tr
           %td
             = loan_row_count
+          %td
+            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => lending.applied_by_staff == session.user.staff_member.id
+            %br
+            - if lending.applied_by_staff == session.user.staff_member.id
+              %i No privilege
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
@@ -70,13 +76,13 @@
           %td
             = lending.created_at.strftime('%Y-%m-%d')
           %td
-            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => lending.applied_by_staff==session.user.staff_member.id
-          %td
             = text_field :name => "lending[#{lending.id}][][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
           %td{:colspan => 17}
+            %i No privilege: The Staff member who created the loan cannot Approve it.
+
     %table
       %tfoot
         %tr.org_total
