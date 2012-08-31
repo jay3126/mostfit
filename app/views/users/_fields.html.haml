@@ -15,7 +15,7 @@
         Staff Member
       - unless @user.staff_member
         %td
-          = select :staff_member, :collection => StaffMember.all(:order => [:name]).map{|s| [s.id.to_s, s.name]}, :prompt => "choose staff member"
+          = select :staff_member, :collection => StaffMember.all(:order => [:name]).select{|s| s.user.blank?}, :prompt => "choose staff member", :text_method => :name, :value_method => :id
       - else
         %td
           = @user.staff_member.name
