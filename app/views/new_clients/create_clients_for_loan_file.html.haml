@@ -1,6 +1,11 @@
-%h1
-  = "Create Clients from loan applications of Loan File #{@loan_file.loan_file_identifier}"
-.menu-strip
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select').change(function() {
+    $('.select').attr('checked',$(this).attr('checked'))});
+  });
+
+%h1= "Create Clients from loan applications of Loan File #{@loan_file.loan_file_identifier}"
+.menu-strip{:style => "width:100%;"}
   %h3
     = "Branch: #{@branch.name}"
     %br
@@ -22,8 +27,8 @@
       %table.dataTable.form{:style => "width:100%;"}
         %thead
           %tr
-            %th
-              = "Select"
+            %th{:width => '5%'}
+              = check_box :id => "toggle_select"
             %th
               = "ID"
             %th
@@ -53,7 +58,8 @@
               - count =+ 1
               %tr
                 %td
-                  = radio_button :name => "loan_application_id", :value => lap.id
+                  = check_box :name => "[selected][#{lap.id}]", :value => lap.id, :class => 'select'
+                  =# radio_button :name => "loan_application_id", :value => lap.id
                 %td
                   = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
                 %td
