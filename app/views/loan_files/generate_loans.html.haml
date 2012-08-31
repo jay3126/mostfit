@@ -67,7 +67,10 @@
         Loan Product
       %th
         Loan Purpose
-     
+    - if @clients.blank?
+      %tr
+        %td{:colspan => 15, :style => "text-align:center;"}
+          No data available
     - @clients.group_by{|client| client.client_group}.each do |client_group, clients|
       %tr.branch
         %td{:colspan => 15}
@@ -117,6 +120,6 @@
         Loan Product
       %th
         Loan Purpose
-  = submit "Go"
+  = submit "Go" unless @clients.blank?
   = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
   %hr
