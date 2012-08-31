@@ -96,7 +96,7 @@ Merb::Router.prepare do
   resources :holidays
   resources :verifications
   resources :ledger_entries
-  resources :users
+  resources :users, :id => %r(\d+)
   resources :staff_members, :id => %r(\d+) do
     resources :staff_member_attendances
   end
