@@ -451,7 +451,8 @@ class Lending
   end
 
   def get_preclosure_penalty_product
-    SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
+    FeeAdministration.get_preclosure_penalty_fee_products(self.lending_product).first
+   # SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
   end
 
   ########

@@ -1,6 +1,7 @@
 %table{:width => '100%'}
   %tr
-    - ledgers_by_type = accounting_facade.get_primary_chart_of_accounts.ledgers.group_by {|l| l.account_type}
+    -# ledgers_by_type = accounting_facade.get_primary_chart_of_accounts.ledgers.group_by {|l| l.account_type}
+    - ledgers_by_type = Ledger.all.group_by {|l| l.account_type}
     - for account_type in Constants::Accounting::ACCOUNT_TYPES
       - ledgers = ledgers_by_type[account_type]
       %td

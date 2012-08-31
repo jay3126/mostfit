@@ -180,7 +180,7 @@ class Lendings < Application
           lendings.each do |lending|
             fee_instances = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
             payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
-              fee_instances.each do |fee_instance|
+            fee_instances.each do |fee_instance|
               payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
             end
             disbursement_errors.push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
@@ -318,38 +318,42 @@ class Lendings < Application
   
   def record_lending_preclose
     # INITIALIZATIONS
-    @errors = []
+    @errors  = []
     @lending = Lending.get params[:loan_id]
 
     # GATE-KEEPING
-    receipt_type = params[:receipt_type]
-    payment_towards = params[:payment_towards]
-    on_product_type = params[:on_product_type]
-    on_product_id = params[:on_product_id]
-    by_counterparty_type = params[:by_counterparty_type]
-    by_counterparty_id = params[:by_counterparty_id]
-    performed_at = params[:performed_at]
-    accounted_at = params[:accounted_at]
-    performed_by = params[:performed_by]
-    effective_on = params[:effective_on]
-    product_action = params[:product_action]
-    make_specific_allocation = true
-    specific_principal_amount = params[:specific_principal_amount]
+    receipt_type                    = params[:receipt_type]
+    payment_towards                 = params[:payment_towards]
+    on_product_type                 = params[:on_product_type]
+    on_product_id                   = params[:on_product_id]
+    by_counterparty_type            = params[:by_counterparty_type]
+    by_counterparty_id              = params[:by_counterparty_id]
+    performed_at                    = params[:performed_at]
+    accounted_at                    = params[:accounted_at]
+    performed_by                    = params[:performed_by]
+    effective_on                    = params[:effective_on]
+    product_action                  = params[:product_action]
+    make_specific_allocation        = true
+    specific_principal_amount       = params[:specific_principal_amount]
     specific_principal_money_amount = MoneyManager.get_money_instance(specific_principal_amount)
-    specific_interest_amount = params[:specific_interest_amount]
-    specific_interest_money_amount =  MoneyManager.get_money_instance(specific_interest_amount)
-    total_money_amount = specific_principal_money_amount + specific_interest_money_amount
-    fee_amount = params[:penalty_amount]
-    fee_money_amount = MoneyManager.get_money_instance(fee_amount)
-    fee_product = @lending.get_preclosure_penalty_product
+    specific_interest_amount        = params[:specific_interest_amount]
+    specific_interest_money_amount  = MoneyManager.get_money_instance(specific_interest_amount)
+    total_money_amount              = specific_principal_money_amount + specific_interest_money_amount
+    fee_amount                      = params[:penalty_amount]
+    fee_money_amount                = MoneyManager.get_money_instance(fee_amount)
+    fee_product                     = @lending.get_preclosure_penalty_product
 
     # VALIDATIONS
     @errors << "Preclosure date must not be future date" if Date.parse(effective_on) > Date.today
     # OPERATIONS
     if @errors.blank?
       begin
-        payment_facade.record_ad_hoc_fee_receipt(fee_money_amount, fee_product, effective_on, @lending, performed_by) unless fee_money_amount.amount == 0
+        fee_instances = FeeInstance.unpaid_loan_preclosure_fee_instance(@lending.id)
+        #payment_facade.record_ad_hoc_fee_receipt(fee_money_amount, fee_product, effective_on, @lending, performed_by) unless fee_money_amount.amount == 0
         payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+        fee_instances.each do |fee_instance|
+          payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
+        end
         message = {:notice => "Succesfully preclosed"}
       rescue => ex
         message = {:error => ex.message}

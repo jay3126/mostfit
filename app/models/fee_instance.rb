@@ -77,6 +77,10 @@ class FeeInstance
     all_unpaid_fees(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_id).select{|fee_instance| fee_instance.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
   end
 
+  def self.unpaid_loan_preclosure_fee_instance(lending_id)
+    all_unpaid_fees(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_id).select{|fee_instance| fee_instance.simple_fee_product.fee_charged_on_type == PRECLOSURE_PENALTY_ON_LOAN}
+  end
+
   def is_collected?
     not (self.fee_receipt.nil?)
   end
