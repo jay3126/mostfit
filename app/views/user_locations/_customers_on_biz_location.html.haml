@@ -4,7 +4,7 @@
     "bJQueryUI": true
   });
 
-= link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => "add grey_button"
+= link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
 
 %br
 - if @customers.blank?
