@@ -171,7 +171,10 @@ class Lendings < Application
         disbursement_errors << "Please select loan for disburse" if lendings.blank?
         if disbursement_errors.blank?
           lendings.each do |lending|
-            fee_instances = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
+            insurance_policies = lending.simple_insurance_policies.map(&:id) rescue []
+            fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
+            fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
+            fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
             payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
             fee_instances.each do |fee_instance|
               payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
