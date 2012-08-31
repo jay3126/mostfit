@@ -3,7 +3,7 @@
 - center = BizLocation.get(@loan_file.at_center_id)
 %h1
   = "Loan File #{@loan_file.loan_file_identifier}"
-.menu-strip
+.menu-strip{:style => "width:100%;"}
   %h3
     = "Branch: #{branch.name}"
     %br
@@ -16,9 +16,17 @@
     = healthcheck_is_clear ? "Cleared" : "Pending"
     %br
     = link_to 'HealthCheck', url_for_checklist('HealthCheck on Loan Files',@loan_file.class.to_s, @loan_file, branch, center, session.user.staff_member, Date.today, params, @loan_file.loan_applications.count), :class => 'add grey_button'
-
-%br
-%hr
+    %br
+    - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
+    - if healthcheck_is_clear
+      = link_to_with_rights "Create clients", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'add grey_button'
+    - else
+      %h3 Client creation will not be performed because Heathcheck on loan file is not clear
+    %br
+    - if @loan_file.loan_applications.count > 0 && (healthcheck_is_clear || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil))
+      = link_to_with_rights "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'add grey_button'
+    - else
+      %h3 Loans can be generated only after Healthcheck approved and clients creation
 
 .shaded
   %h2 Loan Applications
@@ -76,21 +84,3 @@
                 = lap.status.humanize rescue nil
   - else
     %h3 No loan applications
-%br
-%hr
-
-.shaded
-  %h1 Actions
-  %hr
-  %h2 Create Clients
-  - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
-  - if healthcheck_is_clear
-    = link_to_with_rights "Create clients", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'grey_button'
-  - else
-    Client creation will not be performed because Heathcheck on loan file is not clear
-  %hr
-  %h2 Create Loans
-  - if @loan_file.loan_applications.count > 0 && (healthcheck_is_clear || @loan_file.health_check_status == Constants::Status::READY_FOR_DISBURSEMENT) && !(@loan_file.loan_applications.aggregate(:client_id).include?(nil))
-    = link_to_with_rights "Create Loans", url(:controller => :loan_files, :action => :generate_loans, :id => @loan_file.id), :class => 'grey_button'
-  - else
-    Loans can be generated only after Healthcheck approved and clients creation
