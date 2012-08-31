@@ -104,7 +104,7 @@
           %td
             %b Select Disbursal Date
           %td
-            = date_select "disbursal_date", get_effective_date
+            = date_select "disbursal_date", get_effective_date, :max_date => Date.today
           %td
             %b Staff Members
           %td

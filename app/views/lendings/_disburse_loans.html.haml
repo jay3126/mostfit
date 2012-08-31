@@ -89,7 +89,7 @@
           %td
             = lending.disbursal_date
           %td
-            = date_select "lending[#{lending.id}][][payment_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10"}
+            = date_select "lending[#{lending.id}][][payment_on_date]", Date.today, {:id => "lending_#{lending.id}", :size=> "10", :max_date => Date.today}
           %td
             = select :name => "lending[#{lending.id}][][payment_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
           %td

@@ -16,7 +16,7 @@
         %td
           Payment Date
         %td
-          = date_select "payment_date", get_effective_date
+          = date_select "payment_date", get_effective_date, :max_date => Date.today
       %tr
         %td
           Payment Amount

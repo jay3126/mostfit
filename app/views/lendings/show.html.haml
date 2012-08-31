@@ -19,12 +19,21 @@
         %th.odd Disbursed On
         %td
           = @lending.disbursal_date
-      %tr.even
-        %th.even Scheduled first Repayment Date
-        %td= @lending.scheduled_first_repayment_date
       %tr.odd
         %th.odd Loan Due Status
         %td= @lending.current_due_status.humanize
+    - else
+      %tr.odd
+        %th.odd Schedule Disbursal Date
+        %td= @lending.scheduled_disbursal_date
+    - if @lending.loan_receipts.blank?
+      %tr.even
+        %th.even Scheduled first Repayment Date
+        %td= @lending.scheduled_first_repayment_date
+    - else
+      %tr.even
+        %th.even first Repayment Date
+        %td= @lending.loan_receipts.first.effective_on rescue ''
     %tr.even
       %th.even Loan Product
       %td

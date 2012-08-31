@@ -100,7 +100,7 @@
           %td
             %b Select Approved Date
           %td
-            = date_select "approved_on_date", get_effective_date
+            = date_select "approved_on_date", get_effective_date, :max_date => Date.today
           %td
             %b Staff Members
           %td
