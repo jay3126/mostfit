@@ -1,3 +1,7 @@
+//{"loc1_id"=>"12", "loc1_name"=>"Gota", "target_entity_type"=>"Client", "target_entity_id"=>"4", "staff_name"=>"SuperUser", "loc2_name"=>"VASANT NAGAR", "id"=>"10", "action"=>"fill_in_checklist", "loc2_id"=>"29", "loc1_type"=>"branch", "loc2_type"=>"center", "target_entity_name"=>"MANIBEN NADIYA", "staff_id"=>"1", "controller"=>"checklister_slice/checklists", "effective_date"=>"2012-08-31", "referral_url"=>"/new_clients/show/4"}
+- if params[:target_entity_type] == "Client"
+  - client_object = Client.get params[:target_entity_id]
+  - client_phone_number = client_object.telephone_number
 
 %p
   -if message
@@ -31,46 +35,40 @@
 
         %table.form{:style => "width:100%;"}
           %tr
+            %th
+              = label " Staff Member:"
             %td
-              =label " Staff Member:"
-            %td
-              =text_field :name=>:staff_name ,:value=>params[:staff_name] ,:disabled=>true
-              =hidden_field :staff_name ,:value=>params[:staff_name]
-            %td
-              =label params[:target_entity_type]
-            %td
-              =text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
-              =hidden_field :target_entity_name ,:value=>params[:target_entity_name]
+              = text_field :name => :staff_name ,:value=>params[:staff_name] ,:disabled=>true
+              = hidden_field :staff_name ,:value=>params[:staff_name]
           %tr
+            %th
+              = label params[:target_entity_type]
             %td
-            %td
+              = text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
+              = hidden_field :target_entity_name ,:value=>params[:target_entity_name]
           %tr
-          %tr
-          %tr
-          %tr
-
-            %td
+            %th
               =label params[:loc1_type]
             %td
               =text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
               =hidden_field :loc1_name,:value=>params[:loc1_name]
-
-            %td
+          %tr
+            %th
               =label params[:loc2_type]
             %td
               =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
               =hidden_field :loc2_name,:value=>params[:loc2_name]
           %tr
-            %td
-            %td
-          %tr
-          %tr
-          %tr
-            %td
+            %th
               =label "Value Date"
             %td
               =date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
-
+              
+          %tr
+            %th
+              = label "Client telephone number"
+            %td
+              = text_field :phone_number, :value => client_phone_number
         %p
 
           -@sections.each do |section|
