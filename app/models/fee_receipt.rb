@@ -28,7 +28,7 @@ fee product, and when
 
 =end
 
-  def performed_by_staff; StaffMember.get self.performed_at; end;
+  def performed_by_staff; StaffMember.get self.performed_by; end;
 
   def money_amounts; [ :fee_amount ]; end
   

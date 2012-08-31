@@ -36,7 +36,7 @@
         %td
           = fee.fee_receipt.effective_on
         %td
-          = fee.fee_receipt.performed_by_staff.name
+          = fee.fee_receipt.performed_by_staff.name rescue nil
     %tfoot
       %tr.org_total
         %td{:colspan => 6}
