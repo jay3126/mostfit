@@ -91,13 +91,6 @@ class Lendings < Application
     display @lending
   end
 
-
-  def edit
-  end
-
-  def update
-  end
-
   def update_lending_new_to_approve
     @message          = {}
     lendings          = []

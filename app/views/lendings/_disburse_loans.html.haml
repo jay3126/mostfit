@@ -3,6 +3,12 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
+
+  $(document).ready(function() {
+  $('#toggle_select_to_payment').change(function() {
+    $('.select_to_payment').attr('checked',$(this).attr('checked'))});
+  });
+
 - if lendings.blank?
   %h3
     No loan exists
@@ -14,7 +20,9 @@
           %th
             S.No.
           %th
-            Check for Payment
+            Check to Payment
+            %br
+            = check_box :id => "toggle_select_to_payment"
           %th
             Loan ID
           %th
@@ -53,7 +61,7 @@
           %td
             = loan_row_count
           %td
-            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id
+            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :class => "select_to_payment"
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td

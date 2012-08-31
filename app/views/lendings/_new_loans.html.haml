@@ -3,6 +3,12 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
+
+  $(document).ready(function() {
+  $('#toggle_select_to_approve').change(function() {
+    $('.select_to_approve').attr('checked',$(this).attr('checked'))});
+  });
+
 - if lendings.blank?
   %h3
     No loan exists
@@ -14,7 +20,9 @@
           %th
             S.No.
           %th
-            Check for Approve
+            Check to Approve
+            %br
+            = check_box :id => "toggle_select_to_approve"
           %th
             Loan ID
           %th
@@ -47,7 +55,10 @@
           %td
             = loan_row_count
           %td
-            = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => lending.applied_by_staff == session.user.staff_member.id
+            - if lending.applied_by_staff == session.user.staff_member.id
+              = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => true
+            - else
+              = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :class => 'select_to_approve'
             %br
             - if lending.applied_by_staff == session.user.staff_member.id
               %i No privilege

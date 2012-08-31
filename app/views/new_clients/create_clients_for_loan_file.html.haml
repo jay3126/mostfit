@@ -59,7 +59,6 @@
               %tr
                 %td
                   = check_box :name => "[selected][#{lap.id}]", :value => lap.id, :class => 'select'
-                  =# radio_button :name => "loan_application_id", :value => lap.id
                 %td
                   = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
                 %td
