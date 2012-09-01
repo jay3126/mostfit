@@ -1,23 +1,33 @@
 :javascript
-  $('select.location').live('change', function(){
+  $('#location_level_selector').live('change', function(){
       if(jQuery(this).val()=='0'){
         jQuery('.date').show();
       }else{
         jQuery('.date').hide();
       }
     });
-
-%h2 Create a New Biz Location
 %table.form
   %tr
     %th
       Location Level
     %td
-      = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Please Select Location Level", :class => "chosen location"
+      = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Select Location Level", :id => 'location_level_selector'
+  %tr
+    %th
+      Parent Location
+    %td
+      = select :name => 'parent_location_id', :collection =>  [], :prompt => "Select Location ", :id => 'location_selector'
+  %tr
     %th
       Name
-    %th
+    %td
       = text_field :name
+  %tr
+    %th.date{:style => 'display:none'}
+      Default Disbursal Date
+    %td.date{:style => 'display:none'}
+      = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+  %tr
     %th
       Creation Date
     %td
@@ -27,10 +37,6 @@
       Address
     %td
       = text_area :biz_location_address, :rows => 6, :cols => 38
-  %tr
-    %th.date{:style => 'display:none'}
-      Default Disbursal Date
-    %td.date{:style => 'display:none'}
-      = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+
       
 

@@ -60,7 +60,7 @@ class BizLocation
   end
 
   # Create a new location by specifying the name, the creation date, and the level number (not the level)
-  def self.create_new_location(by_name, on_creation_date, at_level_number)
+  def self.create_new_location(by_name, on_creation_date, at_level_number, address = nil, default_disbursal_date = nil)
     raise ArgumentError, "Level numbers begin with zero" if (at_level_number < 0)
     level = LocationLevel.get_level_by_number(at_level_number)
     raise Errors::InvalidConfigurationError, "No level was located for the level number: #{at_level_number}" unless level
@@ -68,6 +68,8 @@ class BizLocation
     location[:name] = by_name
     location[:creation_date] = on_creation_date
     location[:location_level] = level
+    location[:biz_location_address] = address unless address.blank?
+    location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
     new_location = create(location)
     raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
     new_location

@@ -786,6 +786,21 @@ function getAllNominalCenters() {
   });
 }
 
+function get_all_location_on_level() {
+  jQuery('#location_level_selector').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/locations_for_location_level",
+      data: {
+        "location_level" : jQuery("#location_level_selector").val()
+      },
+      success: function(data) {
+        jQuery("#location_selector").html(data);
+      }
+    });
+  });
+}
+
 $(document).ready(function(){
   dataTables();
   create_remotes();
@@ -798,6 +813,7 @@ $(document).ready(function(){
   fillBankAccounts();
   fillPslSubCategories();
   getAllNominalCenters();
+  get_all_location_on_level();
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");

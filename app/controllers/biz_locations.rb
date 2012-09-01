@@ -63,23 +63,28 @@ class BizLocations < Application
 
     # GATE-KEEPING
 
-    b_level         = params[:biz_location][:location_level]
-    b_creation_date = params[:biz_location][:creation_date]
-    b_name          = params[:biz_location][:name]
+    b_level            = params[:biz_location][:location_level]
+    b_creation_date    = params[:biz_location][:creation_date]
+    b_name             = params[:biz_location][:name]
+    b_address          = params[:biz_location][:biz_location_address]
+    b_disbursal_date   = params[:biz_location][:center_disbursal_date]
+    parent_location_id = params[:parent_location_id]
 
     # VALIDATIONS
 
     message[:error] = "Name cannot be blank" if b_name.blank?
     message[:error] = "Please select Location Level" if b_level.blank?
     message[:error] = "Creation Date cannot blank" if b_creation_date.blank?
+    parent_location = BizLocation.get(parent_location_id) unless parent_location_id.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i)
+        biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_address, b_disbursal_date)
         if biz_location.new?
           message = {:notice => "Location creation fail"}
         else
+          LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
           message = {:notice => " Location successfully created"}
         end
       rescue => ex
@@ -158,6 +163,16 @@ class BizLocations < Application
       return("<option value=''>Select center</option>"+centers.map{|center| "<option value=#{center.id}>#{center.name}"}.join)
     else
       return("<option value=''>Select center</option>")
+    end
+  end
+
+  def locations_for_location_level
+    if params[:location_level].blank?
+      return("<option value=''>Select Location</option>")
+    else
+      location_level = LocationLevel.first(:level => params[:location_level].to_i+1)
+      locations      = location_level.biz_locations rescue []
+      return("<option value=''>Select Location</option>"+locations.map{|location| "<option value=#{location.id}>#{location.name}"}.join)
     end
   end
   
