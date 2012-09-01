@@ -4,6 +4,7 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   before :_abandon_session,     :only => [:update, :destroy]
   before  :_maintain_auth_session_after,  :exclude => [:destroy]  # Need to hang onto the redirection during the session.abandon!
   before :ensure_authenticated, :only => [:update]
+  before :check_multiple_login, :only => [:update]
 
   # redirect from an after filter for max flexibility
   # We can then put it into a slice and ppl can easily 
@@ -21,7 +22,19 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   end
   
   
-  private   
+  private
+  def check_multiple_login
+    last_login = session.user.login_instances.last
+    if last_login.blank? || !last_login.logout_time.blank?
+      session.user.login_instances.new(:login_time => Time.now).save
+    else
+      if last_login.logout_time.blank?
+        session.abandon!
+        message[:error] = "This User already login to another system"
+        redirect "/login", :message => message
+      end
+    end
+  end
   # @overwritable
   def redirect_after_login
     message[:notice] = "Authenticated Successfully"
@@ -60,6 +73,11 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   
   # @private
   def _abandon_session
+    user = session.user
+    unless user.blank?
+      last_login = user.login_instances.last
+      last_login.update(:logout_time => Time.now) unless last_login.blank?
+    end
     session.abandon!
   end
 end

@@ -24,10 +24,12 @@ class User
   validates_is_unique :login
   validates_length :password, :min => 6, :if => Proc.new{|u| not u.password.nil?}
   belongs_to :staff_member
+  has n, :login_instances
 
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
+
 
   def name; self.login; end
 
