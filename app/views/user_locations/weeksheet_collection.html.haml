@@ -8,7 +8,7 @@
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
 - parent_location = LocationLink.get_parent(@biz_location)
 .menu-strip{:style => "margin-bottom: 0.5em; margin-left: 0px; margin-top: 0px"}
-
+  = link_to 'Edit', resource(@biz_location, :edit), :class => 'add grey_button'
   - if check_checklist_parameters(@biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil)
 
     = link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', "Center",@biz_location, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"

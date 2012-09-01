@@ -1,4 +1,5 @@
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
+= link_to 'Edit', resource(@biz_location, :edit), :class => 'add grey_button'
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name

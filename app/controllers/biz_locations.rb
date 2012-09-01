@@ -8,6 +8,52 @@ class BizLocations < Application
   end
 
   def edit
+    @biz_location = BizLocation.get params[:id]
+    display @biz_location
+  end
+
+  def update_biz_location
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+
+    message = {}
+
+    # GATE-KEEPING
+
+    b_name           = params[:biz_location][:name]
+    b_disbursal_date = params[:biz_location][:center_disbursal_date]
+    b_address        = params[:biz_location][:biz_location_address]
+    b_id             = params[:id]
+
+    # VALIDATIONS
+
+    message[:error] = "Name cannot be blank" if b_name.blank?
+    message[:error] = "Biz Location cannot be blank" if b_id.blank?
+    @biz_location   = BizLocation.get b_id
+
+    # OPERATIONS PERFORMED
+    if message[:error].blank?
+      begin
+        @biz_location.attributes = {:name => b_name, :center_disbursal_date => b_disbursal_date, :biz_location_address => b_address}
+        if @biz_location.save
+          message = {:notice => " Location successfully Updated"}
+        else
+          message = {:error => @biz_location.errors.first.join(', ')}
+        end
+      rescue => ex
+        message = {:error => "An error has occured: #{ex.message}"}
+      end
+    end
+
+    #REDIRECT/RENDER
+    if message[:error].blank?
+      if @biz_location.location_level.level == 0
+        redirect url(:controller => :user_locations, :action => :weeksheet_collection, :id => @biz_location.id), :message => message
+      else
+        redirect url(:user_location, :action => :show, :id => @biz_location.id), :message => message
+      end
+    else
+      redirect resource(@biz_location, :edit), :message => message
+    end
   end
 
   def create

@@ -35,7 +35,7 @@ class LoanStatusChange
   def self.status_in_force(on_or_before_date)
     in_force = {}
     in_force[:effective_on.lte] = on_or_before_date
-    in_force[:order]            = [:effective_on.desc]
+    in_force[:order]            = [:effective_on.desc, :created_at.desc, :id.desc]
     first(in_force)
   end
 

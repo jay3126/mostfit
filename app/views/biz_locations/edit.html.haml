@@ -1,0 +1,31 @@
+%h1 Update Location
+= form_for(@biz_location, :action => resource(@biz_location,:update_biz_location)) do
+  %table.tall.shaded
+    %tr
+      %th
+        Location Level
+      %td
+        = @biz_location.location_level.name
+    %tr
+      %th
+        Name
+      %td
+        = text_field :name
+    %tr
+      %th
+        Creation Date
+      %td
+        = @biz_location.creation_date
+    %tr
+      %th
+        Address
+      %td
+        = text_area :biz_location_address, :rows => 6, :cols => 38
+    -if @biz_location.location_level.level == 0
+      %tr
+        %th
+          Default Disbursal Date
+        %td
+          = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+  = submit "Update", :class => "grey_button"
+  = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"
