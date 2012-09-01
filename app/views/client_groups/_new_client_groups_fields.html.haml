@@ -1,0 +1,31 @@
+%table.tall.shaded
+  %tr
+    %th
+      For Center:
+    %td
+      = @biz_location.name
+      = hidden_field :biz_location_id, :value => @biz_location.id
+      = hidden_field :new_group_from_biz_location
+  %tr
+    %th
+      Staff Member:
+    %td
+      = get_session_user_name
+      = hidden_field :created_by_staff_member_id, :value => get_session_user_id
+  %tr
+    %th
+      Group Name:
+    %td
+      = text_field :name
+  %tr
+    %th
+      Group Code:
+    %td
+      = text_field :code, :size => 10
+      %br/
+      %span.greytext a two letter unique code for the group
+  %tr
+    %th
+      Maximum clients:
+    %td
+      = text_field :number_of_members, :size => 3

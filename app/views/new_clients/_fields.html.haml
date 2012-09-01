@@ -4,8 +4,9 @@
     %th
       Group name
     %td
-      = select :client_group_id, :collection => ClientGroup.all.collect{|c| [c.id, c.name]}
-      = link_to_with_rights 'Add new group', url(:controller => :client_groups, :action => :new)
+      = select :client_group_id, :collection => ClientGroup.all(:biz_location_id => @biz_location.id).collect{|c| [c.id, c.name]}
+      &nbsp;&nbsp;
+      = link_to 'Add New Group', '#', :class => 'add grey_button', :onclick => "jQuery('#new_client_group_form').toggle(); return false;"      
   %tr
     %th
       Name:

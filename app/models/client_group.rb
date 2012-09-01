@@ -3,66 +3,26 @@ class ClientGroup
 
   #before :valid?, :add_created_by_staff_member
 
-  after :save, :sync_clients
-
   property :id,                Serial
   property :name,              String, :nullable => false
   property :number_of_members, Integer, :nullable => true, :min => 1, :max => 20, :default => 5
   property :code,              String, :length => 100, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
 
-  #validates_is_unique   :code, :scope => :center_id
   validates_length      :code, :min => 1, :max => 100
 
   has n, :clients
+  belongs_to :biz_location, :nullable => true
   belongs_to :created_by_staff,  :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
- # validates_is_unique :name, :scope => :center_id
-  validates_with_method :client_should_be_migratable
 
-  has n, :cgts
-  has n, :grts
+  validates_is_unique :name, :scope => :biz_location_id
+  validates_is_unique :code, :scope => :biz_location_id
 
-  # TODO: we need some way of tracking the CGT and GRT for wach of these groups. One solution is:
-  # has n, :cgts        has n, :grts
-  # or do we need a state machine?
-
-  def client_should_be_migratable
-    if not self.new? and self.clients.count>0 and self.dirty_attributes.find{|k,v| k.name==:center_id}
-      errors = []
-      self.clients.map{|client|
-        client.center = self.center
-        errors << "<li>#{client.name} - #{client.errors.to_a.to_s}</li>" unless client.valid?
-      }
-      return [false, "<ul>#{errors}</ul>"] if errors.length>0
-    end
-    return true
-  end
-
-  # this function moves the client from one center to another. It moves all the open loans to new center. 
-  # This updates the schedule of the open loans and make sure they conform to the guidelines of the center meeting day etc.
-  # Old loan histories are updated to reflect the new center 
-  # without disturbing the schedule.
-  def sync_clients
-    return unless self.valid?
-    Client.all(:client_group_id => self.id).each{|client|
-      client.center = self.center
-      client.save_self
-
-      client.loans.each{|l|
-        if [:rejected, :repaid, :written_off, :claim_settlement].include?(l.status)
-          repository.adapter.execute("update loan_history set center_id=#{self.center.id}, client_group_id=#{self.id} where loan_id=#{l.id}")
-        else
-          l.update_history
-        end
-      }
-    }
-  end
-
-  def self.from_csv(row, headers)
-    center = Center.first(:code => row[headers[:center_code]])
-    obj    = new(:name => row[headers[:name]], :center_id => center.id, :code => row[headers[:code]], :upload_id => row[headers[:upload_id]])
-    [obj.save, obj]
-  end
+  # def self.from_csv(row, headers)
+  #   center = Center.first(:code => row[headers[:center_code]])
+  #   obj    = new(:name => row[headers[:name]], :center_id => center.id, :code => row[headers[:code]], :upload_id => row[headers[:upload_id]])
+  #   [obj.save, obj]
+  # end
 
   def self.search(q, per_page=10)
     if /^\d+$/.match(q)

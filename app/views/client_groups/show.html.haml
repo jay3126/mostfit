@@ -16,20 +16,28 @@
       Group Code
     %td
       = @client_group.code
-    
+  %tr.odd
+    %th.odd
+      Center
+    %td
+      = link_to_with_rights @client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @client_group.biz_location.id)
+
 %h2 Clients under this Group
-%table.narrow{:style => "width: 30%;"}
-  %tr
-    %thead
-      %th
-      %th
-        id
-      %th
-        Client Name
-  - Client.all(:client_group => @client_group).each do |client|
-    %tr{:class => cycle('odd','even')}
-      %td
-      %td
-        = client.id
-      %td
-        = link_to_with_rights client.name, url(:controller => :new_clients, :id => client.id)
+- if @client_group.clients.count == 0
+  %h3 No clients have been created under this group yet.
+- else
+  %table.narrow{:style => "width: 30%;"}
+    %tr
+      %thead
+        %th
+        %th
+          id
+        %th
+          Client Name
+    - Client.all(:client_group => @client_group).each do |client|
+      %tr{:class => cycle('odd','even')}
+        %td
+        %td
+          = client.id
+        %td
+          = link_to_with_rights client.name, url(:controller => :new_clients, :id => client.id)

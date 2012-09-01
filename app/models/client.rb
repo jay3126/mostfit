@@ -61,6 +61,8 @@ class Client
   belongs_to :created_by_staff,     :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :created_by,           :child_key => [:created_by_user_id],    :model => 'User'
 
+  validates_with_method :is_there_space_in_the_client_group?
+
   has_attached_file :picture,
     :styles => {:medium => "300x300>", :thumb => "60x60#"},
     :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
@@ -86,6 +88,13 @@ class Client
 
   def created_on; self.date_joined; end
   def counterparty; self; end
+
+  def is_there_space_in_the_client_group?
+    if (self.client_group and self.client_group.nil? and self.client_group.clients and self.new?)
+      return [false, "The number of clients in this group exceeds the maximum number of members permissible"] if self.client_group.clients.count > self.client_group.number_of_members
+    end
+    return true
+  end
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip

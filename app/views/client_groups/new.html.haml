@@ -2,7 +2,7 @@
   %h1 Add a new Client Group
 
 = error_messages_for @client_group
-- form_url   = ((@client) ? resource(@client, :client_groups) : resource(:client_groups, {:return => params[:return]}))
+- form_url   = ((@biz_location) ? resource(@biz_location, :client_groups) : resource(:client_groups, {:return => params[:return]}))
 - cancel_url = params[:return] ? "/"+params[:return] : (@client ? resource(@client) : resource(:client_groups))
 = form_for(@client_group, :action => form_url, :id => "new_client_group_form") do
   = partial "client_groups/fields", :submit_text => "Create client group", :cancel_link => cancel_url

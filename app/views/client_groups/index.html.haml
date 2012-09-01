@@ -12,6 +12,8 @@
       %th
         Group Name
       %th
+        Group Code
+      %th
         No. Of Clients
       %th
         Action
@@ -25,6 +27,8 @@
           - count += 1
         %td
           = link_to_with_rights client_group.name, resource(client_group)
+        %td
+          = client_group.code
         %td
           = client_group.clients.count
         %td

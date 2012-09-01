@@ -20,6 +20,7 @@ class BizLocation
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]
   has n, :visit_schedules
+  has n, :client_groups
 
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name
