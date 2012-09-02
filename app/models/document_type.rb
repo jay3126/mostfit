@@ -3,7 +3,7 @@ class DocumentType
   
   property :id, Serial
   property :name, String, :length => 100
-  property :parent_model, Enum.send('[]', *ModelsWithDocuments), :index => true
+  property :parent_models, String, :length => 200
   
   has n, :documents
   validates_is_unique :name

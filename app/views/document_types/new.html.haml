@@ -4,5 +4,4 @@
 = form_for(@document_type, :action => url(:document_types) ) do
   =partial :fields
   = submit "Create"
-
-= link_to_with_rights 'Back', url(:admin)
+  = link_to_with_rights 'Back', url(:admin), :class => 'grey_button'
