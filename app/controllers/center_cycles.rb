@@ -125,5 +125,32 @@ class CenterCycles < Application
     end
     redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
   end
-  
+
+  def restart_cgt
+    # GATE-KEEPING
+    center_cycle_id = params[:id]
+
+    # INITIALIZATIONS
+    @errors = []
+    @center_cycle = CenterCycle.get center_cycle_id
+
+    # OPERATIONS PERFORMED
+    begin
+      @center_cycle.update(
+        :cgt_date_one => nil,
+        :cgt_date_two => nil,
+        :cgt_date_three => nil,
+        :cgt_performed_by_staff => nil,
+        :cgt_recorded_at => nil,
+        :grt_status => Constants::CenterFormation::GRT_NOT_DONE,
+        :grt_completed_by_staff => nil,
+        :grt_completed_on => nil,
+        :grt_recorded_at => nil)
+    rescue => ex
+      @errors << "An error has occurred: #{ex.message}"
+    end
+
+    # RENDER/RE-DIRECT
+    render :mark_cgt_grt
+  end
 end # AccountBalances
