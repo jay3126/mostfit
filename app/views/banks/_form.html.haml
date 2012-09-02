@@ -1,5 +1,16 @@
 #new_form{:style => "#{@banks.blank? ? 'display : true' : 'display : none'}"}
   %form{:action => url(:controller => :banks, :action => :create), :method => :post}
-    Name
-    = text_field :name
+    %table#TextBoxesGroup
+      %tr
+        %th
+          Name
+        %td
+          = text_field :name
+      %tr
+        %th
+          Branch
+        %td
+          = text_field :name => 'bank_branch[]'
+    = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;'
+    %br
     = submit "Save"

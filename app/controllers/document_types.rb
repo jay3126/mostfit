@@ -25,8 +25,9 @@ class DocumentTypes < Application
     display @document_type
   end
 
-  def create(document_type)
-    @document_type = DocumentType.new(document_type)
+  def create
+    parent_models  = params[:parent_models].blank? ? '' : params[:parent_models].join(',')
+    @document_type = DocumentType.new(:name => params[:document_type][:name], :parent_models => parent_models )
     if @document_type.save
       redirect resource(:document_types), :message => {:notice => "DocumentType was successfully created"}
     else

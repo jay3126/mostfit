@@ -1,4 +1,9 @@
 .shaded
+  - if @center_cycle && @center_cycle.grt_status == Constants::CenterFormation::GRT_FAILED
+    .menu-strip
+      = link_to_with_rights 'Restart CGT', url(:controller => "center_cycles", :action => "restart_cgt", :id => @center_cycle.id, :parent_location_id => @branch.id, :child_location_id => @center.id), :class => 'greenButton'
+      %i As GRT is failed, you can again restart CGT.
+
   - if @center_cycle && !@center_cycle.blank?
     %table.form
       %h1

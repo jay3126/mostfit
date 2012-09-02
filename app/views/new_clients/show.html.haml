@@ -8,8 +8,7 @@
 .menu-strip
   = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
   - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
-  - debugger
-  -if check_checklist_parameters(@client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil)
+  - if check_checklist_parameters(@client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil)
     = link_to 'Customer Calling', url_for_checklist('Customer Calling',@client.class.to_s, @client, at_branch, at_center, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
 %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px;" }
   %tr.even
