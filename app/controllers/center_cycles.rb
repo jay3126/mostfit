@@ -129,6 +129,8 @@ class CenterCycles < Application
   def restart_cgt
     # GATE-KEEPING
     center_cycle_id = params[:id]
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
 
     # INITIALIZATIONS
     @errors = []
@@ -151,6 +153,7 @@ class CenterCycles < Application
     end
 
     # RENDER/RE-DIRECT
-    render :mark_cgt_grt
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id)
   end
-end # AccountBalances
+
+end
