@@ -53,7 +53,7 @@ class PassbookLabelExtract < Report
     location_facade  = get_location_facade(@user)
     meeting_facade = get_meeting_facade(@user)
 
-    params = {:accounted_at_origin => @biz_location_branch}
+    params = {:status => :approved_loan_status, :approved_on_date.lte => @date, :disbursal_date => nil, :accounted_at_origin => @biz_location_branch}
     lending_ids = Lending.all(params).aggregate(:id)
 
     lending_ids.each do |l|
