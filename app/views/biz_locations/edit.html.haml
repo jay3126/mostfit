@@ -1,4 +1,4 @@
-%h1 Update Location
+%h1 Edit the details of: #{@biz_location.name}
 = form_for(@biz_location, :action => resource(@biz_location,:update_biz_location)) do
   %table.tall.shaded
     %tr
@@ -28,4 +28,11 @@
         %td
           = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
   = submit "Update", :class => "grey_button"
-  = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  - if @biz_location.location_level.level == 0
+    = link_to_with_rights 'Cancel', url("user_locations/weeksheet_collection/#{@biz_location.id}"), :class => "grey_button"
+  - else
+    = link_to_with_rights 'Cancel', url("user_locations/show/#{@biz_location.id}"), :class => "grey_button"
