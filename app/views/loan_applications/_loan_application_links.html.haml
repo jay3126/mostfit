@@ -39,7 +39,7 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Credit Bureau
-      = link_to_with_rights "Download request files", url(:controller => :overlap_report_requests, :action => :index), :class => 'edit_small'
+      = link_to_with_rights "Download request files", url(:controller => :overlap_report_requests, :action => :request_file, :flag => 'true'), :class => 'edit_small'
       %br
       = link_to_with_rights "Upload response files", url(:controller => :overlap_report_responses, :action => :index), :class => 'edit_small'
   %tr

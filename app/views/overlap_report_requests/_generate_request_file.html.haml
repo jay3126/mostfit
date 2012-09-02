@@ -1,0 +1,9 @@
+.shaded
+  - unless params[:parent_location_id].blank? || params[:child_location_id].blank?
+    - branch_name = BizLocation.get(params[:parent_location_id]).name rescue nil
+    - center_name = BizLocation.get(params[:child_location_id]).name rescue nil
+    %h3= "Generate request file for Branch: #{branch_name}, Center: #{center_name}"
+    = link_to_with_rights "Generate", url(:controller => "overlap_report_requests", :action => "generate_cb_request_file", :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]), :class => 'greenButton'
+  - else
+    %h3 Select Both Branch and Center to generate request file
+%br

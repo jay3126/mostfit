@@ -1,0 +1,29 @@
+- center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
+%h1 Generate Credit Bureau Request file
+
+%form{:action => url(:controller => :overlap_report_requests, :action => :request_file), :method => :get}
+  = partial 'lib/biz_location_selector'
+
+- if @center
+  - if center_cycle_number.eql?(0)
+    %h3 No Center cycle currently exists for this center
+  - else
+    %h2= "Center Cycle Number: #{center_cycle_number}"
+
+= partial :generate_request_file
+
+= partial :index

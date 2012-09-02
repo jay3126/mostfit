@@ -355,7 +355,7 @@ class LoanApplication
   def self.pending_overlap_report_request_generation(search_options ={})
     eligible_statuses = [NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
     search_options.merge!(:status => eligible_statuses)
-    is_new_or_suspected_duplicate_loan_application = all.aggregate(:status).include?("1") || all.aggregate(:status).include?("2")
+    is_new_or_suspected_duplicate_loan_application = all(search_options).aggregate(:status).include?("1") || all(search_options).aggregate(:status).include?("2")
     is_new_or_suspected_duplicate_loan_application ? [] : all(search_options)
   end
 

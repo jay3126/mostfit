@@ -2,7 +2,7 @@
   = link_to_with_rights "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true')
   = link_to_with_rights "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new)
   = link_to_with_rights "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true')
-  = link_to_with_rights "Download request files", url(:controller => :overlap_report_requests, :action => :index)
+  = link_to_with_rights "Download request files", url(:controller => :overlap_report_requests, :action => :request_file, :flag => 'true')
   = link_to_with_rights "Upload response files", url(:controller => :overlap_report_responses, :action => :index)
   = link_to_with_rights "Authorize loan applications",  url(:controller => :loan_authorizations, :action => :pending_authorizations, :flag => 'true')
   = link_to_with_rights "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true')

@@ -230,7 +230,13 @@ class LoanApplicationsFacade < StandardFacade
     LoanApplication.completed_authorization(search_options)
   end
 
+  # generates credit bureau request file for particular branch and center
+  def generate_credit_bureau_request_file(branch, center)
+    OverlapReportRequest.generate_credit_bureau_request_file(branch, center)
+  end
+  
 end
+
 
 # A loan application is created either for existing clients or new loan applicants
 # Once created, it is subjected to a de-dupe check across new applicants and clients
