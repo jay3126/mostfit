@@ -22,7 +22,7 @@
         %th
           Default Disbursal Date
         %td
-          = date_select 'center_disbursal_date'
+          = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
   %br
   = submit "Save", :class => "grey_button"
   &nbsp;&nbsp;

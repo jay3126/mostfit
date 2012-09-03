@@ -14,6 +14,8 @@
       %th
         Group Code
       %th
+        Center Name
+      %th
         No. Of Clients
       %th
         Action
@@ -30,7 +32,11 @@
         %td
           = client_group.code
         %td
+          - if (client_group and client_group.biz_location)
+            = link_to_with_rights client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => client_group.biz_location.id)
+          - else
+            Not Attached to any Center
+        %td
           = client_group.clients.count
         %td
           = link_to_with_rights('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
-          

@@ -4,6 +4,10 @@
     = @message[:error]
 = form_for(@client, :action => url(:controller => :new_clients, :action=> :update, :id => @client.id), :multipart => true) do
   = hidden_field :name => :client_type, :value => @client.class
-  = partial 'new_clients/fields', :is_edit_page => "true"
+  = partial 'new_clients/fields'
   = submit "Update client", :class => "grey_button"
-  = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', url(:controller => :new_clients, :action => :show, :id => @client.id), :class => "grey_button"

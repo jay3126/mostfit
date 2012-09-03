@@ -8,7 +8,7 @@ class BizLocation
   property :created_at, DateTime, :nullable => false, :default => DateTime.now
   property :creation_date, Date, :nullable => false, :default => Date.today
   property :deleted_at, ParanoidDateTime
-  property :center_disbursal_date, Date, :nullable => true
+  property :center_disbursal_date, Date, :nullable => true, :default => Date.today
   property :biz_location_address, String, :nullable => true
 
   belongs_to :location_level

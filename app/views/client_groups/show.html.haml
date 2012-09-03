@@ -20,7 +20,10 @@
     %th.odd
       Center
     %td
-      = link_to_with_rights @client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @client_group.biz_location.id)
+      - if @client_group.biz_location.nil?
+        = "Not Attached to any Center"
+      - else
+        = link_to_with_rights @client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @client_group.biz_location.id)
 
 %h2 Clients under this Group
 - if @client_group.clients.count == 0

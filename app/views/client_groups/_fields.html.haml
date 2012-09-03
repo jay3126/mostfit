@@ -1,13 +1,16 @@
-%table.form
+%table.tall.shaded
   %tr
     %th
       For Center:
     %td
-      - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
-      - all_centers_list = location_facade.all_nominal_centers.collect{|center| [center.id, center.name]}
-      = select :biz_location_id, :collection => all_centers_list
-      %br
-        %span.greytext Select the center under which this client group is being created. 
+      - if @client_group.new?
+        - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
+        - all_centers_list = location_facade.all_nominal_centers.collect{|center| [center.id, center.name]}
+        = select :biz_location_id, :collection => all_centers_list
+        %br
+          %span.greytext Select the center under which this client group is being created.
+      - else
+        = @client_group.biz_location.name
   %tr
     %th
       Staff Member:
@@ -31,12 +34,10 @@
       Maximum clients:
     %td
       = text_field :number_of_members, :size => 3
-  %tr
-    %th
-    %th
-      = submit submit_text
-      &nbsp;&nbsp;
-      %b
-        Or
-      &nbsp;&nbsp;
-      = link_to_with_rights 'Cancel', cancel_link, :class => "grey_button"
+
+= submit submit_text
+&nbsp;&nbsp;
+%b
+  Or
+&nbsp;&nbsp;
+= link_to_with_rights 'Cancel', cancel_link, :class => "grey_button"

@@ -21,12 +21,12 @@
         Address
       %td
         = text_area :biz_location_address, :rows => 6, :cols => 38
-    -if @biz_location.location_level.level == 0
+    - if @biz_location.location_level.level == 0
       %tr
         %th
           Default Disbursal Date
         %td
-          = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+          = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
   = submit "Update", :class => "grey_button"
   &nbsp;&nbsp;
   %b

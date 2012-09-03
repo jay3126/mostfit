@@ -26,12 +26,12 @@
     %th.date{:style => 'display:none'}
       Default Disbursal Date
     %td.date{:style => 'display:none'}
-      = date_select_earliest 'biz_location[center_disbursal_date]', {:id => "center_disbursal_date"}
+      = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
   %tr
     %th
       Creation Date
     %td
-      = date_select_earliest 'biz_location[creation_date]', {:id => "creation_date"}
+      = date_select_for @biz_location, :creation_date, :max_date => Date.today
   %tr
     %th
       Address

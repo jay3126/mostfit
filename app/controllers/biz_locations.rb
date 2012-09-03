@@ -35,7 +35,7 @@ class BizLocations < Application
       begin
         @biz_location.attributes = {:name => b_name, :center_disbursal_date => b_disbursal_date, :biz_location_address => b_address}
         if @biz_location.save
-          message = {:notice => " Location successfully Updated"}
+          message = {:notice => "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' updated successfully"}
         else
           message = {:error => @biz_location.errors.first.join(', ')}
         end
@@ -85,7 +85,7 @@ class BizLocations < Application
           message = {:notice => "Location creation fail"}
         else
           LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
-          message = {:notice => " Location successfully created"}
+          message = {:notice => "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' successfully created"}
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
@@ -194,6 +194,7 @@ class BizLocations < Application
     b_creation_date  = params[:creation_date]
     b_name           = params[:name]
     b_id             = params[:id]
+    b_disbursal_date = params[:center_disbursal_date]
     @parent_location = BizLocation.get b_id
 
     # VALIDATIONS
@@ -206,12 +207,12 @@ class BizLocations < Application
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i)
+        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i,b_disbursal_date)
         if child_location.new?
           message = {:notice => "Location creation fail"}
         else
           location_facade.assign(child_location, @parent_location, b_creation_date)
-          message = {:notice => " Location successfully created"}
+          message = {:notice => "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created"}
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
