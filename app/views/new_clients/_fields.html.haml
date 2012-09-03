@@ -6,7 +6,7 @@
     %td
       = select :client_group_id, :collection => ClientGroup.all(:biz_location_id => @biz_location.id).collect{|c| [c.id, c.name]}
       &nbsp;&nbsp;
-      = link_to 'Add New Group', '#', :class => 'add grey_button', :onclick => "jQuery('#new_client_group_form').toggle(); return false;"      
+      = link_to 'Add New Group', '#', :class => 'add grey_button', :onclick => "jQuery('#new_client_group_form').toggle(); return false;" unless is_edit_page
   %tr
     %th
       Name:
