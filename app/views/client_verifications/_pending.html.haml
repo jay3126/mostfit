@@ -2,6 +2,27 @@
 - total_columns = 14
 - center_text = "text-align: center"
 
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_approve_all_cpv1').change(function() {
+    $('.approve_all_cpv1').attr('checked',$(this).attr('checked'))});
+  });
+
+  $(document).ready(function() {
+  $('#toggle_select_reject_all_cpv1').change(function() {
+    $('.reject_all_cpv1').attr('checked',$(this).attr('checked'))});
+  });
+
+  $(document).ready(function() {
+  $('#toggle_select_approve_all_cpv2').change(function() {
+    $('.approve_all_cpv2').attr('checked',$(this).attr('checked'))});
+  });
+
+  $(document).ready(function() {
+  $('#toggle_select_reject_all_cpv2').change(function() {
+    $('.reject_all_cpv2').attr('checked',$(this).attr('checked'))});
+  });
+
 #pending_list
   .shaded
     %h2 Pending verifications
@@ -26,17 +47,21 @@
               %td{:colspan=>3}
                 = "&nbsp;"
               %td
-                = "Approved"
+                = "Approve all"
+                = radio_button :name => 'bulk_select_cpv1', :id => "toggle_select_approve_all_cpv1"
               %td
-                = "Rejected"
+                = "Reject all"
+                = radio_button :name => 'bulk_select_cpv1', :id => "toggle_select_reject_all_cpv1"
               %td
                 = "Verified on Date"
               %td
                 = "Verified by Staff Member"
               %td
-                = "Approved"
+                = "Approve all"
+                = radio_button :name => 'bulk_select_cpv2', :id => "toggle_select_approve_all_cpv2"
               %td
-                = "Rejected"
+                = "Rejecte all"
+                = radio_button :name => 'bulk_select_cpv2', :id => "toggle_select_reject_all_cpv2"
               %td
                 = "Verified on Date"
               %td
@@ -55,9 +80,9 @@
                   - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
                     - unless session.user.role == :support || session.user.role == :finops
                       %td
-                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv1"}
                       %td
-                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv1"}
                       %td
                         = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                       %td
@@ -76,9 +101,9 @@
                   - if ClientVerification.is_CPV1_verified?(l.id)
                     - if session.user.role == :support || session.user.role == :operator
                       %td
-                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED}
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv2"}
                       %td
-                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED}
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv2"}
                       %td
                         = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                       %td
