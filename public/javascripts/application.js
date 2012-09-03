@@ -801,8 +801,12 @@ function get_all_location_on_level() {
   });
 }
 function add_text_field(){
+  locations = jQuery('.biz_location').html();
+  count = jQuery('.biz_location').size();
   jQuery("#TextBoxesGroup").append('<tr><th>Branch </th><td>' +
-    '<input type="text" name="bank_branch[]" id="bank_branch__" value="" ></td></tr>');
+    "<input type='text' name='bank_branch["+count+"][bank_branch]' id='bank_branch_"+count+"__bank_branch_' value='' ></td>"+
+  "<th> Location</th> <td><select id='bank_branch_0"+count+"__location_' name='bank_branch["+count+"][location]' class='biz_location'>"+locations+
+      "</td></tr>");
 }
 
 $(document).ready(function(){

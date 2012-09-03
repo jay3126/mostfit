@@ -1,5 +1,14 @@
 #new_form{:style => "#{@bank_branches.blank? ? 'display : true' : 'display : none'}"}
   %form{:action => url(:controller => :bank_branches, :action => :create, :bank_id => @bank.id), :method => :post}
-    Name
-    = text_field :name
+    %table
+      %tr
+        %th
+          Name
+        %td
+          = text_field :name
+        %th
+          Location
+        %td
+          = select :name => "biz_location_id", :collection => get_all_nominal_branches, :text_method => 'name', :value_method => 'id'
+
     = submit "Save"

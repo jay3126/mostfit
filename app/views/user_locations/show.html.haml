@@ -36,8 +36,9 @@
         Money Deposits
       %li#scv
         SCV
-    %li#branch_eod_summary
-      EOD Summary
+    - if @location_level.level < 2
+      %li#branch_eod_summary
+        EOD Summary
     %li#holiday
       Holiday
     %li#history
@@ -56,8 +57,9 @@
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :money_deposits, :at_location_id => @biz_location.id)}
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_scv, :id => @biz_location.id, :date => @date)}
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id, :date => @date)}
+  - if @location_level.level < 2
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :location_eod_summary, :id => @biz_location.id, :date => @date)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :location_holidays, :action => :index, :biz_location_id => @biz_location.id)}
   %div.tab

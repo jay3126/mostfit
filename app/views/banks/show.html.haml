@@ -19,6 +19,8 @@
           = "ID"
         %th
           = "Name"
+        %th
+          Location
     %tbody
       - @bank_branches.each do |bb|
         %tr
@@ -26,4 +28,6 @@
             = bb.id
           %td
             = link_to bb.name, resource(@bank,bb)
+          %td
+            = link_to_location(bb.biz_location) unless bb.biz_location.blank?
 %br

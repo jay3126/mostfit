@@ -10,7 +10,11 @@
         %th
           Branch
         %td
-          = text_field :name => 'bank_branch[]'
+          = text_field :name => 'bank_branch[0][bank_branch]'
+        %th
+          Location
+        %td
+          = select :name => "bank_branch[0][location]", :collection => get_all_nominal_branches, :text_method => 'name', :value_method => 'id', :class => 'biz_location'
     = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;'
     %br
     = submit "Save"
