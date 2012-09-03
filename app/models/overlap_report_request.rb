@@ -54,6 +54,7 @@ class OverlapReportRequest
       end
     end
 
+    FileUtils.rm([filename]) if loan_applications.blank?
     raise "There are some loan applications which are either in new status or suspected duplicate" if loan_applications.blank?
 
     log_folder = File.join(Merb.root, "log","highmark","requests")
@@ -70,7 +71,7 @@ class OverlapReportRequest
       end
     end
 
-    FileUtils.rm([filename, error_filename]) if loan_applications.empty?
+    FileUtils.rm([filename, error_filename]) if loan_applications.blank?
   end
 
 end
