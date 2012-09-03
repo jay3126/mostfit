@@ -1,43 +1,41 @@
+//{"target_entity_name"=>"loan_file_33_34_01-08-2012", "loc2_type"=>"center", "staff_name"=>"SuperUser", "loc1_name"=>"kkk branch", "no_of_applications"=>"6", "loc1_id"=>"33", "staff_id"=>"1", "loc1_type"=>"branch", "target_entity_type"=>"LoanFile", "id"=>"8", "loc2_name"=>"kkk center", "action"=>"fill_in_checklist", "target_entity_id"=>"3", "effective_date"=>"2012-09-03", "loc2_id"=>"34", "controller"=>"checklister_slice/checklists", "referral_url"=>"/loan_files/show/3"}
+
 %h2.h2c
-  ="#{@checklist.checklist_type.name}"
+  = "#{@checklist.checklist_type.name}"
 %hr
 
 .shaded
   #form_section
     = form(:action => url(:checklister_slice_capture_checklist_data) ) do
-
       %table.form{:style => "width:100%;"}
         %tr
           %td
-            =label " Staff Member:"
+            = label " Staff Member:"
           %td
-            =text_field :name=>:staff_name ,:value=>params[:staff_name] ,:disabled=>true
-            =hidden_field :staff_name ,:value=>params[:staff_name]
+            = text_field :name => :staff_name ,:value => params[:staff_name], :disabled => true
+            = hidden_field :staff_name, :value => params[:staff_name]
           %td
-            =label params[:target_entity_type]
+            = label params[:target_entity_type]
           %td
-            =text_field :target_entity_name ,:value=>params[:target_entity_name]        ,:disabled=>true
-            =hidden_field :target_entity_name ,:value=>params[:target_entity_name]
+            = text_field :target_entity_name, :value => params[:target_entity_name], :disabled => true
+            = hidden_field :target_entity_name, :value => params[:target_entity_name]
         %tr
-
           %td
           %td
-        %tr
         %tr
         %tr
         %tr
-
+        %tr
           %td
-            =label params[:loc1_type]
+            = label params[:loc1_type]
           %td
-            =text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
-            =hidden_field :loc1_name,:value=>params[:loc1_name]
-
+            = text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
+            = hidden_field :loc1_name,:value=>params[:loc1_name]
           %td
-            =label params[:loc2_type]
+            = label params[:loc2_type]
           %td
-            =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
-            =hidden_field :loc2_name,:value=>params[:loc2_name]
+            = text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+            = hidden_field :loc2_name,:value=>params[:loc2_name]
         %tr
           %td
           %td
@@ -45,44 +43,33 @@
         %tr
         %tr
           %td
-            =label "Value Date"
+            = label "Value Date"
           %td
-            =date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
+            = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
           %td
             Member Count
           %td
-            =params[:no_of_applications]
-
+            = params[:no_of_applications]
       %p
-
-        -count=1
-        -@sections.each do |section|
+        - count = 1
+        - @sections.each do |section|
           %hr
           .section_block
             %h2
+          = hidden_field :checklist_id, :value => @checklist.id
+          = hidden_field :filler_type, :value => "User"
+          = hidden_field :staff_id, :value => @staff_id
+          = hidden_field :target_entity_type, :value => params[:target_entity_type]
+          = hidden_field :target_entity_id, :value => params[:target_entity_id]
+          = hidden_field :loc1_id, :value => params[:loc1_id]
+          = hidden_field :loc2_id, :value => params[:loc2_id]
+          = hidden_field :loc1_type, :value => params[:loc1_type]
+          = hidden_field :loc2_type, :value => params[:loc2_type]
+          = hidden_field :no_of_applications, :value => params[:no_of_applications]
+          = hidden_field :referral_url, :value => params[:referral_url]
 
-
-          =hidden_field :checklist_id, :value=>@checklist.id
-
-          =hidden_field :filler_type, :value=>"User"
-          =hidden_field :staff_id, :value=>@staff_id
-          =hidden_field :target_entity_type, :value=>params[:target_entity_type]
-          =hidden_field :target_entity_id, :value=>params[:target_entity_id]
-
-          =hidden_field :loc1_id, :value=>params[:loc1_id]
-          =hidden_field :loc2_id, :value=>params[:loc2_id]
-          =hidden_field :loc1_type, :value=>params[:loc1_type]
-          =hidden_field :loc2_type, :value=>params[:loc2_type]
-          =hidden_field :no_of_applications, :value=>params[:no_of_applications]
-
-          =hidden_field :referral_url, :value=>params[:referral_url]
-
-
-
-
-
-          %table{:cellspacing=>"3px", :cellpadding=>"2px",:border=>" 2"}
-            -if count==2
+          %table{:cellspacing => "3px", :cellpadding => "2px",:border => " 2"}
+            - if count == 2
               %tr
                 %td
                   Name
@@ -108,80 +95,56 @@
                   DeDupe
                 %td
                   Remark
-
-
-            -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
-
-
-              -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-              -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-              -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
-              -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-
-
-              -if count==1 or count==3
-                -if i%3==0
+            - (section.checkpoints.count + section.dropdownpoints.count + section.free_texts.count + section.checkboxpoints.count).times do |i|
+              - checkpoint = Checkpoint.first(:section_id => section.id, :sequence_number => (i+1))
+              - dropdownpoint = Dropdownpoint.first(:section_id => section.id, :sequence_number => (i+1))
+              - free_text = FreeText.first(:section_id => section.id, :sequence_number => (i+1))
+              - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => (i+1))
+              - if count == 1 or count == 3
+                - if i%3 == 0
                   %tr.question_cell
-
-              -else
-                -if i%2==0
+              - else
+                - if i%2 == 0
                   %tr.question_cell
-
-              -if !checkpoint.nil?
+              - if !checkpoint.nil?
                 %td
-                  =" #{checkpoint.name}"
+                  = "#{checkpoint.name}"
                 %td
-                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                  = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
                   Yes
-                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
                   No
-              -if !checkboxpoint.nil?
+              - if !checkboxpoint.nil?
                 %td
-                  ="#{checkboxpoint.name}"
-                  -checkboxpoint.checkboxpoint_options.each do |option|
+                  = "#{checkboxpoint.name}"
+                  - checkboxpoint.checkboxpoint_options.each do |option|
                     %td
-                      =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(params["option#{option.id}".to_sym].to_i==1)
-
-              -if !free_text.nil?
-                -if count!=2
+                      = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)
+              - if !free_text.nil?
+                - if count!= 2
                   %td{:width=>"70px"}
-
-                    =" #{free_text.name}"
-
-                -if free_text.name.downcase=="date"
+                    = "#{free_text.name}"
+                - if free_text.name.downcase == "date"
                   %td
-                    -if params["free_text_#{free_text.id}".to_sym].blank?
-                      -date_value=Date.today
-                    -else
-                      -date_value=Date.parse(params["free_text_#{free_text.id}".to_sym])
-                    =date_select "free_text_#{free_text.id}".to_sym, date_value, :max_date => Date.today
-                -else
+                    - if params["free_text_#{free_text.id}".to_sym].blank?
+                      - date_value = Date.today
+                    - else
+                      - date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
+                    = date_select "free_text_#{free_text.id}".to_sym, date_value, :max_date => Date.today
+                - else
                   %td
-                    =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>params["free_text_#{free_text.id}"]
-              -if !dropdownpoint.nil?
+                    = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
+              - if !dropdownpoint.nil?
                 %td
-                  =" #{dropdownpoint.name}"
+                  = "#{dropdownpoint.name}"
                 %td
-                  -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name, :selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
-                  -else
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:prompt=>"Select A Value From"
-
-
-            -count=count+1
-
-
-
-
-
-
+                  - if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
+                    = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym, :collection => Kernel.const_get(dropdownpoint.model_name).all, :value_method => :id, :text_method => :name, :selected => params["drop_down_point_#{dropdownpoint.id}".to_sym]
+                  - else
+                    = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :prompt => "Select A Value From"
+            - count = count + 1
       %p
-        =check_box :name=>"result_status",:boolean=>true,:checked=>false
+        = check_box :name => "result_status", :boolean => true, :checked => false
         Cleared?
         %br
-        %br
         = submit "Create"
-
-
-
-
