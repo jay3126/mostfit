@@ -79,9 +79,9 @@
                   -# CPV1 can be recorded only if CPV1 is not already done.
                   - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
                     - unless session.user.role == :support || session.user.role == :finops
-                      %td
+                      %td{:style => center_text}
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv1"}
-                      %td
+                      %td{:style => center_text}
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv1"}
                       %td
                         = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
@@ -100,9 +100,9 @@
                       = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
                   - if ClientVerification.is_CPV1_verified?(l.id)
                     - if session.user.role == :support || session.user.role == :operator
-                      %td
+                      %td{:style => center_text}
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv2"}
-                      %td
+                      %td{:style => center_text}
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv2"}
                       %td
                         = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)

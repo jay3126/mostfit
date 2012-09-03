@@ -39,12 +39,10 @@
                 = "Credit Bureau Rating"
               %td
                 = "Credit Bureau Rejection Reason"
-              %td{:colspan => 2, :align => "center"}
-                = "Loan Authorization"
-                %br
+              %td
                 = "Approve all"
                 = radio_button :name => 'bulk_select', :id => "toggle_select_approve_all"
-                %br
+              %td
                 = "Reject all"
                 = radio_button :name => 'bulk_select', :id => "toggle_select_reject_all"
               %td{:colspan => 2}
