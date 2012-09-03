@@ -4,6 +4,16 @@
     jQuery("form.pending_auth select").removeAttr('selected').find(':first').attr('selected','selected');
   }
 
+  $(document).ready(function() {
+  $('#toggle_select_approve_all').change(function() {
+    $('.approve_all').attr('checked',$(this).attr('checked'))});
+  });
+
+  $(document).ready(function() {
+  $('#toggle_select_reject_all').change(function() {
+    $('.reject_all').attr('checked',$(this).attr('checked'))});
+  });
+
 #pending_list
   .shaded
     %h2
@@ -31,6 +41,12 @@
                 = "Credit Bureau Rejection Reason"
               %td{:colspan => 2, :align => "center"}
                 = "Loan Authorization"
+                %br
+                = "Approve all"
+                = radio_button :name => 'bulk_select', :id => "toggle_select_approve_all"
+                %br
+                = "Reject all"
+                = radio_button :name => 'bulk_select', :id => "toggle_select_reject_all"
               %td{:colspan => 2}
                 = "Override reason"
           %tbody.form
@@ -56,11 +72,11 @@
                   = rejection_reason
                 %td
                   - selected_approved = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_APPROVED ? "checked" : nil
-                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED, :checked => selected_approved}
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_APPROVED, :checked => selected_approved, :class => "approve_all"}
                   Approved
                 %td
                   - selected_rejected = !params[:status].nil? && params[:status]["#{lpa.loan_application_id}"] == Constants::Status::APPLICATION_REJECTED ? "checked" : nil
-                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_REJECTED, :checked => selected_rejected}
+                  %input{:name => "[status][#{lpa.loan_application_id}]", :type => "radio", :value => Constants::Status::APPLICATION_REJECTED, :checked => selected_rejected, :class => "reject_all"}
                   Rejected
                 %td
                   - selected_reason = params[:override_reason]? params[:override_reason]["#{lpa.loan_application_id}"] : nil
