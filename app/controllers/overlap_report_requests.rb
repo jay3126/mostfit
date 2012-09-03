@@ -39,16 +39,19 @@ class OverlapReportRequests < Application
 
     # INITIALIZATIONS
     @errors = []
+    message = {}
 
     # OPERATIONS PERFORMED
     begin
-    loan_applications_facade.generate_credit_bureau_request_file(branch, center)
+      loan_applications_facade.generate_credit_bureau_request_file(branch, center)
+      message = {:notice => "Request file generated succesfully."}
     rescue => ex
-      @errors << "An error has occured #{ex.message}"
+      @errors << "An error has occured: #{ex.message}"
+      message = {:error => @errors.to_s}
     end
 
     # RENDER/RE-DIRECT
-    redirect url(:controller => "overlap_report_requests", :action => "request_file", :parent_location_id => branch, :child_location_id => center)
+    redirect url(:controller => "overlap_report_requests", :action => "request_file", :parent_location_id => branch, :child_location_id => center), :message => message
   end
 
 end
