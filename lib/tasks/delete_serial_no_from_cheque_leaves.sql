@@ -1,0 +1,1 @@
+ALTER TABLE `cheque_leaves` DROP COLUMN `serial_no`;

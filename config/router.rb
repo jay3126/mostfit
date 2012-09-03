@@ -30,7 +30,7 @@ Merb::Router.prepare do
 
   resources :auth_override_reasons
   resources :branch_eod_summaries
-  resources :cheque_leaves
+  resources :cheque_leaves, :id => %r(\d+)
   resources :securitizations
   resources :encumberances
   resources :third_parties
@@ -172,7 +172,6 @@ Merb::Router.prepare do
   match('/documents/:action(/:id)').to(:controller => "documents").name(:documents_action_link)
   match('/:controller/:id', :id => %r(\d+)).to(:action => 'redirect_to_show').name(:quick_link)
   match('/rules/get').to(:controller => 'rules', :action => 'get')
-  match('/cheque_leaves/mark_invalid/:id').to(:controller => 'cheque_leaves', :action => 'mark_invalid').name(:mark_invalid)
   match('/securitizations/:action').to(:controller => 'securitizations').name(:securitization_actions)
   match('/securitizations/upload_data/:id').to(:controller => 'securitizations', :action => "upload_data")
   match('/securitizations/save_data').to(:controller => 'securitizations', :action => "save_data")

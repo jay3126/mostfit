@@ -1,5 +1,4 @@
 class ChequeLeaves < Application
-  before :ensure_authenticated
 
   def index
     @bank_accounts = BankAccount.all
@@ -12,31 +11,35 @@ class ChequeLeaves < Application
     display @cheque_leaf
   end
 
-  def new(id)
+  def new
     only_provides :html
     # GATE-KEEPING
-    @account_id=id
+    if request.method == :get
+      @account_id = params[:id]
 
-    # VALIDATION
-    if BankAccount.get(@account_id).nil?
-      redirect(params[:return], :message => {:notice => "Account not found"})
+      # VALIDATION
+      if BankAccount.get(@account_id).nil?
+        redirect(params[:return], :message => {:notice => "Account not found"})
+      end
+      # OPERATIONS PERFORMED
+
+      begin
+      rescue => ex
+        @errors.push(ex.message)
+      end
+
+      # POPULATING RESPONSE AND OTHER VARIABLES
+      @cheque_leaf = ChequeLeaf.new
+      @cheque_leaf.bank_account_id = @account_id
+      @bank_account = BankAccount.get(@account_id)
+      @cheque_leaves = @bank_account.cheques
+
+      # RENDER/RE-DIRECT
+      display @cheque_leaf
+    else
+      @account_id = params[:bank_account_id]
+      create
     end
-    # OPERATIONS PERFORMED
-
-    begin
-
-    rescue => ex
-      @errors.push(ex.message)
-    end
-
-    # POPULATING RESPONSE AND OTHER VARIABLES
-    @cheque_leaf = ChequeLeaf.new
-    @cheque_leaf.bank_account_id=@account_id
-    @bank_account = BankAccount.get(@account_id)
-    @cheque_leaves = @bank_account.cheques
-
-    # RENDER/RE-DIRECT
-    display @cheque_leaf
   end
 
   def edit(id)
@@ -48,56 +51,40 @@ class ChequeLeaves < Application
 
   def create
     # GATE-KEEPING
-    @account_id=params[:account_id]
-    @start=params[:start_serial].to_i
-    @end=params[:end_serial].to_i
+    @bank_account_id = params[:bank_account_id].to_i
+    @start_serial = params[:cheque_leaf][:start_serial].to_i
+    @end_serial = params[:cheque_leaf][:end_serial].to_i
+    @issue_date = params[:cheque_leaf][:issue_date]
 
     # VALIDATION
-    if BankAccount.get(@account_id).nil?
+    if BankAccount.get(@bank_account_id).nil?
       redirect(params[:return], :message => {:notice => "Account not found"})
     end
 
-    if @start<100000 || @start>1000000 ||@end<100000 || @end>1000000
-      redirect(params[:return], :message => {:notice => "Invalid serial numbers, Serial number should be 6 digits positive integer"})
+    if @start_serial.blank?
+      redirect(params[:return], :message => {:error => "Please enter Start Cheque Number"})
     end
 
-    if @start>@end
-      redirect(params[:return], :message => {:notice => "Starting serial number cannot be greater than ending serial number"})
+    if @end_serial.blank?
+      redirect(params[:return], :message => {:error => "Please enter end Cheque Number"})
+    end
+
+    if @issue_date.blank?
+      redirect(params[:return], :message => {:error => "Please choose the issue date"})
+    end
+
+    if @start_serial > @end_serial
+      redirect(params[:return], :message => {:error => "Starting serial number cannot be greater than ending serial number"})
     end
 
     # OPERATIONS PERFORMED
-    begin
-      @message=String.new
-      @unsuccessful=String.new
-      @successful=String.new
-      @already_present=String.new
-      @user=session.user
-      (@end-@start+1).times do |serial_no|
-        #ChequeLeaf.create!(:serial_no=>serial_no+@start, :bank_account_id=>@account_id, :created_by_user_id=>Session.user.id)
-        if ChequeLeaf.all(:serial_no=>serial_no+@start, :bank_account_id=>@account_id).count!=0
-          @already_present=@already_present+"#{serial_no+@start}   "
-        elsif ChequeLeaf.create!(:serial_no=>serial_no+@start, :bank_account_id=>@account_id, :created_by_user_id=>session.user.id)
-          @successful=@successful+"#{serial_no+@start}   "
-        else
-          @unsuccessful=@unsuccessful+"#{serial_no+@start}   "
-        end
-      end
-    rescue => ex
-      #@message+=ex.message
+    cheque_leaf = {:start_serial => @start_serial, :end_serial => @end_serial, :issue_date => @issue_date, :created_by_user_id => session.user.id, :bank_account_id => @bank_account_id}
+    @cheque_leaf = ChequeLeaf.new(cheque_leaf)
+    if @cheque_leaf.save!
+      redirect resource(:cheque_leaves), :message => {:notice => "Cheque Leaves from serial number: '#{@start_serial} to #{@end_serial}' successfully created under Bank Branch Account: '#{@cheque_leaf.bank_account.name}'"}
+    else
+      redirect request.referer, :message => {:error => "Cheque Leaves falied to be created because : #{@cheque_leaf.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
-
-    if @successful.length!=0
-      @message+="Successfully created cheque leaves : #{@successful}\n"
-    end
-    if @unsuccessful.length!=0
-      @message+="Failed to create cheque leaves : #{@unsuccessful}\n"
-    end
-    if @already_present.length!=0
-      @message+="Already existing cheque leaves : #{@already_present}"
-    end
-
-    # RENDER/RE-DIRECT
-    redirect(resource(:cheque_leaves), :message => {:notice => @message})
   end
 
   def update(id, cheque_leaf)
@@ -121,10 +108,16 @@ class ChequeLeaves < Application
   end
   
   def mark_invalid(id)
-    @id=id
-    @cheque_leaf=ChequeLeaf.get(id)
+    @id = id
+    @cheque_leaf = ChequeLeaf.get(id)
     @cheque_leaf.update!(:valid => false)
-    redirect("/ChequeLeaves/new/#{@cheque_leaf.bank_account_id}")
+    redirect url("cheque_leaves/new/#{@cheque_leaf.bank_account_id}"), :message => {:notice => "Cheque Leaves marked as In-Valid successfully"}
+  end
+
+  def mark_valid(id)
+    @cheque_leaf = ChequeLeaf.get(id)
+    @cheque_leaf.update!(:valid => true)
+    redirect url("cheque_leaves/new/#{@cheque_leaf.bank_account_id}"), :message => {:notice => "Cheque Leaves marked as Valid successfully"}
   end
 
 end # ChequeLeaves

@@ -1,55 +1,28 @@
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxcommon.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_filter.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_srnd.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgrid_start.js"}
-%script{:type=>"text/javascript", :src=>"javascripts/exclusions/dhtmlxgridcell.js"}
-:javascript
-    var mygrid;
-    function doInitGrid() {
-        mygrid = new dhtmlXGridFromTable("dhtmlxtable");
-
-        mygrid.setSkin("light");
-        mygrid.attachHeader("#text_filter,#text_filter,#text_filter,#text_filter");
-        mygrid.enableAutoWidth(true);
-        mygrid.enableAutoHeight(true);
-        mygrid.setSizes();
-
-
-        //mygrid.init();
-        //mygrid.loadXML("/assets/sample_data.xml");
-
-
-    }
-
-
-    $(function () {
-        doInitGrid();
-
-
-    });
-
-
-
-= js_include_tag  "exclusions/dhtmlxcommon.js", "exclusions/dhtmlxgrid.js", "exclusions/dhtmlxgrid_filter.js", "exclusions/dhtmlxgrid_srnd.js", "exclusions/dhtmlxgrid_start.js",  "exclusions/dhtmlxgridcell.js"
-= css_include_tag "dhtmlxgrid.css"
-%table{:class=>"dhtmlxGrid",:id=>"dhtmlxtable"}
+%h1 Cheque Leaves
+%br
+%table.dataTable.report.weeksheet.nojs
+  %thead
     %tr
-        %td
-            Bank name
-        %td
-            Bank branch name
-        %td
-            Account no.
-        %td
+      %th
+        Bank name
+      %th
+        Bank Branch name
+      %th
+        Bank Branch Account Name
+      %th
+        Account no.
+      %th
 
+  %tbody
     - for account in @bank_accounts
-        %tr
-            %td
-                =account.bank_branch.bank.name
-            %td
-                =account.bank_branch.name
-            %td
-                =account.account_no
-            %td
-                = link_to 'Add cheque leaves',"/ChequeLeaves/new/#{account.id}"
+      %tr
+        %td
+          = link_to_with_rights account.bank_branch.bank.name, url("banks/#{account.bank_branch.bank.id}")
+        %td
+          = link_to_with_rights account.bank_branch.name, url("banks/#{account.bank_branch.bank.id}/bank_branches/#{account.bank_branch.id}")
+        %td
+          = account.name
+        %td
+          = account.account_no
+        %td
+          = link_to 'Add / View cheque leaves', url("cheque_leaves/new/#{account.id}")

@@ -1,69 +1,96 @@
-%h1
-    Create New ChequeLeaves for  #{@bank_account.name}
+- if @bank_account
+  %h1 Create New Cheque Leaves for : #{@bank_account.name}
+- else
+  %h1 Create New Cheque Leaves
+
 = error_messages_for @cheque_leaf
 
-:javascript
-    var mygrid;
-    function doInitGrid() {
-        mygrid = new dhtmlXGridFromTable("dhtmlxtable");
-
-        mygrid.setSkin("light");
-        mygrid.attachHeader("#text_filter,#select_filter,#text_filter,#select_filter");
-        mygrid.enableAutoWidth(true);
-        mygrid.enableAutoHeight(true);
-        mygrid.setSizes();
-
-    }
-
-    $(function () {
-        doInitGrid();
-
-    });
-
-= js_include_tag  "exclusions/dhtmlxcommon.js", "exclusions/dhtmlxgrid.js", "exclusions/dhtmlxgrid_filter.js", "exclusions/dhtmlxgrid_srnd.js", "exclusions/dhtmlxgrid_start.js",  "exclusions/dhtmlxgridcell.js"
-= css_include_tag "dhtmlxgrid.css"
-
-= form_for(@cheque_leaf, :action => "/cheque_leaves/create" ) do
-    %input{:type => "hidden", :name => "account_id", :value=>@account_id}
-        %p
-            Start ChequeNumber
-            %input{:type => "text", :name => "start_serial", :class => "text"}
-        %p
-            End ChequeNumber
-            %input{:type => "text", :name => "end_serial", :class => "text"}
-        %p
-            = submit   "Create"
-%hr
-%h3
-    ="Existing Cheque Leaves for #{@bank_account.name}"
-%table{:id=>"dhtmlxtable"}
+= form_for(@cheque_leaf, :controller => :cheque_leaves, :action => :create) do
+  %table.tall.shaded
     %tr
+      %th
+        Bank Account Name
+      %td
+        - if @bank_account
+          = @bank_account.name        
+          = hidden_field :name => "bank_account_id", :value => @bank_account.id
+        - else
+          Not Attched to any Bank Account
+    %tr
+      %th
+        Bank Account Number
+      %td
+        - if @bank_account
+          = @bank_account.account_no
+        - else
+          Not Specified
+    %tr
+      %th
+        Start Cheque number
+      %td
+        = text_field :start_serial
+    %tr
+      %th
+        End Cheque number
+      %td
+        = text_field :end_serial
+    %tr
+      %th
+        Issue Date
+      %td
+        = date_select_for @cheque_leaf, :issue_date
+  = submit "Create"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", url(:cheque_leaves), :class => "grey_button"
+%br
+
+%h1 Existing Cheque Leaves for : #{@bank_account.name}
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Serial Number
+      %th
+        Issue Date
+      %th
+        Bank Account Name
+      %th
+        Bank Account Number
+      %th
+        Status of Cheque
+      %th
+        Actions
+      %th
+        Used
+
+  %tbody
+    - @cheque_leaves.each do |leaf|
+      %tr
         %td
-            Serial Number
+          = leaf.serial_no
         %td
+          = leaf.issue_date
+        %td
+          = leaf.bank_account.name
+        %td
+          = leaf.bank_account.account_no
+        %td
+          - if leaf.valid == true
             Valid
+          - else
+            Marked Invalid
         %td
-
+          - if leaf.valid == true && leaf.used == false
+            = link_to_with_rights '(Mark Invalid)', url(:controller => :cheque_leaves, :action => :mark_invalid, :id => leaf.id)
+          - else
+            = link_to_with_rights '(Mark Valid)', url(:controller => :cheque_leaves, :action => :mark_valid, :id => leaf.id)
         %td
+          - if leaf.used == false
+            Unused
+          - else
             Used
-
-    -@cheque_leaves.each do |leaf|
-        %tr
-            %td
-                =leaf.serial_no
-            %td
-                -if leaf.valid==true
-                    Valid
-                - else
-                    Invalid
-            %td
-                -if leaf.valid==true && leaf.used==false
-                    =link_to '(Mark Invalid)', "/cheque_leaves/mark_invalid/#{leaf.id}"
-
-            %td
-                -if leaf.used==false
-                    Unused
-                - else
-                    Used
-
-= link_to 'Back', url(:cheque_leaves)
+%br
+  = link_to 'Back', url(:cheque_leaves), :class => "grey_button"
