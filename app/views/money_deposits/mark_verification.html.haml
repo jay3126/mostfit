@@ -36,7 +36,8 @@
         %td
           = select :name => "verification_status", :collection => Constants::MoneyDepositVerificationStatus::CHOOSE_VERIFICATION_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
         %td
-          = select :name => "verified_by_staff_id", :text_method => :name, :value_method => :id, :collection => choice_facade.all_finops, :prompt => 'Select'
+          = get_session_user_name
+          = hidden_field :name => 'verified_by_staff_id', :value => get_session_user_id
         %td
           = date_select :verified_on, Date.today, :min_date => @money_deposit.created_on, :max_date => Date.today
       %td{:colspan => 3}

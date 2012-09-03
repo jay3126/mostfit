@@ -86,7 +86,9 @@
     %tfoot
       %tr
         %td{:colspan => 3}
-          = select :name => "by_staff_id", :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, params[:at_location_id]), :prompt => "Select staff member"
+          %b Created By:
+          = get_session_user_name
+          = hidden_field :name => 'by_staff_id', :value => get_session_user_id
         %td{:colspan => 2}
           = submit "Create", :disabled => true
 
