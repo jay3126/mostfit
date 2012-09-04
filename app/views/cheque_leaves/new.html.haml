@@ -1,50 +1,55 @@
 - if @bank_account
-  %h1 Create New Cheque Leaves for : #{@bank_account.name}
+  %h1 Create New Cheque Book for : #{@bank_account.name}
 - else
-  %h1 Create New Cheque Leaves
+  %h1 Create New Cheque Book
 
 = error_messages_for @cheque_leaf
 
-= form_for(@cheque_leaf, :controller => :cheque_leaves, :action => :create) do
-  %table.tall.shaded
-    %tr
-      %th
-        Bank Account Name
-      %td
-        - if @bank_account
-          = @bank_account.name        
-          = hidden_field :name => "bank_account_id", :value => @bank_account.id
-        - else
-          Not Attched to any Bank Account
-    %tr
-      %th
-        Bank Account Number
-      %td
-        - if @bank_account
-          = @bank_account.account_no
-        - else
-          Not Specified
-    %tr
-      %th
-        Start Cheque number
-      %td
-        = text_field :start_serial
-    %tr
-      %th
-        End Cheque number
-      %td
-        = text_field :end_serial
-    %tr
-      %th
-        Issue Date
-      %td
-        = date_select_for @cheque_leaf, :issue_date
-  = submit "Create"
+.menu-strip{:style => "width: 32%;"}
+  = link_to_with_rights "Create new Cheque Book", '#', :onclick =>"jQuery('#new_cheque_book').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
-  %b
-    Or
-  &nbsp;&nbsp;
-  = link_to_with_rights "Cancel", url(:cheque_leaves), :class => "grey_button"
+  = link_to 'Back', url(:cheque_leaves), :class => "grey_button"
+#new_cheque_book(style = "display : none")
+  = form_for(@cheque_leaf, :controller => :cheque_leaves, :action => :create) do
+    %table.tall.shaded
+      %tr
+        %th
+          Bank Account Name
+        %td
+          - if @bank_account
+            = @bank_account.name        
+            = hidden_field :name => "bank_account_id", :value => @bank_account.id
+          - else
+            Not Attched to any Bank Account
+      %tr
+        %th
+          Bank Account Number
+        %td
+          - if @bank_account
+            = @bank_account.account_no
+          - else
+            Not Specified
+      %tr
+        %th
+          Start Cheque number
+        %td
+          = text_field :start_serial
+      %tr
+        %th
+          End Cheque number
+        %td
+          = text_field :end_serial
+      %tr
+        %th
+          Issue Date Of Cheque Book
+        %td
+          = date_select_for @cheque_leaf, :issue_date
+    = submit "Create"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", '#', :onclick =>"jQuery('#new_cheque_book').hide(); return false;", :class => "grey_button"    
 %br
 
 %h1 Existing Cheque Leaves for : #{@bank_account.name}
@@ -93,4 +98,3 @@
           - else
             Used
 %br
-  = link_to 'Back', url(:cheque_leaves), :class => "grey_button"
