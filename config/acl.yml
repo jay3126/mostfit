@@ -23,6 +23,46 @@ administrator :
     - all
   admin :
     - all
+  biz_locations :
+    - all
+  staff_members :
+    - all
+  staff_postings :
+    - all
+  location_levels :
+    - all
+  occupations :
+    - all
+  priority_sector_lists :
+    - all
+  psl_sub_categories :
+    - all
+  auth_override_reasons :
+    - all
+  cheque_leaves :
+    - all
+  funders :
+    - all
+  third_parties :
+    - all
+  simple_fee_products :
+    - all
+  simple_insurance_products :
+    - all
+  simple_insurance_policies :
+    - all
+  banks :
+    - all
+  securitizations :
+    - all
+  encumberances :
+    - all
+  stock_registers :
+    - all
+  asset_registers :
+    - all
+  asset_categories :
+    - all
   audit_trails:
     - index
     - show
@@ -40,6 +80,10 @@ administrator :
   loan_purposes :
     - all
   searches :
+    - all
+  users :
+    - all
+  reports :
     - all
 ################
 executive :
@@ -60,8 +104,8 @@ executive :
 #    - index
 #   - show
     - centers_for_selector
-  client_groups :
-    - all
+#  client_groups :
+#    - all
   client_verifications :
     - all
   clients :
@@ -140,15 +184,16 @@ executive :
     - weeksheet_payments
     - create_group_payments
     - payment_form_for_lending
-#  users :
-#     - index
-#    - show
-#    - edit
-#    - update
-#    - change_password
-#     - new
-#    - admin_change_password
-#    - preferred_locale
+  users :
+#    - index
+    - show
+    - edit
+    - update
+    - change_password
+    - new
+    - admin_change_password
+    - preferred_locale
+#    - create
 #    - all
   center_cycles :
     - record_cgt
@@ -187,6 +232,8 @@ supervisor :
     - biz_location_clients
     - biz_location_form
     - centers_for_selector
+    - edit
+    - update_biz_location
   center_cycles :
     - all
   client_groups :
@@ -289,6 +336,7 @@ supervisor :
     - record_cgt
     - mark_cgt_grt
     - record_grt
+    - restart_cgt
   payment_transactions :
     - index
     - new
@@ -312,6 +360,10 @@ supervisor :
   simple_insurance_policies :
 #    - all
     - show
+  securitizations :
+    - all
+  encumberances :
+    - all
 #################
 support :
   admin :
@@ -345,8 +397,8 @@ support :
     - all
 #  center_cycles :
 #    - all
-  client_groups :
-    - all
+#  client_groups :
+#    - all
   client_verifications :
     - all
   new_clients :
@@ -468,8 +520,8 @@ finops :
  #   - all
 #  center_cycles :
 #    - all
-  client_groups :
-    - all
+#  client_groups :
+#    - all
 #  client_verifications :
 #    - all
   new_clients :
@@ -719,8 +771,8 @@ accountant :
 #    - all
 #  client_groups :
 #    - all
-  client_groups :
-    - all
+#  client_groups :
+#    - all
 #  client_verifications :
 #    - all
   clients :
@@ -887,8 +939,8 @@ auditor :
 #    - all
 #  client_groups :
 #    - all
-  client_groups :
-    - all
+#  client_groups :
+#    - all
 #  client_verifications :
 #    - all
   clients :
