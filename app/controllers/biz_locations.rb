@@ -190,21 +190,22 @@ class BizLocations < Application
     @biz_location = BizLocation.get params[:id]
     level = @biz_location.location_level.level
     @child_location_level = LocationLevel.first(:level => level-1)
+    @new_biz_location = @child_location_level.biz_locations.new
     render :partial => 'biz_locations/location_fields', :layout => layout?
   end
 
   def create_and_assign_location
     # INITIALIZING VARIABLES USED THROUGHTOUT
-
     message = {}
 
     # GATE-KEEPING
 
-    b_level          = params[:location_level]
+    b_level          = params[:biz_location][:location_level]
     b_creation_date  = params[:creation_date]
-    b_name           = params[:name]
+    b_name           = params[:biz_location][:name]
     b_id             = params[:id]
-    b_disbursal_date = params[:center_disbursal_date]
+    b_disbursal_date = params[:biz_location][:center_disbursal_date]
+    b_address          = params[:biz_location][:biz_location_address]
     @parent_location = BizLocation.get b_id
 
     # VALIDATIONS
@@ -217,7 +218,7 @@ class BizLocations < Application
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i,b_disbursal_date)
+        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_address,b_disbursal_date)
         if child_location.new?
           message = {:notice => "Location creation fail"}
         else
@@ -246,4 +247,4 @@ class BizLocations < Application
   def destroy
   end
 
-end 
+end
