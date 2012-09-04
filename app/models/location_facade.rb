@@ -103,6 +103,10 @@ class LocationFacade < StandardFacade
     LocationManagement.staff_managing_location(location_id, on_date)
   end
 
+  def create_center_cycle(center_creation_date, center_id)
+    CenterCycle.create_center_cycle(center_creation_date, center_id, for_user.id)
+  end
+
   private
 
   def location_manager

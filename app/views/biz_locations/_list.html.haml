@@ -4,7 +4,7 @@
   - else
     = "Biz-Location :-  #{@biz_location.name}"
 - if params[:action] == "index"
-  = link_to "Create a New Biz Location", "#", :class => 'add grey_button', :onclick => "jQuery('.location').toggle(); return false;"
+  = link_to "Create a New Biz Location", '#', :class => 'add grey_button', :onclick => "jQuery('.location').toggle(); return false;"
   .menu-strip.location{:style => "width : 1160px; display:none"}
     = form_for(@biz_location, :action => url(:biz_locations) ) do
       = partial :fields

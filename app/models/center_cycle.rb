@@ -43,6 +43,17 @@ class CenterCycle
   validates_with_method :cycle_number, :method => :is_cycle_incremented?
   validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
 
+  def self.create_center_cycle(initiated_on, center_id, created_by)
+    center_cycle_hash = {}
+    center_cycle_hash[:initiated_on] = initiated_on
+    center_cycle_hash[:created_by] = created_by
+    center_cycle_hash[:initiated_by_staff_id] = created_by
+    center_cycle_hash[:created_at] = initiated_on
+    center_cycle_hash[:center_id] = center_id
+    center_cycle = create(center_cycle_hash)
+    raise Errors::DataError, center_cycle.errors.first.first unless center_cycle.saved?
+  end
+
   def mark_GRT_status(with_status, by_staff, on_date, by_user)
     self.grt_status = with_status
     self.grt_completed_by_staff = by_staff
@@ -53,7 +64,7 @@ class CenterCycle
   end
 
   # The cycle number can only be incremented by one each time
-  def is_cycle_incremented?    
+  def is_cycle_incremented?
     latest_cycle_number = CenterCycle.get_current_center_cycle(self.center_id)
     previous_center_cycle = CenterCycle.get_cycle(self.center_id, latest_cycle_number)
     return true if (previous_center_cycle && (self.id == previous_center_cycle.id))

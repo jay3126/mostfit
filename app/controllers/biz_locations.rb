@@ -84,8 +84,18 @@ class BizLocations < Application
         if biz_location.new?
           message = {:notice => "Location creation fail"}
         else
-          LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
-          message = {:notice => "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' successfully created"}
+          begin
+            LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
+            if b_level == "0"
+              location_facade.create_center_cycle(b_creation_date, biz_location.id)
+              msg = "Successfully created center with center cycle 1"
+            else
+              msg = "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' successfully created"
+            end
+            message = {:notice => msg}
+          rescue => ex
+            message = {:error => "An error has occured: #{ex.message}"}
+          end
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
