@@ -88,7 +88,7 @@ class BizLocations < Application
             LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
             if b_level == "0"
               location_facade.create_center_cycle(b_creation_date, biz_location.id)
-              msg = "#{biz_location.location_level.name} successfully created center with center cycle 1"
+              msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
             else
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})' successfully created"
             end
