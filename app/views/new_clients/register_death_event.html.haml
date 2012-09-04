@@ -1,13 +1,13 @@
 :javascript
-  $(document).ready(function(){
-    $("#relation_selector").change(function(){
-      if ($("#relation_selector").val() == "Guarantor") {
-        $(".show_guarantor_detail").css("display", "block");
-      } else {
-      $(".show_guarantor_detail").css("display", "none");
-      }
-    });
-  });
+  function get_deceased_person(client,guarantor){
+    if ($("#relation_selector").val() == "Guarantor") {
+      $(".show_guarantor_detail").css("display", "block");
+      $("#deceased_name").attr("value", guarantor);
+    } else {
+    $(".show_guarantor_detail").css("display", "none");
+    $("#deceased_name").attr("value", client);
+    }
+  }
 
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
@@ -27,36 +27,36 @@
 .shaded
   = form_for(@client, :action => url(:controller => :new_clients, :action => :record_death_event)) do
     = hidden_field :name => "client_id", :value => @client.id
-    %table
+    %table.tall.shaded
       %tr
-        %td
+        %th
           Name of client
         %td
           = @client.name
       %tr
-        %td
+        %th
           Deceased name
         %td
-          = text_field :name => "deceased_name", :value => @client.name
+          = text_field :name => "deceased_name", :value => @client.name, :id => "deceased_name", :readonly => "true"
+          %span.greytext.show_guarantor_detail{:style => "display:none;"}
+            = "<b>#{@client.guarantor_relationship}</b>"
       %tr
-        %td
+        %th
           Relationship to client
         %td
-          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s, x]}, :selected => Constants::Masters::SELF_RELATIONSHIP.to_s, :id => "relation_selector"
-          %span.greytext.show_guarantor_detail{:style => "display:none;"}
-            = "<b>#{@client.guarantor_relationship}: #{@client.guarantor_name}</b>"
+          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s, x]}, :selected => Constants::Masters::SELF_RELATIONSHIP.to_s, :id => "relation_selector", :onchange => "get_deceased_person('#{@client.name}', '#{@client.guarantor_name}');"
       %tr
-        %td
+        %th
           Date of death
         %td
           = date_select :date_of_death, Date.today
       %tr
-        %td
+        %th
           Reported on
         %td
           = date_select :reported_on, Date.today
       %tr
-        %td
+        %th
           Reported by
         %td
           = get_session_user_name
