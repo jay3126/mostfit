@@ -52,9 +52,9 @@ class SimpleFeeProducts < Application
 
     #REDIREATION/RENDER
     if @message[:error].blank?
-      redirect resource(fee), :message => {:error => @message[:notice]}
+      redirect resource(fee), :message => {:notice => @message[:notice]}
     else
-      redirect resource(:simple_fee_products), :message => {:notice => @message[:error]}
+      redirect resource(:simple_fee_products), :message => {:error => @message[:error]}
     end
 
   end

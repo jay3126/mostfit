@@ -39,7 +39,7 @@ class SimpleInsurancePolicy
     proposed_insurance[:insurance_for] = from_insurance_product.insurance_for
     proposed_insurance[:proposed_on]   = proposed_on_date
 
-    total_premium_money_amount = from_insurance_product.total_premium_money_amount(proposed_on_date)
+    total_premium_money_amount = from_insurance_product.get_premium_fee_amount(on_loan, proposed_on_date)
     raise Errors::InvalidConfigurationError, "No premium amount was available for #{from_insurance_product} on #{proposed_on_date}" unless total_premium_money_amount
     insured_amount, currency = total_premium_money_amount.amount, total_premium_money_amount.currency
     proposed_insurance[:insured_amount] = insured_amount
