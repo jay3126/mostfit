@@ -1,3 +1,14 @@
+:javascript
+  $(document).ready(function(){
+    $("#relation_selector").change(function(){
+      if ($("#relation_selector").val() == "Guarantor") {
+        $(".show_guarantor_detail").css("display", "block");
+      } else {
+      $(".show_guarantor_detail").css("display", "none");
+      }
+    });
+  });
+
 - unless @errors.blank?
   - if @errors.is_a?(Hash)
     - @errors.keys.each do |client_id|
@@ -31,7 +42,9 @@
         %td
           Relationship to client
         %td
-          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s, x]}, :selected => Constants::Masters::SELF_RELATIONSHIP.to_s
+          = select :name => "relationship_to_client", :collection => Constants::Masters::DECEASED_PERSON_RELATIONSHIPS.map{|x| [x.to_s, x]}, :selected => Constants::Masters::SELF_RELATIONSHIP.to_s, :id => "relation_selector"
+          %span.greytext.show_guarantor_detail{:style => "display:none;"}
+            = "<b>#{@client.guarantor_relationship}: #{@client.guarantor_name}</b>"
       %tr
         %td
           Date of death

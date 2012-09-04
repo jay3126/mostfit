@@ -8,8 +8,8 @@ module Constants
 
   module Client
 
-#    RELIGIONS = ['Hindu','Muslim','Sikh','Christian','Jain','Buddha']
-#    CASTES = ['General','SC','ST','OBC']
+    #    RELIGIONS = ['Hindu','Muslim','Sikh','Christian','Jain','Buddha']
+    #    CASTES = ['General','SC','ST','OBC']
   end
 
   module CenterFormation
@@ -98,11 +98,13 @@ module Constants
     DEFAULT_GENDER = GENDER_NOT_SPECIFIED
     GENDER_CHOICE = [GENDER_NOT_SPECIFIED, FEMALE_GENDER, MALE_GENDER]
 
+
     OTHER_RELATIONSHIP = 'Other'
     DEFAULT_RELATIONSHIP = OTHER_RELATIONSHIP
+    GUARANTOR_RELATIONSHIP = "Guarantor"
     RELATIONSHIPS = ["Father", "Husband", "Mother", "Son", "Daughter", "Wife", "Brother", "Mother-In-law", "Father-In-law", "Daughter-In-law", "Sister-In-Law", "Son-In-Law", "Brother-In-law", "Other"]
     SELF_RELATIONSHIP = "Self relationship"
-    DECEASED_PERSON_RELATIONSHIPS = ([SELF_RELATIONSHIP] + RELATIONSHIPS).flatten
+    DECEASED_PERSON_RELATIONSHIPS = [SELF_RELATIONSHIP, GUARANTOR_RELATIONSHIP]
     DEFAULT_DECEASED_PERSON_RELATIONSHIP = SELF_RELATIONSHIP
 
     RELATIONSHIP_NOT_SPECIFIED = :relationship_not_specified
