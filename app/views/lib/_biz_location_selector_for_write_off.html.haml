@@ -1,0 +1,27 @@
+.shaded
+  %table.form
+    %thead
+      %tr
+        %th Branch:
+        %th
+          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id]
+        %th Center:
+        %th
+          - all_centers = params[:parent_location_id].blank? ? [] : get_all_nominal_centers(params[:parent_location_id])
+          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id]
+        %td
+          %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
+        %td
+          Days Past Dues:
+        %td
+          = text_field :name => "on_days", :value => @due_days
+          = submit "Go"
+  - unless params[:parent_location_id].blank?
+    .menu-strip
+      %h3
+        Branch:
+        = BizLocation.get(params[:parent_location_id]).name
+        - unless params[:child_location_id].blank?
+          %br
+          Center:
+          = BizLocation.get(params[:child_location_id]).name

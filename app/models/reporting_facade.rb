@@ -42,8 +42,11 @@ class ReportingFacade < StandardFacade
     all_outstanding_loan_ids_at_locations_on_date(on_date, Constants::Loan::ADMINISTERED_AT, at_location_ids_ary)
   end
 
-  def all_outstanding_loans_on_date(on_date = Date.today)
-    Lending.all.select{|loan| loan.is_outstanding_on_date?(on_date)}
+  def all_outstanding_loans_on_date(on_date = Date.today, accounted_at = nil, administered_at = nil)
+    search = {}
+    search[:accounted_at_origin] = accounted_at unless accounted_at.blank?
+    search[:administered_at_origin] = administered_at unless administered_at.blank?
+    Lending.all(search).select{|loan| loan.is_outstanding_on_date?(on_date)}
   end
   
   def all_outstanding_loan_IDs_on_date(on_date = Date.today)
@@ -429,19 +432,19 @@ class ReportingFacade < StandardFacade
     {:count => count, :total_amount => sum_money_amount}
   end
   
-  def outstanding_loans_exceeding_days_past_due(days_past_due)
-    outstanding_loans = all_outstanding_loans_on_date
+  def outstanding_loans_exceeding_days_past_due(days_past_due, accounted_at = nil, administered_at = nil)
+    outstanding_loans = all_outstanding_loans_on_date(Date.today, accounted_at, administered_at)
     raise ArgumentError, "Days past due: #{days_past_due} must be a valid number of days" unless (days_past_due and (days_past_due > 0))
     outstanding_loans.select {|loan| (loan.days_past_due >= days_past_due)}
   end
 
-  def loans_eligible_for_write_off(days_past_due = configuration_facade.days_past_due_eligible_for_writeoff)
+  def loans_eligible_for_write_off(days_past_due = configuration_facade.days_past_due_eligible_for_writeoff, accounted_at =nil,administered_at =nil)
     raise Errors::InvalidConfigurationError, "Days past due for write off has not been configured" unless days_past_due
-    [days_past_due, loans_past_due(days_past_due)]
+    [days_past_due, loans_past_due(days_past_due, accounted_at, administered_at)]
   end
 
-  def loans_past_due(by_number_of_days = 1)
-    outstanding_loans_exceeding_days_past_due(by_number_of_days)
+  def loans_past_due(by_number_of_days = 1, accounted_at = nil, administered_at = nil)
+    outstanding_loans_exceeding_days_past_due(by_number_of_days, accounted_at, administered_at)
   end
 
   def all_accrual_transactions_recorded_on_date(on_date)

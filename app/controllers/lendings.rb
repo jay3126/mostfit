@@ -387,18 +387,25 @@ class Lendings < Application
   end
 
   def write_off_lendings
-    on_days    = params[:on_days]
-    @write_off = on_days.blank? ? reporting_facade.loans_eligible_for_write_off : reporting_facade.loans_eligible_for_write_off(on_days.to_i)
-    @lendings  = @write_off.last
-    @due_days  = @write_off.first
+    @lendings = []
+    accounted_at    = params[:parent_location_id]
+    administered_at = params[:child_location_id]
+    on_days         = params[:on_days].blank? ? configuration_facade.days_past_due_eligible_for_writeoff : params[:on_days]
+    unless accounted_at.blank?
+      @write_off = reporting_facade.loans_eligible_for_write_off(on_days.to_i, accounted_at, administered_at)
+      @lendings  = @write_off.last
+      @due_days  = @write_off.first
+    end
     display @lendings
   end
 
   def update_write_off_lendings
-    @message  = {}
-    lendings  = []
-    @staff_id = session.user.staff_member.id
-    lending_params = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
+    @message           = {}
+    lendings           = []
+    @staff_id          = session.user.staff_member.id
+    lending_params     = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
+    parent_location_id = params[:parent_location_id]
+    child_location_id  = params[:child_location_id]
     begin
       lending_params.each do |key, value|
         if value.size == 2
@@ -417,7 +424,7 @@ class Lendings < Application
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
     end
-    redirect resource(:lendings, :write_off_lendings), :message => @message
+      redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
   end
 
 end
