@@ -18,6 +18,10 @@
         %td
           id
         %td
+          Amount Type
+        %td
+          In Percentage
+        %td
           Fee Amount
         %td
           Tax Amount
@@ -28,11 +32,15 @@
         %td
           = amount.id
         %td
-          = amount.to_money[:fee_only_amount].to_s
+          = amount.amount_type.to_s.humanize
         %td
-          = amount.to_money[:tax_only_amount].to_s
+          = amount.percentage.blank? ? '-' : amount.percentage.to_s+'%'
+        %td
+          = amount.fee_only_amount.blank? ? '-' : amount.to_money[:fee_only_amount].to_s
+        %td
+          = amount.tax_only_amount.blank? ? '-' : amount.to_money[:tax_only_amount].to_s
         %td
           = amount.effective_on
     %tfoot
       %tr
-        %td{ :colspan => 4 }
+        %td{ :colspan => 6 }

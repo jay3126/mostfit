@@ -1,18 +1,24 @@
 %h1== Fee : <i>#{@fee_product.name}</i>
-.menu-strip
+.menu-strip{:style => "width: 25%;"}
+  = link_to 'Edit', '#', :onclick =>"jQuery('.show').toggle(); jQuery('.edit').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
   = link_to 'Add Amount', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
-%table.tall.shaded
-  %tr.even
-    %th.even Name
-    %td= @fee_product.name
-  %tr.odd
-    %th.odd Fee Charge Type
-    %td
-      = @fee_product.fee_charged_on_type.humanize
-  %tr.even
-    %th.even Created On
-    %td= @fee_product.created_on
-  %tr.odd
-    %th.odd Created At
-    %td= @fee_product.created_at
+= form_for(@fee_product, :action => resource(@fee_product), :method => 'put') do
+  %table.tall.shaded
+    %tr.even
+      %th.even Name
+      %td.show= @fee_product.name
+      %td.edit{:style => 'display:none'}
+        = text_field :name, :value => @fee_product.name
+        = submit 'Update'
+    %tr.odd
+      %th.odd Fee Charge Type
+      %td
+        = @fee_product.fee_charged_on_type.humanize
+    %tr.even
+      %th.even Created On
+      %td= @fee_product.created_on
+    %tr.odd
+      %th.odd Created At
+      %td= @fee_product.created_at
 = partial 'simple_fee_products/fee_timed_amount'

@@ -3,8 +3,10 @@ class TimedAmount
   include Constants::Properties, Constants::Transaction
 
   property :id,              Serial
-  property :fee_only_amount, *MONEY_AMOUNT_NON_ZERO
-  property :tax_only_amount, *MONEY_AMOUNT
+  property :fee_only_amount, *MONEY_AMOUNT_NULL
+  property :tax_only_amount, *MONEY_AMOUNT_NULL
+  property :amount_type,     Enum.send('[]', *FEE_AMOUNT_TYPE), :nullable => false
+  property :percentage,      Float
   property :currency,        *CURRENCY
   property :effective_on,    *DATE_NOT_NULL
   property :created_at,      *CREATED_AT
