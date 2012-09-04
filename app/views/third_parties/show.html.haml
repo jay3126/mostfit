@@ -1,12 +1,13 @@
-%table
-	%tr
-		%td 
-			Name
-		%td
-			=@third_party.name
-	%tr
-		%td
-			Created by
-		%td
-			=@user    
-
+%h1 Third Party : #{@third_party.name}
+%table.tall.shaded
+  %tr
+    %th 
+      Name
+    %td
+      = @third_party.name
+  %tr
+    %th
+      Created by
+    %td
+      = @user
+= link_to_with_rights "Back", resource(:third_parties), :class => "grey_button"

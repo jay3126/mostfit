@@ -1,37 +1,38 @@
 %h1 Overview of all loan authorize override reasons
 .menu-strip{:style => "margin: 10px;"}
-  = link_to_with_rights('Create a new loan authorize override reason', url(:action=>:new), :class => "add")
+  = link_to_with_rights('Create a new loan authorize override reason', url(:action=>:new), :class => "add grey_button")
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 - if @auth_override_reasons.blank?
   %p
     %i No loan authorize override reasons have been created yet.
 - else
-  %table.shaded{ :width => '100%' }
+  %table.dataTable.report.weeksheet.nojs
     %thead
-      %tr
-        
-        %th Reason name
-        %th Active
-        %th
-        %th
-        %th
+      %tr        
+        %th{:style => "width: 30%;"}
+          Reason name
+        %th{:style => "width: 20%;"}
+          Active
+        %th{:style => "width: 20%;"}
+          Activate / Deactivate
+        %th{:style => "width: 20%;"}
+          Action
     %tbody
-    - for auth_override_reason in @auth_override_reasons
-      
+    - for auth_override_reason in @auth_override_reasons      
       %tr
-        %td{:width=>"80"}
-          =auth_override_reason.reason
-        %td{:width=>"80"}
-          =auth_override_reason.active
+        %td
+          = auth_override_reason.reason
+        %td
+          = auth_override_reason.active
         %td
           - if auth_override_reason.active
-            = link_to_with_rights 'Deactivate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add"
+            = link_to_with_rights 'Deactivate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add grey_button"
           - if !auth_override_reason.active
-            = link_to_with_rights 'Activate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add"
+            = link_to_with_rights 'Activate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add grey_button"
         %td    
-          = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "add"
-        %td  
+          = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "add grey_button"
     %tfoot
       %tr
         %td{ :colspan => 6 }
-

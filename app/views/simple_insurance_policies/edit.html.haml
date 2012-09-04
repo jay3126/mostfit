@@ -5,4 +5,8 @@
 = form_for(@policy, :action => url(:controller => :simple_insurance_policies, :action => :update, :id => @policy.id)) do
   = partial :fields
   = submit 'Update'
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
   = link_to 'Cancel', request.referer, :class => "grey_button"

@@ -4,6 +4,9 @@
       "bJQueryUI": true
     });
 %h1 Insurance Policy
+%br
+  .menu-strip{:style => "width: 10%;"}
+    = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 - if @policies.count == 0
   %p
     %i No Insurance Policy have been created yet.

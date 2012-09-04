@@ -1,26 +1,26 @@
-%table.form
+%table.tall.shaded
   %tr
-    %td
+    %th
       Name
     %td
       = text_field :name
   %tr
-    %td
+    %th
       Insurance Type
     %td
       = select :insured_type, :collection => Constants::Insurance::INSURANCE_TYPES.map{|f| [f, f.to_s.humanize]}
   %tr
-    %td
+    %th
       Insurance For
     %td
       = select :insurance_for, :collection => Constants::Insurance::INSURED_PERSON_RELATIONSHIPS.map{|f| [f, f.to_s.humanize]}
   %tr
-    %td
+    %th
       Fee Product
     %td
       = select :name => 'fee_product_id', :collection => @fee_products.map{|s| [s.id, s.name]}, :prompt => 'Select Fee'
   %tr
-    %td
+    %th
       Created On
     %td
       = date_select 'simple_insurance_product[created_on]', Date.today, {:id => 'created_on'}

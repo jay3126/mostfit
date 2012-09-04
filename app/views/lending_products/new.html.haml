@@ -6,3 +6,8 @@
 = form_for(@lending_product, :action => :create) do
   = partial :fields
   = submit "Create"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", resource(:lending_products), :class => "grey_button"

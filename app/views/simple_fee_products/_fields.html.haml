@@ -1,16 +1,16 @@
-%table.form
+%table.tall.shaded
   %tr
-    %td
+    %th
       Name
     %td
       = text_field :name
   %tr
-    %td
+    %th
       Fee Charge Type
     %td
       = select :fee_charged_on_type, :collection => Constants::Transaction::FEE_CHARGED_ON_TYPES.map{|f| [f, f.to_s.humanize]}
   %tr
-    %td
+    %th
       Created On
     %td
       = date_select 'simple_fee_product[created_on]', Date.today, {:id => 'created_on'}

@@ -1,19 +1,22 @@
-
-
-
-
 - cancel_url =  url(params[:return])
-= form_for(@auth_override_reason, :action => "/auth_override_reasons/create", :class => "form") do
+= form_for(@auth_override_reason, :action => "/auth_override_reasons/create", :class => "tall shaded") do
   %h1 Create a new loan authorize override reason
   = error_messages_for @auth_override_reason
-  %fieldset
-    %p Reason name
-    = text_field :reason
-    %p Active
-    = check_box :active
-    %br
-    = submit "Create a new loan authorize override reason"
-    &nbsp;&nbsp;&nbsp;
+  %table.tall.shaded
+    %tr
+      %th
+        Reason
+      %td
+        = text_area :reason
+    %tr
+      %th
+        Active
+      %td
+        = check_box :active
+  %br
+  = submit "Create a new loan authorize override reason"
+  &nbsp;&nbsp;&nbsp;
+  %b
     Or
-    &nbsp;&nbsp;&nbsp;
-    = link_to 'Cancel', cancel_url, :class => "grey_button"
+  &nbsp;&nbsp;&nbsp;
+  = link_to 'Cancel', cancel_url, :class => "grey_button"

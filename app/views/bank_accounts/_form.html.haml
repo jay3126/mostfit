@@ -1,7 +1,19 @@
 #new_form{:style => "#{@bank_accounts.blank? ? 'display : true' : 'display : none'}"}
   %form{:action => url(:controller => :bank_accounts, :action => :create, :branch_id => @bank_branch.id), :method => :post}
-    Account No.
-    = text_field :account_no
-    Name
-    = text_field :name
+    %table.tall.shaded
+      %tr
+        %th
+          Account No.
+        %td
+          = text_field :account_no
+      %tr
+        %th Name
+        %td
+          = text_field :name
+
     = submit "Save"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#new_form').hide();", :class => "grey_button"

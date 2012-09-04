@@ -1,7 +1,7 @@
 %h1== Fee : <i>#{@fee_product.name}</i>
 .menu-strip
-  = link_to 'Add Amount', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
-%table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
+  = link_to 'Add Amount', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
+%table.tall.shaded
   %tr.even
     %th.even Name
     %td= @fee_product.name

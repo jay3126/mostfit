@@ -17,14 +17,14 @@ class Banks < Application
         bank_branches.each do |branch|
           @bank.bank_branches.new(:name => branch[:bank_branch], :created_by_user_id => session.user.id, :biz_location_id => branch[:location]).save unless branch[:bank_branch].blank?
         end
-        @message[:notice] = "Save Successfully"
+        @message[:notice] = "Bank: #{@bank.name} successfully"
       else
         @message[:error] = @bank.errors.first.join(', ')
       end
     end
 
     if @message[:error].blank?
-      redirect resource(@bank), :message => {:notice => "Save Successfully"}
+      redirect resource(@bank), :message => {:notice => "Bank: #{@bank.name} created successfully"}
     else
       redirect resource(:banks), :message => {:error => @message[:error]}
     end

@@ -1,11 +1,11 @@
 %h1
-  = "Bank :- #{@bank.name}"
-.shaded
-  .menu-strip
-    = link_to_with_rights 'Add Bank Branch','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
-    %br
-    %br
-    = partial 'bank_branches/form'
+  = "Bank : #{@bank.name}"
+.menu-strip{:style => "width: 25%;"}
+  = link_to_with_rights 'Add Bank Branch','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:banks), :class => "grey_button"
+  %br
+= partial 'bank_branches/form'
 %br
 %hr
 
@@ -16,9 +16,9 @@
     %thead
       %tr
         %th
-          = "ID"
+          ID
         %th
-          = "Name"
+          Name
         %th
           Location
     %tbody

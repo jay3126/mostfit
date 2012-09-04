@@ -1,12 +1,13 @@
 %h1
   = "Banks"
-.shaded
-  .menu-strip
-    = link_to_with_rights 'Add Bank','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
-    %br
-    %br
-    = partial 'form'
-  - if @banks && !@banks.empty?
+.menu-strip{:style => "width: 20%;"}
+  = link_to_with_rights 'Add Bank','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+  %br
+= partial 'form'
+- if @banks && !@banks.empty?
+  .shaded
     %table.form{:style => "width:100%;"}
       %thead
         %tr
@@ -21,7 +22,5 @@
               = bank.id
             %td
               = link_to bank.name , resource(bank)
-  - else
-    No Banks found.
-
-%br
+- else
+  No Banks found.

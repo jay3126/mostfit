@@ -4,7 +4,7 @@ class BankBranches < Application
     @bank = Bank.get(params[:bank_id])
     @bank_branch =  @bank.bank_branches.new(:name => params[:name], :created_by_user_id => session.user.id, :biz_location_id => params[:biz_location_id])
     if @bank_branch.save
-      redirect resource(@bank), :message => {:notice => "Save Successfully"}
+      redirect resource(@bank), :message => {:notice => "Bank Branch: #{@bank_branch.name} created successfully"}
     else
       redirect resource(@bank), :message => {:error => @bank_branch.errors.first.join(', ')}
     end

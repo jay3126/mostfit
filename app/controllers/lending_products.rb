@@ -62,7 +62,7 @@ class LendingProducts < Application
         if lending_product.new?
           @message[:error] = lending_product.error.first.join(', ')
         else
-          @message[:notice] = "Lending Product creation successfully"
+          @message[:notice] = "Loan Product: '#{@lending_product.name} (Id: #{@lending_product.id})' created successfully"
         end
       rescue => ex
         @message[:error] = "An error has occured: #{ex.message}"

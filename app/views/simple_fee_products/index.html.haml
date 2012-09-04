@@ -4,8 +4,10 @@
       "bJQueryUI": true
     });
 %h1 Fee
-.menu-strip
-  = link_to 'Add Fee', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+.menu-strip{:style => "width: 20%;"}
+  = link_to 'Add Fee', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 #meeting_div(style = "display : none")
   = form_for(@fee_product, :action => url(:controller => :simple_fee_products, :action => :create), :method => "POST", :class => "tall shaded") do
     = partial 'simple_fee_products/fields'

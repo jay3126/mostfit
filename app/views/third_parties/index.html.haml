@@ -1,12 +1,14 @@
 %h1 Overview of all third parties
-.menu-strip{:style => "margin: 10px;"}
-  = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add"
+.menu-strip{:style => "width: 30;"}
+  = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 - if @third_parties.blank?
   %p
     %i No third parties have been created yet.
 - else
-  %table.shaded{ :width => '100%' }
+  %table.tall.shaded
     %thead
       %tr
         %th
@@ -25,4 +27,3 @@
     %tfoot
       %tr
         %td{ :colspan => 6 }
-

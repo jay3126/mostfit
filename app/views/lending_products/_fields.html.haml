@@ -1,4 +1,4 @@
-%table.shaded
+%table.tall.shaded
   %tr
     %th
       Name
@@ -69,4 +69,3 @@
       Repayment Allocation Strategy
     %td
       = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las, las.to_s.humanize]}
-

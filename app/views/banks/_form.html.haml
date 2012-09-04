@@ -1,6 +1,6 @@
 #new_form{:style => "#{@banks.blank? ? 'display : true' : 'display : none'}"}
-  %form{:action => url(:controller => :banks, :action => :create), :method => :post}
-    %table#TextBoxesGroup
+  %form{:action => url(:controller => :banks, :action => :create), :method => :post, :class => "tall shaded"}
+    %table.tall.shaded#TextBoxesGroup
       %tr
         %th
           Name
@@ -15,6 +15,12 @@
           Location
         %td
           = select :name => "bank_branch[0][location]", :collection => get_all_nominal_branches, :text_method => 'name', :value_method => 'id', :class => 'biz_location'
-    = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;'
-    %br
+          &nbsp; &nbsp;
+          = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;', :class => "grey_button"
     = submit "Save"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#new_form').hide();", :class => "grey_button"
+%br

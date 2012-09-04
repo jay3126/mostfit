@@ -1,11 +1,12 @@
 #new_form{:style => "#{@bank_branches.blank? ? 'display : true' : 'display : none'}"}
   %form{:action => url(:controller => :bank_branches, :action => :create, :bank_id => @bank.id), :method => :post}
-    %table
+    %table.tall.shaded
       %tr
         %th
           Name
         %td
           = text_field :name
+      %tr
         %th
           Location
         %td
