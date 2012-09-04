@@ -24,7 +24,7 @@
       %tr.odd
         %th.odd Location Name
         %td
-          %b= @biz_location.name
+          %b= link_to_with_rights(@biz_location.name, url(:controller => :user_locations, :action => :show, :id => @biz_location.id))
       %tr.even
         %th.even Location Created On
         %td

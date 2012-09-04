@@ -222,7 +222,13 @@ class BizLocations < Application
           message = {:notice => "Location creation fail"}
         else
           location_facade.assign(child_location, @parent_location, b_creation_date)
-          message = {:notice => "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created"}
+          if b_level == "0"
+            location_facade.create_center_cycle(b_creation_date, child_location.id)
+            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"
+          else
+            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created"
+          end
+          message = {:notice => msg}
         end
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
