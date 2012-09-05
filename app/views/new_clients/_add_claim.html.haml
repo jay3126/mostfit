@@ -20,7 +20,7 @@
           = submit "Add claim"
 
 %h1 Recorded Insurace claim
-- claim = @client.death_event.insurance_claim
+- claim = @client.death_event && @client.death_event.insurance_claim ? @client.death_event.insurance_claim : nil
 - unless claim.blank?
   %table.report.weeksheet.nojs.insurances
     %thead
