@@ -1,15 +1,20 @@
 - at_branch = BizLocation.get(@client_admin.registered_at) rescue nil
 - at_center = BizLocation.get(@client_admin.administered_at) rescue nil
+- client_active = client_facade.is_client_active?(@client)
 
 %br
 %div{:style => "float: right; padding: 10px; border: solid 1px lightgrey"}
   = image_tag @client.picture.url(:medium)
 %h1== Client Name: <i>#{@client.name}</i>
-.menu-strip
-  = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
-  - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
-  - if check_checklist_parameters(@client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil)
-    = link_to 'Customer Calling', url_for_checklist('Customer Calling',@client.class.to_s, @client, at_branch, at_center, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
+- unless client_active
+  .menu-strip
+    %h4{:style => "color: red"} Client is Inactive!
+- else
+  .menu-strip
+    = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
+    - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
+    - if check_checklist_parameters(@client, BizLocation.first, BizLocation.last, session.user.staff_member, Date.today, params, nil)
+      = link_to 'Customer Calling', url_for_checklist('Customer Calling',@client.class.to_s, @client, at_branch, at_center, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :target => 'blank'
 %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px;" }
   %tr.even
     %th.even Name
@@ -44,7 +49,7 @@
   %tr.odd
     %th.odd PSL Sub-category
     %td= @client.psl_sub_category.name if @client.psl_sub_category
-  - if @client.death_event.blank?
+  - if client_active
     %tr.even
       %td
         = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
