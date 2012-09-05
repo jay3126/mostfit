@@ -32,4 +32,16 @@ class ClientFacade < StandardFacade
     ClientAdministration.has_death_event?(client)
   end
 
+  def client_has_outstanding_loan?(client)
+    Client.client_has_outstanding_loan?(client)
+  end
+
+  def mark_client_as_inactive(client)
+    Client.mark_client_as_inactive(client)
+  end
+
+  def is_client_active?(client)
+    Client.is_client_active?(client)
+  end
+
 end

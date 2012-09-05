@@ -194,7 +194,7 @@ class Client
     client
   end
 
-  def client_has_outstanding_loan?(client)
+  def self.client_has_outstanding_loan?(client)
     facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, User.first)
     client_loans = facade.get_all_loans_for_counterparty(client)
     active_loan = 0
@@ -206,7 +206,18 @@ class Client
     return (client_loans.blank? || active_loan == 0) ? false : true
   end
 
+  def self.mark_client_as_inactive(client)
+    client.active = false
+    client.save
+    raise Errors::DataError, client.errors.first.first unless client.saved?
+  end
+
+  def self.is_client_active?(client)
+    return client.active == true ? true : false
+  end
+
   private
+  
   def convert_blank_to_nil
     self.attributes.each{|k, v|
       if v.is_a?(String) and v.empty? and self.class.send(k).type==Integer

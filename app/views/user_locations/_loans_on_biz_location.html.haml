@@ -4,7 +4,7 @@
       "bJQueryUI": true
     });
 
-- if params[:controller] == "new_clients" && client_facade.has_death_event?(@client) == true
+- if params[:controller] == "new_clients" && !client_facade.is_client_active?(@client)
   %i Note: Client is Not eligible to Apply New loan, Death event has been registered on client.
 - else
   = link_to_with_rights 'Add Loan', resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => "add grey_button"

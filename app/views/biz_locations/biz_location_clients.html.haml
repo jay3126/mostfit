@@ -30,7 +30,7 @@
         %td
           = client.created_at.strftime("%Y-%m-%d")
         %td
-          - if client_facade.has_death_event?(client) == true
+          - unless client_facade.is_client_active?(client)
             %span.greytext
               Not eligible to Apply New loan, Death event has been registered on client.
           - else

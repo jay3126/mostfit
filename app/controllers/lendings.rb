@@ -22,7 +22,7 @@ class Lendings < Application
     @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
     @location         = BizLocation.get params[:biz_location_id] unless params[:biz_location_id].blank?
     all_clients       = @location.blank? ? Client.all(:id => @counterparty_ids) : client_facade.get_clients_administered(@location.id, get_effective_date)
-    @clients          = all_clients.collect{|c| c if client_facade.has_death_event?(c) == false}.compact
+    @clients          = all_clients.collect{|c| c if client_facade.is_client_active?(c)}.compact
     @lending          = @lending_product.lendings.new
     display @lending_product
   end

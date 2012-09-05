@@ -341,7 +341,8 @@ class NewClients < Application
     if @errors.blank?
       begin
         is_saved = DeathEvent.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, client_id)
-        message = {:notice => "Death event successfully registered"} if is_saved
+        client_facade.mark_client_as_inactive(@client)
+        message = {:notice => "Death event successfully registered and Client is also marked as Inactive"} if is_saved
       rescue => ex
         @errors << "An error has occured: #{ex.message}"
       end

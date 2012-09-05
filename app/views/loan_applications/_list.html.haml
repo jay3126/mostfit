@@ -33,12 +33,12 @@
             - @clients.each do |client|
               %tr
                 %td
-                  - client_death_event = client_facade.has_death_event?(client)
+                  - is_active = client_facade.is_client_active?(client)
                   - is_age_valid = LoanApplication.allow_new_loan_application?(client.id)
                   - is_multiple_loans_allowed = configuration_facade.allow_multiple_loans?
                   - number_of_loans_for_client = client_facade.number_of_outstanding_loans_for_counterparty_on_date(client, get_effective_date)
                   - eligibility = is_multiple_loans_allowed.eql?(true) ? is_age_valid : (number_of_loans_for_client.eql?(0) && is_age_valid)
-                  - if eligibility && client_death_event ==  false
+                  - if eligibility && is_active
                     - checked_value =  params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:selected] == "on" ? "on" : nil
                     = check_box :name => "clients[#{client.id}][selected]", :class => "select" , :checked => checked_value
                 %td

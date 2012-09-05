@@ -89,7 +89,6 @@ class UserLocations < Application
       client_id = center_leader_client.client_id
       @client = Client.get client_id
     end
-
     @errors = []
     begin
       if @biz_location.location_level.level == 0
@@ -97,7 +96,7 @@ class UserLocations < Application
       else
         customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
       end
-      @customers = customers.collect{|c| c if client_facade.has_death_event?(c) == false}.compact
+      @customers = customers.collect{|c| c if client_facade.is_client_active?(c)}.compact
     rescue => ex
       @errors << ex.message
     end
@@ -286,9 +285,9 @@ class UserLocations < Application
     unless @customers_at_location.blank?
       @customers = []
       @customers_at_location.compact.each do |customer|
-        has_outstanding = customer.client_has_outstanding_loan?(customer)
-        no_death_event = client_facade.has_death_event?(customer) == false
-        @customers << customer if has_outstanding && no_death_event
+        has_outstanding = client_facade.client_has_outstanding_loan?(customer)
+        is_active = client_facade.is_client_active?(customer)
+        @customers << customer if has_outstanding && is_active
       end
     end
     @customers = @customers || @customers_at_location

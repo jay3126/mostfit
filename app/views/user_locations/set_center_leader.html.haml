@@ -47,7 +47,7 @@
         %tbody
           - @customers.each do |customer|
             %tr
-              - has_outstanding = customer.client_has_outstanding_loan?(customer)
+              - has_outstanding = client_facade.client_has_outstanding_loan?(customer)
               - unless has_outstanding
                 %td
                   %span.greytext
