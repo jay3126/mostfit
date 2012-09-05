@@ -4,23 +4,24 @@
     "bJQueryUI": true
   });
 
-- unless @client.simple_insurance_policies.blank? || @client.death_events.blank?
+- unless @client.simple_insurance_policies.blank? || @client.death_event.blank?
   %h1 Add claim
   = form(:action => url(:controller => :new_clients, :action => :death_claim_insurance), :method => :get, :class =>"add_claim") do
     %table
       %tr
         %td
-          Select Insurance Policy:
+          %b Select Insurance Policy:
           = select :name => "simple_insurance_policy", :collection => @client.simple_insurance_policies.map{|x| [x.id, x.insured_type]}
         %td
-          Select Death Event:
-          = select :name => "death_event_id", :collection => @client.death_events.map{|x| [x.id, x.deceased_name]}
+          %b Death Event:
+          = @client.death_event.deceased_name
+          = hidden_field :name => 'death_event_id', :value => @client.death_event.id
         %td
           = submit "Add claim"
 
-%h1 Recently Insurace claims
-- client_insurance_claims = @client.death_events.insurance_claims.reverse
-- unless client_insurance_claims.blank?
+%h1 Recorded Insurace claim
+- claim = @client.death_event.insurance_claim
+- unless claim.blank?
   %table.report.weeksheet.nojs.insurances
     %thead
       %tr
@@ -30,17 +31,16 @@
         %th Accounted at
         %th Performed by
     %tbody
-      - client_insurance_claims.each do |claim|
-        %tr
-          %td
-            = claim.claim_unique_id
-          %td
-            = claim.filed_on
-          %td
-            = claim.claim_status.humanize rescue nil
-          %td
-            = BizLocation.get(claim.accounted_at).name rescue nil
-          %td
-            = StaffMember.get(claim.performed_by).name rescue nil
+      %tr
+        %td
+          = claim.claim_unique_id
+        %td
+          = claim.filed_on
+        %td
+          = claim.claim_status.humanize rescue nil
+        %td
+          = BizLocation.get(claim.accounted_at).name rescue nil
+        %td
+          = StaffMember.get(claim.performed_by).name rescue nil
 - else
   No insurance claim found

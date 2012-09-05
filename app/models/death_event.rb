@@ -13,7 +13,7 @@ class DeathEvent
   property :created_at,             *CREATED_AT
 
   belongs_to :affected_client, 'Client', :parent_key => [:id], :child_key => [:affected_client_id]
-  has n, :insurance_claims
+  has 1, :insurance_claim
   has n, :loan_claims, 'LoanClaimProcessing'
 
   def self.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, affected_client_id)

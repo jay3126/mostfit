@@ -4,9 +4,9 @@
       "bJQueryUI": true
     });
 
-%h1 Death events
-- client_death_events = @client.death_events
-- unless client_death_events.blank?
+%h1 Recorded Death event
+- death_event = @client.death_event
+- unless death_event.blank?
   %table.report.weeksheet.nojs.death_claim
     %thead
       %tr
@@ -18,19 +18,18 @@
         %th Reported by
     %tbody
       - death_claim_count = 0
-      - client_death_events.each do |death_event|
-        %tr
-          %td
-            = death_claim_count += 1
-          %td
-            = death_event.deceased_name
-          %td
-            = death_event.relationship_to_client
-          %td
-            = death_event.date_of_death
-          %td
-            = death_event.reported_on
-          %td
-            = StaffMember.get(death_event.reported_by).name rescue nil
+      %tr
+        %td
+          = death_claim_count += 1
+        %td
+          = death_event.deceased_name
+        %td
+          = death_event.relationship_to_client
+        %td
+          = death_event.date_of_death
+        %td
+          = death_event.reported_on
+        %td
+          = StaffMember.get(death_event.reported_by).name rescue nil
 - else
-  No death events found
+  No death event found
