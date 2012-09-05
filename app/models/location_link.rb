@@ -19,7 +19,7 @@ class LocationLink
   # Two locations are related to one another on different location levels and not on the same location level
   def linked_locations_are_at_adjacent_levels?
     (self.parent.level_number - self.child.level_number == 1) ? true :
-        [false, "The linked locations are not on valid adjacent levels"]
+      [false, "The linked locations are not on valid adjacent levels"]
   end
 
   def linked_and_creation_dates_are_valid?
@@ -29,7 +29,7 @@ class LocationLink
   def linked_to_one_location_only_on_one_date?
     linked_on_same_date = LocationLink.first(:child_id => self.child_id, :effective_on => self.effective_on)
     linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] :
-        true
+      true
   end
 
   # Get the 'ancestor' or parent for this location link
@@ -85,4 +85,29 @@ class LocationLink
     children_on_date
   end
 
+  def self.all_children(for_location, on_date = Date.today)
+    if for_location.location_level.level == 0
+      []
+    else
+      @all_children = []
+      location = []
+      children = get_children(for_location, on_date)
+      children.each do |child|
+        location =  all_children(child, on_date)
+      end
+      @all_children = location + children
+      @all_children.flatten.compact.uniq
+    end
+  end
+
+  def self.all_parents(for_location, on_date = Date.today)
+    @all_location = []
+    location = []
+    parent = get_parent(for_location, on_date)
+    unless parent.blank?
+      location <<  all_parents(parent, on_date)
+      @all_location = location << parent
+    end
+    @all_location.flatten.compact.uniq
+  end
 end
