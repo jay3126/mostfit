@@ -30,4 +30,8 @@
         %td
           = client.created_at.strftime("%Y-%m-%d")
         %td
-          = link_to_with_rights "Apply Loan", resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => client.id)
+          - if client_facade.has_death_event?(client) == true
+            %span.greytext
+              Not eligible to Apply New loan, Death event has been registered on client.
+          - else
+            = link_to_with_rights "Apply Loan", resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => client.id)

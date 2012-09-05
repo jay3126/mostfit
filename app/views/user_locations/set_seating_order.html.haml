@@ -24,7 +24,9 @@
     %i No Client Mapping have been created yet.
 - else
   %i
-    Note: These are the clients which have active loans
+    %b Note: These are the clients which have active loans
+    %br
+    %b Note: The clients which has death event registered will not be shown in this list
   = form(:action => url(:controller => :user_locations, :action => :record_seating_order), :id => "form_id") do
     = hidden_field :name=>"clients", :id => "seat"
     = hidden_field :name => "biz_location_id", :value => @biz_location.id

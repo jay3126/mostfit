@@ -28,4 +28,8 @@ class ClientFacade < StandardFacade
     LoanBorrower.number_of_oustanding_loans_for_counterparty_on_date(counterparty, on_date)
   end
 
+  def has_death_event?(client)
+    ClientAdministration.has_death_event?(client)
+  end
+
 end

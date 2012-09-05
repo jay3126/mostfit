@@ -93,10 +93,11 @@ class UserLocations < Application
     @errors = []
     begin
       if @biz_location.location_level.level == 0
-        @customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
+        customers = ClientAdministration.get_clients_administered(@biz_location.id, get_effective_date)
       else
-        @customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
+        customers = ClientAdministration.get_clients_registered(@biz_location.id, get_effective_date)
       end
+      @customers = customers.collect{|c| c if client_facade.has_death_event?(c) == false}.compact
     rescue => ex
       @errors << ex.message
     end
@@ -286,7 +287,8 @@ class UserLocations < Application
       @customers = []
       @customers_at_location.compact.each do |customer|
         has_outstanding = customer.client_has_outstanding_loan?(customer)
-        @customers << customer if has_outstanding
+        no_death_event = client_facade.has_death_event?(customer) == false
+        @customers << customer if has_outstanding && no_death_event
       end
     end
     @customers = @customers || @customers_at_location

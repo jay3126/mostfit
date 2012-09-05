@@ -124,6 +124,10 @@ class ClientAdministration
     get_clients_at_location(COUNTERPARTY_REGISTERED_AT, at_location_id, on_date)
   end
 
+  def self.has_death_event?(client)
+    return client.death_event.blank? ? false : true
+  end
+
   private
 
   # Returns a list of client instances that are administered at or registered at the specified location (by ID) on the specified date
