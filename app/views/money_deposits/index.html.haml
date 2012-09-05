@@ -4,6 +4,9 @@
     $.ajax({
       type: "GET",
       url: "/money_deposits/get_bank_branches/?bank_id="+$("#bank_selector").val(),
+      data: {
+        'biz_location_id' : "#{params[:at_location_id]}"
+      },
       success: function(data){
         $("#bank_branch_selector").html(data);
       }

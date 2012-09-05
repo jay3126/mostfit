@@ -93,9 +93,10 @@ class MoneyDeposits < Application
 
   def get_bank_branches
     if params[:bank_id]
-      bank = Bank.get(params[:bank_id])
-      return("<option value=''>Select branch</option>") unless bank
-      bank_branches = bank.bank_branches
+      bank         = Bank.get(params[:bank_id])
+      biz_location = BizLocation.get(params[:biz_location_id])
+      return("<option value=''>Select branch</option>") if bank.blank? || biz_location.blank?
+      bank_branches = biz_location.bank_branches(:bank_id => params[:bank_id])
       return("<option value=''>Select branch</option>"+bank_branches.map{|b| "<option value=#{b.id}>#{b.name}</option>"}.join)
     end
   end
