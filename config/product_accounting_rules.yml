@@ -9,20 +9,20 @@ loan_repayment:
     total_received: customer_cash
   credit:
     principal_received: customer_loan_debtors
-    interest_received: customer_loan_debtors
+    interest_received: customer_loan_interest_receipt
     advance_received: customer_loan_advance_receipt
 loan_preclosure:
   debit:
     total_received: customer_cash
   credit:
     principal_received: customer_loan_debtors
-    interest_received: customer_loan_debtors
+    interest_received: customer_loan_interest_receipt
 loan_advance_adjustment:
   debit:
     advance_adjusted: customer_loan_advance_receipt
   credit:
     principal_received: customer_loan_debtors
-    interest_received: customer_loan_debtors
+    interest_received: customer_loan_interest_receipt
 loan_recovery:
   debit:
     total_received: customer_cash
