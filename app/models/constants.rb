@@ -8,8 +8,10 @@ module Constants
 
   module Client
 
-    #    RELIGIONS = ['Hindu','Muslim','Sikh','Christian','Jain','Buddha']
-    #    CASTES = ['General','SC','ST','OBC']
+    CLAIM_DOCUMENTS_PENDING = 'documents pending'
+    CLAIM_DOCUMENTS_RECEIVED = 'documents received'
+    CLAIM_DOCUMENTS_STATUS = [CLAIM_DOCUMENTS_PENDING, CLAIM_DOCUMENTS_RECEIVED]
+
   end
 
   module CenterFormation

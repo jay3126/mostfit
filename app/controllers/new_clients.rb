@@ -416,4 +416,30 @@ class NewClients < Application
     render
   end
 
+  def mark_claim_documents_recieved
+    # GATE-KEEPING
+    selected_clients = params[:clients]
+    recieved_by = get_session_user_id
+    
+    # INITIALIZATIONS
+    @errors = []
+    
+    # VALIDATIONS
+    @errors << "Select atleast one client" if selected_clients.blank?
+    
+    # OPERATIONS PERFORMED
+    if @errors.blank?
+      client_ids = selected_clients.keys
+      client_ids.each do |client_id|
+        begin
+          client = Client.get client_id
+          client_facade.mark_client_documents_recieved(client, recieved_by)
+        rescue => ex
+          @errors << "An error has occured #{ex.message}"
+        end
+      end 
+    end
+    redirect resource(:new_clients, :all_deceased_clients)
+  end
+  
 end

@@ -5,6 +5,7 @@ class Client
   include ClientValidations, PeopleValidations
   include Constants::Masters
   include CommonClient::Validations
+  include Constants::Client
   include Identified
 
   before :valid?, :convert_blank_to_nil
@@ -46,6 +47,8 @@ class Client
   property :caste,                    Enum.send('[]', *CASTE_CHOICE), :nullable => true, :default => CASTE_NOT_SPECIFIED
   property :religion,                 Enum.send('[]', *RELIGION_CHOICE), :nullable => true, :default => DEFAULT_RELIGION
   property :created_by_staff_member_id,  Integer, :nullable => false
+  property :claim_document_status,       Enum.send('[]', *CLAIM_DOCUMENTS_STATUS), :default => CLAIM_DOCUMENTS_PENDING
+  property :claim_document_recieved_by,  Integer
 
   has n, :simple_insurance_policies
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
@@ -214,6 +217,13 @@ class Client
 
   def self.is_client_active?(client)
     return client.active == true ? true : false
+  end
+
+  def self.mark_client_documents_recieved(client, recieved_by)
+    client.claim_document_status = Constants::Client::CLAIM_DOCUMENTS_RECEIVED
+    client.claim_document_recieved_by = recieved_by
+    client.save
+    raise Errors::DataError, client.errors.first.first unless client.saved?
   end
 
   private

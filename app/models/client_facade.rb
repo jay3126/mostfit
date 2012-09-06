@@ -53,4 +53,8 @@ class ClientFacade < StandardFacade
     deceased_clients
   end
 
+  def mark_client_documents_recieved(client, recieved_by)
+    Client.mark_client_documents_recieved(client, recieved_by)
+  end
+
 end
