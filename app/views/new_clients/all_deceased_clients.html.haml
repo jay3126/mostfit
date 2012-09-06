@@ -11,7 +11,9 @@
       %thead
         %tr
           %th
-            = "Mark All Verified"
+            = "Select All"
+            %br
+            = "(Documents Recieved)"
             = check_box :id => "toggle_select_to_verify"
           %th
             = "Client"
@@ -54,7 +56,7 @@
                     = "No Insurance Policy"
               - else
                 - if client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED
-                  = "Documents Received"
+                  = "<b> Documents Received </b>"
                 - else
                   = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
             %td

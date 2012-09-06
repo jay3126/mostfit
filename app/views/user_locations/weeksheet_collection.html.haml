@@ -22,11 +22,6 @@
     &nbsp;
   - else
     = link_to ' Business Audit Not Available',"#", :class => 'add grey_button',:disabled=>true
-  - if check_checklist_parameters(@biz_location.location_level, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil)
-    = link_to 'Process Audit', url_for_checklist('Process Audit',"Center", @biz_location, parent_location, @biz_location, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
-  - else
-    = link_to ' Process  Audit Not Available',"#", :class => 'add grey_button',:disabled=>true
-
 
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
