@@ -4,8 +4,7 @@
       "bJQueryUI": true
     });
 %h1 Staff Posting
-.menu-strip
-  = link_to 'Add Posting', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add'
+= link_to 'Add Posting', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
 #meeting_div(style = "display : none")
   = form_for(@staff_posting, :action => url(:controller => :staff_postings, :action => :create), :method => "POST", :class => "tall shaded") do
     = partial 'staff_postings/fields'

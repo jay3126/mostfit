@@ -1,1 +1,22 @@
-= partial 'tabs'
+%h1 Manage Book Keeping
+%div.clearfix
+  .admin-box
+    %h2 Manage organization Accounting
+    %ul.icon_links
+      %li
+        = link_to 'Ledgers', resource(:ledgers), :class => 'book icon'
+      %li
+        = link_to 'Vouchers', resource(:vouchers), :class => 'book icon'
+      %li
+        = link_to 'Cost Centers', resource(:cost_centers), :class => 'book icon'
+      %li#transaction_summaries{:style => 'display:none'}
+        = link_to 'Transaction Summaries', resource(:transaction_summaries), :class => 'report icon'
+      %li
+        = link_to 'Categories and rules', resource(:accounting_rules), :class => 'book icon'
+  .admin-box
+    %h2 Manage Accounting By Tally
+    %ul.icon_links
+      %li
+        = link_to 'Tally download', '#', :class => 'download icon', :onclick => "jQuery('#tally_download').toggle(); return false;"
+    #tally_download{:style => 'display:none'}
+      = partial 'vouchers/tally_download'

@@ -1,15 +1,21 @@
-%table.form
-  %tr
-    %th
-      Level
-    %td
-      = text_field :level, :readonly => true
-    %th
-      Name
-    %td
-      = text_field :name
-    %th
-      Creation Date
-    %td
-      = date_select_earliest 'location_level[creation_date]', {:id => 'creation_date'}
+= form_for(@location_level, :action => url(:location_levels) ) do
+  %table.form
+    %thead
+      %tr
+        %th
+          Level
+        %td
+          = text_field :level, :readonly => true
+        %th
+          Name
+        %td
+          = text_field :name
+        %th
+          Creation Date
+        %td
+          = date_select_earliest 'location_level[creation_date]', {:id => 'creation_date'}
+        %td
+          = submit 'Save'
+        %td
+          = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
 

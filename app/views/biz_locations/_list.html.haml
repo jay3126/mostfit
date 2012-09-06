@@ -1,41 +1,9 @@
-%h1
-  - if params[:action] == "index"
-    = "Biz-Locations"
-  - else
-    = "Biz-Location :-  #{@biz_location.name}"
-- if params[:action] == "index"
-  = link_to "Create a New Biz Location", '#', :class => 'add grey_button', :onclick => "jQuery('.location').toggle(); return false;"
-  .menu-strip.location{:style => "width : 1160px; display:none"}
-    = form_for(@biz_location, :action => url(:biz_locations) ) do
-      = partial :fields
-      = submit 'Create Biz Location'
-      &nbsp;&nbsp;
-      %b
-        Or
-      &nbsp;&nbsp;
-      = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
-- unless @biz_location.new?
-  %div{:style => 'display:table; width:100%;'}
-    %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
-      %tr.even
-        %th.even Location Level
-        %td
-          = @biz_location.level_name
-      %tr.odd
-        %th.odd Location Name
-        %td
-          %b= link_to_with_rights(@biz_location.name, url(:controller => :user_locations, :action => :show, :id => @biz_location.id))
-      %tr.even
-        %th.even Location Created On
-        %td
-          = @biz_location.creation_date
-
 - if @biz_locations.count == 0
   %p
     %i No Location Mapping have been created yet.
 - else
   %br
-  %table.narrow
+  %table.narrow{:style => 'width:100%'}
     %thead
       %tr
         %th
@@ -63,10 +31,7 @@
             %td
               = biz_location.id
             %td
-              - if biz_location_level.first == 0
-                = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id)
-              - else
-                = link_to_with_rights biz_location.name, resource(biz_location)
+              = link_to_location biz_location
             %td
               = biz_location.level_name
             - unless biz_location_link.class == BizLocation
@@ -81,4 +46,4 @@
                 |
                 = link_to_with_rights "Show Clients", resource(biz_location, :biz_location_clients)
               - else
-                = link_to_with_rights "Childrens", resource(biz_location)
+                = link_to_with_rights "Assign Location", resource(biz_location)

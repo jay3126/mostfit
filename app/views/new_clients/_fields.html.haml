@@ -86,8 +86,11 @@
     %th
       State:
     %td
-      - state_location = LocationLink.all_parents(@biz_location).select{|l| l.location_level.name.downcase == 'state'}.first
-      - state_name = state_location.blank? ? '' : state_location.name
+      - if @client.new?
+        - state_location = LocationLink.all_parents(@biz_location).select{|l| l.location_level.name.downcase == 'state'}.first
+        - state_name = state_location.blank? ? '' : state_location.name
+      - else
+        - state_name = @client.state
       = select :state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x]}, :prompt => "---", :selected => state_name.downcase
   %tr
     %th

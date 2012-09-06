@@ -1,21 +1,21 @@
-%table.form
+%table.tall.shaded
   %tr
-    %td
+    %th
       Staff Member
     %td
-      = select :staff_id, :collection => StaffMember.all.collect{|sm| [sm.id, sm.name]}
+      = select :staff_id, :collection => (StaffMember.all - @staff_postings.map(&:staff_assigned)).collect{|sm| [sm.id, sm.name]}
   %tr
-    %td
+    %th
       Location
     %td
       = select :at_location_id, :collection => @biz_locations.map{|bl| [bl.id, bl.name]}
   %tr
-    %td
+    %th
       Performed By
     %td
       = select :performed_by, :collection => StaffMember.all.collect{|sm| [sm.id, sm.name]}
   %tr
-    %td
+    %th
       Effective On
     %td
       = date_select 'staff_posting[effective_on]', Date.today, {:id => 'effective_on'}

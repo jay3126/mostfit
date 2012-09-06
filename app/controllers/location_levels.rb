@@ -27,14 +27,14 @@ class LocationLevels < Application
     message[:error] = "Location Level cannot be blank" if l_level.blank?
     message[:error] = "Location Level is not valid" unless l_level == LocationLevel.level_number_for_new
     message[:error] = "Location Name cannot be blank" if l_name.blank?
-    message[:error] = "Creation Date cannot be blank" if l_name.blank?
+    message[:error] = "Creation Date cannot be blank" if l_creation_date.blank?
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
         location_level = LocationLevel.create_next_level(l_name, l_creation_date)
         if location_level.new?
-          message = {:notice => "Location Level creation fail"}
+          message = {:error => location_level.errors.first.join(', ')}
         else
           message = {:notice => "Location Level successfully created"}
         end

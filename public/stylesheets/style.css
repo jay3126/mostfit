@@ -1652,3 +1652,6 @@ table.moreinfo thead th {
  {
   background: #C6CCF5;
 }
+table.form thead th {
+  vertical-align: middle;
+}

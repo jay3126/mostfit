@@ -1,22 +1,38 @@
-= partial :list
-%br
-%h1
-  Assign Biz-Location
-.menu-strip{:style => "width : auto"}
+%h1== Biz-Location :-  #{@biz_location.name}
+= link_to 'Assign Biz-Location', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
+%div{:style => 'display:table; width:100%;'}
+  %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+    %tr.even
+      %th.even Location Level
+      %td
+        = @biz_location.level_name
+    %tr.odd
+      %th.odd Location Name
+      %td
+        %b= link_to_with_rights(@biz_location.name, url(:controller => :user_locations, :action => :show, :id => @biz_location.id))
+    %tr.even
+      %th.even Location Created On
+      %td
+        = @biz_location.creation_date
+#location_level{:style => "display : none", :class => 'shaded'}
   = form_for(:biz_locations, :action => url('biz_locations/map_locations')) do
     %table.form
-      %tr
-        %th
-          Parent Location
-        %td
-          = select :name => "parent_location", :collection => @parent_locations.map{|l| [l.id, l.name]}, :selected => @biz_location.id.to_s, :prompt => "Please Select Parent Biz-Location", :class => "chosen"
-        %th
-          Child Location
-        %td
-          = select :name => "child_location", :collection => @child_locations.map{|l| [l.id, l.name]}, :prompt => "Please Select Child Biz-Location", :class => "chosen"
-        %th
-          Date
-        %th
-          = date_select "begin_date", Date.today
-    = submit 'Save'
-    = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
+      %thead
+        %tr
+          %th
+            Parent Location
+          %td
+            = select :name => "parent_location", :collection => @parent_locations.map{|l| [l.id, l.name]}, :selected => @biz_location.id.to_s, :prompt => "Select Parent Biz-Location"
+          %th
+            Child Location
+          %td
+            = select :name => "child_location", :collection => @child_locations.map{|l| [l.id, l.name]}, :prompt => "Select Child Biz-Location"
+          %th
+            Date
+          %td
+            = date_select "begin_date", Date.today, {:size => 15}
+          %td
+            = submit 'Save'
+          %td
+            = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
+= partial :list
