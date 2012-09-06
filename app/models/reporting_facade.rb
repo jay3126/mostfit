@@ -17,6 +17,37 @@ class ReportingFacade < StandardFacade
     get_ids(all_oustanding_loans_scheduled_on_date_with_advance_balances(on_date))
   end
 
+  #this method will return due collected and due collectable per location on a date.
+  def total_dues_collected_and_collectable_per_location_on_date(at_location_id, on_date = Date.today)
+    result = {}
+    schedule_principal_due = schedule_interest_due = schedule_total_due = MoneyManager.default_zero_money
+    principal_collected = interest_collected = total_collected = MoneyManager.default_zero_money
+    loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
+    loans.each do |loan|
+      schedule_principal_due += (loan.scheduled_principal_due(on_date) || MoneyManager.default_zero_money)
+      schedule_interest_due += (loan.scheduled_interest_due(on_date) || MoneyManager.default_zero_money)
+      schedule_total_due += (loan.scheduled_total_due(on_date) || MoneyManager.default_zero_money)
+      principal_collected += (loan.principal_received_on_date(on_date) || MoneyManager.default_zero_money)
+      interest_collected += (loan.interest_received_on_date(on_date) || MoneyManager.default_zero_money)
+      total_collected += (principal_collected + interest_collected)
+    end
+    result = {:schedule_principal_due => schedule_principal_due, :schedule_interest_due => schedule_interest_due, :schedule_total_due => schedule_total_due, :principal_collected => principal_collected, :interest_collected => interest_collected, :total_collected => total_collected}
+  end
+
+  #this function will give back the list of staff_members per location.
+  def staff_members_per_location_on_date(at_location_id, on_date)
+    params = {:at_location_id => at_location_id, :effective_on.lte => on_date}
+    staffs = StaffPosting.all(params)
+    staffs
+  end
+
+  #this function will give back the list of location which is managed by staff.
+  def locations_managed_by_staffs_on_date(staff_id, on_date)
+    params = {:manager_staff_id => staff_id, :effective_on => on_date}
+    location_ids_array = LocationManagement.locations_managed_by_staff(staff_id, on_date).map{|lm| lm.managed_location_id}
+    location_ids_array
+  end
+
   # Allocations
 
   def total_loan_allocation_receipts_accounted_at_locations_on_value_date(on_date, *at_location_ids_ary)
