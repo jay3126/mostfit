@@ -41,4 +41,20 @@ class FeeAdministration
   def self.get_preclosure_penalty_fee_products(on_product, on_date = Date.today)
     get_fee_products(on_product, on_date).select{|fee| fee.fee_charged_on_type==Constants::Transaction::PRECLOSURE_PENALTY_ON_LOAN}
   end
+
+  def self.save_fee_products
+    fee_products = SimpleFeeProduct.all
+    user = User.first
+    user_id = user.id
+    staff_id = user.staff_member.id
+    fee_products.each do |fee_product|
+      if !fee_product.loan_fee_id.blank?
+        on_date = LendingProduct.get(fee_product.loan_fee_id).created_at
+        fee_setup(fee_product.id, 'LendingProduct', fee_product.loan_fee_id, on_date, staff_id, user_id)
+      elsif !fee_product.simple_insurance_product_id.blank?
+        on_date = SimpleInsuranceProduct.get(fee_product.simple_insurance_product_id).created_at
+        fee_setup(fee_product.id, 'SimpleInsuranceProduct', fee_product.simple_insurance_product_id, on_date, staff_id, user_id)
+      end
+    end
+  end
 end

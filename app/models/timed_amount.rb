@@ -5,7 +5,7 @@ class TimedAmount
   property :id,              Serial
   property :fee_only_amount, *MONEY_AMOUNT_NULL
   property :tax_only_amount, *MONEY_AMOUNT_NULL
-  property :amount_type,     Enum.send('[]', *FEE_AMOUNT_TYPE), :nullable => false
+  property :amount_type,     Enum.send('[]', *FEE_AMOUNT_TYPE), :nullable => false, :default => FIX_AMOUNT
   property :percentage,      Float
   property :currency,        *CURRENCY
   property :effective_on,    *DATE_NOT_NULL

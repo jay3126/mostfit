@@ -256,6 +256,9 @@ class Lendings < Application
     #VALIDATION
     @message[:error] = "Payment amount cannot be blank" if payment_amount.blank?
     @message[:error] = "Please enter valid value of amount" if payment_amount.to_f <= 0
+    @message[:error] = "Payment Type cannot be blank" if payment_type.blank?
+    @message[:error] = "Payment Date cannot be blank" if payment_date.blank?
+    @message[:error] = "Please select Payment By Staff" if payment_by_staff.blank?
 
     #OPREATION
     if @message[:error].blank?
