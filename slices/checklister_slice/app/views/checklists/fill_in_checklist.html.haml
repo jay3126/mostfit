@@ -1,4 +1,3 @@
-//{"loc1_id"=>"12", "loc1_name"=>"Gota", "target_entity_type"=>"Client", "target_entity_id"=>"4", "staff_name"=>"SuperUser", "loc2_name"=>"VASANT NAGAR", "id"=>"10", "action"=>"fill_in_checklist", "loc2_id"=>"29", "loc1_type"=>"branch", "loc2_type"=>"center", "target_entity_name"=>"MANIBEN NADIYA", "staff_id"=>"1", "controller"=>"checklister_slice/checklists", "effective_date"=>"2012-08-31", "referral_url"=>"/new_clients/show/4"}
 - if params[:target_entity_type] == "Client"
   - client_object = Client.get params[:target_entity_id]
   - client_phone_number = client_object.telephone_number
@@ -62,17 +61,17 @@
             %th
               =label "Value Date"
             %td
-              =date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
-              
-          %tr
-            %th
-              = label "Client telephone number"
-            %td
-              - if client_phone_number.blank?
-                Not available
-              - else
-                = text_field :phone_number, :value => client_phone_number
-              = link_to_with_rights "Update client details", url(:controller => "new_clients", :action => "edit", :id => @client.id)
+              = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
+          - if @checklist.checklist_type.name == "Customer Calling"
+            %tr
+              %th
+                = label "Client telephone number"
+              %td
+                - if client_phone_number.blank?
+                  Not available
+                - else
+                  = text_field :phone_number, :value => client_phone_number
+                = link_to_with_rights "Update client details", url(:controller => "new_clients", :action => "edit", :id => @client.id)
         %p
 
           -@sections.each do |section|
