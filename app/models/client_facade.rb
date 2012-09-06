@@ -44,4 +44,13 @@ class ClientFacade < StandardFacade
     Client.is_client_active?(client)
   end
 
+  def get_all_deceased_clients
+    deceased_clients = []
+    all_clients = Client.all
+    all_clients.each do |client|
+      deceased_clients << client if has_death_event?(client)
+    end
+    deceased_clients
+  end
+
 end

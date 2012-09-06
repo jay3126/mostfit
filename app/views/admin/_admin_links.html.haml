@@ -30,7 +30,8 @@
           = link_to_with_rights 'Users', resource(:users), :class => 'user icon'
         %li
           = link_to_with_rights 'Client Movement', url(:controller => :new_clients, :action => :index), :class => 'user icon'
-
+        %li
+          = link_to_with_rights 'Claim Processing', url(:controller => :new_clients, :action => :all_deceased_clients), :class => 'user icon'
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links

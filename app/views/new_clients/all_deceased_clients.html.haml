@@ -1,0 +1,61 @@
+%h1= "Claim processing"
+- unless @deceased_clients.blank?
+  %table.dataTable
+    %thead
+      %tr
+        %th
+          = "Client"
+        %th
+          = "Administered At"
+        %th
+          = "Registered At"
+        %th
+          = "Deceased Person"
+        %th
+          = "Relationship to client"
+        %th
+          = "Date Of Death"
+        %th
+          = "Death Event Reported On"
+        %th
+          = "Death Event Registered By"
+        %th
+          = "Claim Unique ID"
+        %th
+          = "Claim Filed On"
+        %th
+          = "Claim Status"
+        %th
+          = "Cliam Filed By"
+    %tbody
+      - s_no = 0
+      - @deceased_clients.each do |client|
+        %tr
+          %td
+            - death_event = client.death_event
+            - claim = death_event.insurance_claim ? death_event.insurance_claim : nil
+            = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+          %td
+            = ClientAdministration.get_administered_at(client)
+          %td
+            = ClientAdministration.get_registered_at(client)
+          %td
+            = death_event.deceased_name
+          %td
+            = death_event.relationship_to_client
+          %td
+            = death_event.date_of_death
+          %td
+            = death_event.reported_on
+          %td
+            = StaffMember.get(death_event.reported_by).name rescue nil
+          %td{:style => "text-align:center;"}
+            = claim.nil? ? "-" : claim.claim_unique_id
+          %td{:style => "text-align:center;"}
+            = claim.nil? ? "-" : claim.filed_on
+          %td{:style => "text-align:center;"}
+            = claim.nil? ? "-" : claim.claim_status.humanize rescue nil
+          %td{:style => "text-align:center;"}
+            = claim.nil? ? "-" : StaffMember.get(claim.performed_by).name rescue nil
+- else
+  No clients found

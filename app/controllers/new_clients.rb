@@ -411,4 +411,9 @@ class NewClients < Application
     end
   end
 
+  def all_deceased_clients
+    @deceased_clients = client_facade.get_all_deceased_clients
+    render
+  end
+
 end
