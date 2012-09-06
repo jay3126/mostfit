@@ -12,7 +12,7 @@ class Reports < Application
     #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
     #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
     #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
-    :accounting   => [TrialBalance, DayBook]
+    :accounting   => [TrialBalance, DayBook, PreClosureCustomerDetails]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout

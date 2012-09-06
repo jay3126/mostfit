@@ -39,4 +39,11 @@ class LoanStatusChange
     first(in_force)
   end
 
+  def self.status_between_dates(status, from_date, to_date = Date.today)
+    status_change = {}
+    status_change[:to_status] = status
+    status_change[:effective_on] = (from_date..to_date)
+    all(status_change)
+  end
+
 end

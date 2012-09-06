@@ -1,0 +1,71 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        Center Name
+      %th
+        Customer Name
+      %th
+        Loan Account Number
+      %th
+        Date
+      %th
+        Remarks
+      %th
+        Reason
+      %th
+        Foreclosure POS
+      %th
+        Foreclosure Charges
+      %th
+        Foreclosure Other Charges
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:center_name]
+        %td
+          = values[:member_name]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:on_date]
+        %td
+          = values[:remarks]
+        %td
+          = values[:reason]
+        %td
+          = values[:pre_closure_amount]
+          - accumulate_row_values[:pre_closure_amount] += values[:pre_closure_amount]
+        %td
+          = values[:pre_closure_charges]
+          - accumulate_row_values[:pre_closure_charges] += values[:pre_closure_charges]
+        %td
+          = values[:pre_closure_other_charges]
+          - accumulate_row_values[:pre_closure_other_charges] += values[:pre_closure_other_charges]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:pre_closure_amount]
+      %td
+        = total_rows[:pre_closure_charges]
+      %td
+        = total_rows[:pre_closure_other_charges]
