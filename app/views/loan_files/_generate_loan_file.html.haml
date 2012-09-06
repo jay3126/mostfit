@@ -4,6 +4,7 @@
     $('.select').attr('checked',$(this).attr('checked'))});  
   });
 
+- center_disbursal_date = BizLocation.get(@center.id).center_disbursal_date.blank? ?  Date.today : BizLocation.get(@center.id).center_disbursal_date
 .shaded
   %h1 Add to Loan File
   - if @loan_applications_pending_loan_file_generation and not @loan_applications_pending_loan_file_generation.empty?
@@ -53,7 +54,7 @@
               = date_select("created_on", Date.today, :id => "created_on", :size => 10)
             %td
               = "Scheduled Disbursal"
-              = date_select("scheduled_disbursal_date", Date.today, :id => "scheduled_disbursal_date", :size => 10)
+              = date_select("scheduled_disbursal_date", center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)
             %td
               = "Scheduled First Payment"
               = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)
