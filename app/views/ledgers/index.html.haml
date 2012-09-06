@@ -1,4 +1,14 @@
-%div#container_ledgers
-  .menu-strip
-    = link_to_with_rights 'Add new ledger', resource(:ledgers, :new), :class => "add"
-  = partial :list
+%div{:style => "width:42%; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:user_locations, :action => url(:controller => :ledgers, :action => :index), :method => :get) do
+    %table
+      %thead
+        %tr
+          %th
+            Select Accounts Chart
+          %th
+            = select :name => "accounts_chart_id", :collection => AccountsChart.all, :selected => params[:accounts_chart_id], :text_method => :name, :value_method => :id
+          %td
+            = submit "Go"
+%h1== Accounts Chart :- #{@accounts_chart.name}
+= link_to_with_rights 'Add new ledger', resource(:ledgers, :new), :class => 'add grey_button'
+= partial :list

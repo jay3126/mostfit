@@ -2,7 +2,8 @@ class Ledgers < Application
   # provides :xml, :yaml, :js
 
   def index
-    @ledgers = Ledger.all
+    @accounts_chart = params[:accounts_chart_id].blank? ? accounting_facade.get_primary_chart_of_accounts : AccountsChart.get(params[:accounts_chart_id])
+    @ledgers        = @accounts_chart.blank? ? [] : @accounts_chart.ledgers
     display @ledgers, :layout => layout?
   end
 
@@ -42,7 +43,7 @@ class Ledgers < Application
     @ledger = Ledger.get(id)
     raise NotFound unless @ledger
     if @ledger.update(ledger)
-       redirect resource(@ledger)
+      redirect resource(@ledger)
     else
       display @ledger, :edit
     end
