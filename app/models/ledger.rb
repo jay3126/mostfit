@@ -2,12 +2,12 @@ class Ledger
   include DataMapper::Resource
   include Constants::Properties, Constants::Accounting, Constants::Money, Identified
 
-# Ledger represents an account, and is a basic building-block for book-keeping
-# Ledgers are classified into one of four 'account types': Assets, Liabilities, Incomes, and Expenses
-# Ledgers can also be 'grouped' under an AccountGroup, primarily for standardised reporting of financial statements
-# A ledger must report a "balance" at every point in time since it comes into existence
-# The balance that is associated with the ledger when it is first created represents its (earliest) opening balance
-# Ledger also serves as the base class for certain 'special' kinds of accounts (such as BankAccountLedger)
+  # Ledger represents an account, and is a basic building-block for book-keeping
+  # Ledgers are classified into one of four 'account types': Assets, Liabilities, Incomes, and Expenses
+  # Ledgers can also be 'grouped' under an AccountGroup, primarily for standardised reporting of financial statements
+  # A ledger must report a "balance" at every point in time since it comes into existence
+  # The balance that is associated with the ledger when it is first created represents its (earliest) opening balance
+  # Ledger also serves as the base class for certain 'special' kinds of accounts (such as BankAccountLedger)
 
   property :id,                       Serial
   property :name,                     String, :length => 1024, :nullable => false
@@ -91,7 +91,7 @@ class Ledger
       end
 
       ledger_product_type, ledger_product_id = ledger_is_product_specific ? [for_product_type, for_product_id] :
-          [nil, nil]
+        [nil, nil]
 
       ledger_assignment = LedgerAssignment.record_ledger_assignment(with_accounts_chart, ledger_classification, ledger_product_type, ledger_product_id)
       ledger_name = name_for_product_ledger(with_accounts_chart.counterparty_type, with_accounts_chart.counterparty_id, ledger_classification, ledger_product_type, ledger_product_id)
@@ -112,6 +112,21 @@ class Ledger
       all_product_ledgers[ledger_classification.account_purpose] = product_ledger
     }
     all_product_ledgers
+  end
+
+  def self.save_ledger(name, account_type, open_on, opening_balance, effect)
+    chart = AccountsChart.first
+    opening_balance_amount = MoneyManager.get_money_instance(opening_balance.to_i)
+    fields = {}
+    fields[:name] = name
+    fields[:account_type] = account_type.to_sym
+    fields[:open_on] = open_on
+    fields[:opening_balance_amount] = opening_balance_amount.amount
+    fields[:opening_balance_currency] = DEFAULT_CURRENCY
+    fields[:opening_balance_effect] = effect
+    fields[:accounts_chart] = chart
+    fields[:manual_voucher_permitted] = true
+    self.new(fields)
   end
 
   def self.name_for_product_ledger(counterparty_type, counterparty_id, ledger_classification, product_type = nil, product_id = nil)
