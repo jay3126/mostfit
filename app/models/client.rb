@@ -49,6 +49,7 @@ class Client
   property :created_by_staff_member_id,  Integer, :nullable => false
   property :claim_document_status,       Enum.send('[]', *CLAIM_DOCUMENTS_STATUS), :default => CLAIM_DOCUMENTS_PENDING
   property :claim_document_recieved_by,  Integer
+  property :cliam_document_recieved_on,  Date
 
   has n, :simple_insurance_policies
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
@@ -219,9 +220,10 @@ class Client
     return client.active == true ? true : false
   end
 
-  def self.mark_client_documents_recieved(client, recieved_by)
+  def self.mark_client_documents_recieved(client, recieved_by, recieved_on)
     client.claim_document_status = Constants::Client::CLAIM_DOCUMENTS_RECEIVED
     client.claim_document_recieved_by = recieved_by
+    client.cliam_document_recieved_on = recieved_on
     client.save
     raise Errors::DataError, client.errors.first.first unless client.saved?
   end
