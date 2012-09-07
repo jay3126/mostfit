@@ -48,7 +48,46 @@ class LocationLevels < Application
   
   end
 
+  def show
+    @location_level = LocationLevel.get params[:id].to_i
+    @biz_locations  = @location_level.biz_locations
+    display @location_level
+  end
+
   def update
+
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+
+    message = {}
+
+    # GATE-KEEPING
+
+    location_level_id   = params[:id]
+    location_level_name = params[:location_level][:name]
+
+    # VALIDATIONS
+
+    message[:error] = "Location Name cannot be blank" if location_level_name.blank?
+    @location_level = LocationLevel.get location_level_id
+
+    # OPERATIONS PERFORMED
+    if message[:error].blank?
+      begin
+        @location_level.name = location_level_name
+        if @location_level.save
+          message = {:notice => "Location Level successfully updated"}
+
+        else
+          message = {:error => @location_level.errors.first.join(', ')}
+        end
+      rescue => ex
+        message = {:error => "An error has occured: #{ex.message}"}
+      end
+    end
+
+    #REDIRECT/RENDER
+    redirect resource(@location_level), :message => message
+
   end
 
   def destroy

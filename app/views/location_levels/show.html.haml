@@ -1,0 +1,47 @@
+%h1==Location Level :- #{@location_level.name}
+.menu-strip{:style => "width: 25%;"}
+  = link_to 'Edit', '#', :onclick =>"jQuery('.show').toggle(); jQuery('.edit').toggle(); return false;", :class => 'add grey_button'
+= form_for(@location_level, :action => resource(@location_level), :method => 'put') do
+  %table.tall.shaded
+    %tr.even
+      %th.even Name
+      %td.show= @location_level.name
+      %td.edit{:style => 'display:none'}
+        = text_field :name, :value => @location_level.name
+        = submit 'Update'
+    %tr.odd
+      %th.odd Level
+      %td
+        = @location_level.level
+    %tr.even
+      %th.even Creation Date
+      %td= @location_level.creation_date
+    %tr.odd
+      %th.odd Created At
+      %td= @location_level.created_at
+%br
+- if @biz_locations.count == 0
+  = "No Biz-Location associated with #{@location_level.name} location level"
+-else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Name
+        %th
+          Address
+        %th
+          Creation Date
+    - for location in @biz_locations
+      %tr
+        %td
+          = location.id
+        %td
+          = link_to_location location
+        %td
+          = location.biz_location_address
+        %td
+          = location.creation_date
+
