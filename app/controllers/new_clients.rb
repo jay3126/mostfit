@@ -420,13 +420,14 @@ class NewClients < Application
     # GATE-KEEPING
     selected_clients = params[:clients]
     recieved_by = get_session_user_id
-    recieved_on = Date.today()
-    
+    recieved_on = params[:document_recieved_on]
+
     # INITIALIZATIONS
     @errors = []
     
     # VALIDATIONS
     @errors << "Select atleast one client" if selected_clients.blank?
+    @errors << "Select date document submission" if recieved_on.blank?
     
     # OPERATIONS PERFORMED
     if @errors.blank?
@@ -434,7 +435,8 @@ class NewClients < Application
       client_ids.each do |client_id|
         begin
           client = Client.get client_id
-          client_facade.mark_client_documents_recieved(client, recieved_by, recieved_on)
+          claim_document_recieved_on = params[:document_recieved_on]["#{client_id}"]
+          client_facade.mark_client_documents_recieved(client, recieved_by, claim_document_recieved_on)
         rescue => ex
           @errors << "An error has occured #{ex.message}"
         end
