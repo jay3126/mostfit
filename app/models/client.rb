@@ -228,6 +228,10 @@ class Client
     raise Errors::DataError, client.errors.first.first unless client.saved?
   end
 
+  def self.is_claim_processing_or_inactive?(client)
+    return client.active == false || client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED ? true : false
+  end
+
   private
   
   def convert_blank_to_nil

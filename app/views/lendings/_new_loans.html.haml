@@ -55,12 +55,15 @@
           %td
             = loan_row_count
           %td
-            - if lending.applied_by_staff == session.user.staff_member.id
+            - client = Client.get(lending.loan_borrower.counterparty_id)
+            - if (lending.applied_by_staff == session.user.staff_member.id) || client_facade.is_claim_processing_or_inactive?(client)
               = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => true
             - else
               = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :class => 'select_to_approve'
             %br
-            - if lending.applied_by_staff == session.user.staff_member.id
+            - if client_facade.is_claim_processing_or_inactive?(client)
+              %i Client Inactive
+            - elsif lending.applied_by_staff == session.user.staff_member.id
               %i No privilege
           %td
             = link_to_with_rights lending.id, resource(lending)
@@ -93,6 +96,8 @@
         %tr.org_total
           %td{:colspan => 17}
             %i No privilege: The Staff member who created the loan cannot Approve it.
+            %br
+            %i Client Inactive: The Client is going throuh death claim processing.
 
     %table
       %tfoot

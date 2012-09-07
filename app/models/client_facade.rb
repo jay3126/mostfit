@@ -57,4 +57,8 @@ class ClientFacade < StandardFacade
     Client.mark_client_documents_recieved(client, recieved_by, recieved_on)
   end
 
+  def is_claim_processing_or_inactive?(client)
+    Client.is_claim_processing_or_inactive?(client)
+  end
+  
 end
