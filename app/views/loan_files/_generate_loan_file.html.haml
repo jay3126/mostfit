@@ -13,7 +13,7 @@
         %thead
           %tr
             %th{:width => '5%'}
-              = check_box :id => "toggle_select"
+              = check_box :name => "select_all", :id => "toggle_select"
             %th{:width => '5%'}
               = "Loan Application ID"
             %th
@@ -34,8 +34,8 @@
           - @loan_applications_pending_loan_file_generation.each do |lap|
             %tr
               %td{:width => '5%'}
-                - checked_value = params[:selected] && params[:selected]["#{lap.loan_application_id}"] == "#{lap.loan_application_id}" ? "on" : nil
-                = check_box :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id, :class => 'select', :checked => checked_value
+                = check_box :name => "loan_app_checkbox", :value => lap.loan_application_id, :class => 'select', :disabled => 'disabled'
+                = hidden_field :name => "[selected][#{lap.loan_application_id}]", :value => lap.loan_application_id
               %td
                 = link_to_with_rights lap.loan_application_id, "/loan_applications/#{lap.loan_application_id}"
               %td
@@ -51,13 +51,13 @@
           %tr
             %td
               = "Loan File Created on"
-              = date_select("created_on", Date.today, :id => "created_on", :size => 10)
+              = date_select("created_on", center_disbursal_date, :id => "created_on", :min_date => center_disbursal_date, :max_date => Date.today, :size => 10)
             %td
               = "Scheduled Disbursal"
               = date_select("scheduled_disbursal_date", center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)
             %td
               = "Scheduled First Payment"
-              = date_select("scheduled_first_payment_date", Date.today, :id => "scheduled_first_payment_date", :size => 10)
+              = date_select("scheduled_first_payment_date", center_disbursal_date, :id => "scheduled_first_payment_date", :size => 10)
             %td
               %b By:
               = get_session_user_name

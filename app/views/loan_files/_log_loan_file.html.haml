@@ -1,7 +1,7 @@
 .shaded
   - if @loan_file
     %h1
-      = "Log of Loan File #{@loan_file.loan_file_identifier}"
+      = link_to_with_rights "Log of Loan File #{@loan_file.loan_file_identifier}", url(:controller => "loan_files", :action => "show", :id => @loan_file.id)
 
   - if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
     %table.dataTable{:style => "width:100%;"}

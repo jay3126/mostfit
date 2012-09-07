@@ -119,25 +119,28 @@ class LoanFiles < Application
     is_grt_marked = CenterCycle.is_grt_marked?(params[:child_location_id])
 
     @errors << "Staff member must not be blank" if created_by_staff_id.blank?
-    @errors << "Please select atleast one loan application" unless params.key?('selected')
+    @errors << "Please Select all loan applications" unless params.key?('select_all')
     @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
     @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
 
-    #record the loan file first
-    #was any data actually sent ?
     if @errors.blank?
-      @loan_applications = params['selected'].keys
-      @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
-      @center_id = params[:child_location_id] ? params[:child_location_id] : nil
-      @for_cycle_number = 1
-      if params['loan_file_identifier'] and not params['loan_file_identifier'].nil?
-        @loan_file = loan_applications_facade.locate_loan_file(params['loan_file_identifier'])
-        loan_applications_facade.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
-      else
-        @loan_file = loan_applications_facade.create_loan_file(@branch_id, @center_id, @for_cycle_number,
-          scheduled_disbursal_date, scheduled_first_payment_date,
-          created_by_staff_id, created_on, *@loan_applications)
+      begin
+        @loan_applications = params['selected'].keys
+        @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
+        @center_id = params[:child_location_id] ? params[:child_location_id] : nil
+        @for_cycle_number = 1
+        if params['loan_file_identifier'] and not params['loan_file_identifier'].nil?
+          @loan_file = loan_applications_facade.locate_loan_file(params['loan_file_identifier'])
+          loan_applications_facade.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
+        else
+          @loan_file = loan_applications_facade.create_loan_file(@branch_id, @center_id, @for_cycle_number,
+            scheduled_disbursal_date, scheduled_first_payment_date,
+            created_by_staff_id, created_on, *@loan_applications)
+        end
+      rescue => ex
+        @errors << "An error has occured: #{ex.message}"
       end
+
     end
     get_data(params)
 
