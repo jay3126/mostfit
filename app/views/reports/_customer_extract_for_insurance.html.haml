@@ -1,0 +1,91 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th
+        Center Id
+      %th
+        Center Name
+      %th
+        Client Id
+      %th
+        Client Name
+      %th
+        Gender
+      %th
+        Date Of Birth
+      %th
+        Age as on Loan Disbursement Date
+      %th
+        Guarantor Name
+      %th
+        Relationship to Client
+      %th
+        Loan Id
+      %th
+        LAN Number
+      %th
+        Loan Disbursal Date
+      %th
+        Loan Amount
+      %th
+        Loan COmmencement Date
+      %th
+        Cover Amount
+      %th
+        Premium
+      %th
+        Service Tax
+      %th
+        Total Premium
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:branch_id]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:center_id]
+        %td
+          = values[:center_name]
+        %td
+          = values[:client_id]
+        %td
+          = values[:client_name]
+        %td
+          = values[:gender]
+        %td
+          = values[:date_of_birth]
+        %td
+          = values[:age_as_on_loan_disbursement_date]
+          yrs.
+        %td
+          = values[:guarantor_name]
+        %td
+          = values[:guarantor_relationship]
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_lan]
+        %td
+          = values[:loan_disbursement_date]
+        %td
+          = values[:loan_amount]
+        %td
+          = values[:loan_commencement_date]
+        %td
+          = values[:cover_amount]
+        %td
+          = values[:premium]
+        %td
+          = values[:service_tax]
+        %td
+          = values[:total_premium]
