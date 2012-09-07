@@ -85,6 +85,8 @@ administrator :
     - all
   reports :
     - all
+  location_holidays :
+    - all
 ################
 executive :
   home :
@@ -96,8 +98,28 @@ executive :
   attendances :
     - index
     - create
-  staff_attendances :
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+     - determine_layout
+#  staff_attendances :
   audit_trails :
+    - index
+    - show
+  location_holidays :
+#    - all
     - index
     - show
   biz_locations :
@@ -118,7 +140,7 @@ executive :
     - update
   new_clients :
     - show
-    - new
+#    - new
     - create
     - edit
     - update
@@ -168,7 +190,26 @@ executive :
   searches :
     - all
   user_locations :
-    - all
+#    - all
+    - show
+    - index
+    - meeting_schedule
+    - meeting_calendar
+    - weeksheet_collection
+    - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
+    - loans_on_biz_location
+    - biz_location_list
+    - staffs_on_biz_location
+    - location_eod_summary
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
   lending_products :
     - index
     - show
@@ -185,16 +226,15 @@ executive :
     - create_group_payments
     - payment_form_for_lending
   users :
-#    - index
+#     - all
+#     - index
     - show
     - edit
     - update
     - change_password
-    - new
+#    - new
     - admin_change_password
     - preferred_locale
-#    - create
-#    - all
   center_cycles :
     - record_cgt
     - mark_cgt_grt
@@ -214,6 +254,23 @@ supervisor :
 #    - edit
 #    - update
 #    - show
+  staff_members :
+     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+     - assign_location_to_staff
+     - determine_layout
+     - redirect_to_show
   staff_attendances :
     - create
   attendances :
@@ -318,15 +375,16 @@ supervisor :
      - show
 #     - create
 #     - new
-#  users :
+  users :
+#     - all
 #     - index
-#    - show
-#    - edit
-#    - update
-#    - change_password
-#     - new
-#    - admin_change_password
-#    - preferred_locale
+    - show
+    - edit
+    - update
+    - change_password
+#    - new
+    - admin_change_password
+    - preferred_locale
   reports :
 #    - show
 #    - create
@@ -388,6 +446,22 @@ support :
   attendances :
     - index
     - create
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+     - determine_layout
   staff_attendances :
   audit_trails:
     - all
@@ -404,16 +478,27 @@ support :
   new_clients :
 #   - index
     - show
+    - show_accounts
   clients :
     - index
     - new
     - create
     - bulk_entry
     - show
-#  documents :
+  location_holidays :
+#    - all
+    - index
+    - show
+  documents :
+#    - all
+    - show
+    - get_parent
+    - index
+#    - new
+#  holidays :
 #    - all
 #  holiday_calendars :
-#    - all
+#   - all
 #  ledgers :
 #    - index
 #   - show
@@ -459,19 +544,39 @@ support :
   searches :
     - all
   user_locations :
-    - all
+#    - all
+    - show
+    - index
+    - meeting_schedule
+    - meeting_calendar
+    - weeksheet_collection
+    - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
+    - loans_on_biz_location
+    - biz_location_list
+    - staffs_on_biz_location
+    - location_eod_summary
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
   biz_locations :
     - centers_for_selector
     - show
-#  users :
+  users :
+#    - all
 #     - index
-#    - show
-#    - edit
-#    - update
-#    - change_password
-#     - new
-#    - admin_change_password
-#    - preferred_locale
+    - show
+    - edit
+    - update
+    - change_password
+#    - new
+    - admin_change_password
+    - preferred_locale
 ################
 finops :
   home :
@@ -486,8 +591,8 @@ finops :
 #    - show
   ledgers :
     - all
-#  vouchers :
-#    - all
+  vouchers :
+    - all
 #  cost_centers :
 #    - all
 #  transaction_summaries :
@@ -505,8 +610,28 @@ finops :
 #  attendances :
 #    - index
 #    - create
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+     - determine_layout
   staff_attendances :
   audit_trails :
+    - index
+    - show
+  location_holidays :
+#    - all
     - index
     - show
   biz_locations :
@@ -611,7 +736,26 @@ finops :
     - mark_cgt_grt
 #    - record_grt
   user_locations :
-    - all
+#    - all
+    - show
+    - index
+    - meeting_schedule
+    - meeting_calendar
+    - weeksheet_collection
+    - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
+    - loans_on_biz_location
+    - biz_location_list
+    - staffs_on_biz_location
+    - location_eod_summary
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
 #  users :
 #     - index
 #    - show
@@ -651,8 +795,28 @@ read_only :
 #  attendances :
 #    - index
 #    - create
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+#     - determine_layout
   staff_attendances :
   audit_trails:
+#    - all
+    - index
+    - show
+  location_holidays :
 #    - all
     - index
     - show
@@ -675,9 +839,32 @@ read_only :
 #    - bulk_entry
     - show
   user_locations :
-    - all
+#    - all
+    - show
+    - index
+    - meeting_schedule
+    - meeting_calendar
+    - weeksheet_collection
+    - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
+    - loans_on_biz_location
+    - biz_location_list
+    - staffs_on_biz_location
+    - location_eod_summary
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
   documents :
-    - all
+#    - all
+    - show
+    - get_parent
+    - index
+#    - new
 #  holiday_calendars :
 #    - all
 #  ledgers :
@@ -753,8 +940,28 @@ accountant :
 #  attendances :
 #    - index
 #    - create
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+     - determine_layout
   staff_attendances :
   audit_trails:
+    - index
+    - show
+  location_holidays :
+#    - all
     - index
     - show
   biz_locations:
@@ -789,8 +996,12 @@ accountant :
     - show_accounts
     - show
 #    - new
-#  documents :
+  documents :
 #    - all
+    - show
+    - get_parent
+    - index
+#    - new
 #  holiday_calendars :
 #    - all
 #  holidays :
@@ -921,19 +1132,39 @@ auditor :
 #  attendances :
 #    - index
 #    - create
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+     - show_disbursed
+     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+     - display_sheets
+     - send_sheet
+#     - assign_location_to_staff
+     - determine_layout
   staff_attendances :
   audit_trails:
     - index
     - show
+  location_holidays :
+#    - all
+    - index
+    - show
   biz_locations:
  #   - all
-    - create_and_assign_location
-    - map_locations
+#    - create_and_assign_location
+#    - map_locations
     - show
-    - create
+#    - create
 #    - index
     - biz_location_clients
-    - biz_location_form
+#    - biz_location_form
     - centers_for_selector
 #  center_cycles :
 #    - all
@@ -958,7 +1189,11 @@ auditor :
     - show
 #    - new
   documents :
-    - all
+#    - all
+    - show
+    - get_parent
+    - index
+#    - new
 #  holiday_calendars :
 #    - all
 #  holidays :
@@ -1012,17 +1247,25 @@ auditor :
 #    - all
   user_locations :
 #    - all
-    - index
     - show
-#    - meeting_schedule
-#    - meeting_calendar
+    - index
+    - meeting_schedule
+    - meeting_calendar
     - weeksheet_collection
     - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
     - loans_on_biz_location
-#    - biz_location_list
+    - biz_location_list
     - staffs_on_biz_location
     - location_eod_summary
-#    - pdf_on_biz_location
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
   searches :
     - all
 #  lending_products :
@@ -1114,11 +1357,54 @@ telecaller :
 #    - create
 #    - bulk_entry
     - show
+  staff_members :
+#     - index
+     - show_branches
+     - show_centers
+     - show_clients
+#     - show_disbursed
+#     - day_sheet
+#     - disbursement_sheet
+     - show
+#     - edit
+#     - update
+#     - new
+#     - display_sheets
+#     - send_sheet
+#     - assign_location_to_staff
+#     - determine_layout
+  location_holidays :
+#    - all
+    - index
+    - show
   staff_attendances :
   user_locations :
-    - all
+#    - all
+    - show
+    - index
+    - meeting_schedule
+    - meeting_calendar
+    - weeksheet_collection
+    - customers_on_biz_location
+#    - set_center_leader
+#    - record_center_leader
+    - loans_on_biz_location
+    - biz_location_list
+    - staffs_on_biz_location
+    - location_eod_summary
+    - pdf_on_biz_location
+#    - set_seating_order
+#    - record_seating_order
+    - location_scv
+    - save_location_scv
+    - loan_applications_on_biz_location
+#    - get_seating_order_data
   documents :
-    - all
+#    - all
+    - show
+    - get_parent
+    - index
+#    - new
 #  holiday_calendars :
 #    - all
 #  ledgers :
@@ -1138,12 +1424,12 @@ telecaller :
     - index
 #    - create
 #    - create_repayment_on_lending
-#    - show
+    - show
 #    - edit
 #    - update
 #   - update_lending_approve_to_disburse
 #    - update_lending_new_to_approve
-    - lending_accrual_transaction
+#    - lending_accrual_transaction
 #  loan_applications :
 #   - index
 #    - show
