@@ -34,6 +34,10 @@ fee product, and when
   
   def fee_money_amount; to_money_amount(:fee_amount); end
 
+  def self.all_paid_loan_fee_receipts(lending_id)
+    all(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_id).select{|fee_receipt| fee_receipt.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
+  end
+
   def self.record_ad_hoc_fee(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id, recorded_by_id)
     Validators::Arguments.not_nil?(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id, recorded_by_id)
 

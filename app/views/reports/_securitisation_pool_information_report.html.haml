@@ -1,0 +1,193 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        Center Name
+      %th
+        Loan Account Number
+      %th
+        Member code
+      %th
+        Member Name
+      %th
+        Member address
+      %th
+        State
+      %th
+        Address document
+      %th
+        Address Id Number
+      %th
+        Photo ID doucment
+      %th
+        Photo ID number
+      %th
+        Caste
+      %th
+        Religion
+      %th
+        Loan Purpose
+      %th
+        Loan Cycle
+      %th
+        ROI
+      %th
+        Insurance
+      %th
+        Loan End Date
+      %th
+        First Payment Date
+      %th
+        Fee Collected
+      %th
+        Installment Amount
+      %th
+        Installment Frequency
+      %th
+        Number Of Installments
+      %th
+        Loan Disbursed Date
+      %th
+        Loan Disbursed Amount
+      %th
+        Oustanding Principal
+      %th
+        Oustanding Interest
+      %th
+        Total Interest due at Origination
+      %th
+        Demand completed weeks
+      %th
+        Date week
+      %th
+        Principal week
+      %th
+        Interest week
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:center_name]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:member_id]
+        %td
+          = values[:member_name]
+        %td
+          = values[:member_address]
+        %td
+          = values[:member_state]
+        %td
+          = values[:reference1_type]
+        %td
+          = values[:reference1_id]
+        %td
+          = values[:reference2_type]
+        %td
+          = values[:reference2_id]
+        %td
+          = values[:caste]
+        %td
+          = values[:religion]
+        %td
+          = values[:loan_purpose]
+        %td
+          = values[:loan_cycle]
+        %td
+          = values[:loan_roi]
+        %td
+          = values[:loan_insurance]
+          - accumulate_row_values[:loan_insurance] += values[:loan_insurance]
+        %td
+          = values[:loan_end_date]
+        %td
+          = values[:first_payment_date]
+        %td
+          = values[:fee_collected]
+          - accumulate_row_values[:fee_collected] += values[:fee_collected]
+        %td
+          = values[:installment_amount]
+          - accumulate_row_values[:installment_amount] += values[:installment_amount]
+        %td
+          = values[:installment_frequency]
+        %td
+          = values[:installment_number]
+        %td
+          = values[:loan_disbursed_date]
+        %td
+          = values[:loan_disbursed_amount]
+          - accumulate_row_values[:loan_disbursed_amount] += values[:loan_disbursed_amount]
+        %td
+          = values[:loan_outstanding_principal]
+          - accumulate_row_values[:loan_outstanding_principal] += values[:loan_outstanding_principal]
+        %td
+          = values[:loan_outstanding_interest]
+          - accumulate_row_values[:loan_outstanding_interest] += values[:loan_outstanding_interest]
+        %td
+          = values[:total_interest_due_at_org]
+          - accumulate_row_values[:total_interest_due_at_org] += values[:total_interest_due_at_org]
+        %td
+          = values[:demand_completed_weeks]
+        %td
+          = values[:date_week]
+        %td
+          = values[:principal_week]
+          - accumulate_row_values[:principal_week] += values[:principal_week]
+        %td
+          = values[:interest_week]
+          - accumulate_row_values[:interest_week] += values[:interest_week]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:loan_insurance]
+      %td
+      %td
+      %td
+        = total_rows[:fee_collected]
+      %td
+        = total_rows[:installment_amount]
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:loan_disbursed_amount]
+      %td
+        = total_rows[:loan_outstanding_principal]
+      %td
+        = total_rows[:loan_outstanding_interest]
+      %td
+        = total_rows[:total_interest_due_at_org]
+      %td
+      %td
+      %td
+        = total_rows[:principal_week]
+      %td
+        = total_rows[:interest_week]

@@ -27,7 +27,7 @@ class PreClosureCustomerDetails < Report
     lendings = LoanStatusChange.status_between_dates(LoanLifeCycle::REPAID_LOAN_STATUS, @from_date, @to_date).lending
     lendings.each do |loan|
       member                    = loan.loan_borrower.counterparty
-      status_date               = loan.loan_status_changes(:to_status => LoanLifeCycle::DISBURSED_LOAN_STATUS).first.effective_on
+      status_date               = loan.loan_status_changes(:to_status => LoanLifeCycle::REPAID_LOAN_STATUS).first.effective_on
       remarks                   = loan.remarks.blank? ? '' : loan.remarks rescue ''
       reason                    = ''
       pre_closure_amount        = Money.new(loan.loan_receipts.aggregate(:principal_received.sum).to_i, default_currency)
