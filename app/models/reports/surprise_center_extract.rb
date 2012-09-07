@@ -67,9 +67,14 @@ class SurpriseCenterExtract < Report
       center_name = center.name
       center_creation_month = (center and center.creation_date) ? center.creation_date.strftime("%B") : "Not Specified"
       center_creation_year = (center and center.creation_date) ? center.creation_date.strftime("%Y") : "Not Specified"
-      ro = managed_by_staff(center.id, @date)
-      ro_name = (ro and ro.name) ? ro.name : "Not Specified"
-      ro_code = (ro and ro.employee_id and not ro.employee_id.blank?) ? ro.employee_id : "Not Specified"
+      ro = managed_by_staff(center.id, @date)      
+      if ro == "Not Managed"
+        ro_name = "Not Managed"
+        ro_code = "Not Available"
+      else
+        ro_name = ro.name
+        ro_code = (ro and ro.employee_id and not (ro.employee_id.blank?)) ? ro.employee_id : "Not Available"
+      end
       meeting = meeting_facade.get_meeting_schedules(center).first
       meeting_day = (meeting and meeting.schedule_begins_on) ? meeting.schedule_begins_on.strftime("%A") : "Not Specified"
       meeting_time = meeting ? meeting.meeting_begins_at : "Not Specified"
