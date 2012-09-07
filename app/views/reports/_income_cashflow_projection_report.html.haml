@@ -1,0 +1,70 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Month
+      %th
+        Year
+      %th
+        Loan Id
+      %th
+        Loan Disbursal Date
+      %th
+        Projected POS at Monthend
+      %th
+        Schedule Principal Realisations
+      %th
+        Schedule Interest Realisations
+      %th
+        Schedule Total EWI Realisations
+      %th
+        Projected Interest Accrual
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:month]
+        %td
+          = values[:year]
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_disbursal_date]
+        %td
+          = values[:projected_pos_at_monthend]
+          - accumulate_row_values[:projected_pos] += values[:projected_pos_at_monthend]
+        %td
+          = values[:schedule_principal_realisations]
+          - accumulate_row_values[:principal_realisations] += values[:schedule_principal_realisations]
+        %td
+          = values[:schedule_interest_realisations]
+          - accumulate_row_values[:interest_realisations] += values[:schedule_interest_realisations]
+        %td
+          = values[:schedule_total_realisations]
+          - accumulate_row_values[:total_realisations] += values[:schedule_total_realisations]
+        %td
+          = values[:projected_interest_accrual]
+          - accumulate_row_values[:interest_accrual] += values[:projected_interest_accrual]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:projected_pos]
+      %td
+        = total_rows[:principal_realisations]
+      %td
+        = total_rows[:interest_realisations]
+      %td
+        = total_rows[:total_realisations]
+      %td
+        = total_rows[:interest_accrual]

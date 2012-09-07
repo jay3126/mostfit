@@ -8,7 +8,8 @@ class Reports < Application
     :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract],
     :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
-    #  :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
+    :targets_and_projections  => [IncomeCashflowProjectionReport],
+    #:targets_and_projections  => [IncomeCashflowProjectionReport, CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
     #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
     #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
     #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
