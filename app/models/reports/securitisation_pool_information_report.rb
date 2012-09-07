@@ -59,7 +59,7 @@ class SecuritisationPoolInformationReport < Report
       loan_purpose               = loan.loan_purpose
       loan_cycle                 = ''
       loan_roi                   = loan.lending_product.interest_rate
-      loan_insurance             = loan.simple_insurance_policies.blank? ? 'No Insurance' : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
+      loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
       loan_end_date              = loan.last_scheduled_date
       loan_first_payment_date    = loan.loan_receipts.blank? ? loan.scheduled_first_repayment_date : loan.loan_receipts.first.effective_on
       fee_receipts               = FeeReceipt.all_paid_loan_fee_receipts(loan.id).map(&:fee_money_amount)
