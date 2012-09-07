@@ -140,7 +140,7 @@ class Report
   end
 
   def branch_should_be_selected
-    return [false, "Branch needs to be selected"] if self.respond_to?(:branch_id) and not self.branch_id
+    return [false, "Branch needs to be selected"] if self.respond_to?(:biz_location_branch) and not self.biz_location_branch
     return true
   end
 

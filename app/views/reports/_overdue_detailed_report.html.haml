@@ -1,0 +1,98 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        Center Name
+      %th
+        Customer code
+      %th
+        Customer Name
+      %th
+        Product
+      %th
+        Source Of Fund
+      %th
+        Loan Disbursed Date
+      %th
+        Loan End Date
+      %th
+        Oldest Due Date
+      %th
+        Days Past Due
+      %th
+        Bucket
+      %th
+        Total Principal Overdue
+      %th
+        Total Interest Overdue
+      %th
+        Total Overdue
+      %th
+        PAR
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:center_name]
+        %td
+          = values[:member_id]
+        %td
+          = values[:member_name]
+        %td
+          = values[:product_name]
+        %td
+          = values[:source_of_fund]
+        %td
+          = values[:loan_disbursed_date]
+        %td
+          = values[:loan_end_date]
+        %td
+          = values[:oldest_due_date]
+        %td
+          = values[:days_past_due]
+        %td
+          = values[:bucket]
+        %td
+          = values[:total_principal_overdue]
+          - accumulate_row_values[:total_principal_overdue] += values[:total_principal_overdue]
+        %td
+          = values[:total_interest_overdue]
+          - accumulate_row_values[:total_interest_overdue] += values[:total_interest_overdue]
+        %td
+          = values[:total_overdue]
+          - accumulate_row_values[:total_overdue] += values[:total_overdue]
+        %td
+          = values[:par]
+          - accumulate_row_values[:par] += values[:par]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:total_principal_due]
+      %td
+        = total_rows[:total_interest_overdue]
+      %td
+        = total_rows[:total_overdue]
+      %td
+        = total_rows[:par]
