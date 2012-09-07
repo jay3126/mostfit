@@ -1,0 +1,50 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th
+        Agent Id
+      %th
+        Agent Name
+      %th
+        Centers Total
+      %th
+        Members Total
+
+  %tbody
+    - total_locations_count = total_members_count = 0
+    - staff_count = 0
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          = values[:branch_id]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:staff_id]
+        %td
+          = values[:staff_name]
+          - staff_count += 1
+        %td
+          = values[:centers_members_total][:locations_count]
+          - total_locations_count += values[:centers_members_total][:locations_count]
+        %td
+          = values[:centers_members_total][:members_count]
+          - total_members_count += values[:centers_members_total][:members_count]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+        = staff_count
+      %td
+        = total_locations_count
+      %td
+        = total_members_count

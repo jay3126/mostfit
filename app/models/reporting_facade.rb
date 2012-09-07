@@ -43,9 +43,20 @@ class ReportingFacade < StandardFacade
 
   #this function will give back the list of location which is managed by staff.
   def locations_managed_by_staffs_on_date(staff_id, on_date)
+    result = {}
+    members = []
     params = {:manager_staff_id => staff_id, :effective_on => on_date}
     location_ids_array = LocationManagement.locations_managed_by_staff(staff_id, on_date).map{|lm| lm.managed_location_id}
-    location_ids_array
+    location_ids_array.each do |location|
+      biz_location = BizLocation.get(location)
+      if biz_location.location_level.level == 0
+        members << ClientAdministration.get_clients_administered(biz_location.id, on_date)
+      else
+        members << ClientAdministration.get_clients_registered(biz_location.id, on_date)
+      end
+    end
+    members_count = members.flatten.count
+    result = {:locations_count => location_ids_array.count, :location_ids => location_ids_array, :members_count => members_count}
   end
 
   # Allocations
