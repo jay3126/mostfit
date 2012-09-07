@@ -9,9 +9,9 @@
           %th
             = "Client"
           %th
-            = "Administered At"
+            = "Branch"
           %th
-            = "Registered At"
+            = "Center"
           %th
             = "Deceased Person"
           %th
@@ -39,13 +39,13 @@
           - if client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED
             %tr
               %td
-                = "Yes"
+                = "<b> Yes </b>"
               %td
                 = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
               %td
-                = link_to_location location_object.administered_at_location
-              %td
                 = link_to_location location_object.registered_at_location
+              %td
+                = link_to_location location_object.administered_at_location
               %td
                 = death_event.deceased_name
               %td

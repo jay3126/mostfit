@@ -18,11 +18,13 @@
               = "(Documents Recieved)"
               = check_box :id => "toggle_select_to_verify"
             %th
+              = "Documents Recieved On"
+            %th
               = "Client"
             %th
-              = "Administered At"
+              = "Branch"
             %th
-              = "Registered At"
+              = "Center"
             %th
               = "Deceased Person"
             %th
@@ -58,16 +60,15 @@
                       %span.greytext
                         = "No Insurance Policy"
                   - else
-                    - if client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED
-                      = "<b> Documents Received </b>"
-                    - else
-                      = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
+                    = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
+                %td
+                  = date_select "document_recieved_on[#{client.id}]", Date.today, :max_date => Date.today, :id => "document_recieved_on#{client.id}", :size => 10
                 %td
                   = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
                 %td
-                  = link_to_location location_object.administered_at_location
-                %td
                   = link_to_location location_object.registered_at_location
+                %td
+                  = link_to_location location_object.administered_at_location
                 %td
                   = death_event.deceased_name
                 %td
