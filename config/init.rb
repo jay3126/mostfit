@@ -86,7 +86,7 @@ Merb::BootLoader.before_app_loads do
 
   Merb::Plugins.config[:exceptions] = {
     :email_addresses => ['support@mostfit.org'],
-    :app_name        => "ICash Staging",
+    :app_name        => "Suryoday Staging",
     :environments    => ['production'],
     :email_from      => "production@mostfit.org",
     :mailer_config => {
