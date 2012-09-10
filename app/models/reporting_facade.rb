@@ -17,6 +17,17 @@ class ReportingFacade < StandardFacade
     get_ids(all_oustanding_loans_scheduled_on_date_with_advance_balances(on_date))
   end
 
+  #this method will return the number of installments remaining for a loan.
+  def number_of_installments_per_loan(loan_id)
+    result = {}
+    loan = Lending.get(loan_id)
+    last_payment_date = loan.loan_receipts.aggregate(:effective_on.max)
+    installments = loan.loan_base_schedule.base_schedule_line_items(:on_date.lte => last_payment_date, :installment.gt => 0)
+    installments_remaining = loan.tenure - installments.count
+    installments_paid_till_date = installments.count
+    result = {:installments_remaining => installments_remaining, :installments_paid_till_date => installments_paid_till_date}
+  end
+
   #this method will return due collected and due collectable per location on a date.
   def total_dues_collected_and_collectable_per_location_on_date(at_location_id, on_date = Date.today)
     result = {}
