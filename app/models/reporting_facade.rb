@@ -129,6 +129,25 @@ class ReportingFacade < StandardFacade
     outstanding_amount
   end
 
+  #this function will give the total amount outstanding for loans disbursed till date.
+  def sum_all_outstanding_and_overdues_loans_per_branch_on_date(on_date, *at_location_ids_ary)
+    result = {}
+    loan_ids = Lending.all(:disbursal_date.lte => on_date, :accounted_at_origin => at_location_ids_ary).aggregate(:id)
+    actual_outstanding_amount = scheduled_outstanding_amount = overdue_amounts = MoneyManager.default_zero_money
+    loan_ids.each do |l|
+      loan = Lending.get(l)
+      next unless loan.is_outstanding?
+      actual_outstanding_amount += loan.actual_total_outstanding
+      scheduled_outstanding_amount += loan.scheduled_total_outstanding(on_date)
+      if loan.scheduled_principal_outstanding(on_date) > loan.actual_total_outstanding
+        overdue_amounts += (loan.scheduled_principal_outstanding(on_date) - loan.actual_total_outstanding)
+      else
+        overdue_amounts += (loan.actual_total_outstanding - loan.scheduled_principal_outstanding(on_date))
+      end
+    end
+    result = {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
+  end
+
   #this functions gives the repayments details till date.
   def sum_all_repayments
     result = {}
