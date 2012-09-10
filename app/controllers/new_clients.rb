@@ -444,5 +444,47 @@ class NewClients < Application
     end
     redirect resource(:new_clients, :all_deceased_clients)
   end
-  
+
+  def bulk_update_client_details
+    # GATE-KEEPING
+    client_ids = params[:client_ids].keys
+    # INITIALIZATIONS
+    @errors = []
+    message = {}
+    c_ids = []
+
+    # OPERATIONS-PERFORMED
+    if @errors.blank?
+      client_ids.each do |client_id|
+        begin
+          client_hash = {}
+          client_hash[:marital_status] = params[:marital_status][client_id]
+          client_hash[:caste] = params[:caste][client_id]
+          client_hash[:income] = params[:income][client_id]
+          client_hash[:spouse_date_of_birth] = params[:spouse_date_of_birth][client_id]
+          client_hash[:gender] = params[:gender][client_id]
+          client_hash[:family_income] = params[:family_income][client_id]
+          client_hash[:telephone_type] = params[:telephone_type][client_id]
+          client_hash[:religion] = params[:religion][client_id]
+          client_hash[:occupation_id] = params[:occupation_id][client_id]
+          client_hash[:psl_sub_category_id] = params[:psl_sub_category_id][client_id]
+          client_hash[:spouse_name] = params[:spouse_name][client_id]
+          client_hash[:guarantor_dob] = params[:guarantor_dob][client_id]
+          client_hash[:priority_sector_list_id] = params[:priority_sector_list_id][client_id]
+          client_hash[:telephone_number] = params[:telephone_number][client_id]
+          client = Client.get client_id
+          client.update_client_details_in_bulk(client_hash)
+          c_ids << client_id
+          message = {:notice => "Successfully updated Client ID: #{c_ids.flatten.join(', ')}."}
+        rescue => ex
+          @errors << "An error has occured for Client ID #{client_id}: #{ex.message}"
+          message = {:error => @errors.flatten.join(', ')}
+        end
+      end
+    end
+    
+    # REDIRECT
+    redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{params[:loan_file_id]}"), :message => message
+  end
+
 end

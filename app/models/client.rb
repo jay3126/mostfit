@@ -232,6 +232,12 @@ class Client
     return client.active == false || client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED ? true : false
   end
 
+  def update_client_details_in_bulk(client_hash)
+    update_client = update(client_hash)
+    raise Errors::DataError, self.errors.first unless update_client
+  end
+
+
   private
   
   def convert_blank_to_nil

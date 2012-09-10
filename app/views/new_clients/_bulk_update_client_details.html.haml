@@ -1,0 +1,84 @@
+%h2 Bulk Update Client Details
+- unless @loan_file.loan_applications.blank?
+  - loan_applications = @loan_file.loan_applications
+  = form(:action => url(:controller => :new_clients, :action => :bulk_update_client_details)) do
+    = hidden_field :name => "loan_file_id", :value => @loan_file.id
+    %table.dataTable.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %td
+            = "Client ID"
+          %td
+            = "Name"
+          %td
+            = "Gender"
+          %td
+            = "Marital Status"
+          %td
+            = "Spouse Name"
+          %td
+            = "Spouse DOB"
+          %td
+            = "Guarantor DOB"
+          %td
+            = "Phone number"
+          %td
+            = "Telephone Type"
+          %td
+            = "Income"
+          %td
+            = "Family Income"
+          %td
+            = "Occupation"
+          %td
+            = "PSL"
+          %td
+            = "Sub-PSL"
+          %td
+            = "Caste"
+          %td
+            = "Religion"
+      %tbody
+        - count = 0
+        - loan_applications.each do |lap|
+          - unless lap.client_id.nil? && lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS
+            - client_id = lap.client_id
+            - client = Client.get(client_id)
+            - count =+ 1
+            %tr
+              %td
+                = hidden_field :name => "client_ids[#{client_id}]", :value => client_id
+                = link_to_with_rights lap.client_id, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
+              %td
+                = link_to_with_rights lap.client_name, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
+              %td
+                = select :name => "gender[#{client_id}]", :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.gender.to_s
+              %td
+                = select :name => "marital_status[#{client_id}]", :collection => Constants::Masters::MARITAL_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.marital_status.to_s
+              %td
+                = text_field :name => "spouse_name[#{client_id}]", :value => client.spouse_name, :size => 10
+              %td
+                = date_select "spouse_date_of_birth[#{client_id}]", (client.spouse_date_of_birth || Date.today), :min_date => Date.today-36500, :max_date => Date.today-1000, :id => "spouse_date_of_birth#{client_id}", :size => 10
+              %td
+                = date_select "guarantor_dob[#{client_id}]", (client.guarantor_dob || Date.today),  :min_date => Date.today-36500, :max_date => Date.today-1000, :id => "guarantor_dob#{client_id}", :size => 10
+              %td
+                = text_field :name => "telephone_number[#{client_id}]", :value => client.telephone_number, :size => 10
+              %td
+                = select :name => "telephone_type[#{client_id}]", :collection => Constants::Masters::TELEPHONE_TYPES, :selected => client.telephone_type.to_s
+              %td
+                = text_field :name => "income[#{client_id}]", :value => client.income, :size => 10
+              %td
+                = text_field :name => "family_income[#{client_id}]", :value => client.family_income, :size => 10
+              %td
+                = select :name => "occupation_id[#{client_id}]", :collection => Occupation.all.collect{|occ| [occ.id, occ.name]}, :selected => client.occupation_id.to_s
+              %td
+                = select :name => "priority_sector_list_id[#{client_id}]", :collection => PrioritySectorList.all.collect{|ps| [ps.id, ps.name]}, :id => 'psl_selector', :selected => client.priority_sector_list_id.to_s
+              %td
+                = select :name => "psl_sub_category_id[#{client_id}]", :collection => nil, :value_method => :id, :text_method => :name, :id => 'psl_sub_category_selector', :prompt => "select", :selected => client.psl_sub_category_id.to_s
+              %td
+                = select :name => "caste[#{client_id}]", :collection => Constants::Masters::CASTE_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.caste.to_s
+              %td
+                = select :name => "religion[#{client_id}]", :collection => Constants::Masters::RELIGION_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.religion.to_s
+    = submit "Update", :class => "greenButton"
+- else
+  %h3 No loan applications

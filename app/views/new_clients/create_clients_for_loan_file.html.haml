@@ -4,6 +4,20 @@
     $('.select').attr('checked',$(this).attr('checked'))});
   });
 
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
 %h1= "Create Clients from loan applications of Loan File #{@loan_file.loan_file_identifier}"
 .menu-strip{:style => "width:100%;"}
   %h3
@@ -82,6 +96,8 @@
                 %td
                   = lap.status.humanize rescue nil
       = submit "Create client" unless count == 0
-      = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
   - else
     %h3 No loan applications
+  %br
+= partial :bulk_update_client_details
+= link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
