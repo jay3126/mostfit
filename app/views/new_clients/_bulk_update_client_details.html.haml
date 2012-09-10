@@ -80,5 +80,6 @@
               %td
                 = select :name => "religion[#{client_id}]", :collection => Constants::Masters::RELIGION_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.religion.to_s
     = submit "Update", :class => "greenButton"
+    = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
 - else
   %h3 No loan applications
