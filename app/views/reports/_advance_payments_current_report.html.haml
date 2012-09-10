@@ -1,0 +1,52 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        Center Name
+      %th
+        FCO Name
+      %th
+        Loan Id
+      %th
+        Loan Account Number
+      %th
+        Customer Name
+      %th
+        Advance Payment
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:center_name]
+        %td
+          = values[:fco_name]
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:member_name]
+        %td
+          = values[:advance_payment]
+          - accumulate_row_values[:advance_payment] += values[:advance_payment]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:advance_payment]
