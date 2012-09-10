@@ -25,6 +25,7 @@
   - branch_for_loan_application_report = (params[report] and params[report][:branch_for_loan_application_report] and not params[report][:branch_for_loan_application_report].blank?) ? params[report][:branch_for_loan_application_report] : nil
   - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
   - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
+  - loan_lan_number = (params[report] and params[report][:loan_lan_number] and not params[report][:loan_lan_number].blank?) ? params[report][:loan_lan_number] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -112,6 +113,9 @@
         |
         Loan Product:
         = LendingProduct.get(lending_product_id).name
+      - if loan_lan_number
+        Loan LAN Number:
+        = Lending.get(:lan => loan_lan_number).first.lan
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed':''}"}
@@ -272,6 +276,10 @@
               Branch:
               - branch_collection = location_facade.all_nominal_branches
               = select(:biz_location_branch, :collection => branch_collection, :value_method => :id, :text_method => :name, :include_blank => true)
+          - if @report.respond_to?(:loan_lan_number)
+            %td
+              Loan LAN Number:
+              = select(:loan_lan_number, :collection => Lending.all.map{|l| l.lan}, :prompt => "Select LAN number", :selected => :loan_lan_number)
           - if @report.respond_to?(:branch_for_loan_application_report)
             %td
               Branch:
