@@ -39,7 +39,7 @@ class OngoingLoanInformationReport < Report
     location_facade  = get_location_facade(@user)
     data = {}
 
-    params = {:accounted_at_origin => @biz_location_branch}
+    params = {:accounted_at_origin => @biz_location_branch, :status => :disbursed_loan_status}
     lending_ids = Lending.all(params).aggregate(:id)
     lending_ids.each do |l|
 
