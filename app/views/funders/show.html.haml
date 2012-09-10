@@ -1,4 +1,7 @@
-%h1== Funder: <i>#{@funder.name}</i>
+%h1
+  = "Funder: <i>#{@funder.name}</i>"
+  &nbsp;
+  = link_to_with_rights 'Edit', resource(@funder, :edit), :class => "edit"
 
 %table.narrow.form{ :style => "width: 40%;" }
   %tr.odd
@@ -20,11 +23,8 @@
       = @funder.funding_lines.max(:disbursal_date)
   %tr
     %td Portfolios
-    %td      
+    %td
       %b= @funder.portfolios.size
-
-%p= link_to_with_rights 'edit this funders details', resource(@funder, :edit), :class => "edit"
-
 %div.tab_container
   %ul.tabs
     %li#funding_lines
@@ -33,5 +33,5 @@
       Portfolios
   %div.tab
     = partial "funding_lines/list"
-  %div.tab  
+  %div.tab
     = partial "portfolios/list"

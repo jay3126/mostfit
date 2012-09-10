@@ -1,11 +1,8 @@
-%h2== Funding lines by funder <i>#{@funder.name}</i>
-%p== #{link_to_with_rights 'create a new funding line', resource(@funder, :funding_lines, :new), :class => "add"}
-
 - if @funding_lines.blank?
   %p
     %i No funding lines have been created yet.
 - else
-  %table.narrow.form{ :width => '100%' }
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -18,7 +15,6 @@
         %th
         %th
         %th
-    %tbody
     - for funding_line in @funding_lines
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
@@ -43,8 +39,3 @@
           = link_to_with_rights("details", resource(@funder, funding_line))          
         %td
           = link_to_with_rights 'edit', resource(@funder, funding_line, :edit), :class => "edit"
-    %tfoot
-      %tr
-        %td{ :colspan => 10 }
-
-  

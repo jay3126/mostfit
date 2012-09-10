@@ -6,16 +6,15 @@
   %p
     %i No funders have been created yet.
 - else
-  %table.shaded{ :width => '100%' }
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
-        %th
-        %th ID
-        %th Name
-        %th Funding lines
-        %th Portfolios
-        %th
-    %tbody
+        %td
+        %td ID
+        %td Name
+        %td Funding lines
+        %td Portfolios
+        %td
     - for funder in @funders
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
@@ -28,11 +27,6 @@
         %td
           %b= funder.portfolios.size
         %td
-          = link_to_with_rights 'edit', resource(funder, :edit)
-          &nbsp;|&nbsp
-          = link_to_with_rights 'new funding line', resource(funder, :funding_lines, :new)
-
-    %tfoot
-      %tr
-        %td{ :colspan => 6 }
-
+          = link_to_with_rights 'Edit', resource(funder, :edit)
+          %br
+          = link_to_with_rights 'New Funding Line', resource(funder, :funding_lines, :new)

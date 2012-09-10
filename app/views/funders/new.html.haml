@@ -3,4 +3,5 @@
 = error_messages_for @funder
 
 = form_for(@funder, :action => url(:funders)) do
-  = partial :fields, :submit_text => "Create funder"
+  = partial :fields
+  = submit "Create Funder"

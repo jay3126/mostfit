@@ -1,29 +1,20 @@
 %h1 Overview of all third parties
 .menu-strip{:style => "width: 30;"}
   = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add grey_button"
-  &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 - if @third_parties.blank?
   %p
     %i No third parties have been created yet.
 - else
-  %table.tall.shaded
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
-        %th
-        %th ID
-        %th Name
-        %th
-    %tbody
+        %td{:style => "text-align:center;"} ID
+        %td{:style => "text-align:center;"} Name
     - for third_party in @third_parties
-      %tr{ :class => cycle('odd','') }
-        %td &nbsp;
-        %td
-          = third_party.id
-        %td
-          %b= link_to third_party.name, resource(third_party)
-        
-    %tfoot
       %tr
-        %td{ :colspan => 6 }
+        %td{:style => "text-align:center;"}
+          = third_party.id
+        %td{:style => "text-align:center;"}
+          %b= link_to third_party.name, resource(third_party)
