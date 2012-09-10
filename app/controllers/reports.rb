@@ -6,14 +6,14 @@ class Reports < Application
     :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
     # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
     :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport],
-    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo],
+    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, OverdueDetailedReport, AdvancePaymentsCurrentReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
     :targets_and_projections  => [IncomeCashflowProjectionReport],
     #:targets_and_projections  => [IncomeCashflowProjectionReport, CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
     #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
     #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
     #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
-    :accounting   => [TrialBalance, DayBook, PreClosureCustomerDetails, SecuritisationPoolInformationReport, OverdueDetailedReport, AdvancePaymentsCurrentReport]
+    :accounting   => [TrialBalance, DayBook]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout
