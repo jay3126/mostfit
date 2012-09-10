@@ -3,28 +3,29 @@
   &nbsp;
   = link_to_with_rights 'Edit', resource(@funder, :edit), :class => "edit"
 
-%table.narrow.form{ :style => "width: 40%;" }
-  %tr.odd
-    %td name
+%table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even name
     %td
-      %b= @funder.name
+      = @funder.name
       == (id: #{@funder.id})
-  %tr
-    %td Funding lines
-    %td
-      %b= @funder.funding_lines.size
   %tr.odd
-    %td First disbursement
+    %th.odd Funding lines
+    %td
+      = @funder.funding_lines.size
+  %tr.even
+    %th.even First disbursement
     %td
       = @funder.funding_lines.min(:disbursal_date)
-  %tr
-    %td Last disbursement
+  %tr.odd
+    %th.odd Last disbursement
     %td
       = @funder.funding_lines.max(:disbursal_date)
-  %tr
-    %td Portfolios
+  %tr.even
+    %th.even Portfolios
     %td
-      %b= @funder.portfolios.size
+      = @funder.portfolios.size
+
 %div.tab_container
   %ul.tabs
     %li#funding_lines
