@@ -21,10 +21,15 @@ class ReportingFacade < StandardFacade
   def number_of_installments_per_loan(loan_id)
     result = {}
     loan = Lending.get(loan_id)
-    last_payment_date = loan.loan_receipts.aggregate(:effective_on.max)
-    installments = loan.loan_base_schedule.base_schedule_line_items(:on_date.lte => last_payment_date, :installment.gt => 0)
-    installments_remaining = loan.tenure - installments.count
-    installments_paid_till_date = installments.count
+    if loan.loan_receipts.blank?
+      last_payment_date = loan.loan_receipts.aggregate(:effective_on.max)
+      installments = loan.loan_base_schedule.base_schedule_line_items(:on_date.lte => last_payment_date, :installment.gt => 0)
+      installments_remaining = loan.tenure - installments.count
+      installments_paid_till_date = installments.count
+    else
+      installments_remaining = loan.tenure
+      installments_paid_till_date = 0
+    end
     result = {:installments_remaining => installments_remaining, :installments_paid_till_date => installments_paid_till_date}
   end
 
