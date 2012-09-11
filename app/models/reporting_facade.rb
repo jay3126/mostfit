@@ -33,7 +33,12 @@ class ReportingFacade < StandardFacade
     result = {}
     schedule_principal_due = schedule_interest_due = schedule_total_due = MoneyManager.default_zero_money
     principal_collected = interest_collected = total_collected = MoneyManager.default_zero_money
-    loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
+    biz_location = BizLocation.get at_location_id
+    if biz_location.location_level.level == 0
+      loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
+    else
+      loans = LoanAdministration.get_loans_accounted(at_location_id, on_date).compact
+    end
     loans.each do |loan|
       schedule_principal_due += (loan.scheduled_principal_due(on_date) || MoneyManager.default_zero_money)
       schedule_interest_due += (loan.scheduled_interest_due(on_date) || MoneyManager.default_zero_money)

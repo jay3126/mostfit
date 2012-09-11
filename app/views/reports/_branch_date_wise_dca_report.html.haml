@@ -1,0 +1,146 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+      %th
+      %th{:colspan => 3}
+        DUES
+      %th{:colspan => 7}
+        COLLECTIONS
+      %th{:colspan => 3}
+        DISBURSAL, ACCRUAL, POS
+    %tr
+      %th
+      %th
+      %th{:colspan => 3}
+        EMI Due
+      %th{:colspan => 3}
+        EMI Collect
+      %th
+        Processing
+      %th
+        Foreclosure
+      %th
+        Foreclosure
+      %th
+        Total
+      %th
+        Interest
+      %th
+        Disbursed
+      %th
+        Principal*
+    %tr
+      %th
+        Branch Name
+      %th
+        Txn Date
+      %th
+        Principal
+      %th
+        Interset
+      %th
+        Total
+      %th
+        Principal
+      %th
+        Interset
+      %th
+        Total
+      %th
+        Fees
+      %th
+        Fees
+      %th
+        POS
+      %th
+        Collection
+      %th
+        Accrued
+      %th
+        Amount
+      %th
+        Principal
+  %tbody
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, branch_values|
+      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+      - branch_values.sort.each do |key, values|
+        %tr
+          %td
+            %b
+              = values[:branch_name]
+          %td
+            = values[:on_date]
+          %td
+            = values[:dues_emi_principal]
+            - accumulate_row_values[:dues_emi_principal] += values[:dues_emi_principal]
+          %td
+            = values[:dues_emi_interest]
+            - accumulate_row_values[:dues_emi_interest] += values[:dues_emi_interest]
+          %td
+            = values[:dues_emi_total]
+            - accumulate_row_values[:dues_emi_total] += values[:dues_emi_total]
+          %td
+            = values[:emi_collect_principal]
+            - accumulate_row_values[:emi_collect_principal] += values[:emi_collect_principal]
+          %td
+            = values[:emi_collect_interest]
+            - accumulate_row_values[:emi_collect_interest] += values[:emi_collect_interest]
+          %td
+            = values[:emi_collect_total]
+            - accumulate_row_values[:emi_collect_total] += values[:emi_collect_total]
+          %td
+            = values[:loan_fee_collect]
+            - accumulate_row_values[:loan_fee_collect] += values[:loan_fee_collect]
+          %td
+            = values[:preclosure_collect_fee]
+            - accumulate_row_values[:preclosure_collect_fee] += values[:preclosure_collect_fee]
+          %td
+            = values[:preclosure_collect]
+            - accumulate_row_values[:preclosure_collect] += values[:preclosure_collect]
+          %td
+            = values[:total_fee_collect]
+            - accumulate_row_values[:total_fee_collect] += values[:total_fee_collect]
+          %td
+            = values[:interest_accrued]
+            - accumulate_row_values[:interest_accrued] += values[:interest_accrued]
+          %td
+            = values[:disbursed_amount]
+            - accumulate_row_values[:disbursed_amount] += values[:disbursed_amount]
+          %td
+            = values[:outstanding_principal]
+            - accumulate_row_values[:outstanding_principal] += values[:outstanding_principal]
+      - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+      %tfoot
+        %tr
+          %th
+            Total
+          %td
+          %td
+            = total_rows[:dues_emi_principal]
+          %td
+            = total_rows[:dues_emi_interest]
+          %td
+            = total_rows[:dues_emi_total]
+          %td
+            = total_rows[:emi_collect_principal]
+          %td
+            = total_rows[:emi_collect_interest]
+          %td
+            = total_rows[:emi_collect_total]
+          %td
+            = total_rows[:loan_fee_collect]
+          %td
+            = total_rows[:preclosure_collect_fee]
+          %td
+            = total_rows[:preclosure_collect]
+          %td
+            = total_rows[:total_fee_collect]
+          %td
+            = total_rows[:interest_accrued]
+          %td
+            = total_rows[:disbursed_amount]
+          %td
+            = total_rows[:outstanding_principal]

@@ -38,6 +38,22 @@ fee product, and when
     all(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_id).select{|fee_receipt| fee_receipt.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
   end
 
+  def self.all_paid_loan_fee_receipts_on_accounted_at(location_id, on_date = nil)
+    search = {}
+    location = BizLocation.get location_id
+    if location.location_level.level == 0
+      search[:performed_at] = location_id
+    else
+      search[:accounted_at] = location_id
+    end
+    search[:fee_applied_on_type] = FEE_ON_LOAN
+    search[:effective_on] = on_date unless on_date.blank?
+    fee_receipts = all(search)
+    loan_fee_receipts = fee_receipts.select{|fee_receipt| fee_receipt.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
+    loan_preclosure_fee_receipts = fee_receipts.select{|fee_receipt| fee_receipt.simple_fee_product.fee_charged_on_type == PRECLOSURE_PENALTY_ON_LOAN}
+    {:loan_fee_receipts => loan_fee_receipts, :loan_preclousure_fee_receipts => loan_preclosure_fee_receipts}
+  end
+
   def self.record_ad_hoc_fee(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id, recorded_by_id)
     Validators::Arguments.not_nil?(fee_money_amount, fee_product, effective_on, fee_recorded_on_type, performed_by_id, recorded_by_id)
 

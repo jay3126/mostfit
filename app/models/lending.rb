@@ -334,20 +334,20 @@ class Lending
     scheduled_principal_due(on_date) + scheduled_interest_due(on_date)
   end
 
-  def actual_principal_outstanding
+  def actual_principal_outstanding(on_date = Date.today)
     return zero_money_amount unless is_outstanding?
 
-    if (total_loan_disbursed > principal_received_till_date)
-      return (total_loan_disbursed - principal_received_till_date)
+    if (total_loan_disbursed > principal_received_till_date(on_date))
+      return (total_loan_disbursed - principal_received_till_date(on_date))
     end
     zero_money_amount
   end
 
-  def actual_interest_outstanding
+  def actual_interest_outstanding(on_date = Date.today)
     return zero_money_amount unless is_outstanding?
 
-    if (total_interest_applicable > interest_received_till_date)
-      return (total_interest_applicable - interest_received_till_date)
+    if (total_interest_applicable > interest_received_till_date(on_date))
+      return (total_interest_applicable - interest_received_till_date(on_date))
     end
     zero_money_amount
   end
