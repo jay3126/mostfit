@@ -144,13 +144,33 @@ class ReportingFacade < StandardFacade
       next unless loan.is_outstanding?
       actual_outstanding_amount += loan.actual_total_outstanding
       scheduled_outstanding_amount += loan.scheduled_total_outstanding(on_date)
-      if loan.scheduled_principal_outstanding(on_date) > loan.actual_total_outstanding
-        overdue_amounts += (loan.scheduled_principal_outstanding(on_date) - loan.actual_total_outstanding)
+      if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
+        overdue_amounts += (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))
       else
-        overdue_amounts += (loan.actual_total_outstanding - loan.scheduled_principal_outstanding(on_date))
+        overdue_amounts += (loan.actual_principal_outstanding(on_date) - loan.scheduled_principal_outstanding(on_date))
       end
     end
     result = {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
+  end
+
+  #this method will return back the overdue values (principal and interest) on date.
+  def overdue_amounts(loan_id, on_date)
+    result = {}
+    loan = Lending.get(loan_id)
+    next unless loan.is_outstanding?
+
+    if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
+      principal_overdue_amount = (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))
+    else
+      principal_overdue_amount = (loan.actual_principal_outstanding(on_date) - loan.scheduled_principal_outstanding(on_date))
+    end
+
+    if loan.scheduled_interest_outstanding(on_date) > loan.actual_interest_outstanding(on_date)
+      interest_overdue_amount = (loan.scheduled_interest_outstanding(on_date) - loan.actual_interest_outstanding(on_date))
+    else
+      interest_overdue_amount = (loan.actual_interest_outstanding(on_date) - loan.scheduled_interest_outstanding(on_date))
+    end
+    result = {:principal_overdue_amount => principal_overdue_amount, :interest_overdue_amount => interest_overdue_amount}
   end
 
   #this functions gives the repayments details till date.
