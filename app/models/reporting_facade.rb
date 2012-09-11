@@ -157,18 +157,21 @@ class ReportingFacade < StandardFacade
   def overdue_amounts(loan_id, on_date)
     result = {}
     loan = Lending.get(loan_id)
-    next unless loan.is_outstanding?
+    if loan.is_outstanding?
 
-    if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
-      principal_overdue_amount = (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))
-    else
-      principal_overdue_amount = (loan.actual_principal_outstanding(on_date) - loan.scheduled_principal_outstanding(on_date))
-    end
+      if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
+        principal_overdue_amount = (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))
+      else
+        principal_overdue_amount = (loan.actual_principal_outstanding(on_date) - loan.scheduled_principal_outstanding(on_date))
+      end
 
-    if loan.scheduled_interest_outstanding(on_date) > loan.actual_interest_outstanding(on_date)
-      interest_overdue_amount = (loan.scheduled_interest_outstanding(on_date) - loan.actual_interest_outstanding(on_date))
+      if loan.scheduled_interest_outstanding(on_date) > loan.actual_interest_outstanding(on_date)
+        interest_overdue_amount = (loan.scheduled_interest_outstanding(on_date) - loan.actual_interest_outstanding(on_date))
+      else
+        interest_overdue_amount = (loan.actual_interest_outstanding(on_date) - loan.scheduled_interest_outstanding(on_date))
+      end
     else
-      interest_overdue_amount = (loan.actual_interest_outstanding(on_date) - loan.scheduled_interest_outstanding(on_date))
+      principal_overdue_amount = interest_overdue_amount = MoneyManager.default_zero_money
     end
     result = {:principal_overdue_amount => principal_overdue_amount, :interest_overdue_amount => interest_overdue_amount}
   end
