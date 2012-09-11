@@ -1,0 +1,212 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        Branch Code
+      %th
+        Center Name
+      %th
+        Loan Product
+      %th
+        Loan Account Number
+      %th
+        Member code
+      %th
+        Member Name
+      %th
+        Gender
+      %th
+        Caste Name
+      %th
+        Religion Name
+      %th
+        Occupation Name
+      %th
+        PSL Category
+      %th
+        Phone Number
+      %th
+        ID Proof
+      %th
+        ID Proof No.
+      %th
+        Gurantor Name
+      %th
+        Member address
+      %th
+        Pincode
+      %th
+        Meeting Address
+      %th
+        Loan Cycle
+      %th
+        Disbursal Date
+      %th
+        Loan Start Date
+      %th
+        Loan Maturity Date
+      %th
+        Loan Purpose
+      %th
+        Loan Disbursed Amount
+      %th
+        EMI Amount
+      %th
+        Outstanding Principal
+      %th
+        Outstanding Interest
+      %th
+        Overdue Principal
+      %th
+        Overdue Interest
+      %th
+        No. Of Days Overdue
+      %th
+        Days Since Disbursal
+      %th
+        Days Remaining
+      %th
+        Source Of Fund ID
+      %th
+        Loan Status
+      %th
+        Loan Foreclosure Date
+      %th
+        RO Name
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:branch_id]
+        %td
+          = values[:center_name]
+        %td
+          = values[:loan_product_name]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:member_id]
+        %td
+          = values[:member_name]
+        %td
+          = values[:gender]
+        %td
+          = values[:caste]
+        %td
+          = values[:religion]
+        %td
+          = values[:occupation]
+        %td
+          = values[:psl_category]
+        %td
+          = values[:phone_number]
+        %td
+          = values[:reference1_type]
+        %td
+          = values[:reference1_id]
+        %td
+          = values[:gurantor_name]
+        %td
+          = values[:member_address]
+        %td
+          = values[:pincode]
+        %td
+          = values[:meeting_address]
+        %td
+          = values[:loan_cycle]
+        %td
+          = values[:loan_disbursal_date]
+        %td
+          = values[:loan_start_date]
+        %td
+          = values[:loan_end_date]
+        %td
+          = values[:loan_purpose]
+        %td
+          = values[:loan_disbursed_amount]
+          - accumulate_row_values[:loan_disbursed_amount] += values[:loan_disbursed_amount]
+        %td
+          = values[:installment_amount]
+          - accumulate_row_values[:installment_amount] += values[:installment_amount]
+        %td
+          = values[:loan_outstanding_principal]
+          - accumulate_row_values[:loan_outstanding_principal] += values[:loan_outstanding_principal]
+        %td
+          = values[:loan_outstanding_interest]
+          - accumulate_row_values[:loan_outstanding_interest] += values[:loan_outstanding_interest]
+        %td
+          = values[:overdue_principal]
+          - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
+        %td
+          = values[:overdue_interest]
+          - accumulate_row_values[:overdue_interest] += values[:overdue_interest]
+        %td
+          = values[:days_overdue]
+        %td
+          = values[:days_since_disbursal]
+        %td
+          = values[:days_remaining]
+        %td
+          = values[:source_of_fund_id]
+        %td
+          = values[:loan_status]
+        %td
+          = values[:loan_closure_date]
+        %td
+          = values[:ro_name]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:loan_disbursed_amount]
+      %td
+        = total_rows[:installment_amount]
+      %td
+        = total_rows[:loan_outstanding_principal]
+      %td
+        = total_rows[:loan_outstanding_interest]
+      %td
+        = total_rows[:overdue_principal]
+      %td
+        = total_rows[:overdue_interest]
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
