@@ -1,0 +1,171 @@
+=partial :form
+%div{:style => 'display:table; width:65%;'}
+  %h2 Loan Information
+  %table.tall.shaded
+    %thead
+      %tr
+        %th
+          Loan Number
+        %td
+          = @data[:loan_info][:loan_number]
+      %tr
+        %th
+          Loan Start Date
+        %td
+          = @data[:loan_info][:loan_start_date]
+      %tr
+        %th
+          Loan End Date
+        %td
+          = @data[:loan_info][:loan_end_date]
+      %tr
+        %th
+          Disbursal Date
+        %td
+          = @data[:loan_info][:disbursal_date]
+      %tr
+        %th
+          Disbursal Amount
+        %td
+          = @data[:loan_info][:disbursed_amount]
+      %tr
+        %th
+          No. Of Installment
+        %td
+          = @data[:loan_info][:total_installments]
+      %tr
+        %th
+          Outstanding Principal Amount(includeing overdue principal)
+        %td
+          = @data[:loan_info][:outstanding_principal]
+      %tr
+        %th
+          Outstanding Interest Amount(includeing overdue interset)
+        %td
+          = @data[:loan_info][:outstanding_interest]
+      %tr
+        %th
+          Overdue Principal Amount
+        %td
+          = @data[:loan_info][:overdue_principal]
+      %tr
+        %th
+          Overdue Interest Amount
+        %td
+          = @data[:loan_info][:overdue_interest]
+      %tr
+        %th
+          Installment Fallen Due
+        %td
+          = @data[:loan_info][:installment_fallen_due]
+      %tr
+        %th
+          Installment Remaining
+        %td
+          = @data[:loan_info][:installment_remaining]
+      %tr
+        %th
+          Total Amount Paid
+        %td
+          = @data[:loan_info][:total_amount_paid]
+  %div{:style => "display:table-cell; width:35%;"}
+    %h2 Customer Information
+    %table.tall.shaded
+      %thead
+        %tr
+          %th
+            Customer Name
+          %td
+            = @data[:customer_info][:member_name]
+        %tr
+          %th
+            Customer Id
+          %td
+            = @data[:customer_info][:member_id]
+        %tr
+          %th
+            Customer Address
+          %td
+            = @data[:customer_info][:member_address]
+        %tr
+          %th
+            Center Name
+          %td
+            = @data[:customer_info][:center_name]
+        %tr
+          %th
+            Loan Purpose
+          %td
+            = @data[:customer_info][:loan_purpose]
+        %tr
+          %th
+            Loan Cycle
+          %td
+            = @data[:customer_info][:loan_cycle]
+        %tr
+          %th
+            Loan Status
+          %td
+            = @data[:customer_info][:loan_status].humanize
+
+%br
+%h2 Charges History
+%table.tall.shaded
+  %tr
+    %th
+      Schedule Date
+    %th
+      Payment Date
+    %th
+      Due Amount
+    %th
+      Paid Amount
+  - @data[:charge_history].each do |id, fee_charge|
+    %tr
+      %td
+        = fee_charge[:schedule_date].strftime('%Y-%m-%d')
+      %td
+        = fee_charge[:payment_date]
+      %td
+        = fee_charge[:due_amount]
+      %td
+        = fee_charge[:paid_amount]
+%br
+%h2 Repayments History
+%table.tall.shaded
+  %thead
+    %tr
+      %th
+        Schedule Date
+      %th
+        Payment Date
+      %th
+        Principal Due Amount
+      %th
+        Interest Due Amount
+      %th
+        Total Due Amount
+      %th
+        Principal Paid Amount
+      %th
+        Interest Paid Amount
+      %th
+        Total Paid Amount
+  - @data[:repayments_history].sort.each do |key, repayment|
+    %tr
+      %td
+        = repayment[:schedule_date]
+      %td
+        = repayment[:payment_date]
+      %td
+        = repayment[:principal_due]
+      %td
+        = repayment[:interest_due]
+      %td
+        = repayment[:total_due]
+      %td
+        = repayment[:principal_paid]
+      %td
+        = repayment[:interest_paid]
+      %td
+        = repayment[:total_paid]

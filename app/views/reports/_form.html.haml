@@ -115,7 +115,7 @@
         = LendingProduct.get(lending_product_id).name
       - if loan_lan_number
         Loan LAN Number:
-        = Lending.get(:lan => loan_lan_number).first.lan
+        = Lending.first(:lan => loan_lan_number).lan
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed':''}"}
@@ -279,7 +279,7 @@
           - if @report.respond_to?(:loan_lan_number)
             %td
               Loan LAN Number:
-              = select(:loan_lan_number, :collection => Lending.all.map{|l| l.lan}, :prompt => "Select LAN number", :selected => :loan_lan_number)
+              = select(:loan_lan_number, :collection => Lending.all.map{|l| l.lan}, :prompt => "Select LAN number", :selected => loan_lan_number)
           - if @report.respond_to?(:branch_for_loan_application_report)
             %td
               Branch:
