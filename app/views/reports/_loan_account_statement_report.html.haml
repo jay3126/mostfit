@@ -1,5 +1,10 @@
+:javascript
+  $('table.repayment_history').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
 =partial :form
-%div{:style => 'display:table; width:65%;'}
+%div{:style => 'display:table; width:65%;', :class => 'shaded'}
   %h2 Loan Information
   %table.tall.shaded
     %thead
@@ -106,20 +111,21 @@
           %th
             Loan Status
           %td
-            = @data[:customer_info][:loan_status].humanize
+            = @data[:customer_info][:loan_status].humanize rescue ''
 
 %br
 %h2 Charges History
-%table.tall.shaded
-  %tr
-    %th
-      Schedule Date
-    %th
-      Payment Date
-    %th
-      Due Amount
-    %th
-      Paid Amount
+%table.dataTable.report.nojs.weeksheet
+  %thead
+    %tr
+      %th
+        Schedule Date
+      %th
+        Payment Date
+      %th
+        Due Amount
+      %th
+        Paid Amount
   - @data[:charge_history].each do |id, fee_charge|
     %tr
       %td
@@ -132,7 +138,7 @@
         = fee_charge[:paid_amount]
 %br
 %h2 Repayments History
-%table.tall.shaded
+%table.dataTable.report.nojs.weeksheet.repayment_history
   %thead
     %tr
       %th

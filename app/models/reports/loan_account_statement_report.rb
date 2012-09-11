@@ -57,8 +57,8 @@ class LoanAccountStatementReport < Report
       overdue_principal          = overdue_amount[:principal_overdue_amount]
       overdue_interest           = overdue_amount[:interest_overdue_amount]
       loan_installment           = get_reporting_facade(@user).number_of_installments_per_loan(loan.id)
-      installment_fallen_due     = loan_installment[:installments_paid_till_date]
       installment_remaining      = loan_installment[:installments_remaining]
+      installment_fallen_due     = installment_remaining == loan_tenure ? 1 : loan_tenure-installment_remaining
       total_amount_paid          = loan.total_received_till_date
       loan_scheduled_dates       = loan.schedule_dates
       loan_repayments            = loan.loan_receipts.group_by{|lr| lr.effective_on}.to_a
