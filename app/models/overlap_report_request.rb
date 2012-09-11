@@ -30,12 +30,12 @@ class OverlapReportRequest
     self.set_status(SENT_STATUS)
   end
 
-  def self.generate_credit_bureau_request_file(branch, center)
+  def self.generate_credit_bureau_request_file(search_option)
     errors = {}
     errors[:generation_errors] = {}
     errors[:save_status_errors] = {}
-    options = {:at_branch_id => branch, :at_center_id => center}
-    loan_applications = LoanApplication.pending_overlap_report_request_generation(options)
+    #options = {:at_branch_id => branch, :at_center_id => center}
+    loan_applications = LoanApplication.pending_overlap_report_request_generation(search_option)
     credit_bureau_name = "Highmark"
     request_name = "overlap_report_request"
 
@@ -55,7 +55,7 @@ class OverlapReportRequest
     end
 
     FileUtils.rm([filename]) if loan_applications.blank?
-    raise "There are some loan applications which are either in new status or suspected duplicate" if loan_applications.blank?
+    raise "There are no Loan Application pending for Highmark Process" if loan_applications.blank?
 
     log_folder = File.join(Merb.root, "log","highmark","requests")
     FileUtils.mkdir_p log_folder

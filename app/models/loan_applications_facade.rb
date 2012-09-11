@@ -231,8 +231,8 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # generates credit bureau request file for particular branch and center
-  def generate_credit_bureau_request_file(branch, center)
-    OverlapReportRequest.generate_credit_bureau_request_file(branch, center)
+  def generate_credit_bureau_request_file(search_option = {})
+    OverlapReportRequest.generate_credit_bureau_request_file(search_option)
   end
   
 end

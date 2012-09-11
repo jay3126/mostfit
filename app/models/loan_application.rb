@@ -353,10 +353,11 @@ class LoanApplication
 
   #returns all loan applications which are pending for overlap report requests generation
   def self.pending_overlap_report_request_generation(search_options ={})
-    eligible_statuses = [NEW_STATUS, SUSPECTED_DUPLICATE_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
+    eligible_statuses = [SUSPECTED_DUPLICATE_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
+    suspected_duplicate_centers = all(:status => "suspected_duplicate").aggregate(:at_center_id)
     search_options.merge!(:status => eligible_statuses)
-    is_new_or_suspected_duplicate_loan_application = all(search_options).aggregate(:status).include?("1") || all(search_options).aggregate(:status).include?("2")
-    is_new_or_suspected_duplicate_loan_application ? [] : all(search_options)
+    search_options.merge!(:at_center_id.not => suspected_duplicate_centers)
+    all(search_options)
   end
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
