@@ -280,6 +280,12 @@ class LoanApplications < Application
     params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
     params[:loan_application][:client_reference2] = params[:loan_application][:client_reference2].strip
 
+    loan_money_amount = MoneyManager.get_money_instance(params[:loan_application][:amount])
+    loan_amount = loan_money_amount.amount.to_i
+    loan_amount_currency = loan_money_amount.currency
+    params[:loan_application][:amount] = loan_amount
+    params[:loan_application][:currency] = loan_amount_currency
+
     loan_application = @loan_application.update(params[:loan_application])
     if loan_application
       redirect resource(@loan_application), :message => {:notice => "Loan application updated succesfully"}
