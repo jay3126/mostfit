@@ -53,8 +53,9 @@ class LoanAccountStatementReport < Report
       loan_disbursed_amount      = loan.to_money[:disbursed_amount]
       outstanding_principal      = loan.actual_principal_outstanding
       outstanding_interest       = loan.actual_interest_outstanding
-      overdue_principal          = MoneyManager.default_zero_money
-      overdue_interest           = MoneyManager.default_zero_money
+      overdue_amount             =  get_reporting_facade(@user).overdue_amounts(loan.id, Date.today)
+      overdue_principal          = overdue_amount[:principal_overdue_amount]
+      overdue_interest           = overdue_amount[:interest_overdue_amount]
       loan_installment           = get_reporting_facade(@user).number_of_installments_per_loan(loan.id)
       installment_fallen_due     = loan_installment[:installments_paid_till_date]
       installment_remaining      = loan_installment[:installments_remaining]
