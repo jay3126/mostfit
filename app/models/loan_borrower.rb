@@ -46,7 +46,7 @@ class LoanBorrower
     loans[:counterparty_type] = counterparty_type
     loans[:counterparty_id]   = counterparty_id
     all_loan_borrowers = all(loans)
-    all_loan_borrowers.collect {|loan_borrower| loan_borrower.lending}
+    all_loan_borrowers.collect {|loan_borrower| loan_borrower.lending}.compact
   end
 
   def self.aggregate_loans_applied(aggregate_by, on_date)
