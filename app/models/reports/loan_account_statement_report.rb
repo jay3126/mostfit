@@ -44,7 +44,7 @@ class LoanAccountStatementReport < Report
         member_address  = member.address
       end
       loan_purpose               = loan.loan_purpose.blank? ? 'Not Specified' : loan.loan_purpose
-      loan_cycle                 = ''
+      loan_cycle                 = loan.cycle_number
       loan_status                = loan.status
       loan_start_date            = loan.scheduled_first_repayment_date
       loan_end_date              = loan.last_scheduled_date
@@ -54,7 +54,7 @@ class LoanAccountStatementReport < Report
       oustanding_with_overdue    = get_reporting_facade(@user).sum_outstanding_amounts_including_overdues(loan.id, Date.today)
       outs_principalwith_overdue = oustanding_with_overdue[:principal_outstanding_including_overdues]
       outs_interest_with_overdue = oustanding_with_overdue[:interest_outstanding_including_overdues]
-      overdue_amount             =  get_reporting_facade(@user).overdue_amounts(loan.id, Date.today)
+      overdue_amount             = get_reporting_facade(@user).overdue_amounts(loan.id, Date.today)
       overdue_principal          = overdue_amount[:principal_overdue_amount]
       overdue_interest           = overdue_amount[:interest_overdue_amount]
       loan_installment           = get_reporting_facade(@user).number_of_installments_per_loan(loan.id)

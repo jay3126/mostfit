@@ -1,19 +1,19 @@
 class Reports < Application
   include DateParser
   Types = {
-    :periodic     => [DailyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, LoanCollectionsDetailReport],
+    :periodic     => [DailyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, LoanCollectionsDetailReport, LoanAccountStatementReport],
     #:periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
-    :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
+    :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport, MonthlyLoanDetailsReport],
     # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
     :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport, BranchReport],
-    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, OverdueDetailedReport, AdvancePaymentsCurrentReport, BranchDateWiseDcaReport],
+    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, SecuritisationLoanDetailsReport, OverdueDetailedReport, AdvancePaymentsCurrentReport, BranchDateWiseDcaReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
     :targets_and_projections  => [IncomeCashflowProjectionReport],
     #:targets_and_projections  => [IncomeCashflowProjectionReport, CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
     #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
     #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
     #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
-    :accounting   => [TrialBalance, DayBook, LoanAccountStatementReport, MonthlyLoanDetailsReport]
+    :accounting   => [TrialBalance, DayBook]
   }
   Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
   layout :determine_layout

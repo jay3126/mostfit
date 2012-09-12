@@ -4,7 +4,7 @@ class MonthlyLoanDetailsReport < Report
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 30
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
-    @name = "Securitisation Pool Information Report from #{@from_date} to #{@to_date}"
+    @name = "Monthly Loan Details Report from #{@from_date} to #{@to_date}"
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
@@ -84,7 +84,7 @@ class MonthlyLoanDetailsReport < Report
       loan_status                = loan.status.humanize
       loan_account_number        = loan.lan
       loan_purpose               = loan.loan_purpose
-      loan_cycle                 = ''
+      loan_cycle                 = loan.cycle_number
       loan_tenure                = loan.lending_product.tenure
       loan_roi                   = loan.lending_product.interest_rate
       loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)

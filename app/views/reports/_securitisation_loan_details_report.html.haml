@@ -1,0 +1,178 @@
+= partial :form
+- header = []
+- header =  ['State Name', 'District Name', 'Branch Name', 'Branch Code', 'Loan Porduct','Repayment Frequency', 'Customer Type', 'Installment Type', 'Interest Type', 'Prepay Penalty', 'Prepay Penalty Type']
+- header += ['Penalty On Overdue', 'Overdue Penalty Type', 'Upfront Charges', 'Upfront Charges Type', 'Upfront Refund Deposit', 'Upfront Deposit Type']
+- header += ['Other Upfront Collection', 'Other Upfront Collection Type', 'Collateral Security Type', 'Collateral Value', 'Insurance', 'Top Up Loan Product']
+- header += ['Repayment Schedule Provided', 'Address', 'ID Proof', 'ID Proof Number', 'Village', 'Center Name', 'Customer Name', 'Customer ID', 'Gender Name', 'Caste Name']
+- header += ['Religion Name', 'Occupation Name', 'Guarantor Name', 'Loan Refereance Number', 'Loan Cycle Number', 'Rate Of Interest', 'Number Of Installments']
+- header += ['Pin Code', 'Disbursement Mode', 'Loan Start Date', 'Loan Maturity Date', 'Loan Purpose Name', 'Loan Status', 'Disbursed Date', 'Disbursed Amount']
+- header += ['EWI Amount', 'EWI Date', 'Number Of Repayments', 'Principal Due', 'Interest Due', 'Total Due', 'Overdue', 'Overdue Installment', 'Number Of Days Overdues']
+- header += ['Weeks Since Disbursal', 'Weeks Remaining']
+
+%table.monthly_loan.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      - header.each do |value|
+        %th
+          = value
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.each do |branch, values|
+      %tr
+        %td
+          %b
+            = values[:state_name]
+        %td
+          = values[:district_name]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:branch_id]
+        %td
+          = values[:loan_product_name]
+        %td
+          = values[:repay_frequency]
+        %td
+          = values[:customer_type]
+        %td
+          = values[:installment_type]
+        %td
+          = values[:interest_type]
+        %td
+          = values[:prepay_penalty]
+        %td
+          = values[:prepay_penalty_type]
+        %td
+          = values[:penalty_on_overdue]
+        %td
+          = values[:overdue_penalty_type]
+        %td
+          = values[:upfront_charges]
+        %td
+          = values[:upfront_charges_type]
+        %td
+          = values[:upfront_refund_deposit]
+        %td
+          = values[:upfront_deposit_type]
+        %td
+          = values[:other_upfront_collection]
+        %td
+          = values[:other_upfront_collection_type]
+        %td
+          = values[:collateral_security_type]
+        %td
+          = values[:collateral_value]
+        %td
+          = values[:loan_insurance]
+        %td
+          = values[:top_up_loan_product]
+        %td
+          = values[:repayment_schedule_provided]
+        %td
+          = values[:member_address]
+        %td
+          = values[:reference1_type]
+        %td
+          = values[:reference1_id]
+        %td
+          = values[:village]
+        %td
+          = values[:center_name]
+        %td
+          = values[:member_name]
+        %td
+          = values[:member_id]
+        %td
+          = values[:gender_name]
+        %td
+          = values[:caste_name]
+        %td
+          = values[:religion_name]
+        %td
+          = values[:occupation_name]
+        %td
+          = values[:guarantor_name]
+        %td
+          = values[:loan_account_number]
+        %td
+          = values[:loan_cycle]
+        %td
+          = values[:loan_roi]
+        %td
+          = values[:number_of_installment]
+        %td
+          = values[:pincode]
+        %td
+          = values[:disbursement_mode]
+        %td
+          = values[:loan_start_date]
+        %td
+          = values[:loan_matruity_date]
+        %td
+          = values[:loan_pupose]
+        %td
+          = values[:loan_status]
+        %td
+          = values[:loan_disbursed_date]
+        %td
+          = values[:loan_disbursed_amount]
+          - accumulate_row_values[:loan_disbursed_amount] += values[:loan_disbursed_amount]
+        %td
+          = values[:ewi_amount]
+          - accumulate_row_values[:ewi_amount] += values[:ewi_amount]
+        %td
+          = values[:ewi_date]
+        %td
+          = values[:number_of_repayments]
+        %td
+          = values[:loan_total_principal_due]
+          - accumulate_row_values[:loan_total_principal_due] += values[:loan_total_principal_due]
+        %td
+          = values[:loan_total_interest_due]
+          - accumulate_row_values[:loan_total_interest_due] += values[:loan_total_interest_due]
+        %td
+          = values[:loan_total_due]
+          - accumulate_row_values[:loan_total_due] += values[:loan_total_due]
+        %td
+          = values[:loan_total_overdue]
+          - accumulate_row_values[:loan_total_overdue] += values[:loan_total_overdue]
+        %td
+          = values[:loan_overdue_installments]
+        %td
+          = values[:number_of_days_overdues]
+        %td
+          = values[:weeks_since_disbursal]
+        %td
+          = values[:weeks_remaining]
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      -(1..46).each do |k|
+        %td
+      %td
+        = total_rows[:loan_disbursed_amount]
+      %td
+        = total_rows[:ewi_amount]
+      %td
+      %td
+      %td
+        = total_rows[:loan_principal]
+      %td
+        = total_rows[:loan_interest]
+      %td
+        = total_rows[:loan_total_interest_due]
+      %td
+        = total_rows[:loan_total_overdue]
+      %td
+      -(1..3).each do |k|
+        %td
+#header_values
+  - count = 1
+  =# check_box :name => 'header_all', :checked => true, :onclick => "check_all_box(this,'advance');"
+  - header.each do |value|
+    = value
+    = check_box :name => 'header', :value => "#{value}", :class => 'report_check_box', :checked => true, :onclick => "toggle_table_row(this,'monthly_loan', '#{count}');"
+    - count += 1

@@ -57,7 +57,7 @@ class SecuritisationPoolInformationReport < Report
       end
       loan_account_number        = loan.lan
       loan_purpose               = loan.loan_purpose
-      loan_cycle                 = ''
+      loan_cycle                 = loan.cycle_number
       loan_roi                   = loan.lending_product.interest_rate
       loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
       loan_end_date              = loan.last_scheduled_date
