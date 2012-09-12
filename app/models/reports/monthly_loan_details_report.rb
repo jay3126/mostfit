@@ -44,11 +44,13 @@ class MonthlyLoanDetailsReport < Report
 
   def generate
 
-    data = {}
+    data     = {}
+    lendings = []
     branches = @biz_location_branch.class == Array ? @biz_location_branch : [@biz_location_branch]
-    lendings = LoanStatusChange.all(:effective_on => (@from_date..@to_date)).lending
-    lendings = lendings.select{|lending| branches.include?(lending.accounted_at_origin)}.uniq
-    lendings.each do |loan|
+    branches.each do |branch|
+      lendings << LoanAdministration.get_loans_accounted(branch, @to_date).compact
+    end
+    lendings.flatten.each do |loan|
       member = loan.loan_borrower.counterparty
       if member.blank?
         member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = ''
@@ -94,8 +96,8 @@ class MonthlyLoanDetailsReport < Report
       installment_number         = loan.lending_product.tenure
       loan_disbursed_date        = loan.disbursal_date
       loan_disbursed_amount      = loan.to_money[:disbursed_amount]
-      loan_outstanding_principal = loan.actual_principal_outstanding
-      loan_outstanding_interest  = loan.actual_interest_outstanding
+      loan_outstanding_principal = loan.actual_principal_outstanding(@to_date)
+      loan_outstanding_interest  = loan.actual_interest_outstanding(@to_date)
       total_interest_due_at_org  = MoneyManager.default_zero_money
       demand_completed_weeks     = MoneyManager.default_zero_money
       date_week                  = ''
@@ -108,7 +110,7 @@ class MonthlyLoanDetailsReport < Report
       branch_name                = branch ? branch.name : "Not Specified"
       branch_id                  = branch ? branch.id : "Not Specified"
       loan_installment           = get_reporting_facade(@user).number_of_installments_per_loan(loan.id)
-      overdue_amount             = get_reporting_facade(@user).overdue_amounts(loan.id, Date.today)
+      overdue_amount             = get_reporting_facade(@user).overdue_amounts(loan.id, @to_date)
       overdue_principal          = overdue_amount[:principal_overdue_amount]
       overdue_interest           = overdue_amount[:interest_overdue_amount]
       installment_remaining      = loan_installment[:installments_remaining]

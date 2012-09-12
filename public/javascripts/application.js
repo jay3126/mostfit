@@ -805,8 +805,8 @@ function add_text_field(){
   count = jQuery('.biz_location').size();
   jQuery("#TextBoxesGroup").append('<tr><th>Branch </th><td>' +
     "<input type='text' name='bank_branch["+count+"][bank_branch]' id='bank_branch_"+count+"__bank_branch_' value='' ></td>"+
-  "<th> Location</th> <td><select id='bank_branch_0"+count+"__location_' name='bank_branch["+count+"][location]' class='biz_location'>"+locations+
-      "</td></tr>");
+    "<th> Location</th> <td><select id='bank_branch_0"+count+"__location_' name='bank_branch["+count+"][location]' class='biz_location'>"+locations+
+    "</td></tr>");
 }
 
 $(document).ready(function(){
@@ -1276,5 +1276,31 @@ function date_validation(){
   }else{
     alert(message);
     return false;
+  }
+}
+
+function check_all_box(obj, table_class){
+
+  if(jQuery(obj).attr('checked')) {
+    jQuery('table.'+table_class+' td').show();
+    jQuery('table.'+table_class+' tr').show();
+    jQuery('table.'+table_class+' th').show();
+    jQuery('.report_check_box').attr('checked',true);
+  }
+  else{
+    jQuery('table.'+table_class+' tr').hide();
+    jQuery(".report_check_box").attr('checked', false);
+  }
+}
+function toggle_table_row(obj, table_class, row_no){
+
+  jQuery('table.'+table_class+' td').show();
+  jQuery('table.'+table_class+' tr').show();
+  jQuery('table.'+table_class+' th').show();
+  if(jQuery(obj).attr('checked')) {
+    jQuery("table.advance td:nth-child("+row_no+"),th:nth-child("+row_no+")").show();
+  }
+  else{
+    jQuery('table.advance td:nth-child('+row_no+'),th:nth-child('+row_no+')').hide();
   }
 }

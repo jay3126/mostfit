@@ -1,21 +1,11 @@
 = partial :form
-%table.dataTable.report.weeksheet.nojs
+- header = ['Branch Name', 'Center Name', 'FCO Name', 'Loan ID', 'Loan Account Number', 'Customer Name', 'Advance Payment']
+%table.dataTable.report.weeksheet.nojs.advance
   %thead
     %tr
-      %th
-        Branch Name
-      %th
-        Center Name
-      %th
-        FCO Name
-      %th
-        Loan Id
-      %th
-        Loan Account Number
-      %th
-        Customer Name
-      %th
-        Advance Payment
+      - header.each do |value|
+        %th
+          = value
 
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
@@ -50,3 +40,12 @@
       %td
       %td
         = total_rows[:advance_payment]
+
+#header_values
+  - count = 1
+  Select All
+  = check_box :name => 'header_all', :checked => true, :onclick => "check_all_box(this,'advance');"
+  - header.each do |value|
+    = value
+    = check_box :name => 'header', :value => "#{value}", :class => 'report_check_box', :checked => true, :onclick => "toggle_table_row(this,'advance', '#{count}');"
+    - count += 1
