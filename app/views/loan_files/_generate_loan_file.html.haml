@@ -7,7 +7,7 @@
 - center_disbursal_date = BizLocation.get(@center.id).center_disbursal_date.blank? ?  Date.today : BizLocation.get(@center.id).center_disbursal_date
 .shaded
   %h1 Add to Loan File
-  - if @loan_applications_pending_loan_file_generation and not @loan_applications_pending_loan_file_generation.empty?
+  - unless @loan_applications_pending_loan_file_generation.blank?
     %form{:action => url(:controller => :loan_files, :action => :record_loan_file), :method => :post}
       %table.form{:style => "width:100%;"}
         %thead

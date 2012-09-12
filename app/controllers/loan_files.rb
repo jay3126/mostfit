@@ -129,8 +129,8 @@ class LoanFiles < Application
         @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
         @center_id = params[:child_location_id] ? params[:child_location_id] : nil
         @for_cycle_number = 1
-        if params['loan_file_identifier'] and not params['loan_file_identifier'].nil?
-          @loan_file = loan_applications_facade.locate_loan_file(params['loan_file_identifier'])
+        unless params[:loan_file_identifier].blank?
+          @loan_file = loan_applications_facade.locate_loan_file(params[:loan_file_identifier])
           loan_applications_facade.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
         else
           @loan_file = loan_applications_facade.create_loan_file(@branch_id, @center_id, @for_cycle_number,
@@ -261,7 +261,7 @@ class LoanFiles < Application
     @center = location_facade.get_location(@center_id)
     @center_cycle_number = 1
     @loan_file = loan_applications_facade.locate_loan_file_at_center(@branch_id, @center_id, @center_cycle_number)
-    @loan_applications_pending_loan_file_generation = loan_applications_facade.pending_loan_file_generation({:at_branch_id=>@branch_id, :at_center_id => @center_id})
+    @loan_applications_pending_loan_file_generation = loan_applications_facade.pending_loan_file_generation({:at_branch_id => @branch_id, :at_center_id => @center_id})
     @loan_applications_added_to_loan_file = (not @loan_file.nil?) ? @loan_file.loan_applications : nil
   end
 
