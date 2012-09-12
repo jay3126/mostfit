@@ -3,6 +3,14 @@
 %div{:style => 'display:table; width:100%;'}
   %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
     %tr.even
+      %th.even Loan Id
+      %td
+        = @lending.id
+    %tr.odd
+      %th.odd LAN Number
+      %td
+        = @lending.lan
+    %tr.even
       %th.even Borrower
       %td
         = link_to_with_rights @lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => @lending.loan_borrower.counterparty.id)

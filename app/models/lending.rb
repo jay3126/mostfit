@@ -908,6 +908,8 @@ class Lending
   def self.search(q, per_page)
     if /^\d+$/.match(q)
       Lending.all(:conditions => {:id => q}, :limit => per_page)
+    else
+      Lending.all(:conditions => ["lan=? or lan like ?", q, q+'%'], :limit => per_page)
     end
   end
 
