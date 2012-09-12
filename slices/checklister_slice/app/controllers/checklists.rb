@@ -132,8 +132,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
   def capture_checklist_data
     #find for which checklist is data being captured
-
-
     @checklist=Checklist.get(params[:checklist_id])
     @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
 
@@ -155,8 +153,11 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:staff_id]= params[:staff_id]
     parameter_hash[:staff_name]= params[:staff_name]
     parameter_hash[:staff_role]= "support",
-        parameter_hash[:referral_url]= params[:referral_url]
+    parameter_hash[:referral_url]= params[:referral_url]
 
+    if @checklist_type.name == "Surprise Center Visit"
+      VisitSchedule.create(:visit_scheduled_date => Date.today(),:visited_on => Date.today(),:staff_member_id => session.user.id, :biz_location_id => params[:loc2_id] )
+    end
 
     #capturing meta-data
     #creating object for who filled the checklist
@@ -246,7 +247,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       # message={:error => e.message}
       # message={:error => params[:result_status]}
       message[:error]="Fields cannot be blank"
-    #  render :fill_in_checklist, :message => message
+      #  render :fill_in_checklist, :message => message
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
     else
