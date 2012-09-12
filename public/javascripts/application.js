@@ -1294,13 +1294,10 @@ function check_all_box(obj, table_class){
 }
 function toggle_table_row(obj, table_class, row_no){
 
-  jQuery('table.'+table_class+' td').show();
-  jQuery('table.'+table_class+' tr').show();
-  jQuery('table.'+table_class+' th').show();
   if(jQuery(obj).attr('checked')) {
-    jQuery("table.advance td:nth-child("+row_no+"),th:nth-child("+row_no+")").show();
+    jQuery("table."+table_class+" td:nth-child("+row_no+"),th:nth-child("+row_no+")").show();
   }
   else{
-    jQuery('table.advance td:nth-child('+row_no+'),th:nth-child('+row_no+')').hide();
+    jQuery("table."+table_class+" td:nth-child("+row_no+ "),th:nth-child("+row_no+")").hide();
   }
 }

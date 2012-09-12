@@ -6,7 +6,6 @@
       - header.each do |value|
         %th
           = value
-
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency

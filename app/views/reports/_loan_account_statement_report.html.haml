@@ -42,12 +42,12 @@
         %th
           Outstanding Principal Amount(includeing overdue principal)
         %td
-          = @data[:loan_info][:outstanding_principal]
+          = @data[:loan_info][:outstanding_principal_with_overdue]
       %tr
         %th
           Outstanding Interest Amount(includeing overdue interset)
         %td
-          = @data[:loan_info][:outstanding_interest]
+          = @data[:loan_info][:outstanding_interset_with_overdue]
       %tr
         %th
           Overdue Principal Amount

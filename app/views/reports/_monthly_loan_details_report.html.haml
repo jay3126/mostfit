@@ -1,82 +1,15 @@
 = partial :form
-%table.dataTable.report.weeksheet.nojs
+- header =  ['Branch Name', 'Branch Code','Center Name', 'Loan Porduct', 'Loan Account Number', 'Member Code', 'Member Name', 'Gender','Caste Name','Religion Name']
+- header += ['Occupation Name', 'PSL Category', 'Phone Number', 'ID Proof', 'ID Proof No.','Gurantor Name', 'Member Address', 'Pincode', 'Meeting Address']
+- header += ['Loan Cycle', 'Disbursal Date', 'Loan Start Date', 'Loan Maturity Date', 'Loan Purpose', 'Loan Disbursed Amount', 'EMI Amount']
+- header += ['Outstanding Principal', 'Outstanding Interest', 'Overdue Principal', 'Overdue Interest', 'No. Of Days Overdue', 'Days Since Disbursal']
+- header += ['Days Remaining', 'Source Of Fund ID', 'Loan Status', 'Loan Foreclosure Date', 'RO Name']
+%table.monthly_loan.dataTable.report.weeksheet.nojs
   %thead
     %tr
-      %th
-        Branch Name
-      %th
-        Branch Code
-      %th
-        Center Name
-      %th
-        Loan Product
-      %th
-        Loan Account Number
-      %th
-        Member code
-      %th
-        Member Name
-      %th
-        Gender
-      %th
-        Caste Name
-      %th
-        Religion Name
-      %th
-        Occupation Name
-      %th
-        PSL Category
-      %th
-        Phone Number
-      %th
-        ID Proof
-      %th
-        ID Proof No.
-      %th
-        Gurantor Name
-      %th
-        Member address
-      %th
-        Pincode
-      %th
-        Meeting Address
-      %th
-        Loan Cycle
-      %th
-        Disbursal Date
-      %th
-        Loan Start Date
-      %th
-        Loan Maturity Date
-      %th
-        Loan Purpose
-      %th
-        Loan Disbursed Amount
-      %th
-        EMI Amount
-      %th
-        Outstanding Principal
-      %th
-        Outstanding Interest
-      %th
-        Overdue Principal
-      %th
-        Overdue Interest
-      %th
-        No. Of Days Overdue
-      %th
-        Days Since Disbursal
-      %th
-        Days Remaining
-      %th
-        Source Of Fund ID
-      %th
-        Loan Status
-      %th
-        Loan Foreclosure Date
-      %th
-        RO Name
-
+      - header.each do |value|
+        %th
+          = value
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
@@ -114,7 +47,7 @@
         %td
           = values[:reference1_id]
         %td
-          = values[:gurantor_name]
+          = values[:guarantor_name]
         %td
           = values[:member_address]
         %td
@@ -124,7 +57,7 @@
         %td
           = values[:loan_cycle]
         %td
-          = values[:loan_disbursal_date]
+          = values[:loan_disbursed_date]
         %td
           = values[:loan_start_date]
         %td
@@ -168,29 +101,8 @@
     %tr
       %th
         Total
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
+      -(1..23).each do |k|
+        %td
       %td
         = total_rows[:loan_disbursed_amount]
       %td
@@ -203,10 +115,12 @@
         = total_rows[:overdue_principal]
       %td
         = total_rows[:overdue_interest]
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
-      %td
+      -(1..7).each do |k|
+        %td
+#header_values
+  - count = 1
+  =# check_box :name => 'header_all', :checked => true, :onclick => "check_all_box(this,'advance');"
+  - header.each do |value|
+    = value
+    = check_box :name => 'header', :value => "#{value}", :class => 'report_check_box', :checked => true, :onclick => "toggle_table_row(this,'monthly_loan', '#{count}');"
+    - count += 1

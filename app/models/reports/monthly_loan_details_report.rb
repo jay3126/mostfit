@@ -60,6 +60,7 @@ class MonthlyLoanDetailsReport < Report
         member_name     = member.name.humanize
         member_state    = member.state.humanize
         member_address  = member.address
+        phone_number    = member.telephone_number
         reference1_type = member.reference_type.humanize
         reference1_id   = member.reference
         reference2_type = member.reference2_type.humanize
@@ -94,8 +95,8 @@ class MonthlyLoanDetailsReport < Report
       installment_amount         = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
       installment_frequency      = loan.lending_product.repayment_frequency
       installment_number         = loan.lending_product.tenure
-      loan_disbursed_date        = loan.disbursal_date
-      loan_disbursed_amount      = loan.to_money[:disbursed_amount]
+      loan_disbursed_date        = loan.disbursal_date.blank? ? 'Not Disbursed' : loan.disbursal_date
+      loan_disbursed_amount      = loan.is_outstanding? ? loan.to_money[:disbursed_amount] : MoneyManager.default_zero_money
       loan_outstanding_principal = loan.actual_principal_outstanding(@to_date)
       loan_outstanding_interest  = loan.actual_interest_outstanding(@to_date)
       total_interest_due_at_org  = MoneyManager.default_zero_money
@@ -135,7 +136,7 @@ class MonthlyLoanDetailsReport < Report
       data[loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
         :guarantor_name => guarantor_name, :occupation => occupation, :gender => gender, :pincode => pincode, :psl_category => psl_category,
         :village_slum => village_slum, :city => city, :district => district, :loan_product_name => loan_product_name, :tenor_in_week => tenor_in_week,
-        :center_name => center_name, :center_id => center_id, :loan_account_number => loan_account_number,
+        :center_name => center_name, :center_id => center_id, :loan_account_number => loan_account_number, :phone_number => phone_number,
         :branch_name => branch_name, :branch_id => branch_id,
         :reference1_type => reference1_type, :reference1_id => reference1_id,
         :reference2_type => reference2_type, :reference2_id => reference2_id,

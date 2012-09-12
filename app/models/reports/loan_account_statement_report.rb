@@ -51,8 +51,9 @@ class LoanAccountStatementReport < Report
       loan_disbursed_date        = loan.disbursal_date
       loan_tenure                = loan.lending_product.tenure
       loan_disbursed_amount      = loan.to_money[:disbursed_amount]
-      outstanding_principal      = loan.actual_principal_outstanding
-      outstanding_interest       = loan.actual_interest_outstanding
+      oustanding_with_overdue    = get_reporting_facade(@user).sum_outstanding_amounts_including_overdues(loan.id, Date.today)
+      outs_principalwith_overdue = oustanding_with_overdue[:principal_outstanding_including_overdues]
+      outs_interest_with_overdue = oustanding_with_overdue[:interest_outstanding_including_overdues]
       overdue_amount             =  get_reporting_facade(@user).overdue_amounts(loan.id, Date.today)
       overdue_principal          = overdue_amount[:principal_overdue_amount]
       overdue_interest           = overdue_amount[:interest_overdue_amount]
@@ -96,7 +97,7 @@ class LoanAccountStatementReport < Report
       data[:customer_info] = {:member_name => member_name, :member_id => member_id, :member_address => member_address, :center_name =>  center_name,
         :loan_purpose => loan_purpose, :loan_cycle => loan_cycle, :loan_status => loan_status}
       data[:loan_info] = {:loan_number => @lan_number, :loan_start_date => loan_start_date, :loan_end_date => loan_end_date, :total_installments => loan_tenure,
-        :disbursal_date => loan_disbursed_date, :outstanding_principal => outstanding_principal, :outstanding_interset => outstanding_interest,
+        :disbursal_date => loan_disbursed_date, :outstanding_principal_with_overdue => outs_principalwith_overdue, :outstanding_interset_with_overdue => outs_interest_with_overdue,
         :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :installment_fallen_due => installment_fallen_due,
         :disbursed_amount => loan_disbursed_amount,:installment_remaining => installment_remaining, :total_amount_paid => total_amount_paid}
     end
