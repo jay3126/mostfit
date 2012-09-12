@@ -7,6 +7,8 @@ class Lending
   include LoanUtility
   include LoanValidations
 
+  after  :create,    :update_cycle_number
+
   property :id,                             Serial
   property :lan,                            *UNIQUE_ID
   property :applied_amount,                 *MONEY_AMOUNT_NON_ZERO
@@ -35,6 +37,7 @@ class Lending
   property :created_at,                     *CREATED_AT
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
+  property :cycle_number,                   Integer, :default => 1, :nullable => false, :index => true
 
   def administered_at_origin_location; BizLocation.get(self.administered_at_origin); end
   def accounted_at_origin_location; BizLocation.get(self.accounted_at_origin); end
@@ -45,6 +48,20 @@ class Lending
 
   def accounted_at(on_date)
     LoanAdministration.get_accounted_at(self.id, on_date)
+  end
+
+  #Increment/sync the loan cycle number. All the past loans which are disbursed are counted
+  def update_cycle_number
+    client_facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, User.first)
+    client = self.loan_borrower.counterparty
+    loans = client_facade.get_all_loans_for_counterparty(client)
+    count = 0
+    loans.each do |loan|
+      if (loan.id < id and loan.disbursal_date != nil)
+        count += 1
+      end
+    end
+    self.cycle_number = count + 1
   end
 
   # Lists the properties that are money amounts

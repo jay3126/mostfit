@@ -18,7 +18,9 @@
     %thead
       %tr
         %th
-          id
+          Loan Id
+        %th
+          Cycle No.
         %th
           Name
         %th
@@ -31,6 +33,8 @@
       %tr
         %td
           = lending.id
+        %td
+          = lending.cycle_number
         %td
           = link_to_with_rights lending.lending_product.name, resource(lending)
         %td
