@@ -37,7 +37,7 @@
                       - route = YAML::load(obj.route).last
                       = link_to_with_rights obj.name, url(route)
                   - elsif function == :applied_amount
-                    - if params[:query].to_i == 0
+                    - if Lending.get(params[:query]).nil?
                       - field = Lending.all(:lan => params[:query]).first.to_money[:applied_amount].to_s
                       = link_to_with_rights(field, "/#{model}/#{obj.id}")
                     - else
