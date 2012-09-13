@@ -92,7 +92,7 @@ class LoanDueStatus
     due_status = {}
     due_status[:lending_id]      = for_loan_id
     due_status[:loan_status]     = loan.current_loan_status
-    loan_due_status = loan.due_status_from_outstanding(on_date)
+    loan_due_status              = loan.due_status_from_outstanding(on_date)
     due_status[:due_status]      = loan_due_status
     due_status[:administered_at] = administered_at_id
     due_status[:accounted_at]    = accounted_at_id

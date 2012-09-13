@@ -162,7 +162,7 @@ class ReportingFacade < StandardFacade
   def overdue_amounts(loan_id, on_date)
     result = {}
     loan = Lending.get(loan_id)
-    if loan.is_outstanding?
+    if loan.is_outstanding? && loan.days_past_due_on_date(on_date) > 0
 
       if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
         principal_overdue_amount = (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))

@@ -12,7 +12,7 @@ class SecuritisationLoanDetailsReport < Report
   end
 
   def name
-    "Securitisation Loan Details Report on #{@to_date}"
+    "Securitisation Loan Details Report on #{@date}"
   end
 
   def self.name
@@ -52,7 +52,7 @@ class SecuritisationLoanDetailsReport < Report
     lendings.flatten.each do |loan|
       member = loan.loan_borrower.counterparty
       if member.blank?
-        member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste_name = religion_name = ''
+        member_id   = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste_name = religion_name = ''
         member_name = guarantor_name = occupation_name = gender_name = pincode = village = city = district = ''
       else
         member_id       = member.id
@@ -75,69 +75,70 @@ class SecuritisationLoanDetailsReport < Report
         district        = 'Not Specified'
       end
 
-      loan_product_name             = loan.lending_product.name
-      disbursement_mode             = 'Not Specified'
-      loan_start_date               = loan.is_outstanding? ? loan.disbursal_date : 'Not Disbursed'
-      loan_status                   = loan.status.humanize
-      loan_account_number           = loan.lan
-      loan_purpose                  = loan.loan_purpose
-      loan_cycle                    = loan.cycle_number
-      loan_roi                      = loan.lending_product.interest_rate
-      loan_insurance                = loan.simple_insurance_policies.map(&:simple_insurance_produet.name).join(', ') rescue 'No Insurance'
-      loan_matruity_date            = loan.last_scheduled_date
-      loan_first_payment_date       = loan.loan_receipts.blank? ? loan.scheduled_first_repayment_date : loan.loan_receipts.first.effective_on
-      installment_amount            = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
-      repay_frequency               = loan.lending_product.repayment_frequency
-      number_of_installment         = loan.lending_product.tenure
-      installment_type              = 'Not Specified'
-      interest_type                 = 'Not Specified'
-      prepay_penalty                = MoneyManager.default_zero_money
-      prepay_penalty_type           = 'Not Specified'
-      penalty_on_overdue            = MoneyManager.default_zero_money
-      overdue_penalty_type          = 'Not Specified'
-      upfront_charges               = MoneyManager.default_zero_money
-      upfront_charges_type          = 'Not Specified'
-      upfront_deposit_type          = 'Not Specified'
-      upfront_refund_deposit        = MoneyManager.default_zero_money
-      other_upfront_collection      = MoneyManager.default_zero_money
-      other_upfront_collection_type = 'Not Specified'
-      collateral_security_type      = "Not Specified"
-      collateral_value              = MoneyManager.default_zero_money
-      top_up_loan_product           = 'Not Specified'
-      repayment_schedule_provided   = 'Not Specified'
-      customer_type                 = 'Not Specified'
-      ewi_amount                    = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
-      ewi_date                      = loan.scheduled_first_repayment_date
-      number_of_repayments          = loan.loan_receipts.count
-      principal_on_date             = loan.principal_received_till_date(@date)
-      interest_on_date              = loan.interest_received_till_date(@date)
-      schedule_principal_on_date    = loan.scheduled_principal_due(@date)
-      schedule_interest_on_date     = loan.scheduled_interest_due(@date)
-      overdue_amount                = get_reporting_facade(@user).overdue_amounts(loan.id, @date)
-      loan_overdue_principal        = overdue_amount[:principal_overdue_amount]
-      loan_overdue_interest         = overdue_amount[:interest_overdue_amount]
-      loan_total_overdue            = loan_overdue_principal + loan_overdue_interest
-      number_of_days_overdues       = loan.is_outstanding? ? loan.days_past_due_on_date(@date) : 0
-      days_since_disbursal          = loan.is_outstanding? ? (loan.disbursal_date..Date.today).to_a.size : 'Not Disbursed'
-      days_remaining                = loan.is_outstanding? ? (Date.today..loan_matruity_date).to_a.size : 'Not Disbursed'
-      weeks_since_disbursal         = (days_since_disbursal/7).to_i
-      weeks_remaining               = (days_remaining/7).to_i
-      loan_frequence_days           = days_of_repayment_frequency(repay_frequency)
-      loan_overdue_installments     = (number_of_days_overdues/loan_frequence_days).to_i
-      loan_disbursed_date           = loan.disbursal_date.blank? ? 'Not Disbursed' : loan.disbursal_date
-      loan_disbursed_amount         = loan.is_outstanding? ? loan.to_money[:disbursed_amount] : MoneyManager.default_zero_money
-      loan_total_principal_due      = schedule_principal_on_date < principal_on_date ? MoneyManager.default_zero_money : (schedule_principal_on_date - principal_on_date)
-      loan_total_interest_due       = schedule_interest_on_date < interest_on_date ? MoneyManager.default_zero_money : (schedule_interest_on_date - interest_on_date)
-      loan_total_due                = loan_total_principal_due + loan_total_interest_due
-      center                        = loan.administered_at_origin_location
-      center_id                     = center ? center.id : "Not Specified"
-      center_name                   = center ? center.name : "Not Specified"
-      branch                        = loan.accounted_at_origin_location
-      branch_name                   = branch ? branch.name : "Not Specified"
-      branch_id                     = branch ? branch.id : "Not Specified"
-      all_parent_locations          = LocationLink.all_parents(branch, Date.today)
-      state_name                    = all_parent_locations.select{|l| l.location_level.downcase == 'state'}.name rescue 'Not Specified'
-      district_name                 = all_parent_locations.select{|l| l.location_level.downcase == 'district'}.name rescue 'Not Specified'
+      loan_product_name                = loan.lending_product.name
+      disbursement_mode                = 'Not Specified'
+      loan_start_date                  = loan.is_outstanding? ? loan.disbursal_date : 'Not Disbursed'
+      loan_status                      = loan.status.humanize
+      loan_account_number              = loan.lan
+      loan_purpose                     = loan.loan_purpose
+      loan_cycle                       = loan.cycle_number
+      loan_roi                         = loan.lending_product.interest_rate
+      loan_insurance                   = loan.simple_insurance_policies.map(&:simple_insurance_produet.name).join(', ') rescue 'No Insurance'
+      loan_matruity_date               = loan.last_scheduled_date
+      loan_first_payment_date          = loan.loan_receipts.blank? ? loan.scheduled_first_repayment_date : loan.loan_receipts.first.effective_on
+      installment_amount               = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
+      repay_frequency                  = loan.lending_product.repayment_frequency
+      number_of_installment            = loan.lending_product.tenure
+      installment_type                 = 'Not Specified'
+      interest_type                    = 'Not Specified'
+      prepay_penalty                   = MoneyManager.default_zero_money
+      prepay_penalty_type              = 'Not Specified'
+      penalty_on_overdue               = MoneyManager.default_zero_money
+      overdue_penalty_type             = 'Not Specified'
+      upfront_charges                  = MoneyManager.default_zero_money
+      upfront_charges_type             = 'Not Specified'
+      upfront_deposit_type             = 'Not Specified'
+      upfront_refund_deposit           = MoneyManager.default_zero_money
+      other_upfront_collection         = MoneyManager.default_zero_money
+      other_upfront_collection_type    = 'Not Specified'
+      collateral_security_type         = "Not Specified"
+      collateral_value                 = MoneyManager.default_zero_money
+      top_up_loan_product              = 'Not Specified'
+      repayment_schedule_provided      = 'Not Specified'
+      customer_type                    = 'Not Specified'
+      ewi_amount                       = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
+      ewi_date                         = loan.scheduled_first_repayment_date
+      number_of_repayments             = loan.loan_receipts.count
+      amounts_info                     = loan.get_sum_scheduled_amounts_info_till_date(@date)
+      principal_on_date                = loan.principal_received_till_date(@date)
+      interest_on_date                 = loan.interest_received_till_date(@date)
+      schedule_principal_due_till_date = amounts_info[:sum_of_scheduled_principal_due]
+      schedule_interest_due_till_date  = amounts_info[:sum_of_scheduled_interest_due]
+      overdue_amount                   = get_reporting_facade(@user).overdue_amounts(loan.id, @date)
+      loan_overdue_principal           = overdue_amount[:principal_overdue_amount]
+      loan_overdue_interest            = overdue_amount[:interest_overdue_amount]
+      loan_total_overdue               = loan_overdue_principal + loan_overdue_interest
+      number_of_days_overdues          = loan.is_outstanding? ? loan.days_past_due_on_date(@date) : 0
+      days_since_disbursal             = loan.is_outstanding? ? (loan.disbursal_date..Date.today).to_a.size : 'Not Disbursed'
+      days_remaining                   = loan.is_outstanding? ? (Date.today..loan_matruity_date).to_a.size : 'Not Disbursed'
+      weeks_since_disbursal            = (days_since_disbursal/7).to_i
+      weeks_remaining                  = (days_remaining/7).to_i
+      loan_frequence_days              = days_of_repayment_frequency(repay_frequency)
+      loan_overdue_installments        = number_of_days_overdues > 0 ? (number_of_days_overdues/loan_frequence_days + 1).to_i : 0
+      loan_disbursed_date              = loan.disbursal_date.blank? ? 'Not Disbursed' : loan.disbursal_date
+      loan_disbursed_amount            = loan.is_outstanding? ? loan.to_money[:disbursed_amount] : MoneyManager.default_zero_money
+      loan_total_principal_due         = schedule_principal_due_till_date < principal_on_date ? MoneyManager.default_zero_money : (schedule_principal_due_till_date - principal_on_date)
+      loan_total_interest_due          = schedule_interest_due_till_date < interest_on_date ? MoneyManager.default_zero_money : (schedule_interest_due_till_date - interest_on_date)
+      loan_total_due                   = loan_total_principal_due + loan_total_interest_due
+      center                           = loan.administered_at_origin_location
+      center_id                        = center ? center.id : "Not Specified"
+      center_name                      = center ? center.name : "Not Specified"
+      branch                           = loan.accounted_at_origin_location
+      branch_name                      = branch ? branch.name : "Not Specified"
+      branch_id                        = branch ? branch.id : "Not Specified"
+      all_parent_locations             = LocationLink.all_parents(branch, Date.today)
+      state_name                       = all_parent_locations.select{|l| l.location_level.downcase == 'state'}.name rescue 'Not Specified'
+      district_name                    = all_parent_locations.select{|l| l.location_level.downcase == 'district'}.name rescue 'Not Specified'
 
       data[loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
         :guarantor_name => guarantor_name, :occupation_name => occupation_name, :gender_name => gender_name, :pincode => pincode,

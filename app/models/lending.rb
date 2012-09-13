@@ -444,6 +444,21 @@ class Lending
     earlier_amortization_item
   end
 
+  def get_sum_scheduled_amounts_info_till_date(on_date)
+    sum_of_scheduled_principal_due = sum_of_scheduled_interest_due = zero_money_amount
+    unless (on_date < scheduled_first_repayment_date)
+      line_items = loan_base_schedule.base_schedule_line_items.all(:on_date.lte => on_date)
+      line_items.each do |value|
+        installment_no = value.installment
+        if installment_no > 0
+          sum_of_scheduled_principal_due += value.to_money[:scheduled_principal_due]
+          sum_of_scheduled_interest_due += value.to_money[:scheduled_interest_due]
+        end
+      end
+    end
+    {:sum_of_scheduled_principal_due => sum_of_scheduled_principal_due, :sum_of_scheduled_interest_due => sum_of_scheduled_interest_due}
+  end
+
   #########################
   # LOAN BALANCES QUERIES # ends
   #########################
@@ -469,7 +484,7 @@ class Lending
 
   def get_preclosure_penalty_product
     FeeAdministration.get_preclosure_penalty_fee_products(self.lending_product).first
-   # SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
+    # SimpleFeeProduct.get_applicable_preclosure_penalty(self.lending_product_id)
   end
 
   ########
@@ -563,7 +578,11 @@ class Lending
   def due_status_from_outstanding(on_date)
     return NOT_APPLICABLE unless is_outstanding_on_date?(on_date)
     return NOT_DUE if (on_date < self.scheduled_first_repayment_date)
-    (actual_total_outstanding_net_advance_balance > sum_of_outstanding_and_due_total(on_date)) ? OVERDUE : DUE
+    unless(schedule_date?(on_date))
+      (actual_total_outstanding_net_advance_balance >= sum_of_outstanding_and_due_total(on_date)) ? OVERDUE : DUE
+    else
+      (actual_total_outstanding_net_advance_balance > sum_of_outstanding_and_due_total(on_date)) ? OVERDUE : DUE
+    end
   end
 
   def get_loan_due_status_record(on_date)
