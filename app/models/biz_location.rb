@@ -31,6 +31,14 @@ class BizLocation
     Validators::Assignments.is_valid_assignment_date?(self.creation_date, self, self.location_level)
   end
 
+  def self.get_state_locations
+    all('location_level.name' => 'state')
+  end
+
+  def get_parent_loaction_at_location_level(location_level_name)
+    LocationLink.all_parents(self).select{|l| l.location_level.name.downcase == location_level_name.downcase}.first
+  end
+
   def created_on; creation_date; end
 
   def address_text
@@ -142,8 +150,8 @@ class BizLocation
     t_money_deposits_pending_verification = reporting_facade.total_money_deposited_pending_verification_until_date_at_locations(on_date, *location_ids)
 
     EodSummary.new(total_new_loan_application, loans_pending_approval, loans_approved_today, loans_scheduled_for_disbursement, loans_disbursed_today,
-                  t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
-                  t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
+      t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
+      t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
   end
 
   #################

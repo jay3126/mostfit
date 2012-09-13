@@ -86,12 +86,13 @@
     %th
       State:
     %td
+      - all_states = BizLocation.get_state_locations
       - if @client.new?
-        - state_location = LocationLink.all_parents(@biz_location).select{|l| l.location_level.name.downcase == 'state'}.first
+        - state_location = @biz_location.get_parent_loaction_at_location_level('state')
         - state_name = state_location.blank? ? '' : state_location.name
       - else
         - state_name = @client.state
-      = select :state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x]}, :prompt => "---", :selected => state_name.downcase
+      = select :state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => "---", :selected => state_name
   %tr
     %th
       Pincode:

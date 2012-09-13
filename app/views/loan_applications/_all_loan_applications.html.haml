@@ -49,7 +49,7 @@
             %td
               = loan_application.client_address
             %td
-              = loan_application.client_state.humanize
+              = loan_application.client_state.humanize rescue ''
             %td
               = loan_application.client_pincode
             %td
