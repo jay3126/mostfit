@@ -34,7 +34,7 @@
     %th
       Funding Line
     %td
-      = select :name => "funding_line", :id => 'funding_line_selector'
+      = select :name => "funding_line", :collection => select_fundling_lines, :id => 'funding_line_selector'
   - if Funder.count == 0 and session.user.role == :operator
     %tr
       %td{:colspan => 2}
