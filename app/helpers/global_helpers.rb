@@ -684,6 +684,10 @@ module Merb
       catalog
     end
 
+    def select_tranches
+      [Funder.first.funding_lines.first.tranches.first] rescue []
+    end
+
     private
     
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)

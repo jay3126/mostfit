@@ -49,7 +49,14 @@
     %th
       Tranch
     %td
-      = select :name => "tranch_id", :id => 'tranch_selector'
+      - tranches = select_tranches.blank? ? [] : select_tranches.map{|x| [x.id, x.name]}
+      = select :name => "tranch_id", :collection => tranches, :id => 'tranch_selector'
+  - if Tranch.count == 0 and session.user.role == :operator
+    %tr
+      %td{:colspan => 2}
+        You do not have any tranch created yet. Create them
+        = link_to("here", resource(:funders))
+
   %tr
     %th
       Loan Purpose
