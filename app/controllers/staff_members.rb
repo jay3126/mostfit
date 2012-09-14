@@ -64,13 +64,18 @@ class StaffMembers < Application
   end
 
   def day_sheet(id)
-    @staff_member = StaffMember.get(id)
-    raise NotFound unless @staff_member
-    @date       = params[:date] ? parse_date(params[:date]) : get_effective_date
-    @date       = @date.holiday_bump
-    location_manage = LocationManagement.locations_managed_by_staff(@staff_member.id, @date)
-    @biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
-    @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
+    @weeksheets       = []
+    @staff_member     = StaffMember.get(id)
+    @date             = params[:date] ? parse_date(params[:date]) : get_effective_date
+    @date             = @date.holiday_bump
+    @biz_location_ids = params[:biz_location_ids]
+    @message          = {}
+    @message[:error]  = 'Please Select Location For Repayment' if(@biz_location_ids.blank? && params[:payment]==true)
+    if @biz_location_ids.blank?
+      @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
+    else
+      @biz_location_ids.each{|location_id| @weeksheets << CollectionsFacade.new(session.user.id).get_collection_sheet(location_id, @date)}
+    end
     if params[:format] == "pdf"
       file = @staff_member.generate_collection_pdf(session.user.id, @date)
       filename   = File.join(Merb.root, "doc", "pdfs", "staff", @staff_member.name, "collection_sheets", "collection_#{@staff_member.id}_#{@date.strftime('%Y_%m_%d')}.pdf")
@@ -80,7 +85,7 @@ class StaffMembers < Application
         redirect resource(@staff_member), :message => {:notice => "No centers for collection today"}
       end
     else
-      display @weeksheets
+      display @weeksheets, :message => @message
     end
   end
 

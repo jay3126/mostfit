@@ -4,13 +4,20 @@
       %tr
         %th Branch:
         %th
-          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id]
+          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location'
         %th Center:
         %th
           - all_centers = params[:parent_location_id].blank? ? [] : get_all_nominal_centers(params[:parent_location_id])
-          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id]
+          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id], :class => 'location'
         %td
           %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
+        - if staff_member
+          %td
+            Staff Member:
+          %th
+            - location_id   = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
+            - staff_members = (location_id.blank? && params[:staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
+            = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id]
         - if date.blank?
           %td
             Days Past Dues:
@@ -20,7 +27,7 @@
           %td
             Select Date:
           %td
-            = date_select 'date', date, :max_date => Date.today
+            = date_select 'date', date, :max_date => Date.today, :size => 15
         %td
           = submit "Go"
   - unless params[:parent_location_id].blank?

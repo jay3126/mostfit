@@ -74,7 +74,7 @@ Merb::Router.prepare do
   resources :biz_locations, :id => %r(\d+), :collection => {:map_locations => [:get]}, :member => {:update_biz_location => [:put], :biz_location_clients => [:get], :centers_for_selector => [:get], :biz_location_form => [:get]}
   resources :new_clients, :collection => {:update_client_location => [:get,:put], :create_client_for_selected_loan_application => [:get, :put], :create_clients_for_loan_file => [:get], :death_claim_insurance => [:get, :put], :record_death_event => [:put, :get], :record_death_claim_insurance => [:get, :put], :all_deceased_clients => [:get, :put]}, :member => {:register_death_event => [:get]}
   resources :simple_insurance_policies
-  resources :payment_transactions, :id => %r(\d+), :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get], :payment_form_for_lending => [:get], :payment_by_staff_member => [:get]}
+  resources :payment_transactions, :id => %r(\d+), :collection => {:create_group_payments => [:get], :weeksheet_payments => [:get], :payment_form_for_lending => [:get], :payment_by_staff_member => [:get], :payment_by_staff_member_for_location => [:get]}
   resources :designations
   resources :user_roles
   resources :fee_instances, :collection => {:fee_instance_on_lending => [:get]}

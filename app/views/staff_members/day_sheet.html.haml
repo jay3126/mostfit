@@ -6,7 +6,7 @@
 %h1
   = "Daily Collection Sheet for #{@staff_member.name} for #{@date}"
 %p
-  - if @biz_locations.count > 0
+  - if @weeksheets.count > 0
     = link_to_with_rights "Download pdf >>", url(:day_sheet_with_format, :format => "pdf", :date => @date.strftime("%Y-%m-%d")), :style => "float: left; margin-left: 25px", :class => "button"
   - else
     %b This Staff Manager has no collection today.
@@ -16,7 +16,7 @@
   - header = ['Select All','Branch Name', 'Center Name', 'Meeting Time', 'Amount', 'Scheduled Principal Due', 'Actual Principal Due', 'Scheduled Interest Due']
   - header += ['Actual Interest Due', 'Advance Amount Balance', 'Receipt Principal', 'Receipt Interest', 'Receipt Advance', 'Total Due']
   - weeksheets_location_wise = @weeksheets.flatten.group_by{|l| l.at_biz_location_id}
-  = form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member)) do
+  = form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member_for_location)) do
     %table.dataTable.report.weeksheet.nojs
       %thead
         %tr
@@ -42,7 +42,7 @@
         - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
         %tr
           %td
-            = check_box :name => "biz_locations[]" ,:value => location_id, :class => 'select_to_payment'
+            = check_box :name => "biz_location_ids[]" ,:value => location_id, :class => 'select_to_payment'
           %td
             = parent_location.blank? ? '-' : parent_location.name
           %td
@@ -78,7 +78,7 @@
   %br
   - @weeksheets.each do |@weeksheet|
     - unless @weeksheet.blank?
-      - @biz_location = @biz_locations.select{|location| location.id == @weeksheet.at_biz_location_id }.first
+      - @biz_location = BizLocation.get @weeksheet.at_biz_location_id
       %div{:id => "biz_location_#{@biz_location.id}", :class => 'biz_location', :style => 'display:none'}
         %h2
           = "#{@biz_location.name} at #{@weeksheet.at_meeting_time_begins_hours}:#{'%02d' % @weeksheet.at_meeting_time_begins_minutes}"

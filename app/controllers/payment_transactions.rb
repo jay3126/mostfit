@@ -28,20 +28,41 @@ class PaymentTransactions < Application
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     @user = session.user
     @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
-
     display @weeksheet
 
   end
 
+  def payment_by_staff_member_for_location
+    @weeksheets      = []
+    @message         = {}
+    @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
+    @message[:error] = 'Please Select Location For Payment' if params[:biz_location_ids].blank?
+    if @message[:error].blank?
+      @date             = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+      @staff_member     = StaffMember.get(params[:staff_member_id])
+      @user             = session.user
+      @biz_location_ids = params[:biz_location_ids]
+      @biz_location_ids.each{|location_id| @weeksheets << CollectionsFacade.new(session.user.id).get_collection_sheet(location_id, @date)}
+    end
+    if @message[:error].blank?
+      display @weeksheets.flatten!
+    else
+      redirect request.referer, :message => @message
+    end
+  end
+
   def payment_by_staff_member
-    @weeksheets = []
-    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-    @child_biz_location = BizLocation.get params[:child_location_id]
-    @parent_biz_location = BizLocation.get params[:parent_location_id]
-    @staff_member = StaffMember.get(params[:staff_member_id])
-    @user = session.user
-    @biz_location_ids = params[:biz_locations]
-    @biz_location_ids.each{|location_id| @weeksheets << CollectionsFacade.new(session.user.id).get_collection_sheet(location_id, @date)}
+    @weeksheets      = []
+    @message         = {}
+    @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
+    if @message[:error].blank?
+      @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+      @child_biz_location  = BizLocation.get params[:child_location_id]
+      @parent_biz_location = BizLocation.get params[:parent_location_id]
+      @staff_member        = StaffMember.get(params[:staff_member_id])
+      @user                = session.user
+      @weeksheets          = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
+    end
     display @weeksheets.flatten!
   end
 

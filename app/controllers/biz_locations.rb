@@ -176,6 +176,16 @@ class BizLocations < Application
     end
   end
 
+  def staffs_for_selector
+    if params[:parent_location_id].blank?
+      return("<option value=''>Select Location</option>")
+    else
+      location_id = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
+      staff_members = StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
+      return("<option value=''>Select Location</option>"+staff_members.map{|staff| "<option value=#{staff.id}>#{staff.name}"}.join)
+    end
+  end
+
   def locations_for_location_level
     if params[:location_level].blank?
       return("<option value=''>Select Location</option>")

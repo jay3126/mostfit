@@ -771,6 +771,22 @@ function portfolioCalculations(){
   });
 }
 
+function get_all_staff_member_on_location() {
+  jQuery('.location').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/staffs_for_selector/"+jQuery("#parent_selector").val(),
+      data: {
+        'child_location_id'  : jQuery("#child_selector").val(),
+        'parent_location_id' : jQuery("#parent_selector").val()
+      },
+      success: function(data) {
+        jQuery("#staff_selector").html(data);
+      }
+    });
+  });
+}
+
 function getAllNominalCenters() {
   jQuery('#parent_selector').change(function() {
     jQuery.ajax({
@@ -838,6 +854,7 @@ $(document).ready(function(){
   fillPslSubCategories();
   getAllNominalCenters();
   get_all_location_on_level();
+  get_all_staff_member_on_location()
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
