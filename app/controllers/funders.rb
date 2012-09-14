@@ -54,16 +54,6 @@ class Funders < Application
     end
   end
 
-  #   def destroy(id)
-  #     @funder = Funder.get(id)
-  #     raise NotFound unless @funder
-  #     if @funder.destroy
-  #       redirect resource(:funders)
-  #     else
-  #       raise InternalServerError
-  #     end
-  #   end
-
   def funding_lines_tranches
     funding_line_id = params[:funding_line_id]
     unless funding_line_id.blank?

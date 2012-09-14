@@ -41,7 +41,9 @@ class Lendings < Application
     loan_purpose_id               = params[:lending][:loan_purpose]
     loan_borrower_id              = params[:loan_borrower]
     recorded_by_user              = session.user.id
-    
+    funding_line_id               = params[:funding_line_id]
+    tranch_id                     = params[:tranch_id]
+
     @loan_borrower                = Client.get loan_borrower_id unless loan_borrower_id.blank?
     @lending_product              = LendingProduct.get lending_product_id unless lending_product_id.blank?
 
@@ -51,6 +53,9 @@ class Lendings < Application
     @message[:error] = "Please select staff" if applied_by_staff.blank?
     @message[:error] = "Schedule Disbursal Date cannot blank" if schedule_disbursal_date.blank?
     @message[:error] = "Schedule First Repayment Date cannot blank" if schedule_first_repayment_date.blank?
+    @message[:error] = "Funding line cannot be blank" if funding_line_id.blank?
+    @message[:error] = "Tranch cannot be blank" if tranch_id.blank?
+
     @lending = @lending_product.lendings.new(params[:lending])
 
     # PERFORM OPERATION
@@ -61,7 +66,7 @@ class Lendings < Application
         @loan_purpose = LoanPurpose.get loan_purpose_id
         @lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
           @loan_borrower, @client_admin.administered_at, @client_admin.registered_at, applied_date, schedule_disbursal_date,
-          schedule_first_repayment_date, applied_by_staff, recorded_by_user, lan_id, @loan_purpose)
+          schedule_first_repayment_date, applied_by_staff, recorded_by_user, funding_line_id, tranch_id, lan_id, @loan_purpose)
 
         if @lending.new?
           @message[:error] = @lending.error.first.join(", ")
@@ -428,7 +433,7 @@ class Lendings < Application
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
     end
-      redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
+    redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
   end
 
 end

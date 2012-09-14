@@ -116,6 +116,8 @@ class Lending
       scheduled_first_repayment_date,
       applied_by_staff,
       recorded_by_user,
+      funding_line_id,
+      tranch_id,
       lan = nil,
       loan_purpose = nil
     )
@@ -153,6 +155,7 @@ class Lending
       new_loan,
       principal_and_interest_amounts)
     LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
+    FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date, recorded_by_user)
     new_loan
   end
 
