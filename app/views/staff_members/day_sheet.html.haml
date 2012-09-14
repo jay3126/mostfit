@@ -12,11 +12,77 @@
     %b This Staff Manager has no collection today.
 %br
 %br
-- @weeksheets.each do |@weeksheet|
-  - unless @weeksheet.blank?
-    - @biz_location = @biz_locations.select{|location| location.id == @weeksheet.at_biz_location_id }.first
-    %h2
-      = "#{@biz_location.name} at #{@weeksheet.at_meeting_time_begins_hours}:#{'%02d' % @weeksheet.at_meeting_time_begins_minutes}"
-      = "(No meeting)" unless MeetingCalendar.meeting_at_location_on_date(@biz_location, @date)
-    = partial "user_locations/weeksheet_collection_list"
-    %hr
+- unless @weeksheets.blank?
+  - header = ['Select All','Branch Name', 'Center Name', 'Meeting Time', 'Amount', 'Scheduled Principal Due', 'Actual Principal Due', 'Scheduled Interest Due']
+  - header += ['Actual Interest Due', 'Advance Amount Balance', 'Receipt Principal', 'Receipt Interest', 'Receipt Advance', 'Total Due']
+  - weeksheets_location_wise = @weeksheets.flatten.group_by{|l| l.at_biz_location_id}
+  = form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member)) do
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          - header.each do |value|
+            %th
+              = value
+      - weeksheets_location_wise.each do |location_id, weeksheet|
+        - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+        - @default_currency ||= MoneyManager.get_default_currency
+        - biz_location = BizLocation.get(location_id)
+        - parent_location = LocationLink.get_parent(biz_location)
+        - weeksheet.first.collection_sheet_lines.each do |ws|
+          - accumulate_row_values[:loan_amount]                       += ws.loan_disbursed_amount
+          - accumulate_row_values[:loan_schedule_principal_due]       += ws.loan_schedule_principal_due
+          - accumulate_row_values[:loan_actual_principal_outstanding] += ws.loan_disbursed_amount
+          - accumulate_row_values[:loan_schedule_interest_due]        += ws.loan_schedule_interest_due
+          - accumulate_row_values[:loan_actual_interest_outstanding]  += ws.loan_actual_interest_outstanding
+          - accumulate_row_values[:loan_advance_amount]               += ws.loan_advance_amount
+          - accumulate_row_values[:loan_principal_receipts]           += ws.loan_principal_receipts
+          - accumulate_row_values[:loan_interest_receipts]            += ws.loan_interest_receipts
+          - accumulate_row_values[:loan_advance_receipts]             += ws.loan_advance_receipts
+          - accumulate_row_values[:loan_actual_total_due]             += ws.loan_actual_total_due
+        - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+        %tr
+          %td
+            = check_box :name => "biz_locations[]" ,:value => location_id, :class => 'select_to_payment'
+          %td
+            = parent_location.blank? ? '-' : parent_location.name
+          %td
+            = link_to weeksheet.first.at_biz_location_name, '#', :onclick => "jQuery('#biz_location_#{location_id}').slideToggle(); return false;"
+          %td
+            = "#{weeksheet.first.at_meeting_time_begins_hours}:#{'%02d' % weeksheet.first.at_meeting_time_begins_minutes}"
+            = "(No meeting)" unless MeetingCalendar.meeting_at_location_on_date(biz_location, @date)
+          %td
+            = total_rows[:loan_amount]
+          %td
+            = total_rows[:loan_schedule_principal_due]
+          %td
+            = total_rows[:loan_actual_principal_outstanding]
+          %td
+            = total_rows[:loan_schedule_interest_due]
+          %td
+            = total_rows[:loan_actual_interest_outstanding]
+          %td
+            = total_rows[:loan_advance_amount]
+          %td
+            = total_rows[:loan_principal_receipts]
+          %td
+            = total_rows[:loan_interest_receipts]
+          %td
+            = total_rows[:loan_advance_receipts]
+          %td
+            = total_rows[:loan_actual_total_due]
+    = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
+    = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
+    = hidden_field :name => 'date', :value => @date
+    = hidden_field :name => 'staff_member_id', :value => @staff_member.id
+    = submit "Payment"
+  %br
+  - @weeksheets.each do |@weeksheet|
+    - unless @weeksheet.blank?
+      - @biz_location = @biz_locations.select{|location| location.id == @weeksheet.at_biz_location_id }.first
+      %div{:id => "biz_location_#{@biz_location.id}", :class => 'biz_location', :style => 'display:none'}
+        %h2
+          = "#{@biz_location.name} at #{@weeksheet.at_meeting_time_begins_hours}:#{'%02d' % @weeksheet.at_meeting_time_begins_minutes}"
+          = "(No meeting)" unless MeetingCalendar.meeting_at_location_on_date(@biz_location, @date)
+        = partial "user_locations/weeksheet_collection_list"
+        %hr
+

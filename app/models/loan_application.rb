@@ -71,7 +71,7 @@ class LoanApplication
   property :client_name,                    String, CommonClient::Validations.get_validation(:client_name, LoanApplication)
   property :client_dob,                     Date
   property :client_address,                 Text, CommonClient::Validations.get_validation(:client_address, LoanApplication)
-  property :client_state,                   String
+  property :client_state,                   String, :default => ''
   property :client_pincode,                 Integer, CommonClient::Validations.get_validation(:client_pincode, LoanApplication)
   property :client_reference1,              String, CommonClient::Validations.get_validation(:client_reference1, LoanApplication)
   property :client_reference1_type,         Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:client_reference1_type, LoanApplication)

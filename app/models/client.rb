@@ -16,7 +16,7 @@ class Client
   property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:guarantor_relationship, Client)
   property :telephone_number,         String, :nullable => true
   property :telephone_type,           Enum.send('[]', *TELEPHONE_TYPES), :default => DEFAULT_TELEPHONE_TYPE
-  property :state,                    String
+  property :state,                    String, :default => ''
   property :pincode,                  Integer, CommonClient::Validations.get_validation(:pincode, Client)
   property :income,                   Integer
   property :family_income,            Integer

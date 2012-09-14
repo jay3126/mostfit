@@ -33,6 +33,18 @@ class PaymentTransactions < Application
 
   end
 
+  def payment_by_staff_member
+    @weeksheets = []
+    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+    @child_biz_location = BizLocation.get params[:child_location_id]
+    @parent_biz_location = BizLocation.get params[:parent_location_id]
+    @staff_member = StaffMember.get(params[:staff_member_id])
+    @user = session.user
+    @biz_location_ids = params[:biz_locations]
+    @biz_location_ids.each{|location_id| @weeksheets << CollectionsFacade.new(session.user.id).get_collection_sheet(location_id, @date)}
+    display @weeksheets.flatten!
+  end
+
   def create_group_payments
     # INITIALIZING VARIABLES USED THROUGHTOUT
     @message = {}

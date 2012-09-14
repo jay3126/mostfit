@@ -1237,6 +1237,20 @@ function update_total_amount(currency){
   jQuery('div#weeksheet_total_amount').html(total.toFixed(2) + ' ' + currency);
 }
 
+function update_total_on_div_amount(currency, id){
+  payments = jQuery('.weeksheet_total_'+id);
+  total = 0.0
+  jQuery.each(payments, function(index, payment) {
+    if(payment.value == ""){
+      f_value = 0.0;
+    }else{
+      f_value = parseFloat(payment.value);
+    }
+    total = parseFloat(total) + f_value;
+  });
+  jQuery('div#weeksheet_total_amount_'+id).html(total.toFixed(2) + ' ' + currency);
+}
+
 function date_validation(){
   dates_fields = jQuery('input.hasDatepicker');
   text = ''

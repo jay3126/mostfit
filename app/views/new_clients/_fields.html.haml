@@ -92,7 +92,7 @@
         - state_name = state_location.blank? ? '' : state_location.name
       - else
         - state_name = @client.state
-      = select :state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => "---", :selected => state_name
+      = select :state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => "---", :selected => state_name.downcase
   %tr
     %th
       Pincode:

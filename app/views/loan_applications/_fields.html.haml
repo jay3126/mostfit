@@ -54,7 +54,7 @@
               - state_name = state_location.blank? ? '' : state_location.name
             - else
               - state_name = loan_application.client_state
-            = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => 'Select', :selected => state_name
+            = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => 'Select', :selected => state_name.downcase
           %td
             = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
             = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id
