@@ -111,6 +111,7 @@ Merb::Router.prepare do
     resources :cgts
   end
   resources :payments
+  resources :funders, :collection => {:funding_lines_tranches => [:get]}
   resources :funding_lines
   resources :funders do    
     resources :portfolios

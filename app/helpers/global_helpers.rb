@@ -178,7 +178,7 @@ module Merb
       catalog = Funder.catalog
       collection = []
       catalog.keys.sort.each do |funder_name|
-        collection << ['', funder_name]
+        collection << ['', "FUNDER: #{funder_name}"]
         catalog[funder_name].each_pair { |k, v| collection << [k.to_s, "!!!!!!#{v}"] }
       end
       html = select col,

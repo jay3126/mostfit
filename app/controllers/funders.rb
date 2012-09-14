@@ -40,7 +40,7 @@ class Funders < Application
     @funder = Funder.get(id)
     raise NotFound unless @funder
     if @funder.update_attributes(funder)
-       redirect resource(:funders)
+      redirect resource(:funders)
     else
       display @funder, :edit
     end
@@ -54,14 +54,25 @@ class Funders < Application
     end
   end
 
-#   def destroy(id)
-#     @funder = Funder.get(id)
-#     raise NotFound unless @funder
-#     if @funder.destroy
-#       redirect resource(:funders)
-#     else
-#       raise InternalServerError
-#     end
-#   end
+  #   def destroy(id)
+  #     @funder = Funder.get(id)
+  #     raise NotFound unless @funder
+  #     if @funder.destroy
+  #       redirect resource(:funders)
+  #     else
+  #       raise InternalServerError
+  #     end
+  #   end
 
-end # Funders
+  def funding_lines_tranches
+    funding_line_id = params[:funding_line_id]
+    unless funding_line_id.blank?
+      funding_line = FundingLine.get funding_line_id
+      tranches = funding_line.tranches
+      return("<option value=''> Select tranch </option>"+tranches.map{|tranch| "<option value=#{tranch.id}>#{tranch.name}"}.join)
+    else
+      return("<option value=''> Select tranch </option>")
+    end
+  end
+  
+end

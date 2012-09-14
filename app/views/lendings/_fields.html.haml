@@ -32,6 +32,26 @@
       = text_field :lan
   %tr
     %th
+      Funding Line
+    %td
+      = select_funding_line_for @lending, :funding_line, :id => 'funding_line_selector'
+  - if Funder.count == 0 and session.user.role == :operator
+    %tr
+      %td{:colspan => 2}
+        You do not have any funder created yet. Create them
+        = link_to("here", resource(:funders, :new))
+  - if FundingLine.count == 0 and session.user.role == :operator
+    %tr
+      %td{:colspan => 2}
+        You do not have any funding line created yet. Create them
+        = link_to("here", resource(:funders))
+  %tr
+    %th
+      Tranch
+    %td
+      = select :name => "tranch_id", :id => 'tranch_selector'
+  %tr
+    %th
       Loan Purpose
     %td
       = select :name => "lending[loan_purpose]", :collection => LoanPurpose.all.map{|lp| [lp.id, lp.name]}

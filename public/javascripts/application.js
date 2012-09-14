@@ -809,11 +809,27 @@ function add_text_field(){
     "</td></tr>");
 }
 
+function fillFundingLines(){
+  $("#funding_line_selector").change(function(){
+    $.ajax({
+      type: "GET",
+      url: "/funders/funding_lines_tranches",
+      data : {
+        'funding_line_id' : $("#funding_line_selector").val()
+      },
+      success: function(data) {
+        $("#tranch_selector").html(data);
+      }
+    });
+  });
+}
+
 $(document).ready(function(){
   dataTables();
   create_remotes();
   attachFormRemote();
   fillCenters();
+  fillFundingLines();
   fillComboBranches();
   fillAccounts();
   fillFundingLines();
