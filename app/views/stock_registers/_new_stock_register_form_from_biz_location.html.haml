@@ -1,0 +1,12 @@
+- form_url = resource(:stock_registers, {:return => params[:return]})
+= error_messages_for @stock_register
+
+= form_for(@stock_register, :action => form_url) do
+  %h2 Enter new Stock details
+  = partial "stock_registers/fields_from_biz_location"
+  = submit "Submit Details", :class => "grey_button"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', '#', :class => "grey_button", :onclick => "jQuery('#new_stock_register_form_from_biz_location').hide(); return false;"

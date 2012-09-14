@@ -6,13 +6,10 @@
 = form_for(@stock_register, :action => form_url, :class => "") do
   = error_messages_for @stock_register
   %fieldset
-    = partial "stock_registers/fields"
+    = partial "stock_registers/fields_from_biz_location"
     = submit "Save changes"
     &nbsp;&nbsp;
     %b
       Or
-      &nbsp;&nbsp;
-    - if @biz_location
-      = link_to_with_rights 'Cancel', url(:controller => "user_locations", :action => :show, :id => @stock_register.biz_location.id)
-    - else
-      = link_to_with_rights 'Cancel', url("stock_registers/#{@stock_register.id}"), :class => "grey_button"
+    &nbsp;&nbsp;
+    = link_to_with_rights 'Cancel', url("user_locations/show/#{@stock_register.biz_location.id}" + "#stock_register"), :class => "grey_button"

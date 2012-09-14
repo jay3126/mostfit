@@ -1,17 +1,13 @@
+%br
 %h1  List of Stock Details
 %br
-.menu-strip{:style => "width: 30%;"}
-  = link_to_with_rights "Enter new Stock details", '#', :class => "add grey_button", :onclick => "jQuery('#new_stock_register_form').toggle(); return false;"
-  &nbsp;
-  - if @biz_location
-    = link_to_with_rights 'Back', url("user_locations/show/#{@biz_location.id}"), :class => "grey_button"
-  - else
-    = link_to_with_rights 'Back', url(:admin), :class => "grey_button"
+.menu-strip{:style => "width: 25%;"}
+  = link_to_with_rights "Enter new Stock details", '#', :class => "add grey_button", :onclick => "jQuery('#new_stock_register_form_from_biz_location').toggle(); return false;"
+  
+%div#new_stock_register_form_from_biz_location(style = "display : none")
+  = partial "stock_registers/new_stock_register_form_from_biz_location"
 
-%div#new_stock_register_form(style = "display : none")
-  = partial :new_stock_register_form
-
-- if @stock_registers.blank?
+- if StockRegister.all(:biz_location_id => @biz_location.id).blank?
   %p
     %i No data to display. Please enter the data to view the Stock Register.
 - else
@@ -30,7 +26,7 @@
         %th Entered By
         %th Action
       
-    - for stock_register in @stock_registers
+    - StockRegister.all(:biz_location_id => @biz_location.id).each do |stock_register|
       %tr{ :class => cycle('odd', '') }
         %td
           = link_to_with_rights stock_register.id, url(:controller => "stock_registers", :action => :show, :id => stock_register.id)
@@ -51,9 +47,9 @@
         %td
           = link_to_with_rights stock_register.manager.name, url(:quick_link, "staff_members", stock_register.manager_staff_id)
         %td
-          = link_to_with_rights 'show', url("stock_registers/#{stock_register.id}")
+          = link_to_with_rights 'show', url(:controller => "stock_registers", :action => :show_from_biz_location, :id => stock_register.id)
           %br
-            = link_to_with_rights 'edit', resource(stock_register, :edit)
+            = link_to_with_rights 'edit', url(:controller => "stock_registers", :action => :edit_from_biz_location, :id => stock_register.id)
           
     %tfoot
       %tr

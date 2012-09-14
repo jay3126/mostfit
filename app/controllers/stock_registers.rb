@@ -4,8 +4,8 @@ class StockRegisters < Application
   include DateParser
 
   def index
-    if request.xhr? and params[:branch_id]
-      @stock_registers = StockRegister.all(:branch_id => params[:branch_id]).paginate(:page => params[:page], :per_page => 15, :order => [:date_of_entry.desc])
+    if request.xhr? and params[:biz_location_id]
+      @stock_registers = StockRegister.all(:biz_location_id => params[:biz_location_id]).paginate(:page => params[:page], :per_page => 15, :order => [:date_of_entry.desc])
       display @stock_registers, :layout => layout?
     else
       @stock_registers = (@stock_registers || StockRegister.all).paginate(:page => params[:page], :per_page => 15)
@@ -19,10 +19,16 @@ class StockRegisters < Application
     display @stock_register, :layout => layout?
   end
 
+  def show_from_biz_location(id)
+    @stock_register = StockRegister.get(id)
+    raise NotFound unless @stock_register
+    display @stock_register, :layout => layout?
+  end
+
   def new
     only_provides :html
     @stock_register = StockRegister.new
-    @branch = Branch.get(params[:branch_id]) if params and params.key?(:branch_id)
+    @branch = BizLocation.get(params[:biz_location_id]) if params and params.key?(:biz_location_id)
     display @stock_register, :layout => layout?
   end
 
@@ -30,14 +36,23 @@ class StockRegisters < Application
     only_provides :html
     @stock_register = StockRegister.get(id)
     raise NotFound unless @stock_register
-    @branch = @stock_register.branch if @stock_register.branch_id
+    @branch = @stock_register.biz_location if @stock_register.biz_location_id
     display @stock_register, :layout => layout?
   end
 
-  def create(stock_register)
+  def edit_from_biz_location(id)
+    only_provides :html
+    @stock_register = StockRegister.get(id)
+    raise NotFound unless @stock_register
+    @branch = @stock_register.biz_location if @stock_register.biz_location_id
+    display @stock_register, :layout => layout?
+  end
+
+  def create
+    stock_register = {:manager_staff_id => params[:manager_staff_id], :stock_quantity => params[:stock_quantity], :stock_code => params[:stock_code], :stock_name => params[:stock_name], :biz_location_id => params[:biz_location_id], :bill_number => params[:bill_number], :bill_date => params[:stock_register][:bill_date], :date_of_entry => params[:stock_register][:date_of_entry]}
     @stock_register = StockRegister.new(stock_register)
     if @stock_register.save
-      redirect(params[:return] ||resource(@stock_register.branch), :message => {:notice => "Stock entry was successfully entered"})
+      redirect(params[:return] || url("user_locations/show/#{@stock_register.biz_location_id}"), :message => {:notice => "Stock entry was successfully entered"})
     else
       message[:error] = "Stock entry failed to be entered"
       render :new #error message will show
@@ -48,7 +63,7 @@ class StockRegisters < Application
     @stock_register = StockRegister.get(id)
     raise NotFound unless @stock_register
     if @stock_register.update(stock_register)
-      redirect(params[:return] ||resource(@stock_register.branch), :message => {:notice => "Stock entry was successfully updated"})
+      redirect(params[:return] || url("user_locations/show/#{@stock_register.biz_location_id}" + "#stock_register"), :message => {:notice => "Stock entry was successfully updated"})
     else
       display @stock_register, :edit 
     end
@@ -57,8 +72,9 @@ class StockRegisters < Application
   def destroy(id)
     @stock_register = StockRegister.get(id)
     raise NotFound unless @stock_register
+    @biz_location_id = @stock_register.biz_location_id
     if @stock_register.destroy
-      redirect(params[:return] ||resource(@stock_register.branch), :message => {:notice => "Stock entry was successfully deleted"})
+      redirect(params[:return] || url("user_locations/show/#{@biz_location_id}" + "#stock_register"), :message => {:notice => "Stock entry was successfully deleted"})
     else
       raise InternalServerError
     end
@@ -75,7 +91,7 @@ class StockRegisters < Application
 
   private
   def get_context
-    @branch = Branch.get(params[:branch_id]) if params.key?(:branch_id)
+    @branch = BizLocation.get(params[:biz_location_id]) if params.key?(:biz_location_id)
   end
 
 end # StockRegisters

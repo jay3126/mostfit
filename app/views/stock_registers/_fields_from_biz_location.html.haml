@@ -3,10 +3,12 @@
     %th
       Branch
     %td
-      - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
-      - branch_collection = location_facade.all_nominal_branches
-      = select :biz_location_id, :collection => branch_collection.map{|b| [b.id, b.name]}, :prompt => "Select Branch"
-      %span.greytext select the branch for which Stock Details are being entered
+      - if params[:action] == "edit_from_biz_location"
+        = @stock_register.biz_location.name
+        = hidden_field(:biz_location_id, :value => @biz_location.id)
+      - else
+        = @biz_location.name
+        = hidden_field(:biz_location_id, :value => @biz_location.id)
   %tr
     %th
       Stock Code
@@ -47,5 +49,9 @@
     %th
       Stock Details Entered By
     %td
-      = select :manager_staff_id, :collection => StaffMember.all(:order => [:name]).select{|s| s.user.blank?}, :prompt => "choose staff member", :text_method => :name, :value_method => :id
+      - staff_member = []
+      - @staff_postings = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date)
+      - @staff_postings.each do |staff_posting|
+        - staff_member << staff_posting.staff_assigned
+      = select :manager_staff_id, :collection => staff_member.map{|s| [s.id, s.name]}, :prompt => "choose staff member"
       %span.greytext select the person who is entering the details

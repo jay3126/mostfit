@@ -12,6 +12,7 @@ class StockRegister
   property :date_of_entry,    Date,      :default => Date.today, :nullable => false
 
   belongs_to  :manager,  :child_key => [:manager_staff_id],  :model => 'StaffMember'
+  belongs_to :biz_location
 
   validates_present       :manager
   validates_with_method   :manager,   :manager_is_an_active_staff_member?

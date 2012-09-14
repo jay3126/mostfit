@@ -1,11 +1,13 @@
 %br
 %h1 Stock Details for : #{@stock_register.biz_location.name}
 %br
+
 .menu-strip{:style => "width: 28%;"}
   = link_to_with_rights "Edit stock details", resource(@stock_register, :edit), :class => "edit grey_button"
   &nbsp;&nbsp;
-  = link_to_with_rights "Back", url(:stock_registers), :class => "grey_button"
+  = link_to_with_rights "Back", url("user_locations/show/#{@stock_register.biz_location.id}" + "#stock_register"), :class => "grey_button"
 %br
+
 %table.tall.shaded
   %tr
     %th
