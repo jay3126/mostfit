@@ -1,7 +1,12 @@
-%h2
-  Asset Register
-%p
-  = link_to_with_rights "Enter new details", resource(:asset_registers, :new, {:branch_id => params[:branch_id]}), :class => "add _remote_"
+%h1 List of Assets
+%br
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights "Enter new Asset details", resource(:asset_registers, :new, {:biz_location_id => params[:biz_location_id]}), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
+
 - if @asset_registers.blank?
   %p
     %i No data to display. Please enter the data to the Asset Register.
@@ -15,7 +20,6 @@
         %th Issue Date
         %th Issued By
         %th Returned On
-
         %th Asset Category
         %th Asset Sub-category
         %th Asset Type
@@ -28,7 +32,6 @@
         %th Model
         %th Serial number
         %th Date
-
         %th Edit/Delete
 
     %tbody
@@ -38,7 +41,6 @@
           = asset_register.id
         %td
           = asset_register.biz_location
-
         %td
           = asset_register.name
         %td
@@ -47,15 +49,12 @@
           = link_to asset_register.manager_staff_id, url(:quick_link, "staff_members", asset_register.manager_staff_id)
         %td
           = asset_register.returned_date
-
-
         %td
           = asset_register.asset_category.name
         %td
           = asset_register.asset_sub_category.name
         %td
           = asset_register.asset_type.name
-
         %td
           = asset_register.name_of_the_item
         %td
@@ -74,7 +73,6 @@
           = asset_register.serial_no
         %td
           = asset_register.date
-
         %td
           = link_to 'edit', resource(asset_register, :edit)
 
@@ -83,7 +81,8 @@
         %td{ :colspan => 10 }
 
   = paginate @asset_registers
-  - if @branch
-    = link_to 'Back', url(:quick_link, "branches", asset_register.branch_id)
+  &nbsp;&nbsp;
+  - if @biz_location
+    = link_to 'Back', url("user_locations/show/#{asset_register.biz_location.id}"), :class => "grey_button"
   - else
-    = link_to 'Back', url(:asset_registers)
+    = link_to 'Back', url(:asset_registers), :class => "grey_button"

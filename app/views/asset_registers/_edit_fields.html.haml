@@ -1,32 +1,36 @@
-%table
+%table.tall.shaded
   %tr
-
-    %td
+    %th
       Asset Type
     %td
       = text_field :asset_type
   %tr
-    %td
+    %th
       Issue To
     %td
       = text_field :name
       %span.greytext
   %tr
-    %td
+    %th
       Issue Date
     %td
       = date_select_for @asset_register, :issue_date
   %tr
-    %td
+    %th
       Issued By
     %td
-      - if @branch
-        = select :manager_staff_id, :collection => @branch.centers.managers(:order => [:name]).map{ |x| [x.id, x.name]}
+      - if @biz_location
+        - staff_member = []
+        - @staff_postings = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date)
+        - @staff_postings.each do |staff_posting|
+          - staff_member << staff_posting.staff_assigned
+        = select :manager_staff_id, :collection => staff_member.map{|s| [s.id, s.name]}, :prompt => "choose staff member"
+        %span.greytext select the person who is entering the details
       - else
-        = select_staff_member_for @asset_register, :manager, {}, true
-      %span.greytext select the person who has issued the asset
+        = select :manager_staff_id, :collection => StaffMember.all(:order => [:name]).select{|s| s.user.blank?}, :prompt => "choose staff member", :text_method => :name, :value_method => :id
+        %span.greytext select the person who has issued the asset
   %tr
-    %td
+    %th
       Returned On
     %td
       = date_select_for @asset_register, :returned_date

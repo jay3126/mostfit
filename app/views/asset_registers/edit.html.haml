@@ -8,7 +8,11 @@
   %fieldset
     = partial "asset_registers/fields"
     = submit "Save changes"
-    - if @branch
-      = link_to 'Cancel', url(:quick_link, "branches", @asset_register.branch_id)
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    - if @biz_location
+      = link_to 'Cancel', url("user_locations/show/#{asset_register.biz_location.id}"), :class => "grey_button"
     - else
-      = link_to 'Cancel', url(:asset_registers)
+      = link_to 'Cancel', url(:asset_registers), :class => "grey_button"

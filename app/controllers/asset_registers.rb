@@ -4,8 +4,8 @@ class AssetRegisters < Application
   include DateParser
 
   def index
-    if request.xhr? and params[:branch_id]
-      @asset_registers = AssetRegister.all(:branch_id=>params[:branch_id]).paginate(:page => 1, :per_page => 15, :order => [:issue_date.desc])
+    if request.xhr? and params[:biz_location_id]
+      @asset_registers = AssetRegister.all(:biz_location_id => params[:biz_location_id]).paginate(:page => 1, :per_page => 15, :order => [:issue_date.desc])
       display @asset_registers, :layout => layout?
     else
       @asset_registers = (@asset_registers || AssetRegister.all).paginate(:page => 1, :per_page => 15)
@@ -22,7 +22,7 @@ class AssetRegisters < Application
   def new
     only_provides :html
     @asset_register = AssetRegister.new
-    @branch = Branch.get(params[:branch_id]) if params and params.key?(:branch_id)
+    @branch = BizLocation.get(params[:biz_location_id]) if params and params.key?(:biz_location_id)
     display @asset_register, :layout => layout?
   end
 
@@ -40,7 +40,7 @@ class AssetRegisters < Application
       redirect(params[:return] ||url(:asset_registers), :message => {:notice => "Asset entry was successfully entered"})
     else
       message[:error] = "Asset entry failed to be entered"
-      render :new #error message will show                                                                                                                              
+      render :new #error message will show
     end
   end
 
@@ -75,7 +75,7 @@ class AssetRegisters < Application
 
   private
   def get_context
-    @branch = Branch.get(params[:branch_id]) if params.key?(:branch_id)
+    @branch = BizLocation.get(params[:biz_location_id]) if params.key?(:biz_location_id)
   end
 
 end # AssetRegisters
