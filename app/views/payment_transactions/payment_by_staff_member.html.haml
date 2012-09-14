@@ -1,4 +1,4 @@
-%h1== Today Payment By Staff Member
+%h1== Payment By Staff Member
 .menu-strip{:style => "width: 8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 = form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member)) do
