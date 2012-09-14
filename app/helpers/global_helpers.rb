@@ -41,9 +41,9 @@ module Merb
       uri_query = path.nil? ? '' : uri.query
       show_text = params[:show_text] == true ? text : ''
       request = Merb::Request.new(
-          Merb::Const::REQUEST_PATH => uri_path,
-          Merb::Const::REQUEST_METHOD => method,
-          Merb::Const::QUERY_STRING => uri_query)
+        Merb::Const::REQUEST_PATH => uri_path,
+        Merb::Const::REQUEST_METHOD => method,
+        Merb::Const::QUERY_STRING => uri_query)
       route = Merb::Router.match(request)[1] rescue nil
       session.user.can_access?(route, params) ? link_to(text, path, params) : show_text
     end
@@ -76,24 +76,24 @@ module Merb
 
       unless checklist_type.blank?
         url(:checklister_slice_checklists,
-            :checklist_area => checklist_type.name,
-            :checklist_type_id => checklist_type.id,
-            :checklist_master_version => '1.0',
-            :target_entity_type => target_entity_type ,
-            :target_entity_name => target_entity.name ,
-            :target_entity_id => target_entity.id,
-            :loc1_type => "branch",
-            :loc1_name => location1.name,
-            :loc1_id => location1.id,
-            :loc2_type => "center",
-            :loc2_name => location2.name,
-            :loc2_id => location2.id,
-            :staff_id => staff_member.id,
-            :staff_name => staff_member.name,
-            :staff_role => staff_member.user.role,
-            :no_of_applications => no_of_applications,
-            :effective_date => date.strftime("%Y-%m-%d"),
-            :referral_url => url(local_params)
+          :checklist_area => checklist_type.name,
+          :checklist_type_id => checklist_type.id,
+          :checklist_master_version => '1.0',
+          :target_entity_type => target_entity_type ,
+          :target_entity_name => target_entity.name ,
+          :target_entity_id => target_entity.id,
+          :loc1_type => "branch",
+          :loc1_name => location1.name,
+          :loc1_id => location1.id,
+          :loc2_type => "center",
+          :loc2_name => location2.name,
+          :loc2_id => location2.id,
+          :staff_id => staff_member.id,
+          :staff_name => staff_member.name,
+          :staff_role => staff_member.user.role,
+          :no_of_applications => no_of_applications,
+          :effective_date => date.strftime("%Y-%m-%d"),
+          :referral_url => url(local_params)
         )
       end
     end
@@ -111,13 +111,13 @@ module Merb
       # this is to generate links to loans, as the resouce method doesn't work for descendant classes of Loan
       # it expects the whole context (@branch, @center, @client) to exist
       base = if @branch and @center and @client
-               url(:branch_center_client, @branch.id, @center.id, @client.id)
-             elsif @client
-               url(:branch_center_client, @client.center.branch_id, @client.center_id, @client.id)
-             else
-               client = loan.client
-               url(:branch_center_client, client.center.branch_id, client.center_id, client.id)
-             end
+        url(:branch_center_client, @branch.id, @center.id, @client.id)
+      elsif @client
+        url(:branch_center_client, @client.center.branch_id, @client.center_id, @client.id)
+      else
+        client = loan.client
+        url(:branch_center_client, client.center.branch_id, client.center_id, client.id)
+      end
       base + "/loans/#{loan.id}/" + action.to_s + (opts.length>0 ? "?#{opts.inject([]) { |s, x| s << "#{x[0]}=#{x[1]}" }.join("&")}" : '')
     end
 
@@ -132,10 +132,10 @@ module Merb
       end
 
       select(col,
-             :collection => staff_members_collection(allow_unassigned, allow_inactive),
-             :name => "#{obj.class.to_s.snake_case}[#{id_col}]",
-             :id => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
-             :selected => selected)
+        :collection => staff_members_collection(allow_unassigned, allow_inactive),
+        :name => "#{obj.class.to_s.snake_case}[#{id_col}]",
+        :id => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
+        :selected => selected)
     end
 
     def staff_members_on_location(on_date, location_id=nil)
@@ -165,11 +165,11 @@ module Merb
       selected_id = session[:center_id].to_s if not selected_id and session.key?(:center_id)
 
       html = select col,
-                    :collection => collection,
-                    :name => "#{obj.class.to_s.snake_case}[#{id_col}]",
-                    :id => "#{obj.class.to_s.snake_case}_#{id_col}",
-                    :selected => selected_id,
-                    :prompt => (attrs[:prompt] or "&lt;select a center&gt;")
+        :collection => collection,
+        :name => "#{obj.class.to_s.snake_case}[#{id_col}]",
+        :id => "#{obj.class.to_s.snake_case}_#{id_col}",
+        :selected => selected_id,
+        :prompt => (attrs[:prompt] or "&lt;select a center&gt;")
       html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
     end
 
@@ -182,11 +182,11 @@ module Merb
         catalog[funder_name].each_pair { |k, v| collection << [k.to_s, "!!!!!!#{v}"] }
       end
       html = select col,
-                    :collection => collection,
-                    :name => attrs[:name] || "#{obj.class.to_s.snake_case}[#{id_col}]",
-                    :id => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
-                    :selected => (obj.send(id_col) ? obj.send(id_col).to_s : nil),
-                    :prompt => (attrs[:prompt] or "&lt;select a funding line&gt;")
+        :collection => collection,
+        :name => attrs[:name] || "#{obj.class.to_s.snake_case}[#{id_col}]",
+        :id => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
+        :selected => (obj.send(id_col) ? obj.send(id_col).to_s : nil),
+        :prompt => (attrs[:prompt] or "&lt;select a funding line&gt;")
       html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
     end
 
@@ -275,30 +275,30 @@ module Merb
       date = attrs[:date]
       nullable = attrs[:nullable]
       day_attrs = attrs.merge(
-          :name => attrs[:name] + '[day]',
-          :id => attrs[:id] + '_day',
-          :selected => (date ? date.day.to_s : ''),
-          :class => (obj and col) ? (obj.errors[col] ? 'error' : '') : nil,
-          :collection => (nullable ? [['', '-']] : []) + (1..31).to_a.map { |x| x = [x.to_s, x.to_s] }
+        :name => attrs[:name] + '[day]',
+        :id => attrs[:id] + '_day',
+        :selected => (date ? date.day.to_s : ''),
+        :class => (obj and col) ? (obj.errors[col] ? 'error' : '') : nil,
+        :collection => (nullable ? [['', '-']] : []) + (1..31).to_a.map { |x| x = [x.to_s, x.to_s] }
       )
 
       count = 0
       month_attrs = attrs.merge(
-          :name => attrs[:name] + '[month]',
-          :id => attrs[:id] + '_month',
-          :selected => (date ? date.month.to_s : ''),
-          :class => obj ? (obj.errors[col] ? 'error' : '') : nil,
-          :collection => (nullable ? [['', '-']] : []) + MONTHS.map { |x| count += 1; x = [count, x] }
+        :name => attrs[:name] + '[month]',
+        :id => attrs[:id] + '_month',
+        :selected => (date ? date.month.to_s : ''),
+        :class => obj ? (obj.errors[col] ? 'error' : '') : nil,
+        :collection => (nullable ? [['', '-']] : []) + MONTHS.map { |x| count += 1; x = [count, x] }
       )
 
       min_year = attrs[:min_date] ? attrs[:min_date].year : 1900
       max_year = attrs[:max_date] ? attrs[:max_date].year : date.year + 3
       year_attrs = attrs.merge(
-          :name => attrs[:name] + '[year]',
-          :id => attrs[:id] + '_year',
-          :selected => (date ? date.year.to_s : ''),
-          :class => obj ? (obj.errors[col] ? 'error' : '') : nil,
-          :collection => (nullable ? [['', '-']] : []) + (min_year..max_year).to_a.reverse.map { |x| x = [x.to_s, x.to_s] }
+        :name => attrs[:name] + '[year]',
+        :id => attrs[:id] + '_year',
+        :selected => (date ? date.year.to_s : ''),
+        :class => obj ? (obj.errors[col] ? 'error' : '') : nil,
+        :collection => (nullable ? [['', '-']] : []) + (min_year..max_year).to_a.reverse.map { |x| x = [x.to_s, x.to_s] }
       )
       select(month_attrs) + '' + select(day_attrs) + '' + select(year_attrs)
     end
@@ -340,14 +340,14 @@ module Merb
 
     def plurial_nouns(freq)
       case freq.to_sym
-        when :daily
-          'days'
-        when :weekly
-          'weeks'
-        when :monthly
-          'months'
-        else
-          '????'
+      when :daily
+        'days'
+      when :weekly
+        'weeks'
+      when :monthly
+        'months'
+      else
+        '????'
       end
     end
 
@@ -359,16 +359,16 @@ module Merb
 
     def debug_info
       [
-          {:name => 'merb_config', :code => 'Merb::Config.to_hash', :obj => Merb::Config.to_hash},
-          {:name => 'params', :code => 'params.to_hash', :obj => params.to_hash},
-          {:name => 'session', :code => 'session.to_hash', :obj => session.to_hash},
-          {:name => 'cookies', :code => 'cookies', :obj => cookies},
-          {:name => 'request', :code => 'request', :obj => request},
-          {:name => 'exceptions', :code => 'request.exceptions', :obj => request.exceptions},
-          {:name => 'env', :code => 'request.env', :obj => request.env},
-          {:name => 'routes', :code => 'Merb::Router.routes', :obj => Merb::Router.routes},
-          {:name => 'named_routes', :code => 'Merb::Router.named_routes', :obj => Merb::Router.named_routes},
-          {:name => 'resource_routes', :code => 'Merb::Router.resource_routes', :obj => Merb::Router.resource_routes},
+        {:name => 'merb_config', :code => 'Merb::Config.to_hash', :obj => Merb::Config.to_hash},
+        {:name => 'params', :code => 'params.to_hash', :obj => params.to_hash},
+        {:name => 'session', :code => 'session.to_hash', :obj => session.to_hash},
+        {:name => 'cookies', :code => 'cookies', :obj => cookies},
+        {:name => 'request', :code => 'request', :obj => request},
+        {:name => 'exceptions', :code => 'request.exceptions', :obj => request.exceptions},
+        {:name => 'env', :code => 'request.env', :obj => request.env},
+        {:name => 'routes', :code => 'Merb::Router.routes', :obj => Merb::Router.routes},
+        {:name => 'named_routes', :code => 'Merb::Router.named_routes', :obj => Merb::Router.named_routes},
+        {:name => 'resource_routes', :code => 'Merb::Router.resource_routes', :obj => Merb::Router.resource_routes},
       ]
     end
 
@@ -438,43 +438,43 @@ module Merb
           if relations.key?(k)
             str = "<tr><td>#{relations[k].first.to_s.humanize}</td><td>"
             str += (
-            if action==:update and v.class==Array
-              str = "changed from "
-              if v.first and relations[k] and obj=relations[k].last.get(v.first)
-                str += obj.name
-              else
-                str += "nil"
-              end
-              str += "</td><td>to "
+              if action==:update and v.class==Array
+                str = "changed from "
+                if v.first and relations[k] and obj=relations[k].last.get(v.first)
+                  str += obj.name
+                else
+                  str += "nil"
+                end
+                str += "</td><td>to "
 
-              if v.last and relations[k] and obj=relations[k].last.get(v.last)
-                str += obj.name
+                if v.last and relations[k] and obj=relations[k].last.get(v.last)
+                  str += obj.name
+                else
+                  str += "nil"
+                end
+                str
+              elsif action==:create and v.class==Array
+                child_obj = relations[k].last.get(v.last)
+                ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
+              elsif action==:create
+                child_obj = relations[k].last.get(v)
+                ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
               else
-                str += "nil"
-              end
-              str
-            elsif action==:create and v.class==Array
-              child_obj = relations[k].last.get(v.last)
-              ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
-            elsif action==:create
-              child_obj = relations[k].last.get(v)
-              ((child_obj and child_obj.respond_to?(:name)) ? child_obj.name : "id: #{v.last}")
-            else
-              "#{v}"
-            end)||""
+                "#{v}"
+              end)||""
           else
             str="<tr><td>#{k.humanize}</td><td>"
             str+=if action==:update and v.class==Array
-                   if model.properties.find { |x| x.name == k }.type.respond_to?(:flag_map)
-                     "changed from #{model.properties.find { |x| x.name == k }.type.flag_map[v.first]}</td><td>to #{v.last}"
-                   else
-                     "changed from #{v.first}</td><td>to #{v.last}"
-                   end
-                 elsif action==:create and v.class==Array
-                   "#{v}"
-                 else
-                   "#{v}"
-                 end
+              if model.properties.find { |x| x.name == k }.type.respond_to?(:flag_map)
+                "changed from #{model.properties.find { |x| x.name == k }.type.flag_map[v.first]}</td><td>to #{v.last}"
+              else
+                "changed from #{v.first}</td><td>to #{v.last}"
+              end
+            elsif action==:create and v.class==Array
+              "#{v}"
+            else
+              "#{v}"
+            end
           end
           str+="</td></tr>"
         }
@@ -523,47 +523,47 @@ module Merb
 
     def get_accessible_centers(branch_id, staff=nil)
       centers = if staff or session.user.staff_member
-                  Center.all(:branch => get_accessible_branches, :order => [:name])
-                elsif branch_id and not branch_id.blank?
-                  Center.all(:branch_id => branch_id, :order => [:name])
-                else
-                  []
-                end
+        Center.all(:branch => get_accessible_branches, :order => [:name])
+      elsif branch_id and not branch_id.blank?
+        Center.all(:branch_id => branch_id, :order => [:name])
+      else
+        []
+      end
       centers.map { |x| [x.id, "#{x.name}"] }
     end
 
     def get_accessible_staff_members(staff=nil)
       staff_members = if staff or staff = session.user.staff_member
-                        if branches = staff.branches and branches.length>0
-                          [staff] + branches.centers.managers(:order => [:name])
-                        elsif centers = staff.centers and centers.length>0
-                          [staff] + centers.managers(:order => [:name])
-                        else
-                          [staff] + [staff]
-                        end
-                      else
-                        StaffMember.all(:order => [:name])
-                      end
+        if branches = staff.branches and branches.length>0
+          [staff] + branches.centers.managers(:order => [:name])
+        elsif centers = staff.centers and centers.length>0
+          [staff] + centers.managers(:order => [:name])
+        else
+          [staff] + [staff]
+        end
+      else
+        StaffMember.all(:order => [:name])
+      end
       staff_members.map { |x| [x.id, x.name] }
     end
 
     def get_accessible_funders(user=nil)
       (
-      if session.user.role == :funder
-        Funder.all(:user => user)
-      else
-        Funder.all
-      end).map { |x| [x.id, "#{x.name}"] }
+        if session.user.role == :funder
+          Funder.all(:user => user)
+        else
+          Funder.all
+        end).map { |x| [x.id, "#{x.name}"] }
     end
 
     def get_accessible_funding_lines(funder_id, user = nil)
       fl = if user or session.user.role == :funder
-             FundingLine.all(:funder => get_accessible_funders)
-           elsif funder_id and not funder_id.blank?
-             FundingLine.all(:funder_id => funder_id)
-           else
-             []
-           end
+        FundingLine.all(:funder => get_accessible_funders)
+      elsif funder_id and not funder_id.blank?
+        FundingLine.all(:funder_id => funder_id)
+      else
+        []
+      end
       fl.map { |x| [x.id, "#{x.name}"] }
     end
 
@@ -571,39 +571,39 @@ module Merb
     #otherwise nothing is displayed.
     def get_accessible_combo_branches(area_id)
       br = if area_id and not area_id.blank?
-             Branch.all(:area_id => @area_id, :order => [:name])
-           else
-             []
-           end
+        Branch.all(:area_id => @area_id, :order => [:name])
+      else
+        []
+      end
       br.map { |x| [x.id, "#{x.name}"] }
     end
 
     #this function is for getting the list of accounts whose account_category is Cash and belongs to a particular branch.
     def get_accessible_cash_accounts(branch_id)
       acc = if branch_id and not branch_id.blank?
-              Account.all(:branch_id => @branch_id, :account_category => "Cash", :order => [:name])
-            else
-              []
-            end
+        Account.all(:branch_id => @branch_id, :account_category => "Cash", :order => [:name])
+      else
+        []
+      end
       acc.map { |x| [x.id, "#{x.name}"] }
     end
 
     #this function is for getting the list of accounts whose account_category is Bank and belongs to a particular branch.
     def get_accessible_bank_accounts(branch_id)
       acc = if branch_id and not branch_id.blank?
-              Account.all(:branch_id => @branch_id, :account_category => "Bank", :order => [:name])
-            else
-              []
-            end
+        Account.all(:branch_id => @branch_id, :account_category => "Bank", :order => [:name])
+      else
+        []
+      end
       acc.map { |x| [x.id, "#{x.name}"] }
     end
 
     def get_accessible_accounts(branch_id)
       accounts = if branch_id and not branch_id.blank?
-                   Account.all(:branch_id => @branch_id, :order => [:name])
-                 else
-                   Account.all(:branch_id => nil, :order => [:name])
-                 end
+        Account.all(:branch_id => @branch_id, :order => [:name])
+      else
+        Account.all(:branch_id => nil, :order => [:name])
+      end
       accounts.map { |x| [x.id, "#{x.name}"] }
     end
 
@@ -614,10 +614,10 @@ module Merb
         MASS_ENTRY_FIELDS[model].sort_by { |x| x.to_s }.each { |k| collection << ["#{model}[#{k.to_s}]", "!!!!!!#{k.to_s.camelcase(' ')}"] }
       end
       select(
-          :collection => collection,
-          :name => "#{attrs[:name]}",
-          :id => "#{attrs[:id]||'select_mass_entry'}",
-          :prompt => (attrs[:prompt] or "&lt;select a field&gt;")).gsub("!!!", "&nbsp;")
+        :collection => collection,
+        :name => "#{attrs[:name]}",
+        :id => "#{attrs[:id]||'select_mass_entry'}",
+        :prompt => (attrs[:prompt] or "&lt;select a field&gt;")).gsub("!!!", "&nbsp;")
     end
 
     def paginate_on_weekdays(biz_location, selected=Date.today.weekday)
@@ -640,11 +640,11 @@ module Merb
         accounts.sort_by { |a| a.name }.each { |a| collection << [a.id.to_s, "!!!!!!!!!#{a.name}"] }
       end
       html = select(
-          :collection => collection,
-          :name => name,
-          :id => attrs[:id],
-          :selected => attrs[:selected],
-          :prompt => (attrs[:prompt] or "&lt;select a account&gt;"))
+        :collection => collection,
+        :name => name,
+        :id => attrs[:id],
+        :selected => attrs[:selected],
+        :prompt => (attrs[:prompt] or "&lt;select a account&gt;"))
       html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
     end
 
@@ -663,19 +663,29 @@ module Merb
 
     def get_status_class(idx)
       case idx
-        when 0
-          'red'
-        when 1
-          'green'
-        when 2
-          'blue'
-        else
-          'grey'
+      when 0
+        'red'
+      when 1
+        'green'
+      when 2
+        'blue'
+      else
+        'grey'
       end
     end
 
+    def select_fundling_lines
+      catalog = Funder.catalog
+      collection = []
+      catalog.keys.sort.each do |funder_name|
+        collection << ['', "FUNDER: #{funder_name}"]
+        catalog[funder_name].each_pair { |k, v| collection << [k.to_s, "!!!!!!#{v}"] }
+      end
+      catalog
+    end
 
     private
+    
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)
       hash = allow_inactive ? {} : {:active => true}
       if staff = session.user.staff_member
