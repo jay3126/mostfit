@@ -285,12 +285,22 @@ class ReportingFacade < StandardFacade
     loan_balances_by_loan_id = {}
     if loan_ids_array.is_a?(Fixnum)
       for_loan_id = loan_ids_array
-      due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
-      loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
-    else
-      loan_ids_array.each { |for_loan_id|
+      loan = Lending.get(for_loan_id)
+      if on_date >= loan.disbursal_date
         due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
         loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+      else
+        loan_balances_by_loan_id[for_loan_id] = MoneyManager.default_zero_money
+      end
+    else
+      loan_ids_array.each { |for_loan_id|
+        loan = Lending.get(for_loan_id)
+        if on_date >= loan.disbursal_date
+          due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
+          loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+        else
+          loan_balances_by_loan_id[for_loan_id] = MoneyManager.default_zero_money
+        end
       }
     end
     loan_balances_by_loan_id
@@ -303,8 +313,13 @@ class ReportingFacade < StandardFacade
     loan_ids_array1 = loan_ids_array.uniq
     if (loan_ids_array1 and (not loan_ids_array1.empty?))
       loan_ids_array1.each { |for_loan_id|
-        due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
-        loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+        loan = Lending.get(for_loan_id)
+        if on_date >= loan.disbursal_date
+          due_status_record = LoanDueStatus.most_recent_status_record_on_date(for_loan_id, on_date)
+          loan_balances_by_loan_id[for_loan_id] = due_status_record.to_money if due_status_record
+        else
+          loan_balances_by_loan_id[for_loan_id] = MoneyManager.default_zero_money
+        end
       }
     end
     loan_balances_by_loan_id
