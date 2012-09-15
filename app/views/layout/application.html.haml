@@ -62,6 +62,7 @@
           #flash-messages.span-17.prefix-5.suffix-5.last
             - message.each do |key, value|
               .flash{ :class => key.to_s }
+                - value = value.join('<br/>') if value.class == Array
                 %p= value.gsub("\n", "<br/>")
         - if request.exceptions
           - @exceptions = request.exceptions.dup

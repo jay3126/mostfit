@@ -53,7 +53,7 @@ class Client
 
   has n, :simple_insurance_policies
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
-  has n, :attendances
+  has n, :attendance_records, :parent_key => [:id], :child_key => [:counterparty_id]
   has 1, :claim
 
   has n, :loan_applications

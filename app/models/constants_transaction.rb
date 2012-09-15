@@ -2,12 +2,13 @@ module Constants
   module Transaction
 
     CLIENT = :client
+    STAFFMEMBER = :staff_member
     FIX_AMOUNT = :fix_amount
     PERCENTAGE_AMOUNT = :percentage_amount
     FEE_AMOUNT_TYPE = [FIX_AMOUNT, PERCENTAGE_AMOUNT]
-    COUNTERPARTIES = [CLIENT]
-    COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client' }
-    MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT }
+    COUNTERPARTIES = [CLIENT, STAFFMEMBER]
+    COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client' ,STAFFMEMBER => 'StaffMember' }
+    MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT, 'StaffMember' => STAFFMEMBER }
 
     COUNTERPARTY_ADMINISTERED_AT = :administered_at
     COUNTERPARTY_REGISTERED_AT   = :registered_at

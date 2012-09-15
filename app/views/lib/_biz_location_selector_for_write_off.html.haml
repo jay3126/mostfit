@@ -27,6 +27,7 @@
           %td
             Select Date:
           %td
+            - date = params[:date].blank? ? get_effective_date : params[:date]
             = date_select 'date', date, :max_date => Date.today, :size => 15
         %td
           = submit "Go"
