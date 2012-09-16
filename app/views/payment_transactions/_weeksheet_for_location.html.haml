@@ -1,3 +1,12 @@
+:javascript
+  $(document).ready(function() {
+    $('#toggle_select_all').change(function() {
+      $('input.checkbox').attr('checked',$(this).attr('checked'))
+    });
+  });
+  function toggle_check_box(obj, class_name){
+    $('.'+class_name).attr('checked',$(obj).attr('checked'));
+  }
 - p_id, c_id, s_id, date = params[:parent_location_id], params[:child_location_id], params[:staff_member_id], params[:date]
 - url = resource(:payment_transactions, :create_group_payments, :parent_location_id => p_id, :child_location_id => c_id, :staff_member_id => s_id, :date => date)
 - date = @date.blank? ? get_effective_date : @date
@@ -39,7 +48,7 @@
           %th
             Select All
             %br
-            = check_box :id => "toggle_select_to_disburse"
+            = check_box :id => "toggle_select_all"
           %th
             Name
           %th
@@ -83,7 +92,7 @@
           - collection_sheets.each do |ws|
             %tr{:class => "biz_location_#{biz_location.id} payment"}
               %td{:style => 'text-align:center'}
-                = check_box :name => "payment_transactions[payments][#{loan_row_count}][payment]", :value => true
+                = check_box :name => "payment_transactions[payments][#{loan_row_count}][payment]", :value => true, :class => "payment_#{location_id}"
                 = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][performed_at]", :value => weeksheet.at_biz_location_id
                 = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][accounted_at]", :value => parent_location.id
                 = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_id]", :value => ws.borrower_id
@@ -133,7 +142,7 @@
             %td{:style => "text-align:center"}
               = link_to "Total For #{biz_location.name.humanize}", '#', :onclick => "jQuery('.biz_location_#{biz_location.id}').toggle(); return false;"
               %br
-              = check_box :id => "toggle_select_to_disburse"
+              = check_box :id => "toggle_select_to_disburse", :class => "payment_#{location_id}", :onclick => "toggle_check_box(this, 'payment_#{location_id}')"
             %td
             %td
             %td
