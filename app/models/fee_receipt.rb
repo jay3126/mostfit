@@ -115,8 +115,8 @@ fee product, and when
     fee_receipt_values[:by_counterparty_type] = by_counterparty_type
     fee_receipt_values[:by_counterparty_id]   = by_counterparty_id
 
-    fee_receipt_values[:fee_amount]   = fee_instance.money_amount.amount
-    fee_receipt_values[:currency]     = fee_instance.money_amount.currency
+    fee_receipt_values[:fee_amount]   = fee_instance.total_money_amount.amount
+    fee_receipt_values[:currency]     = fee_instance.currency
     fee_receipt_values[:effective_on] = effective_on
     fee_receipt_values[:performed_by] = performed_by_id
     fee_receipt_values[:recorded_by]  = recorded_by_id

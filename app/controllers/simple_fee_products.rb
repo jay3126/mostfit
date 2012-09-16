@@ -17,7 +17,9 @@ class SimpleFeeProducts < Application
     fee_amount      = params[:timed_amount][:fee_only_amount]
     tax_amount      = params[:timed_amount][:tax_only_amount]
     amount_type     = params[:timed_amount][:amount_type]
-    percentage      = params[:timed_amount][:percentage]
+    fee_percentage  = params[:timed_amount][:fee_only_percentage]
+    tax_percentage  = params[:timed_amount][:tax_only_percentage]
+    tax_percentage  = tax_percentage.blank? ? 0.00 : tax_percentage
     currency        = 'INR'
 
     #VALIDATION
@@ -26,7 +28,7 @@ class SimpleFeeProducts < Application
     @message[:error] = 'Name cannot be blank' if name.blank?
     @message[:error] = 'Fee Amount cannot be blank' if fee_amount.blank? && amount_type == 'fix_amount'
     @message[:error] = 'Tax Amount cannot be blank' if tax_amount.blank? && amount_type == 'fix_amount'
-    @message[:error] = 'Percentage Amount cannot be blank' if percentage.blank? && amount_type != 'fix_amount'
+    @message[:error] = 'Fee Percentage Amount cannot be blank' if fee_percentage.blank? && amount_type != 'fix_amount'
 
     #PERFORM OPERTION
     begin
@@ -36,9 +38,9 @@ class SimpleFeeProducts < Application
           if amount_type == 'fix_amount'
             fee_money_amount = MoneyManager.get_money_instance(fee_amount)
             tax_money_amount = MoneyManager.get_money_instance(tax_amount)
-            fee_time_amount = fee.timed_amounts.new(:amount_type => amount_type, :fee_only_amount => fee_money_amount.amount, :tax_only_amount => tax_money_amount.amount , :currency => currency, :effective_on => created_on)
+            fee_time_amount  = fee.timed_amounts.new(:amount_type => amount_type, :fee_only_amount => fee_money_amount.amount, :tax_only_amount => tax_money_amount.amount , :currency => currency, :effective_on => created_on)
           else
-            fee_time_amount = fee.timed_amounts.new(:amount_type => amount_type, :percentage => percentage.to_f, :currency => currency, :effective_on => created_on)
+            fee_time_amount = fee.timed_amounts.new(:amount_type => amount_type, :fee_only_percentage => fee_percentage.to_f, :tax_only_percentage => tax_percentage.to_f, :currency => currency, :effective_on => created_on)
           end
           fee_time_amount.save
           @message[:notice] = 'Fee Product saved successfully'
@@ -106,8 +108,10 @@ class SimpleFeeProducts < Application
     fee_amount      = params[:timed_amount][:fee_only_amount]
     tax_amount      = params[:timed_amount][:tax_only_amount]
     amount_type     = params[:timed_amount][:amount_type]
-    percentage      = params[:timed_amount][:percentage]
+    fee_percentage  = params[:timed_amount][:fee_only_percentage]
+    tax_percentage  = params[:timed_amount][:tax_only_percentage]
     effective_on    = params[:timed_amount][:effective_on]
+    tax_percentage  = tax_percentage.blank? ? 0.00 : tax_percentage
     fee_product     = SimpleFeeProduct.get fee_product_id
     currency        = 'INR'
 
@@ -117,7 +121,7 @@ class SimpleFeeProducts < Application
     @message[:error] = 'Currency cannot be blank' if currency.blank?
     @message[:error] = 'Fee Amount cannot be blank' if fee_amount.blank? && amount_type == 'fix_amount'
     @message[:error] = 'Tax Amount cannot be blank' if tax_amount.blank? && amount_type == 'fix_amount'
-    @message[:error] = 'Percentage Amount cannot be blank' if percentage.blank? && amount_type != 'fix_amount'
+    @message[:error] = 'Percentage Amount cannot be blank' if fee_percentage.blank? && amount_type != 'fix_amount'
 
     #PERFORM OPERTION
     begin
@@ -127,7 +131,7 @@ class SimpleFeeProducts < Application
           tax_money_amount = MoneyManager.get_money_instance(tax_amount)
           fee_time_amount = fee_product.timed_amounts.new(:amount_type => amount_type, :fee_only_amount => fee_money_amount.amount, :tax_only_amount => tax_money_amount.amount , :currency => currency, :effective_on => effective_on)
         else
-          fee_time_amount = fee_product.timed_amounts.new(:amount_type => amount_type, :percentage => percentage.to_f, :currency => currency, :effective_on => effective_on)
+          fee_time_amount = fee_product.timed_amounts.new(:amount_type => amount_type, :fee_only_percentage => fee_percentage.to_f, :tax_only_percentage => tax_percentage.to_f, :currency => currency, :effective_on => effective_on)
         end
         if fee_time_amount.save
           @message[:notice] = 'Fee Time Amount saved successfully'

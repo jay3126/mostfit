@@ -21,9 +21,7 @@ class SimpleInsuranceProduct
     fee_timed_amount = self.premium.effective_timed_amount(on_date)
     if fee_timed_amount.amount_type == PERCENTAGE_AMOUNT && !lending.blank?
       loan_amount      = lending.to_money[:disbursed_amount]||lending.to_money[:applied_amount]
-      percentage       = fee_timed_amount.percentage.to_f
-      fee_amount       = (percentage/100) * loan_amount.amount
-      fee_money_amount = MoneyManager.get_money_instance_least_terms(fee_amount.to_i)
+      fee_money_amount = fee_timed_amount.total_money_amount(loan_amount)
     elsif fee_timed_amount.amount_type == FIX_AMOUNT
       fee_money_amount = fee_timed_amount.total_money_amount
     end

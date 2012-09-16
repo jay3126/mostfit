@@ -1,5 +1,11 @@
 :javascript
-  $('.fee_selector').live('change', function(){
+  $(document).ready(function() {
+    if(jQuery('select.fee_selector option:selected').attr('value')=='percentage_amount'){
+        jQuery('.fix').hide();
+        jQuery('.percentage').show();
+        jQuery('.fix_amount').val('');
+    }
+    $('.fee_selector').live('change', function(){
       if(jQuery(this).val()=='fix_amount'){
         jQuery('.fix').show();
         jQuery('.percentage').hide();
@@ -10,6 +16,7 @@
         jQuery('.fix_amount').val('');
       }
     });
+  });
 %table.tall.shaded
   %tr
     %th
@@ -18,9 +25,14 @@
       = select :name => 'timed_amount[amount_type]', :collection => Constants::Transaction::FEE_AMOUNT_TYPE.map{|f| [f, f.to_s.humanize]}, :class => 'fee_selector'
   %tr.percentage{:style => 'display:none'}
     %th
-      Amount In Percentage
+      Fee In Percentage
     %td
-      = text_field :name => 'timed_amount[percentage]', :class => 'percentage_amount'
+      = text_field :name => 'timed_amount[fee_only_percentage]', :class => 'percentage_amount'
+  %tr.percentage{:style => 'display:none'}
+    %th
+      Tax In Percentage
+    %td
+      = text_field :name => 'timed_amount[tax_only_percentage]', :class => 'percentage_amount'
   %tr.fix
     %th
       Fee Amount
