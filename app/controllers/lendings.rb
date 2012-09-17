@@ -549,7 +549,7 @@ class Lendings < Application
 
     # INITIATIZATION
     @errors = []
-
+    message = {}
     # VALIDATIONS
     @errors << "Select atleast one loan" if lending.blank?
 
@@ -561,9 +561,9 @@ class Lendings < Application
           funding_line_id = params[:funding_line_id]["#{l}"]
           tranch_id = params[:tranch_id]["#{l}"]
           FundingLineAddition.assign_tranch_to_loan(lending_id, funding_line_id, tranch_id, session.user.id, created_on, session.user.id)
-          message = {:notice => "Susscessfully updated funding lines"}
+          message = {:notice => "Successfully updated funding lines"}
         rescue => ex
-          @errors << "An error has occured: #{ex.message}"
+          @errors << "An error has occured for Loan ID #{lending_id}: #{ex.message}"
         end
       end
     end
