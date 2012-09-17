@@ -25,3 +25,12 @@
     %tr.odd
       %th.odd On Date
       %td= @lending_status.effective_on
+  %tr.odd
+    %th.odd Funder
+    %td= loan_facade.get_funder_assigned_to_loan(@lending.id).name rescue nil
+  %tr.odd
+    %th.odd Funding Line
+    %td= loan_facade.get_funding_line_assigned_to_loan(@lending.id).name rescue nil
+  %tr.odd
+    %th.odd Tranch
+    %td= loan_facade.get_tranch_assigned_to_loan(@lending.id).name rescue nil
