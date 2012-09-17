@@ -23,7 +23,7 @@ class Comment
   def self.save_comment(text, reason_id, commentable_type, commentable_id, user_id)
     values = {}
     values[:text] = text
-    values[:region_id] = reason_id
+    values[:reason_id] = reason_id
     values[:commentable_class] = commentable_type
     values[:commentable_id] = commentable_id
     values[:user_id] = user_id
