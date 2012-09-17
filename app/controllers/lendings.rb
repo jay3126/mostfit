@@ -312,6 +312,18 @@ class Lendings < Application
     display @lending
   end
 
+  def bulk_lending_preclose
+    @lendings        = []
+    @message         = {}
+    @date            = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
+    @biz_location_id = params[:child_location_id]
+    unless params[:child_location_id].blank?
+      @biz_location =  BizLocation.get @biz_location_id
+      @lendings     = LoanAdministration.get_loans_administered(@biz_location.id, @date).compact.select{|l| l.is_outstanding?}
+    end
+    display @lendings
+  end
+
   def check_preclosure_date
     lending_id = params[:loan_id]
     preclose_on_date = params[:effective_on]
@@ -320,6 +332,85 @@ class Lendings < Application
     @preclosure_penalty_amount = preclosure_penalty_product ? preclosure_penalty_product.effective_total_amount(preclose_on_date) :
       MoneyManager.default_zero_money
     render :template => "lendings/lending_preclose"
+  end
+
+  def record_bulk_lending_preclose
+    @message                 = {:error => [], :notice => []}
+    preclose_lendings        = {}
+    @staff_id                = session.user.staff_member.id
+    lending_params           = params[:preclose].blank? ? [] : params[:preclose]
+    parent_location_id       = params[:parent_location_id]
+    child_location_id        = params[:child_location_id]
+    effective_on             = params[:on_date]
+    performed_by             = params[:performed_by]
+    recorded_by              = session.user.id
+    receipt_type             = Constants::Transaction::RECEIPT
+    payment_towards          = Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
+    on_product_type          = 'lending'
+    by_counterparty_type     = 'client'
+    currency                 = 'INR'
+    product_action           = Constants::Transaction::LOAN_PRECLOSURE
+    make_specific_allocation = true
+
+    @message[:error] << "Please select checkbox for Preclose loan" if lending_params.values.select{|l| l[:preclose]}.blank?
+    @message[:error] << "Preclose date cannot be blank" if effective_on.blank?
+    @message[:error] << "Please select Staff Member" if performed_by.blank?
+    @message[:error] << "Please Enter Interest Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:interest_amount].to_f < 0}.blank?
+    @message[:error] << "Please Enter Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:total_amount].to_f <= 0}.blank?
+
+    begin
+      if @message[:error].blank?
+        lending_params.each do |key, value|
+          unless value[:preclose].blank?
+            lending                       = Lending.get value[:lending_id]
+            preclose_lendings[lending.id] = {}
+            by_counterparty_id            = value[:client_id]
+            performed_at                  = lending.administered_at_origin
+            accounted_at                  = lending.accounted_at_origin
+            money_principal_amount        = MoneyManager.get_money_instance(value[:principal_amount].to_f)
+            money_interest_amount         = MoneyManager.get_money_instance(value[:interest_amount].to_f)
+            money_amount                  = money_principal_amount + money_interest_amount
+            preclose_lendings[lending.id][:principal_amount] = money_principal_amount
+            preclose_lendings[lending.id][:interest_amount] = money_interest_amount
+            if(money_amount.amount > 0)
+              payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
+                :on_product_type      => on_product_type, :on_product_id  => lending.id,
+                :performed_at         => performed_at, :accounted_at   => accounted_at,
+                :performed_by         => performed_by, :recorded_by    => recorded_by,
+                :by_counterparty_type => by_counterparty_type, :by_counterparty_id  => by_counterparty_id,
+                :receipt_type         => receipt_type, :payment_towards     => payment_towards)
+              if payment_transaction.valid?
+                if payment_facade.is_loan_payment_permitted?(payment_transaction)
+                  preclose_lendings[lending.id][:payment_transaction] = payment_transaction
+                else
+                  @message[:error] << "#{on_product_type}(#{lending.id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
+                end
+              end
+            end
+          end
+        end
+      end
+      if @message[:error].blank?
+        begin
+          preclose_lendings.each do |key, preclose_lending|
+            pt                 = preclose_lending[:payment_transaction]
+            principal_amount   = preclose_lending[:principal_amount]
+            interest_amount    = preclose_lending[:interest_amount]
+            fee_instances      = FeeInstance.unpaid_loan_preclosure_fee_instance(pt.on_product_id)
+            total_money_amount = pt.to_money[:amount]
+            payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, principal_amount, interest_amount)
+            fee_instances.each do |fee_instance|
+              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', pt.on_product_id, 'client', pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
+            end
+            @message[:notice] = "Succesfully preclosed"
+          end
+        rescue => ex
+          @message[:error] << ex.message
+        end
+      end
+    end
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect resource(:lendings, :bulk_lending_preclose, :date => effective_on, :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
   end
   
   def record_lending_preclose

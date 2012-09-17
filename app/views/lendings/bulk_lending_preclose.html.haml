@@ -1,0 +1,142 @@
+:javascript
+  $(document).ready(function() {
+    $('#toggle_select_all').change(function() {
+      $('input.checkbox').attr('checked',$(this).attr('checked'))
+    });
+  });
+
+%h1 Preclose Loan
+%br
+= form_for(:lendings, :action => url(:controller => :lendings, :action => :bulk_lending_preclose), :method => :get) do
+  = partial 'lib/biz_location_selector_for_write_off', :date => get_effective_date, :staff_member => false
+- if params[:child_location_id].blank?
+  %h3 Please Select Center
+- else
+  %h2= "Preclose Loans On #{@date}"
+  - if @lendings.blank?
+    %h3
+      No loan exists
+  - else
+    = form_for(:lendings, :action => url(:controller => :lendings, :action => :record_bulk_lending_preclose)) do
+      = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
+      = hidden_field :name => 'child_location_id', :value => params[:child_location_id]
+      = hidden_field :name => 'date', :value => params[:date]
+      %table.report.weeksheet.nojs
+        %thead
+          %tr
+            %th
+              Select All
+              %br
+              = check_box :id => "toggle_select_all"
+            %th
+              Loan ID
+            %th
+              Loan Account No.
+            %th
+              Loan Product Name
+            %th
+              Borrower Name
+            %th
+              Loan Amount
+            %th
+              Loan Disbursed On
+            %th
+              Last Repayment Date
+            %th
+              Last Repayment Amount
+            %th
+              Principal Due
+            %th
+              Interest Due
+            %th
+              Preclosure Penalty
+            %th
+              Total Due
+        - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+        - @default_currency ||= MoneyManager.get_default_currency
+        - @lendings.each do |lending|
+          = hidden_field :name => "preclose[#{lending.id}][lending_id]", :value => lending.id
+          - last_repayment = lending.loan_receipts.last
+          - last_repayment_date = last_repayment.blank? ? '-' : last_repayment.effective_on
+          - last_repayment_amount = last_repayment.blank? ? '-' : last_repayment.to_money[:principal_received] + last_repayment.to_money[:interest_received]
+          %tr
+            %td{:style => "text-align:center"}
+              = check_box :name => "preclose[#{lending.id}][preclose]" ,:value => true, :class => 'select_to_disburse'
+            %td
+              = link_to_with_rights lending.id, resource(lending)
+            %td
+              = lending.lan
+            %td
+              = lending.lending_product.name
+            %td
+              = lending.loan_borrower.counterparty.name
+              = hidden_field :name => "preclose[#{lending.id}][client_id]", :value => lending.loan_borrower.counterparty.id
+            %td
+              = lending.total_loan_disbursed.to_s
+              - accumulate_row_values[:total_loan_disbursed] += lending.total_loan_disbursed
+            %td
+              = lending.disbursal_date
+            %td
+              = last_repayment_date
+            %td
+              = last_repayment_amount
+              - accumulate_row_values[:last_repayment_amount] += last_repayment_amount unless last_repayment.blank?
+            %td
+              - loan_principal = lending.actual_principal_outstanding
+              = loan_principal
+              = hidden_field :name => "preclose[#{lending.id}][principal_amount]", :value => loan_principal.to_regular_amount, :class => "weeksheet_total_#{lending.id}"
+              - accumulate_row_values[:loan_principal] += loan_principal
+            %td
+              - from_date     = last_repayment.blank? ? lending.scheduled_first_repayment_date : last_repayment_date
+              - loan_interest = lending.accrued_interim_interest(from_date, @date)
+              = text_field :name => "preclose[#{lending.id}][interest_amount]", :value => loan_interest.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{lending.id} weeksheet_total weeksheet_total_lending", :onkeyup => "update_total_amount('INR'); update_total_on_div_amount('INR', '#{lending.id}'); update_total_on_div_amount('INR', 'lending');", :style => "width:100px"
+              - accumulate_row_values[:loan_interest] += loan_interest
+            %td
+              - preclosure_penalty = lending.get_preclosure_penalty_product.effective_total_amount(@date) rescue MoneyManager.default_zero_money
+              = preclosure_penalty
+              - accumulate_row_values[:preclosure_penalty] += preclosure_penalty
+            %td
+              - total_due = loan_principal + loan_interest
+              %div{:id => "weeksheet_total_amount_#{lending.id}"}
+                = total_due
+              = hidden_field :name => "preclose[#{lending.id}][total_amount]", :value => total_due.to_regular_amount, :class => 'weeksheet_total_lending'
+              - accumulate_row_values[:total_due] += total_due
+        - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+        %tfoot
+          %tr.org_total
+            %td
+              Total
+            %td
+            %td
+            %td
+            %td
+            %td
+              = total_rows[:total_loan_disbursed]
+            %td
+            %td
+            %td
+              = total_rows[:last_repayment_amount]
+            %td
+              = total_rows[:loan_principal]
+            %td
+              %div{:id => "weeksheet_total_amount"}
+                = total_rows[:loan_interest]
+            %td
+              = total_rows[:preclosure_penalty]
+            %td
+              %div{:id => "weeksheet_total_amount_lending"}
+                = total_rows[:total_due]
+
+      %table.narrow.form{:style => "text-align:right;width:100%;"}
+        %tfoot
+          %tr
+            %td
+              %b Chosen date
+              = @date
+              = hidden_field :name => "on_date", :value => @date
+            %td
+              %b Performed by
+              - staff_member  = session.user.staff_member
+              = select :name => "performed_by", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+            %td
+              = submit 'Save Payment'

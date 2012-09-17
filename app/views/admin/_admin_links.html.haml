@@ -62,6 +62,8 @@
       %li
         = link_to_with_rights 'Bulk edit funding lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
       %li
+        = link_to_with_rights 'Bulk Preclose', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
+      %li
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
       %li
         =# link_to_with_rights 'Insurance companies & products', url(:action => :insurance), :class => 'insurance icon'

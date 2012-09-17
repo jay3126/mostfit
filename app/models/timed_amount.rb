@@ -17,7 +17,6 @@ class TimedAmount
   def money_amounts; [:fee_only_amount, :tax_only_amount]; end
 
   def fee_money_amount(amount = MoneyManager.default_zero_money)
-    debugger
     if self.amount_type == PERCENTAGE_AMOUNT
       fee_percentage   = self.fee_only_percentage.blank? ? 0 : self.fee_only_percentage
       fee_amount       = (fee_percentage.to_f/100) * amount.amount
