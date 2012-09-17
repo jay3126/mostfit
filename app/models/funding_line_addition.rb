@@ -24,4 +24,23 @@ class FundingLineAddition
     assign_tranch
   end
 
+  def self.get_funder_assigned_to_loan(lending_id)
+    funding_line_addition = last(:lending_id => lending_id)
+    funding_line_id = funding_line_addition.funding_line_id
+    funding_line = FundingLine.get funding_line_id
+    funding_line.funder
+  end
+
+  def self.get_funding_line_assigned_to_loan(lending_id)
+    funding_line_addition = last(:lending_id => lending_id)
+    funding_line_id = funding_line_addition.funding_line_id
+    FundingLine.get funding_line_id
+  end
+
+  def self.get_tranch_assigned_to_loan(lending_id)
+    funding_line_addition = last(:lending_id => lending_id)
+    tranch_id = funding_line_addition.tranch_id
+    Tranch.get tranch_id
+  end
+
 end

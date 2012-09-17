@@ -188,6 +188,18 @@ class LoanFacade < StandardFacade
     Lending.loans_eligible_for_sec_or_encum(center_id)
   end
 
+  def get_funder_assigned_to_loan(lending_id)
+    FundingLineAddition.get_funder_assigned_to_loan(lending_id)
+  end
+
+  def get_funding_line_assigned_to_loan(lending_id)
+    FundingLineAddition.get_funding_line_assigned_to_loan(lending_id)
+  end
+
+  def get_tranch_assigned_to_loan(lending_id)
+    FundingLineAddition.get_tranch_assigned_to_loan(lending_id)
+  end
+
   private
 
   # LoanManager instance

@@ -62,23 +62,30 @@
             = link_to_with_rights lending.lending_product.name, url(:controller => :lending_products, :action => :show, :id => lending.lending_product.id)
           %td
             = lending.loan_borrower.counterparty.name
+          %td{:style => "text-align: left;"}
+            = "<b> Funder: </b>"
+            = loan_facade.get_funder_assigned_to_loan(lending.id).name
+            %br
+            = "<b> Funding Line: </b>"
+            = loan_facade.get_funding_line_assigned_to_loan(lending.id).name
+            %br
+            = "<b> Tranch: </b>"
+            = loan_facade.get_tranch_assigned_to_loan(lending.id).name
           %td
-            = "Funder"
-          %td
-            = select :name => "funding_line_id", :collection => select_fundling_lines, :id => "funding_line_selector_#{lending.id}", :onchange => "fillFundingLines('#{lending.id}')"
+            = select :name => "[funding_line_id][#{lending.id}]", :collection => select_fundling_lines, :id => "funding_line_selector_#{lending.id}", :onchange => "fillFundingLines('#{lending.id}')", :selected => loan_facade.get_funding_line_assigned_to_loan(lending.id)
           %td
             - tranches = select_tranches.blank? ? [] : select_tranches.map{|x| [x.id, x.name]}
-            = select :name => "tranch_id", :collection => tranches, :id => "tranch_selector_#{lending.id}"
+            = select :name => "[tranch_id][#{lending.id}]", :collection => tranches, :id => "tranch_selector_#{lending.id}", :selected => loan_facade.get_tranch_assigned_to_loan(lending.id)
           - s_no += 1
     %table.narrow.form{:style => "width:100%;"}
       %tfoot
         %tr
           %td
             %b On:
-            = date_select "disbursal_date", get_effective_date, :max_date => Date.today
+            = date_select "created_on", get_effective_date, :max_date => Date.today
             %b By:
-            = select :name => "disbursed_by_staff", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id
+            = select :name => "created_by_staff", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id
     = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
-    = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
+    = hidden_field :name => 'child_location_id', :value => params[:child_location_id]
     %br
     = submit "Update"

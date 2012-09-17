@@ -449,6 +449,40 @@ class Lendings < Application
     render :bulk_edit_funding_lines
   end
 
+  def update_loans_funding_lines
+    # GATE-KEEPING
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    created_on = params[:created_on]
+    lending = params[:lending]
+
+    # INITIATIZATION
+    @errors = []
+
+    # VALIDATIONS
+    @errors << "Select atleast one loan" if lending.blank?
+
+    # OPERATIONS-PERFORMED
+    if @errors.blank?
+      lending.keys.each do |l|
+        begin
+          lending_id = lending["#{l}"]
+          funding_line_id = params[:funding_line_id]["#{l}"]
+          tranch_id = params[:tranch_id]["#{l}"]
+          FundingLineAddition.assign_tranch_to_loan(lending_id, funding_line_id, tranch_id, session.user.id, created_on, session.user.id)
+          message = {:notice => "Susscessfully updated funding lines"}
+        rescue => ex
+          @errors << "An error has occured: #{ex.message}"
+        end
+      end
+    end
+    unless @errors.blank?
+      message = {:error => @errors.flatten.join(', ')}
+    end
+    # RE-DIRECT/RENDER
+    redirect resource(:lendings, :bulk_edit_funding_lines, :parent_location_id => branch_id, :child_location_id => center_id), :message => message
+  end
+
   private
 
   def get_all_loans_eligible_for_sec_or_encum(params)
