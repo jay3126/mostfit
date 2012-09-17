@@ -70,6 +70,7 @@ Merb::Router.prepare do
       resources :account_balances
     end
   end
+  resources :regions
   resources :location_levels
   resources :biz_locations, :id => %r(\d+), :collection => {:map_locations => [:get]}, :member => {:update_biz_location => [:put], :biz_location_clients => [:get], :centers_for_selector => [:get], :biz_location_form => [:get]}
   resources :new_clients, :collection => {:update_client_location => [:get,:put], :create_client_for_selected_loan_application => [:get, :put], :create_clients_for_loan_file => [:get], :death_claim_insurance => [:get, :put], :record_death_event => [:put, :get], :record_death_claim_insurance => [:get, :put], :all_deceased_clients => [:get, :put]}, :member => {:register_death_event => [:get]}

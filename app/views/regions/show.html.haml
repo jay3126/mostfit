@@ -1,0 +1,31 @@
+%h1== Region:- #{@region.name}
+= link_to 'Edit', '#', :onclick => "jQuery('.region_div').toggle();", :class => "add grey_button"
+.region_div{:style => 'display:none'}
+  = form_for(@region, :id => "regions_form", :action => resource(@region)) do
+    = text_field :name
+    = submit 'Update'
+%h2 Remarks
+%table.datatable.report.weeksheet.nojs
+  %thead
+    %th
+      ID
+    %th
+      Remark On Type
+    %th
+      Remark On ID
+    %th
+      Remark
+    %th
+      Created At
+  - @region.comments.each do |comment|
+    %tr
+      %td
+        = comment.id
+      %td
+        = comment.commentable_class
+      %td
+        = comment.commentable_id
+      %td
+        = comment.text
+      %td
+        = comment.created_at

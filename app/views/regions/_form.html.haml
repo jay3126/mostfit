@@ -1,0 +1,4 @@
+- region = Region.new
+= form_for(region, :id => "regions_form", :action => resource(:regions)) do
+  = text_field :name
+  = submit 'Save'

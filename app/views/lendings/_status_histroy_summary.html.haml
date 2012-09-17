@@ -13,6 +13,9 @@
     %tr.odd
       %th.odd Closing outstanding interest
       %td= repaid.to_money[:closing_outstanding_interest]
+    %tr.odd
+      %th.odd Region/Remarks
+      %td= Comment.lending_to_s(@lending.id).join('<br>')
   - elsif @lending.is_written_off?
     - recovery = @lending.loan_recovery_till_date
     %tr.odd

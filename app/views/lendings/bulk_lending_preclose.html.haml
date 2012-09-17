@@ -21,6 +21,7 @@
       = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
       = hidden_field :name => 'child_location_id', :value => params[:child_location_id]
       = hidden_field :name => 'date', :value => params[:date]
+      = hidden_field :name => "on_date", :value => @date
       %table.report.weeksheet.nojs
         %thead
           %tr
@@ -55,7 +56,6 @@
         - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
         - @default_currency ||= MoneyManager.get_default_currency
         - @lendings.each do |lending|
-          = hidden_field :name => "preclose[#{lending.id}][lending_id]", :value => lending.id
           - last_repayment = lending.loan_receipts.last
           - last_repayment_date = last_repayment.blank? ? '-' : last_repayment.effective_on
           - last_repayment_amount = last_repayment.blank? ? '-' : last_repayment.to_money[:principal_received] + last_repayment.to_money[:interest_received]
@@ -64,6 +64,7 @@
               = check_box :name => "preclose[#{lending.id}][preclose]" ,:value => true, :class => 'select_to_disburse'
             %td
               = link_to_with_rights lending.id, resource(lending)
+              = hidden_field :name => "preclose[#{lending.id}][lending_id]", :value => lending.id
             %td
               = lending.lan
             %td
@@ -127,16 +128,27 @@
               %div{:id => "weeksheet_total_amount_lending"}
                 = total_rows[:total_due]
 
-      %table.narrow.form{:style => "text-align:right;width:100%;"}
-        %tfoot
-          %tr
-            %td
-              %b Chosen date
-              = @date
-              = hidden_field :name => "on_date", :value => @date
-            %td
-              %b Performed by
-              - staff_member  = session.user.staff_member
-              = select :name => "performed_by", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
-            %td
-              = submit 'Save Payment'
+      %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+        %table.form{:style => "text-align:right;width:100%;"}
+          %thead
+            %tr
+              %th
+                Region:
+              %th
+                = select :name => 'region', :collection => Region.all, :text_method => :name, :value_method => :id, :prompt => 'Select Region'
+              %th
+                Remarks:
+              %th
+                = text_area :name => 'remarks', :rows => 6, :cols => 33
+              %th
+                Performed by:
+              %th
+                - staff_member  = session.user.staff_member
+                = select :name => "performed_by", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+              %th
+                = submit 'Save Payment'
+%br
+%br
+%br
+%br
+

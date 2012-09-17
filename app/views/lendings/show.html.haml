@@ -77,7 +77,7 @@
     - unless @fee_instance.blank?
       %tr.even
         %th.even Fee Status
-        %td= @fee_instance.map(&:status).join(', ')
+        %td= @fee_instance.map(&:status).join('<br>')
     - if @lending.is_outstanding_now?
       %tr
         %td

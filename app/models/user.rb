@@ -29,6 +29,7 @@ class User
   has n, :payments_created, :child_key => [:created_by_user_id], :model => 'Payment'
   has n, :payments_deleted, :child_key => [:deleted_by_user_id], :model => 'Payment'
   has n, :audit_trail, :model => 'AuditTrail'
+  has n, :comments
 
 
   def name; self.login; end
