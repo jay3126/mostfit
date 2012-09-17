@@ -31,9 +31,9 @@
           %th
             Loan Product
           %th
-            Applied Amount
-          %th
             Borrower
+          %th
+            Funder
           %th
             Fundling Line
           %th
@@ -61,13 +61,14 @@
           %td
             = link_to_with_rights lending.lending_product.name, url(:controller => :lending_products, :action => :show, :id => lending.lending_product.id)
           %td
-            = lending.to_money[:applied_amount].to_s
-          %td
             = lending.loan_borrower.counterparty.name
           %td
-            = "funding line"
+            = "Funder"
           %td
-            = "tranch"
+            = select :name => "funding_line_id", :collection => select_fundling_lines, :id => "funding_line_selector_#{lending.id}", :onchange => "fillFundingLines('#{lending.id}')"
+          %td
+            - tranches = select_tranches.blank? ? [] : select_tranches.map{|x| [x.id, x.name]}
+            = select :name => "tranch_id", :collection => tranches, :id => "tranch_selector_#{lending.id}"
           - s_no += 1
     %table.narrow.form{:style => "width:100%;"}
       %tfoot

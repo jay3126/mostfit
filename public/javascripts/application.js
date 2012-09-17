@@ -825,18 +825,16 @@ function add_text_field(){
     "</td></tr>");
 }
 
-function fillFundingLines(){
-  $("#funding_line_selector").change(function(){
-    $.ajax({
-      type: "GET",
-      url: "/funders/funding_lines_tranches",
-      data : {
-        'funding_line_id' : $("#funding_line_selector").val()
-      },
-      success: function(data) {
-        $("#tranch_selector").html(data);
-      }
-    });
+function fillFundingLines(obj_id){
+  $.ajax({
+    type: "GET",
+    url: "/funders/funding_lines_tranches",
+    data : {
+      'funding_line_id' : $("#funding_line_selector_"+obj_id).val()
+    },
+    success: function(data) {
+      $("#tranch_selector_"+obj_id).html(data);
+    }
   });
 }
 
