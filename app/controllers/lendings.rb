@@ -343,7 +343,7 @@ class Lendings < Application
     child_location_id        = params[:child_location_id]
     effective_on             = params[:on_date]
     performed_by             = params[:performed_by]
-    region_id                = params[:region]
+    reason_id                = params[:reason]
     remarks                  = params[:remarks]
     recorded_by              = session.user.id
     receipt_type             = Constants::Transaction::RECEIPT
@@ -359,7 +359,7 @@ class Lendings < Application
     @message[:error] << "Please select Staff Member" if performed_by.blank?
     @message[:error] << "Please Enter Interest Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:interest_amount].to_f < 0}.blank?
     @message[:error] << "Please Enter Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:total_amount].to_f <= 0}.blank?
-    @message[:error] << "Please select Region" if region_id.blank?
+    @message[:error] << "Please select Reason" if reason_id.blank?
     @message[:error] << 'Remarks cannot be blank' if remarks.blank?
 
     begin
@@ -406,7 +406,7 @@ class Lendings < Application
             fee_instances.each do |fee_instance|
               payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', pt.on_product_id, 'client', pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
             end
-            Comment.save_comment(remarks, region_id, 'Lending', lending_id, recorded_by)
+            Comment.save_comment(remarks, reason_id, 'Lending', lending_id, recorded_by)
             @message[:notice] = "Succesfully preclosed"
           end
         rescue => ex

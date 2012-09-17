@@ -1,0 +1,4 @@
+- reason = Reason.new
+= form_for(reason, :id => "reasons_form", :action => resource(:reasons)) do
+  = text_field :name
+  = submit 'Save'

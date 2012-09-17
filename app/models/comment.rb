@@ -9,7 +9,7 @@ class Comment
   property :created_at,        DateTime
   
   belongs_to :user
-  belongs_to :region
+  belongs_to :reason
 
   def self.comments_on_lending(lending_id)
     all(:commentable_class => 'Lending', :commentable_id => lending_id )
@@ -17,13 +17,13 @@ class Comment
 
   def self.lending_to_s(lending_id)
     comments = comments_on_lending(lending_id)
-    comments.blank? ? '' : comments.map{|c| "#{c.region.name.humanize}:- #{c.text}"}
+    comments.blank? ? '' : comments.map{|c| "#{c.reason.name.humanize}:- #{c.text}"}
   end
 
-  def self.save_comment(text, region_id, commentable_type, commentable_id, user_id)
+  def self.save_comment(text, reason_id, commentable_type, commentable_id, user_id)
     values = {}
     values[:text] = text
-    values[:region_id] = region_id
+    values[:region_id] = reason_id
     values[:commentable_class] = commentable_type
     values[:commentable_id] = commentable_id
     values[:user_id] = user_id

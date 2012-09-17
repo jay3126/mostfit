@@ -1,0 +1,21 @@
+%h1 Reason
+= link_to 'Add New Reason', '#', :onclick => "jQuery('.reason_div').toggle();", :class => "add grey_button"
+.reason_div{:style => 'display:none'}
+  = partial 'form'
+%table.datatable.report.weeksheet.nojs
+  %thead
+    %th
+      Name
+    %th
+      Remarks Count
+    %th
+      Created At
+  - @reasons.each do |reason|
+    %tr
+      %td
+        = link_to_with_rights reason.name, resource(reason)
+      %td
+        = reason.comments.count
+      %td
+        = reason.created_at
+

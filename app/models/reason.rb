@@ -1,4 +1,4 @@
-class Region
+class Reason
   include DataMapper::Resource
 
   property :id,         Serial
