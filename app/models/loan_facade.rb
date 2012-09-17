@@ -184,6 +184,10 @@ class LoanFacade < StandardFacade
   # Aggregation # ends
   #############
 
+  def loans_eligible_for_sec_or_encum(center_id)
+    Lending.loans_eligible_for_sec_or_encum(center_id)
+  end
+
   private
 
   # LoanManager instance

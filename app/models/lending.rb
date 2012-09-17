@@ -783,6 +783,27 @@ class Lending
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
 
+  # Fetch all the loans to update funding lines
+  # Eligible loans criteria:
+  # 1. loan should be never encumbered or never securitised
+  # 2. loan borrower mush not be inactive(under claim processing)
+  # 3. loan must not be written-off, preclosed, rejected, cancelled.
+  # 4. loan must have outstanding
+  # 5. loan must have minimum 3 repayments recieved
+  def self.loans_eligible_for_sec_or_encum(center_id)
+    loan_assignment_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
+    eligible_loans = []
+    loans = LoanAdministration.get_loans_administered(center_id)
+    loans.each do |loan|
+      client = Client.get(loan.loan_borrower.counterparty_id)
+      is_inactive = !Client.is_claim_processing_or_inactive?(client)
+      has_3_minimum_repayments = loan.loan_receipts.size >= 3 ? true : false
+      eligible = loan_assignment_facade.get_loan_assigned_to(loan.id, Date.today).nil? && loan.is_outstanding? && is_inactive && has_3_minimum_repayments ? true : false
+      eligible_loans << loan if eligible == true
+    end
+    eligible_loans
+  end
+
   private
 
   def get_loan_fee_product

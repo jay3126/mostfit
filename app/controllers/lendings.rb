@@ -437,4 +437,22 @@ class Lendings < Application
     redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
   end
 
+  def bulk_edit_funding_lines
+    @errors = []
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    unless params[:flag] == 'true'
+      @errors << "No branch selected " if branch_id.blank?
+      @errors << "No center selected " if center_id.blank?
+    end
+    get_all_loans_eligible_for_sec_or_encum(params) if @errors.blank?
+    render :bulk_edit_funding_lines
+  end
+
+  private
+
+  def get_all_loans_eligible_for_sec_or_encum(params)
+    @lendings = loan_facade.loans_eligible_for_sec_or_encum(params[:child_location_id])
+  end
+
 end
