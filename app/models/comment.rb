@@ -16,8 +16,8 @@ class Comment
   end
 
   def self.lending_to_s(lending_id)
-    comments = comments_on_lending(lending_id)
-    comments.blank? ? '' : comments.map{|c| "#{c.reason.name.humanize}:- #{c.text}"}
+    comments = comments_on_lending(lending_id).map{|c| "#{c.reason.name.humanize}:- #{c.text}"} rescue []
+    comments.blank? ? [] : comments
   end
 
   def self.save_comment(text, reason_id, commentable_type, commentable_id, user_id)
