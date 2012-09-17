@@ -1,4 +1,4 @@
-class Reason < Application
+class Reasons < Application
   # provides :xml, :yaml, :js
 
   def index
