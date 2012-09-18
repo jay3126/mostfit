@@ -1,0 +1,36 @@
+:javascript
+  $('table.client_move').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+- if @client.blank?
+  %h2 Client cannot be blank
+- else
+  -if @attendances.blank?
+    %h2 No Attendance Records
+  - else
+    %table.report.weeksheet.nojs.client_move
+      %thead
+        %tr
+          %th
+            Date
+          %th
+            Attendance
+          %th
+            Location
+          %th
+            By Staff Member
+          %th
+            Update At
+      - @attendances.each do |attendance|
+        %tr
+          %td
+            = attendance.on_date
+          %td
+            = attendance.attendance.humanize
+          %td
+            = attendance.at_location_origin.name
+          %td
+            = attendance.by_staff_member.name
+          %td
+            = attendance.updated_at

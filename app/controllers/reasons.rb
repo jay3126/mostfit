@@ -26,23 +26,25 @@ class Reasons < Application
   end
 
   def create(reason)
+    message = {}
     @reason = Reason.new(reason)
     if @reason.save
-      redirect resource(@reason), :message => {:notice => "Reason was successfully created"}
+      message[:notice] = "Reason was successfully created"
     else
-      message[:error] = "Reason failed to be created"
-      render :new
+      message[:error] = @reason.errors.first.join(', ')
     end
+    redirect resource(:reasons), :message => message
   end
 
   def update(id, reason)
+    message = {}
     @reason = Reason.get(id)
-    raise NotFound unless @reason
     if @reason.update(reason)
-      redirect resource(@reason)
+      message[:notice] = "Reason was successfully updated"
     else
-      display @reason, :edit
+      message[:error] = @reason.errors.first.join(', ')
     end
+    redirect resource(@reason), :message => message
   end
 
   def destroy(id)

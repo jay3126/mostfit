@@ -487,4 +487,10 @@ class NewClients < Application
     redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{params[:loan_file_id]}"), :message => message
   end
 
+  def client_attendance
+    @client = Client.get params[:id]
+    @attendances = @client.attendance_records
+    partial 'new_clients/client_attendances'
+  end
+
 end

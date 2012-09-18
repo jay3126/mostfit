@@ -14,6 +14,9 @@ class AttendanceRecord
   property :created_at,        *CREATED_AT
   property :updated_at,        *UPDATED_AT
 
+  def by_staff_member; StaffMember.get(self.performed_by); end
+  def at_location_origin; BizLocation.get(self.at_location); end
+
   def self.save_and_update(records = {})
     records.each do |key, obj|
       exist_record = first(:counterparty_type => obj[:counterparty_type], :counterparty_id => obj[:counterparty_id], :on_date => obj[:on_date], :at_location => obj[:at_location])

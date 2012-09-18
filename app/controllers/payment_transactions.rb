@@ -92,8 +92,7 @@ class PaymentTransactions < Application
     @message[:error] << "Please Select Operation Type(Payment/Attendance/Both)" if operation.blank?
     @message[:error] << "Performed by must not be blank" if performed_by.blank?
     @message[:error] << "Please Select Check box For Payment/Attendance" if payments.values.select{|f| f[:payment]}.blank?
-    @message[:error] << "Please Enter Amount Greater Than ZERO" if payments.values.select{|f| f[:amount].to_f < 0}
-
+    @message[:error] << "Please Enter Amount Greater Than ZERO" if ['payment','payment_and_client_attendance'].include?(operation) && payments.values.select{|f| f[:amount].to_f <= 0}.blank?
     # OPERATIONS PERFORMED
     if @message[:error].blank?
       begin
