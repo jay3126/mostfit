@@ -14,7 +14,6 @@
         %th last payment
         %th
         %th
-        %th
     - for funding_line in @funding_lines
       %tr{ :class => cycle('odd','') }
         %td &nbsp;
@@ -34,8 +33,6 @@
           = funding_line.last_payment_date
         %td
           = link_to_with_rights("Tranches","/tranches/list/#{funding_line.id}")
-          
-        %td
-          = link_to_with_rights("details", resource(@funder, funding_line))          
+          =# link_to_with_rights("details", resource(@funder, funding_line))
         %td
           = link_to_with_rights 'edit', resource(@funder, funding_line, :edit), :class => "edit"

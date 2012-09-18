@@ -274,4 +274,3 @@ class Upload
     }
   end
 end
-
