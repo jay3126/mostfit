@@ -61,8 +61,6 @@ class UserLocations < Application
     request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @hc_route = Merb::Router.match(request)[1] rescue nil
 
-
-
     display @weeksheet
   end
 
@@ -80,6 +78,7 @@ class UserLocations < Application
     end
     partial 'customers_on_biz_location'
   end
+
 
   def set_center_leader
     @biz_location = BizLocation.get params[:biz_location_id]

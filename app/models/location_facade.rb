@@ -89,8 +89,8 @@ class LocationFacade < StandardFacade
   end
 
   # Create a new location by specifying the name, the creation date, and the level number (not the level)
-  def create_new_location(by_name, on_creation_date, at_level_number, address = nil, defualt_disbursal_date = nil)
-    BizLocation.create_new_location(by_name, on_creation_date, at_level_number, address, defualt_disbursal_date)
+  def create_new_location(by_name, on_creation_date, at_level_number, originator_by = for_user.staff_member.id, address = nil, defualt_disbursal_date = nil)
+    BizLocation.create_new_location(by_name, on_creation_date, at_level_number, originator_by, address, defualt_disbursal_date)
   end
 
   # Assign administered_at and accounted_at locations to loan

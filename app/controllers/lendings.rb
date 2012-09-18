@@ -437,6 +437,7 @@ class Lendings < Application
     product_action                  = params[:product_action]
     reason_id                       = params[:reason]
     remarks                         = params[:remarks]
+    recorded_by                     = session.user.id
     make_specific_allocation        = true
     specific_principal_amount       = params[:specific_principal_amount]
     specific_principal_money_amount = MoneyManager.get_money_instance(specific_principal_amount)
@@ -460,6 +461,7 @@ class Lendings < Application
         fee_instances.each do |fee_instance|
           payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
         end
+        Comment.save_comment(remarks, reason_id, 'Lending', @lending.id, recorded_by)
         message = {:notice => "Succesfully preclosed"}
       rescue => ex
         message = {:error => ex.message}

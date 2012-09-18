@@ -10,6 +10,7 @@ class BizLocation
   property :deleted_at, ParanoidDateTime
   property :center_disbursal_date, Date, :nullable => true, :default => Date.today
   property :biz_location_address, String, :nullable => true
+  property :originator_by, Integer
 
   belongs_to :location_level
   has n, :meeting_schedules, :through => Resource
@@ -69,7 +70,7 @@ class BizLocation
   end
 
   # Create a new location by specifying the name, the creation date, and the level number (not the level)
-  def self.create_new_location(by_name, on_creation_date, at_level_number, address = nil, default_disbursal_date = nil)
+  def self.create_new_location(by_name, on_creation_date, at_level_number, originator_by, address = nil, default_disbursal_date = nil)
     raise ArgumentError, "Level numbers begin with zero" if (at_level_number < 0)
     level = LocationLevel.get_level_by_number(at_level_number)
     raise Errors::InvalidConfigurationError, "No level was located for the level number: #{at_level_number}" unless level
@@ -77,6 +78,7 @@ class BizLocation
     location[:name] = by_name
     location[:creation_date] = on_creation_date
     location[:location_level] = level
+    location[:originator_by] = originator_by
     location[:biz_location_address] = address unless address.blank?
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
     new_location = create(location)

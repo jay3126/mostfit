@@ -770,6 +770,7 @@ function get_all_staff_member_on_location() {
       },
       success: function(data) {
         jQuery("#staff_selector").html(data);
+        jQuery(".staff_selection").html(data);
       }
     });
   });
@@ -799,7 +800,7 @@ function get_all_location_on_level() {
         "location_level" : jQuery("#location_level_selector").val()
       },
       success: function(data) {
-        jQuery("#location_selector").html(data);
+        jQuery("#parent_selector").html(data);
       }
     });
   });

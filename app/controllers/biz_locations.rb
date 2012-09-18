@@ -59,7 +59,7 @@ class BizLocations < Application
   def create
     # INITIALIZING VARIABLES USED THROUGHTOUT
 
-    message = {}
+    message = {:error => [], :notice => []}
 
     # GATE-KEEPING
 
@@ -67,20 +67,33 @@ class BizLocations < Application
     b_creation_date    = params[:biz_location][:creation_date]
     b_name             = params[:biz_location][:name]
     b_address          = params[:biz_location][:biz_location_address]
-    b_disbursal_date   = params[:biz_location][:center_disbursal_date]
+    b_disbursal_date   = Date.parse params[:biz_location][:center_disbursal_date]
     parent_location_id = params[:parent_location_id]
+    b_originator_by    = params[:biz_location][:originator_by]
+    b_managed_by       = params[:managed_by]
+    b_meeting          = params[:meeting_schedule]
+    b_meeting_number   = params[:meeting][:meeting_numbers].to_i
+    b_frequency        = params[:meeting][:meeting_frequency]
+    b_begins_hours     = params[:meeting][:meeting_time_begins_hours].to_i
+    b_begins_minutes   = params[:meeting][:meeting_time_begins_minutes].to_i
+    recorded_by        = session.user
+    perfomed_by        = recorded_by.staff_member
+
 
     # VALIDATIONS
 
-    message[:error] = "Name cannot be blank" if b_name.blank?
-    message[:error] = "Please select Location Level" if b_level.blank?
-    message[:error] = "Creation Date cannot blank" if b_creation_date.blank?
+    message[:error] << "Name cannot be blank" if b_name.blank?
+    message[:error] << "Please select Location Level" if b_level.blank?
+    message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
+    message[:error] << "Meeting Number cannot be blank" if b_level == '0' && !b_meeting.blank? && b_meeting_number.blank?
+    message[:error] << "Please fill right value of time" if b_level == '0' && !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
+      Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
+    message[:error] << "Default Disbursal Date cannot be holiday" if b_level == '0' && !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
     parent_location = BizLocation.get(parent_location_id) unless parent_location_id.blank?
-
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_address, b_disbursal_date)
+        biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_originator_by, b_address, b_disbursal_date)
         if biz_location.new?
           message = {:notice => "Location creation fail"}
         else
@@ -88,6 +101,15 @@ class BizLocations < Application
             LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
             if b_level == "0"
               location_facade.create_center_cycle(b_creation_date, biz_location.id)
+              unless b_meeting.blank?
+                msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
+                meeting_facade.setup_meeting_schedule(biz_location, msi)
+                meeting_facade.setup_meeting_calendar_for_location(biz_location, b_disbursal_date, b_meeting_number)
+              end
+              unless b_managed_by.blank?
+                staff = StaffMember.get b_managed_by
+                LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, perfomed_by.id, recorded_by.id)
+              end
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
             else
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})' successfully created"
@@ -103,6 +125,7 @@ class BizLocations < Application
     end
 
     #REDIRECT/RENDER
+    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
     redirect resource(:biz_locations), :message => message
   
   end
@@ -197,16 +220,17 @@ class BizLocations < Application
   end
   
   def biz_location_form
-    @biz_location = BizLocation.get params[:id]
-    level = @biz_location.location_level.level
+    @biz_location         = BizLocation.get params[:id]
+    level                 = @biz_location.location_level.level
     @child_location_level = LocationLevel.first(:level => level-1)
-    @new_biz_location = @child_location_level.biz_locations.new
+    @new_biz_location     = @child_location_level.biz_locations.new
+    @staff_members        = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date).map(&:staff_assigned)
     render :partial => 'biz_locations/location_fields', :layout => layout?
   end
 
   def create_and_assign_location
     # INITIALIZING VARIABLES USED THROUGHTOUT
-    message = {}
+    message = {:error => [], :notice => []}
 
     # GATE-KEEPING
 
@@ -214,25 +238,48 @@ class BizLocations < Application
     b_creation_date  = params[:creation_date]
     b_name           = params[:biz_location][:name]
     b_id             = params[:id]
-    b_disbursal_date = params[:biz_location][:center_disbursal_date]
-    b_address          = params[:biz_location][:biz_location_address]
+    b_disbursal_date = Date.parse params[:biz_location][:center_disbursal_date]
+    b_managed_by     = params[:managed_by]
+    b_address        = params[:biz_location][:biz_location_address]
+    b_originator_by  = params[:biz_location][:originator_by]
+    b_meeting        = params[:meeting_schedule]
+    b_meeting_number = params[:meeting][:meeting_numbers].to_i
+    b_frequency      = params[:meeting][:meeting_frequency]
+    b_begins_hours   = params[:meeting][:meeting_time_begins_hours].to_i
+    b_begins_minutes = params[:meeting][:meeting_time_begins_minutes].to_i
+    recorded_by      = session.user
+    perfomed_by      = recorded_by.staff_member
     @parent_location = BizLocation.get b_id
 
     # VALIDATIONS
 
-    message[:error] = "Name cannot be blank" if b_name.blank?
-    message[:error] = "Please select Location Level" if b_level.blank?
-    message[:error] = "Creation Date cannot blank" if b_creation_date.blank?
-    message[:error] = "Parent location is invaild" if @parent_location.blank?
+    message[:error] << "Name cannot be blank" if b_name.blank?
+    message[:error] << "Please select Location Level" if b_level.blank?
+    message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
+    message[:error] << "Parent location is invaild" if @parent_location.blank?
+    message[:error] << "Please select Driginator By" if b_originator_by.blank?
+    message[:error] << "Meeting Number cannot be blank" if !b_meeting.blank? && b_meeting_number.blank?
+    message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
+      Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
+    message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
     
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_address,b_disbursal_date)
+        child_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_originator_by, b_address, b_disbursal_date)
         if child_location.new?
           message = {:notice => "Location creation fail"}
         else
           location_facade.assign(child_location, @parent_location, b_creation_date)
+          unless b_meeting.blank?
+            msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
+            meeting_facade.setup_meeting_schedule(child_location, msi)
+            meeting_facade.setup_meeting_calendar_for_location(child_location, b_disbursal_date, b_meeting_number)
+          end
+          unless b_managed_by.blank?
+            staff = StaffMember.get b_managed_by
+            LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, perfomed_by.id, recorded_by.id)
+          end
           if b_level == "0"
             location_facade.create_center_cycle(b_creation_date, child_location.id)
             msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"
@@ -247,14 +294,9 @@ class BizLocations < Application
     end
 
     #REDIRECT/RENDER
+    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
     redirect url(:controller => :user_locations, :action => :show, :id => @parent_location.id), :message => message
 
-  end
-
-  def update
-  end
-
-  def destroy
   end
 
 end

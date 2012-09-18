@@ -1,42 +1,87 @@
 :javascript
-  $('#location_level_selector').live('change', function(){
+  $(document).ready(function() {
+    $('#meeting_schedule').attr('checked', false);
+    $('#location_level_selector option:first').attr('selected', true);
+    $('#meeting_schedule').change(function() {
+      jQuery('.meeting_div').toggle();
+    });
+    $('#location_level_selector').live('change', function(){
       if(jQuery(this).val()=='0'){
+        jQuery('.center_meeting_div').show();
         jQuery('.date').show();
       }else{
+        jQuery('.center_meeting_div').hide();
         jQuery('.date').hide();
       }
     });
-%table.tall
-  %tr
-    %th
-      Location Level
-    %td
-      = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Select Location Level", :id => 'location_level_selector'
-  %tr
-    %th
-      Parent Location
-    %td
-      = select :name => 'parent_location_id', :collection =>  [], :prompt => "Select Location ", :id => 'location_selector'
-  %tr
-    %th
-      Name
-    %td
-      = text_field :name
-  %tr
-    %th.date{:style => 'display:none'}
-      Default Disbursal Date
-    %td.date{:style => 'display:none'}
-      = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
-  %tr
-    %th
-      Creation Date
-    %td
-      = date_select_for @biz_location, :creation_date, :max_date => Date.today
-  %tr
-    %th
-      Address
-    %td
-      = text_area :biz_location_address, :rows => 6, :cols => 38
+  });
+%div{:style => 'display:table; width:100%;', :class => 'shaded'}
+  %table.tall
+    %tr
+      %th
+        Location Level
+      %td
+        = select :location_level, :collection =>  @location_levels.map{|l| [l.level, "#{l.level}-#{l.name}"]}, :prompt => "Select Location Level", :id => 'location_level_selector'
+    %tr
+      %th
+        Parent Location
+      %td
+        = select :name => 'parent_location_id', :collection =>  [], :prompt => "Select Location ", :id => 'parent_selector', :class => 'location'
+    %tr
+      %th
+        Name
+      %td
+        = text_field :name
+    %tr
+      %th.date{:style => 'display:none'}
+        Default Disbursal Date
+      %td.date{:style => 'display:none'}
+        = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
+    %tr
+      %th
+        Creation Date
+      %td
+        = date_select_for @biz_location, :creation_date, :max_date => Date.today
+    %tr
+      %th
+        Address
+      %td
+        = text_area :biz_location_address, :rows => 6, :cols => 38
+    %tr
+      %th
+        Originator By
+      %td
+        = select :originator_by, :collection => @staff_members, :text_method => :name, :value_method => :id, :class => 'staff_selection'
+    %tr
+      %th
+        Managed By
+      %td
+        = select :name => :managed_by, :collection => @staff_members, :text_method => :name, :value_method => :id, :class => 'staff_selection'
+    %tr{:style => "display:none", :class => 'center_meeting_div'}
+      %td
+        Create Meeting Schedule
+        = check_box :name => 'meeting_schedule', :value => true, :checked => false, :id => 'meeting_schedule'
+  %div{:style => "display:table-cell; width:42%;"}
+    %table.tall
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          Meetings for days
+        %td
+          = text_field :name => "meeting[meeting_numbers]"
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          Meeting Frequency
+        %td
+          = select :name => "meeting[meeting_frequency]", :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          Meeting Time
+        %td
+          = text_field :name => "meeting[meeting_time_begins_hours]", :size => 2, :maxlength => 2
+          %b
+          = text_field :name => "meeting[meeting_time_begins_minutes]", :size => 2, :maxlength => 2
+          &nbsp;&nbsp;
+          %span.greytext time is in a 24 hour format
 
       
 

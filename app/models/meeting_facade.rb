@@ -119,4 +119,12 @@ class MeetingFacade < StandardFacade
     MeetingCalendar.setup_calendar(on_date, for_locations_and_schedules)
   end
 
+  def setup_meeting_calendar_for_location(location, begion_date, number_of_days)
+    1.upto(number_of_days) do |count|
+      begion_date += 1
+      for_locations_and_schedules = MeetingScheduleManager.get_all_meeting_schedules_on_date(begion_date, [location])
+      MeetingCalendar.setup_calendar(begion_date, for_locations_and_schedules)
+    end
+  end
+
 end
