@@ -1,89 +1,90 @@
 - if params[:date] && (Date.parse(params[:date]) > Date.today)
   = "Repayment by Weeksheet"
 - else
-  = link_to_with_rights "Repayment by Weeksheet", resource(:payment_transactions, :weeksheet_payments ,:biz_location_id => @biz_location.id, :date => @date), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+  = link_to_with_rights "Repayment by Weeksheet", resource(:payment_transactions, :weeksheet_payments ,:biz_location_id => @biz_location.id, :date => @date), :class => 'add grey_button _remote_', :onclick =>"jQuery('#weeksheet_div').hide();"
 - total_amount, total_schedule_principal_due, total_principal_due, total_schedule_principal_outstanding, total_schedule_interest_due = 0,0,0,0,0
 - total_schedule_interest_outstanding, total_advance_amount_balance, total_receipt_principal, total_receipt_interest, total_receipt_advance = 0,0,0,0,0
 - total_due_principal, total_due_interest, total = 0,0,0
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Client Name
-      %th
-        Loan Id
-      %th
-        Loan Status
-      %th
-        Amount
-      %th
-        Disbursed On Date
-      %th
-        Installment No.
-      %th
-        Installment Date
-      %th
-        Due Status
-      %th
-        Schedule Principal Due
-      %th
-        Actual Principal Outstanding
-      %th
-        Schedule Interest Due
-      %th
-        Actual Interest Outstanding
-      %th
-        Advance Amount Balance
-      %th
-        Receipts Principal
-      %th
-        Receipts Interest
-      %th
-        Receipts Advance
-      %th
-        Total Due
-  - @weeksheet.groups.each do |group|
-    - loan_row_count = 0
-    - biz_location = BizLocation.get @weeksheet.at_biz_location_id
-    - collection_sheets = @weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
-    - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    - collection_sheets.each do |ws|
+#weeksheet_div
+  %table.dataTable.report.weeksheet.nojs
+    %thead
       %tr
-        %td
-          = link_to_with_rights ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
-        %td
-          = link_to_with_rights ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
-        %td
-          = ws.loan_status.to_s.humanize
-        %td
-          = ws.loan_disbursed_amount.to_s
-        %td
-          = ws.loan_disbursed_date
-        %td
-          = ws.loan_installment_number
-        %td
-          = ws.loan_schedule_date
-        %td
-          = ws.loan_due_status.to_s.humanize
-        %td
-          = ws.loan_schedule_principal_due.to_s
-        %td
-          = ws.loan_actual_principal_outstanding.to_s
-        %td
-          = ws.loan_schedule_interest_due.to_s
-        %td
-          = ws.loan_actual_interest_outstanding.to_s
-        %td
-          = ws.loan_advance_amount.to_s
-        %td
-          = ws.loan_principal_receipts.to_s
-        %td
-          = ws.loan_interest_receipts.to_s
-        %td
-          = ws.loan_advance_receipts.to_s
-        %td
-          = ws.loan_actual_total_due.to_s
-  %tfoot
-    %tr.org_total
-      %td{:colspan => 20}
+        %th
+          Client Name
+        %th
+          Loan Id
+        %th
+          Loan Status
+        %th
+          Amount
+        %th
+          Disbursed On Date
+        %th
+          Installment No.
+        %th
+          Installment Date
+        %th
+          Due Status
+        %th
+          Schedule Principal Due
+        %th
+          Actual Principal Outstanding
+        %th
+          Schedule Interest Due
+        %th
+          Actual Interest Outstanding
+        %th
+          Advance Amount Balance
+        %th
+          Receipts Principal
+        %th
+          Receipts Interest
+        %th
+          Receipts Advance
+        %th
+          Total Due
+    - @weeksheet.groups.each do |group|
+      - loan_row_count = 0
+      - biz_location = BizLocation.get @weeksheet.at_biz_location_id
+      - collection_sheets = @weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
+      - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      - collection_sheets.each do |ws|
+        %tr
+          %td
+            = link_to_with_rights ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
+          %td
+            = link_to_with_rights ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
+          %td
+            = ws.loan_status.to_s.humanize
+          %td
+            = ws.loan_disbursed_amount.to_s
+          %td
+            = ws.loan_disbursed_date
+          %td
+            = ws.loan_installment_number
+          %td
+            = ws.loan_schedule_date
+          %td
+            = ws.loan_due_status.to_s.humanize
+          %td
+            = ws.loan_schedule_principal_due.to_s
+          %td
+            = ws.loan_actual_principal_outstanding.to_s
+          %td
+            = ws.loan_schedule_interest_due.to_s
+          %td
+            = ws.loan_actual_interest_outstanding.to_s
+          %td
+            = ws.loan_advance_amount.to_s
+          %td
+            = ws.loan_principal_receipts.to_s
+          %td
+            = ws.loan_interest_receipts.to_s
+          %td
+            = ws.loan_advance_receipts.to_s
+          %td
+            = ws.loan_actual_total_due.to_s
+    %tfoot
+      %tr.org_total
+        %td{:colspan => 20}
       

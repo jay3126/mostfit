@@ -25,13 +25,13 @@ class PaymentTransactions < Application
   end
 
   def weeksheet_payments
-    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-    @biz_location = BizLocation.get params[:biz_location_id]
+    @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+    @biz_location        = BizLocation.get params[:biz_location_id]
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
-    @user = session.user
-    @weeksheet = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
-    display @weeksheet
-
+    @user                = session.user
+    @staff_member        = @user.staff_member
+    @weeksheet           = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
+    partial 'payment_transactions/weeksheet_payments', :layout => layout?
   end
 
   def payment_by_staff_member_for_location
@@ -59,7 +59,7 @@ class PaymentTransactions < Application
     @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
     if @message[:error].blank?
       @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-      @child_biz_location  = BizLocation.get params[:child_location_id]
+      @child_biz_location  = BizLocation.get paramsrender :partial => 'biz_locations/location_fields', :layout => layout?[:child_location_id]
       @parent_biz_location = BizLocation.get params[:parent_location_id]
       @staff_member        = StaffMember.get(params[:staff_member_id])
       @user                = session.user
@@ -92,7 +92,8 @@ class PaymentTransactions < Application
     @message[:error] << "Please Select Operation Type(Payment/Attendance/Both)" if operation.blank?
     @message[:error] << "Performed by must not be blank" if performed_by.blank?
     @message[:error] << "Please Select Check box For Payment/Attendance" if payments.values.select{|f| f[:payment]}.blank?
-    @message[:error] << "Please Enter Amount Greater Than ZERO" if ['payment','payment_and_client_attendance'].include?(operation) && payments.values.select{|f| f[:amount].to_f <= 0}.blank?
+    @message[:error] << "Please Enter Amount Greater Than ZERO" if ['payment','payment_and_client_attendance'].include?(operation) && !payments.values.select{|f| f[:amount].to_f <= 0}.blank?
+    
     # OPERATIONS PERFORMED
     if @message[:error].blank?
       begin

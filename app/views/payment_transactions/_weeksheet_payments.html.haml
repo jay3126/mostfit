@@ -1,0 +1,174 @@
+:javascript
+  $('table.payment').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+  $(document).ready(function() {
+    $('#toggle_select_all').change(function() {
+      $('input.checkbox').attr('checked',$(this).attr('checked'))
+    });
+  });
+  function toggle_check_box(obj, class_name){
+    $('.'+class_name).attr('checked',$(obj).attr('checked'));
+  }
+- p_id, c_id, s_id, date = params[:parent_location_id], params[:child_location_id], params[:staff_member_id], params[:date]
+- url = resource(:payment_transactions, :create_group_payments, :parent_location_id => p_id, :child_location_id => c_id, :staff_member_id => s_id, :date => date)
+%h1== Weeksheet Payments On #{@date}
+= form_for(:payment_transactions ,:action => url) do
+  - if @weeksheet.blank?
+    No Repayment Schedule On Date
+  - else
+    - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0
+    - total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
+    - total_actual_principal_outstanding, total_actual_interest_outstanding = 0, 0
+    = link_to 'Show/Hide All Record', '#', :onclick => "jQuery('.payment').toggle();", :class => 'dataTables_filter'
+    %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix'}
+      Payment Only
+      = radio_button :name => 'operation', :value => 'payment', :checked=>"checked"
+      Client Attendance Only
+      = radio_button :name => 'operation', :value => 'client_attendance'
+      Both
+      = radio_button :name => 'operation', :value => 'payment_and_client_attendance'
+    %table.dataTable.report.weeksheet.nojs.payment
+      %thead
+        %tr
+          %th
+          %th{:colspan => 2}
+            Client
+          %th{:colspan => 7}
+            Loan
+          %th{:colspan => 2}
+            Principal Schedule
+          %th{:colspan => 2}
+            Interest Schedule
+          %th
+            Advance
+          %th
+            Total
+        %tr
+          %th
+            Select All
+            %br
+            = check_box :id => "toggle_select_all"
+          %th
+            Client Name
+          %th
+            Client Attendance
+          %th
+            Loan Id
+          %th
+            Loan Status
+          %th
+            Amount
+          %th
+            Disbursed On Date
+          %th
+            Due Status
+          %th
+            Installment No.
+          %th
+            Installment Date
+          %th
+            Schedule Principal Due
+          %th
+            Actual Principal Outstanding
+          %th
+            Schedule Interest Due
+          %th
+            Actual Interest Outstanding
+          %th
+            Advance Amount Balance
+          %th
+            Total Due
+      - loan_row_count  = 1
+      - weeksheet       = @weeksheet
+      - biz_location    = BizLocation.get weeksheet.at_biz_location_id
+      - parent_location = LocationLink.get_parent(biz_location)
+      - weeksheet.groups.each do |group|
+        - collection_sheets = weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
+        - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        - collection_sheets.each do |ws|
+          %tr{:class => "biz_location_#{biz_location.id} payment"}
+            %td{:style => 'text-align:center'}
+              = check_box :name => "payment_transactions[payments][#{loan_row_count}][payment]", :value => true, :class => "payment_#{weeksheet.at_biz_location_id}"
+              = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][performed_at]", :value => weeksheet.at_biz_location_id
+              = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][accounted_at]", :value => parent_location.id
+              = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_id]", :value => ws.borrower_id
+              = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_id]", :value => ws.loan_id
+            %td
+              = link_to_with_rights ws.borrower_name, url(:controller=> :new_clients, :action => :show, :id => ws.borrower_id)
+            %td
+              = select :name => "payment_transactions[payments][#{loan_row_count}][client_attendance]", :collection => Constants::User::ATTENDANCE_STATUSES.map{|x| [x.to_s, x.to_s.humanize]}, :style => "width:100px"
+            %td
+              = link_to_with_rights ws.loan_id, url(:controller => :lendings, :action => :show, :id => ws.loan_id)
+            %td
+              = ws.loan_status.to_s.humanize
+            %td
+              = ws.loan_disbursed_amount.to_s
+              - total_disbursed_amount = total_disbursed_amount + ws.loan_disbursed_amount.amount unless ws.loan_disbursed_amount.blank?
+            %td
+              = ws.loan_disbursed_date
+            %td
+              = ws.loan_due_status.to_s.humanize
+            %td
+              = ws.loan_installment_number
+            %td
+              = ws.loan_schedule_date
+            %td
+              = ws.loan_schedule_principal_due.to_s
+              - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount unless ws.loan_schedule_principal_due.blank?
+            %td
+              = ws.loan_actual_principal_outstanding.to_s
+              - total_actual_principal_outstanding = total_actual_principal_outstanding + ws.loan_actual_principal_outstanding.amount unless ws.loan_actual_principal_outstanding.blank?
+            %td
+              = ws.loan_schedule_interest_due.to_s
+              - total_schedule_interest_due = total_schedule_interest_due + ws.loan_schedule_interest_due.amount unless ws.loan_schedule_interest_due.blank?
+            %td
+              = ws.loan_actual_interest_outstanding.to_s
+              - total_actual_interest_outstanding = total_actual_interest_outstanding + ws.loan_actual_interest_outstanding.amount unless ws.loan_actual_interest_outstanding.blank?
+            %td
+              = ws.loan_advance_amount.to_s
+              - total_advance_amount = total_advance_amount + ws.loan_advance_amount.amount unless ws.loan_advance_amount.blank?
+            %td
+              = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.loan_actual_total_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
+              - total_amount = total_amount + ws.loan_actual_total_due.amount unless ws.loan_actual_total_due.blank?
+              - loan_row_count = loan_row_count + 1
+      %tfoot
+        %tr.org_total
+          %td{:style => "text-align:center"}
+            Total
+          %td
+          %td
+          %td
+          %td
+          %td{:style => "text-align:right"}
+            = Money.new(total_disbursed_amount,:INR).to_s
+          %td
+          %td
+          %td
+          %td
+          %td{:style => "text-align:right"}
+            = Money.new(total_schedule_principal_due,:INR).to_s
+          %td{:style => "text-align:right"}
+            = Money.new(total_actual_principal_outstanding,:INR).to_s
+          %td{:style => "text-align:right"}
+            = Money.new(total_schedule_interest_due,:INR).to_s
+          %td{:style => "text-align:right"}
+            = Money.new(total_actual_interest_outstanding,:INR).to_s
+          %td{:style => "text-align:right"}
+            = Money.new(total_advance_amount,:INR).to_s
+          %td{:style => "text-align:right"}
+            %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
+              = Money.new(total_amount,:INR).to_s
+  %table.narrow.form{:style => "text-align:right;width:100%;"}
+    %tfoot
+      %tr
+        %td
+          %b Chosen date
+          = @date
+          = hidden_field :name => "payment_transactions[on_date]", :value => @date
+        %td
+          %b Performed by
+          = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [@staff_member], :prompt => "Select staff member", :selected => @staff_member.id.to_s
+        %td
+          = submit 'Save Payment'

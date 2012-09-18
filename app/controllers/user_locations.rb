@@ -36,29 +36,30 @@ class UserLocations < Application
   end
 
   def weeksheet_collection
-    @biz_location = BizLocation.get params[:id]
-    center_cycle_no = CenterCycle.get_current_center_cycle params[:id]
-    @center_cycle =  CenterCycle.get_cycle(params[:id], center_cycle_no)
+    @biz_location        = BizLocation.get params[:id]
+    center_cycle_no      = CenterCycle.get_current_center_cycle params[:id]
+    @center_cycle        = CenterCycle.get_cycle(params[:id], center_cycle_no)
     @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
-    set_effective_date(Date.today) if session[:effective_date].blank?
-    @date = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-    @meeting_schedule = meeting_facade.get_meeting_schedules(@biz_location)
+    @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+    @meeting_schedule    = meeting_facade.get_meeting_schedules(@biz_location)
+    @user                = session.user
+    @staff_member        = @user.staff_member
     unless @meeting_schedule.blank?
-      @next_meeting = meeting_facade.get_next_meeting(@biz_location, @date)
-      @previous_meeting = meeting_facade.get_previous_meeting(@biz_location, @date)
-      @weeksheet = collections_facade.get_collection_sheet(@biz_location.id, @date)
+      @next_meeting      = meeting_facade.get_next_meeting(@biz_location, @date)
+      @previous_meeting  = meeting_facade.get_previous_meeting(@biz_location, @date)
+      @weeksheet         = collections_facade.get_collection_sheet(@biz_location.id, @date)
     end
     #generate scv route
-    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:scv_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request    = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:scv_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @scv_route = Merb::Router.match(request)[1] rescue nil
     #generate ba route
-    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:ba_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request   = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:ba_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @ba_route = Merb::Router.match(request)[1] rescue nil
     #generate  pa route
-    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:pa_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request   = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:pa_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @pa_route = Merb::Router.match(request)[1] rescue nil
     #generate hc route
-    request = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
+    request   = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:hc_checklist),Merb::Const::REQUEST_METHOD => "GET")
     @hc_route = Merb::Router.match(request)[1] rescue nil
 
     display @weeksheet
