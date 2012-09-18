@@ -4,7 +4,7 @@
     $('.select').attr('checked',$(this).attr('checked'))});  
   });
 
-- center_disbursal_date = BizLocation.get(@center.id).center_disbursal_date.blank? ?  Date.today : BizLocation.get(@center.id).center_disbursal_date
+- center_disbursal_date = BizLocation.get(@center.id).center_disbursal_date.blank? ?  Date.today : BizLocation.get(@center.id).center_disbursal_date unless @center.blank?
 .shaded
   %h1 Add to Loan File
   - unless @loan_applications_pending_loan_file_generation.blank?
