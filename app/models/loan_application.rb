@@ -356,7 +356,7 @@ class LoanApplication
     eligible_statuses = [SUSPECTED_DUPLICATE_STATUS, NOT_DUPLICATE_STATUS, CLEARED_NOT_DUPLICATE_STATUS]
     suspected_duplicate_centers = all(:status => "suspected_duplicate").aggregate(:at_center_id)
     search_options.merge!(:status => eligible_statuses)
-    search_options.merge!(:at_center_id.not => suspected_duplicate_centers)
+    search_options.merge!(:at_center_id.not => suspected_duplicate_centers) unless suspected_duplicate_centers.blank?
     all(search_options)
   end
 

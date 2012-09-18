@@ -34,7 +34,6 @@ class OverlapReportRequest
     errors = {}
     errors[:generation_errors] = {}
     errors[:save_status_errors] = {}
-    #options = {:at_branch_id => branch, :at_center_id => center}
     loan_applications = LoanApplication.pending_overlap_report_request_generation(search_option)
     credit_bureau_name = "Highmark"
     request_name = "overlap_report_request"
