@@ -1,4 +1,14 @@
 -#%h1 This is process audit checklist
+- if params[:target_entity_type] == "Client"
+  - client_object = Client.get params[:target_entity_id]
+  - client_phone_number = client_object.telephone_number
+
+%p
+  -if message
+    #flash-messages.span-17.prefix-5.suffix-5.last
+    -  message.each do |key, value|
+      .flash{ :class => key.to_s }
+        %p= value.gsub("\n", "<br/>")
 
 %h2.h2c
   ="#{@checklist.checklist_type.name}"
@@ -22,17 +32,35 @@
         -#    = text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
         -#    = hidden_field :target_entity_name ,:value=>params[:target_entity_name]
         %tr
+
+          -#= label params[:target_entity_type]
+          = hidden_field :target_entity_type, :value=>params[:target_entity_type]
+          = hidden_field :target_entity_name ,:value=>params[:target_entity_name]
+          -#%td
+          -#  -#= text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
+          -#  = hidden_field :target_entity_name ,:value=>params[:target_entity_name]
+        %tr
           %th
             =label params[:loc1_type].capitalize
           %td
             =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
-            =hidden_field :loc2_name,:value=>params[:loc2_name]
+            =hidden_field :loc1_type, :value=>params[:loc1_type]
+            =hidden_field :loc1_name,:value=>params[:loc1_name]
         -#%tr
         -#  %th
         -#    =label params[:loc2_type]
         -#  %td
         -#    =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
         -#    =hidden_field :loc2_name,:value=>params[:loc2_name]
+        %tr
+
+          -#=label params[:loc2_type]
+          =hidden_field :loc2_type, :value=>params[:loc2_type]
+          =hidden_field :loc2_name,:value=>params[:loc2_name]
+          -#%td
+            -#=text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+            -#=hidden_field :loc2_name,:value=>params[:loc2_name]
+
         %tr
           %th
             =label "Value Date"
@@ -67,6 +95,7 @@
           =hidden_field :target_entity_type, :value=>params[:target_entity_type]
           =hidden_field :target_entity_id, :value=>params[:target_entity_id]
 
+          -#- debugger
           =hidden_field :loc1_id, :value=>params[:loc1_id]
           =hidden_field :loc2_id, :value=>params[:loc2_id]
           =hidden_field :loc1_type, :value=>params[:loc1_type]
