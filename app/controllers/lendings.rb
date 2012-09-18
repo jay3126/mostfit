@@ -435,6 +435,8 @@ class Lendings < Application
     performed_by                    = params[:performed_by]
     effective_on                    = params[:effective_on]
     product_action                  = params[:product_action]
+    reason_id                       = params[:reason]
+    remarks                         = params[:remarks]
     make_specific_allocation        = true
     specific_principal_amount       = params[:specific_principal_amount]
     specific_principal_money_amount = MoneyManager.get_money_instance(specific_principal_amount)
@@ -447,6 +449,8 @@ class Lendings < Application
 
     # VALIDATIONS
     @errors << "Preclosure date must not be future date" if Date.parse(effective_on) > Date.today
+    @errors << "Please select Reason" if reason_id.blank?
+    @errors << 'Remarks cannot be blank' if remarks.blank?
     # OPERATIONS
     if @errors.blank?
       begin
@@ -462,7 +466,7 @@ class Lendings < Application
       end
       redirect url("lendings/#{@lending.id}"), :message => message
     else
-      redirect url("lendings/lending_preclose/#{@lending.id}"), :message => {:error => @errors.flatten.join(' ,')}
+      redirect url(:controller => 'lendings', :action => 'check_preclosure_date', :loan_id => @lending.id, :effective_on => effective_on), :message => {:error => @errors.flatten.join('<br>')}
     end
   end
 
