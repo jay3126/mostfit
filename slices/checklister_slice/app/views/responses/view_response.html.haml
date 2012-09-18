@@ -1,36 +1,69 @@
 %h2= "Checklist Filled  by #{@filler.name}"
 
-%table.dataTable.report.weeksheet.nojs
-  %tr
-    %td
-      Effective Date:
-    %td
-      %b
-        =@response.value_date.strftime("%b %e")
-  %tr
-    %td
-      =@response.checklist_locations.first.type+":"
-    %td
-      %b
-        =@response.checklist_locations.first.name
-  %tr
-    %td
-      =@response.checklist_locations.last.type+":"
-    %td
-      %b
-        =@response.checklist_locations.last.name
-  %tr
-    %td
-      =@response.target_entity.type
-    %td
-      %b
-        =@response.target_entity.name
-  %tr
-    %td
-      Filled On
-    %td
-      %b
-        =@response.created_at.strftime("%b %e %Y ")
+-if @checklist.checklist_type.is_pa_checklist?
+  %table.dataTable.report.weeksheet.nojs
+    %tr
+      %td
+        Effective Date:
+      %td
+        %b
+          =@response.value_date.strftime("%b %e")
+    %tr
+      %td
+        =@response.checklist_locations.first.type.capitalize+":"
+      %td
+        %b
+          =@response.checklist_locations.first.name
+    -#%tr
+    -#  %td
+    -#    =@response.checklist_locations.last.type+":"
+    -#  %td
+    -#    %b
+    -#      =@response.checklist_locations.last.name
+    -#%tr
+    -#  %td
+    -#    =@response.target_entity.type
+    -#  %td
+    -#    %b
+    -#      =@response.target_entity.name
+    %tr
+      %td
+        Filled On
+      %td
+        %b
+          =@response.created_at.strftime("%b %e %Y ")
+-else
+  %table.dataTable.report.weeksheet.nojs
+    %tr
+      %td
+        Effective Date:
+      %td
+        %b
+          =@response.value_date.strftime("%b %e")
+    %tr
+      %td
+        =@response.checklist_locations.first.type+":"
+      %td
+        %b
+          =@response.checklist_locations.first.name
+    %tr
+      %td
+        =@response.checklist_locations.last.type+":"
+      %td
+        %b
+          =@response.checklist_locations.last.name
+    %tr
+      %td
+        =@response.target_entity.type
+      %td
+        %b
+          =@response.target_entity.name
+    %tr
+      %td
+        Filled On
+      %td
+        %b
+          =@response.created_at.strftime("%b %e %Y ")
 
 
 
