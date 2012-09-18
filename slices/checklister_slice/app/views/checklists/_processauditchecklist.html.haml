@@ -1,0 +1,123 @@
+-#%h1 This is process audit checklist
+
+%h2.h2c
+  ="#{@checklist.checklist_type.name}"
+%hr
+
+.shaded
+  #form_section
+    = form(:action => url(:checklister_slice_capture_checklist_data) ) do
+
+      %table.form{:style => "width:100%;"}
+        %tr
+          %th
+            = label " Staff Member:"
+          %td
+            = text_field :name => :staff_name ,:value=>params[:staff_name] ,:disabled=>true
+            = hidden_field :staff_name ,:value=>params[:staff_name]
+        -#%tr
+        -#  %th
+        -#    = label params[:target_entity_type]
+        -#  %td
+        -#    = text_field :name=>:target_entity_name ,:value=>params[:target_entity_name],:disabled=>true
+        -#    = hidden_field :target_entity_name ,:value=>params[:target_entity_name]
+        %tr
+          %th
+            =label params[:loc1_type].capitalize
+          %td
+            =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+            =hidden_field :loc2_name,:value=>params[:loc2_name]
+        -#%tr
+        -#  %th
+        -#    =label params[:loc2_type]
+        -#  %td
+        -#    =text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
+        -#    =hidden_field :loc2_name,:value=>params[:loc2_name]
+        %tr
+          %th
+            =label "Value Date"
+          %td
+            = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
+        - if @checklist.checklist_type.name == "Customer Calling"
+          %tr
+            %th
+              = label "Client telephone number"
+            %td
+              - if client_phone_number.blank?
+                Not available
+              - else
+                = text_field :phone_number, :value => client_phone_number
+              = link_to_with_rights "Update client details", url(:controller => "new_clients", :action => "edit", :id => @client.id)
+      %p
+
+        -@sections.each do |section|
+          %hr
+          .section_block
+            %h2
+              %b{:style=>"color:black"}
+                %u
+                  =section.name
+              %br
+            =section.instructions
+
+          =hidden_field :checklist_id, :value=>@checklist.id
+
+          =hidden_field :filler_type, :value=>"User"
+          =hidden_field :staff_id, :value=>@staff_id
+          =hidden_field :target_entity_type, :value=>params[:target_entity_type]
+          =hidden_field :target_entity_id, :value=>params[:target_entity_id]
+
+          =hidden_field :loc1_id, :value=>params[:loc1_id]
+          =hidden_field :loc2_id, :value=>params[:loc2_id]
+          =hidden_field :loc1_type, :value=>params[:loc1_type]
+          =hidden_field :loc2_type, :value=>params[:loc2_type]
+          =hidden_field :no_of_applications, :value=>params[:no_of_applications]
+
+          =hidden_field :referral_url, :value=>params[:referral_url]
+
+
+
+
+          -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+          -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+          -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+          -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+            %table{:cellspacing=>"3px", :cellpadding=>"3px"}
+              %tr.question_cell
+
+              -if !checkpoint.nil?
+                %td{:width=>"800px"}
+                  ="#{i+1} . #{checkpoint.name}"
+                %td
+                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                  Yes
+                %td
+                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                  No
+              -elsif !free_text.nil?
+                %td{:width=>"800px"}
+                  ="#{i+1} .  #{free_text.name}"
+
+                  -if free_text.name.downcase=="date"
+                    %td
+                      =date_select "free_text_#{free_text.id}".to_sym, Date.today, :max_date => Date.today
+                  -else
+                    %tr
+
+                      %td
+                        =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
+              -elsif !dropdownpoint.nil?
+                %td{:width=>"800px"}
+                  ="#{i+1} . #{dropdownpoint.name}"
+                %td
+                  -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
+                  -else
+                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value"
+
+
+
+
+
+      %p
+        = submit "Create"

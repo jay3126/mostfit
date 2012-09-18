@@ -18,9 +18,11 @@
   $("select").datepicker();
   });
 
-
+-#- debugger
 -if @checklist_type.is_hc_checklist?
   =partial "checklists/healthchecklist"
+-elsif @checklist_type.is_pa_checklist?
+  =partial "checklists/processauditchecklist"
 -else
 
 
@@ -138,7 +140,6 @@
                       =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
                     -else
                       =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value"
-
 
 
 
