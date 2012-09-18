@@ -20,6 +20,8 @@
         %th
           Loan Id
         %th
+          Borrower Name
+        %th
           Cycle No.
         %th
           Name
@@ -33,6 +35,8 @@
       %tr
         %td
           = lending.id
+        %td
+          = link_to_with_rights lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => lending.loan_borrower.counterparty.id)
         %td
           = lending.cycle_number
         %td
