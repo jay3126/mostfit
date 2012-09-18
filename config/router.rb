@@ -30,7 +30,7 @@ Merb::Router.prepare do
 
   resources :auth_override_reasons
   resources :branch_eod_summaries
-  resources :cheque_leaves, :id => %r(\d+)
+  resources :cheque_books, :id => %r(\d+)
   resources :securitizations
   resources :encumberances
   resources :third_parties
@@ -124,9 +124,6 @@ Merb::Router.prepare do
     resources :checkers, :collection => {:recheck => [:get]}
   end
 
-  match('/dashboard/centers/:report_type/:branch_id').to(:controller => 'dashboard', :action => "centers", :branch_id => ":branch_id", :report_type => ":report_type").name(:dashboard_centers)
-  match('/design').to(:controller => 'loan_products', :action => 'design').name(:design_loan_product)
-
   # maintainer slice
   slice(:maintainer, :path_prefix => "maintain")
   add_slice(:checklister_slice,:path_prefix=>"check")
@@ -138,30 +135,18 @@ Merb::Router.prepare do
   match('/reports/show(/:id)').to(:controller => 'reports', :action => 'show')
   match('/reports/:report_type(/:id)').to(:controller => 'reports', :action => 'show').name(:show_report)
   resources :reports
-  match('/data_entry(/:action)').to(:namespace => 'data_entry', :controller => 'index').name(:data_entry)
 
   namespace :credit_bureaus do 
     match('/:name/:action').to(:controller => :name)
   end
 
-  namespace :data_entry, :name_prefix => 'enter' do  # for url(:enter_payment) and the likes
-    match('/clients(/:action)(/:id)(.:format)').to(:controller => 'clients').name(:clients)
-    match('/payments(/:action)(.:format)').to(:controller => 'payments').name(:payments)
-    match('/attendancy(/:action)(.:format)').to(:controller => 'attendancy').name(:attendancy)
-    match('/groups(/:action)(/:id)(.:format)').to(:controller => 'client_groups').name(:groups)
-    match('/client_groups(/:action)(/:id)(.:format)').to(:controller => 'client_groups').name(:groups)
-  end
-
   match('/client_verifications(/:action)').to(:controller => 'client_verifications').name(:client_verifications)
   match('/admin(/:action)').to(:controller => 'admin').name(:admin)
   match('/admin(/:action/:id)').to(:controller => 'admin').name(:admin)
-  match('/dashboard/clients/:id(/group_by/:group_by)(/branch_id/:branch_id)(/center_id/:center_id)(/staff_member_id/:staff_member_id)').to(:id => ":id", :action => "clients", :controller => 'dashboard').name(:dashboard_breakup_clients)
-  match('/dashboard/:action/:id(/branch_id/:branch_id)(/by/:by)(/staff_member_id/:staff_member_id)').to(:action => ":action", :controller => 'dashboard').name(:dashboard_actions)
   match('/dashboard(/:action)').to(:controller => 'dashboard').name(:dashboard)
   match('/change_password').to(:controller => "users", :action => 'change_password').name(:change_password)
   match('/preferred_locale').to(:controller => "users", :action => 'preferred_locale').name(:preferred_locale)
   match('/graph_data/:action(/:id)').to(:controller => 'graph_data').name(:graph_data)
-  match('/staff_members/:id/centers').to(:controller => 'staff_members', :action => 'show_centers').name(:show_staff_member_centers)
   match('/entrance(/:action)').to(:controller => 'entrance').name(:entrance)
   match('/staff_members/:id/day_sheet').to(:controller => 'staff_members', :action => 'day_sheet').name(:day_sheet)
   match('/staff_members/:id/day_sheet.:format').to(:controller => 'staff_members', :action => 'day_sheet', :format => ":format").name(:day_sheet_with_format)
@@ -222,7 +207,4 @@ Merb::Router.prepare do
   match("/checklister/healthcheck_checklist").to(:controller => "checklister", :action => "healthcheck_checklist").name(:hc_checklist)
   default_routes
   match('/').to(:controller => 'entrance', :action =>'root')
-
-
-
 end

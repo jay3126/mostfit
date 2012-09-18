@@ -26,7 +26,9 @@
           %th
             Loan ID
           %th
-            Applied Amount
+            Loan Product
+          %th
+            Loan Purpose
           %th
             Borrower
           %th
@@ -36,17 +38,9 @@
           %th
             Scheduled Disbursal Date
           %th
-            Repayment Frequency
+            Center
           %th
-            Tenure
-          %th
-            Administered At
-          %th
-            Accounted At
-          %th
-            Status
-          %th
-            Created Date
+            Branch
           %th
             Approve Amount
       - loan_row_count = 1
@@ -68,7 +62,9 @@
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
-            = lending.to_money[:applied_amount].to_s
+            = link_to_with_rights lending.lending_product.name, resource(lending.lending_product)
+          %td
+            = lending.loan_purpose
           %td
             = link_to lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => lending.loan_borrower.counterparty.id)
           %td
@@ -78,17 +74,9 @@
           %td
             = lending.scheduled_disbursal_date
           %td
-            = lending.repayment_frequency
-          %td
-            = lending.tenure
-          %td
             = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
           %td
             = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
-          %td
-            = lending.status.humanize
-          %td
-            = lending.created_at.strftime('%Y-%m-%d')
           %td
             = text_field :name => "lending[#{lending.id}][][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
           - loan_row_count = loan_row_count + 1

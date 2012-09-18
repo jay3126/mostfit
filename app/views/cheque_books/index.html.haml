@@ -1,4 +1,4 @@
-%h1 Cheque Leaves
+%h1 List of Cheque Books
 .menu-strip{:style => "width: 10%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 %br
@@ -27,4 +27,4 @@
         %td
           = account.account_no
         %td
-          = link_to 'Add / View cheque leaves', url("cheque_leaves/new/#{account.id}")
+          = link_to 'Add / View Cheque Books', url("cheque_books/new/#{account.id}")

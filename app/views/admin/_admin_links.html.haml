@@ -40,7 +40,7 @@
       %li
         = link_to_with_rights 'Loan authorize override reasons', resource(:auth_override_reasons), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Cheque leaves', resource(:cheque_leaves), :class => 'loan icon'
+        = link_to_with_rights 'Cheque Book and Cheque Leaves', resource(:cheque_books), :class => 'loan icon'
       %li
         = link_to_with_rights 'Funders and funding lines', resource(:funders), :class => 'funder icon'
       %li
@@ -56,13 +56,13 @@
       %li
         = link_to_with_rights 'Loan products', resource(:lending_products), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Loans', resource(:lendings), :class => 'loan icon'
+        = link_to_with_rights 'Approve and Disburse Loans', resource(:lendings), :class => 'loan icon'
       %li
         = link_to_with_rights 'Write Off Loans', resource(:lendings, :write_off_lendings), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Bulk edit funding lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
+        = link_to_with_rights 'Bulk Edit of Funding Lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Bulk Preclose', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
+        = link_to_with_rights 'Bulk Preclose of Loans', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
       %li
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
       %li
@@ -90,7 +90,7 @@
       %li
         = link_to_with_rights 'Asset Categories', resource(:asset_categories), :class => 'report icon'
       %li
-        = link_to_with_rights 'Reasons', resource(:reasons), :class => 'report icon'
+        = link_to_with_rights 'Reason Master', resource(:reasons), :class => 'report icon'
 
 
     .admin_box

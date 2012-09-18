@@ -1,0 +1,54 @@
+%h1 List of Cheque Leaves for Cheque Book from serial number : #{@cheque_book.serial_no}
+
+.menu-strip{:style => "width:10%;"}
+  = link_to_with_rights "Back", url("cheque_books/new/#{@cheque_book.bank_account_id}"), :class => "grey_button"
+
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Id
+      %th
+        Cheaque Leaf No.
+      %th
+        Cheque Leaf Issue Date
+      %th
+        Issued By
+      %th
+        Status of Cheque Leaf
+      %th
+        Mark Valid/In-Valid
+      %th
+        Used/Unsed
+      %th
+        Actions
+
+  %tbody
+    - for cheque_leaf in @cheque_leaves
+      %tr
+        = form(:action => url(:controller => :cheque_leaves, :action => :update, :id => cheque_leaf.id), :method => :post) do
+          %td
+            = cheque_leaf.id
+          %td
+            = cheque_leaf.serial_number
+          %td
+            = date_select "cheque_leaf[#{cheque_leaf.id}][][cheque_issue_date]", cheque_leaf.cheque_issue_date, {:id => "cheque_leaf_#{cheque_leaf.id}", :size => "10", :max_date => Date.today}
+          %td
+            = select :name => "cheque_leaf[#{cheque_leaf.id}][][issued_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
+          %td
+            - if cheque_leaf.valid == true
+              Valid
+            - else
+              Marked Invalid
+          %td
+            - if cheque_leaf.valid == true && cheque_leaf.used == false
+              = link_to_with_rights '(Mark Invalid)', url(:controller => :cheque_leaves, :action => :mark_invalid, :id => cheque_leaf.id)
+            - else
+              = link_to_with_rights '(Mark Valid)', url(:controller => :cheque_leaves, :action => :mark_valid, :id => cheque_leaf.id)
+          %td
+            - if cheque_leaf.used == false
+              Unused
+            - else
+              Used
+          %td
+            = submit "Update"

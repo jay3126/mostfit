@@ -9,7 +9,7 @@ class BankAccount
 
 
   has n, :money_deposits
-  has n, :cheques,:model=>'ChequeLeaf'
+  has n, :cheque_books, :model => 'ChequeBook'
 
   belongs_to :bank_branch
   belongs_to :user, :child_key => [:created_by_user_id], :model => 'User'

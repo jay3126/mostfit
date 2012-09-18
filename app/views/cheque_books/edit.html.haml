@@ -1,0 +1,15 @@
+%h1
+  ChequeLeaves controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/cheque_books/edit.html.erb
+= error_messages_for @cheque_book
+
+= form_for(@cheque_book, :action => url(:cheque_book, @cheque_book)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:cheque_book, @cheque_book)
+|
+= link_to 'Back', url(:cheque_books)

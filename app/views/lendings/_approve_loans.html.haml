@@ -24,31 +24,31 @@
             %br
             = check_box :id => "toggle_select_to_disburse"
           %th
+            Disbursement Mode
+          %th
+            Cheque No.
+          %th
             Loan ID
           %th
-            Applied Amount
+            Loan Product
+          %th
+            Loan Purpose
           %th
             Borrower
-          %th
-            Applied Date
           %th
             First Repayment Date
           %th
             Scheduled Disbursal Date
           %th
-            Repayment Frequency
+            Center
           %th
-            Tenure
+            Branch
           %th
-            Administered At
+            Approved Amount
           %th
-            Accounted At
+            Approved by
           %th
-            Approve Amount
-          %th
-            Approve by
-          %th
-            Approve Date
+            Approval Date
           %th
             Disburse Amount
       - loan_row_count = 1
@@ -68,21 +68,21 @@
             - elsif lending.applied_by_staff == session.user.staff_member.id
               %i No privilege
           %td
+            = select :name => :disbursement_mode, :collection => Constants::Loan::DISBURSEMENT_MODES
+          %td
+            = select :name => :cheque_number, :collection => ["Not Specified"] + ChequeLeaf.all(:biz_location_id => params[:parent_location_id]).map{|cl| [cl.id, cl.serial_number]}
+          %td
             = link_to_with_rights lending.id, resource(lending)
           %td
-            = lending.to_money[:applied_amount].to_s
+            = link_to_with_rights lending.lending_product.name, resource(lending.lending_product)
+          %td
+            = lending.loan_purpose
           %td
             = lending.loan_borrower.counterparty.name
-          %td
-            = lending.applied_on_date
           %td
             = lending.scheduled_first_repayment_date
           %td
             = lending.scheduled_disbursal_date
-          %td
-            = lending.repayment_frequency
-          %td
-            = lending.tenure
           %td
             = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
           %td

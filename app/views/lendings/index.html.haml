@@ -1,5 +1,5 @@
-%h1
-  Loans
+%h1 Approve and Disburse Loans
+
 .menu-strip{:style => "width: 8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 = form_for(:lendings, :action => url(:controller => :lendings, :action => :index)) do
@@ -8,10 +8,10 @@
   %div.tab_container.shaded
     %ul.tabs
       %li#apply_loans
-        Applied Loans
+        Loans for Approval
       %li#approved_Loans
-        Approved Loans
-      %li#disbursed_loans
+        Loans for Disbursal
+      %li#disbursed_loans{:style=>'display:none'}
         Disbursed Loans
       %li#fee_loans{:style=>'display:none'}
         Fee Loans

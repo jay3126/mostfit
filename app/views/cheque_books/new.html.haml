@@ -3,14 +3,14 @@
 - else
   %h1 Create New Cheque Book
 
-= error_messages_for @cheque_leaf
+= error_messages_for @cheque_book
 
 .menu-strip{:style => "width: 32%;"}
   = link_to_with_rights "Create new Cheque Book", '#', :onclick =>"jQuery('#new_cheque_book').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
-  = link_to 'Back', url(:cheque_leaves), :class => "grey_button"
+  = link_to 'Back', url(:cheque_books), :class => "grey_button"
 #new_cheque_book(style = "display : none")
-  = form_for(@cheque_leaf, :controller => :cheque_leaves, :action => :create) do
+  = form_for(@cheque_book, :controller => :cheque_books, :action => :create) do
     %table.tall.shaded
       %tr
         %th
@@ -43,7 +43,7 @@
         %th
           Issue Date Of Cheque Book
         %td
-          = date_select_for @cheque_leaf, :issue_date
+          = date_select_for @cheque_book, :issue_date
     = submit "Create"
     &nbsp;&nbsp;
     %b
@@ -52,49 +52,32 @@
     = link_to_with_rights "Cancel", '#', :onclick =>"jQuery('#new_cheque_book').hide(); return false;", :class => "grey_button"    
 %br
 
-%h1 Existing Cheque Leaves for : #{@bank_account.name}
+%h1 Existing Cheque Books for : #{@bank_account.name}
 %table.dataTable.report.weeksheet.nojs
   %thead
     %tr
       %th
-        Serial Number
+        Cheque Book Id
       %th
-        Issue Date
+        Cheque Book
+      %th
+        Cheque Book Issue Date
       %th
         Bank Account Name
       %th
         Bank Account Number
-      %th
-        Status of Cheque
-      %th
-        Actions
-      %th
-        Used
 
   %tbody
-    - @cheque_leaves.each do |leaf|
+    - @cheque_books.each do |book|
       %tr
         %td
-          = leaf.serial_no
+          = book.id
         %td
-          = leaf.issue_date
+          = link_to_with_rights book.serial_no, url(:controller => "cheque_books", :action => "show", :id => book.id)
         %td
-          = leaf.bank_account.name
+          = book.issue_date
         %td
-          = leaf.bank_account.account_no
+          = book.bank_account.name
         %td
-          - if leaf.valid == true
-            Valid
-          - else
-            Marked Invalid
-        %td
-          - if leaf.valid == true && leaf.used == false
-            = link_to_with_rights '(Mark Invalid)', url(:controller => :cheque_leaves, :action => :mark_invalid, :id => leaf.id)
-          - else
-            = link_to_with_rights '(Mark Valid)', url(:controller => :cheque_leaves, :action => :mark_valid, :id => leaf.id)
-        %td
-          - if leaf.used == false
-            Unused
-          - else
-            Used
+          = book.bank_account.account_no
 %br
