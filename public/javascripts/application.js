@@ -684,18 +684,6 @@ function fillBankAccounts(){
   }
 }
 
-function fillFundingLines(){
-  $("#funder_selector").change(function(){
-    $.ajax({
-      type: "GET",
-      url: "/funders/funding_lines/"+$("#funder_selector").val(),
-      success: function(data){
-        $("#funding_line_selector").html(data);
-      }
-    });
-  });
-}
-
 function floatHeaders(){
   if($("table.report").length>0){
     $('.report').floatHeader({
@@ -843,10 +831,8 @@ $(document).ready(function(){
   create_remotes();
   attachFormRemote();
   fillCenters();
-  fillFundingLines();
   fillComboBranches();
   fillAccounts();
-  fillFundingLines();
   fillCashAccounts();
   fillBankAccounts();
   fillPslSubCategories();
