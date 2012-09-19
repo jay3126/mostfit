@@ -38,7 +38,7 @@ class Lending
   property :updated_at,                     *UPDATED_AT
   property :deleted_at,                     *DELETED_AT
   property :cycle_number,                   Integer, :default => 1, :nullable => false, :index => true
-  property :disbursement_mode,              Enum.send('[]', *DISBURSEMENT_MODES), :nullable => false
+  property :disbursement_mode,              Enum.send('[]', *DISBURSEMENT_MODES), :nullable => false, :default => NOT_SPECIFIED
   property :cheque_number,                  Integer, :nullable => true
 
   validates_with_method :cheque_number, :cheque_number_needs_to_be_entered
