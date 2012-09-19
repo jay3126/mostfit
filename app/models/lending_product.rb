@@ -23,6 +23,8 @@ class LendingProduct
   has 1, :loan_preclosure_penalty, 'SimpleFeeProduct', :parent_key => [:id], :child_key => [:loan_preclosure_penalty_id]
   has n, :simple_insurance_products
 
+  validates_is_unique :name
+
   # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency; self.repayment_frequency; end
 
