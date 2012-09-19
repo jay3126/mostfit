@@ -17,11 +17,13 @@ class FeeInstance
   include Constants::Properties
   include Constants::Fee
   include Constants::Transaction
+  include Constants::Money
+
 
   property :id,                     Serial
   property :fee_amount,             *MONEY_AMOUNT
   property :tax_amount,             *MONEY_AMOUNT
-  property :currency,               *CURRENCY
+  property :currency,               Enum.send('[]', *CURRENCIES), :nullable => false, :default => DEFAULT_CURRENCY
   property :fee_applied_on_type,    Enum.send('[]', *FEE_APPLIED_ON_TYPES), :nullable => false
   property :fee_applied_on_type_id, *INTEGER_NOT_NULL
   property :by_counterparty_type,   Enum.send('[]', *COUNTERPARTIES), :nullable => false

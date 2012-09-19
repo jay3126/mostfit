@@ -44,12 +44,12 @@
         %td= @lending.scheduled_first_repayment_date
     - else
       %tr.even
-        %th.even first Repayment Date
+        %th.even First Repayment Date
         %td= @lending.loan_receipts.first.effective_on rescue ''
     %tr.odd
       %th.odd Loan Product
       %td
-        = @lending_product.name
+        = link_to_with_rights @lending_product.name, resource(@lending_product)
     %tr.even
       %th.even Loan Purpose
       %td
@@ -69,10 +69,10 @@
         - else
           = loan_assigned_to.loan_assignment_instance.to_s
     %tr.even
-      %th.even Administered At
+      %th.even Center
       %td= link_to_with_rights @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
     %tr.odd
-      %th.odd Accounted At
+      %th.odd Branch
       %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
     - unless @fee_instance.blank?
       %tr.even
@@ -100,7 +100,7 @@
       Status History
   %div.tab
     %div#loan_schedules
-      =partial "lendings/lending_schedule"
+      = partial "lendings/lending_schedule"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_transactions, :id => @lending.id)}
   %div.tab
