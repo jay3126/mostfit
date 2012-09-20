@@ -27,6 +27,20 @@
           Default Disbursal Date
         %td
           = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
+    %tr
+      %th
+        Originator By
+      %td
+        = select :originator_by, :collection => @staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member'
+    %tr
+      %th
+        Managed By
+      %td
+        = select :name => :managed_by, :collection => @staff_members, :selected => @managed_by_staff.id.to_s, :prompt => 'Select Staff Member', :text_method => :name, :value_method => :id
+      %th
+        On Date
+      %td
+        = date_select 'on_date', get_effective_date
   = submit "Update", :class => "grey_button"
   &nbsp;&nbsp;
   %b

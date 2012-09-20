@@ -8,7 +8,9 @@ class BizLocations < Application
   end
 
   def edit
-    @biz_location = BizLocation.get params[:id]
+    @biz_location     = BizLocation.get params[:id]
+    @staff_members    = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date).map(&:staff_assigned) rescue []
+    @managed_by_staff = location_facade.location_managed_by_staff(@biz_location.id, get_effective_date).manager_staff_member rescue ''
     display @biz_location
   end
 
@@ -16,25 +18,32 @@ class BizLocations < Application
     # INITIALIZING VARIABLES USED THROUGHTOUT
 
     message = {}
-
     # GATE-KEEPING
 
     b_name           = params[:biz_location][:name]
     b_disbursal_date = params[:biz_location][:center_disbursal_date]
     b_address        = params[:biz_location][:biz_location_address]
+    b_originator_by  = params[:biz_location][:originator_by]
+    b_managed_by     = params[:managed_by]
+    b_on_date        = Date.parse params[:on_date]
     b_id             = params[:id]
+    staff            = StaffMember.get(b_managed_by) unless b_managed_by.blank?
 
     # VALIDATIONS
 
     message[:error] = "Name cannot be blank" if b_name.blank?
     message[:error] = "Biz Location cannot be blank" if b_id.blank?
     @biz_location   = BizLocation.get b_id
+    recorded_by     = session.user
+    performed_by    = recorded_by.staff_member
 
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
-        @biz_location.attributes = {:name => b_name, :center_disbursal_date => b_disbursal_date, :biz_location_address => b_address}
+        location_management      = LocationManagement.check_valid_obj(staff, @biz_location, b_on_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
+        @biz_location.attributes = {:name => b_name, :center_disbursal_date => b_disbursal_date, :biz_location_address => b_address, :originator_by => b_originator_by}
         if @biz_location.save
+          location_management.save unless b_managed_by.blank?
           message = {:notice => "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' updated successfully"}
         else
           message = {:error => @biz_location.errors.first.join(', ')}
@@ -77,7 +86,7 @@ class BizLocations < Application
     b_begins_hours     = params[:meeting][:meeting_time_begins_hours].to_i
     b_begins_minutes   = params[:meeting][:meeting_time_begins_minutes].to_i
     recorded_by        = session.user
-    perfomed_by        = recorded_by.staff_member
+    performed_by       = recorded_by.staff_member
 
 
     # VALIDATIONS
@@ -108,7 +117,7 @@ class BizLocations < Application
               end
               unless b_managed_by.blank?
                 staff = StaffMember.get b_managed_by
-                LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, perfomed_by.id, recorded_by.id)
+                LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id)
               end
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
             else
@@ -248,7 +257,7 @@ class BizLocations < Application
     b_begins_hours   = params[:meeting][:meeting_time_begins_hours].to_i
     b_begins_minutes = params[:meeting][:meeting_time_begins_minutes].to_i
     recorded_by      = session.user
-    perfomed_by      = recorded_by.staff_member
+    performed_by     = recorded_by.staff_member
     @parent_location = BizLocation.get b_id
 
     # VALIDATIONS
@@ -278,7 +287,7 @@ class BizLocations < Application
           end
           unless b_managed_by.blank?
             staff = StaffMember.get b_managed_by
-            LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, perfomed_by.id, recorded_by.id)
+            LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, performed_by.id, recorded_by.id)
           end
           if b_level == "0"
             location_facade.create_center_cycle(b_creation_date, child_location.id)

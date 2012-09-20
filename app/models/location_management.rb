@@ -16,8 +16,8 @@ class LocationManagement
   validates_with_method :staff_member_is_active?
 
   def only_one_assignment_on_date?
-    already_assigned_on_date = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)
-    already_assigned_on_date ? [false, "There is already a staff member assigned to manage the location on the date: #{self.effective_on}"] : true
+    assigned = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)
+    assigned && assigned.manager_staff_id != self.manager_staff_id ? [false, "There is already a staff member(#{assigned.manager_staff_member.name.humanize}) assigned to manage the location on the date: #{self.effective_on}"] : true
   end
 
   def assignment_and_creation_dates_are_valid?
@@ -93,6 +93,24 @@ class LocationManagement
       currently_managed_locations.push(currently_managed_instance) if currently_managed_instance.manager_staff_id == staff_id
     }
     currently_managed_locations
+  end
+
+  def self.check_valid_obj(staff_member, location, effective_on, performed_by, recorded_by)
+    Validators::Arguments.not_nil?(staff_member, location, effective_on, performed_by, recorded_by)
+
+    raise ArgumentError, "Staff member assigned is not a valid instance" unless staff_member.is_a?(StaffMember)
+    raise ArgumentError, "Location to be assigned is not a valid instance" unless location.is_a?(BizLocation)
+
+    management = {}
+    management[:manager_staff_id]    = staff_member.id
+    management[:managed_location_id] = location.id
+    management[:effective_on]        = effective_on
+    management[:performed_by]        = performed_by
+    management[:recorded_by]         = recorded_by
+
+    location_manager = new(management)
+    raise Errors::DataError, location_manager.errors.first.join(', ') unless location_manager.valid?
+    location_manager
   end
 
 end
