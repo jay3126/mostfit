@@ -249,6 +249,10 @@ class Client
     raise Errors::DataError, self.errors.first unless update_client
   end
 
+  def self.death_event_filed_for(client)
+    death_event = DeathEvent.first(:affected_client_id => client.id)
+    death_event.relationship_to_client == "Self relationship" ? "Client" : death_event.relationship_to_client
+  end
 
   private
   

@@ -419,8 +419,16 @@ class Lending
     scheduled_interest_outstanding_from_date = scheduled_interest_outstanding(from_date)
     most_recent_schedule_date = Constants::Time.get_immediately_earlier_date(to_date, *schedule_dates)
     recent_scheduled_interest_outstanding = scheduled_interest_outstanding(most_recent_schedule_date)
-
     scheduled_interest_outstanding_from_date > recent_scheduled_interest_outstanding ? (scheduled_interest_outstanding_from_date - recent_scheduled_interest_outstanding) : zero_money_amount
+  end
+
+  def interest_for_preclose(to_date)
+    scheduled_amount_till_date  = get_sum_scheduled_amounts_info_till_date(to_date)
+    scheduled_received_interest = scheduled_amount_till_date[:sum_of_scheduled_interest_due]
+    received_interest_till_date = interest_received_till_date(to_date)
+    interest                    = scheduled_received_interest - received_interest_till_date
+    interest                    += broken_period_interest_due(to_date) unless schedule_dates.include?(to_date)
+    interest
   end
 
   def broken_period_interest_due(on_date)

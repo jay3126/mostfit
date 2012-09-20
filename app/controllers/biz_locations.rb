@@ -93,6 +93,7 @@ class BizLocations < Application
     # VALIDATIONS
 
     message[:error] << "Name cannot be blank" if b_name.blank?
+    message[:error] << "Disbursal Date cannot be blank" if b_level == '0' && b_disbursal_date.blank?
     message[:error] << "Please select Location Level" if b_level.blank?
     message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
     message[:error] << "Meeting Number cannot be blank" if b_level == '0' && !b_meeting.blank? && b_meeting_number.blank?
@@ -106,7 +107,7 @@ class BizLocations < Application
       begin
         biz_location = location_facade.create_new_location(b_name, b_creation_date, b_level.to_i, b_originator_by, b_address, b_disbursal_date)
         if biz_location.new?
-          message = {:notice => "Location creation fail"}
+          message = {:error => "Location creation fail"}
         else
           begin
             LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?

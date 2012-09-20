@@ -28,7 +28,7 @@
       %td
         - from_date = @lending.most_recent_payment_transaction_on_date
         - to_date = Date.parse(preclose_on_date)
-        - actual_interest = @lending.accrued_interim_interest(from_date, to_date)
+        - actual_interest = @lending.interest_for_preclose(to_date)
         = text_field :name => "specific_interest_amount", :value => actual_interest, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
         %span.greytext
           = actual_interest

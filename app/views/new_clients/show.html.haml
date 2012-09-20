@@ -9,10 +9,12 @@
 - if client_facade.client_has_death_event?(@client)
   - if client_facade.client_death_documents_recieved?(@client)
     .menu-strip
-      %h4{:style => "color: red"} Client is Inactive!
+      %h4{:style => "color: red"} 
+        = "Client is Inactive (#{client_facade.death_event_filed_for(@client)} Death)"
   - else
     .menu-strip
-      %h4{:style => "color: red"} Client is under Death Claim Process!
+      %h4{:style => "color: red"}
+        = "Client is under Death Claim Process (#{client_facade.death_event_filed_for(@client)} Death)"
 - else
   .menu-strip
     = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
