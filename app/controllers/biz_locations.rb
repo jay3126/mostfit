@@ -73,10 +73,10 @@ class BizLocations < Application
     # GATE-KEEPING
 
     b_level            = params[:biz_location][:location_level]
-    b_creation_date    = params[:biz_location][:creation_date]
+    b_creation_date    = Date.parse(params[:biz_location][:creation_date])
     b_name             = params[:biz_location][:name]
     b_address          = params[:biz_location][:biz_location_address]
-    b_disbursal_date   = Date.parse params[:biz_location][:center_disbursal_date]
+    b_disbursal_date   = params[:biz_location][:center_disbursal_date].blank? ? '' : Date.parse(params[:biz_location][:center_disbursal_date])
     parent_location_id = params[:parent_location_id]
     b_originator_by    = params[:biz_location][:originator_by]
     b_managed_by       = params[:managed_by]
@@ -87,6 +87,7 @@ class BizLocations < Application
     b_begins_minutes   = params[:meeting][:meeting_time_begins_minutes].to_i
     recorded_by        = session.user
     performed_by       = recorded_by.staff_member
+    staff              = StaffMember.get b_managed_by unless b_managed_by.blank?
 
 
     # VALIDATIONS
@@ -95,6 +96,7 @@ class BizLocations < Application
     message[:error] << "Please select Location Level" if b_level.blank?
     message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
     message[:error] << "Meeting Number cannot be blank" if b_level == '0' && !b_meeting.blank? && b_meeting_number.blank?
+    message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
     message[:error] << "Please fill right value of time" if b_level == '0' && !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
     message[:error] << "Default Disbursal Date cannot be holiday" if b_level == '0' && !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
@@ -115,10 +117,7 @@ class BizLocations < Application
                 meeting_facade.setup_meeting_schedule(biz_location, msi)
                 meeting_facade.setup_meeting_calendar_for_location(biz_location, b_disbursal_date, b_meeting_number)
               end
-              unless b_managed_by.blank?
-                staff = StaffMember.get b_managed_by
-                LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id)
-              end
+              LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
             else
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})' successfully created"
@@ -167,7 +166,7 @@ class BizLocations < Application
     message[:error] = "Please select Child Location" if c_location.blank?
     message[:error] = "Creation Date cannot blank" if creation_date.blank?
 
-    # OPERATIONS PERFORMED
+    # OPERATIONS PERFORMEDmessage[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
     if message[:error].blank?
       begin
         parent = BizLocation.get p_location
@@ -244,10 +243,10 @@ class BizLocations < Application
     # GATE-KEEPING
 
     b_level          = params[:biz_location][:location_level]
-    b_creation_date  = params[:creation_date]
+    b_creation_date  = Date.parse(params[:creation_date])
     b_name           = params[:biz_location][:name]
     b_id             = params[:id]
-    b_disbursal_date = Date.parse params[:biz_location][:center_disbursal_date]
+    b_disbursal_date = params[:biz_location][:center_disbursal_date].blank? ? '' : Date.parse(params[:biz_location][:center_disbursal_date])
     b_managed_by     = params[:managed_by]
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
@@ -259,6 +258,7 @@ class BizLocations < Application
     recorded_by      = session.user
     performed_by     = recorded_by.staff_member
     @parent_location = BizLocation.get b_id
+    staff            = StaffMember.get b_managed_by unless b_managed_by.blank?
 
     # VALIDATIONS
 
@@ -268,6 +268,7 @@ class BizLocations < Application
     message[:error] << "Parent location is invaild" if @parent_location.blank?
     message[:error] << "Please select Driginator By" if b_originator_by.blank?
     message[:error] << "Meeting Number cannot be blank" if !b_meeting.blank? && b_meeting_number.blank?
+    message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
     message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
     message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
@@ -285,10 +286,7 @@ class BizLocations < Application
             meeting_facade.setup_meeting_schedule(child_location, msi)
             meeting_facade.setup_meeting_calendar_for_location(child_location, b_disbursal_date, b_meeting_number)
           end
-          unless b_managed_by.blank?
-            staff = StaffMember.get b_managed_by
-            LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, performed_by.id, recorded_by.id)
-          end
+          LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
           if b_level == "0"
             location_facade.create_center_cycle(b_creation_date, child_location.id)
             msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"

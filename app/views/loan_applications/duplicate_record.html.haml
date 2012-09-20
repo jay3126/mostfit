@@ -96,11 +96,11 @@
     reference1 = false
     reference2 = false
     val = jQuery(this).text();
-    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference1.gsub(/[^0-9]/, '')}"){
+    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference1.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference1}") >= 0){
       jQuery(this).css('background','LightSeaGreen');
       reference1 = true
     }
-    if(jQuery.trim(val) == "#{@loan_application.client_reference2}" || jQuery.trim(val) == "#{@loan_application.client_reference2.gsub(/[^0-9]/, '')}"){
+    if(jQuery.trim(val) == "#{@loan_application.client_reference2}" || jQuery.trim(val) == "#{@loan_application.client_reference2.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference2}") >= 0){
       jQuery(this).css('background','Orchid');
       reference2 = true
     }
