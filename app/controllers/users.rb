@@ -122,7 +122,8 @@ class Users < Application
     end
   end
 
-  def admin_change_password    
+  def admin_change_password
+    message = {:error => [], :notice => []}
     user = params[:user]
     @user = User.get(params[:user_id])
     raise NotFound unless @user
@@ -131,26 +132,27 @@ class Users < Application
     if session.user.role == :administrator or session.user.role == :operator or session.user.id == @user.id
       if request.method==:put and user.key?(:password) and user.key?(:password_confirmation) and not user[:password].blank? and not user[:password_confirmation].blank?
         @user.transaction do |t|
-          old_crypt = @user.crypted_password
-          @user.password = user[:password]
-          @user.password_confirmation = user[:password]
-          @user.password_changed_at   = DateTime.now
-          @status = @user.save
-          t.rollback if not @status
-          if (@user.crypted_password == old_crypt)
-            t.rollback
-            @status = false
-            @user.errors.add(:password, "Same as old password")
+          message[:error] << "New Password Same as old password" if @user.crypted_password == @user.encrypt(user[:password])
+          message[:error] << "Old password is not vaild" if @user.crypted_password != @user.encrypt(user[:old_password])
+          if message[:error].blank?
+            @user.password              = user[:password]
+            @user.password_confirmation = user[:password]
+            @user.password_changed_at   = DateTime.now
+            if @user.save
+              message[:notice] = "Password changed successfully"
+            else
+              message[:error] << @user.errors.first
+            end
           end
         end
       end
     end
 
-    if @status
-      redirect(resource(:users), :message => {:notice => "Password changed successfully"})
+    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
+    if message[:error].blank?
+      redirect(resource(:users), :message => message)
     else
-      message[:error] = "Password could not be changed"
-      display @user, :edit
+      redirect(resource(@user, :edit), :message => message)
     end
   end
 end # Users
