@@ -1,9 +1,11 @@
 %h1
-  Client Groups
+  List Of Client Groups
 
-.menu-strip{:style => "width:20%"}
+.menu-strip{:style => "width:30%"}
   = link_to_with_rights "Create a new Client Group", resource(:client_groups, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
-  %br
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
 %table.dataTable.report.weeksheet.nojs
   %thead
     %tr

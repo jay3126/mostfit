@@ -1,7 +1,12 @@
 %h1
   = I18n.t "priority_sector_list.index.title", :default => "Priority Sector Lists"
-= link_to I18n.t("priority_sector_list.index.add_an_priority_sector_list", :default => "Add a priority sector list"), url(:new_priority_sector_list), :class => 'add grey_button'
-%table.narrow
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to I18n.t("priority_sector_list.index.add_an_priority_sector_list", :default => "Add a priority sector list"), url(:new_priority_sector_list), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
+%table.dataTable.report.weeksheet.nojs
   %thead
     %tr
       %th
@@ -24,6 +29,6 @@
       %td
         = link_to I18n.t("priority_sector_list.index.show", :default => "Show"), url(:priority_sector_list, priority_sector_list)
         &nbsp;&nbsp;
-        |
-        &nbsp;&nbsp;
-        = link_to I18n.t("priority_sector_list.index.edit", :default => "Edit"), url(:edit_priority_sector_list,  priority_sector_list)
+        %br
+          &nbsp;&nbsp;
+          = link_to I18n.t("priority_sector_list.index.edit", :default => "Edit"), url(:edit_priority_sector_list,  priority_sector_list)
