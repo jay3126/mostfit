@@ -11,7 +11,10 @@
         <b>Checklist Name</b>
       %th
         %b
-          =params[:target_entity_type]
+          -if @checklist_type.is_pa_checklist?
+            =params[:loc1_type].capitalize
+          -else
+            =params[:target_entity_type]
       %th
         <b>Filled By</b>
       %th
@@ -28,6 +31,7 @@
         =checklist.name
       %td
         =params[:target_entity_name]
+        -#=params[:loc2_name]
       %td
         =params[:staff_name]
       %td
@@ -42,6 +46,7 @@
         -parameter_hash[:loc1_id]=@loc1_id
         -parameter_hash[:loc2_id]=@loc2_id
 
+
         -parameter_hash[:target_entity_id]=@target_entity_id
         -parameter_hash[:target_entity_type]=@target_entity_type
         -parameter_hash[:target_entity_name]=@target_entity_name
@@ -54,6 +59,7 @@
         -parameter_hash[:effective_date]=@effective_date
         -parameter_hash[:referral_url]=@referral_url
 
+        -#- debugger
         -if @checklist_type.is_hc_checklist?
           - if !Checklist.is_healthcheck_complete?(params[:target_entity_name])
             =perform_link(session.user.role,checklist,parameter_hash)
