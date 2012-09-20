@@ -1,6 +1,8 @@
 %h1==Location Level :- #{@location_level.name}
 .menu-strip{:style => "width: 25%;"}
   = link_to 'Edit', '#', :onclick =>"jQuery('.show').toggle(); jQuery('.edit').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:location_levels), :class => "grey_button"
 = form_for(@location_level, :action => resource(@location_level), :method => 'put') do
   %table.tall.shaded
     %tr.even

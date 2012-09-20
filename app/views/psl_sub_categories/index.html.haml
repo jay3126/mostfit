@@ -1,7 +1,12 @@
 %h1
   = I18n.t "psl_sub_category.index.title", :default => "PSL Sub-Category"
-= link_to I18n.t("psl_sub_category.index.add_an_psl_sub_category", :default => "Add a PSL Sub-Category"), url(:new_psl_sub_category), :class => 'add grey_button'
-%table.narrow
+
+.menu-strip{:style => "width: 35%;"}
+  = link_to I18n.t("psl_sub_category.index.add_an_psl_sub_category", :default => "Add a PSL Sub-Category"), url(:new_psl_sub_category), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
+%table.dataTable.report.weeksheet.nojs
   %thead
     %tr
       %th
@@ -23,7 +28,5 @@
         = link_to psl_sub_category.priority_sector_list.name, resource(psl_sub_category.priority_sector_list)
       %td
         = link_to I18n.t("psl_sub_category.index.show", :default => "Show"), url(:psl_sub_category, psl_sub_category)
-        &nbsp;&nbsp;
-        |
-        &nbsp;&nbsp;
-        = link_to I18n.t("psl_sub_category.index.edit", :default => "Edit"), url(:edit_psl_sub_category,  psl_sub_category)
+        %br
+          = link_to I18n.t("psl_sub_category.index.edit", :default => "Edit"), url(:edit_psl_sub_category,  psl_sub_category)

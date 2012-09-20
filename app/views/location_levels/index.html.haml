@@ -1,6 +1,11 @@
 %h1
   Location Level
-= link_to 'Add New Location Level', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to 'Add New Location Level', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 #location_level{:style => "display : #{@location_levels.blank? ? false : 'none' }", :class => 'shaded'}
   = partial :fields
 %br

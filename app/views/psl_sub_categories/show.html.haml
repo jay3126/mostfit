@@ -1,7 +1,13 @@
 %h1
   = I18n.t "psl_sub_category.show.title", :default => "PSL Sub-Category :"
   = @psl_sub_category.name
-%table
+
+.menu-strip{:style => "width: 20%;"}
+  = link_to I18n.t("psl_sub_category.show.edit", :default => "Edit"),  url(:edit_psl_sub_category,  @psl_sub_category), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to I18n.t("psl_sub_category.show.back", :default => "Back"), url(:psl_sub_categories), :class => "grey_button"
+
+%table.tall.shaded
   %tr.odd
     %th
       = I18n.t"psl_sub_category.show.id", :default => "Id"   
@@ -17,9 +23,3 @@
       = I18n.t"psl_sub_category.show.priority_sector_list", :default => "Priority Sector List"   
     %td
       = @psl_sub_category.priority_sector_list.name
-%br
-  = link_to I18n.t("psl_sub_category.show.edit", :default => "Edit"),  url(:edit_psl_sub_category,  @psl_sub_category), :class => "grey_button"
-  &nbsp;&nbsp;
-  |
-  &nbsp;&nbsp;
-  = link_to I18n.t("psl_sub_category.show.back", :default => "Back"), url(:psl_sub_categories), :class => "grey_button"

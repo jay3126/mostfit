@@ -1,5 +1,9 @@
-%h1 Biz-Locations
-= link_to "Create a New Biz Location", '#', :class => 'add grey_button', :onclick => "jQuery('#location').toggle(); return false;"
+%h1 List of Biz-Locations
+
+.menu-strip{:style => "width: 35%;"}
+  = link_to "Create a New Biz Location", '#', :class => 'add grey_button', :onclick => "jQuery('#location').toggle(); return false;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 #location(style = "display : none")
   = form_for(@biz_location, :action => url(:biz_locations) ) do
     = partial :fields
