@@ -41,13 +41,6 @@ class Lending
   property :disbursement_mode,              Enum.send('[]', *DISBURSEMENT_MODES), :nullable => false, :default => NOT_SPECIFIED
   property :cheque_number,                  Integer, :nullable => true
 
-  validates_with_method :cheque_number, :cheque_number_needs_to_be_entered
-
-  def cheque_number_needs_to_be_entered
-    return [false, "Please enter cheque number"] if (self.disbursement_mode == "Cheque" and self.cheque_number.nil?)
-    return true
-  end
-
   def administered_at_origin_location; BizLocation.get(self.administered_at_origin); end
   def accounted_at_origin_location; BizLocation.get(self.accounted_at_origin); end
 
