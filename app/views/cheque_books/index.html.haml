@@ -8,6 +8,8 @@
       %th
         Bank name
       %th
+        Branch
+      %th
         Bank Branch name
       %th
         Bank Branch Account Name
@@ -20,6 +22,11 @@
       %tr
         %td
           = link_to_with_rights account.bank_branch.bank.name, url("banks/#{account.bank_branch.bank.id}")
+        %td
+          - if account.bank_branch.biz_location.nil?
+            = "Branch not specified"
+          - else
+            = link_to_with_rights account.bank_branch.biz_location.name, url("user_locations/show/#{account.bank_branch.biz_location.id}")
         %td
           = link_to_with_rights account.bank_branch.name, url("banks/#{account.bank_branch.bank.id}/bank_branches/#{account.bank_branch.id}")
         %td
