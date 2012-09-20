@@ -61,4 +61,11 @@ class ClientFacade < StandardFacade
     Client.is_claim_processing_or_inactive?(client)
   end
   
+  def client_death_documents_recieved?(client)
+    Client.client_death_documents_recieved?(client)
+  end
+
+  def client_has_death_event?(client)
+    Client.client_has_death_event?(client)
+  end
 end

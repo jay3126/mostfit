@@ -6,9 +6,13 @@
 %div{:style => "float: right; padding: 10px; border: solid 1px lightgrey"}
   = image_tag @client.picture.url(:medium)
 %h1== Client Name: <i>#{@client.name}</i>
-- unless client_active
-  .menu-strip
-    %h4{:style => "color: red"} Client is Inactive!
+- if client_facade.client_has_death_event?(@client)
+  - if client_facade.client_death_documents_recieved?(@client)
+    .menu-strip
+      %h4{:style => "color: red"} Client is Inactive!
+  - else
+    .menu-strip
+      %h4{:style => "color: red"} Client is under Death Claim Process!
 - else
   .menu-strip
     = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'

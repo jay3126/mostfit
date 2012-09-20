@@ -232,6 +232,18 @@ class Client
     return client.active == false || client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED ? true : false
   end
 
+  def self.client_death_documents_recieved?(client)
+    death_event = DeathEvent.first(:affected_client_id => client.id)
+    unless death_event.blank?
+      return client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED ? true :false
+    end
+  end
+
+  def self.client_has_death_event?(client)
+    death_event = DeathEvent.first(:affected_client_id => client.id)
+    return death_event.blank? ? false : true
+  end
+
   def update_client_details_in_bulk(client_hash)
     update_client = update(client_hash)
     raise Errors::DataError, self.errors.first unless update_client
