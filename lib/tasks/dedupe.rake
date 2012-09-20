@@ -10,13 +10,15 @@ namespace :mostfit do
   task :dedupe do
     require 'fastercsv'
 
-    clients = Client.all(:fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
-    loan_applicants = LoanApplicationsFacade.pending_dedupe
+    all_clients             = Client.all(:fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
+    loan_applicants         = LoanApplicationsFacade.pending_dedupe
     total_loan_applications = LoanApplication.all - loan_applicants
 
     #checking for duplicate loan_applicants handing both the conditions, i.e, ration_card and varous id_proofs.
     loan_applicants.each do |applicant|
       loan_applicant_duplicate = false
+      clients = all_clients.select{|c| c.state == applicant.client_state}
+      
       if applicant.client_id && clients.map(&:id).include?(applicant.client_id)
         LoanApplicationsFacade.new(User.first).not_duplicate(applicant.id)
         next
@@ -37,7 +39,7 @@ namespace :mostfit do
         #checking reference1 in existing clients only for numerice reference1
         if same_client_reference.blank?
           reference1 = applicant.client_reference1.gsub(/[^0-9]/, '')
-          same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference == reference1) || (c.reference2_type == applicant.client_reference1_type and c.reference2 == reference1) }
+          same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.include?(reference1)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.include(reference1)) }
         end
         loan_applicant_duplicate = true unless same_reference_clients.blank? && same_client_reference.blank?
       end

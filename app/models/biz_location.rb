@@ -78,7 +78,7 @@ class BizLocation
     location[:name] = by_name
     location[:creation_date] = on_creation_date
     location[:location_level] = level
-    location[:originator_by] = originator_by
+    location[:originator_by] = originator_by unless originator_by.blank?
     location[:biz_location_address] = address unless address.blank?
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
     new_location = create(location)

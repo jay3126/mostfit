@@ -210,11 +210,11 @@ class BizLocations < Application
 
   def staffs_for_selector
     if params[:parent_location_id].blank?
-      return("<option value=''>Select Location</option>")
+      return("<option value=''>Select Staff Member</option>")
     else
       location_id = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
       staff_members = StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
-      return("<option value=''>Select Location</option>"+staff_members.map{|staff| "<option value=#{staff.id}>#{staff.name}"}.join)
+      return("<option value=''>Select Staff Member</option>"+staff_members.map{|staff| "<option value=#{staff.id}>#{staff.name}"}.join)
     end
   end
 
