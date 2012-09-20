@@ -1,56 +1,114 @@
 = partial :form
-%table.report.nojs
-  %tr.header
-    %th
-    %th{:colspan => 3}
-      Dues
-    %th{:colspan => 7}
-      Collections
-    %th{:colspan => 3}
-      Disbursal, Accrual, POS
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th{:colspan => 3}
+        Dues
+      %th{:colspan => 7}
+        Collections
+      %th{:colspan => 3}
+        Disbursal, Accrual, POS
 
-  %tr.header
-    %th
-    %th
-      EWI due Principal
-    %th
-      EWI due Interest
-    %th
-      EWI due Total
-    %th
-      EWI collected Principal
-    %th
-      EWI collected Interest
-    %th
-      EWI collected Total
-    %th
-      Processing Fees
-    %th
-      Foreclosure Fees
-    %th
-      Foreclosure POS
-    %th
-      Total Collected
-    %th
-      Disbursed Amount
-    %th
-      Interest Accrued
-    %th
-      Outstanding Principal
+    %tr
+      %th
+      %th
+      %th
+        EWI due Principal
+      %th
+        EWI due Interest
+      %th
+        EWI due Total
+      %th
+        EWI collected Principal
+      %th
+        EWI collected Interest
+      %th
+        EWI collected Total
+      %th
+        Processing Fees
+      %th
+        Foreclosure Fees
+      %th
+        Foreclosure POS
+      %th
+        Total Collected
+      %th
+        Disbursed Amount
+      %th
+        Interest Accrued
+      %th
+        Outstanding Principal
 
-  %tr.Footer
-    %th
-      Total
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
-    %td
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:branch_id]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:ewi_principal_due]
+          - accumulate_row_values[:principal_due] += values[:ewi_principal_due]
+        %td
+          = values[:ewi_interest_due]
+          - accumulate_row_values[:interest_due] += values[:ewi_interest_due]
+        %td
+          = values[:ewi_total_due]
+          - accumulate_row_values[:total_due] += values[:ewi_total_due]
+        %td
+          = values[:ewi_principal_paid]
+          - accumulate_row_values[:principal_paid] += values[:ewi_principal_paid]
+        %td
+          = values[:ewi_interest_paid]
+          - accumulate_row_values[:interest_paid] += values[:ewi_interest_paid]
+        %td
+          = values[:ewi_total_paid]
+          - accumulate_row_values[:total_paid] += values[:ewi_total_paid]
+        %td
+        %td
+        %td
+        %td
+        %td
+          = values[:disbursed_amount]
+          - accumulate_row_values[:disbursed_amount] += values[:disbursed_amount]
+        %td
+          = values[:interest_accrued]
+          - accumulate_row_values[:interest_accrued] += values[:interest_accrued]
+        %td
+          = values[:outstanding_principal]
+          - accumulate_row_values[:outstanding_principal] += values[:outstanding_principal]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_rows[:principal_due]
+      %td
+        = total_rows[:interest_due]
+      %td
+        = total_rows[:total_due]
+      %td
+        = total_rows[:principal_paid]
+      %td
+        = total_rows[:interest_paid]
+      %td
+        = total_rows[:total_paid]
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:disbursed_amount]
+      %td
+        = total_rows[:interest_accrued]
+      %td
+        = total_rows[:outstanding_principal]
