@@ -1,14 +1,18 @@
-%h1
-  = I18n.t "loan_purpose.show.title", :default => "Loan Purpose"
-%table
+%h1 Loan Purpose : #{@loan_purpose.name}
+%br
+
+.menu-strip{:style => "width: 15%;"}
+  = link_to_with_rights I18n.t("loan_purpose.show.edit", :default => "Edit"), url(:edit_loan_purpose, @loan_purpose), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights I18n.t("loan_purpose.show.back", :default => "Back"), url(:loan_purposes), :class => "grey_button"
+%br
+
+%table.tall.shaded
   %tr.odd
-    %td 
+    %th
       = I18n.t"loan_purpose.show.id", :default => "Id"
     %td=@loan_purpose.id
   %tr
-    %td
+    %th
       = I18n.t"loan_purpose.show.name", :default => "Name"
     %td=@loan_purpose.name
-= link_to_with_rights I18n.t("loan_purpose.show.edit", :default => "Edit"), url(:edit_loan_purpose, @loan_purpose)
-|
-= link_to_with_rights I18n.t("loan_purpose.show.back", :default => "Back"), url(:loan_purposes)

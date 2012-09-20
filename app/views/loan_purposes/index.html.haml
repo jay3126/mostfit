@@ -1,16 +1,25 @@
 %h1
   = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
-= link_to I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add'
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
 - unless @loan_purposes.blank?
   %table.narrow
     %thead
       %tr
+        %th
+          = I18n.t "loan_purpose.index.id", :default => "Id"
         %th
           = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
         %th
           = I18n.t "loan_purpose.index.actions", :default => "Actions"
     - for loan_purpose in @loan_purposes
       %tr{:class => cycle('odd', '')}
+        %td
+          = loan_purpose.id
         %td
           = loan_purpose.name
         %td
