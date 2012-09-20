@@ -68,4 +68,9 @@ class ClientFacade < StandardFacade
   def client_has_death_event?(client)
     Client.client_has_death_event?(client)
   end
+
+  def death_event_filed_for(client)
+    Client.death_event_filed_for(client)
+  end
+
 end
