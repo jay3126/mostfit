@@ -57,7 +57,7 @@
         %b= "Total:"
       %td
         #weeksheet_total_amount
-          %b= @lending.actual_principal_outstanding + @lending.actual_interest_outstanding
+          %b= @lending.actual_principal_outstanding + actual_interest
     %tr
       %td
         = submit 'Preclose', :class => "greenButton"

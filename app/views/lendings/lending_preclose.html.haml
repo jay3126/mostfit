@@ -10,10 +10,10 @@
           = date_select :effective_on, Date.today, :min_date => @lending.most_recent_payment_transaction_on_date, :max_date => Date.today
           = submit "Go"
 
-  - unless params[:effective_on].blank?
-    - effective_on_date_str = params[:effective_on]
+  - unless @preclose_on_date.blank?
+    - effective_on_date_str = @preclose_on_date
     - effective_on_date = Date.parse(effective_on_date_str)
-    - preclosure_date_condition = effective_on_date && (effective_on_date > @lending.most_recent_payment_transaction_on_date && effective_on_date <= Date.today)
+    - preclosure_date_condition = effective_on_date && (effective_on_date >= @lending.most_recent_payment_transaction_on_date && effective_on_date <= Date.today)
 
     - if preclosure_date_condition
       = partial :preclosure_form, :preclose_on_date => params[:effective_on]
