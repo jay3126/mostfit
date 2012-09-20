@@ -228,7 +228,7 @@
           - if @report.respond_to?(:funding_line_id)
             %td
               Funding Line:
-              = select(:funding_line_id, :collection => get_accessible_funding_lines(funder_id, @user), :include_blank => true, :selected => funding_line_id, :id => "funding_line_selector")
+              = select(:funding_line_id, :collection => FundingLine.all.map{|fl| [fl.id, fl.name]}, :include_blank => true, :selected => funding_line_id)
           - if @report.respond_to?(:securitization_id)
             %td
               Securitization:

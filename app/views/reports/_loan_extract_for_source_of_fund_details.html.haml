@@ -1,0 +1,101 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Loan Id
+      %th
+        LAN Number
+      %th
+        Customer Id
+      %th
+        Customer Name
+      %th
+        Center Name
+      %th
+        Caste
+      %th
+        Religion
+      %th
+        Loan Amount
+      %th
+        Loan Start Date
+      %th
+        Disbursal Date
+      %th
+        POS
+      %th
+        OD
+      %th
+        State
+      %th
+        District
+      %th
+        Branch Name
+      %th
+        Source Of Fund
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_lan_number]
+        %td
+          = values[:client_id]
+        %td
+          = values[:client_name]
+        %td
+          = values[:center_name]
+        %td
+          = values[:caste]
+        %td
+          = values[:religion]
+        %td
+          = values[:loan_amount]
+          - accumulate_row_values[:total_loan_amount] += values[:loan_amount]
+        %td
+          = values[:loan_start_date]
+        %td
+          = values[:loan_disbursal_date]
+        %td
+          = values[:pos]
+          - accumulate_row_values[:total_pos] += values[:pos]
+        %td
+          = values[:principal_overdue]
+          - accumulate_row_values[:total_principal_overdue] += values[:principal_overdue]
+        %td
+          = values[:state_name]
+        %td
+          = values[:district_name]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:source_of_fund]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:total_loan_amount]
+      %td
+      %td
+      %td
+        = total_rows[:total_pos]
+      %td
+        = total_rows[:total_principal_overdue]
+      %td
+      %td
+      %td
+      %td
