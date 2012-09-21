@@ -181,6 +181,8 @@ class UserLocations < Application
         file = biz_location.generate_disbursement_labels_pdf(session.user.id, date)
       elsif(pdf_type == 'disbursement_loans')
         file = biz_location.location_generate_disbursement_pdf(session.user.id, date)
+      elsif(pdf_type == 'disbursement_loan_receipts')
+        file = biz_location.generate_receipt_labels_pdf(session.user.id, date)
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
@@ -189,7 +191,7 @@ class UserLocations < Application
     if file.blank?
       redirect request.referer, :message => @message
     else
-      send_data(file.to_s, :filename => "disbursement_labels_#{biz_location.name}.pdf")
+      send_data(file.to_s, :filename => "#{pdf_type}_#{biz_location.name}.pdf")
     end
   end
 

@@ -111,12 +111,12 @@ module Pdf
       pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
       pdf.text "Disbursal Report and Acknowledgement", :font_size => 16, :justification => :center
       pdf.text("\n")
-      table1 = PDF::SimpleTable.new
-      clients_count = ClientAdministration.get_clients_administered(self.id, on_date).count
-      location_manage = location_facade.location_managed_by_staff(self.id, on_date)
+      table1              = PDF::SimpleTable.new
+      clients_count       = ClientAdministration.get_clients_administered(self.id, on_date).count
+      location_manage     = location_facade.location_managed_by_staff(self.id, on_date)
       staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
-      meeting        = meeting_facade.get_meeting(self, on_date)
-      meeting_status = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+      meeting             = meeting_facade.get_meeting(self, on_date)
+      meeting_status      = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
       table1.data = [{"col1"=>"<b>Location</b>", "col2"=>"#{self.name}", "col3"=>"<b>No. of Members</b>", "col4"=>"#{clients_count}"},
         {"col1"=>"<b>R.O Name</b>", "col2"=>"#{staff_member_name}", "col3"=>"<b>Scheduled Disbursal Date</b>", "col4"=>"#{on_date}"},
         {"col1"=>"<b>Meeting Address</b>", "col2"=>"#{}", "col3"=>"<b>Time</b>", "col4"=>"#{meeting_status}"}
@@ -213,6 +213,31 @@ module Pdf
       end
       return pdf
     end
+  
+    def generate_receipt_labels_pdf(user_id, on_date)
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      lendings        = location_facade.get_loans_administered(self.id, on_date).compact
+      raise ArgumentError,"No loans for generate pdf" if lendings.blank?
+      pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
+      pdf.select_font "Times-Roman"
+      return nil if lendings.blank?
+      pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
+      pdf.text "Disbursed Loan Receipt", :font_size => 16, :justification => :center
+      pdf.text("\n")
+      lendings            = location_facade.get_loans_administered(self.id, on_date).compact
+      lendings.each do |la|
+        pdf.text('Receipt', :font_size => 14, :justification => :center)
+        pdf.text("\n")
+        pdf.rounded_rectangle(pdf.absolute_left_margin-5, pdf.y+pdf.top_margin-25, 530, 120, 5).stroke
+        pdf.text("I/We received a loan of #{la.to_money[:disbursed_amount]} on date #{la.disbursal_date} from center #{la.administered_at_origin_location.name} of Suryoday Microfinance Pvt. LTD")
+        pdf.text("\n")
+        pdf.text("Borrower Name :- #{la.loan_borrower.counterparty.name}")
+        pdf.text("\n")
+        pdf.text("Borrower Sign. :------------------------------")
+        pdf.text("\n")
+        pdf.start_new_page if pdf.y < 120
+      end
+      return pdf
+    end
   end
-
 end
