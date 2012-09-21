@@ -1,9 +1,6 @@
--#- debugger
-- loan_file = LoanFile.get(params[:id])
--#- loan_file = LoanFile.get(loan_file_id)
-- loan_applications_of_loan_file = loan_file.loan_applications
-- number_of_loan_applications_in_loan_file = loan_applications_of_loan_file.size
-
+- loan_file_id = @response.target_entity.model_record_id
+- loan_file = LoanFile.get(loan_file_id)
+- no_of_loan_applications = loan_file.loan_applications.size
 
 %p
   -count=1
@@ -67,7 +64,7 @@
           -if !checkboxpoint.nil?
             -#%td
             -#  ="#{checkboxpoint.name}"
-            - loan_applications_of_loan_file.each do |loan_application|
+            - loan_file.loan_applications.each do |loan_application|
               %tr
                 %td
                   = "#{loan_application.client_name}"
@@ -93,7 +90,7 @@
                 -else
                   - (1).times do |f|
                     %td
-                      =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+                      =text_field :name=>"free_text_#{free_text.id}_#{loan_application.id}".to_sym,:value=>@comment,:disabled=>true
           -if !dropdownpoint.nil?
             %td
               =" #{dropdownpoint.name}"
@@ -126,7 +123,7 @@
               -if checkpoint_filling.nil?
                 Not Attempted
               -else
-                - debugger
+                -#- debugger
                 =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
                 -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? 'checked' : nil,:disabled=>true
           -if !checkboxpoint.nil?
