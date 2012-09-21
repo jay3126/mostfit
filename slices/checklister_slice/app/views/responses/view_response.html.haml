@@ -8,18 +8,18 @@
       %td
         %b
           =@response.value_date.strftime("%b %e")
+    -#%tr
+    -#  %td
+    -#    =@response.checklist_locations.first.type.capitalize+":"
+    -#  %td
+    -#    %b
+    -#      =@response.checklist_locations.first.name
     %tr
       %td
         =@response.checklist_locations.first.type.capitalize+":"
       %td
         %b
-          =@response.checklist_locations.first.name
-    -#%tr
-    -#  %td
-    -#    =@response.checklist_locations.last.type+":"
-    -#  %td
-    -#    %b
-    -#      =@response.checklist_locations.last.name
+          =@response.checklist_locations.last.name
     -#%tr
     -#  %td
     -#    =@response.target_entity.type
