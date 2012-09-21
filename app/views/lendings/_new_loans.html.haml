@@ -51,9 +51,9 @@
           %td
             - client = Client.get(lending.loan_borrower.counterparty_id)
             - if (lending.applied_by_staff == session.user.staff_member.id) || client_facade.is_claim_processing_or_inactive?(client)
-              = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :disabled => true
+              = check_box :name => "lending[#{lending.id}][approve]" ,:value => true, :disabled => true
             - else
-              = check_box :name => "lending[#{lending.id}][]" ,:value => lending.id, :class => 'select_to_approve'
+              = check_box :name => "lending[#{lending.id}][approve]" ,:value => true, :class => 'select_to_approve'
             %br
             - if client_facade.is_claim_processing_or_inactive?(client)
               %i Client Inactive
@@ -78,7 +78,7 @@
           %td
             = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
           %td
-            = text_field :name => "lending[#{lending.id}][][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
+            = text_field :name => "lending[#{lending.id}][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
@@ -87,18 +87,28 @@
             %br
             %i Client Inactive: The Client is going throuh death claim processing.
 
-    %table
-      %tfoot
-        %tr.org_total
-          %td
-            %b Select Approved Date
-          %td
-            = date_select "approved_on_date", get_effective_date, :max_date => Date.today
-          %td
-            %b Staff Members
-          %td
-            = select :name => "approved_by_staff", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id
+    %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+      %table.form{:style => "text-align:right;width:100%;"}
+        %thead
+          %tr
+            %th
+              Date:
+            %td
+              = date_select "approved_on_date", get_effective_date, :max_date => Date.today, :size => 8
+            %th
+              Performed by:
+            %th
+              - staff_member  = session.user.staff_member
+              = select :name => "approved_by_staff", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+            %th
+              Reason:
+            %th
+              = select :name => 'reason', :collection => Reason.all, :text_method => :name, :value_method => :id, :prompt => 'Select Reason'
+            %th
+              Remarks:
+            %th
+              = text_area :name => 'remarks', :rows => 6, :cols => 20
     = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
     = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
     = submit "Approve"
-    =# submit "Reject"
+    = submit "Reject"

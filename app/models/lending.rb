@@ -21,6 +21,7 @@ class Lending
   property :approved_on_date,               *DATE
   property :disbursal_date,                 *DATE
   property :repaid_on_date,                 *DATE
+  property :rejected_on_date,               *DATE
   property :write_off_on_date,              *DATE
   property :repayment_frequency,            *FREQUENCY
   property :tenure,                         *TENURE
@@ -29,6 +30,7 @@ class Lending
   property :applied_by_staff,               *INTEGER_NOT_NULL
   property :approved_by_staff,              Integer
   property :disbursed_by_staff,             Integer
+  property :rejected_by_staff,              Integer
   property :written_off_by_staff,           Integer
   property :recorded_by_user,               *INTEGER_NOT_NULL
   property :repayment_allocation_strategy,  Enum.send('[]', *LOAN_REPAYMENT_ALLOCATION_STRATEGIES), :nullable => false
@@ -681,12 +683,21 @@ class Lending
     raise Errors::BusinessValidationError, "approved amount #{approved_amount.to_s} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount
     raise Errors::BusinessValidationError, "approved on date: #{approved_on_date} cannot precede the applied on date #{applied_on_date}" if approved_on_date < applied_on_date
     raise Errors::InvalidStateChangeError, "Only a new loan can be approved" unless current_loan_status == NEW_LOAN_STATUS
-
     self.approved_amount   = approved_amount.amount
     self.approved_on_date  = approved_on_date
     self.approved_by_staff = approved_by
     set_status(APPROVED_LOAN_STATUS, approved_on_date)
     setup_on_approval
+  end
+
+  def reject(rejected_on_date, rejected_by)
+    Validators::Arguments.not_nil?(rejected_on_date, rejected_by)
+    raise Errors::BusinessValidationError, "reject on date: #{rejected_on_date} cannot precede the applied on date #{applied_on_date}" if rejected_on_date < applied_on_date
+    raise Errors::InvalidStateChangeError, "Only a new and approve loan can be reject" unless [NEW_LOAN_STATUS, APPROVED_LOAN_STATUS].include?(current_loan_status)
+
+    self.rejected_on_date  = rejected_on_date
+    self.rejected_by_staff = rejected_by
+    set_status(REJECTED_LOAN_STATUS, rejected_on_date)
   end
 
   def write_off(write_off_on_date, written_off_by_staff)

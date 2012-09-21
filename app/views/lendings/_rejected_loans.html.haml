@@ -1,0 +1,78 @@
+:javascript
+  $('table.rejected_loan').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true
+    });
+
+  $(document).ready(function() {
+  $('#toggle_select_to_payment').change(function() {
+    $('.select_to_payment').attr('checked',$(this).attr('checked'))});
+  });
+
+%br
+- if lendings.blank?
+  %h3
+    No loan exists
+- else
+  %table.report.weeksheet.nojs.rejected_loan
+    %thead
+      %tr
+        %th
+          S.No.
+        %th
+          Loan ID
+        %th
+          Applied Amount
+        %th
+          Borrower
+        %th
+          Applied Date
+        %th
+          First Repayment Date
+        %th
+          Scheduled Disbursal Date
+        %th
+          Repayment Frequency
+        %th
+          Tenure
+        %th
+          Administered At
+        %th
+          Accounted At
+        %th
+          Rejected by
+        %th
+          Rejected Date
+    - loan_row_count = 1
+    - lendings.each do |lending|
+      %tr
+        %td
+          = loan_row_count
+        %td
+          = link_to_with_rights lending.id, resource(lending)
+        %td
+          = lending.to_money[:applied_amount].to_s
+        %td
+          = lending.loan_borrower.counterparty.name
+        %td
+          = lending.applied_on_date
+        %td
+          = lending.scheduled_first_repayment_date
+        %td
+          = lending.scheduled_disbursal_date
+        %td
+          = lending.repayment_frequency
+        %td
+          = lending.tenure
+        %td
+          = link_to_location lending.administered_at_origin_location
+        %td
+          = link_to_location lending.accounted_at_origin_location
+        %td
+          = link_to StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff)
+        %td
+          = lending.rejected_on_date
+        - loan_row_count = loan_row_count + 1
+    %tfoot
+      %tr.org_total
+        %td{:colspan => 14}
