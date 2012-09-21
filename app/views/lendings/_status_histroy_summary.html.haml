@@ -13,9 +13,6 @@
     %tr.odd
       %th.odd Closing outstanding interest
       %td= repaid.to_money[:closing_outstanding_interest]
-    %tr.odd
-      %th.odd Reason/Remarks
-      %td= Comment.lending_to_s(@lending.id).join('<br>')
   - elsif @lending.is_written_off?
     - recovery = @lending.loan_recovery_till_date
     %tr.odd
@@ -31,9 +28,12 @@
   %tr.odd
     %th.odd Funder
     %td= loan_facade.get_funder_assigned_to_loan(@lending.id).name rescue nil
-  %tr.odd
-    %th.odd Funding Line
+  %tr.even
+    %th.even Funding Line
     %td= loan_facade.get_funding_line_assigned_to_loan(@lending.id).name rescue nil
   %tr.odd
     %th.odd Tranch
     %td= loan_facade.get_tranch_assigned_to_loan(@lending.id).name rescue nil
+  %tr.even
+    %th.even Reason/Remarks
+    %td= Comment.lending_to_s(@lending.id).join('<br>')

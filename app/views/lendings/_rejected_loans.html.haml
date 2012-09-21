@@ -36,9 +36,9 @@
         %th
           Tenure
         %th
-          Administered At
+          = LocationLevel.first(:level=>0).name
         %th
-          Accounted At
+          = LocationLevel.first(:level=>1).name
         %th
           Rejected by
         %th

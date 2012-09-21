@@ -38,9 +38,9 @@
           %th
             Scheduled Disbursal Date
           %th
-            Center
+            = LocationLevel.first(:level=>0).name
           %th
-            Branch
+            = LocationLevel.first(:level=>1).name
           %th
             Approve Amount
       - loan_row_count = 1
