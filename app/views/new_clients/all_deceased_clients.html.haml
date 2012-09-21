@@ -52,15 +52,19 @@
             - unless client.claim_document_status == Constants::Client::CLAIM_DOCUMENTS_RECEIVED
               %tr
                 %td
-                  - if claim.blank?
-                    - unless client.simple_insurance_policies.blank?
-                      %span.greytext
-                        = "No Claim Filed"
+                  - if client_facade.client_has_outstanding_loan?(client)
+                    - if claim.blank?
+                      - unless client.simple_insurance_policies.blank?
+                        %span.greytext
+                          = "No Claim Filed"
+                      - else
+                        %span.greytext
+                          = "No Insurance Policy"
                     - else
-                      %span.greytext
-                        = "No Insurance Policy"
+                      = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
                   - else
-                    = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
+                    %span.greytext
+                      = "Client has no Active Loan"
                 %td
                   = date_select "document_recieved_on[#{client.id}]", Date.today, :max_date => Date.today, :id => "document_recieved_on#{client.id}", :size => 10
                 %td
