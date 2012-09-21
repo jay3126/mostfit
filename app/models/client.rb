@@ -254,6 +254,18 @@ class Client
     death_event.relationship_to_client == "Self relationship" ? "Client" : death_event.relationship_to_client
   end
 
+  def self.get_all_counterparty_outstanding_loan(client)
+    facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, User.first)
+    client_loans = facade.get_all_loans_for_counterparty(client)
+    active_loan = []
+    unless client_loans.blank?
+      client_loans.compact.each do |loan|
+        active_loan << loan if loan.is_outstanding?
+      end
+    end
+    active_loan
+  end
+
   private
   
   def convert_blank_to_nil

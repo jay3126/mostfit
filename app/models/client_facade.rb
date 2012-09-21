@@ -73,4 +73,8 @@ class ClientFacade < StandardFacade
     Client.death_event_filed_for(client)
   end
 
+  def get_all_counterparty_outstanding_loan(client)
+    Client.get_all_counterparty_outstanding_loan(client)
+  end
+
 end

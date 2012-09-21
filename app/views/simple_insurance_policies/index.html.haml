@@ -45,4 +45,9 @@
 %br
 - unless @client.blank?
   = partial "new_clients/death_claims"
-  = partial "new_clients/add_claim", :client => @client
+  - if client_facade.client_has_outstanding_loan?(@client)
+    = partial "new_clients/add_claim", :client => @client
+  - else
+    %br
+    %h1 Add Insurance Claim
+    Client is not eligible to Add Claim because Client has no outstanding loan

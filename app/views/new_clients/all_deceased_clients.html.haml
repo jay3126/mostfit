@@ -53,15 +53,33 @@
               %tr
                 %td
                   - if client_facade.client_has_outstanding_loan?(client)
-                    - if claim.blank?
+                    - unless claim.blank?
                       - unless client.simple_insurance_policies.blank?
-                        %span.greytext
-                          = "No Claim Filed"
+                        - outstanding_loan = client_facade.get_all_counterparty_outstanding_loan(client)
+                        - first_loan = outstanding_loan.last
+                        - unless first_loan.simple_insurance_policies.blank?
+                          - policy = first_loan.simple_insurance_policies.all(:lending_id=> first_loan.id).first
+                          - result = false
+                          - if (policy.insurance_for == Constants::Insurance::INSURED_CLIENT && client_facade.death_event_filed_for(client) == "Client")
+                            - result = true
+                          - elsif (policy.insurance_for == Constants::Insurance::INSURED_GUARANTOR && client_facade.death_event_filed_for(client) == "Guarantor")
+                            - result = true
+                          - elsif (policy.insurance_for == Constants::Insurance::INSURED_CLIENT_AND_GUARANTOR)
+                            - result = true
+                          - if result == true
+                            = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
+                          - else
+                            %span.greytext
+                              = "client_facade.death_event_filed_for(client) is not insured"
+                        - else
+                          %span.greytext
+                            = "client is not insured"
                       - else
                         %span.greytext
                           = "No Insurance Policy"
                     - else
-                      = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
+                      %span.greytext
+                        = "No Claim Filed"
                   - else
                     %span.greytext
                       = "Client has no Active Loan"
