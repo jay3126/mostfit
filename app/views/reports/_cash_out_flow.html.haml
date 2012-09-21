@@ -1,0 +1,45 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        District
+      %th
+        Branch
+      %th
+        Center
+      %th
+        Disbursal Date
+      %th
+        Loan Amount
+
+  %tbody
+    - center_count = 0
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|center| center}.each do |center, values|
+      %tr
+        %td
+          = values[:district_name]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:center_name]
+          - center_count += 1
+        %td
+          = values[:disbursal_date]
+        %td
+          = values[:loan_amount][:total_loan_amount]
+          - accumulate_row_values[:loan_amount] += values[:loan_amount][:total_loan_amount]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = center_count
+      %td
+      %td
+        = total_rows[:loan_amount]

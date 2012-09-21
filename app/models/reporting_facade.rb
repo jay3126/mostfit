@@ -139,6 +139,19 @@ class ReportingFacade < StandardFacade
     outstanding_amount
   end
 
+  #this function will give the total loan amount per branch for a date range.
+  def sum_all_loan_amounts_per_center_for_a_date_range(from_date, to_date, for_location_id)
+    result = {}
+    loan_amount = MoneyManager.default_zero_money
+    loan_ids = Lending.all(:disbursal_date.gte => from_date, :disbursal_date.lte => to_date, :administered_at_origin => for_location_id).aggregate(:id)
+    loan_ids.each do |l|
+      loan = Lending.get(l)
+      next unless loan.is_outstanding?
+      loan_amount += MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s)
+    end
+    result = {:total_loan_amount => loan_amount}
+  end
+
   #this function will give the total amount outstanding for loans disbursed till date.
   def sum_all_outstanding_and_overdues_loans_per_branch_on_date(on_date, *at_location_ids_ary)
     result = {}
