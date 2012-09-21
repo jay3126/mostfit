@@ -110,7 +110,7 @@
         %td
           = values[:loan_matruity_date]
         %td
-          = values[:loan_pupose]
+          = values[:loan_purpose]
         %td
           = values[:loan_status]
         %td
@@ -150,7 +150,7 @@
     %tr
       %th
         Total
-      -(1..46).each do |k|
+      - (1..46).each do |k|
         %td
       %td
         = total_rows[:loan_disbursed_amount]
@@ -159,15 +159,15 @@
       %td
       %td
       %td
-        = total_rows[:loan_principal]
-      %td
-        = total_rows[:loan_interest]
+        = total_rows[:loan_total_principal_due]
       %td
         = total_rows[:loan_total_interest_due]
       %td
+        = total_rows[:loan_total_due]
+      %td
         = total_rows[:loan_total_overdue]
       %td
-      -(1..3).each do |k|
+      - (1..3).each do |k|
         %td
 = link_to 'Hide Column', '#', :onclick => "jQuery('#header_values').toggle(); return false;"
 #header_values{:style => 'display : none'}

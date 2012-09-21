@@ -1,13 +1,12 @@
 class SecuritisationLoanDetailsReport < Report
-  attr_accessor :biz_location_branch, :date
+  attr_accessor :funding_line_id, :date
+
+  validates_with_method :funding_line_id, :funding_line_not_selected
 
   def initialize(params, dates, user)
     @date = Date.parse(params[:date]) rescue Date.today
     @name = "Securitisation Loan Details Report on #{@date}"
     @user = user
-    location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
     get_parameters(params, user)
   end
 
@@ -45,11 +44,9 @@ class SecuritisationLoanDetailsReport < Report
 
     data     = {}
     lendings = []
-    branches = @biz_location_branch.class == Array ? @biz_location_branch : [@biz_location_branch]
-    branches.each do |branch|
-      lendings << LoanAdministration.get_loans_accounted(branch, @date).compact
-    end
-    lendings.flatten.each do |loan|
+    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
+    loan_ids.each do |l|
+      loan = Lending.get(l)
       member = loan.loan_borrower.counterparty
       if member.blank?
         member_id   = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste_name = religion_name = ''
@@ -172,6 +169,11 @@ class SecuritisationLoanDetailsReport < Report
     when 'daily'
       1
     end
+  end
+
+  def funding_line_not_selected
+    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
+    return true
   end
 
 end
