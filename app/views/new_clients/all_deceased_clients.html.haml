@@ -70,7 +70,7 @@
                             = check_box :name => "clients[#{client.id}]", :class => "select_to_verify"
                           - else
                             %span.greytext
-                              = "client_facade.death_event_filed_for(client) is not insured"
+                              = "#{client_facade.death_event_filed_for(client)} is not insured"
                         - else
                           %span.greytext
                             = "client is not insured"
