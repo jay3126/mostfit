@@ -46,6 +46,11 @@ class Application < Merb::Controller
   end
 
   def ensure_can_do
+    login_instance = LoginInstance.get session[:login_id]
+    unless login_instance.logout_time.blank?
+      session.abandon!
+      raise NotPrivileged, "The User's Session Terminated Successfully"
+    end
     @route = Merb::Router.match(request)
     unless session.user and session.user.can_access?(@route[1], params)
       raise NotPrivileged
