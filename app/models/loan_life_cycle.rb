@@ -21,6 +21,10 @@ module LoanLifeCycle
     LoanLifeCycle.is_repaid_status?(current_loan_status)
   end
 
+  def is_preclosed?
+    LoanLifeCycle.is_preclosed_status?(current_loan_status)
+  end
+
   def is_written_off?
     LoanLifeCycle.is_written_off_status?(current_loan_status)
   end
@@ -46,6 +50,11 @@ module LoanLifeCycle
     status == REPAID_LOAN_STATUS
   end
 
+  def self.is_preclosed_status?(status)
+    validate_status(status)
+    status == PRECLOSED_LOAN_STATUS
+  end
+
   def self.is_written_off_status?(status)
     validate_status(status)
     status == WRITTEN_OFF_LOAN_STATUS
@@ -62,9 +71,10 @@ module LoanLifeCycle
   DISBURSED_LOAN_STATUS   = :disbursed_loan_status
   CANCELLED_LOAN_STATUS   = :cancelled_loan_status
   REPAID_LOAN_STATUS      = :repaid_loan_status
+  PRECLOSED_LOAN_STATUS   = :preclosed_loan_status
   WRITTEN_OFF_LOAN_STATUS = :written_off_loan_status
 
-  LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS, WRITTEN_OFF_LOAN_STATUS]
+  LOAN_STATUSES = [STATUS_NOT_SPECIFIED, NEW_LOAN_STATUS, APPROVED_LOAN_STATUS, REJECTED_LOAN_STATUS, DISBURSED_LOAN_STATUS, CANCELLED_LOAN_STATUS, REPAID_LOAN_STATUS, PRECLOSED_LOAN_STATUS, WRITTEN_OFF_LOAN_STATUS]
 
   REPAID_IN_FULL = :repaid_in_full
   PRECLOSED      = :preclosed

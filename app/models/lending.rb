@@ -23,6 +23,7 @@ class Lending
   property :repaid_on_date,                 *DATE
   property :rejected_on_date,               *DATE
   property :write_off_on_date,              *DATE
+  property :preclosed_on_date,              *DATE
   property :repayment_frequency,            *FREQUENCY
   property :tenure,                         *TENURE
   property :administered_at_origin,         *INTEGER_NOT_NULL
@@ -32,6 +33,8 @@ class Lending
   property :disbursed_by_staff,             Integer
   property :rejected_by_staff,              Integer
   property :written_off_by_staff,           Integer
+  property :preclosed_by_staff,             Integer
+  property :repaid_by_staff,                Integer
   property :recorded_by_user,               *INTEGER_NOT_NULL
   property :repayment_allocation_strategy,  Enum.send('[]', *LOAN_REPAYMENT_ALLOCATION_STRATEGIES), :nullable => false
   property :status,                         Enum.send('[]', *LOAN_STATUSES), :nullable => false, :default => STATUS_NOT_SPECIFIED
@@ -663,19 +666,28 @@ class Lending
         if (actual_total_outstanding == zero_money_amount)
           repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
           raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
-          mark_loan_repaid(repaid_nature, payment_transaction.effective_on, actual_principal_outstanding, actual_interest_outstanding)
+          mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, actual_principal_outstanding, actual_interest_outstanding)
         end
       elsif loan_action == LOAN_PRECLOSURE
         repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
         raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
-        mark_loan_repaid(repaid_nature, payment_transaction.effective_on, actual_principal_outstanding, actual_interest_outstanding)
+        mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, actual_principal_outstanding, actual_interest_outstanding)
       end
     end
   end
 
-  def mark_loan_repaid(repaid_nature, repaid_on_date, closing_principal_outstanding, closing_interest_outstanding)
-    self.loan_repaid_status = LoanRepaidStatus.to_loan_repaid_status(self, repaid_nature, repaid_on_date, closing_principal_outstanding, closing_interest_outstanding)
-    set_status(REPAID_LOAN_STATUS, repaid_on_date)
+  def mark_loan_repaid(repaid_nature, on_date, by_staff, closing_principal_outstanding, closing_interest_outstanding)
+    self.loan_repaid_status = LoanRepaidStatus.to_loan_repaid_status(self, repaid_nature, on_date, closing_principal_outstanding, closing_interest_outstanding)
+    if repaid_nature == PRECLOSED
+      self.preclosed_on_date  = on_date
+      self.preclosed_by_staff = by_staff
+      status                  = PRECLOSED_LOAN_STATUS
+    else
+      self.repaid_on_date  = on_date
+      self.repaid_by_staff = by_staff
+      status               = REPAID_LOAN_STATUS
+    end
+    set_status(status, on_date)
   end
 
   def approve(approved_amount, approved_on_date, approved_by)

@@ -1,5 +1,5 @@
 :javascript
-  $('table.client_move').dataTable({
+  $('table.client_attendance').dataTable({
       "bPaginate": false,
       "bJQueryUI": true
     });
@@ -9,7 +9,7 @@
   -if @attendances.blank?
     %h2 No Attendance Records
   - else
-    %table.report.weeksheet.nojs.client_move
+    %table.report.weeksheet.nojs.client_attendance
       %thead
         %tr
           %th

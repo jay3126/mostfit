@@ -69,10 +69,10 @@
         - else
           = loan_assigned_to.loan_assignment_instance.to_s
     %tr.even
-      %th.even== LocationLevel.first(:level => 0).name
+      %th.even= LocationLevel.first(:level => 0).name
       %td= link_to_with_rights @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
     %tr.odd
-      %th.odd== LocationLevel.first(:level => 1).name
+      %th.odd= LocationLevel.first(:level => 1).name
       %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
     - unless @fee_instance.blank?
       %tr.even

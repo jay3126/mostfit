@@ -2,7 +2,7 @@
   %tr.even
     %th.even Status
     %td= @lending.status.humanize
-  - if @lending.is_repaid?
+  - if @lending.is_repaid? || @lending.is_preclosed?
     - repaid = @lending.loan_repaid_status
     %tr.odd
       %th.odd Nature
