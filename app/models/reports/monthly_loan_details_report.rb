@@ -1,16 +1,13 @@
 class MonthlyLoanDetailsReport < Report
-  attr_accessor :from_date, :to_date, :biz_location_branch_id
+  attr_accessor :from_date, :to_date, :funding_line_id
 
-  validates_with_method :biz_location_branch_id, :branch_should_be_selected
+  validates_with_method :funding_line_id, :funding_line_not_selected
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 30
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Monthly Loan Details Report from #{@from_date} to #{@to_date}"
     @user = user
-    location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
   end
 
@@ -47,16 +44,13 @@ class MonthlyLoanDetailsReport < Report
   def generate
 
     data     = {}
-    lendings = []
-    branches = @biz_location_branch.class == Array ? @biz_location_branch : [@biz_location_branch]
-    branches.each do |branch|
-      lendings << LoanAdministration.get_loans_accounted(branch, @to_date).compact
-    end
-    lendings.flatten.each do |loan|
+    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
+    loan_ids.each do |l|
+      loan = Lending.get(l)
       member = loan.loan_borrower.counterparty
       if member.blank?
-        member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = ''
-        member_name = guarantor_name = occupation = gender = pincode = psl_category = village_slum = city = district = ''
+        member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = 'Not Available'
+        member_name = guarantor_name = occupation = gender = pincode = psl_category = village_slum = city = district = 'Not Available'
       else
         member_id       = member.id
         member_name     = member.name.humanize
@@ -71,17 +65,17 @@ class MonthlyLoanDetailsReport < Report
         religion        = member.religion.humanize
         guarantor_name  = member.guarantor_name.humanize
         occupation      = member.occupation.blank? ? 'Not Specified' : member.occupation.name.humanize
-        gender          = member.gender.humanize
+        gender          = (member and member.gender) ? member.gender.humanize : "Not Specified"
         pincode         = member.pincode
         psl_category    = member.psl_sub_category.blank? ? 'Not Specified' : member.psl_sub_category.name.humanize
-        village_slum    = ''
-        city            = ''
-        district        = ''
+        village_slum    = 'Not Specified'
+        city            = 'Not Specified'
+        district        = 'Not Specified'
       end
 
       loan_product_name          = loan.lending_product.name
-      tenor_in_week              = ''
-      disbursement_mode          = ''
+      tenor_in_week              = loan.tenure
+      disbursement_mode          = loan.disbursement_mode
       loan_start_date            = loan.is_outstanding? ? loan.disbursal_date : 'Not Specified'
       loan_status                = loan.status.humanize
       loan_account_number        = loan.lan
@@ -123,16 +117,16 @@ class MonthlyLoanDetailsReport < Report
       overdue_installment        = ''
       overdue_amount             = overdue_principal + overdue_interest
       days_overdue               = loan.is_outstanding? ? loan.days_past_due : 0
-      payment_scheme             = ''
-      security_deposit           = ''
-      land_holding               = ''
-      land_holding_in_acres      = ''
+      payment_scheme             = 'Not Specified'
+      security_deposit           = 'Not Specified'
+      land_holding               = 'Not Specified'
+      land_holding_in_acres      = 'Not Specified'
       days_since_disbursal       = loan.is_outstanding? ? (loan.disbursal_date..Date.today).to_a.size : 'Not Disbursed'
       days_remaining             = loan.is_outstanding? ? (Date.today..loan_end_date).to_a.size : 'Not Disbursed'
       ro_name                    = managed_by_staff(center.id, Date.today)
       status_date                = loan.loan_status_changes(:to_status => LoanLifeCycle::REPAID_LOAN_STATUS).first
       loan_closure_date          = status_date.blank? ? 'Not Forclosure' : status_date.effective_on
-      source_of_fund_id          = ''
+      source_of_fund_id          = FundingLine.get(FundingLineAddition.first(:lending_id => loan.id).funding_line_id).name
       meeting_address            = center.biz_location_address
 
       data[loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
@@ -155,7 +149,7 @@ class MonthlyLoanDetailsReport < Report
         :disbursement_mode => disbursement_mode, :loan_start_date => loan_start_date, :loan_status =>loan_status,
         :weeks_since_disbural => weeks_since_disbursal, :weeks_remaining => weeks_remaining, :installment_paid => installments_paid,
         :overdue_installment => overdue_installment, :days_overdue => days_overdue, :payment_scheme => payment_scheme, :security_deposit => security_deposit,
-        :lend_holding => land_holding, :land_holding_in_acres => land_holding_in_acres, :days_since_disbursal => days_since_disbursal,
+        :land_holding => land_holding, :land_holding_in_acres => land_holding_in_acres, :days_since_disbursal => days_since_disbursal,
         :days_remaining => days_remaining, :ro_name => ro_name, :loan_closure_date => loan_closure_date, :source_of_fund_id => source_of_fund_id, :meeting_address => meeting_address
       }
 
@@ -163,8 +157,8 @@ class MonthlyLoanDetailsReport < Report
     data
   end
 
-  def branch_should_be_selected
-    return [false, "Branch needs to be selected"] if self.respond_to?(:biz_location_branch) and not self.biz_location_branch
+  def funding_line_not_selected
+    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
     return true
   end
 end
