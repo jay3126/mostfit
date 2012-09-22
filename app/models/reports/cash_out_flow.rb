@@ -1,6 +1,6 @@
 class CashOutFlow < Report
 
-  attr_accessor :from_date, :to_date, :biz_location_branch
+  attr_accessor :from_date, :to_date, :biz_location_branch_id
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -9,7 +9,7 @@ class CashOutFlow < Report
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
   end
 

@@ -1,6 +1,6 @@
 class LoanCollectionsDetailReport < Report
 
-  attr_accessor :biz_location_branch, :date
+  attr_accessor :biz_location_branch_id, :date
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -8,7 +8,7 @@ class LoanCollectionsDetailReport < Report
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
   end
 

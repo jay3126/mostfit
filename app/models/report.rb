@@ -144,6 +144,12 @@ class Report
     return true
   end
 
+  def funding_line_not_selected
+    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
+    return true
+  end
+
+
   private
 
   def set_instance_variables(params)

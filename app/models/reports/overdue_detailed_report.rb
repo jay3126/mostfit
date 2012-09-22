@@ -1,5 +1,7 @@
 class OverdueDetailedReport < Report
-  attr_accessor :biz_location_branch, :date
+  attr_accessor :biz_location_branch_id, :date
+
+  validates_with_method :biz_location_branch_id, :branch_should_be_selected
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -7,12 +9,12 @@ class OverdueDetailedReport < Report
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
   end
 
   def name
-    "Overdue Detailed Report"
+    "Overdue Detailed Report for #{@date}"
   end
 
   def self.name
@@ -61,18 +63,19 @@ class OverdueDetailedReport < Report
       unless loan_overdue_status.blank?
         member                    = loan.loan_borrower.counterparty
         if member.blank?
-          member_id = ''
+          member_id = 'Not Specified'
           member_name = 'Not Specified'
         else
           member_id       = member.id
           member_name     = member.name
         end
-        loan_product_name          = loan.lending_product.name
-        source_of_fund             = ''
-        loan_account_number        = loan.lan
-        loan_disbursed_date        = loan.disbursal_date
-        loan_end_date              = loan.last_scheduled_date
-        oldest_due_date            = loan_due_status.on_date
+        loan_product_name      = (loan and loan.lending_product and (not loan.nil?)) ? loan.lending_product.name : "Loan Product Not Available"
+        funding_line           = FundingLineAddition.all(:lending_id => loan.id)
+        source_of_fund             = (funding_line and (not funding_line.blank?)) ? FundingLine.get(funding_line.first.funding_line_id).name : "Source of Fund not Available"
+        loan_account_number        = (loan and (not loan.nil?)) ? loan.lan : "Not Specified"
+        loan_disbursed_date        = (loan and loan.disbursal_date and (not loan.nil?)) ? loan.disbursal_date : "Disbursal Date Not Available"
+        loan_end_date              = (loan and loan.last_scheduled_date and (not loan.nil?)) ? loan.last_scheduled_date : "End Date Not Available"
+        oldest_due_date            = (loan_due_status and (not loan_due_status.nil?)) ? loan_due_status.on_date : "Status Not Available"
         days_past_due              = loan.days_past_due_on_date(@date)
         bucket                     = set_overdue_days_range(days_past_due)
         total_principal_overdue    = loan_overdue_status.to_money[:actual_principal_outstanding]
@@ -100,6 +103,8 @@ class OverdueDetailedReport < Report
     data
   end
 
-
-
+  def branch_should_be_selected
+    return [false, "Branch needs to be selected"] if self.respond_to?(:biz_location_branch_id) and not self.biz_location_branch_id
+    return true
+  end
 end

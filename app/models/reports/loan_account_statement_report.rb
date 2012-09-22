@@ -1,10 +1,10 @@
 class LoanAccountStatementReport < Report
-  attr_accessor :loan_lan_number
+  attr_accessor :loan_lan_number_id
 
-  #validates_with_method :loan_lan_number, :lan_number_should_be_selected
+  validates_with_method :loan_lan_number_id, :lan_number_should_be_selected
 
   def initialize(params, dates, user)
-    @lan_number = (params and params[:loan_lan_number]) ? params[:loan_lan_number] : ""
+    @lan_number = (params and params[:loan_lan_number_id]) ? params[:loan_lan_number_id] : ""
     @name = "Loan Account Statement for #{@lan_number}"
     @user = user
     get_parameters(params, user)
@@ -105,6 +105,7 @@ class LoanAccountStatementReport < Report
   end
 
   def lan_number_should_be_selected
-    @lan_number.blank? ? true : [false, "LAN Number should be selected"]
+    return [false, "LAN Number needs to be selected"] if self.respond_to?(:loan_lan_number_id) and not self.loan_lan_number_id
+    return true
   end
 end
