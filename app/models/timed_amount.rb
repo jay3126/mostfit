@@ -39,7 +39,7 @@ class TimedAmount
   end
   
   def total_money_amount(amount = MoneyManager.default_zero_money)
-    fee_money_amount(amount) + tax_money_amount(amount)
+    (fee_money_amount(amount) and tax_money_amount(amount)) ? (fee_money_amount(amount) + tax_money_amount(amount)) : MoneyManager.default_zero_money
   end
   
 end

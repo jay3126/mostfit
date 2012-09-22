@@ -22,17 +22,17 @@ class SimpleFeeProduct
 
   def effective_fee_only_amount(on_date = Date.today, amount = MoneyManager.default_zero_money)
     timed_amount = effective_timed_amount(on_date)
-    timed_amount ? timed_amount.fee_money_amount(amount) : nil
+    timed_amount ? timed_amount.fee_money_amount(amount) : MoneyManager.default_zero_money
   end
 
   def effective_tax_only_amount(on_date = Date.today, amount = MoneyManager.default_zero_money)
     timed_amount = effective_timed_amount(on_date)
-    timed_amount ? timed_amount.tax_money_amount(amount) : nil
+    timed_amount ? timed_amount.tax_money_amount(amount) : MoneyManager.default_zero_money
   end
 
   def effective_total_amount(on_date = Date.today, amount = MoneyManager.default_zero_money)
     timed_amount = effective_timed_amount(on_date)
-    timed_amount ? timed_amount.total_money_amount(amount) : nil
+    timed_amount ? timed_amount.total_money_amount(amount) : MoneyManager.default_zero_money
   end
 
   def self.get_applicable_fee_products_on_loan_product(loan_product_id)
