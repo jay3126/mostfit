@@ -1,0 +1,140 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Client Id
+      %th
+        Client Name
+      %th
+        Loan Id
+      %th
+        LAN No.
+      %th
+        District Id
+      %th
+        District Name
+      %th
+        Branch Id
+      %th
+        Branch Name
+      %th
+        No. Of Installments Remaining
+      %th
+        Principal Outstanding Beginning of Week
+      %th
+        Principal Due During Week
+      %th
+        Principal Paid During Week
+      %th
+        Principal Overdue
+      %th
+        No. Of Days Principal Overdue
+      %th
+        Current Principal Outstanding
+      %th
+        Interest Outstanding Beginning of Week
+      %th
+        Interest Due During Week
+      %th
+        Interest Paid During Week
+      %th
+        Interest Overdue
+      %th
+        No. Of Days Interest Overdue
+      %th
+        Current Interest Outstanding
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|loan| loan}.each do |loan, values|
+      %tr
+        %td
+          = values[:client_id]
+        %td
+          = values[:client_name]
+        %td
+          = values[:loan_id]
+        %td
+          = values[:loan_lan]
+        %td
+          = values[:district_id]
+        %td
+          = values[:district_name]
+        %td
+          = values[:branch_id]
+        %td
+          = values[:branch_name]
+        %td
+          = values[:no_of_installments_remaining][:installments_remaining]
+        %td
+          = values[:principal_outstanding_beginning_of_week]
+          - accumulate_row_values[:principal_outstanding_beginning_of_week] += values[:principal_outstanding_beginning_of_week]
+        %td
+          = values[:principal_due_during_week]
+          - accumulate_row_values[:principal_due_during_week] += values[:principal_due_during_week]
+        %td
+          = values[:principal_paid_during_week]
+          - accumulate_row_values[:principal_paid_during_week] += values[:principal_paid_during_week]
+        %td
+          = values[:principal_overdue]
+          - accumulate_row_values[:principal_overdue] += values[:principal_overdue]
+        %td
+          = values[:number_of_days_principal_overdue]
+        %td
+          = values[:current_principal_outstanding]
+          - accumulate_row_values[:current_principal_outstanding] += values[:current_principal_outstanding]
+        %td
+          = values[:interest_outstanding_beginning_of_week]
+          - accumulate_row_values[:interest_outstanding_beginning_of_week] += values[:interest_outstanding_beginning_of_week]
+        %td
+          = values[:interest_due_during_week]
+          - accumulate_row_values[:interest_due_during_week] += values[:interest_due_during_week]
+        %td
+          = values[:interest_paid_during_week]
+          - accumulate_row_values[:interest_paid_during_week] += values[:interest_paid_during_week]
+        %td
+          = values[:interest_overdue]
+          - accumulate_row_values[:interest_overdue] += values[:interest_overdue]
+        %td
+          = values[:number_of_days_interest_overdue]
+        %td
+          = values[:current_interest_outstanding]
+          - accumulate_row_values[:current_interest_outstanding] += values[:current_interest_outstanding]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+      %td
+        = total_rows[:principal_outstanding_beginning_of_week]
+      %td
+        = total_rows[:principal_due_during_week]
+      %td
+        = total_rows[:principal_paid_during_week]
+      %td
+        = total_rows[:principal_overdue]
+      %td
+      %td
+        = total_rows[:current_principal_outstanding]
+      %td
+        = total_rows[:interest_outstanding_beginning_of_week]
+      %td
+        = total_rows[:interest_due_during_week]
+      %td
+        = total_rows[:interest_paid_during_week]
+      %td
+        = total_rows[:interest_overdue]
+      %td
+      %td
+        = total_rows[:current_interest_outstanding]
