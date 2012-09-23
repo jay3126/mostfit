@@ -15,9 +15,7 @@
   - if @weeksheets.flatten.blank? || @weeksheets.flatten.map(&:collection_sheet_lines).flatten.blank?
     No Repayment Schedule On Date
   - else
-    - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0
-    - total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
-    - total_actual_principal_outstanding, total_actual_interest_outstanding = 0, 0
+
     = link_to 'Show/Hide All Record', '#', :onclick => "jQuery('.payment').toggle();", :class => 'dataTables_filter'
     %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix'}
       Payment Only
@@ -86,9 +84,12 @@
         - weeksheet       = weeksheet.first
         - biz_location    = BizLocation.get weeksheet.at_biz_location_id
         - parent_location = LocationLink.get_parent(biz_location)
+        - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0
+        - total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
+        - total_actual_principal_outstanding, total_actual_interest_outstanding = 0, 0
+        - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         - weeksheet.groups.each do |group|
           - collection_sheets = weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
-          - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
           - collection_sheets.each do |ws|
             %tr{:class => "biz_location_#{biz_location.id} payment"}
               %td{:style => 'text-align:center'}

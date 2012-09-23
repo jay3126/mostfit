@@ -889,10 +889,12 @@ class Lending
     effective_on = payment_transaction.effective_on
     performed_at = payment_transaction.performed_at
     accounted_at = payment_transaction.accounted_at
+    performed_by = payment_transaction.performed_by
+    recorded_by  = payment_transaction.recorded_by
     payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
     if payment_transaction.product_action == LOAN_FEE_RECEIPT
       fee_instance = FeeInstance.get(fee_instance_id)
-      fee_receipt = FeeReceipt.record_fee_receipt(fee_instance, payment_amount, effective_on, performed_at, accounted_at) unless fee_instance.blank?
+      fee_receipt = FeeReceipt.record_fee_receipt(fee_instance, payment_amount, effective_on, performed_by, recorded_by) unless fee_instance.blank?
     else
       loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_allocation, performed_at, accounted_at, self, effective_on)
     end
