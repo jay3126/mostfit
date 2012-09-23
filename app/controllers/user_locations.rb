@@ -183,6 +183,8 @@ class UserLocations < Application
         file = biz_location.location_generate_disbursement_pdf(session.user.id, date)
       elsif(pdf_type == 'disbursement_loan_receipts')
         file = biz_location.generate_receipt_labels_pdf(session.user.id, date)
+      elsif(pdf_type == 'loan_product_receipts')
+        file = biz_location.location_loan_product_receipts_pdf(session.user.id, date)
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}

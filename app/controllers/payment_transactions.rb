@@ -59,8 +59,8 @@ class PaymentTransactions < Application
     @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
     if @message[:error].blank?
       @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
-      @child_biz_location  = BizLocation.get paramsrender :partial => 'biz_locations/location_fields', :layout => layout?[:child_location_id]
-      @parent_biz_location = BizLocation.get params[:parent_location_id]
+      @child_biz_location  = BizLocation.get(params[:child_location_id])
+      @parent_biz_location = BizLocation.get(params[:parent_location_id])
       @staff_member        = StaffMember.get(params[:staff_member_id])
       @user                = session.user
       @weeksheets          = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)

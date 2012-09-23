@@ -239,5 +239,96 @@ module Pdf
       end
       return pdf
     end
+
+    def location_loan_product_receipts_pdf(user_id, on_date)
+      location_facade  = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      meeting_facade   = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
+      all_lendings     = location_facade.get_loans_administered(self.id, on_date).compact.select{|l| l.is_outstanding?}
+      lending_products = LendingProduct.all
+      pdf              = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
+      pdf.select_font "Times-Roman"
+      pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 12, :justification => :left
+      pdf.text "1101 Sharada Terraces, Plot 65, Sector 11,", :font_size => 12, :justification => :left
+      pdf.text "CBD Belapur, Navi Mumbai - 400614", :font_size => 12, :justification => :left
+      pdf.text("\n")
+      pdf.text("Receipt", :font_size => 16, :justification => :center, :text_color=>'red')
+      pdf.rounded_rectangle(pdf.absolute_left_margin+10, pdf.y+pdf.top_margin - 20, 500, 20, 5).stroke
+      
+      pdf.text("\n")
+      table1              = PDF::SimpleTable.new
+      table1.data = [{"col1"=>"<b>Date</b>", "col2"=>"", "col3"=>"<b>#{on_date}</b>"},
+        {"col1"=>"<b>Center Name</b>", "col2"=>"", "col3"=>"<b>#{self.name}</b>"},
+        {"col1"=>"<b>No. Of Members</b>", "col2"=>"", "col3"=>"<b>#{all_lendings.count}</b>"}
+      ]
+
+      table1.column_order  = ["col1", "col2", "col3"]
+      table1.show_lines    = :none
+      table1.shade_rows    = :none
+      table1.show_headings = false
+      table1.shade_headings = true
+      table1.orientation   = :center
+      table1.position      = :center
+      table1.title_font_size = 16
+      table1.header_gap = 20
+      table1.width = 500
+      table1.render_on(pdf)
+      pdf.text("\n")
+      pdf.text('Received the following charges from the members of the above center', :font_size => 12, :justification => :center)
+      pdf.text("\n")
+      count = 1
+
+      if lending_products.count > 0
+        table      = PDF::SimpleTable.new
+        table.data = []
+        members    = 0
+        tot_amount = MoneyManager.default_zero_money
+        lendings   = []
+        lendings_by_group = all_lendings.group_by{|l| l.lending_product}
+        lending_products.each do |lending_product|
+          product_fee_amount = MoneyManager.default_zero_money
+          total_fee_amount   = MoneyManager.default_zero_money
+          lendings           = lendings_by_group[lending_product]
+          fee_products       = FeeAdministration.get_lending_fee_products(lending_product)
+          fee_instances      = lendings.blank? ? [] : FeeInstance.all_fee_instances_on_loan(lendings.map(&:id))
+          product_name       = lending_product.name
+          member             = lendings.blank? ? '-' : lendings.count
+          fee_products.each{|f| product_fee_amount += f.effective_total_amount(Date.today, lending_product.to_money[:amount])}
+          fee_instances.each{|f| total_fee_amount += f.total_money_amount}
+          total              = lendings.blank? ? '-' : total_fee_amount.to_s
+
+          table.data.push({'S. No.'=> count, "Loan Type"=> product_name, "Charges" => product_fee_amount.to_s, "  " => 'X', "No. of Members" => member,
+              "Total" =>  total
+            })
+          count += 1
+          tot_amount += total_fee_amount
+          members  += lendings.count unless lendings.blank?
+        end
+
+        table.data.push({"S. No."=>"Total", "  " => 'X', "No. of Members" => members, "Total" =>  tot_amount.to_s})
+        table.column_order  = ["S. No.", "Loan Type", "Charges", '  ', "No. of Members", "Total"]
+        table.show_lines    = :all
+        table.shade_rows    = :none
+        table.show_headings = true
+        table.shade_headings = true
+        table.orientation   = :center
+        table.position      = :center
+        table.title_font_size = 16
+        table.header_gap = 20
+        table.width = 500
+        table.render_on(pdf)
+        pdf.start_new_page if pdf.y < 315
+        pdf.text("\n")
+        pdf.text("Amount In Word:_____________________________________")
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("Branch Manager:_____________________________________")
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("\n")
+        pdf.text("Signature")
+        return pdf
+      end
+
+    end
   end
 end
