@@ -174,6 +174,20 @@ class MeetingSchedule
     all_dates
   end
 
+  # Returns all of the dates that meetings will be scheduled as per the frequency of meetings
+  def get_no_of_meeting_dates_in_schedule(meeting_no)
+    all_dates = []
+    date = self.schedule_begins_on
+    while meeting_no > 0
+      if is_proposed_scheduled_on_date?(date)
+        all_dates << date
+        meeting_no -= 1
+      end
+      date += 1
+    end
+    all_dates
+  end
+
   # returns a number in days for the meeting frequency
   # not all meeting frequencies have a frequency in days
   # for e.g., monthly does not have a regular 'frequency'

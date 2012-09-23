@@ -36,7 +36,7 @@
       %th.date{:style => 'display:none'}
         Default Disbursal Date
       %td.date{:style => 'display:none'}
-        = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
+        = date_select_for @biz_location, :center_disbursal_date
     %tr
       %th
         Creation Date
@@ -65,7 +65,7 @@
     %table.tall
       %tr{:style => "display:none", :class => 'meeting_div'}
         %th
-          Meetings for days
+          No. Of Meetings
         %td
           = text_field :name => "meeting[meeting_numbers]"
       %tr{:style => "display:none", :class => 'meeting_div'}

@@ -15,7 +15,7 @@
 - url = resource(:payment_transactions, :create_group_payments, :parent_location_id => p_id, :child_location_id => c_id, :staff_member_id => s_id, :date => date)
 %h1== Weeksheet Payments On #{@date}
 = form_for(:payment_transactions ,:action => url) do
-  - if @weeksheet.blank?
+  - if @weeksheet.blank? || @weeksheet.collection_sheet_lines.blank?
     No Repayment Schedule On Date
   - else
     - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0

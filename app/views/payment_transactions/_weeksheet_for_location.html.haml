@@ -12,7 +12,7 @@
 - date = @date.blank? ? get_effective_date : @date
 = form_for(:payment_transactions ,:action => url) do
   %h1== Collection Sheet For #{@staff_member.name} on #{@date}
-  - if @weeksheets.flatten.blank?
+  - if @weeksheets.flatten.blank? || @weeksheets.flatten.map(&:collection_sheet_lines).flatten.blank?
     No Repayment Schedule On Date
   - else
     - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0

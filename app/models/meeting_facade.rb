@@ -101,8 +101,12 @@ class MeetingFacade < StandardFacade
   ##################
 
   # Creates a new meeting schedule for the given location
-  def setup_meeting_schedule(for_location, meeting_schedule_info)
-    MeetingScheduleManager.create_meeting_schedule(for_location, meeting_schedule_info)
+  def setup_meeting_schedule(for_location, meeting_schedule_info, number_of_meetings = 0)
+    result = MeetingScheduleManager.create_meeting_schedule(for_location, meeting_schedule_info)
+    if result == true
+      meeting_schedule = for_location.meeting_schedules.last
+      setup_meeting_calendar_for_location(meeting_schedule, for_location, number_of_meetings)
+    end
   end
 
   # Creates a holiday at the location as specified
@@ -119,11 +123,10 @@ class MeetingFacade < StandardFacade
     MeetingCalendar.setup_calendar(on_date, for_locations_and_schedules)
   end
 
-  def setup_meeting_calendar_for_location(location, begion_date, number_of_days)
-    1.upto(number_of_days) do |count|
-      begion_date += 1
-      for_locations_and_schedules = MeetingScheduleManager.get_all_meeting_schedules_on_date(begion_date, [location])
-      MeetingCalendar.setup_calendar(begion_date, for_locations_and_schedules)
+  def setup_meeting_calendar_for_location(meeting_schedule, location, number_of_meetings)
+    meeting_dates = meeting_schedule.get_no_of_meeting_dates_in_schedule(number_of_meetings)
+    meeting_dates.each do |date|
+      MeetingCalendar.setup_location_meeting_calendar(meeting_schedule, location.id, date)
     end
   end
 

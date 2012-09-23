@@ -1,5 +1,23 @@
+:javascript
+  $(document).ready(function() {
+    $('#meeting_schedule').attr('checked', false);
+    $('#location_level_selector option:first').attr('selected', true);
+    $('#meeting_schedule').change(function() {
+      jQuery('.meeting_div').toggle();
+    });
+    $('#location_level_selector').live('change', function(){
+      if(jQuery(this).val()=='0'){
+        jQuery('.center_meeting_div').show();
+        jQuery('.date').show();
+      }else{
+        jQuery('.center_meeting_div').hide();
+        jQuery('.date').hide();
+      }
+    });
+  });
 %h1 Edit the details of: #{@biz_location.name}
 = form_for(@biz_location, :action => resource(@biz_location,:update_biz_location)) do
+  = hidden_field :location_level, :value => @biz_location.location_level.level
   %table.tall.shaded
     %tr
       %th
@@ -26,7 +44,7 @@
         %th
           Default Disbursal Date
         %td
-          = date_select_for @biz_location, :center_disbursal_date, :max_date => Date.today
+          = date_select_for @biz_location, :center_disbursal_date
     %tr
       %th
         Originator By
@@ -38,9 +56,33 @@
       %td
         = select :name => :managed_by, :collection => @staff_members, :selected => @managed_by_staff.id.to_s, :prompt => 'Select Staff Member', :text_method => :name, :value_method => :id
       %th
-        On Date
+        Manage On Date
       %td
         = date_select 'on_date', get_effective_date
+    - if @biz_location.location_level.level == 0
+      %tr{:class => 'center_meeting_div'}
+        %td
+          Create Meeting Schedule
+          = check_box :name => 'meeting_schedule', :value => true, :checked => false, :id => 'meeting_schedule'
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          No. Of Meetings
+        %td
+          = text_field :name => "meeting[meeting_numbers]"
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          Meeting Frequency
+        %td
+          = select :name => "meeting[meeting_frequency]", :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+      %tr{:style => "display:none", :class => 'meeting_div'}
+        %th
+          Meeting Time
+        %td
+          = text_field :name => "meeting[meeting_time_begins_hours]", :size => 2, :maxlength => 2
+          %b
+          = text_field :name => "meeting[meeting_time_begins_minutes]", :size => 2, :maxlength => 2
+          &nbsp;&nbsp;
+          %span.greytext time is in a 24 hour format
   = submit "Update", :class => "grey_button"
   &nbsp;&nbsp;
   %b

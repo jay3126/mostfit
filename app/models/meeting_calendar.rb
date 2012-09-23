@@ -138,6 +138,10 @@ class MeetingCalendar
     setup(locations_and_meetings, on_date)
   end
 
+  def self.setup_location_meeting_calendar(meeting_schedule, location_id, on_date)
+    setup_meeting_calendar(meeting_schedule, location_id, on_date)
+  end
+
   private
 
   # Test for whether a holiday is in force for the specified location on a given date
@@ -162,6 +166,16 @@ class MeetingCalendar
         :meeting_time_begins_minutes => meeting.last.meeting_time_begins_minutes
       )
     }
+  end
+
+  def self.setup_meeting_calendar(meeting_schedule, location_id,  on_date)
+      first_or_create(
+        :on_date => on_date,
+        :location_id => location_id,
+        :meeting_status => PROPOSED_MEETING_STATUS,
+        :meeting_time_begins_hours => meeting_schedule.meeting_time_begins_hours,
+        :meeting_time_begins_minutes => meeting_schedule.meeting_time_begins_minutes
+      )
   end
 
   # Returns the first meeting for a location on a given date
