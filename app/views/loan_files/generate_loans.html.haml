@@ -30,8 +30,8 @@
       %tr
         %th Application date
         %td
-          - selected_applied_on_date = params[:loan] && params[:loan][:applied_on] ? params[:loan][:applied_on] : @loan_file.created_on
-          = date_select("loan[applied_on]", selected_applied_on_date, :id =>"applied_on")
+          = @loan_file.created_on
+          = hidden_field :name => "loan[applied_on]", :value => @loan_file.created_on
       %tr
         %th Scheduled disbursal date
         %td
