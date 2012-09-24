@@ -42,6 +42,9 @@
         |
         Center: 
         = Center.get(center_id).name
+      - if biz_location_branch_id
+        Branch:
+        = BizLocation.get(biz_location_branch_id).name
       - if loan_product_id
         |
         Product: 
@@ -105,10 +108,7 @@
       - if loan_file_status
         |
         Loan File Status:
-        = params[report][:loan_file_status]
-      - if biz_location_branch_id
-        Branch:
-        = BizLocation.get(biz_location_branch_id).name
+        = params[report][:loan_file_status]     
       - if lending_product_id
         |
         Loan Product:

@@ -1,5 +1,6 @@
 class SecuritisationPoolInformationReport < Report
-  attr_accessor :from_date, :to_date, :biz_location_branch_id
+
+  attr_accessor :from_date, :to_date, :biz_location_branch_id, :funding_line_id
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -8,7 +9,10 @@ class SecuritisationPoolInformationReport < Report
     @user = user
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
+    all_funding_line_ids = FundingLine.all.collect {|fl| fl.id}
+    debugger
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @funding_line = (params and params[:funding_line_id] and (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
     get_parameters(params, user)
   end
 
@@ -35,13 +39,15 @@ class SecuritisationPoolInformationReport < Report
   def generate
 
     data = {}
-    branches = @biz_location_branch.class == Array ? @biz_location_branch : [@biz_location_branch]
-    lendings = LoanStatusChange.status_between_dates(LoanLifeCycle::DISBURSED_LOAN_STATUS, @from_date, @to_date).lending
-    lendings = lendings.select{|lending| branches.include?(lending.accounted_at_origin)}
-    lendings.each do |loan|
+    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line).aggregate(:lending_id)
+    params_for_lending = {:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch, :status => LoanLifeCycle::DISBURSED_LOAN_STATUS}
+    loan_ids_with_disbursal_dates = Lending.all(params_for_lending).aggregate(:id)
+
+    loan_ids_with_disbursal_dates.each do |l|
+      loan = Lending.get(l)
       member                    = loan.loan_borrower.counterparty
       if member.blank?
-        member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = ''
+        member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = 'Not Specified'
         member_name = 'Not Specified'
       else
         member_id       = member.id
@@ -55,8 +61,8 @@ class SecuritisationPoolInformationReport < Report
         caste           = member.caste
         religion        = member.religion
       end
-      loan_account_number        = loan.lan
-      loan_purpose               = loan.loan_purpose
+      loan_account_number        = loan ? loan.lan : "Not Specified"
+      loan_purpose               = (loan and loan.loan_purpose) ? loan.loan_purpose : "Not Specified"
       loan_cycle                 = loan.cycle_number
       loan_roi                   = loan.lending_product.interest_rate
       loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
