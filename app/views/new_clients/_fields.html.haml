@@ -88,7 +88,7 @@
     %td
       - all_states = BizLocation.get_state_locations
       - if @client.new?
-        - state_location = @biz_location.get_parent_loaction_at_location_level('state')
+        - state_location = @biz_location.get_parent_location_at_location_level('state')
         - state_name = state_location.blank? ? '' : state_location.name
       - else
         - state_name = @client.state

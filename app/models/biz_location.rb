@@ -36,7 +36,7 @@ class BizLocation
     all('location_level.name' => 'state')
   end
 
-  def get_parent_loaction_at_location_level(location_level_name)
+  def get_parent_location_at_location_level(location_level_name)
     LocationLink.all_parents(self).select{|l| l.location_level.name.downcase == location_level_name.downcase}.first
   end
 
