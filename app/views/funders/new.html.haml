@@ -5,3 +5,8 @@
 = form_for(@funder, :action => url(:funders)) do
   = partial :fields
   = submit "Create Funder"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", url(:funders), :class => "grey_button"

@@ -5,22 +5,20 @@
   %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
-        %th
-        %th id
-        %th amount
-        %th interest
-        %th disbursal
-        %th first payment
-        %th last payment
-        %th
-        %th
+        %th Id
+        %th Amount
+        %th Interest
+        %th Disbursal Date
+        %th First Payment Date
+        %th Last Payment Date
+        %th View Tranches
+        %th Action
     - for funding_line in @funding_lines
       %tr{ :class => cycle('odd','') }
-        %td &nbsp;
         %td
           = funding_line.id
         %td
-          %b= funding_line.amount
+          %b= link_to_with_rights funding_line.amount, resource(funding_line)
         %td
           %b
             = funding_line.interest_percentage
@@ -32,7 +30,6 @@
         %td
           = funding_line.last_payment_date
         %td
-          = link_to_with_rights("Tranches","/tranches/list/#{funding_line.id}")
-          =# link_to_with_rights("details", resource(@funder, funding_line))
+          = link_to_with_rights("View Tranches","/tranches/list/#{funding_line.id}")
         %td
-          = link_to_with_rights 'edit', resource(@funder, funding_line, :edit), :class => "edit"
+          = link_to_with_rights 'Edit Funding Line', resource(@funder, funding_line, :edit), :class => "edit grey_button"

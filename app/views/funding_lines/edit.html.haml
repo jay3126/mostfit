@@ -1,8 +1,12 @@
-%h1== Edit funding line ##{@funding_line.id} by '#{@funder.name}'
+%h1 Edit funding line #{@funding_line.id} by #{@funder.name}
 
 = error_messages_for @funding_line
 
 = form_for(@funding_line, :action => resource(@funder, @funding_line)) do
   = partial :fields
   = submit "Save changes"
-  = link_to_with_rights 'Cancel', resource(@funder, :funding_lines)
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', url("funders/#{@funder.id}/funding_lines/#{@funding_line.id}"), :class => "grey_button"

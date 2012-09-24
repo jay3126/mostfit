@@ -23,7 +23,7 @@ class Funders < Application
   def create(funder)
     @funder = Funder.new(funder)
     if @funder.save
-      redirect resource(:funders), :message => {:notice => "Funder #{@funder.name} was successfully created"}
+      redirect resource(@funder), :message => {:notice => "Funder #{@funder.name} was successfully created"}
     else
       render :new
     end
@@ -40,7 +40,7 @@ class Funders < Application
     @funder = Funder.get(id)
     raise NotFound unless @funder
     if @funder.update_attributes(funder)
-      redirect resource(:funders)
+      redirect resource(@funder), :message => {:notice => "Funder #{@funder.name} was successfully updated"}
     else
       display @funder, :edit
     end

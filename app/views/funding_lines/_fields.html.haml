@@ -1,4 +1,4 @@
-%table
+%table.tall.shaded
   %tr
     %th
       Amount
@@ -8,7 +8,7 @@
     %th
       Interest Rate
     %td
-      = text_field :interest_percentage
+      = text_field :interest_rate
       = "%"
   %tr
     %th
@@ -25,4 +25,3 @@
       Last Payment Date
     %td
       = date_select_for @funding_line, :last_payment_date, :max_date => Date.today + 3650
-

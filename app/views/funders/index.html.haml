@@ -1,6 +1,9 @@
 %h1 Overview of all funders
-.menu-strip{:style => "margin: 10px;"}
-  = link_to_with_rights 'Create a new funder', url(:new_funder), :class => "add"
+
+.menu-strip{:style => "margin: 10px; width: 30%;"}
+  = link_to_with_rights 'Create a new funder', url(:new_funder), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 - if @funders.blank?
   %p
@@ -9,15 +12,13 @@
   %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
-        %td
         %td ID
         %td Name
-        %td Funding lines
+        %td Funding Lines
         %td Portfolios
         %td
     - for funder in @funders
       %tr{ :class => cycle('odd','') }
-        %td &nbsp;
         %td
           = funder.id
         %td

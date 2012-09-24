@@ -5,8 +5,12 @@
     });
 = form_for(@tranch, :action => url(:controller => :tranches, :action => :loans_for_tranch_on_date, :id => @tranch.id)) do
   %h1
-    Tranches
-  %table
+    List of Loans assigned to Tranch: #{@tranch.name}
+
+  .menu-strip{:style => "width: 10%;"}
+    = link_to_with_rights "Back", request.referer, :class => "grey_button"
+
+  %table.tall.shaded
     %tr
       %th
         Name

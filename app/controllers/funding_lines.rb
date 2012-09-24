@@ -25,16 +25,16 @@ class FundingLines < Application
     @funding_line = FundingLine.new(funding_line)
     @funding_line.funder = @funder
     if @funding_line.save
-      redirect resource(@funder), :message => {:notice => "FundingLine was successfully created"}
+      redirect resource(@funder), :message => {:notice => "Funding Line was successfully created"}
     else
-      render :new
+      redirect url("funders/#{@funder.id}/funding_lines/new"), :message => {:error => "Funding Line failed to be created because: #{@funding_line.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
 
   def edit(id)
     only_provides :html
     @funding_line = FundingLine.get(id)
-    @funding_line.funder = @funder
+    @funder = @funding_line.funder
     raise NotFound unless @funding_line
     display @funding_line
   end
@@ -43,22 +43,13 @@ class FundingLines < Application
     funding_line[:interest_rate] = funding_line[:interest_rate].to_f / 100
     @funding_line = FundingLine.get(id)
     raise NotFound unless @funding_line
+    @funder = Funder.get(params[:funder_id])
     if @funding_line.update_attributes(funding_line)
-       redirect resource(@funder)
+      redirect url("funders/#{@funder.id}/funding_lines/#{@funding_line.id}"), :message => {:notice => "Funding Line details updated successfully"}
     else
-      display @funding_line, :edit
+      redirect url("funders/#{@funder.id}/funding_lines/#{@funding_line.id}/edit"), :message => {:error => "Details of Funding Line cannot be updated because: #{@funding_line.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
-
-#   def destroy(id)
-#     @funding_line = FundingLine.get(id)
-#     raise NotFound unless @funding_line
-#     if @funding_line.destroy
-#       redirect resource(:funding_lines)
-#     else
-#       raise InternalServerError
-#     end
-#   end
 
   # used from the router to redirect to a resourceful url
   def redirect_to_show(id)
@@ -70,7 +61,12 @@ class FundingLines < Application
   private
   # this works from proper resourceful urls
   def get_context
-    @funder = Funder.get(params[:funder_id])
-    raise NotFound unless @funder
+    if params[:id]
+      @funding_line = FundingLine.get(params[:id])
+      raise NotFound unless @funding_line
+    elsif params[:funder_id]
+      @funder = Funder.get(params[:funder_id])
+      raise NotFound unless @funder
+    end      
   end
 end # FundingLines

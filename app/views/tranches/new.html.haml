@@ -1,8 +1,13 @@
 - form_url   =  resource(:tranches, {:return => params[:return]})
 - cancel_url =  url(params[:return])
 = form_for (@tranch, :action => "/tranches/create") do
-	%h1 New Tranch
-	= error_messages_for @tranch
-	%fieldset
-		= partial "fields" 
-		= submit "create"
+  %h1 Create a new Tranch
+  = error_messages_for @tranch
+  %fieldset
+    = partial "fields" 
+    = submit "Create"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", request.referer, :class => "grey_button"

@@ -1,11 +1,16 @@
 %h1
   = "Funder: <i>#{@funder.name}</i>"
-  &nbsp;
-  = link_to_with_rights 'Edit', resource(@funder, :edit), :class => "edit"
+
+.menu-strip{:style => "width: 50%;"}
+  = link_to_with_rights 'Edit this funder details', resource(@funder, :edit), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Create a New Funding Line", resource(@funder, :funding_lines, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:funders), :class => "grey_button"
 
 %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
-    %th.even name
+    %th.even Name
     %td
       = @funder.name
       == (id: #{@funder.id})
@@ -29,10 +34,10 @@
 %div.tab_container
   %ul.tabs
     %li#funding_lines
-      Funding lines
-    %li#portfolios
-      Portfolios
+      Funding Lines
+    -# %li#portfolios
+    -#   Portfolios
   %div.tab
     = partial "funding_lines/list"
-  %div.tab
-    = partial "portfolios/list"
+  -# %div.tab
+  -#   = partial "portfolios/list"
