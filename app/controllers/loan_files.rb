@@ -21,7 +21,6 @@ class LoanFiles < Application
     @center = BizLocation.get(@loan_file.at_center_id)
     @branch = BizLocation.get(@loan_file.at_branch_id)
     @clients = []
-
     # GATE-KEEPING
     if params[:loan]
       applied_on_date = params[:loan][:applied_on]
@@ -30,6 +29,8 @@ class LoanFiles < Application
       applied_by_staff = params[:loan][:applied_by_staff_id]
       recorded_by_user = session.user.id
       clients = params[:clients]
+      tranch_id = params[:tranch_id]
+      funding_line_id = params[:funding_line_id]
 
       # VALIDATIONS
       @errors << "Applied on date must not be blank" if applied_on_date.blank?
@@ -39,6 +40,8 @@ class LoanFiles < Application
       @errors << "Scheduled disbursal date must not before application date" if Date.parse(scheduled_disbursal_date) < Date.parse(applied_on_date)
       @errors << "Scheduled first payment date must not before application date" if Date.parse(scheduled_first_payment_date) < Date.parse(applied_on_date)
       @errors << "Scheduled first payment date must not before Scheduled disbursal date" if Date.parse(scheduled_first_payment_date) < Date.parse(scheduled_disbursal_date)
+      @errors << "Funding line should not be blank" if tranch_id.blank?
+      @errors << "Tranch should not be blank" if funding_line_id.blank?
     end
 
     # need to refactor: get those clients only who are eligible
@@ -50,7 +53,7 @@ class LoanFiles < Application
 
     sc = clients.map{|k,v| k if v[:chosen]}.compact if clients
     @selected_clients = sc.blank? ? nil : sc
-
+    
     if params[:loan]
       if @errors.blank?
         unless @selected_clients.blank?
@@ -70,7 +73,9 @@ class LoanFiles < Application
               for_borrower = Client.get(client_id)
               administered_at_origin = lap.at_center_id
               accounted_at_origin = lap.at_branch_id
-              loan = loan_facade.create_new_loan(applied_money_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_payment_date,applied_by_staff,recorded_by_user, nil, loan_purpose)
+              loan_funding_line_id = params[:funding_line_id][client_id]
+              loan_tranch_id = params[:tranch_id][client_id]
+              loan = loan_facade.create_new_loan(applied_money_amount,repayment_frequency,tenure,from_lending_product,for_borrower,administered_at_origin,accounted_at_origin,applied_on_date,scheduled_disbursal_date,scheduled_first_payment_date,applied_by_staff,recorded_by_user, loan_funding_line_id, loan_tranch_id, nil, loan_purpose)
               @loans.push(loan)
             end
             r = @loans.map{|l| l.saved?}
