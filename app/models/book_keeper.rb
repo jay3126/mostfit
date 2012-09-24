@@ -100,7 +100,6 @@ module BookKeeper
 
   def account_for_accrual(accrual_transaction)
     accrual_allocation = {:total_accrued => accrual_transaction.accrual_money_amount}
-    debugger
     account_for_payment_transaction(accrual_transaction, accrual_allocation)
   end
 

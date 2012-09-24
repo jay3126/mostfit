@@ -13,9 +13,11 @@
         %th Interest Outstanding
         %th Interest Due
     %tbody
+      - biz_location = @lending.administered_at_origin_location
       - @lending_schedules.each do |l_schedule|
-        %tr{ :class => cycle('odd','even') }
-          %td{:class => 'default_class'}
+        - holiday = LocationHoliday.get_origin_move_date(biz_location, l_schedule.on_date)
+        %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
+          %td
             %b= l_schedule.payment_type
           %td
             = l_schedule.on_date
@@ -32,3 +34,8 @@
     %tfoot
       %tr
         %td{ :colspan => 8}
+          #notification
+            #holiday{:style => "display:table"}
+              #h_color{:style=>"background-color:PaleGoldenRod; width:12px; height:12px;"}
+              %div{:style => "display:table-cell;"}
+                &nbsp;Indicates that Loan schedule effected by holiday

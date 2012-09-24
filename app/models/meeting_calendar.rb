@@ -38,6 +38,10 @@ class MeetingCalendar
   property :meeting_time_begins_hours,  Integer, :min => EARLIEST_MEETING_HOURS_ALLOWED, :max => LATEST_MEETING_HOURS_ALLOWED
   property :meeting_time_begins_minutes,Integer, :min => EARLIEST_MEETING_MINUTES_ALLOWED, :max => LATEST_MEETING_MINUTES_ALLOWED
 
+  before :save, :date_change_according_to_holiday
+
+  def location; BizLocation.get(self.location_id); end;
+
   # Returns an instance of MeetingInfo
   def to_info
     MeetingInfo.new(location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
@@ -206,6 +210,11 @@ class MeetingCalendar
     raise ArgumentError, "to date is not valid: #{to_date}" unless to_date
     raise ArgumentError, "from date should precede to date" if to_date < from_date
     {:on_date.gte => from_date, :on_date.lt => to_date, :order => [:on_date.asc]}
+  end
+
+  def date_change_according_to_holiday
+    holiday = LocationHoliday.get_any_holiday(self.location, self.on_date)
+    self.on_date = holiday.move_work_to_date unless holiday.blank?
   end
 
 end

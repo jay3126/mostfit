@@ -74,7 +74,7 @@ class LoanBaseSchedule
     return [last_schedule_date, nil] if on_date > last_schedule_date
 
     return [Constants::Time.get_immediately_earlier_date(on_date, *all_schedule_dates),
-            Constants::Time.get_immediately_next_date(on_date, *all_schedule_dates)]
+      Constants::Time.get_immediately_next_date(on_date, *all_schedule_dates)]
   end
 
   #######################
@@ -174,6 +174,8 @@ class BaseScheduleLineItem
   property :currency,                       *CURRENCY
   property :created_at,                     *CREATED_AT
 
+  before :save, :date_change_according_to_holiday
+
   # Returns a data structure as follows:
   # Hash with
   # Array as key: [installment, date]
@@ -247,6 +249,12 @@ class BaseScheduleLineItem
     line_item[SCHEDULED_INTEREST_DUE]          = scheduled_interest_due
     line_item[:currency]                       = currency
     new(line_item)
+  end
+
+  def date_change_according_to_holiday
+    location = self.loan_base_schedule.lending.administered_at_origin_location
+    holiday = LocationHoliday.get_any_holiday(location, self.on_date)
+    self.on_date = holiday.move_work_to_date unless holiday.blank?
   end
 
 end

@@ -48,6 +48,11 @@ class LocationHoliday
     not (get_any_holiday(to_location, on_date).nil?)
   end
 
+  def self.get_origin_move_date(at_location, move_date)
+    parent_locations = LocationLink.all_parents(at_location, Date.today) << at_location
+    LocationHoliday.first(:move_work_to_date => move_date, :biz_location => parent_locations)
+  end
+
   private
 
   # This returns the holiday that was created for a specific location

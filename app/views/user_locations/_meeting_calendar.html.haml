@@ -23,7 +23,8 @@
         %td
           Description
     - @meeting_dates.each do |md|
-      %tr{ :class => cycle('odd','')}
+      - holiday = LocationHoliday.get_origin_move_date(@biz_location, md.on_date)
+      %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
         %td
           = md.on_date
         %td
@@ -37,3 +38,8 @@
     %tfoot
       %tr
         %td{ :colspan => 7 }
+          #notification
+            #holiday{:style => "display:table"}
+              #h_color{:style=>"background-color:PaleGoldenRod; width:12px; height:12px;"}
+              %div{:style => "display:table-cell;"}
+                &nbsp;Indicates that meeting schedule effected by holiday
