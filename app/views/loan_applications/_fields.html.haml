@@ -50,7 +50,7 @@
             - branch_id = @branch.nil? ? params[:parent_location_id] : @branch.id
             - biz_location =  BizLocation.get(branch_id)
             - if loan_application.new?
-              - state_location = biz_location.get_parent_loaction_at_location_level('state')
+              - state_location = biz_location.get_parent_location_at_location_level('state')
               - state_name = state_location.blank? ? '' : state_location.name
             - else
               - state_name = loan_application.client_state

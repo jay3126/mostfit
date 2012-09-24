@@ -44,7 +44,7 @@ class LoanFiles < Application
       @errors << "Tranch should not be blank" if funding_line_id.blank?
     end
 
-    # need to refactor: get those clients only who are eligible
+    # need to re-factor: get those clients only who are eligible
     @loan_file.loan_applications.each do |l|
       client = Client.get(l.client_id)
       not_eligible_client = client_facade.get_all_loans_for_counterparty(client)
@@ -95,7 +95,12 @@ class LoanFiles < Application
       else
         message = {:error => @errors.flatten.join(', ')}
       end
+      if @errors.blank? && message[:error].blank?
       redirect url("loan_files/generate_loans/#{params['id']}"), :message => message
+      else
+        @errors << message[:error]
+        render :generate_loans
+      end
     else
       if @clients.include?(nil)
         redirect resource(@loan_file), :message => {:error => 'Cannot generate loans for this loan file because clients have not been created for certain loan applications'}

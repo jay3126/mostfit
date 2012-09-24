@@ -8,6 +8,20 @@
       });
   });
 
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
 - staffmember = [session.user.staff_member]
 %h1
   Loan entry for
@@ -17,15 +31,8 @@
 
 = form :action => url(:controller => :loan_files, :action => :generate_loans, :class => "_disable_button_", :id => @loan_file.id) do
   = hidden_field :name => :center_id, :value => @center.id
-  .menu-strip{:style => "width:100%"}
-    - if @loans
-      .error
-        %ulDate.today
-          - [:applied_on, :scheduled_disbursal_date, :scheduled_first_payment_date, :applied_by_staff_id, :funding_line_id].each do |field|
-            = @loans.first.errors[field].each do |x|
-              %li
-                = x
-    - params[:loan] ||= Nothing
+  -# params[:loan] ||= Nothing
+  .menu-strip{:style => "width:100%; text-align: left;"}
     %table
       %tr
         %th Application date
@@ -42,6 +49,7 @@
         %td
           - scheduled_first_payment_date_selected = params[:loan] && params[:loan][:scheduled_first_payment_date] ? params[:loan][:scheduled_first_payment_date] : @loan_file.scheduled_first_payment_date
           = date_select "loan[scheduled_first_payment_date]", scheduled_first_payment_date_selected, :id =>"scheduled_first_payment_date"
+      %tr
         %th Applied by
         %td
           = select :name => "loan[applied_by_staff_id]", :collection => staffmember, :value_method => :id, :text_method => :name, :class => 'chosen'
@@ -110,10 +118,11 @@
               = Funder.first.funding_lines.first.tranches.first.name rescue "<b> Not created </b>"
               = hidden_field :name => "tranch_id[#{client.id}]", :value => Funder.first.funding_lines.first.tranches.first.id rescue nil
             %td
-              = select :name => "clients[#{client.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(la.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => ((@loan_product or Nothing).id or Nothing).to_s
+              - selected_loan_product = params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:loan_product_id] ? params[:clients]["#{client.id}"][:loan_product_id] : nil
+              = select :name => "clients[#{client.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(la.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
             %td
-              = select :name => "clients[#{client.id}][loan_purpose]", :class => "loan_purpose", :collection => LoanPurpose.all.map{|lp| [lp.name]}, :prompt => "select loan purpose", :selected => ((params[:clients] && params[:clients][client.id.to_s]) ? params[:clients][client.id.to_s][:loan_purpose_id] : nil), :id => client.id
-          -# blank row for grouping purpose
+              - selected_loan_purpose = params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:loan_purpose] ? params[:clients]["#{client.id}"][:loan_purpose] : nil
+              = select :name => "clients[#{client.id}][loan_purpose]", :class => "loan_purpose", :collection => LoanPurpose.all.map{|lp| [lp.name]}, :prompt => "select loan purpose", :selected => selected_loan_purpose, :id => client.id
           - if (row_number % 5 == 0)
             %tr
               %td{:colspan => 7}
