@@ -14,7 +14,7 @@ class Client
   property :guarantor_name,           String, CommonClient::Validations.get_validation(:guarantor_name, Client)
   property :guarantor_dob,            Date
   property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:guarantor_relationship, Client)
-  property :telephone_number,         String, :nullable => true
+  property :telephone_number,         String, CommonClient::Validations.get_validation(:telephone_number, Client)
   property :telephone_type,           Enum.send('[]', *TELEPHONE_TYPES), :default => DEFAULT_TELEPHONE_TYPE
   property :state,                    String, :default => ''
   property :pincode,                  Integer, CommonClient::Validations.get_validation(:pincode, Client)
@@ -91,6 +91,7 @@ class Client
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
   validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
+
 
   def created_on; self.date_joined; end
   def counterparty; self; end

@@ -13,7 +13,8 @@ module CommonClient
       :client_reference2 => :reference2,
       :client_reference2_type => :reference2_type,
       :client_guarantor_name => :guarantor_name,
-      :client_guarantor_relationship => :guarantor_relationship
+      :client_guarantor_relationship => :guarantor_relationship,
+      :client_telephone_number => :telephone_number
     }
 
     CLIENT_MAPPING = {
@@ -25,7 +26,8 @@ module CommonClient
       :reference2 => :reference2,
       :reference2_type => :reference2_type,
       :guarantor_name => :guarantor_name,
-      :guarantor_relationship => :guarantor_relationship
+      :guarantor_relationship => :guarantor_relationship,
+      :telephone_number => :telephone_number
     }
 
     VALIDATIONS = {
@@ -37,7 +39,8 @@ module CommonClient
       :reference2 => {:nullable => false, :format => Constants::ReferenceFormatValidations::FORMAT_REFERENCE2},
       :reference2_type => {:default => Constants::Masters::DEFAULT_REFERENCE2_TYPE},
       :guarantor_name => {:nullable => false},
-      :guarantor_relationship => {:default => Constants::Masters::OTHER_RELATIONSHIP}
+      :guarantor_relationship => {:default => Constants::Masters::OTHER_RELATIONSHIP},
+      :telephone_number => {:nullable => false}
     }
 
     CLASSES_AND_MAPPINGS = { LoanApplication => LOAN_APPLICATION_MAPPING, Client => CLIENT_MAPPING }
