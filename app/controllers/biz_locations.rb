@@ -9,7 +9,9 @@ class BizLocations < Application
 
   def edit
     @biz_location     = BizLocation.get params[:id]
-    @staff_members    = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date).map(&:staff_assigned) rescue []
+    @parent_location  = LocationLink.get_parent(@biz_location, get_effective_date)
+    location_id       = @biz_location.location_level.level == 0 ? @parent_location.id : @biz_location.id
+    @staff_members    = StaffPosting.get_staff_assigned(location_id, get_effective_date).map(&:staff_assigned) rescue []
     @managed_by_staff = location_facade.location_managed_by_staff(@biz_location.id, get_effective_date).manager_staff_member rescue ''
     display @biz_location
   end
