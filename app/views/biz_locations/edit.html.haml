@@ -64,25 +64,25 @@
         %td
           Create Meeting Schedule
           = check_box :name => 'meeting_schedule', :value => true, :checked => false, :id => 'meeting_schedule'
-      %tr{:style => "display:none", :class => 'meeting_div'}
-        %th
-          No. Of Meetings
-        %td
-          = text_field :name => "meeting[meeting_numbers]"
-      %tr{:style => "display:none", :class => 'meeting_div'}
-        %th
-          Meeting Frequency
-        %td
-          = select :name => "meeting[meeting_frequency]", :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
-      %tr{:style => "display:none", :class => 'meeting_div'}
-        %th
-          Meeting Time
-        %td
-          = text_field :name => "meeting[meeting_time_begins_hours]", :size => 2, :maxlength => 2
-          %b
-          = text_field :name => "meeting[meeting_time_begins_minutes]", :size => 2, :maxlength => 2
-          &nbsp;&nbsp;
-          %span.greytext time is in a 24 hour format
+    %tr{:style => "display:none", :class => 'meeting_div'}
+      %th
+        No. Of Meetings
+      %td
+        = text_field :name => "meeting[meeting_numbers]"
+    %tr{:style => "display:none", :class => 'meeting_div'}
+      %th
+        Meeting Frequency
+      %td
+        = select :name => "meeting[meeting_frequency]", :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+    %tr{:style => "display:none", :class => 'meeting_div'}
+      %th
+        Meeting Time
+      %td
+        = text_field :name => "meeting[meeting_time_begins_hours]", :size => 2, :maxlength => 2
+        %b
+        = text_field :name => "meeting[meeting_time_begins_minutes]", :size => 2, :maxlength => 2
+        &nbsp;&nbsp;
+        %span.greytext time is in a 24 hour format
   = submit "Update", :class => "grey_button"
   &nbsp;&nbsp;
   %b
