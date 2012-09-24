@@ -34,6 +34,7 @@ class MeetingCalendar
   property :id,                         Serial
   property :location_id,                Integer, :nullable => false
   property :on_date,                    Date, :nullable => false
+  property :actual_date,                Date
   property :meeting_status,             Enum.send('[]', *MEETING_SCHEDULE_STATUSES), :nullable => false, :default => PROPOSED_MEETING_STATUS
   property :meeting_time_begins_hours,  Integer, :min => EARLIEST_MEETING_HOURS_ALLOWED, :max => LATEST_MEETING_HOURS_ALLOWED
   property :meeting_time_begins_minutes,Integer, :min => EARLIEST_MEETING_MINUTES_ALLOWED, :max => LATEST_MEETING_MINUTES_ALLOWED
@@ -164,6 +165,7 @@ class MeetingCalendar
     locations_and_meetings.each { |meeting| 
       first_or_create(
         :on_date => on_date,
+        :actual_date => on_date,
         :location_id => meeting.first,
         :meeting_status => PROPOSED_MEETING_STATUS,
         :meeting_time_begins_hours => meeting.last.meeting_time_begins_hours,
@@ -173,13 +175,14 @@ class MeetingCalendar
   end
 
   def self.setup_meeting_calendar(meeting_schedule, location_id,  on_date)
-      first_or_create(
-        :on_date => on_date,
-        :location_id => location_id,
-        :meeting_status => PROPOSED_MEETING_STATUS,
-        :meeting_time_begins_hours => meeting_schedule.meeting_time_begins_hours,
-        :meeting_time_begins_minutes => meeting_schedule.meeting_time_begins_minutes
-      )
+    first_or_create(
+      :on_date => on_date,
+      :actual_date => on_date,
+      :location_id => location_id,
+      :meeting_status => PROPOSED_MEETING_STATUS,
+      :meeting_time_begins_hours => meeting_schedule.meeting_time_begins_hours,
+      :meeting_time_begins_minutes => meeting_schedule.meeting_time_begins_minutes
+    )
   end
 
   # Returns the first meeting for a location on a given date

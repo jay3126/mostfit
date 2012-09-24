@@ -166,6 +166,7 @@ class BaseScheduleLineItem
   property :id,                             Serial
   property :installment,                    *INSTALLMENT
   property :on_date,                        *DATE_NOT_NULL
+  property :actual_date,                    *DATE
   property :payment_type,                   Enum.send('[]', *LOAN_PAYMENT_TYPES), :nullable => false
   property SCHEDULED_PRINCIPAL_OUTSTANDING, *MONEY_AMOUNT
   property SCHEDULED_PRINCIPAL_DUE,         *MONEY_AMOUNT
@@ -242,6 +243,7 @@ class BaseScheduleLineItem
     line_item                                  = { }
     line_item[:installment]                    = installment
     line_item[:on_date]                        = on_date
+    line_item[:actual_date]                    = on_date
     line_item[:payment_type]                   = payment_type
     line_item[SCHEDULED_PRINCIPAL_OUTSTANDING] = scheduled_principal_outstanding
     line_item[SCHEDULED_PRINCIPAL_DUE]         = scheduled_principal_due

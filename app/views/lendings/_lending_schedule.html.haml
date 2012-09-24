@@ -6,6 +6,7 @@
     %thead
       %tr
         %th Transaction
+        %th Actual Installment Date
         %th Installment Date
         %th Installment
         %th Principal Outstanding
@@ -19,6 +20,8 @@
         %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
           %td
             %b= l_schedule.payment_type
+          %td
+            = l_schedule.actual_date
           %td
             = l_schedule.on_date
           %td

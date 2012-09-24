@@ -15,6 +15,8 @@
         %td
           Meeting Date
         %td
+          Actual Meeting Date
+        %td
           Meeting Weekday
         %td
           Meeting Status
@@ -27,6 +29,8 @@
       %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
         %td
           = md.on_date
+        %td
+          = md.actual_date
         %td
           = Constants::Time.get_week_day(md.on_date)
         %td

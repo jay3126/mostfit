@@ -35,6 +35,9 @@ class LocationHoliday
     holiday_params[:biz_location] = at_location
     holiday = create(holiday_params)
     raise Errors::DataError, holiday.errors.first.first unless holiday.saved?
+    BaseScheduleLineItem.all(:on_date => on_date).update(:on_date => move_work_to_date)
+    MeetingCalendar.all(:on_date => on_date).update(:on_date => move_work_to_date)
+
     holiday
   end
 
