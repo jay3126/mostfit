@@ -1,3 +1,4 @@
-%br
-= link_to_with_rights 'Add Holiday', resource(:location_holidays, :new, :biz_location_id => params[:biz_location_id]), :class => "_remote_ add grey_button"
+%h1 Holiday
+- url = params[:biz_location_id].blank? ? resource(:location_holidays, :new) : resource(:location_holidays, :holiday_for_location, :biz_location_id => params[:biz_location_id])
+= link_to_with_rights 'Add Holiday',url , :class => "_remote_ add grey_button"
 = partial :list

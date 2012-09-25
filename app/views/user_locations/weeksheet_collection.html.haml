@@ -82,10 +82,10 @@
         - if @weeksheet.blank?
           Today don't have any repayments
         - else
-          - if message[:error].blank?
-            = partial "user_locations/weeksheet_collection_list"
-          - else
+          - if message[:weeksheet_error] && !message[:error].blank?
             = partial "payment_transactions/weeksheet_payments"
+          - else
+            = partial "user_locations/weeksheet_collection_list"
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :customers_on_biz_location, :id => @biz_location.id)}
   %div.tab

@@ -21,7 +21,7 @@
     - @holidays.each do |holiday|
       %tr
         %td
-          = holiday.name
+          = link_to holiday.name, resource(holiday)
         %td
           = holiday.on_date
         %td

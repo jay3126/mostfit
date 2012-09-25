@@ -16,7 +16,8 @@ class BizLocation
   has n, :meeting_schedules, :through => Resource
   has 1, :address
   has n, :permitted_pin_codes, 'AddressPinCode'
-  has n, :location_holidays
+  has n, :holiday_administrations
+  has n, :location_holidays, :through => :holiday_administrations
   has 1, :cost_center
 
   has n, :origin_home_staff, :model => 'StaffMember', :child_key => [:origin_home_location_id]

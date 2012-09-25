@@ -25,7 +25,7 @@
         %td
           Description
     - @meeting_dates.each do |md|
-      - holiday = LocationHoliday.get_origin_move_date(@biz_location, md.on_date)
+      - holiday = LocationHoliday.get_origin_move_date(md.location, md.on_date)
       %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
         %td
           = md.on_date

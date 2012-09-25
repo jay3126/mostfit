@@ -1,5 +1,6 @@
-= hidden_field :biz_location, :value => params[:biz_location_id]
-%table
+:javascript
+  jQuery("select.multiple").multiSelect();
+%table.tall
   %tr
     %th
       Name
@@ -15,6 +16,14 @@
       Move Date
     %td
       = date_select_for @holiday, :move_work_to_date
+  - if @biz_location.blank?
+    %tr
+      %th
+        For Location
+      %td
+        = select :name => 'biz_location', :collection => BizLocation.all, :text_method => :name, :value_method => :id, :class => 'multiple'
+  - else
+    = hidden_field :name => 'biz_location', :value => @biz_location.id
   %tr
     %th
       By Staff Member

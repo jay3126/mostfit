@@ -71,7 +71,7 @@ class PaymentTransactions < Application
   def create_group_payments
     
     # INITIALIZING VARIABLES USED THROUGHTOUT
-    @message              = {:error => [], :notice => []}
+    @message              = {:error => [], :notice => [],:weeksheet_error => ''}
     @payment_transactions = []
     @client_attendance    = {}
     

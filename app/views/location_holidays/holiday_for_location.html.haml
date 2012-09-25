@@ -1,0 +1,15 @@
+:javascript
+  jQuery("select.multiple").multiSelect();
+= form_for(:location_holidays, :id => "reason_form", :action => resource(:location_holidays, :create_holiday_for_location)) do
+  = hidden_field :name => 'biz_location_id', :value => @biz_location.id
+  %table.tall
+    %tr
+      %th
+        Holiday
+      %td
+        = select :name => 'location_holiday', :collection => LocationHoliday.all-@biz_location.location_holidays, :text_method => :name, :value_method => :id, :class => 'multiple', :style => "width:120px"
+      %th
+        Staff Member
+      %td
+        = select :name => 'staff_member_id', :collection => @staff_members, :text_method => :name, :value_method => :id
+  = submit 'Save'

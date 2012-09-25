@@ -1,0 +1,25 @@
+:javascript
+  jQuery("select.multiple").multiSelect();
+= form_for(@holiday, :id => "reason_form", :action => resource(@holiday)) do
+  %table.tall
+    %tr
+      %th
+        Name
+      %td
+        = text_field :name
+    %tr
+      %th
+        On Date
+      %td
+        = date_select_for @holiday, :on_date
+    %tr
+      %th
+        Move Date
+      %td
+        = date_select_for @holiday, :move_work_to_date
+    %tr
+      %th
+        For Location
+      %td
+        = select :name => 'biz_location', :collection => BizLocation.all-@holiday.biz_locations, :text_method => :name, :value_method => :id, :class => 'multiple'
+  = submit 'Update'
