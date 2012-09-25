@@ -299,7 +299,11 @@ class LoanApplication
     end
     return status
   end
-  
+
+  def record_CPV1_pending(by_staff, on_date, by_user_id)
+    # TODO
+  end
+
   def record_CPV2_approved(by_staff, on_date, by_user_id)
     status = nil
     ClientVerification.transaction do |t|
@@ -318,6 +322,10 @@ class LoanApplication
       t.rollback unless status == true
     end
     return status
+  end
+
+  def record_CPV2_pending(by_staff, on_date, by_user_id)
+    # TODO
   end
 
   def self.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason = nil)

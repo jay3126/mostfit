@@ -89,6 +89,12 @@ class LoanApplicationsFacade < StandardFacade
     loan_application.record_CPV1_rejected(by_staff, on_date, user_id)
   end
 
+  def record_CPV1_pending(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV1_pending(by_staff, on_date, user_id)
+  end
+
   def record_CPV2_approved(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
@@ -99,6 +105,12 @@ class LoanApplicationsFacade < StandardFacade
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
     loan_application.record_CPV2_rejected(by_staff, on_date, user_id)
+  end
+
+  def record_CPV2_pending(loan_application_id, by_staff, on_date)
+    loan_application = LoanApplication.get(loan_application_id)
+    raise NotFound if loan_application.nil?
+    loan_application.record_CPV2_pending(by_staff, on_date, user_id)
   end
 
   # Locate center cycle information

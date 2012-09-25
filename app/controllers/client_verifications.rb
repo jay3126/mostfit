@@ -30,18 +30,21 @@ class ClientVerifications < Application
             @errors[id] = "Loan Application ID #{id} : Verified-on Date must be provided for #{cpv_type}"
             next
           end
-
           if cpv_type == Constants::Verification::CPV1
             if verification_status == Constants::Verification::VERIFIED_ACCEPTED
               loan_applications_facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
             elsif verification_status == Constants::Verification::VERIFIED_REJECTED
               loan_applications_facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
+            elsif verification_status == Constants::Verification::VERIFIED_PENDING
+              loan_applications_facade.record_CPV1_pending(id,verified_by_staff_id, verified_on_date)
             end
           elsif cpv_type == Constants::Verification::CPV2
             if verification_status == Constants::Verification::VERIFIED_ACCEPTED
               loan_applications_facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
             elsif verification_status == Constants::Verification::VERIFIED_REJECTED
               loan_applications_facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
+            elsif verification_status == Constants::Verification::VERIFIED_PENDING
+              loan_applications_facade.record_CPV2_pending(id,verified_by_staff_id, verified_on_date)
             end
           end
         end

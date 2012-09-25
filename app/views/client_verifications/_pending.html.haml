@@ -6,12 +6,24 @@
   $(document).ready(function() {
     $('#toggle_select_approve_all_cpv1').change(function() {
       $('.approve_all_cpv1').attr('checked',$(this).attr('checked'))});
+
     $('#toggle_select_reject_all_cpv1').change(function() {
       $('.reject_all_cpv1').attr('checked',$(this).attr('checked'))});
+
     $('#toggle_select_approve_all_cpv2').change(function() {
       $('.approve_all_cpv2').attr('checked',$(this).attr('checked'))});
+
     $('#toggle_select_reject_all_cpv2').change(function() {
       $('.reject_all_cpv2').attr('checked',$(this).attr('checked'))});
+
+    $('#toggle_select_reject_all_cpv2').change(function() {
+      $('.reject_all_cpv2').attr('checked',$(this).attr('checked'))});
+
+    $('#toggle_select_all_pending_cpv1').change(function() {
+      $('.all_pending_cpv1').attr('checked',$(this).attr('checked'))});
+
+    $('#toggle_select_all_pending_cpv2').change(function() {
+      $('.all_pending_cpv2').attr('checked',$(this).attr('checked'))});
   });
 
 #pending_list
@@ -30,13 +42,16 @@
                 = "Applicant"
               %td
                 = "Address"
-              %td{:colspan => 4,:style => center_text}
+              %td{:colspan => 5,:style => center_text}
                 = "Contact Point Verification 1"
-              %td{:colspan => 4,:style => center_text}
+              %td{:colspan => 5,:style => center_text}
                 = "Contact Point Verification 2"
             %tr
               %td{:colspan=>3}
                 = "&nbsp;"
+              %td
+                = "Pending cpv1"
+                = radio_button :name => 'bulk_select_cpv1', :id => "toggle_select_all_pending_cpv1"
               %td
                 = "Approve all"
                 = radio_button :name => 'bulk_select_cpv1', :id => "toggle_select_approve_all_cpv1"
@@ -47,6 +62,9 @@
                 = "Verified on Date"
               %td
                 = "Verified by Staff Member"
+              %td
+                = "Pending cpv2"
+                = radio_button :name => 'bulk_select_cpv2', :id => "toggle_select_all_pending_cpv2"
               %td
                 = "Approve all"
                 = radio_button :name => 'bulk_select_cpv2', :id => "toggle_select_approve_all_cpv2"
@@ -70,6 +88,8 @@
                   -# CPV1 can be recorded only if CPV1 is not already done.
                   - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
                     - unless session.user.role == :support || session.user.role == :finops
+                      %td
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv1"}
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv1"}
                       %td{:style => center_text}
@@ -79,11 +99,11 @@
                       %td
                         = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else
-                      %td{:colspan => 4, :style => center_text}
+                      %td{:colspan => 5, :style => center_text}
                         %b
                           = "Not privilaged"
                   - else
-                    %td{:colspan => 2,:style => center_text}
+                    %td{:colspan => 3,:style => center_text}
                       = get_status_display(ClientVerification.get_CPV1_status(l.id))
                     %td
                       = ClientVerification.get_CPV1(l.id).verified_on_date.display
@@ -91,6 +111,8 @@
                       = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
                   - if ClientVerification.is_CPV1_verified?(l.id)
                     - if session.user.role == :support || session.user.role == :operator
+                      %td
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv2"}
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv2"}
                       %td{:style => center_text}
@@ -100,11 +122,11 @@
                       %td
                         = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else
-                      %td{:colspan => 4, :style => center_text}
+                      %td{:colspan => 5, :style => center_text}
                         %b
                           = "Not privilaged"
                   - else
-                    %td{:colspan => 4, :style => center_text}
+                    %td{:colspan => 5, :style => center_text}
                       %i
                         = "CPV1 is pending"
         %table.narrow.form{:style => "width:100%;"}
