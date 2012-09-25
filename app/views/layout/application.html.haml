@@ -78,6 +78,8 @@
             login as
             = select :user_id, :collection => User.all(:order => [:login]).map{|u| [u.id, u.login]}, :class => 'field'
             = submit "go"
+      %p{:style => "position: relative; left: 10%; float: left;"}
+        = image_tag("/images/istpl_logo.png", :height => 80)
       %p{:style => "position: relative; right: 10%; float: right;"}
-        =image_tag("/images/mostfit_logo.png", :height => 80)
-      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.
+        = image_tag("/images/mostfit_logo.png", :height => 80)
+      == &copy; 2012 Intellecap Software Technologies Pvt. Ltd. (ISTPL) &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.
