@@ -1333,3 +1333,10 @@ function toggle_table_row(obj, table_class, row_no){
     jQuery("table."+table_class+" td:nth-child("+row_no+ "),th:nth-child("+row_no+")").hide();
   }
 }
+
+function ddmmyyyyToDate(str) {
+  var parts = str.split("-");                  // Gives us ["dd", "mm", "yyyy"]
+  return new Date(parseInt(parts[2], 10),      // Year
+    parseInt(parts[1], 10) - 1,  // Month (starts with 0)
+    parseInt(parts[0], 10));     // Day of month
+}
