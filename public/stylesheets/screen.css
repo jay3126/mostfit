@@ -281,9 +281,13 @@ input.error, textarea.error, select.error {background:#FBE3E4;}
 .container .success a {color:#264409; background:none; padding:0; margin:0; }
 .container .center {text-align: center;}
 .holiday_indicator, .ui-datepicker .holiday_indicator a { background-color:red;color:red }
+
+@lightgreen: #B7E4EB;
+@header-text: #B7E4EB * 0.5;
 .lap_header_tab  a {
-  background: #00444D;
-  color: white;
+  background: #B7E4EB;
+  /* color: #360808; */
+  color: black;
   border-radius: 10px;
   padding: 5px 18px 5px 8px;
   box-shadow: 1px 1px #00292E inset;
@@ -292,6 +296,21 @@ input.error, textarea.error, select.error {background:#FBE3E4;}
   font-size: 1.1em;
   font-weight: 700;
 }
+
+.lap_header_tab a:hover{
+    background: white;
+    color: #B7E4EB;
+    z-index:10;
+    box-shadow: 2px 2px #B7E4EB * 0.6 inset;
+}
+
+.lap_header_tab a.selected{
+    @nav-selected-bg: #B7E4EB * 0.5;
+    background: #B7E4EB * 0.5;
+    color: white;
+    box-shadow: 1px 1px @nav-selected-bg * 0.6 inset;
+}
+
 #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
 #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1em }
 #sortable li span { position: absolute; margin-left: -1.3em; }
