@@ -93,7 +93,7 @@ class LocationLink
       location = []
       children = get_children(for_location, on_date)
       children.each do |child|
-        location =  all_children(child, on_date)
+        location << all_children(child, on_date)
       end
       @all_children = location + children
       @all_children.flatten.compact.uniq
