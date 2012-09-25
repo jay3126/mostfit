@@ -1,6 +1,6 @@
-%table.form#user_form
+%table.tall.shaded#user_form
   %tr
-    %td
+    %th
       Login name:
     %td
       - if @user.new?
@@ -11,7 +11,7 @@
         = @user.name
 
     %tr.staff_member
-      %td
+      %th
         Staff Member
       - unless @user.staff_member
         %td
@@ -20,24 +20,24 @@
         %td
           = @user.staff_member.name
   %tr
-    %td
+    %th
       Preferred Locale
     %td
       = select :preferred_locale, :collection => LOCALES.map{|s| [s[0].to_s, s[1].to_s]}, :selected => (@user.preferred_locale ? @user.preferred_locale : ""), :prompt => "choose locale"
   - if @user.new?
     %tr
-      %td
+      %th
         Password:
       %td
         = password_field :password
     %tr
-      %td
+      %th
         Password confirmation:
       %td
         = password_field :password_confirmation
 
   %tr
-    %td
+    %th
       Active ?
     %td
       = check_box :active

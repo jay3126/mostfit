@@ -3,8 +3,12 @@
 %h1
   Overview of all staff members 
   = " of #{@branch.name}" if @branch
-= link_to_with_rights 'create a new staff member', resource(:staff_members, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
-%br
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights 'Create a new staff member', resource(:staff_members, :new), :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 %br
 - if @staff_members.blank?
   %p

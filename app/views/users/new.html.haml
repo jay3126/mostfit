@@ -1,4 +1,3 @@
-
 .prefix-2.span-20.suffix-2.last
   %h1 Create a new user
 
@@ -8,6 +7,10 @@
     = partial 'fields'
     %p
       = submit "create"
+      &nbsp;&nbsp;
+      %b
+        Or
+      &nbsp;&nbsp;
       = link_to_with_rights 'Back', url(:users), :class => "greenButton"
 
   %p

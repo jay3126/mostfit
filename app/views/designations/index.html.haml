@@ -1,6 +1,11 @@
 %h1
-  Designation
-= link_to_with_rights 'Create Designation', '#', :onclick => "jQuery(this).next().toggle(); return false;", :class => 'add grey_button'
+  List of Designations
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights 'Create Designation', '#', :onclick => "jQuery('#designation').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 #designation{:style => "display : none"}
   = form_for(@designation, :action => url(:designations) ) do
     = partial :fields

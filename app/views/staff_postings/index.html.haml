@@ -3,12 +3,22 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-%h1 Staff Posting
-= link_to 'Add Posting', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
+%h1 List of Staff Members Posted at various Locations
+
+.menu-strip{:style => "width: 25%;"}
+  = link_to_with_rights 'Add Posting', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 #meeting_div(style = "display : none")
   = form_for(@staff_posting, :action => url(:controller => :staff_postings, :action => :create), :method => "POST", :class => "tall shaded") do
     = partial 'staff_postings/fields'
     = submit 'Save', :class => "greenButton"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", "#", :onclick => "jQuery('#meeting_div').hide(); return false;", :class => "grey_button"
 %br
 - if @staff_postings.count == 0
   %p

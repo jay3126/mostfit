@@ -1,10 +1,12 @@
-%h1 Users
-.menu-strip
-  = link_to_with_rights 'create a new user', resource(:users, :new), :class => "add grey_button"
+%h1 List of Users
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights 'Create a new user', resource(:users, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 %table.dataTable.report.weeksheet.nojs
   %thead
     %tr
-      %th
       %th ID
       %th Login
       %th Staff member/Funder
@@ -13,7 +15,6 @@
   - @users.each do |user|
     - next if user.role == :maintainer
     %tr
-      %td &nbsp;
       %td
         = user.id
       %td

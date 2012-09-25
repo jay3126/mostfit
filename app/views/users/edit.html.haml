@@ -6,6 +6,11 @@
     = partial 'fields'
     %p
       = submit "Save changes"
+      &nbsp;&nbsp;
+      %b
+        Or
+      &nbsp;&nbsp;
+      = link_to_with_rights "Cancel", resource(@user), :class => "grey_button"
   
   %hr
   %h2 Change password
@@ -30,7 +35,11 @@
           %span.greytext (password fields must be filled to complete user profile)
     %p
       = submit "Save changes"
-      = link_to_with_rights 'Back', url(:users), :class => "greenButton"
+      &nbsp;&nbsp;
+      %b
+        Or
+      &nbsp;&nbsp;
+      = link_to_with_rights 'Cancel', resource(@user), :class => "greenButton"
 
   %p
     %br/

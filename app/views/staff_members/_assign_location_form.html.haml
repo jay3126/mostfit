@@ -1,5 +1,5 @@
-%p.menu-strip{:style => "width: 44%; margin-bottom: 0.2em;"}
-  = link_to 'Assign Location', "#", :onclick =>"jQuery('#location_div').toggle(); return false;", :class => 'add'
+%p.menu-strip{:style => "width: 20%; margin-bottom: 0.2em;"}
+  = link_to_with_rights 'Assign Location', "#", :onclick =>"jQuery('#location_div').toggle(); return false;", :class => 'add grey_button'
   #location_div(style = "display : none")
     = form_for(@staff_member, :action => url(:controller => :staff_members, :action=> :assign_location_to_staff, :id => @staff_member.id)) do
       %table

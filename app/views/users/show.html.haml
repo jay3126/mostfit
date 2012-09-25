@@ -2,7 +2,13 @@
 - if @user
   .shaded  
     %h1== User: <i>#{@user.login}</i>
-    %table.tall
+
+    .menu-strip{:style => "width: 30%;"}
+      = link_to_with_rights 'Edit this user\'s details ', resource(@user, :edit), :class => "edit grey_button"
+      &nbsp;&nbsp;
+      = link_to_with_rights "Back", url(:users), :class => "grey_button"
+
+    %table.tall.shaded
       - counter+= 1
       %tr
         %th Role
@@ -35,7 +41,7 @@
         %th StaffMember
         %td=@user.staff_member.name if @user.staff_member
     %p
-      = link_to_with_rights 'edit this user\'s details ', resource(@user, :edit), :class => "edit"
+     
 
   -# %div.tab_container
   -#   %ul.tabs
