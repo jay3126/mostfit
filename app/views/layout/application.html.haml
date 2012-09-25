@@ -54,7 +54,8 @@
           %b= link_to 'login', url(:login)
           to proceed
     - if (params[:controller] == "loan_applications" && (params[:action] != "index" && params[:action] != "show" && params[:action] != "edit" && params[:action] != "loan_application_list")) || params[:controller] == "overlap_report_requests" || params[:controller] == "overlap_report_responses" || params[:controller] == "loan_authorizations" || params[:controller] == "client_verifications" || params[:controller] == "loan_files" || params[:controller] == "center_cycles"
-      = partial "layout/loan_application_workflow_header"
+      %br
+        = partial "layout/loan_application_workflow_header"
     #content
       .container
         %p

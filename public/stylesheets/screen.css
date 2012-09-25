@@ -282,12 +282,15 @@ input.error, textarea.error, select.error {background:#FBE3E4;}
 .container .center {text-align: center;}
 .holiday_indicator, .ui-datepicker .holiday_indicator a { background-color:red;color:red }
 .lap_header_tab  a {
-  background-color: #CFCFCF;
-  color: black;
-  font-family: small-caption;
-  margin: 87px -43px 0 45px;
-  padding: 2px 15px 5px 8px;
-  text-decoration: underline;
+  background: #00444D;
+  color: white;
+  border-radius: 10px;
+  padding: 5px 18px 5px 8px;
+  box-shadow: 1px 1px #00292E inset;
+  margin: 87px -43px -1 45px;
+  text-decoration: none;
+  font-size: 1.1em;
+  font-weight: 700;
 }
 #sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
 #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1em }
