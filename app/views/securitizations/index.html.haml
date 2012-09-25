@@ -1,5 +1,11 @@
-%h2== Securitizations
-%p== #{link_to_with_rights 'Create a new securitization',"/Securitizations/new",:class=>"add"}
+%h1 List of Securitizations
+
+.menu-strip{:style => "width: 35%;"}
+  = link_to_with_rights 'Create a new securitization', url("securitizations/new"), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
+%br
 - if @securitizations.blank?
   %p
     %i No securitizations have been created yet.

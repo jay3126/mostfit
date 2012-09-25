@@ -1,6 +1,8 @@
 %h1 Overview of all third parties
-.menu-strip{:style => "width: 30;"}
+
+.menu-strip{:style => "width: 20;"}
   = link_to_with_rights 'Create a new third party', url(:new_third_party), :class => "add grey_button"
+  &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 - if @third_parties.blank?

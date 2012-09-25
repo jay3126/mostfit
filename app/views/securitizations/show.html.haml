@@ -3,10 +3,14 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
+
+%h1 Details of Securitization: #{@securitization.name}
+
+.menu-strip{:style => "width: 10%;"}
+  = link_to_with_rights "Back", url(:securitizations), :class => "grey_button"
+
 = form_for(@securitization, :action => url(:controller => :securitizations, :action => :loans_for_securitization_on_date, :id => @securitization.id)) do
-  %h1
-    Securitizations
-  %table
+  %table.tall.shaded
     %tr
       %th
         Name

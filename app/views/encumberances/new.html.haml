@@ -1,10 +1,13 @@
 - form_url   =  resource(:encumberances, {:return => params[:return]})
 - cancel_url =  url(params[:return])
 = form_for (@encumberance, :action => "create") do
-	%h1 New Encumberance
-	= error_messages_for @encumberance
-	%fieldset
-		= partial "fields"
-		= submit "create"
-
-
+  %h1 New Encumberance
+  = error_messages_for @encumberance
+  %fieldset
+    = partial "fields"
+    = submit "Create"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", url(:encumberances), :class => "grey_button"

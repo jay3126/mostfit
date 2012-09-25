@@ -1,8 +1,13 @@
 - form_url   =  resource(:securitizations, {:return => params[:return]})
 - cancel_url =  url(params[:return])
 = form_for (@securitization, :action => "create") do
-	%h1 New Securitization
-	= error_messages_for @securitization
-	%fieldset
-		= partial "fields" 
-		= submit "create"
+  %h1 New Securitization
+  = error_messages_for @securitization
+  %fieldset
+    = partial "fields" 
+    = submit "create"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", url(:securitizations), :class => "grey_button"

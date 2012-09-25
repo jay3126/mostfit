@@ -1,5 +1,11 @@
-%h2== Encumberances
-%p== #{link_to_with_rights 'Create a new encumberance',"/Encumberances/new",:class=>"add"}
+%h1 List of Encumberances
+
+.menu-strip{:style => "width: 35%;"}
+  = link_to_with_rights 'Create a new encumberance', url("Encumberances/new"), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
+%br
 - if @encumberances.blank?
   %p
     %i No encumberances have been created yet.
