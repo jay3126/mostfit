@@ -178,7 +178,7 @@ class LocationHolidays < Application
       @holiday_admins.each do |holiday|
         holiday.destroy if location_ids.include?(holiday.biz_location_id.to_s)
       end
-      at_locations.each{|location| child_locations << LocationLink.all_children(location)}
+      at_locations.each{|location| child_locations << LocationLink.all_children(location) << location}
       BaseScheduleLineItem.all('loan_base_schedule.lending.administered_at_origin' => child_locations.flatten.uniq.map(&:id), :on_date => @holiday.move_work_to_date, :actual_date.not => @holiday.move_work_to_date).update(:on_date => @holiday.on_date)
       MeetingCalendar.all(:location_id => child_locations.flatten.uniq.map(&:id), :on_date => @holiday.move_work_to_date, :actual_date.not => @holiday.move_work_to_date).update(:on_date => @holiday.on_date)
       message[:notice] = "Holiday Successfully Deleted from Locations"
