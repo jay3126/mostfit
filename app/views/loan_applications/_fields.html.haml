@@ -7,7 +7,12 @@
       var current_date = new Date();
       var current_date_year = current_date.getFullYear();
       diff = current_date_year - client_dob_year;
+      if (isNaN(diff)) {
+        $("#client_age").attr('value', "0");
+      }
+      else {
       $("#client_age").attr('value', diff);
+      }
     });
   });
 
