@@ -86,10 +86,11 @@
                   %td
                     = l.client_address
                   -# CPV1 can be recorded only if CPV1 is not already done.
-                  - if ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED
+                  - if (ClientVerification.get_CPV1_status(l.id) == Constants::Verification::NOT_VERIFIED || ClientVerification.get_CPV1_status(l.id) == Constants::Verification::VERIFIED_PENDING) && !(l.status == Constants::Status::CPV1_APPROVED_STATUS) && !(l.status == Constants::Status::CPV2_PENDING_STATUS)
                     - unless session.user.role == :support || session.user.role == :finops
                       %td
-                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv1"}
+                        - pending_cpv1_selected = ClientVerification.get_CPV1_status(l.id) == Constants::Verification::VERIFIED_PENDING ? 'checked' : nil
+                        %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv1", :checked => pending_cpv1_selected}
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv1"}
                       %td{:style => center_text}
@@ -104,15 +105,16 @@
                           = "Not privilaged"
                   - else
                     %td{:colspan => 3,:style => center_text}
-                      = get_status_display(ClientVerification.get_CPV1_status(l.id))
+                      = get_status_display(l.status)
                     %td
                       = ClientVerification.get_CPV1(l.id).verified_on_date.display
                     %td
                       = StaffMember.get(ClientVerification.get_CPV1(l.id).verified_by_staff_id).name
-                  - if ClientVerification.is_CPV1_verified?(l.id)
+                  - if l.status == Constants::Status::CPV1_APPROVED_STATUS || l.status == Constants::Status::CPV2_PENDING_STATUS
                     - if session.user.role == :support || session.user.role == :operator
                       %td
-                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv2"}
+                        - pending_cpv2_selected = l.status == Constants::Status::CPV2_PENDING_STATUS ? 'checked' : nil
+                        %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_PENDING, :class => "all_pending_cpv2", :checked => pending_cpv2_selected}
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_ACCEPTED, :class => "approve_all_cpv2"}
                       %td{:style => center_text}
