@@ -58,15 +58,15 @@ class CenterCycles < Application
       # All three dates must be unique
       both_dates = [cgt_date_one_str, cgt_date_two_str]
       unique_dates = both_dates.uniq
-      @errors << "Both CGT Date 1, CGT Date 2 must be different" unless both_dates.eql?(unique_dates)
-
-      # greater than and less than validations on all three dates
-      @errors << "CGT Date 2 must not be before CGT Date 1" if cgt_date_two < cgt_date_one
+      @errors << "Both CGT Start Date and CGT End Date must be different" unless both_dates.eql?(unique_dates)
     end
+    
+    # greater than and less than validations on all three dates
+    @errors << "CGT End Date must not be before CGT Start Date" if cgt_date_two < cgt_date_one
 
     # Future date validations
-    @errors << "CGT Date 1 must not be future date" if cgt_date_one > Date.today
-    @errors << "CGT Date 2 must not be future date" if cgt_date_two > Date.today
+    @errors << "CGT Start Date must not be future date" if cgt_date_one > Date.today
+    @errors << "CGT End Date must not be future date" if cgt_date_two > Date.today
 
     @errors << "CGT recorded by must not be blank" if cgt_performed_by_staff.blank?
     #OPERATIONS-PERFORMED
@@ -102,7 +102,7 @@ class CenterCycles < Application
     @errors << "GRT completed on date must not be future date" if grt_completed_on > Date.today
     @errors << "GRT recorded by must not be blank" if grt_completed_by_staff.blank?
     @errors << "Please select GRT status either pass or fail" if grt_status.blank?
-    @errors << "GRT completed on date must be before CGT Date 2" if grt_completed_on < @center_cycle.cgt_date_two
+    @errors << "GRT completed on date must be before CGT End Date" if grt_completed_on < @center_cycle.cgt_date_two
 
     #OPERATIONS-PERFORMED
     if @errors.blank?
