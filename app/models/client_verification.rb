@@ -69,6 +69,10 @@ class ClientVerification
     record_verification(loan_application_id, CPV1, VERIFIED_REJECTED, by_staff, on_date, by_user_id)
   end
 
+  def self.record_CPV1_pending(loan_application_id, by_staff, on_date, by_user_id)
+    record_verification(loan_application_id, CPV1, VERIFIED_PENDING, by_staff, on_date, by_user_id)
+  end
+
   # Submit an approved CPV2
   def self.record_CPV2_approved(loan_application_id, by_staff, on_date, by_user_id)
     record_verification(loan_application_id, CPV2, VERIFIED_ACCEPTED, by_staff, on_date, by_user_id)
@@ -77,6 +81,11 @@ class ClientVerification
   # Submit a rejected CPV2
   def self.record_CPV2_rejected(loan_application_id, by_staff, on_date, by_user_id)
     record_verification(loan_application_id, CPV2, VERIFIED_REJECTED, by_staff, on_date, by_user_id)
+  end
+
+  # Submit a pending CPV1
+  def self.record_CPV2_pending(loan_application_id, by_staff, on_date, by_user_id)
+    record_verification(loan_application_id, CPV2, VERIFIED_PENDING, by_staff, on_date, by_user_id)
   end
 
   # Get CPV1 status on the loan application
@@ -149,11 +158,11 @@ class ClientVerification
     cpvs = get_CPVs(loan_application_id)
     cpvinfos = []
     cpvs.each do |c| 
-        if not c.nil?
-            cpvinfos.push(c.to_info)
-        else
-            cpvinfos.push(nil)
-        end
+      if not c.nil?
+        cpvinfos.push(c.to_info)
+      else
+        cpvinfos.push(nil)
+      end
     end
     cpvinfos
   end
@@ -198,10 +207,19 @@ end
 #this is a seperate function because it is needed on both ClientVerification and ClientVerificationInfo class and I can't figure out a good place for it.
 #returns the text to be displayed for a given status in views
 public
+
 def get_status_display(status)
-    if status == Constants::Verification::VERIFIED_ACCEPTED
-        return "Accepted"
-    elsif status == Constants::Verification::VERIFIED_REJECTED
-        return "Rejected"
-    end
+  if status == Constants::Status::CPV1_APPROVED_STATUS
+    return "CPV1 Accepted"
+  elsif status == Constants::Status::CPV1_REJECTED_STATUS
+    return "CPV1 Rejected"
+  elsif status == Constants::Status::CPV1_PENDING_STATUS
+    return "CPV1 Pending"
+  elsif status == Constants::Status::CPV2_APPROVED_STATUS
+    return "CPV2 Accepted"
+  elsif status == Constants::Status::CPV2_REJECTED_STATUS
+    return "CPV2 Rejected"
+  elsif status == Constants::Status::CPV2_PENDING_STATUS
+    return "CPV2 Pending"
+  end
 end

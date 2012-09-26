@@ -301,7 +301,13 @@ class LoanApplication
   end
 
   def record_CPV1_pending(by_staff, on_date, by_user_id)
-    # TODO
+    status = nil
+    ClientVerification.transaction do |t|
+      ClientVerification.record_CPV1_pending(self.id, by_staff, on_date, by_user_id)
+      status = self.set_status(CPV1_PENDING_STATUS)
+      t.rollback unless status == true
+    end
+    return status
   end
 
   def record_CPV2_approved(by_staff, on_date, by_user_id)
@@ -325,7 +331,13 @@ class LoanApplication
   end
 
   def record_CPV2_pending(by_staff, on_date, by_user_id)
-    # TODO
+    status = nil
+    ClientVerification.transaction do |t|
+      ClientVerification.record_CPV2_pending(self.id, by_staff, on_date, by_user_id)
+      status = self.set_status(CPV2_PENDING_STATUS)
+      t.rollback unless status == true
+    end
+    return status
   end
 
   def self.record_authorization(on_loan_application, as_status, by_staff, on_date, by_user, with_override_reason = nil)
@@ -370,7 +382,7 @@ class LoanApplication
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_CPV(search_options = {})
-    search_options.merge!(:status => [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS])
+    search_options.merge!(:status => [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS, CPV1_PENDING_STATUS, CPV2_PENDING_STATUS])
     all(search_options)
   end
 
