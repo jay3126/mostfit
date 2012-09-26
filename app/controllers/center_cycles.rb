@@ -37,7 +37,7 @@ class CenterCycles < Application
 
   def record_cgt
     @errors = []
-    all_three_dates = []
+    both_dates = []
     unique_dates = []
 
     # GATE-KEEPING
@@ -47,36 +47,32 @@ class CenterCycles < Application
     cgt_date_two_str = params[:cgt_date_two]
     cgt_date_two = Date.parse(cgt_date_two_str)
     
-    cgt_date_three_str = params[:cgt_date_three]
-    cgt_date_three = Date.parse(cgt_date_three_str)
-
     cgt_performed_by_staff = params[:cgt_performed_by_staff]
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
+    @center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
 
     # VALIDATIONS
 
-    # All three dates must be unique
-    all_three_dates = [cgt_date_one_str, cgt_date_two_str, cgt_date_three_str]
-    unique_dates = all_three_dates.uniq
-    @errors << "All three dates: CGT Date 1, CGT Date 2, CGT Date 3 must be different" unless all_three_dates.eql?(unique_dates)
+    unless @center_cycle.is_restarted
+      # All three dates must be unique
+      both_dates = [cgt_date_one_str, cgt_date_two_str]
+      unique_dates = both_dates.uniq
+      @errors << "Both CGT Date 1, CGT Date 2 must be different" unless both_dates.eql?(unique_dates)
+
+      # greater than and less than validations on all three dates
+      @errors << "CGT Date 2 must not be before CGT Date 1" if cgt_date_two < cgt_date_one
+    end
 
     # Future date validations
     @errors << "CGT Date 1 must not be future date" if cgt_date_one > Date.today
     @errors << "CGT Date 2 must not be future date" if cgt_date_two > Date.today
-    @errors << "CGT Date 3 must not be future date" if cgt_date_three > Date.today
-
-    # greater than and less than validations on all three dates
-    @errors << "CGT Date 2 must not be before CGT Date 1" if cgt_date_two < cgt_date_one
-    @errors << "CGT Date 3 must not be before CGT Date 2" if cgt_date_three < cgt_date_two
-    @errors << "CGT Date 3 must not be before CGT Date 1" if cgt_date_three < cgt_date_one
 
     @errors << "CGT recorded by must not be blank" if cgt_performed_by_staff.blank?
     #OPERATIONS-PERFORMED
     if @errors.blank?
       begin
-        @center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
-        @record_cgt = @center_cycle.update(:cgt_date_one => cgt_date_one, :cgt_date_two => cgt_date_two, :cgt_date_three => cgt_date_three, :cgt_performed_by_staff => cgt_performed_by_staff, :cgt_recorded_at => DateTime.now())
+        @record_cgt = @center_cycle.update(:cgt_date_one => cgt_date_one, :cgt_date_two => cgt_date_two, :cgt_performed_by_staff => cgt_performed_by_staff, :cgt_recorded_at => DateTime.now())
         if @record_cgt
           message = {:notice => "CGT successfully completed"}
         else
@@ -106,7 +102,7 @@ class CenterCycles < Application
     @errors << "GRT completed on date must not be future date" if grt_completed_on > Date.today
     @errors << "GRT recorded by must not be blank" if grt_completed_by_staff.blank?
     @errors << "Please select GRT status either pass or fail" if grt_status.blank?
-    @errors << "GRT completed on date must be before CGT Date 3" if grt_completed_on < @center_cycle.cgt_date_three
+    @errors << "GRT completed on date must be before CGT Date 2" if grt_completed_on < @center_cycle.cgt_date_two
 
     #OPERATIONS-PERFORMED
     if @errors.blank?
@@ -141,13 +137,13 @@ class CenterCycles < Application
       @center_cycle.update(
         :cgt_date_one => nil,
         :cgt_date_two => nil,
-        :cgt_date_three => nil,
         :cgt_performed_by_staff => nil,
         :cgt_recorded_at => nil,
         :grt_status => Constants::CenterFormation::GRT_NOT_DONE,
         :grt_completed_by_staff => nil,
         :grt_completed_on => nil,
-        :grt_recorded_at => nil)
+        :grt_recorded_at => nil,
+        :is_restarted => true)
     rescue => ex
       @errors << "An error has occurred: #{ex.message}"
     end

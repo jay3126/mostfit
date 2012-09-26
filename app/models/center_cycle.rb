@@ -21,7 +21,6 @@ class CenterCycle
   # for CGT at center for cycle
   property :cgt_date_one,          Date, :nullable => true
   property :cgt_date_two,          Date, :nullable => true
-  property :cgt_date_three,        Date, :nullable => true
   property :cgt_performed_by_staff,Integer, :nullable => true #Staff Member ID
   property :cgt_recorded_by_user,  Integer, :nullable => true
   property :cgt_recorded_at,       DateTime, :nullable => true
@@ -32,6 +31,7 @@ class CenterCycle
   property :grt_completed_on,      Date, :nullable => true
   property :grt_recorded_by_user,  Integer, :nullable => true
   property :grt_recorded_at,       DateTime, :nullable => true
+  property :is_restarted,          Boolean, :default => false
 
   property :status,                Enum.send('[]', *CENTER_CYCLE_STATUSES), :nullable => false, :default => OPEN_CENTER_CYCLE_STATUS
   property :created_by,            Integer, :nullable => false
