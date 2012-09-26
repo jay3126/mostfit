@@ -1,0 +1,134 @@
+%h2= "Checklist Filled  by #{@filler.name}"
+
+-if @checklist.checklist_type.is_pa_checklist?
+  %table.dataTable.report.weeksheet.nojs
+    %tr
+      %td
+        Effective Date:
+      %td
+        %b
+          =@response.value_date.strftime("%b %e")
+    -#%tr
+    -#  %td
+    -#    =@response.checklist_locations.first.type.capitalize+":"
+    -#  %td
+    -#    %b
+    -#      =@response.checklist_locations.first.name
+    %tr
+      %td
+        =@response.checklist_locations.first.type.capitalize+":"
+      %td
+        %b
+          =@response.checklist_locations.last.name
+    -#%tr
+    -#  %td
+    -#    =@response.target_entity.type
+    -#  %td
+    -#    %b
+    -#      =@response.target_entity.name
+    %tr
+      %td
+        Filled On
+      %td
+        %b
+          =@response.created_at.strftime("%b %e %Y ")
+-else
+  %table.dataTable.report.weeksheet.nojs
+    %tr
+      %td
+        Effective Date:
+      %td
+        %b
+          =@response.value_date.strftime("%b %e")
+    %tr
+      %td
+        =@response.checklist_locations.first.type+":"
+      %td
+        %b
+          =@response.checklist_locations.first.name
+    %tr
+      %td
+        =@response.checklist_locations.last.type+":"
+      %td
+        %b
+          =@response.checklist_locations.last.name
+    %tr
+      %td
+        =@response.target_entity.type
+      %td
+        %b
+          =@response.target_entity.name
+    %tr
+      %td
+        Filled On
+      %td
+        %b
+          =@response.created_at.strftime("%b %e %Y ")
+
+
+
+-if @checklist.checklist_type.is_hc_checklist?
+  =partial "responses/edit_healthcheck_response"
+-else
+
+
+  -@sections.each do |section|
+    %hr
+    .section_block
+      %h2
+        %b{:style=>"color:black"}
+          %u
+            =section.name
+        %br
+      =section.instructions
+
+    -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+    -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+    -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+    -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+      %table{:cellspacing=>"3px", :cellpadding=>"3px"}
+        %tr.question_cell
+
+        -if !checkpoint.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} . #{checkpoint.name}"
+          %td
+            -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+            -if checkpoint_filling.nil?
+              Not Attempted
+            -else
+              =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
+        -elsif !free_text.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} .  #{free_text.name}"
+
+            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+            -if free_text_filling.nil?
+              -@comment=""
+            -else
+              -@comment=free_text_filling.comment
+            -if free_text.name.downcase=="date"
+              %td
+                =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
+            -else
+              %td
+                =text_area @comment ,:name=>"free_text_#{free_text.id}".to_sym,:disabled=>false
+
+
+
+        -elsif !dropdownpoint.nil?
+          %td{:width=>"800px"}
+            ="#{i+1} . #{dropdownpoint.name}"
+          %td
+            =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+
+
+
+
+
+
+%h4
+  =#link_to "Back",params[:referral_url]
+  -#=link_to "Back",request.referer,:class=>"greenButton"
+  -#check this update link
+  = link_to_with_rights "Update", url(:controller => "responses", :action => "update", :id => @response.id),:class=>"greenButton"

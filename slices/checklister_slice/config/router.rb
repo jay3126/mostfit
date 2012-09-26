@@ -4,7 +4,8 @@ Merb::Router.prepare do
   resources :rejection_reasons
   resources :dropdownpoint_fillings
   resources :dropdownpoints
-  #resources :responses
+  resources :responses
+  #resources :responses, :id => %r(\d+)
   #resources :checkpoint_fillings
   #resources :target_entities
   #resources :fillers
@@ -21,6 +22,7 @@ Merb::Router.prepare do
   #match('check/checklists/fill_in_checklist/:id').to(:controller => 'checklists', :action => 'fill_in_checklist').name(:fill_in_checklist)
   #match('check/checklists/capture_checklist_data').to(:controller => 'checklists', :action => 'capture_checklist_data').name(:capture_checklist_data)
   #match('check/responses/view_response/:id/').to(:controller => 'responses', :action => 'view_response').name(:view_response)
+  #match('check/responses/edit_response/:id/').to(:controller => 'responses', :action => 'edit_response').name(:edit_response)
 
 
 #  ... 
