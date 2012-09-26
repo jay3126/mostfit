@@ -1185,7 +1185,11 @@ class Loan
       principal_due_today                    = [principal_due - ((last_row or Nothing)[:principal_due] || 0), 0].max
       interest_due_today                     = [interest_due  - ((last_row or Nothing)[:interest_due]  || 0), 0].max
 
-      actual_outstanding_principal           = outstanding ? actual[:balance].round(2) : 0
+      if self.loan_product.name.include?("Dairy") and i_num >= 26
+        actual_outstanding_principal           = outstanding ? (actual[:balance].round(2) + self.insurance_policy.premium) : 0
+      else
+        actual_outstanding_principal           = outstanding ? actual[:balance].round(2) : 0
+      end
       actual_outstanding_total               = outstanding ? actual[:total_balance].round(2) : 0
       actual_outstanding_interest            = outstanding ? (actual_outstanding_total - actual_outstanding_principal) : 0
 
