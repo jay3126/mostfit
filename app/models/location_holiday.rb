@@ -120,6 +120,12 @@ class LocationHoliday < StandardFacade
     HolidayAdministration.first('location_holiday.move_work_to_date' => move_date, :biz_location => parent_locations.flatten.uniq)
   end
 
+  def self.working_holiday?(at_location, on_date)
+    on_date = Date.parse on_date
+    valid_dates = get_configuration_facade(User.first).permitted_business_days_in_month(on_date)
+    !(valid_dates.include?(on_date) && get_any_holiday(at_location, on_date).blank?)
+  end
+
   private
 
   # This returns the holiday that was created for a specific location
@@ -144,7 +150,7 @@ class LocationHoliday < StandardFacade
     nil
   end
 
-  def get_configuration_facade(user)
+  def self.get_configuration_facade(user)
     @configuration_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CONFIGURATION_FACADE, user)
   end
 end

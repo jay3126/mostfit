@@ -289,7 +289,6 @@ class BizLocations < Application
     message[:error] << "Please select Location Level" if b_level.blank?
     message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
     message[:error] << "Parent location is invaild" if @parent_location.blank?
-    message[:error] << "Please select Driginator By" if b_originator_by.blank?
     message[:error] << "Meeting Number cannot be blank" if !b_meeting.blank? && b_meeting_number.blank?
     message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
     message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&

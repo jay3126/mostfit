@@ -31,7 +31,7 @@ class Lendings < Application
 
   def create
     #INITIALIZING VARIABLES USED THOURGHTOUT
-    @message = {}
+    @message = {:error => [], :notice => []}
 
     #GET-KEEPING
     lending_product_id            = params[:lending_product_id]
@@ -48,22 +48,26 @@ class Lendings < Application
 
     @loan_borrower                = Client.get loan_borrower_id unless loan_borrower_id.blank?
     @lending_product              = LendingProduct.get lending_product_id unless lending_product_id.blank?
+    @client_admin                 = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
+    @biz_location                 = @client_admin.administered_at_location
 
     # VALIDATIONS
-    @message[:error] = "Loan Id cannot blank" if lan_id.blank?
-    @message[:error] = "Applied Date cannot blank" if applied_date.blank?
-    @message[:error] = "Please select staff" if applied_by_staff.blank?
-    @message[:error] = "Schedule Disbursal Date cannot blank" if schedule_disbursal_date.blank?
-    @message[:error] = "Schedule First Repayment Date cannot blank" if schedule_first_repayment_date.blank?
-    @message[:error] = "Funding line cannot be blank" if funding_line_id.blank?
-    @message[:error] = "Tranch cannot be blank" if tranch_id.blank?
+    @message[:error] << "Loan Id cannot blank" if lan_id.blank?
+    @message[:error] << "Applied Date cannot blank" if applied_date.blank?
+    @message[:error] << "Please select staff" if applied_by_staff.blank?
+    @message[:error] << "Schedule Disbursal Date cannot blank" if schedule_disbursal_date.blank?
+    @message[:error] << "Schedule First Repayment Date cannot blank" if schedule_first_repayment_date.blank?
+    @message[:error] << "Funding line cannot be blank" if funding_line_id.blank?
+    @message[:error] << "Tranch cannot be blank" if tranch_id.blank?
+    @message[:error] << "Applied cannot be holiday" if !applied_date.blank? && LocationHoliday.working_holiday?(@biz_location, applied_date)
+    @message[:error] << "Schedule Disbursal Date cannot be holiday" if !schedule_disbursal_date.blank? && LocationHoliday.working_holiday?(@biz_location, schedule_disbursal_date)
+    @message[:error] << "Schedule First Repayment Date cannot be holiday" if !schedule_first_repayment_date.blank? && LocationHoliday.working_holiday?(@biz_location, schedule_first_repayment_date)
 
     @lending = @lending_product.lendings.new(params[:lending])
 
     # PERFORM OPERATION
     if @message[:error].blank?
       begin
-        @client_admin = ClientAdministration.first :counterparty_type => 'client', :counterparty_id => @loan_borrower.id
         money_amount  = @lending_product.to_money[:amount]
         @loan_purpose = LoanPurpose.get loan_purpose_id
         @lending       = Lending.create_new_loan(money_amount, @lending_product.repayment_frequency.to_s, @lending_product.tenure, @lending_product,
@@ -71,16 +75,17 @@ class Lendings < Application
           schedule_first_repayment_date, applied_by_staff, recorded_by_user, funding_line_id, tranch_id, lan_id, @loan_purpose)
 
         if @lending.new?
-          @message[:error] = @lending.error.first.join(", ")
+          @message[:error] << @lending.error.first.join("<br>")
         else
           @message[:notice] = "Lending created successfully"
         end
       rescue => ex
-        @message = {:error => "An error has occured: #{ex.message}"}
+        @message[:error] << "An error has occured: #{ex.message}"
       end
     end
 
     #REDIRECTION/RENDER
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
     if @message[:error].blank?
       redirect resource(@lending), :message => @message
     else
