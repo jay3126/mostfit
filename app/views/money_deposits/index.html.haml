@@ -84,6 +84,8 @@
           =  select :name => "account", :id => "bank_account_selector", :prompt => 'Select account'
         %td
           = text_field :name => "amount"
+          %span.greytext
+            = "numbers>0"
         %td
           = date_select "created_on", Date.today, :id => "deposit_date", :max_date => Date.today
     %tfoot
