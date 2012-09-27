@@ -1,3 +1,21 @@
+:javascript
+  $(document).ready(function() {
+    $("#cgt_date_one, #cgt_date_two").change(function() {
+      cgt_start_date = jQuery("#cgt_date_one").val();
+      cgt_end_date = jQuery("#cgt_date_two").val();
+      cgt_start_date = ddmmyyyyToDate(cgt_start_date);
+      cgt_end_date = ddmmyyyyToDate(cgt_end_date);
+      oneDay  = 24*60*60*1000;
+      diffDays = (cgt_end_date.getTime() - cgt_start_date.getTime()) / oneDay;
+      if (isNaN(diffDays) || (diffDays < 0)) {
+        $("#days_between_dates").attr('value', "0");
+      }
+      else {
+        $("#days_between_dates").attr('value', diffDays);
+      }
+    });
+  });
+
 .shaded
   - if @center_cycle && !@center_cycle.blank?
     = form(:action => url(:controller => 'center_cycles', :action => 'record_cgt'), :method => :post) do
@@ -11,6 +29,9 @@
             %th CGT Start Date:
             %td
               = date_select :cgt_date_one
+            %th No. of days
+            %td
+              = text_field :name => :days_difference, :readonly => 'true', :id => "days_between_dates"
           %tr
             %th CGT End Date:
             %td
