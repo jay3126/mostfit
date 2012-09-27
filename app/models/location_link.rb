@@ -110,4 +110,12 @@ class LocationLink
     end
     @all_location.flatten.compact.uniq
   end
+
+  def self.all_children_with_self(for_location, on_date = Date.today)
+    all_children(for_location, on_date)<<for_location
+  end
+
+  def self.all_parents_with_self(for_location, on_date = Date.today)
+    all_parents(for_location, on_date)<<for_location
+  end
 end

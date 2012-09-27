@@ -243,7 +243,7 @@ module Merb
           @holidays = @holidays||LocationHoliday.all.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
         else
           @biz_location = @biz_location || BizLocation.get(attrs[:location_id])
-          @holidays =  LocationLink.all_parents(@biz_location).map(&:location_holidays).flatten.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
+          @holidays =  LocationLink.all_parents_with_self(@biz_location).map(&:location_holidays).flatten.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
         end
         @holidays_count = @holidays.count
         @working_holiday = configuration_facade.non_working_days.to_s
