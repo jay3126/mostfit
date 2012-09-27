@@ -291,6 +291,7 @@ class NewClients < Application
         begin
           loan_application = LoanApplication.get loan_application_id
           loan_application.create_client
+          loan_application.set_status(Constants::Status::CLIENT_CREATED)
           message = {:notice => "Successfully created client for Loan Application ID #{loan_application_id} as Client ID #{loan_application.client_id}"}
         rescue => ex
           @errors << "An error has occured for Loan Application ID #{loan_application_id}: #{ex.message}"
