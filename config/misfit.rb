@@ -95,14 +95,15 @@ module Misfit
         Date.instance_eval do
           class << self 
             mfi = Mfi.first
-            min_allowed_transaction_date = if mfi.min_date_from and mfi.number_of_past_days
-                                             (mfi.min_date_from==:today ? Date.today : mfi.in_operation_since) - mfi.number_of_past_days
-                                           elsif mfi.in_operation_since
-                                             mfi.in_operation_since
-                                           else              
-                                             Date.new(2000, 01, 01)
-                                           end
+            # min_allowed_transaction_date = if mfi.min_date_from and mfi.number_of_past_days
+            #                                  (mfi.min_date_from==:today ? Date.today : mfi.in_operation_since) - mfi.number_of_past_days
+            #                                elsif mfi.in_operation_since
+            #                                  mfi.in_operation_since
+            #                                else              
+            #                                  Date.new(2000, 01, 01)
+            #                                end
             
+            min_allowed_transaction_date = Date.new(2012, 9, 27)
             min_allowed_date = if not mfi.in_operation_since.blank?
                                  mfi.in_operation_since 
                                else
