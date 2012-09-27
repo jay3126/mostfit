@@ -131,7 +131,7 @@ class Lendings < Application
             if lending.valid?
               lendings << lending
             else
-              @message[:error] << "#{lending.id}= #{lending.errors.first.join(', ')}"
+              @message[:error] << "Loan (#{lending.id}):- #{lending.errors.first.join('<br>')}"
             end
           end
         end

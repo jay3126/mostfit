@@ -46,6 +46,22 @@ class Lending
   property :disbursement_mode,              Enum.send('[]', *DISBURSEMENT_MODES), :nullable => false, :default => NOT_SPECIFIED
   property :cheque_number,                  Integer, :nullable => true
 
+  validates_with_method :check_working_business_holiday?
+
+  def check_working_business_holiday?
+    return_value = true
+    loan_dates = {'Apply Date' => self.applied_on_date, 'Approve Date'=>self.approved_on_date, 'Disbursal Date' => self.disbursal_date,
+      'Reject Date' => self.rejected_on_date, 'Repaid Date' => self.repaid_on_date, 'Preclose Date' => self.preclosed_on_date,
+      'Write Off Date' => self.write_off_on_date
+    }
+    loan_dates.select{|key,value| !value.blank?}.sort_by{|name,value| value}.each do |date_name, date|
+      if !date.blank? && LocationHoliday.working_holiday?(self.administered_at_origin_location, date)
+        return return_value = [false, "#{date_name} cannot be Working/Business Holiday"]
+      end
+    end
+    return_value
+  end
+
   def administered_at_origin_location; BizLocation.get(self.administered_at_origin); end
   def accounted_at_origin_location; BizLocation.get(self.accounted_at_origin); end
 
@@ -391,7 +407,7 @@ class Lending
     sum_of_oustanding_and_due_principal(on_date) + sum_of_oustanding_and_due_interest(on_date)
   end
 
-  def actual_total_due(on_date)    
+  def actual_total_due(on_date)
     net_outstanding = actual_total_outstanding_net_advance_balance
     scheduled_outstanding = scheduled_total_outstanding(on_date)
 

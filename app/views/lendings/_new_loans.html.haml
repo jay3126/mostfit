@@ -94,7 +94,7 @@
             %th
               Date:
             %td
-              = date_select "approved_on_date", get_effective_date, :max_date => Date.today, :size => 8
+              = date_select "approved_on_date", get_effective_date, :max_date => Date.today, :size => 8, :location_id => params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
             %th
               Performed by:
             %th

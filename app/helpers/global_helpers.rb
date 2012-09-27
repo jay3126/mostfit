@@ -201,9 +201,9 @@ module Merb
       attrs.merge!(:size => opts[:size]||20)
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
-      attrs.merge!(:nullable => (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable))
-      attrs.merge!(:holiday  => (attrs.key?(:holiday) ? attrs[:holiday] : true))
-      attrs.merge!(:location_id  => (attrs.key?(:location_id) ? attrs[:location_id] : ''))
+      attrs.merge!(:nullable => (opts.key?(:nullable) ? opts[:nullable] : Mfi.first.date_box_editable))
+      attrs.merge!(:holiday  => (opts.key?(:holiday) ? opts[:holiday] : true))
+      attrs.merge!(:location_id  => (opts.key?(:location_id) ? opts[:location_id] : ''))
       date_select_html(attrs)
     end
 
