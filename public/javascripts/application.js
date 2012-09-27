@@ -29,6 +29,7 @@ function addFloater(link, form){
 function dataTables(){
   if ($('table').hasClass('unsortable')){
     $('table.unsortable').dataTable({
+      "sScrollX": "100%",
       "sPaginationType": "full_numbers",
       "bSort": false,
       "bJQueryUI": true
@@ -36,12 +37,14 @@ function dataTables(){
   }
   else if ($('table').hasClass('weeksheet')){
     $('table.weeksheet').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
       "bJQueryUI": true
     });
   }
   else{
     $('table.dataTable').dataTable({
+      "sScrollX": "100%",
       "sPaginationType": "full_numbers",
       "bJQueryUI": true
     });

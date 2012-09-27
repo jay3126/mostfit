@@ -10,7 +10,6 @@ class SecuritisationPoolInformationReport < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     all_funding_line_ids = FundingLine.all.collect {|fl| fl.id}
-    debugger
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     @funding_line = (params and params[:funding_line_id] and (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
     get_parameters(params, user)
