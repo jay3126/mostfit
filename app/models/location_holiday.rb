@@ -1,4 +1,4 @@
-class LocationHoliday < StandardFacade
+class LocationHoliday
   include DataMapper::Resource
   include Constants::Space
   include Constants::Properties
@@ -20,7 +20,7 @@ class LocationHoliday < StandardFacade
   validates_with_method :check_working_business_holiday?
 
   def check_working_business_holiday?
-    valid_dates = get_configuration_facade(User.first).permitted_business_days_in_month(self.move_work_to_date)
+    valid_dates = LocationHoliday.get_configuration_facade(User.first).permitted_business_days_in_month(self.move_work_to_date)
     if !valid_dates.include?(self.move_work_to_date)
       [false, "There is already Working/Business Holiday defined on Move Date(#{self.move_work_to_date})"]
     elsif !valid_dates.include?(self.on_date)
