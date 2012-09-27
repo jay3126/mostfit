@@ -1,4 +1,4 @@
-class LocationHoliday
+class LocationHoliday < StandardFacade
   include DataMapper::Resource
   include Constants::Space
   include Constants::Properties
@@ -14,13 +14,22 @@ class LocationHoliday
   has n, :holiday_administrations
   has n, :biz_locations, :through => :holiday_administrations
 
-  validates_with_method :only_one_holiday_at_a_location_on_date?
+  validates_is_unique :name
+  validates_is_unique :on_date, :scope => :move_work_to_date
 
-  def only_one_holiday_at_a_location_on_date?
-    existing_holiday_on_date = HolidayAdministration.first('location_holiday.on_date' => self.on_date, :biz_location => self.biz_locations)
-    existing_holiday_on_date && self.id != existing_holiday_on_date.location_holiday.id ? [false, "There is already a holiday: #{existing_holiday_on_date.location_holiday.to_s} in force at the location(#{existing_holiday_on_date.biz_location.name})"] : true
+  validates_with_method :check_working_business_holiday?
+
+  def check_working_business_holiday?
+    valid_dates = get_configuration_facade(User.first).permitted_business_days_in_month(self.move_work_to_date)
+    if !valid_dates.include?(self.move_work_to_date)
+      [false, "There is already Working/Business Holiday defined on Move Date(#{self.move_work_to_date})"]
+    elsif !valid_dates.include?(self.on_date)
+      [false, "There is already Working/Business Holiday defined On Date(#{self.on_date})"]
+    else
+      true
+    end
   end
-
+  
   def to_s; "Holiday #{name} on #{on_date}"; end
 
   def performed_by_staff; StaffMember.get(performed_by) end;
@@ -111,6 +120,12 @@ class LocationHoliday
     HolidayAdministration.first('location_holiday.move_work_to_date' => move_date, :biz_location => parent_locations.flatten.uniq)
   end
 
+  def self.working_holiday?(at_location, on_date)
+    on_date = Date.parse on_date
+    valid_dates = get_configuration_facade(User.first).permitted_business_days_in_month(on_date)
+    !(valid_dates.include?(on_date) && get_any_holiday(at_location, on_date).blank?)
+  end
+
   private
 
   # This returns the holiday that was created for a specific location
@@ -135,4 +150,7 @@ class LocationHoliday
     nil
   end
 
+  def self.get_configuration_facade(user)
+    @configuration_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CONFIGURATION_FACADE, user)
+  end
 end

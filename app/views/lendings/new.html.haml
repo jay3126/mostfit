@@ -3,7 +3,7 @@
   New Loan
 - if @message && !@message[:error].blank?
   .error
-    = @message[:error]
+    = @message[:error].class == Array ? @message[:error].join('<br>') : @message[:error]
 = form_for(@lending, :action => url(@lending , :action => :create), :class => "shaded") do
   = partial 'lendings/fields'
   = submit 'Save'
