@@ -8,7 +8,7 @@
 = link_to_with_rights "Make #{@lending.is_written_off? ? 'Recovery' : 'Repayment'}", url(:controller => :payment_transactions, :action => :payment_form_for_lending, :lending_id => @lending.id), :class => '_remote_ add grey_button'
 - if @lending_transactions.blank?
   %h3
-    No Loan Transactions exists
+    No Loan Transaction exists
 - else
   %table.dataTable.report.weeksheet.nojs.payment
     %thead
