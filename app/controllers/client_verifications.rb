@@ -20,32 +20,41 @@ class ClientVerifications < Application
     if params.key?('verification_status')
       params['verification_status'].keys.each do | cpv_type |
         params['verification_status'][cpv_type].keys.each do | id |
-          verified_by_staff_id = params['verified_by_staff_id'][cpv_type][id]
-          verification_status = params['verification_status'][cpv_type][id]
-          verified_on_date = params['verified_on_date'][cpv_type][id]
-          if verified_by_staff_id.empty?
-            @errors[id] = "Loan Application ID #{id} : Staff ID must be provided for #{cpv_type}"
-            next
-          elsif verified_on_date.empty?
-            @errors[id] = "Loan Application ID #{id} : Verified-on Date must be provided for #{cpv_type}"
-            next
-          end
-          if cpv_type == Constants::Verification::CPV1
-            if verification_status == Constants::Verification::VERIFIED_ACCEPTED
-              loan_applications_facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
-            elsif verification_status == Constants::Verification::VERIFIED_REJECTED
-              loan_applications_facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
-            elsif verification_status == Constants::Verification::VERIFIED_PENDING
-              loan_applications_facade.record_CPV1_pending(id,verified_by_staff_id, verified_on_date)
+          begin
+            verified_by_staff_id = params['verified_by_staff_id'][cpv_type][id]
+            verification_status = params['verification_status'][cpv_type][id]
+            verified_on_date = params['verified_on_date'][cpv_type][id]
+            client_verification = loan_applications_facade.find_cpv1_for_loan_application(id)
+            if verified_by_staff_id.empty?
+              @errors[id] = "Loan Application ID #{id} : Staff ID must be provided for #{cpv_type}"
+              next
+            elsif verified_on_date.empty?
+              @errors[id] = "Loan Application ID #{id} : Verified-on Date must be provided for #{cpv_type}"
+              next
             end
-          elsif cpv_type == Constants::Verification::CPV2
-            if verification_status == Constants::Verification::VERIFIED_ACCEPTED
-              loan_applications_facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
-            elsif verification_status == Constants::Verification::VERIFIED_REJECTED
-              loan_applications_facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
-            elsif verification_status == Constants::Verification::VERIFIED_PENDING
-              loan_applications_facade.record_CPV2_pending(id,verified_by_staff_id, verified_on_date)
+            unless client_verification.blank?
+              cpv1_date = client_verification.verified_on_date
+              raise "Loan Application ID #{id} : CPV2 verification date must not before CPV1 verification date" if cpv1_date > Date.parse(verified_on_date)
             end
+            if cpv_type == Constants::Verification::CPV1
+              if verification_status == Constants::Verification::VERIFIED_ACCEPTED
+                loan_applications_facade.record_CPV1_approved(id,verified_by_staff_id, verified_on_date)
+              elsif verification_status == Constants::Verification::VERIFIED_REJECTED
+                loan_applications_facade.record_CPV1_rejected(id,verified_by_staff_id, verified_on_date)
+              elsif verification_status == Constants::Verification::VERIFIED_PENDING
+                loan_applications_facade.record_CPV1_pending(id,verified_by_staff_id, verified_on_date)
+              end
+            elsif cpv_type == Constants::Verification::CPV2
+              if verification_status == Constants::Verification::VERIFIED_ACCEPTED
+                loan_applications_facade.record_CPV2_approved(id,verified_by_staff_id, verified_on_date)
+              elsif verification_status == Constants::Verification::VERIFIED_REJECTED
+                loan_applications_facade.record_CPV2_rejected(id,verified_by_staff_id, verified_on_date)
+              elsif verification_status == Constants::Verification::VERIFIED_PENDING
+                loan_applications_facade.record_CPV2_pending(id,verified_by_staff_id, verified_on_date)
+              end
+            end
+          rescue => ex
+            @errors['CPV Recording'] = ex.message
           end
         end
       end

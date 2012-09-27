@@ -167,6 +167,10 @@ class ClientVerification
     cpvinfos
   end
 
+  def self.find_cpv1_for_loan_application(loan_application_id)
+    ClientVerification.first(:loan_application_id => loan_application_id, :verification_type => "cpv1")
+  end
+
   private
 
   # Queries CPV status for a loan application

@@ -113,6 +113,9 @@ class LoanApplicationsFacade < StandardFacade
     loan_application.record_CPV2_pending(by_staff, on_date, user_id)
   end
 
+  def find_cpv1_for_loan_application(loan_application_id)
+    ClientVerification.find_cpv1_for_loan_application(loan_application_id)
+  end
   # Locate center cycle information
 
   def get_current_center_cycle_number(at_center_id)
