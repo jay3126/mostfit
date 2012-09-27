@@ -4,7 +4,7 @@ class Account
   before :save, :convert_blank_to_nil
 
   property :id,                     Serial  
-  property :name,                   String, :index => true
+  property :name,                   String, :index => true, :length => 100
   property :opening_balance,        Integer, :nullable => false, :default => 0
   property :opening_balance_on_date, Date, :nullable => false, :default => Date.today
   property :gl_code,                String, :index => true
