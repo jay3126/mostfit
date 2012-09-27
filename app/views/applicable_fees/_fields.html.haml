@@ -13,7 +13,7 @@
       %th
         Applicable on
       %td
-        = date_select_for @applicable_fee, :applicable_on
+        = date_select_for @applicable_fee, :applicable_on, :min_date => Date.new(2012, 9, 27)
     %tr
       %td
       %td

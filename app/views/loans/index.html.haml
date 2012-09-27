@@ -287,5 +287,5 @@
           - if [:admin, :mis_manager].include?(session.user.role)
             = form_for(@client, :action => url(:action => :move_to_center, :controller => :clients, :id => @client.id)) do
               = select :name => :new_center_id, :collection => @client.center.branch.centers - [@client.center], :text_method => :name, :value_method => :id, :prompt => "Please select a center", :class => "chosen"
-              = date_select "date", Date.today
+              = date_select "date", Date.today, :min_date => Date.new(2012, 9, 27)
               = submit 'move client', :class => 'greenButton'

@@ -35,12 +35,12 @@
     %td
       Date from
     %td
-      = date_select_for(@insurance_policy, "date_from", :date => @insurance_policy.date_from)
+      = date_select_for(@insurance_policy, "date_from", :date => @insurance_policy.date_from, :min_date => Date.new(2012, 9, 27))
   %tr
     %td
       Date to
     %td
-      = date_select_for(@insurance_policy, "date_to", :date => @insurance_policy.date_to, :max_date => Date.today + 3650)
+      = date_select_for(@insurance_policy, "date_to", :date => @insurance_policy.date_to, :min_date => Date.new(2012, 9, 27), :max_date => Date.today + 3650)
       = hidden_field :client_id, :value => @client.id
   %tr
     %td
