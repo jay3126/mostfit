@@ -202,6 +202,8 @@ module Merb
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
       attrs.merge!(:nullable => (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable))
+      attrs.merge!(:holiday  => (attrs.key?(:holiday) ? attrs[:holiday] : true))
+      attrs.merge!(:location_id  => (attrs.key?(:location_id) ? attrs[:location_id] : ''))
       date_select_html(attrs)
     end
 
@@ -214,6 +216,8 @@ module Merb
       attrs.merge!(:name => "#{klass.to_s.snake_case}[#{col.to_s}]")
       attrs.merge!(:id => "#{klass.to_s.snake_case}_#{col.to_s}")
       attrs[:nullable] = (attrs.key?(:nullable) ? attrs[:nullable] : Mfi.first.date_box_editable)
+      attrs[:holiday]  = (attrs.key?(:holiday) ? attrs[:holiday] : true)
+      attrs[:location_id] = (attrs.key?(:location_id) ? attrs[:location_id] : '')
       date = attrs[:date] || obj.send(col)
       date = Date.today if date.blank? and not attrs[:nullable]
       date = nil if date.blank? and attrs[:nullable]
@@ -230,15 +234,39 @@ module Merb
     end
 
     def date_select_html (attrs, obj = nil, col = nil)
+      if attrs[:holiday] == false
+        @holidays = []
+        @holidays_count = 0
+        @working_holiday = ''
+      else
+        if attrs[:location_id].blank?
+          @holidays = @holidays||LocationHoliday.all.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
+        else
+          @biz_location = @biz_location || BizLocation.get(attrs[:location_id])
+          @holidays =  LocationLink.all_parents(@biz_location).map(&:location_holidays).flatten.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
+        end
+        @holidays_count = @holidays.count
+        @working_holiday = configuration_facade.non_working_days.to_s
+      end
       str = %Q{
         <input type='text' name="#{attrs[:name]}" id="#{attrs[:id]}" value="#{attrs[:date]}" size="#{attrs[:size]}" #{attrs[:nullable] ? "" : "readonly='true'"}>
         <script type="text/javascript">
           $(function(){
-            var holidays= #{$holidays_list.to_json};
       function nonWorkingDays(date) {
-      for (var j = 0; j < holidays.length; j++) {
-      if (date.getMonth() == holidays[j][1] - 1 && date.getDate() == holidays[j][0] && date.getYear() - 100 == holidays[j][2]) {
-      return [true, 'holiday_indicator'];
+      var day = date.getDay();
+      var weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      var nonworking_days = '#{@working_holiday}';
+      if (nonworking_days.indexOf(weekdays[day]) >= 0){
+      return [false, 'holiday_indicator'];
+      }
+      #{@count = @holidays_count}
+      for (var j = 0; j < #{@holidays.length}; j++) {
+      day = #{@holidays.blank? ? '' : @holidays[@count-1][0]}
+      month = #{@holidays.blank? ? '' : @holidays[@count-1][1]}
+      year = #{@holidays.blank? ? '' : @holidays[@count-1][2]}
+      #{@count = @count - 1}
+      if (date.getMonth() == month - 1 && date.getDate() == day && date.getYear() - 100 == year) {
+      return [false, 'holiday_indicator'];
       }
       }
       return [true, ''];
