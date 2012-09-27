@@ -11,6 +11,22 @@
           %td
             = "Name"
           %td
+            = "Guarantor Name"
+          %td
+            = "Applicant Birth Date"
+          %td
+            = "Ration Card No."
+          %td
+            = "Voter Card No."
+          %td
+            = "Amount"
+          %td
+            = "Address"
+          %td
+            = "State"
+          %td
+            = "Pincode"
+          %td
             = "Gender"
           %td
             = "Marital Status"
@@ -51,6 +67,22 @@
                 = link_to_with_rights lap.client_id, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
               %td
                 = link_to_with_rights lap.client_name, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
+              %td
+                = lap.client_guarantor_name
+              %td
+                = lap.client_dob
+              %td
+                = lap.client_reference1
+              %td
+                = lap.client_reference2
+              %td
+                = lap.loan_money_amount.to_s
+              %td
+                = lap.client_address
+              %td
+                = lap.client_state.humanize
+              %td
+                = lap.client_pincode
               %td
                 = select :name => "gender[#{client_id}]", :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.gender.to_s
               %td
