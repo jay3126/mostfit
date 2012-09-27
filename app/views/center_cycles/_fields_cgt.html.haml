@@ -31,7 +31,10 @@
               = date_select :cgt_date_one
             %th No. of days
             %td
-              = text_field :name => :days_difference, :readonly => 'true', :id => "days_between_dates"
+              = text_field :name => :days_difference, :readonly => 'true', :id => "days_between_dates", :size => 5
+              %td
+                .greytext
+                  = "(No. of days between CGT Start date and CGT End date)"
           %tr
             %th CGT End Date:
             %td
