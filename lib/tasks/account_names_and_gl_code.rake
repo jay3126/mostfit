@@ -41,5 +41,28 @@ namespace :mostfit do
         acc.save
       end
     end
+
+    desc "This will rename Kotak to AVIVA"
+    task :change_kotak_to_AVIVA do
+      sl_no = 0   #this variable is for serial number.
+      f = File.open("tmp/name_change_from_Kotak_to_AVIVA_#{DateTime.now.to_s}.csv", "w")
+      f.puts("\"Sl. No.\", \"Account Name Before Renaming\", \"GL Code before renaming\", \"Account Name after Renaming\", \"GL Code after renaming\", \"Branch Id\", \"Branch Name\", \"Account Type\"")
+      
+      Account.all.each do |acc|
+        next unless (acc.name.include?("Kotak") and acc.gl_code.include?("Kotak"))
+        sl_no += 1
+        old_acc_name = acc.name
+        old_acc_gl_code = acc.gl_code
+        acc.name = acc.name.gsub("Kotak", "AVIVA")
+        new_acc_name = acc.name
+        acc.gl_code = acc.gl_code.gsub("Kotak", "AVIVA")
+        new_acc_gl_code = acc.gl_code
+        acc.save
+
+        f.puts("#{sl_no}, \"#{old_acc_name}\", \"#{old_acc_gl_code}\", \"#{new_acc_name}\", \"#{new_acc_gl_code}\", #{acc.branch_id}, \"#{acc.branch.name}\", \"#{acc.account_type.name}\"")
+      end
+      f.close
+    end
+
   end
 end
