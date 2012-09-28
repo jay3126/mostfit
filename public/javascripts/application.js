@@ -37,7 +37,6 @@ function dataTables(){
   }
   else if ($('table').hasClass('home_page')){
     $('table.home_page').dataTable({
-      "sScrollX": 890,
       "bPaginate": false,
       "bJQueryUI": true,
       "sDom": '<"H"Tfr>t<"F"ip>',
