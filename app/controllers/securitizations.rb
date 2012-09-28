@@ -58,7 +58,7 @@ class Securitizations < Application
   end
 
   def do_calculations
-     @errors = []
+    @errors = []
     money_hash_list = []
     begin 
       @lendings.each do |lending|
@@ -71,6 +71,18 @@ class Securitizations < Application
     rescue => ex
       @errors << ex.message
     end
+  end
+
+  def loan_assignments
+    render
+  end
+
+  def upload_loan_assignment_file
+    render :loan_assignments
+  end
+
+  def download_xls_file_format
+    send_file('public/loan_assignment_file_format.xls', :filename => ('public/loan_assignment_file_format.xls'.split("/")[-1].chomp))
   end
 
 end

@@ -31,7 +31,7 @@ Merb::Router.prepare do
   resources :auth_override_reasons
   resources :branch_eod_summaries
   resources :cheque_books, :id => %r(\d+)
-  resources :securitizations
+  resources :securitizations, :id => %r(\d+)
   resources :encumberances
   resources :third_parties
   resources :tranches
