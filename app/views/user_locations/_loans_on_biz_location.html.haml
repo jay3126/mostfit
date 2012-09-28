@@ -1,7 +1,12 @@
 :javascript
   $('table.center_loan').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
 
 - if params[:controller] == "new_clients" && !client_facade.is_client_active?(@client)

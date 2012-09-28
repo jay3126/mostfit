@@ -1,7 +1,12 @@
 :javascript
   $('table.center_list').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
 - @date = get_effective_date if @date.blank?
 %h2

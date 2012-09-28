@@ -35,11 +35,26 @@ function dataTables(){
       "bJQueryUI": true
     });
   }
+  else if ($('table').hasClass('home_page')){
+    $('table.home_page').dataTable({
+      "sScrollX": 890,
+      "bPaginate": false,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "../swf/copy_csv_xls_pdf.swf"
+      }
+    });
+  }
   else if ($('table').hasClass('weeksheet')){
     $('table.weeksheet').dataTable({
       "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
   }
   else{

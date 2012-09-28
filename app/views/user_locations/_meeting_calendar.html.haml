@@ -1,7 +1,12 @@
 :javascript
   $('table.center_meeting_cal').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
 %h1
   == Center Meeting Calender for center #{@biz_location.name}

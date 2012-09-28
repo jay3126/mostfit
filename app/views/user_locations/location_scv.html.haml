@@ -1,7 +1,12 @@
 :javascript
   $('table.scv').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
 %br
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
