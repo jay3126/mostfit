@@ -1,0 +1,16 @@
+- unless @errors.blank?
+  - @errors.keys.each do |key|
+    .error
+      = "#{@errors[key]}"
+      %br
+
+%h1 Loan Assignments
+%br
+.menu-strip
+  = link_to_with_rights "Click to Download xls file format", url(:controller => :securitizations, :action => :download_xls_file_format)
+%br
+.shaded
+  %h2 Upload xls to mark loan as assigned (securitized or encumbered)
+  %form{:action => url(:controller => :securitizations, :action => :upload_loan_assignment_file), :enctype => "multipart/form-data", :method => "post"}
+    %input{:name => "file", :size => "80", :type => "file"}
+    %input{:type => "submit", :value => "Upload"}
