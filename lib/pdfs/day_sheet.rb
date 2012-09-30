@@ -111,10 +111,12 @@ module Pdf
     end
 
     def generate_all_due_collection_pdf(user_id, location_ids, date)
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       file_names = {}
       folder   = File.join(Merb.root, "doc", "pdfs", "company","due_sheets",date.to_s)
       FileUtils.mkdir_p(folder)
-      
+      idx = 0
       all_branches = location_ids.blank? ? BizLocation.all('location_level.level' => 1) : BizLocation.all(:id => location_ids)
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
       all_branches.each do |branch|
@@ -123,92 +125,78 @@ module Pdf
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
         pdf.info.title = "due_generation_#{branch.name}_#{Time.now}"
-        pdf.text "Daily Collection Sheet for #{branch.name} for #{date}", :font_size => 24, :justification => :center
+        pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 24, :justification => :center
         pdf.text("\n")
-        idx = 0
+
+        create_new_page = false
         branch_centers = LocationLink.get_children(branch)
         branch_centers.each{|center| weeksheets << CollectionsFacade.new(user_id).get_collection_sheet(center.id, date)}
         weeksheets.each do |weeksheet|
           unless weeksheet.blank?
-            location = BizLocation.get weeksheet.at_biz_location_id
+            location            = BizLocation.get weeksheet.at_biz_location_id
+            location_manage     = location_facade.location_managed_by_staff(location.id, date)
+            staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
+            meeting             = meeting_facade.get_meeting(location, date)
+            meeting_status      = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+            table1              = PDF::SimpleTable.new
             pdf.start_new_page if idx > 0
-            pdf.text "Location: #{location.name}, Manager: #{self.name}, signature: ______________________", :font_size => 12, :justification => :left
-            #pdf.text("Center leader: #{location.leader.client.name}, signature: ______________________", :font_size => 12, :justification => :left) if location.leader
-            pdf.text("Date: #{date}, Time: #{weeksheet.at_meeting_time_begins_hours}:#{'%02d' % weeksheet.at_meeting_time_begins_minutes}", :font_size => 12, :justification => :left)
-            pdf.text("Meeting Status: No Meeting", :font_size => 12, :justification => :left) unless MeetingCalendar.meeting_at_location_on_date(location, date)
-            pdf.text("\n")
+            table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{branch.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{location.name}"},
+              {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
+              {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{location.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"}
+            ]
 
-            table = PDF::SimpleTable.new
+            table1.column_order  = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
+            table1.show_lines    = :none
+            table1.shade_rows    = :none
+            table1.show_headings = false
+            table1.shade_headings = true
+            table1.orientation   = :center
+            table1.position      = :center
+            table1.heading_font_size = 16
+            table1.font_size         = 14
+            table1.header_gap = 20
+            table1.width = 600
+            table1.render_on(pdf)
+            pdf.text("\n")
+            table      = PDF::SimpleTable.new
             table.data = []
-            tot_amount, tot_outstanding, tot_installments, tot_principal, tot_interest, total_due, tot_fee= 0, 0, 0, 0, 0, 0, 0
+            tot_amount = MoneyManager.default_zero_money
             weeksheet.groups.each do |group|
               collection_sheets = weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
-              group_amount, group_outstanding, group_installments, group_principal, group_interest, group_fee, group_due = 0, 0, 0, 0, 0, 0, 0
-              #table.data.push({"Actual Principal Due" => group ? group[1] : "No group"})
-              loan_row_count=0
+              loan_row_count=1
               collection_sheets.each do |ws|
+                lending = Lending.get ws.loan_id
+                due     = lending.get_loan_due_status_record(date)
                 table.data.push({
-                    "Name"                         => ws.borrower_name,
-                    "Loan Id"                      => ws.loan_id,
-                    "Status"                       => ws.loan_status.to_s.humanize,
-                    "Disbursed Amount"             => ws.loan_disbursed_amount.to_s,
-                    "Disbursed Date"               => ws.loan_disbursed_date,
-                    "Installment Number"           => ws.loan_installment_number,
-                    "Schedule Date"                => ws.loan_schedule_date,
-                    "Due Status"                   => ws.loan_due_status.to_s.humanize,
-                    "Schedule Principal Due"       => ws.loan_schedule_principal_due.to_s,
-                    "Actual Principal Outstanding" => ws.loan_actual_principal_outstanding.to_s,
-                    "Schedule Interest Due"        => ws.loan_schedule_interest_due.to_s,
-                    "Actual Interest Outstanding"  => ws.loan_actual_interest_outstanding.to_s,
-                    "Advance Amount"               => ws.loan_advance_amount.to_s,
-                    "Principal Receipts"           => ws.loan_principal_receipts.to_s,
-                    "Interest Receipts"            => ws.loan_interest_receipts.to_s,
-                    "Advance Receipts"             => ws.loan_advance_receipts.to_s,
-                    "Total Amount"                 => ws.loan_actual_total_due.to_s,
-                    "Signature" => "" })
-                loan_row_count     += 1
-                if loan_row_count==0
-                  table.data.push({"Name" => ws.borrower_name, "Signature" => "", "Status" => "nothing outstanding"})
-                end
+                    "S. No."     => loan_row_count,
+                    "Group"      => ws.borrower_group_name,
+                    "Name"       => ws.borrower_name,
+                    "LAN"        => lending.lan,
+                    "POS"        => ws.loan_schedule_principal_outstanding,
+                    "EWI Date"   => ws.loan_schedule_date,
+                    "EWI No./46" => ws.loan_installment_number,
+                    "Overdue"    => due.blank? ? '' : due.due_status.to_s,
+                    "EWI Due"    => (ws.loan_schedule_principal_due+ws.loan_schedule_interest_due).to_s,
+                    "EWI Paid"   => '',
+                    "Attendance" => ''
+                  })
+                loan_row_count += 1
+                tot_amount += ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
               end
-
-              #          table.data.push({"amount" => group_amount.to_currency, "outstanding" => group_outstanding.to_currency,
-              #              "principal" => group_principal.to_currency, "interest" => group_interest.to_currency,
-              #              "fee" => group_fee.to_currency, "total due" => group_due.to_currency
-              #            })
-              #          tot_amount         += group_amount
-              #          tot_outstanding    += group_outstanding
-              #          tot_installments   += group_installments
-              #          tot_principal      += group_principal
-              #          tot_interest       += group_interest
-              #          tot_fee            += group_fee
-              #          total_due          += (group_principal + group_interest + group_fee)
-
             end
-            #        table.data.push({"amount" => tot_amount.to_currency, "outstanding" => tot_outstanding.to_currency,
-            #            "principal" => tot_principal.to_currency,
-            #            "interest" => tot_interest.to_currency, "fee" => tot_fee.to_currency,
-            #            "total due" => (tot_principal + tot_interest + tot_fee).to_currency
-            #          })
-            #table.column_order  = ["name", "loan id" , "amount", "outstanding", "status", "disbursed", "installment", "principal", "interest", "fee", "total due", "days absent/total", "signature"]
-            table.column_order  = ["Name", "Loan Id" ,"Status","Disbursed Amount","Disbursed Date","Installment Number",
-              "Schedule Date","Due Status","Schedule Principal Due",
-              "Actual Principal Outstanding","Schedule Interest Due",
-              "Actual Interest Outstanding","Advance Amount",
-              "Principal Receipts","Interest Receipts","Advance Receipts",
-              "Total Amount", "Signature"]
+            table.data.push({"Group" => 'Total', "EWI Due" => tot_amount.to_s})
+            table.column_order      = ["S. No.", "Group" , "LAN", "Name", "POS", "EWI Date", "EWI No./46", "Overdue", "EWI Due", "EWI Paid", "Attendance"]
             table.show_lines        = :all
             table.show_headings     = true
             table.shade_rows        = :none
             table.shade_headings    = true
             table.orientation       = :center
             table.position          = :center
-            table.heading_font_size = 8
-            table.font_size         = 8
+            table.heading_font_size = 16
+            table.font_size         = 12
             table.header_gap        = 10
             table.maximum_width     = 830
             table.render_on(pdf)
-
             idx += 1
           end
         end
