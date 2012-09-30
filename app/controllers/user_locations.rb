@@ -277,6 +277,32 @@ class UserLocations < Application
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_center_id => @biz_location.id})
     partial 'loan_applications/all_loan_applications'
   end
+  
+  def due_generation_for_location
+    @locations = BizLocation.all('location_level.level' => 1)
+    display @location
+  end
+
+  def get_due_generation_sheet_for_location
+    @message = {}
+    @date = params[:on_date]
+    location_ids = params[:location_ids]
+    @message[:error] = "Date cannot be blank" if @date.blank?
+    if @message.blank?
+      begin
+        @date = Date.parse params[:on_date]
+        @file = session.user.staff_member.generate_all_due_collection_pdf(session.user.id, location_ids, @date)
+      rescue => ex
+        @message = {:error => ex.message}
+      end
+    end
+    if @message[:error].blank?
+      send_data(File.read(@file), :filename => @file.split('/').last, :type => "application/zip")
+    else
+      redirect request.referer, :message => @message
+    end
+  end
+
 
   private
 

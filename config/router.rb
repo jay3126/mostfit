@@ -24,7 +24,7 @@ Merb::Router.prepare do
   resources :overlap_report_responses, :id => %r(\d+)
   resources :overlap_report_requests, :id => %r(\d+)
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
-  resources :user_locations, :id => %r(\d+), :member => {:weeksheet_collection => [:get]}
+  resources :user_locations, :id => %r(\d+), :member => {:weeksheet_collection => [:get]}, :collection => {:get_due_generation_sheet_for_location => [:get], :due_generation_for_location => [:get]}
 
   #book-keeping from bk ends
 

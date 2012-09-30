@@ -17,6 +17,8 @@
           = link_to_with_rights 'Location Level', url(:controller => "location_levels", :action => "index"), :class => 'org icon'
         %li
           = link_to_with_rights 'Biz Location', resource(:biz_locations), :class => 'org icon'
+        %li
+          = link_to_with_rights 'Due Generation Sheets', resource(:user_locations, :due_generation_for_location), :class => 'org icon'
     .admin-box
       %h2 Manage staff, users and roles
       %ul.icon_links

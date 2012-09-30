@@ -1,0 +1,16 @@
+%h1 Due Generation For Location
+= form_for(:user_locations, :action => resource(:user_locations, :get_due_generation_sheet_for_location), :method => :get) do
+  .shaded
+    %table.form
+      %thead
+        %tr
+          %th Branch:
+          %th
+            = select :name => "location_ids", :text_method => :name, :value_method => :id, :collection => @locations, :prompt => "Select branch", :class => 'multiple'
+          %th
+            Select Date:
+          %th
+            - date = params[:on_date] ? params[:on_date] : get_effective_date
+            = date_select 'on_date', date
+          %td
+            = submit "Go"

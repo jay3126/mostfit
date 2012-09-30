@@ -9,7 +9,8 @@ function addFloater(link, form){
     }
     if((window.document.height > form.offset().top + form.height()) && !$(".floatingBox").hasClass("shiftUp")){
       var top = link.offset().top + link.height();
-    }else{
+    }
+    else{
       var top = link.offset().top;
     }
     $(form).offset({
@@ -42,6 +43,16 @@ function dataTables(){
       "sDom": '<"H"Tfr>t<"F"ip>',
       "oTableTools": {
         "sSwfPath": "../swf/copy_csv_xls_pdf.swf"
+      }
+    });
+  }
+  else if ($('table').hasClass('location_weeksheet')){
+    $('table.weeksheet').dataTable({
+      "bPaginate": false,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
       }
     });
   }
