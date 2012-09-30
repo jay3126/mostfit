@@ -303,6 +303,11 @@ class UserLocations < Application
     end
   end
 
+  def zip_file_download
+    file_url = params[:file_url]
+    send_data(File.read(file_url), :filename => file_url.split('/').last, :type => "application/zip")
+  end
+
 
   private
 

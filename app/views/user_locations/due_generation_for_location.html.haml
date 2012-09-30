@@ -14,3 +14,18 @@
             = date_select 'on_date', date
           %td
             = submit "Go"
+- files = {}
+- Dir.entries("#{Merb.root}/doc/pdfs/company/due_sheets").delete_if{|s| s.include?('.')}.map{|dir| files["#{Merb.root}/doc/pdfs/company/due_sheets/#{dir.to_s}"]=Dir.entries("#{Merb.root}/doc/pdfs/company/due_sheets/"+dir)} rescue []
+%br
+%table.dataTable.weeksheet.report.nojs
+  %thead
+    %tr
+      %th Date
+      %th File Name
+  - files.each do |path, file_names|
+    -file_names.select{|s| s.split('.').last=="zip"}.each do |file|
+      %tr
+        %td
+          = path.split('/').last
+        %td
+          = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")

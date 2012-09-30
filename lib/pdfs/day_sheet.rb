@@ -115,7 +115,7 @@ module Pdf
       folder   = File.join(Merb.root, "doc", "pdfs", "company","due_sheets",date.to_s)
       FileUtils.mkdir_p(folder)
       
-      all_branches = location_ids.blank? ? BizLocation.all(:id => location_ids) : BizLocation.all('location_level.level' => 1)
+      all_branches = location_ids.blank? ? BizLocation.all('location_level.level' => 1) : BizLocation.all(:id => location_ids)
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
       all_branches.each do |branch|
         weeksheets = []
