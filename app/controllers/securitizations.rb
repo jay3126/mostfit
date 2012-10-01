@@ -86,6 +86,7 @@ class Securitizations < Application
   end
 
   def loan_assignments
+    @loan_assignments = LoanAssignment.all
     render
   end
 

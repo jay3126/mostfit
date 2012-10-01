@@ -1,4 +1,3 @@
-- facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
 %h1== Loan Name: <i>#{@lending_product.name}</i>
 %div{:style => 'display:table; width:100%;'}
   %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
@@ -63,7 +62,7 @@
     %tr.odd
       %th.odd Loan assignment status
       %td
-        - loan_assigned_to = facade.get_loan_assigned_to(@lending.id, Date.today)
+        - loan_assigned_to = loan_assignment_facade.get_loan_assigned_to(@lending.id, Date.today)
         - if loan_assigned_to.nil?
           = "Not Assigned"
         - else

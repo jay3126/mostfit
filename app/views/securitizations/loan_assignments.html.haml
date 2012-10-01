@@ -14,3 +14,31 @@
   %form{:action => url(:controller => :securitizations, :action => :upload_loan_assignment_file), :enctype => "multipart/form-data", :method => "post"}
     %input{:name => "file", :size => "80", :type => "file"}
     %input{:type => "submit", :value => "Upload"}
+%br
+.shaded
+  %h2 Assigned Loans
+  - unless @loan_assignments.blank?
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %td Loan ID
+          %td LAN ID
+          %td Loan Assignment Status
+          %td Funder
+          %td Funding Line
+          %td Tranch
+      %tbody
+        - @loan_assignments.each do |la|
+          - loan = Lending.get(la.loan_id)
+          - funder = loan_facade.get_funder_assigned_to_loan(la.loan_id) rescue nil
+          - funding_line = loan_facade.get_funding_line_assigned_to_loan(la.loan_id) rescue nil
+          - tranch = loan_facade.get_tranch_assigned_to_loan(la.loan_id) rescue nil
+          %tr
+            %td= link_to_with_rights la.loan_id, resource(loan)
+            %td= loan.lan
+            %td= loan_assignment_facade.get_loan_assigned_to(la.loan_id, Date.today).loan_assignment_instance.to_s
+            %td= "#{funder.name} (Id: #{funder.id})" rescue nil
+            %td= "#{funding_line.name} (Id: #{funding_line.id})" rescue nil
+            %td= "#{tranch.name} (Id: #{tranch.id})" rescue nil
+  - else
+    "No loans has been assigned to either securitization or encumbrance"
