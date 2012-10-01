@@ -105,6 +105,8 @@
           %li
             = link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
           %li
+            = link_to_with_rights 'Loans Eligible For Loan Assignment', url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments, :flag => 'true'), :class => 'icon accept'
+          %li
             = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
 
   .admin-box

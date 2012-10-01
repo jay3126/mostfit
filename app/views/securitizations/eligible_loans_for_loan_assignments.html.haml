@@ -1,0 +1,66 @@
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+%h1
+  = "List of Loans Eligible for Loan Assignment"
+
+%form{:action => url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments), :method => :get}
+  = partial 'lib/biz_location_selector'
+
+- lendings = @lendings
+- if lendings.blank?
+  .shaded
+    %h3 No Loan exists
+- else
+  %table.report.weeksheet.nojs.update_funding_lines
+    %thead
+      %tr
+        %th
+          S.No.
+        %th
+          Loan ID
+        %th
+          LAN ID
+        %th
+          Loan Product
+        %th
+          Borrower
+        %th
+          Funder
+        %th
+          Fundling Line
+        %th
+          Tranch
+    - s_no = 1
+    - lendings.each do |lending|
+      - funder = loan_facade.get_funder_assigned_to_loan(lending.id)
+      - funding_line = loan_facade.get_funding_line_assigned_to_loan(lending.id)
+      - tranch = loan_facade.get_tranch_assigned_to_loan(lending.id)
+      %tr
+        %td
+          = s_no
+        %td
+          = link_to_with_rights lending.id, resource(lending)
+        %td
+          = lending.lan
+        %td
+          = link_to_with_rights lending.lending_product.name, url(:controller => :lending_products, :action => :show, :id => lending.lending_product.id)
+        %td
+          = lending.loan_borrower.counterparty.name
+        %td
+          = "#{funder.name} (Id: #{funder.id})"
+        %td
+          = "#{funding_line.name} (Id: #{funding_line.id})"
+        %td
+          = "#{tranch.name} (Id: #{tranch.id})"
+        - s_no += 1

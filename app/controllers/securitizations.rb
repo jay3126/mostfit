@@ -73,6 +73,18 @@ class Securitizations < Application
     end
   end
 
+  def eligible_loans_for_loan_assignments
+    @errors = []
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    unless params[:flag] == 'true'
+      @errors << "No branch selected " if branch_id.blank?
+      @errors << "No center selected " if center_id.blank?
+    end
+    @lendings = loan_facade.loans_eligible_for_sec_or_encum(params[:child_location_id]) if @errors.blank?
+    render :eligible_loans_for_loan_assignments
+  end
+
   def loan_assignments
     render
   end
