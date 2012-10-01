@@ -8,7 +8,7 @@
     %th
       Amount
     %td
-      = text_field :assigned_value
+      = text_field :assigned_value, :value => params[:encumberance] && params[:encumberance][:assigned_value] ? params[:encumberance][:assigned_value] : ''
   %tr
     %th
       Effective on
