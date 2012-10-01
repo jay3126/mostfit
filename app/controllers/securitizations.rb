@@ -91,6 +91,7 @@ class Securitizations < Application
   end
 
   def upload_loan_assignment_file
+    @loan_assignments = LoanAssignment.all
     render :loan_assignments
   end
 
