@@ -91,7 +91,20 @@ class Securitizations < Application
   end
 
   def upload_loan_assignment_file
+    # INITIALIZATIONS
+    @errors = []
     @loan_assignments = LoanAssignment.all
+
+    # VALIDATIONS
+    @errors << "Please select file" if params[:file].blank?
+    @errors << "Invalid file selection (Accepts .xls extension file only)" if params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel"
+
+    # OPERATION PERFORMED
+    if @errors.blank?
+      # TODO
+    end
+
+    # RENDER/RE-DIRECT
     render :loan_assignments
   end
 

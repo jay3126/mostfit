@@ -1,7 +1,7 @@
 - unless @errors.blank?
-  - @errors.keys.each do |key|
+  - @errors.each do |error|
     .error
-      = "#{@errors[key]}"
+      = error
       %br
 
 %h1 Loan Assignments
