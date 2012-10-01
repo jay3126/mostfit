@@ -37,12 +37,12 @@ class Encumberances < Application
 
     # OPERATIONS
     if @errors.blank?
-      @money = MoneyManager.get_money_instance(amount)
-      encum = facade.create_encumberance(name, effective_on, @money)
-      if encum
+      begin
+        @money = MoneyManager.get_money_instance(amount)
+        encum = facade.create_encumberance(name, effective_on, @money)
         redirect resource(:encumberances), :message => {:notice => "Encumberance was successfully created"}
-      else
-        message[:error] = "Encumberance failed to be created"
+      rescue => ex
+        message[:error] = ex.message
         render :new
       end
     else
