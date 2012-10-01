@@ -12,7 +12,7 @@ class Securitization
   def created_on; self.effective_on; end
 
   def to_s
-    "Securitization: #{name} effective #{effective_on}"
+    "<b>Securitization:</b> #{name} <b>Effective On:</b> #{effective_on}"
   end
 
 end

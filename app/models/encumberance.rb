@@ -19,9 +19,8 @@ class Encumberance
   def created_on; self.effective_on; end
 
   def to_s
-    "Encumberance: #{name} effective on #{effective_on}"
+    "<b>Encumberance:</b> #{name} <b>Effective On:</b> #{effective_on}"
   end
-
   def self.create_encumberance(name, effective_on, assigned_value_money_amount)
     new_encumberance = {}
     new_encumberance[:name] = name
