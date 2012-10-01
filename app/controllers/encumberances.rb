@@ -40,7 +40,7 @@ class Encumberances < Application
       begin
         @money = MoneyManager.get_money_instance(amount)
         encum = facade.create_encumberance(name, effective_on, @money)
-        redirect resource(:encumberances), :message => {:notice => "Encumberance was successfully created"}
+        redirect resource(:encumberances), :message => {:notice => "Encumbrance was successfully created"}
       rescue => ex
         message[:error] = ex.message
         render :new

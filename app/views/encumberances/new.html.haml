@@ -1,7 +1,7 @@
 - form_url   =  resource(:encumberances, {:return => params[:return]})
 - cancel_url =  url(params[:return])
 = form_for (@encumberance, :action => "create") do
-  %h1 New Encumberance
+  %h1 New Encumbrance
   = error_messages_for @encumberance
   %fieldset
     = partial "fields"
