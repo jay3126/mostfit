@@ -46,7 +46,7 @@
     %th
       Date of birth:
     %td
-      = date_select_for @client, :date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000
+      = date_select_for @client, :date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
       Date joined
@@ -61,7 +61,7 @@
     %th
       Spouse Date of Birth:
     %td
-      = date_select_for @client, :spouse_date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000
+      = date_select_for @client, :spouse_date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
       Guarantor name:
@@ -71,7 +71,7 @@
     %th
       Guarantor Date of Birth:
     %td
-      = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000
+      = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
       Guarantor relationship:

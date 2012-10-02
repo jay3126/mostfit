@@ -155,7 +155,7 @@ module Pdf
             table1.heading_font_size = 16
             table1.font_size         = 14
             table1.header_gap = 20
-            table1.width = 600
+            table1.width = 830
             table1.render_on(pdf)
             pdf.text("\n")
             table      = PDF::SimpleTable.new
@@ -166,26 +166,27 @@ module Pdf
               loan_row_count=1
               collection_sheets.each do |ws|
                 lending = Lending.get ws.loan_id
-                due     = lending.get_loan_due_status_record(date)
+                installment_due = ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
+                overdue_amt = lending.overdue_amount(date)
                 table.data.push({
-                    "S. No."     => loan_row_count,
-                    "Group"      => ws.borrower_group_name,
-                    "Name"       => ws.borrower_name,
-                    "LAN"        => lending.lan,
-                    "POS"        => ws.loan_schedule_principal_outstanding,
-                    "EWI Date"   => ws.loan_schedule_date,
-                    "EWI No./46" => ws.loan_installment_number,
-                    "Overdue"    => due.blank? ? '' : due.due_status.to_s,
-                    "EWI Due"    => (ws.loan_schedule_principal_due+ws.loan_schedule_interest_due).to_s,
-                    "EWI Paid"   => '',
-                    "Attendance" => ''
+                    "S. No."           => loan_row_count,
+                    "Group"            => ws.borrower_group_name,
+                    "Name"             => ws.borrower_name,
+                    "LAN"              => lending.lan,
+                    "POS"              => ws.loan_schedule_principal_outstanding,
+                    "Installment Date" => ws.loan_schedule_date,
+                    "Installment No."  => ws.loan_installment_number,
+                    "Overdue Amount"   => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
+                    "Installment Due"  => installment_due.to_s,
+                    "Installment Paid" => '',
+                    "Attendance"       => ''
                   })
                 loan_row_count += 1
                 tot_amount += ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
               end
             end
-            table.data.push({"Group" => 'Total', "EWI Due" => tot_amount.to_s})
-            table.column_order      = ["S. No.", "Group" , "LAN", "Name", "POS", "EWI Date", "EWI No./46", "Overdue", "EWI Due", "EWI Paid", "Attendance"]
+            table.data.push({"Group" => 'Total', "Installment Due" => tot_amount.to_s})
+            table.column_order      = ["S. No.", "Group" , "LAN", "Name", "POS", "Installment Date", "Installment No.", "Overdue Amount", "Installment Due", "Installment Paid", "Attendance"]
             table.show_lines        = :all
             table.show_headings     = true
             table.shade_rows        = :none

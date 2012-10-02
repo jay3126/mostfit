@@ -572,6 +572,18 @@ class Lending
 
   def advance_balance(on_date = Date.today); advance_received_till_date(on_date) - advance_adjusted_till_date(on_date); end
 
+  def overdue_amount(on_date)
+    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
+    schedule_amount_till_date = get_sum_scheduled_amounts_info_till_date(on_date)
+    line_item                 = loan_base_schedule.base_schedule_line_items.first(:on_date => on_date)
+    schedule_amount_on_date   = line_item.blank? ? zero_money_amount : line_item.to_money[:scheduled_principal_due]+line_item.to_money[:scheduled_interest_due]
+    amount_till_date          = schedule_amount_till_date[:sum_of_scheduled_principal_due]+schedule_amount_till_date[:sum_of_scheduled_interest_due]
+    received_till_date        = amounts_received_till_date(on_date)[:total_received]
+    return zero_money_amount if amount_till_date < received_till_date
+    overdue_on_date = amount_till_date-received_till_date
+    received_till_date > amount_till_date || overdue_on_date < schedule_amount_on_date ? zero_money_amount : overdue_on_date-schedule_amount_on_date
+  end
+
   ########################################################
   # LOAN PAYMENTS, RECEIPTS, ADVANCES, ALLOCATION  QUERIES # ends
   ########################################################

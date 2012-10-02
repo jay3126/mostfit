@@ -19,7 +19,7 @@
     %tr
       %th Applicant Birth Date
       %td
-        = date_select_for @loan_application, :client_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10
+        = date_select_for @loan_application, :client_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
     %tr
       %th Ration Card No.
       %td
