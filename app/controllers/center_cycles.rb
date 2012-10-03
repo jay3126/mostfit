@@ -152,4 +152,15 @@ class CenterCycles < Application
     redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id)
   end
 
+  def get_date_difference
+    begin
+      start_date = Date.parse(params[:cgt_start_date])
+      end_date = Date.parse(params[:cgt_end_date])
+      days_passed = end_date.mjd - start_date.mjd
+      return (days_passed < 0) ? "negative" : "#{days_passed}"
+    rescue
+      return("0")
+    end
+  end
+
 end

@@ -313,7 +313,18 @@ class LoanApplications < Application
     @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition) - [@loan_application]
     display @loan_applicaion
   end
-  
+
+  def get_client_age
+    begin
+      client_dob = Date.parse(params[:client_date_of_birth])
+      today_date = Date.today
+      age = client_dob.blank? ? 0 : today_date.year - client_dob.year
+      return("#{age}")
+    rescue => ex
+      return("0")
+    end
+  end
+
   private
 
   def get_param_value(param_name_sym)

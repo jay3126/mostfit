@@ -1,21 +1,3 @@
-:javascript
-  $(document).ready(function() {
-    $('#client_dob').change(function() {
-      client_dob = jQuery("#client_dob").val();
-      client_date = ddmmyyyyToDate(client_dob);
-      client_dob_year = client_date.getFullYear();
-      var current_date = new Date();
-      var current_date_year = current_date.getFullYear();
-      diff = current_date_year - client_dob_year;
-      if (isNaN(diff)) {
-        $("#client_age").attr('value', "0");
-      }
-      else {
-      $("#client_age").attr('value', diff);
-      }
-    });
-  });
-
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - if @center.nil?
   %h3 Select branch and center to create new loan application for new loan applicant
@@ -26,7 +8,7 @@
   %h2
     = "Center Cycle Number: #{center_cycle_number}"
   = form_for(loan_application, :action => url(:controller => :loan_applications, :action => :bulk_create_loan_applicant), :method => :post) do
-    %table.form.shaded
+    %table.dataTable
       %thead
         %tr
           %th Applicant Name
