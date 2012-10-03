@@ -61,7 +61,7 @@
         = link_to @center.manager.name, resource(@center.manager)
       %td
         %form{:action => url(:enter_payments, :action => 'by_center'), :method => 'GET', :style => 'margin: 0px; padding: 0px;'}
-          = date_select 'for_date', @date
+          = date_select 'for_date', @date, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
           = hidden_field :name => :center_id, :value => @center.id
           = submit 'Go!',  :style => 'margin: 0px; padding: 0px;'
   - fees_payable       = @fee_paying_things.values.inject({}){|s,x| s+=x}.length
@@ -126,7 +126,7 @@
         Fees collected by
         = select :name => "payment[received_by]", :collection => staff_members_collection, :selected => @center.manager.id.to_s, :id => 'fees_received_by'
         collected on
-        = date_select :for_date, @date, :id => "fees_for_date"
+        = date_select :for_date, @date, :id => "fees_for_date", :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
         = submit 'Pay Fees'
         %table.report.nojs{:style => "width:100%"}
           %thead

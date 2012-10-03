@@ -94,10 +94,10 @@
       Validity
     %td{:colspan => 3}
       %span.greytext valid from
-      = date_select_for @loan_product, :valid_from, :size => 12
+      = date_select_for @loan_product, :valid_from, :size => 12, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
     %td{:colspan => 3}
       %span.greytext valid upto
-      = date_select_for @loan_product, :valid_upto, :size => 12
+      = date_select_for @loan_product, :valid_upto, :size => 12, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
   %tr
     %td
     %td.legend{:colspan => 5}

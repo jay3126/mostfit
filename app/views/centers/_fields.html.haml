@@ -24,7 +24,7 @@
     %td
       %b Creation Date
     %td
-      = date_select_for @center, :creation_date
+      = date_select_for @center, :creation_date, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
       %span.greytext pick the date this center was created on
   %tr
     %td

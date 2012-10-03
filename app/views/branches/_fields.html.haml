@@ -30,7 +30,7 @@
     %td
       Creation Date
     %td
-      = date_select_for @branch, :creation_date
+      = date_select_for @branch, :creation_date, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
       %span.greytext pick the date this branch was created on
   %tr
     - if StaffMember.count==0 and session.user.role==:admin

@@ -18,7 +18,7 @@
   Payments collected by 
   = select :name => "payment[received_by]", :collection => staff_members_collection, :selected => @center.manager.id.to_s, :id => 'payments_received_by', :class => "chosen"
   collected on
-  = date_select "received_on", @date
+  = date_select "received_on", @date, :min_date => Date.new(2012, 9, 27), :max_date => Date.new(2012, 9, 27)
   &nbsp;&nbsp;
   preclose all?
   = check_box :id => "preclose_all", :name => "preclose_all"
