@@ -3,10 +3,10 @@ class Reports < Application
   Types = {
     :periodic     => [DailyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, LoanCollectionsDetailReport, LoanAccountStatementReport],
     #:periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
-    :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport, MonthlyLoanDetailsReport],
+    :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport, MonthlyLoanDetailsReport, BranchDateWiseDcaReport, DateWiseSofDuesCollectionsAndAccrualsReport],
     # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
     :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport, BranchReport, LoanStatusReport],
-    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, SecuritisationLoanDetailsReport, OverdueDetailedReport, AdvancePaymentsCurrentReport, BranchDateWiseDcaReport, LoanExtractForSourceOfFundDetails, PeriodicLoanStatusReport],
+    :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, SecuritisationLoanDetailsReport, OverdueDetailedReport, AdvancePaymentsCurrentReport,  LoanExtractForSourceOfFundDetails, PeriodicLoanStatusReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
     :targets_and_projections  => [IncomeCashflowProjectionReport, CashOutFlow, CashInflow],
     #:targets_and_projections  => [IncomeCashflowProjectionReport, CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],
