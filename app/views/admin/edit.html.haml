@@ -132,11 +132,11 @@
             Allow GRT date on new client form
           %td
             = check_box :allow_grt_date_on_form
-        %tr
-          %td
-            Enable Maps ?
-          %td
-            = check_box :map_enabled
+        -# %tr
+        -#   %td
+        -#     Enable Maps ?
+        -#   %td
+        -#     = check_box :map_enabled
         %tr
           %td{:colspan => 2}
             %hr
@@ -171,6 +171,8 @@
           %td
             = check_box :asset_register_enabled
             = hidden_field :name => :prefered_date_style, :value => DEFAULT_DATE_STYLE
+            = hidden_field :name => :prefered_date_pattern, :value => DEFAULT_DATE_PATTERN
+            = hidden_field :name => :prefered_date_separator, :value => DEFAULT_DATE_SEPARATOR
         -# %tr
         -#   %td{:colspan => 2}
         -#     %hr
@@ -196,21 +198,21 @@
         -#     = (@mfi.prefered_date_style if @mfi.prefered_date_style)|| DEFAULT_DATE_STYLE  
         -#     ) : &nbsp;
         -#     = Date.new(2001, 12, 31).display
-        %tr
-          %td{:colspan => 2}
-            %hr
-        %tr
-          %td{:colspan => 2}
-            %h3 Choose formating for short date style
-        %tr
-          %td
-            Prefered date pattern
-          %td{:width => "30"}
-            = select :prefered_date_pattern, :collection => PREFERED_DATE_PATTERNS.map{|x| [x, Date.new(2001, 12, 31).strftime(x)]}, :selected => (@mfi.prefered_date_pattern if @mfi.prefered_date_pattern) || DEFAULT_DATE_PATTERN
-          %td
-            Prefered date separator
-          %td
-            = select :prefered_date_separator, :collection => PREFERED_DATE_SEPARATORS.collect{ |x| [x[1], "#{x[1]}  ( #{x[0].to_s} )"] }, :selected => (@mfi.prefered_date_separator if @mfi.prefered_date_separator)|| DEFAULT_DATE_SEPARATOR
+        -# %tr
+        -#   %td{:colspan => 2}
+        -#     %hr
+        -# %tr
+        -#   %td{:colspan => 2}
+        -#     %h3 Choose formating for short date style
+        -# %tr
+        -#   %td
+        -#     Prefered date pattern
+        -#   %td{:width => "30"}
+        -#     = select :prefered_date_pattern, :collection => PREFERED_DATE_PATTERNS.map{|x| [x, Date.new(2001, 12, 31).strftime(x)]}, :selected => (@mfi.prefered_date_pattern if @mfi.prefered_date_pattern) || DEFAULT_DATE_PATTERN
+        -#   %td
+        -#     Prefered date separator
+        -#   %td
+        -#     = select :prefered_date_separator, :collection => PREFERED_DATE_SEPARATORS.collect{ |x| [x[1], "#{x[1]}  ( #{x[0].to_s} )"] }, :selected => (@mfi.prefered_date_separator if @mfi.prefered_date_separator)|| DEFAULT_DATE_SEPARATOR
         %tr
           %td{:colspan => 2}
             %hr
