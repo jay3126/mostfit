@@ -94,8 +94,13 @@
       %li
         = link_to_with_rights 'Reason Master', resource(:reasons), :class => 'report icon'
       %li
-        = link_to_with_rights 'Holiday', resource(:location_holidays), :class => 'edit'
+        = link_to_with_rights 'Holiday', resource(:location_holidays), :class => 'icon holiday'
 
+  .admin-box
+    -# %h2 Data Administration
+    -# %ul.icon_links
+    -#   %li
+    -#     = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
 
     .admin_box
       %h2 Securitisation
@@ -108,12 +113,6 @@
             = link_to_with_rights 'Loans Eligible For Loan Assignment', url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments, :flag => 'true'), :class => 'icon accept'
           %li
             = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
-
-  .admin-box
-    %h2 Data Administration
-    %ul.icon_links
-      %li
-        = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
 
     -# %h2 API Use
     -# %ul
