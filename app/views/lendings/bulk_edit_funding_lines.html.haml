@@ -13,6 +13,8 @@
         %br
 %h1
   = "Bulk Edit Funding Lines Of Loans"
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
 %form{:action => url(:controller => :lendings, :action => :bulk_edit_funding_lines), :method => :get}
   = partial 'lib/biz_location_selector'

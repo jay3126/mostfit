@@ -1,7 +1,8 @@
-%h1 Document Types
+%h1 Enter the details of new Document Types
 = error_messages_for @document_type
 
 = form_for(@document_type, :action => url(:document_types) ) do
-  =partial :fields
+  = partial :fields
   = submit "Create"
-  = link_to_with_rights 'Back', url(:admin), :class => 'grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', url(:admin), :class => 'grey_button'

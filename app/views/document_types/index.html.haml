@@ -1,7 +1,10 @@
-%h1
-  Document Types
-= link_to_with_rights 'New', url(:new_document_type), :class => 'add grey_button'
-= link_to_with_rights 'Back', url(:admin), :class => 'grey_button'
+%h1 List of Document Types
+
+.menu-strip{:style => "width: 35%;"}
+  = link_to_with_rights 'Create New Document Type', url(:new_document_type), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Back', url(:admin), :class => 'grey_button'
+%br
 - unless @document_types.blank?
   %table.dataTable.report.weeksheet.nojs
     %thead
@@ -15,10 +18,8 @@
     - for document_type in @document_types
       %tr
         %td
-          =document_type.name
+          = link_to_with_rights document_type.name, url("document_types/#{document_type.id}")
         %td
-          =document_type.parent_models
+          = document_type.parent_models
         %td
           = link_to_with_rights 'Edit', url(:edit_document_type,  document_type)
-
-

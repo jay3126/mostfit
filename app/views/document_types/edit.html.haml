@@ -1,9 +1,9 @@
-%h1
-  Document Types
+%h1 Edit the details of: #{@document_type.name}
 = error_messages_for @document_type
 = form_for(@document_type, :action => url(:document_type, @document_type)) do
-  =partial :fields
+  = partial :fields
   = submit "Save"
-= link_to_with_rights 'Show', url(:document_type, @document_type)
-|
-= link_to_with_rights 'Back', url(:document_types)
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', url(:document_type, @document_type), :class => "grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Back', url(:document_types), :class => "grey_button"

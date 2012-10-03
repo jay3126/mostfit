@@ -1,7 +1,12 @@
 %h1 Reason
-= link_to 'Add New Reason', '#', :onclick => "jQuery('.reason_div').toggle();", :class => "add grey_button"
+.menu-strip{:style => "width:26%;"}
+  = link_to 'Add New Reason', '#', :onclick => "jQuery('.reason_div').toggle();", :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
 .reason_div{:style => 'display:none'}
   = partial 'form'
+%br
 %table.datatable.report.weeksheet.nojs
   %thead
     %th

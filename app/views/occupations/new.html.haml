@@ -6,5 +6,8 @@
 = form_for(@occupation, :action => url(:occupations) ) do
   = partial :fields
   = submit I18n.t "occupation.new.create", :default => "Create"
-
-= link_to_with_rights I18n.t("occupation.new.back", :default => "Back"), url(:occupations)
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights I18n.t("occupation.new.cancel", :default => "Cancel"), url(:occupations), :class => "grey_button"

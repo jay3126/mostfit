@@ -13,7 +13,10 @@
         %br
 %h1
   = "List of Loans Eligible for Loan Assignment"
-
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
+  
 %form{:action => url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments), :method => :get}
   = partial 'lib/biz_location_selector'
 

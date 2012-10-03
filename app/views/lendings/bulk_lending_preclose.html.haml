@@ -5,7 +5,9 @@
     });
   });
 
-%h1 Preclose Loan
+%h1 Bulk Preclosure of Loan
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 %br
 = form_for(:lendings, :action => url(:controller => :lendings, :action => :bulk_lending_preclose), :method => :get) do
   = partial 'lib/biz_location_selector_for_write_off', :date => get_effective_date, :staff_member => false

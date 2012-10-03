@@ -5,6 +5,8 @@
   });
 
 %h1= "Claim Processing"
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 .shaded
   %h2= "Death Claim Documents Pending:"
   - unless @deceased_clients.blank?

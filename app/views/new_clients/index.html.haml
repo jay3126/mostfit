@@ -1,4 +1,6 @@
 %h1 Client Movement
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 = form_for(:new_clients, :action => url(:controller => :new_clients, :action => :index)) do
   = partial 'lib/biz_location_selector'
 - unless @client_admins.blank?

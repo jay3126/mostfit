@@ -1,10 +1,18 @@
-%h1
-  DocumentTypes controller, show action
-%p
-  Edit this file in
-  %tt
-    app/views/document_types/show.html.erb
+%h1 Details of Document Type: #{@document_type.name}
 
-= link_to_with_rights 'Edit',  url(:edit_document_type,  @document_type)
-|
-= link_to_with_rights 'Back', url(:document_types)
+.menu-strip{:style => "width: 15%;"}
+  = link_to_with_rights "Edit", url("document_types/#{@document_type.id}/edit"), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:document_types), :class => "grey_button"
+
+%table.tall.shaded
+  %tr
+    %th
+      Name
+    %td
+      = @document_type.name
+  %tr
+    %th
+      Applicable To
+    %td
+      = @document_type.parent_models

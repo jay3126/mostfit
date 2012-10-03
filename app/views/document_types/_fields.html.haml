@@ -1,9 +1,9 @@
-%table
+%table.tall.shaded
   %tr
-    %td Name
+    %th Name
     %td 
-      =text_field :name
+      = text_field :name
   %tr
-    %td Applicable to
+    %th Applicable to
     %td 
-      =select :name=> 'parent_models', :collection => ModelsWithDocuments.map{|x| [x.to_s, x.to_s]}, :class => 'multiple'
+      = select :name => 'parent_models', :collection => ModelsWithDocuments.map{|x| [x.to_s, x.to_s]}, :class => 'multiple'
