@@ -1,4 +1,8 @@
 %h1 Due Generation For Location
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
 = form_for(:user_locations, :action => resource(:user_locations, :get_due_generation_sheet_for_location), :method => :get) do
   .shaded
     %table.form
