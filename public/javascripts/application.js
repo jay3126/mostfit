@@ -867,6 +867,7 @@ $(document).ready(function(){
   fillPslSubCategories();
   getAllNominalCenters();
   getClientAge();
+  getDateDifference();
   get_all_location_on_level();
   get_all_staff_member_on_location()
   $('.chosen').chosen();
@@ -1380,6 +1381,28 @@ function getClientAge() {
       },
       success: function(data) {
         jQuery("#client_age").val(data);
+      }
+    });
+  });
+}
+
+function getDateDifference() {
+  jQuery("#cgt_date_one, #cgt_date_two").change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/center_cycles/get_date_difference/",
+      data: {
+        "cgt_start_date" : jQuery("#cgt_date_one").val(),
+        "cgt_end_date" : jQuery("#cgt_date_two").val()
+      },
+      success: function(data) {
+        if (data == "negative") {
+          alert("End date must not before start date");
+          jQuery("#days_between_dates").val("0");
+        }
+        else {
+          jQuery("#days_between_dates").val(data);
+        }
       }
     });
   });
