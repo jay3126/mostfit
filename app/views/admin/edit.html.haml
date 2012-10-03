@@ -170,31 +170,32 @@
             Enable Asset Register ?
           %td
             = check_box :asset_register_enabled
-        %tr
-          %td{:colspan => 2}
-            %hr
-        %tr
-          %td
-            %h3 Choose formatting of dates
-        %tr
-          %td 
-            Date styles 
-          %td
-            - PREFERED_DATE_STYLES.each do |s|
-              = "#{s[0].to_s.capitalize} : &nbsp #{s[1]}"
-              = "<b>(default)</b>" if s[0].to_s == @mfi.prefered_date_style || (s[0].to_s ==  DEFAULT_DATE_STYLE and @mfi.prefered_date_style.blank?)
-              <br/>
-        %tr
-          %td
-            Specify prefered date style
-          %td
-            = select :prefered_date_style, :collection => PREFERED_DATE_STYLES.collect{|x| [x[0].to_s,x[0].to_s]}, :selected => (@mfi.prefered_date_style if @mfi.prefered_date_style)|| DEFAULT_DATE_STYLE
-        %tr
-          %td{:colspan => 2}
-            Currently choosen default date display (
-            = (@mfi.prefered_date_style if @mfi.prefered_date_style)|| DEFAULT_DATE_STYLE  
-            ) : &nbsp;
-            = Date.new(2001, 12, 31).display
+            = hidden_field :name => :prefered_date_style, :value => DEFAULT_DATE_STYLE
+        -# %tr
+        -#   %td{:colspan => 2}
+        -#     %hr
+        -# %tr
+        -#   %td
+        -#     %h3 Choose formatting of dates
+        -# %tr
+        -#   %td 
+        -#     Date styles 
+        -#   %td
+        -#     - PREFERED_DATE_STYLES.each do |s|
+        -#       = "#{s[0].to_s.capitalize} : &nbsp #{s[1]}"
+        -#       = "<b>(default)</b>" if s[0].to_s == @mfi.prefered_date_style || (s[0].to_s ==  DEFAULT_DATE_STYLE and @mfi.prefered_date_style.blank?)
+        -#       <br/>
+        -# %tr
+        -#   %td
+        -#     Specify prefered date style
+        -#   %td
+        -#     = select :prefered_date_style, :collection => PREFERED_DATE_STYLES.collect{|x| [x[0].to_s,x[0].to_s]}, :selected => (@mfi.prefered_date_style if @mfi.prefered_date_style)|| DEFAULT_DATE_STYLE
+        -# %tr
+        -#   %td{:colspan => 2}
+        -#     Currently choosen default date display (
+        -#     = (@mfi.prefered_date_style if @mfi.prefered_date_style)|| DEFAULT_DATE_STYLE  
+        -#     ) : &nbsp;
+        -#     = Date.new(2001, 12, 31).display
         %tr
           %td{:colspan => 2}
             %hr
@@ -277,5 +278,5 @@
           %td
             = text_area :main_text, :rows => 40, :cols => 120, :class => "mceEditor"
 
-      
-  = submit "Save my details"
+  %br
+    = submit "Save my details"
