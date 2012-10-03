@@ -8,7 +8,7 @@
   $('#toggle_select_to_approve').change(function() {
     $('.select_to_approve').attr('checked',$(this).attr('checked'))});
   });
-
+%br
 - if lendings.blank?
   %h3
     No loan exists
@@ -86,7 +86,7 @@
             %i No privilege: The Staff member who created the loan cannot Approve it.
             %br
             %i Client Inactive: The Client is going throuh death claim processing.
-
+    %br
     %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
       %table.form{:style => "text-align:right;width:100%;"}
         %thead

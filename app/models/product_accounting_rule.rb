@@ -12,7 +12,7 @@ class ProductAccountingRule
     self.product_posting_rules.collect {|rule| rule.to_posting_info(payment_transaction, payment_allocation)}
   end
 
-  def self.load_product_accounting_rules(rules_hash)    
+  def self.load_product_accounting_rules(rules_hash)
     rules_hash.each { |product_action, accounting|
       product_accounting_rule = first_or_create(:product_action => product_action.to_sym)
       debits = accounting['debit']
@@ -42,7 +42,7 @@ class ProductAccountingRule
       }
     }
   end
-  
+
   def self.resolve_rule_for_product_action(product_action)
     first(:product_action => product_action.to_sym)
   end

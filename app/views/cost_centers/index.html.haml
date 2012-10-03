@@ -1,16 +1,32 @@
-%div#container_cost_centers
-  %h1
-    Cost Centers 
-
-  %table.tall
-    %thead
-      %tr
-        %th Name
-    %tbody
-      - @cost_centers.sort!
-      - @cost_centers.each do |cost_center|
+:javascript
+  $(document).ready(function(){
+    var center_value = jQuery('#cost_center_selector option:selected').text();
+    if(center_value=="Head Office"){
+      jQuery('.product').hide();
+      jQuery('#product_selector').val(1);
+    }else{
+      jQuery('.product').show();
+    }
+    $('#cost_center_selector').live('change', function(){
+        if(jQuery(this).val()=='1'){
+          jQuery('.product').hide();
+          jQuery('#product_selector').val(1);
+        }else{
+          jQuery('.product').show();
+        }
+      });
+  });
+%div{:style => "width:auto; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:user_locations, :action => url(:controller => :cost_centers, :action => :index), :method => :get) do
+    %table
+      %thead
         %tr
+          %th
+            Cost Center
+          %th
+            = select :name => "cost_center_id", :collection => CostCenter.all, :selected => @cost_center.id.to_s, :text_method => :name, :value_method => :id, :id => 'cost_center_selector'
           %td
-            = cost_center.name
-        
--# = link_to_with_rights 'New', url(:new_cost_center)
+            = submit "Go"
+%h1== Cost Center :- #{@cost_center.name}
+= link_to_with_rights 'Add new Cost Center', resource(:cost_centers, :new), :class => 'add grey_button'
+= partial :list

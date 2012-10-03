@@ -9,12 +9,12 @@ module BookKeeper
   	#the voucher contents come from the transaction summary
   	total_amount, currency, effective_on = transaction_summary.amount, transaction_summary.currency, transaction_summary.effective_on
     notation = nil
-  	
+
   	#the accounting rule is obtained from the money category
   	raise StandardError, "Unable to resolve the accounting rule corresponding to money category: #{money_category}" unless money_category.accounting_rule
   	accounting_rule = money_category.accounting_rule
-  	postings = accounting_rule.get_posting_info(total_amount, currency) 
-  	
+  	postings = accounting_rule.get_posting_info(total_amount, currency)
+
   	#any applicable cost centers are resolved
   	branch_id = transaction_summary.branch_id
     raise StandardError, "no branch ID was available for the transaction summary" unless branch_id
@@ -34,8 +34,7 @@ module BookKeeper
 
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
-
-    Voucher.create_generated_voucher(total_amount, currency, effective_on, postings, notation)
+    Voucher.create_generated_voucher(total_amount, payment_transaction.receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation)
   end
 
   def self.can_accrue_on_loan_on_date?(loan, on_date)
@@ -64,7 +63,7 @@ module BookKeeper
     amortization_on_date = loan.get_scheduled_amortization(on_date)
     amortization = amortization_on_date.values.first
     scheduled_principal_due = amortization[SCHEDULED_PRINCIPAL_DUE]
-    scheduled_interest_due  = amortization[SCHEDULED_INTEREST_DUE] 
+    scheduled_interest_due  = amortization[SCHEDULED_INTEREST_DUE]
     accrual_temporal_type = ACCRUE_REGULAR
     receipt_type = RECEIPT
     on_product_type, on_product_id = LENDING, loan.id
@@ -104,7 +103,7 @@ module BookKeeper
   end
 
   def get_primary_chart_of_accounts
-    AccountsChart.first
+    AccountsChart.first(:name => 'Financial Accounting')
   end
 
   def setup_counterparty_accounts_chart(for_counterparty)
@@ -144,7 +143,7 @@ class MyBookKeeper
     @created_at = at_time
   end
 
-  def to_s 
+  def to_s
     "#{self.class} created at #{@created_at}"
   end
 

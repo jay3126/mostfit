@@ -5,6 +5,7 @@ class Voucher
 
   property :id,             Serial
   property :guid,           *UNIQUE_ID
+  property :type,           Enum.send('[]', *VOUCHER_TYPE), :nullable => false
   property :total_amount,   *MONEY_AMOUNT_NON_ZERO
   property :currency,       *CURRENCY
   property :effective_on,   *DATE_NOT_NULL
@@ -12,16 +13,21 @@ class Voucher
   property :generated_mode, Enum.send('[]', *VOUCHER_MODES), :nullable => false
   property :mode_of_accounting, Enum.send('[]', *ACCOUNTING_MODES), :nullable => false, :default => PRODUCT_ACCOUNTING
   property :accounted_at,   Integer
+  property :performed_at,   Integer
   property :created_at,     *CREATED_AT
 
   has n, :ledger_postings
+  belongs_to :cost_center, :nullable => true
 
   def money_amounts; [ :total_amount ]; end
 
   validates_present :effective_on
   validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?#OOO, :validate_all_post_to_unique_accounts?
   validates_with_method :manual_voucher_permitted?
-  
+
+  def performed_at_location; BizLocation.get(self.performed_at); end
+  def accounted_at_location; BizLocation.get(self.accounted_at); end
+
   def manual_voucher_permitted?
     return true unless self.generated_mode == MANUAL_VOUCHER
     self.ledger_postings.any? {|posting| (not (posting.ledger.manual_voucher_permitted?))} ? [false, "One or more ledgers do not permit manual vouchers"] :
@@ -30,19 +36,19 @@ class Voucher
 
   def voucher_type; "RECEIPT"; end
 
-  def self.create_generated_voucher(total_amount, currency, effective_on, postings, notation = nil)
-    create_voucher(total_amount, currency, effective_on, notation, postings, GENERATED_VOUCHER)
+  def self.create_generated_voucher(total_amount, voucher_type, currency, effective_on, postings, performed_at =nil, accounted_at=nil, notation = nil)
+    create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, GENERATED_VOUCHER)
   end
 
-  def self.create_manual_voucher(total_money_amount, effective_on, postings, notation = nil)
-    create_voucher(total_money_amount.amount, total_money_amount.currency, effective_on, notation, postings, MANUAL_VOUCHER)
+  def self.create_manual_voucher(total_money_amount, voucher_type, effective_on, postings, performed_at = nil, accounted_at= nil, notation = nil)
+    create_voucher(total_money_amount.amount, voucher_type, total_money_amount.currency, effective_on, postings, notation, performed_at, accounted_at, MANUAL_VOUCHER)
   end
 
   def self.get_postings(ledger, to_date = Date.today, from_date = nil)
     LedgerPosting.all_postings_on_ledger(ledger, to_date, from_date)
   end
 
-  def self.find_by_date_and_cost_center(on_date)
+  def self.find_by_date_and_cost_center(on_date, cost_center_id = nil)
     predicates = {}
     predicates[:effective_on] = on_date
     all(predicates)
@@ -99,13 +105,21 @@ class Voucher
         x.DATA{
           x.TALLYMESSAGE{
             voucher_list.each do |voucher|
+              center_name = voucher.accounted_at_location.name rescue ''
               debit_postings, credit_postings = voucher.ledger_postings.group_by{ |ledger_posting| ledger_posting.effect }.values
               x.VOUCHER{
                 x.DATE voucher.effective_on.strftime("%Y%m%d")
                 x.NARRATION voucher.narration
-                x.VOUCHERTYPENAME voucher.voucher_type
+                x.VOUCHERTYPENAME voucher.type.blank? ? voucher.voucher_type : voucher.type.to_s.upcase
                 x.VOUCHERNUMBER voucher.id
                 x.REMOTEID voucher.guid
+                x.tag! 'ACCOUNTINGALLOCATIONS.LIST' do
+                  x.tag! 'CATEGORYALLOCATIONS.LIST' do
+                    x.tag! 'COSTCENTREALLOCATIONS.LIST' do
+                      x.NAME(center_name)
+                    end
+                  end
+                end
                 credit_postings.each do |credit_posting|
                   x.tag! 'ALLLEDGERENTRIES.LIST' do
                     x.LEDGERNAME(credit_posting.ledger.name)
@@ -117,7 +131,7 @@ class Voucher
                   x.tag! 'ALLLEDGERENTRIES.LIST' do
                     x.LEDGERNAME(debit_posting.ledger.name)
                     x.ISDEEMEDPOSITIVE("Yes")
-                    x.AMOUNT(debit_posting.to_balance.to_regular_amount)
+                    x.AMOUNT('-'+debit_posting.to_balance.to_regular_amount)
                   end
                 end
               }
@@ -134,7 +148,7 @@ class Voucher
   end
 
   def is_similar?(other_voucher)
-    (self.mode_of_accounting == other_voucher.mode_of_accounting) and 
+    (self.mode_of_accounting == other_voucher.mode_of_accounting) and
       (self.ledger_classifications == other_voucher.ledger_classifications)
   end
 
@@ -150,13 +164,16 @@ class Voucher
 
   private
 
-  def self.create_voucher(total_amount, currency, effective_on, notation, postings, generated_mode)
+  def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode)
     values = {}
     values[:total_amount] = total_amount
     values[:currency] = currency
     values[:effective_on] = effective_on
+    values[:type] = voucher_type
     values[:narration] = notation if notation
     values[:generated_mode] = generated_mode
+    values[:performed_at] = performed_at unless performed_at.blank?
+    values[:accounted_at] = accounted_at unless accounted_at.blank?
     ledger_postings = []
     postings.each { |p|
       next unless p.amount > 0
@@ -166,12 +183,14 @@ class Voucher
       posting[:currency] = p.currency
       posting[:effect] = p.effect
       posting[:ledger] = p.ledger
+      posting[:performed_at] = p.performed_at unless p.performed_at.blank?
+      posting[:accounted_at] = p.accounted_at unless p.accounted_at.blank?
       ledger_postings.push(posting)
     }
     values[:ledger_postings] = ledger_postings
     voucher = create(values)
     raise Errors::DataError, voucher.errors.first.first unless voucher.saved?
     voucher
-  end  
+  end
 
 end

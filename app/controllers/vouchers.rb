@@ -1,6 +1,6 @@
 class Vouchers < Application
   # provides :xml, :yaml, :js
-  
+
   def index
     on_date_str = params[:on_date]
     @on_date = (on_date_str and !on_date_str.empty?) ? Date.parse(on_date_str) : nil
@@ -36,6 +36,7 @@ class Vouchers < Application
     sum = MoneyManager.get_money_instance("0")
     postings = []
     date_str = params["voucher"]["effective_on"]
+    voucher_type = params["voucher_type"]
     effective_on = Date.parse(date_str)
     narration = params["voucher"]["narration"]
     credit_accounts = params['credit_accounts']
@@ -44,7 +45,8 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(credit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger)
+      accounted_at = CostCenter.get(credit_posting["cost_center_id"].to_i).biz_location.id rescue nil
+      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger, accounted_at)
     end
     debit_accounts = params['debit_accounts']
     debit_accounts.each do |debit_posting|
@@ -52,10 +54,12 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(debit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger)
+      accounted_at = CostCenter.get(debit_posting["cost_center_id"].to_i).biz_location.id rescue nil
+      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger, accounted_at)
     end
     accounting_facade = AccountingFacade.new(session.user)
-    @voucher = accounting_facade.create_manual_voucher(sum, effective_on, postings, narration)
+
+    @voucher = accounting_facade.create_manual_voucher(sum, voucher_type, effective_on, postings, nil, nil, narration)
     if @voucher.save
       if params["form_submit"] == "Create and Continue"
         redirect url(:controller => "vouchers", :action => "new"), :message => {:notice => "Voucher was successfully created"}
@@ -91,10 +95,17 @@ class Vouchers < Application
   def tally_download
     if params[:from_date] and params[:to_date]
       search_options = {}
-      from_date = Date.parse(params[:from_date])
-      to_date   = Date.parse(params[:to_date])
+      location_ids   = []
+      from_date      = Date.parse(params[:from_date])
+      to_date        = Date.parse(params[:to_date])
+      locations      = params[:biz_location_ids].blank? ? [] : params[:biz_location_ids]
+      locations.each do |location_id|
+        biz_location = BizLocation.get location_id
+        location_ids = location_ids + LocationLink.all_children(biz_location).map(&:id)
+      end
       file   = File.join("/", "tmp", "voucher_#{from_date.strftime('%Y-%m-%d')}_#{to_date.strftime('%Y-%m-%d')}_#{Time.now.to_i}.xml")
       search_options = {:effective_on.gte => from_date, :effective_on.lte => to_date}
+      search_options.merge!(:accounted_at => locations.flatten.compact) unless locations.flatten.compact.blank?
       voucher_list = Voucher.get_voucher_list(search_options)
       Voucher.to_tally_xml(voucher_list, file)
       send_data(File.read(file), :filename => file)
@@ -102,5 +113,5 @@ class Vouchers < Application
       render :layout => layout?
     end
   end
-  
+
 end # Vouchers

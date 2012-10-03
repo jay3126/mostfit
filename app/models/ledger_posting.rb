@@ -7,6 +7,8 @@ class LedgerPosting
   property :amount,       *MONEY_AMOUNT_NON_ZERO
   property :currency,     *CURRENCY
   property :effect,       Enum.send('[]', *ACCOUNTING_EFFECTS), :nullable => false
+  property :accounted_at,   Integer
+  property :performed_at,   Integer
   property :created_at,   *CREATED_AT
 
   belongs_to :voucher
@@ -18,14 +20,17 @@ class LedgerPosting
 
   validates_with_method :valid_accounting_effect?
 
+  def performed_at_location; BizLocation.get(self.performed_at); end
+  def accounted_at_location; BizLocation.get(self.accounted_at); end
+
   def to_balance
-    LedgerBalance.to_balance_obj(amount, currency, effect)    
+    LedgerBalance.to_balance_obj(amount, currency, effect)
   end
 
   def valid_accounting_effect?
     LedgerBalance.valid_balance_obj?(self)
   end
-  
+
   def self.all_postings_on_ledger(ledger, to_date = Date.today, from_date = nil)
     predicates = effective_on_date_predicates(to_date, from_date)
     predicates[:ledger] = ledger

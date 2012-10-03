@@ -2,8 +2,9 @@ class CostCenters < Application
   # provides :xml, :yaml, :js
 
   def index
-    @cost_centers = CostCenter.all
-    display @cost_centers, :layout => layout?
+    @course_product = params[:course_product]
+    @cost_center = params[:cost_center_id].blank? ? CostCenter.first(:name => 'Head Office') : CostCenter.get(params[:cost_center_id].to_i)
+    display @cost_center
   end
 
   def show(id)
@@ -13,7 +14,6 @@ class CostCenters < Application
   end
 
   def new
-    only_provides :html
     @cost_center = CostCenter.new
     display @cost_center
   end
@@ -26,9 +26,9 @@ class CostCenters < Application
   end
 
   def create(cost_center)
-    @cost_center = CostCenter.new(cost_center)
+    @cost_center = CostCenter.new(:name => cost_center[:name], :biz_location_id => cost_center[:biz_location])
     if @cost_center.save
-      redirect resource(@cost_center), :message => {:notice => "CostCenter was successfully created"}
+      redirect resource(:cost_centers), :message => {:notice => "CostCenter was successfully created"}
     else
       message[:error] = "CostCenter failed to be created"
       render :new

@@ -9,6 +9,11 @@
       Narration
     %td
       = text_area :narration
+  %tr
+    %td
+      Voucher Type
+    %td
+      = select :name => 'voucher_type', :collection => Constants::Accounting::VOUCHER_TYPE.map{|t| [t, t.to_s.humanize]}
   - if params[:debit_accounts]
     - params[:debit_accounts].each_with_index do |da, idx|
       = partial "vouchers/account_amount", :account => da, :account_type => :debit_accounts, :last_account => (params[:debit_accounts].length == idx + 1 ? true : false)

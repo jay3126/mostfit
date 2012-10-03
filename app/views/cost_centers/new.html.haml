@@ -1,0 +1,10 @@
+%h1 New Cost Center
+
+= error_messages_for @cost_center
+
+= form_for(@cost_center, :action => url(:cost_centers) ) do
+  = partial :fields
+  %p
+    = submit "Create"
+
+= link_to_with_rights 'Back', url(:cost_centers)

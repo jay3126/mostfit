@@ -1,0 +1,26 @@
+:javascript
+  $("select.multiple").multiSelect();
+- biz_locations = CostCenter.all.map(&:biz_location).compact || []
+%h1 Tally voucher download
+%form{:method => "POST", :action => url(:controller => :vouchers, :action => :tally_download, :return => params[:return])}
+  %table.form
+    %tr
+      %td
+        Cost Center
+      %td
+        = select :name => 'biz_location_ids', :collection =>get_all_nominal_branches.select{|b| biz_locations.include?(b)}.map{|f| [f.id,f.name.humanize]}, :prompt => "Select Cost Center", :class => 'multiple'
+    %tr
+      %td
+        From date
+      %td
+        - today = Date.today
+        - month_first = Date.new(today.year, today.month, 1)
+        = date_select :from_date, (params[:from_date] || month_first), :min_date => Date.min_date, :max_date => Date.today
+    %tr
+      %td
+        To date
+      %td
+        = date_select :to_date, (params[:to_date] || Date.today - 1), :min_date => Date.min_date, :max_date => Date.today
+    %tr
+      %td
+        = submit "download"

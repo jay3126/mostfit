@@ -67,7 +67,7 @@
     %th
       Applied Date
     %td
-      = date_select_for @lending, 'applied_on_date', :location_id => @location.id
+      = date_select_for @lending, 'applied_on_date', :location_id => "#{@location.blank? ? '' : @location.id}"
     %th
       by
     %td
@@ -76,9 +76,9 @@
     %th
       Schedule Disbursal Date
     %td
-      = date_select_for @lending, 'scheduled_disbursal_date', :location_id => @location.id
+      = date_select_for @lending, 'scheduled_disbursal_date', :location_id => "#{@location.blank? ? '' : @location.id}"
   %tr
     %th
       Schedule First Repayment Date
     %td
-      = date_select_for @lending, 'scheduled_first_repayment_date', :location_id => @location.id
+      = date_select_for @lending, 'scheduled_first_repayment_date', :location_id => "#{@location.blank? ? '' : @location.id}"

@@ -33,8 +33,9 @@
               = voucher.effective_on if voucher.effective_on and count == 0
             %td{:rowspan => postings_count}
               = voucher.narration
-            %td{:rowspan => postings_count}
-              = #voucher.cost_center.name
+            %td
+              - cost_center = p.accounted_at_location.cost_center
+              = cost_center.blank? ? '' : cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?
             %td
@@ -44,6 +45,9 @@
             - count += 1
         - else
           %tr
+            %td
+              - cost_center = p.accounted_at_location.cost_center
+              = cost_center.blank? ? '' : cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?
             %td

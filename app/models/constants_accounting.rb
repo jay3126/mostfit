@@ -5,6 +5,9 @@ module Constants
     LIABILITIES = :liabilities
     INCOMES = :incomes
     EXPENSES = :expenses
+    RECEIPT = :receipt
+    PAYMENT = :payment
+    VOUCHER_TYPE = [RECEIPT, PAYMENT]
     ACCOUNT_TYPES = [ASSETS, LIABILITIES, INCOMES, EXPENSES]
     ACCOUNT_TYPES_MENU_CHOICES = ACCOUNT_TYPES.collect {|type| [type.to_s, type]}
 
@@ -138,11 +141,11 @@ module Constants
 
         Constants::Transaction::RECEIPT =>
           { 
-            Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT  => Constants::Transaction::LOAN_REPAYMENT,
-            Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE => Constants::Transaction::LOAN_PRECLOSURE,
-            Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY   => Constants::Transaction::LOAN_RECOVERY,
-            Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT    => Constants::Transaction::LOAN_FEE_RECEIPT
-          },
+          Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT  => Constants::Transaction::LOAN_REPAYMENT,
+          Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE => Constants::Transaction::LOAN_PRECLOSURE,
+          Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY   => Constants::Transaction::LOAN_RECOVERY,
+          Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT    => Constants::Transaction::LOAN_FEE_RECEIPT
+        },
 
         Constants::Transaction::PAYMENT =>
           { Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT => Constants::Transaction::LOAN_DISBURSEMENT},
