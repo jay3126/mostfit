@@ -38,7 +38,6 @@ class DateWiseSofDuesCollectionsAndAccrualsReport < Report
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    # branches         = @biz_location_branch.class == Array ? @biz_location_branch : [@biz_location_branch]
     preclosure_loans = LoanStatusChange.status_between_dates(LoanLifeCycle::REPAID_LOAN_STATUS, @from_date, @to_date).lending
     # branches.each do |branch_id|
     loan_ids.each do |loan_id|
@@ -46,43 +45,42 @@ class DateWiseSofDuesCollectionsAndAccrualsReport < Report
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_name = branch ? branch.name : "Not Specified"
       branch_id = branch.id
-      branch_preclosure_loans = preclosure_loans.select{|lending| lending.accounted_at_origin == branch_id}
-      data[branch_id] = {}
+      sof = FundingLine.get(@funding_line_id)
+      sof_name = sof.name
+      sof_id = sof.id
+      sof_preclosure_loans = preclosure_loans.select{|lending| lending.id == loan_id}
+      data[sof_id] = {}
       (@from_date..@to_date).each do |on_date|
 
         preclosure_collect = interest_accured     = disbursed_amount       = outstanding_principal = emi_collect_interest = MoneyManager.default_zero_money
         dues_emi_interest  = dues_emi_total       = dues_emi_principal     = emi_collect_principal = emi_collect_total = MoneyManager.default_zero_money
         fee_collect        = total_fee_collection = preclosure_fee_collect = MoneyManager.default_zero_money
         unless check_holiday_on_date(on_date)
-
-          branch_loans = LoanAdministration.get_loans_accounted(branch_id, on_date).compact
-          branch_loans.each do |lending|
-            if lending.is_outstanding_on_date?(on_date)
-              dues_emi_principal    += lending.actual_principal_outstanding(on_date) || MoneyManager.default_zero_money
-              dues_emi_interest     += lending.actual_interest_outstanding(on_date)  || MoneyManager.default_zero_money
-              dues_emi_total        = dues_emi_principal + dues_emi_interest
-              emi_collect_principal += lending.principal_received_on_date(on_date)
-              emi_collect_interest  += lending.interest_received_on_date(on_date)
-              emi_collect_total     = emi_collect_principal + emi_collect_interest
-              interest_accured      = interest_accured      + lending.accrued_interim_interest(@from_date, @to_date)
-              disbursed_amount      = disbursed_amount      + lending.to_money[:disbursed_amount] if lending.disbursal_date == on_date
-              outstanding_principal = outstanding_principal + lending.actual_principal_outstanding(on_date)
-            end
+          if loan.is_outstanding_on_date?(on_date)
+            dues_emi_principal    += loan.actual_principal_outstanding(on_date) || MoneyManager.default_zero_money
+            dues_emi_interest     += loan.actual_interest_outstanding(on_date)  || MoneyManager.default_zero_money
+            dues_emi_total        = dues_emi_principal + dues_emi_interest
+            emi_collect_principal += loan.principal_received_on_date(on_date)
+            emi_collect_interest  += loan.interest_received_on_date(on_date)
+            emi_collect_total     = emi_collect_principal + emi_collect_interest
+            interest_accured      = interest_accured      + loan.accrued_interim_interest(@from_date, @to_date)
+            disbursed_amount      = disbursed_amount      + loan.to_money[:disbursed_amount] if loan.disbursal_date == on_date
+            outstanding_principal = outstanding_principal + loan.actual_principal_outstanding(on_date)
           end
         
           fee_collection         = FeeReceipt.all_paid_loan_fee_receipts_on_accounted_at(branch_id, on_date)
           fee_collect            = fee_collection[:loan_fee_receipts].blank? ? MoneyManager.default_zero_money  : Money.new(fee_collection[:loan_fee_receipts].map(&:fee_amount).sum.to_i, default_currency)
           preclosure_fee_collect = fee_collection[:loan_preclousure_fee_receipts].blank? ? MoneyManager.default_zero_money  : Money.new(fee_collection[:loan_preclousure_fee_receipts].map(&:fee_amount).sum.to_i, default_currency)
 
-          branch_preclosure_loans.each do |lending|
+          sof_preclosure_loans.each do |lending|
             status_change      = lending.loan_status_changes(:to_status => LoanLifeCycle::REPAID_LOAN_STATUS, :effective_on => on_date)
             preclosure_collect += lending.loan_receipts.last.to_money[:principal_received] unless status_change.blank?
           end
 
           total_fee_collection = fee_collect + preclosure_fee_collect + preclosure_collect
         end
-        data[branch_id][on_date] = {
-          :branch_name => branch_name, :branch_id => branch_id, :on_date => on_date,
+        data[sof_id][on_date] = {
+          :sof_name => sof_name, :sof_id => sof_id, :on_date => on_date,
           :dues_emi_principal => dues_emi_principal , :dues_emi_interest => dues_emi_interest, :dues_emi_total => dues_emi_total,
           :emi_collect_principal => emi_collect_principal, :emi_collect_interest => emi_collect_interest, :emi_collect_total => emi_collect_total,
           :loan_fee_collect => fee_collect, :preclosure_collect_fee => preclosure_fee_collect, :preclosure_collect => preclosure_collect, :total_fee_collect => total_fee_collection,
