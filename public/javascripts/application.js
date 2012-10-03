@@ -866,6 +866,7 @@ $(document).ready(function(){
   fillBankAccounts();
   fillPslSubCategories();
   getAllNominalCenters();
+  getClientAge();
   get_all_location_on_level();
   get_all_staff_member_on_location()
   $('.chosen').chosen();
@@ -1367,4 +1368,19 @@ function ddmmyyyyToDate(str) {
   return new Date(parseInt(parts[2], 10),      // Year
     parseInt(parts[1], 10) - 1,  // Month (starts with 0)
     parseInt(parts[0], 10));     // Day of month
+}
+
+function getClientAge() {
+  jQuery('#client_dob').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/loan_applications/get_client_age/",
+      data: {
+        "client_date_of_birth" : jQuery("#client_dob").val()
+      },
+      success: function(data) {
+        jQuery("#client_age").val(data);
+      }
+    });
+  });
 }
