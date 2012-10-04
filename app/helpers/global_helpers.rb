@@ -246,6 +246,7 @@ module Merb
           @holidays =  LocationLink.all_parents_with_self(@biz_location).map(&:location_holidays).flatten.map{|lh| [lh.on_date.day, lh.on_date.month, lh.on_date.year.to_s[2..4].to_i]}
         end
         @holidays_count = @holidays.count
+        configuration_facade = FacadeFactory.instance.get_instance(FacadeFactory::CONFIGURATION_FACADE, User.first)
         @working_holiday = configuration_facade.non_working_days.to_s
       end
       str = %Q{
