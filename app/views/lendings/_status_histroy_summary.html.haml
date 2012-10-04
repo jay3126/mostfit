@@ -6,13 +6,13 @@
     - repaid = @lending.loan_repaid_status
     %tr.odd
       %th.odd Nature
-      %td= "#{repaid.repaid_nature.humanize} on #{repaid.repaid_on_date}"
+      %td= "#{repaid.repaid_nature.humanize} on #{repaid.repaid_on_date}" rescue nil
     %tr.even
       %th.even Closing outstanding principal
-      %td= repaid.to_money[:closing_outstanding_principal]
+      %td= repaid.to_money[:closing_outstanding_principal] rescue MoneyManager.default_zero_money
     %tr.odd
       %th.odd Closing outstanding interest
-      %td= repaid.to_money[:closing_outstanding_interest]
+      %td= repaid.to_money[:closing_outstanding_interest] rescue MoneyManager.default_zero_money
   - elsif @lending.is_written_off?
     - recovery = @lending.loan_recovery_till_date
     %tr.odd
