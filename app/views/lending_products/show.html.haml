@@ -52,27 +52,38 @@
         Preclosure Penality
       %td
         = fee_penalities.map(&:name).join(',') unless fee_penalities.blank?
-- schedule_template_items = @lending_product.loan_schedule_template.schedule_template_line_items
-- unless schedule_template_items.blank?
-  %table.dataTable.report.weeksheet.nojs
-    %thead
-      %tr
-        %td
-          Installment
-        %td
-          Payment Type
-        %td
-          Principal Amount
-        %td
-          Interest Amount
-    %tbody.form
-      - schedule_template_items.each do |item|
-        %tr
-          %td
-            = item.installment
-          %td
-            = item.payment_type.humanize
-          %td
-            = item.to_money[:principal_amount]
-          %td
-            = item.to_money[:interest_amount]
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#schedule Schedule
+    %li#history History
+
+  %div.tab
+    %br
+    - schedule_template_items = @lending_product.loan_schedule_template.schedule_template_line_items
+    - unless schedule_template_items.blank?
+      %table.dataTable.report.weeksheet.nojs
+        %thead
+          %tr
+            %td
+              Installment
+            %td
+              Payment Type
+            %td
+              Principal Amount
+            %td
+              Interest Amount
+        %tbody.form
+          - schedule_template_items.each do |item|
+            %tr
+              %td
+                = item.installment
+              %td
+                = item.payment_type.humanize
+              %td
+                = item.to_money[:principal_amount]
+              %td
+                = item.to_money[:interest_amount]
+  %div.tab
+    %br
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

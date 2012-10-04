@@ -16,6 +16,8 @@ class AuditTrails < Application
     end
 
     model = "BizLocation" if (params[:audit_for][:controller] == "user_locations")
+    model = "SimpleFeeProduct" if (params[:audit_for][:controller] == "simple_fee_products")
+    model = "SimpleInsurancePolicy" if (params[:audit_for][:controller] == "simple_insurance_policies")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
     @obj    = Kernel.const_get(model).get(id)
 

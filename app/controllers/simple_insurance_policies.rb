@@ -58,7 +58,7 @@ class SimpleInsurancePolicies < Application
 
     #REDIRECTION/RENDER
     if @message[:error].blank?
-      redirect resource(:simple_insurance_policies), :message => @message
+      redirect resource(insur_policy), :message => @message
     else
       render :new
     end
@@ -92,7 +92,7 @@ class SimpleInsurancePolicies < Application
       begin
         @policy.attributes = {:insured_name => insured_name, :insured_on => insured_on, :issued_status => issued_status, :expires_on => expires_on}
         if @policy.save
-          @message[:notice] = "Insurance Policy created successfully"
+          @message[:notice] = "Insurance Policy updated successfully"
         else
           @message[:error] = @policy.errors.first.join(", ")
         end
@@ -103,7 +103,7 @@ class SimpleInsurancePolicies < Application
 
     #REDIRECTION/RENDER
     if @message[:error].blank?
-      redirect resource(:simple_insurance_policies), :message => @message
+      redirect resource(@policy), :message => @message
     else
       render :edit
     end

@@ -21,4 +21,13 @@
     %tr.odd
       %th.odd Created At
       %td= @fee_product.created_at
-= partial 'simple_fee_products/fee_timed_amount'
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#fee_amounts Fee Amounts
+    %li#history History
+
+  %div.tab
+    = partial 'simple_fee_products/fee_timed_amount'
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

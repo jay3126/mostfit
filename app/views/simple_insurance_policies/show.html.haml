@@ -1,4 +1,10 @@
-= link_to "Edit", resource(@policy, :edit), :class => 'add grey_button'
+%h1 Details of Insurance Policy: #{@policy.insured_name}
+
+.menu-strip{:style => "width: 20%;"}
+  = link_to_with_rights "Edit", resource(@policy, :edit), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:simple_insurance_policies), :class => "grey_button"
+
 - fee_instances = FeeInstance.get_all_fees_for_instance(@policy)
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
@@ -52,38 +58,46 @@
     %td
       = "#{@policy.simple_insurance_product.blank? ? '' : @policy.simple_insurance_product.name}"
 
-%h1 Fee Detail
-%br
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Id
-      %td
-        Name
-      %td
-        Amount
-      %td
-        Administered At
-      %td
-        Accounted At
-      %td
-        Applied On
-      %td
-        Status
-  - fee_instances.each do |fee|
-    %tr
-      %td
-        = fee.id
-      %td
-        = fee.simple_fee_product.name unless fee.simple_fee_product.blank?
-      %td
-        = fee.effective_total_amount(get_effective_date)
-      %td
-        = fee.administered_at_location.name
-      %td
-        = fee.accounted_at_location.name
-      %td
-        = fee.applied_on
-      %td
-        = fee.status(get_effective_date)
+%div.tab_container.shaded
+  %ul.tabs
+    %li#fee_detail Fee Detail
+    %li#history History
+
+  %div.tab
+    %br
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %th
+            Id
+          %td
+            Name
+          %td
+            Amount
+          %td
+            Administered At
+          %td
+            Accounted At
+          %td
+            Applied On
+          %td
+            Status
+      - fee_instances.each do |fee|
+        %tr
+          %td
+            = fee.id
+          %td
+            = fee.simple_fee_product.name unless fee.simple_fee_product.blank?
+          %td
+            = fee.effective_total_amount(get_effective_date)
+          %td
+            = fee.administered_at_location.name
+          %td
+            = fee.accounted_at_location.name
+          %td
+            = fee.applied_on
+          %td
+            = fee.status(get_effective_date)
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
