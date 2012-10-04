@@ -49,7 +49,11 @@
     %tr
       %th Location
       %td
-        = select :client_state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
+        - all_states = BizLocation.get_state_locations
+        - branch_id = @branch.nil? ? params[:parent_location_id] : @branch.id
+        - biz_location =  BizLocation.get(branch_id)
+        - state_name = @loan_application.client_state
+        = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => 'Select', :selected => state_name.downcase
     %tr
       %th Pincode
       %td
