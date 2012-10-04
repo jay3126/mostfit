@@ -38,7 +38,7 @@
             = link_to_with_class('Sourcing', url(:loan_applications))
             //= link_to_with_class('Collections', '#')
             = link_to_with_class('Configuration', url(:admin))
-            = link_to_with_class('Accounting', url(:controller => :book_keeping, :action => :index))
+            = link_to_with_class('Accounting', resource(:book_keepings))
             //= link_to_with_class('Dashboard', url(:dashboard))
             = link_to_with_class('Reports', url(:reports))
           #header_search_div

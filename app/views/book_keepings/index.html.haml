@@ -13,6 +13,8 @@
         = link_to 'Transaction Summaries', resource(:transaction_summaries), :class => 'report icon'
       %li
         = link_to 'Categories and rules', resource(:accounting_rules), :class => 'book icon'
+      %li
+        = link_to 'EOD/MOD Accounting', resource(:book_keepings, :eod_accounting), :class => 'book icon'
   .admin-box
     %h2 Manage Accounting By Tally
     %ul.icon_links

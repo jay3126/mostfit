@@ -15,7 +15,7 @@ Merb::Router.prepare do
   resources :ledgers
   resources :bank_account_ledgers
   resources :accounting_rules
-  resources :book_keeping
+  resources :book_keepings, :collection => {:eod_accounting => [:get], :update_accounting_status_on_date => [:get,:post]}
   resources :vouchers, :id => %r(\d+)
   resources :cost_centers
   resources :transaction_summaries

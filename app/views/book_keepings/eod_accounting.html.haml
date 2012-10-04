@@ -1,0 +1,87 @@
+- unless @message[:error].blank?
+  .error
+    = @message[:error]
+%h1 EOD/MOD
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+= form_for(:book_keepings, :action => resource(:book_keepings, :eod_accounting), :method => :get) do
+  .shaded
+    %table.form
+      %thead
+        %tr
+          %th Cost Center:
+          %th
+            = select :name => "cost_center_ids", :text_method => :name, :value_method => :id, :collection => CostCenter.all, :prompt => "Select Cost Center", :class => 'multiple'
+          %th
+            Date:
+          %th
+            - on_date = params[:on_date] ? params[:on_date] : get_effective_date
+            = date_select 'on_date', on_date
+          %td
+            = submit "Go"
+- if @ledgers.blank?
+  No Accounts created
+- else
+  - staff = session.user.staff_member
+  = form_for(:book_keepings, :action => url(:controller => :book_keepings, :action => :update_accounting_status_on_date)) do
+    %table.unsortable.dataTable.weeksheet.report.nojs
+      %thead
+        %tr
+          %th Branch
+          %th Account Name
+          %th Opening Balance
+          %th Closing Balance
+          %th Status
+          %th
+            Select All
+            %br
+            = check_box :name => 'select_all'
+      - @cost_centers.each do |location|
+        - opening_total = MoneyManager.default_zero_money
+        - closing_total = MoneyManager.default_zero_money
+        - @ledgers.each do |ledger|
+          %tr{:style => "display:non", :class => "eod_#{location.id}"}
+            %td= location.name
+            %td{:style => "width:50%"}
+              = ledger.name
+            %td
+              - opening_amount = ledger.opening_balance(@date) rescue MoneyManager.default_zero_money
+              - opening_total += opening_amount
+              = opening_amount
+            %td
+              - closing_amount = ledger.balance(@date) rescue MoneyManager.default_zero_money
+              - closing_total += closing_amount
+              = closing_amount
+            %td
+              = select :name => "approve[#{ledger.id}][status]", :collection => ['Pending', 'Approve', 'Varify', 'Reject', 'Close'], :prompt => 'Select Status'
+            %td{:style => "text-align:center;"}
+              = check_box :name => "approve[#{ledger.id}][approved]", :value => true
+        %tr{:style => "background-color:Wheat; cursor:pointer;", :id => "eod_total_#{location.id}"}
+          %td{ :onclick => "jQuery('.eod_#{location.id}').slideToggle('fast'); return false;"}
+            %b= location.name
+          %td{ :onclick => "jQuery('.eod_#{location.id}').slideToggle('fast'); return false;"}
+            %b Total
+          %td{ :onclick => "jQuery('.eod_#{location.id}').slideToggle('fast'); return false;"}
+            %b= opening_total
+          %td{ :onclick => "jQuery('.eod_#{location.id}').slideToggle('fast'); return false;"}
+            %b= closing_total
+          %td
+            = select :name => "approve[status]", :collection => ['Pending', 'Approve', 'Varify', 'Reject', 'Close'], :prompt => 'Select Status'
+          %td{:style => "text-align:center;"}
+            = check_box :name => "eod_on_#{location.id}"
+    %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+      %table.form{:style => "text-align:right;width:60%;"}
+        %tfoot
+          %tr
+            %th
+              Date :-
+            %th
+              = @date
+              = hidden_field :name => "approve[on_date]", :value => @date
+            %th
+              Performed by :-
+            %th
+              = select :name => "approve[performed_by]", :text_method => :name, :value_method => :id, :collection => [staff], :prompt => "Select staff member", :selected => staff.id.to_s
+            %th
+              = submit 'Save'
+%br

@@ -31,7 +31,7 @@ class CostCenter
     (other and other.respond_to?(:name)) ? self.name <=> other.name : nil
   end
 
-  def get_sum_of_balances_cost_center(product_name = nil)
+  def get_sum_of_balances_cost_center(till_date = Date.today, product_name = nil)
     account_type_balance = {}
     all_ledgers          = []
     course_list          = []
@@ -56,6 +56,7 @@ class CostCenter
       all_ledgers = ledger_postings.blank? ? [] : ledger_postings.map(&:ledger).uniq
     end
     unless all_ledgers.blank?
+      all_ledgers = all_ledgers.select{|s| s.created_at >= till_date}
       currency_in_use = all_ledgers.first.balance(Date.today).currency
       zero_balance    = LedgerBalance.zero_debit_balance(currency_in_use)
       all_ledgers.group_by{|l| [l.account_type]}.each do |account_type, ledgers|

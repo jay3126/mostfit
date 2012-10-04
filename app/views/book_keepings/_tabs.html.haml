@@ -11,6 +11,8 @@
       = link_to 'Transaction Summaries', resource(:transaction_summaries)
     %li#categories_and_rules
       = link_to 'Categories and rules', resource(:accounting_rules)
+    %li#eod_accounting
+      = link_to 'EOD/MOD Accounting', resource(:book_keepings, :eod_accounting)
 %div.box
   %h1
     %a{:class => "_remote_", :href => url(:controller =>  :vouchers, :action => :tally_download), :id => "tally"}

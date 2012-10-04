@@ -30,8 +30,7 @@ function addFloater(link, form){
 function dataTables(){
   if ($('table').hasClass('unsortable')){
     $('table.unsortable').dataTable({
-      "sScrollX": "100%",
-      "sPaginationType": "full_numbers",
+      "bPaginate": false,
       "bSort": false,
       "bJQueryUI": true
     });
