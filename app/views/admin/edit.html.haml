@@ -18,6 +18,7 @@
       %li#operational Operational details
       %li#security Access control & Security
       %li#info Main page
+      %li#history History
     %div.tab
       %table.tall.shaded
         %tr
@@ -279,6 +280,9 @@
             Text
           %td
             = text_area :main_text, :rows => 40, :cols => 120, :class => "mceEditor"
+
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
 
   %br
     = submit "Save my details"

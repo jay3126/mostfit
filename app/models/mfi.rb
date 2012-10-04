@@ -10,7 +10,7 @@ class Mfi
 
   attr_accessor :subdomain, :city_name, :state_id, :district_id, :logo, :fetched
 
-  property :id,           Serial, :nullable => false, :index => true
+  property :id,           Serial, :nullable => false, :index => true, :default => 1
   property :name,         String, :nullable => true, :index => true
   property :address,      Text
   property :website,      String

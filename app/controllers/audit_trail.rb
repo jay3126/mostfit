@@ -19,12 +19,20 @@ class AuditTrails < Application
     model = "SimpleFeeProduct" if (params[:audit_for][:controller] == "simple_fee_products")
     model = "SimpleInsurancePolicy" if (params[:audit_for][:controller] == "simple_insurance_policies")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
+
     if (params[:audit_for][:controller] == "center_cycles")
       model = "CenterCycle"
       id = params[:audit_for][:center_cycle_id]
     end
 
-    @obj    = Kernel.const_get(model).get(id)
+    debugger
+    if (params[:audit_for][:controller] == "admin")
+      model = "Mfi"
+      @obj    = Kernel.const_get(model).first
+      id = @obj.id
+    else
+      @obj    = Kernel.const_get(model).get(id)
+    end
 
     if model == "Lending"
       model = ["Lending", @obj.class.to_s]
