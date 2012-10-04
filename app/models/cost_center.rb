@@ -55,8 +55,8 @@ class CostCenter
       end
       all_ledgers = ledger_postings.blank? ? [] : ledger_postings.map(&:ledger).uniq
     end
+    all_ledgers = all_ledgers.select{|s| s.created_at <= till_date}
     unless all_ledgers.blank?
-      all_ledgers = all_ledgers.select{|s| s.created_at >= till_date}
       currency_in_use = all_ledgers.first.balance(Date.today).currency
       zero_balance    = LedgerBalance.zero_debit_balance(currency_in_use)
       all_ledgers.group_by{|l| [l.account_type]}.each do |account_type, ledgers|
