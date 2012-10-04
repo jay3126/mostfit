@@ -3,13 +3,13 @@ module Merb
   module GlobalHelpers
     CRUD_ACTIONS = ["list", "index", "show", "edit", "new"]
     MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    TRANSACTION_MODELS = [ClientGroup, Cgt, Grt, Client, Payment]
+    TRANSACTION_MODELS = [BizLocation, ClientGroup, Cgt, Grt, Client, PaymentTransaction, Lending]
 
     def page_title
       begin
         generate_page_title(params)
       rescue
-        return "MostFit" rescue Exception
+        return "MOSTFIT" rescue Exception
       end
     end
 

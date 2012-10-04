@@ -30,8 +30,7 @@ MONTHS = ["None", "January", "February", "March", "April", "May", "June", "July"
 STATUSES = [:applied_in_future, :applied, :rejected, :approved, :disbursed, :outstanding, :repaid, :written_off, :claim_settlement, :preclosed]
 EPSILON  = 0.01
 INACTIVE_REASONS = ['', 'no_further_loans', 'death_of_client', 'death_of_spouse']
-ModelsWithDocuments = ['Area', 'Region', 'Branch', 'Center', 'Client', 'Loan', 'ClientGroup', 'StaffMember', 'User', 'Mfi', 'Funder', 
-                       'InsuranceCompany', 'InsurancePolicy', 'Claim', 'BizLocation']
+ModelsWithDocuments = ['Client', 'Lending', 'ClientGroup', 'StaffMember', 'User', 'Mfi', 'Funder', 'InsuranceCompany', 'InsurancePolicy', 'Claim', 'BizLocation']
 CLAIM_DOCUMENTS = [:death_certificate, :center_declaration_form, :kyc_document]
 LOANS_NOT_PAYABLE = [nil, :repaid, :pending, :written_off, :claim_settlement, :preclosed]
 DUMP_FOLDER      = "db/daily"
@@ -111,7 +110,7 @@ BookmarkTypes   = [:custom_reports, :system]
 MethodNames = [:get, :post, :put, :delete]
 
 # Audit
-AUDITABLES = ["Branch","Center","Client","ClientGroup","Loan","Payment","StaffMember"]
+AUDITABLES = ["BizLocation","Client","ClientGroup","Lending","PaymentTransaction","StaffMember"]
 
 # Targets
 TargetOf    = [:center_creation, :group_creation, :client_registration, :loan_disbursement_by_amount, :loan_disbursements_by_number]

@@ -6,20 +6,21 @@ class AuditTrails < Application
     model = params[:audit_for][:controller] == 'new_clients' ? 'Client' :params[:audit_for][:controller].singularize.camelcase
 
     if params[:audit_for].key?(:id)
-      id=params[:audit_for][:id]
-    elsif params[:audit_for][:controller]=="loans" and params[:audit_for].key?(:client_id)
-      id=params[:audit_for][:client_id]
+      id = params[:audit_for][:id]
+    elsif params[:audit_for][:controller] == "lendings" and params[:audit_for].key?(:client_id)
+      id = params[:audit_for][:client_id]
       model = "Client"
-    elsif params[:audit_for][:controller]=="payments" and params[:audit_for].key?(:loan_id) and not params[:audit_for].key?(:id)
-      id=params[:audit_for][:loan_id]
-      model = "Loan"
+    elsif params[:audit_for][:controller] == "payment_transactions" and params[:audit_for].key?(:loan_id) and not params[:audit_for].key?(:id)
+      id = params[:audit_for][:loan_id]
+      model = "Lending"
     end
 
-    model = "Loan" if not ["Branch", "Center", "Loan", "Client", "Payment"].include?(model) and /Loan^/.match(model)   
+    model = "BizLocation" if (params[:audit_for][:controller] == "user_locations")
+    model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
     @obj    = Kernel.const_get(model).get(id)
 
-    if model=="Loan"
-      model = ["Loan", @obj.class.to_s]
+    if model == "Lending"
+      model = ["Lending", @obj.class.to_s]
     end
     @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
     partial "audit_trails/list", :layout => false

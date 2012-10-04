@@ -97,6 +97,8 @@
       Due Status
     %li#status_history
       Status History
+    %li#history
+      History
   %div.tab
     %div#loan_schedules
       = partial "lendings/lending_schedule"
@@ -110,3 +112,5 @@
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_due_statuses, :id => @lending.id)}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :lendings, :action => :lending_status_history, :id => @lending.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

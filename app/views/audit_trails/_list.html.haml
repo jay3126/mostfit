@@ -10,10 +10,10 @@
       Date
     %th
       User
-  -@trails.each do |trail|
+  - @trails.each do |trail|
     %tr
       %td
-        =link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+        = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
       %td.text
         %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
           = trail.action

@@ -1,6 +1,6 @@
 class DataAccessObserver
   include DataMapper::Observer
-  observe *(DataMapper::Model.descendants.to_a - [AuditTrail] + [ClientGroup, Client, Payment]).uniq # strange bug where observer drops some of the descnedants.
+  observe *(DataMapper::Model.descendants.to_a - [AuditTrail] + [BizLocation, ClientGroup, Client, Lending, PaymentTransaction]).uniq # strange bug where observer drops some of the descnedants.
 
   
   def self.insert_session(id)
@@ -34,8 +34,9 @@ class DataAccessObserver
           diff[index][:discriminator] = diff[index][:discriminator].map{|x| x.to_s if x}
         end
         return if diff.length==0
-        model = (/Loan$/.match(obj.class.to_s) ? "Loan" : obj.class.to_s)
-        log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log,
+        model = (/Lending$/.match(obj.class.to_s) ? "Lending" : obj.class.to_s)
+        user_role = @_user.staff_member.designation.role_class
+        log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log, :user_role => user_role,
                              :auditable_type => model, :user => @_user, :created_at => DateTime.now)
         log.save
       end
