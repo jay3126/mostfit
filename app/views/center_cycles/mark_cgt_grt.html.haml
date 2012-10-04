@@ -14,18 +14,25 @@
         %br
 %h1
   = "Record CGT, GRT"
-
 %form{:action => url(:controller => :center_cycles, :action => :mark_cgt_grt), :method => :get}
-  = partial "lib/biz_location_selector"
+  = partial "lib/biz_location_selector", :center_cycle_id => @center_cycle.id
 
 - if @center
   - if center_cycle_number.eql?(0)
     %h3 No Center cycle currently exists for this center
   - else
     %h2= "Center Cycle Number: #{center_cycle_number}"
-
 - if @center_cycle
-  - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil
-    = partial :fields_cgt
-  - else
-    = partial :fields_grt
+  %div.tab_container.shaded
+    %ul.tabs
+      %li#CGT_GRT
+        CGT, GRT
+      %li#History
+        History
+    %div.tab
+      - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil
+        = partial :fields_cgt
+      - else
+        = partial :fields_grt
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

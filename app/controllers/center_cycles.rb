@@ -31,7 +31,7 @@ class CenterCycles < Application
       @center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
       @center_cycle = CenterCycle.first(:center_id => @center.id, :cycle_number => 1)
     end
-    
+
     render :mark_cgt_grt
   end
 
@@ -84,7 +84,7 @@ class CenterCycles < Application
     else
       message = {:error => @errors.flatten.join(', ')}
     end
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id), :message => message
   end
 
   def record_grt
@@ -119,7 +119,7 @@ class CenterCycles < Application
     else
       message = {:error => @errors.flatten.join(', ')}
     end
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id ), :message => message
   end
 
   def restart_cgt
@@ -149,7 +149,7 @@ class CenterCycles < Application
     end
 
     # RENDER/RE-DIRECT
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id)
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id)
   end
 
   def get_date_difference
