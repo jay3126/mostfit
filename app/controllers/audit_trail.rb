@@ -22,6 +22,7 @@ class AuditTrails < Application
     model = "Funder" if (params[:audit_for][:controller] == "funders")
     model = "FundingLine" if (params[:audit_for][:controller] == "funding_lines")
     model = "Tranch" if (params[:audit_for][:controller] == "tranches")
+    model = "ThirdParty" if (params[:audit_for][:controller] == "third_parties")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")
