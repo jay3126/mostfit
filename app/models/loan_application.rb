@@ -58,6 +58,7 @@ class LoanApplication
   property :created_by_staff_id,            Integer,  :nullable => false
   property :created_by_user_id,             Integer,  :nullable => false
   property :created_at,                     DateTime, :nullable => false, :default => DateTime.now
+  property :deleted_at,                     *DELETED_AT
   property :updated_at,                     DateTime, :nullable => false, :default => DateTime.now
   property :created_on,                     Date,     :nullable => false
   property :amount,                         *MONEY_AMOUNT
@@ -71,7 +72,7 @@ class LoanApplication
   property :client_name,                    String, CommonClient::Validations.get_validation(:client_name, LoanApplication)
   property :client_dob,                     Date
   property :client_address,                 Text, CommonClient::Validations.get_validation(:client_address, LoanApplication)
-  property :client_state,                   String, :default => ''
+  property :client_state,                   String, :nullable => false
   property :client_pincode,                 Integer, CommonClient::Validations.get_validation(:client_pincode, LoanApplication)
   property :client_reference1,              String, CommonClient::Validations.get_validation(:client_reference1, LoanApplication)
   property :client_reference1_type,         Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:client_reference1_type, LoanApplication)
@@ -423,10 +424,7 @@ class LoanApplication
   def self.pending_loan_file_generation(search_options = {})
     search_options[:status] = CPV2_APPROVED_STATUS
     loan_applications = all(search_options)
-    applications_pending_loan_file_generation = loan_applications#.select { |lap|
-    #   lap.is_pending_loan_file_generation?
-    # }
-    applications_pending_loan_file_generation.collect {|lap| lap.to_info}
+    loan_applications.collect {|lap| lap.to_info}
   end
 
   #returns all loan applications for which CPV was recently recorded
