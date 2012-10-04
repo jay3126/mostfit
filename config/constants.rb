@@ -110,7 +110,7 @@ BookmarkTypes   = [:custom_reports, :system]
 MethodNames = [:get, :post, :put, :delete]
 
 # Audit
-AUDITABLES = ["BizLocation","Client","ClientGroup","Lending","PaymentTransaction","StaffMember"]
+AUDITABLES = ["BizLocation","Client","ClientGroup","Lending","PaymentTransaction","StaffMember","Mfi"]
 
 # Targets
 TargetOf    = [:center_creation, :group_creation, :client_registration, :loan_disbursement_by_amount, :loan_disbursements_by_number]

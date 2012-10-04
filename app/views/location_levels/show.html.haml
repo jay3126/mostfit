@@ -21,29 +21,38 @@
     %tr.odd
       %th.odd Created At
       %td= @location_level.created_at
-%br
-- if @biz_locations.count == 0
-  = "No Biz-Location associated with #{@location_level.name} location level"
--else
-  %table.dataTable.report.weeksheet.nojs
-    %thead
-      %tr
-        %th
-          Id
-        %th
-          Name
-        %th
-          Address
-        %th
-          Creation Date
-    - for location in @biz_locations
-      %tr
-        %td
-          = location.id
-        %td
-          = link_to_location location
-        %td
-          = location.biz_location_address
-        %td
-          = location.creation_date
 
+%div.tab_container.shaded
+  %ul.tabs
+    %li#centers Centers
+    %li#history History
+
+  %div.tab
+    %br
+    - if @biz_locations.count == 0
+      = "No Biz-Location associated with #{@location_level.name} location level"
+    - else
+      %table.dataTable.report.weeksheet.nojs
+        %thead
+          %tr
+            %th
+              Id
+            %th
+              Name
+            %th
+              Address
+            %th
+              Creation Date
+        - for location in @biz_locations
+          %tr
+            %td
+              = location.id
+            %td
+              = link_to_location location
+            %td
+              = location.biz_location_address
+            %td
+              = location.creation_date
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

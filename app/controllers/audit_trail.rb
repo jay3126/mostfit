@@ -18,6 +18,7 @@ class AuditTrails < Application
     model = "BizLocation" if (params[:audit_for][:controller] == "user_locations")
     model = "SimpleFeeProduct" if (params[:audit_for][:controller] == "simple_fee_products")
     model = "SimpleInsurancePolicy" if (params[:audit_for][:controller] == "simple_insurance_policies")
+    model = "LocationLevel" if (params[:audit_for][:controller] == "location_levels")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")
@@ -25,13 +26,12 @@ class AuditTrails < Application
       id = params[:audit_for][:center_cycle_id]
     end
 
-    debugger
     if (params[:audit_for][:controller] == "admin")
       model = "Mfi"
-      @obj    = Kernel.const_get(model).first
+      @obj = Kernel.const_get(model).first
       id = @obj.id
     else
-      @obj    = Kernel.const_get(model).get(id)
+      @obj = Kernel.const_get(model).get(id)
     end
 
     if model == "Lending"
