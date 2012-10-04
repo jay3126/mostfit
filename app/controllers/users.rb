@@ -54,7 +54,7 @@ class Users < Application
 
     raise NotFound unless @user
     if @user.update_attributes(user)
-      redirect resource(:users), :message => {:notice => "User '#{@user.login}' has been modified"}
+      redirect resource(@user), :message => {:notice => "User '#{@user.login}' has been successfully modified"}
     else
       display @user, :edit
     end

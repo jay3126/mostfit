@@ -52,6 +52,7 @@
 %div.tab_container
   %ul.tabs
     %li#manages Manages
+    %li#history History
     %li#info_created{:style => "display:none"} Info (created)
     %li#info_managed{:style => "display:none"} Info (managed)
     %li#sheets{:style => "display:none"} Day Sheets
@@ -60,6 +61,8 @@
       %li#map Map
   %div.tab
     = partial "staff_members/assign_location_form"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => "/info/moreinfo/#{@staff_member.id}?for=staff_member&type=created"}
   %div.tab

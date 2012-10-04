@@ -39,14 +39,11 @@
 
       %tr.odd
         %th StaffMember
-        %td=@user.staff_member.name if @user.staff_member
-    %p
-     
+        %td=@user.staff_member.name if @user.staff_member     
 
-  -# %div.tab_container
-  -#   %ul.tabs
-  -#     %li#history
-  -#       History
-  -#   %div.tab
-  -#     = partial "audit_trails/list", :layout => false
-  -#     %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+  %div.tab_container
+    %ul.tabs
+      %li#history
+        History
+    %div.tab
+      = partial "audit_trails/list"
