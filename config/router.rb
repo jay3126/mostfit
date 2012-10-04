@@ -47,7 +47,7 @@ Merb::Router.prepare do
       resources :bank_accounts
     end
   end
-  resources :money_deposits, :id => %r(\d+), :collection => {:get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
+  resources :money_deposits, :id => %r(\d+), :collection => {:bulk_record_varification => [:get,:post],:get_money_deposits => [:get], :get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
   resources :holiday_calendars
   resources :location_holidays, :id => %r(\d+), :collection => {:holiday_for_location => [:get], :create_holiday_for_location => [:put]}
 

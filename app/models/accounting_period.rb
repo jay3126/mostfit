@@ -14,11 +14,8 @@ class AccountingPeriod
   property :closed,     Boolean, :nullable => false, :default => false
   property :created_at, DateTime, :nullable => false, :default => Time.now
 
-  has n, :account_balances
-  has n, :accounts, :through => :account_balances
-  
-  belongs_to :organization
-  property :organization_id, Integer, :nullable => true
+  has n, :ledger_accountings
+  has n, :ledgers, :through => :ledger_accountings
   
   validates_with_method :cannot_overlap
   validates_with_method :closing_done_sequentially

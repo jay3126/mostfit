@@ -20,6 +20,7 @@ class MoneyDeposit
   belongs_to :user, :child_key => [:created_by_user_id], :model => 'User'
   belongs_to :staff_member, :child_key => [:created_by_staff_id], :model => 'StaffMember'
 
+  def varified_by_staff; StaffMember.get(self.verified_by_staff_id); end;
   validates_present :created_by_staff_id
 
   def money_amounts; [:amount]; end
@@ -38,6 +39,10 @@ class MoneyDeposit
     deposit = create(money_deposit)
     raise Errors::DataError, deposit.errors.first.first unless deposit.saved?
     deposit
+  end
+
+  def varified?
+    self.verification_status == VERIFIED_CONFIRMED
   end
 
   validates_with_method  :created_on, :method => :deposit_not_in_future?

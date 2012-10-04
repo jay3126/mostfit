@@ -1,0 +1,115 @@
+:javascript
+  function check_all_box(obj, class_name){
+    jQuery('.'+class_name).attr('checked',$(obj).attr('checked'));
+  }
+%h2
+  = "Mark Verification"
+= form_for(:money_deposits, :action => resource(:money_deposits, :get_money_deposits), :method => :get) do
+  .shaded
+    %table.form
+      %thead
+        %tr
+          %th Branch:
+          %th
+            = select :name => "location_ids", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select Branch", :class => 'multiple'
+          %th
+            Date:
+          %th
+            - on_date = params[:on_date] ? params[:on_date] : get_effective_date
+            = date_select 'on_date', on_date
+          %td
+            = submit "Go"
+%br
+- if @money_deposits.blank?
+  No Money Deposit
+- else
+  - staff = session.user.staff_member
+  - @money_deposits = @money_deposits.group_by{|md| md.at_location_id}
+  - @money_deposits.each do |location_id, money_deposits|
+    - location = BizLocation.get(location_id.to_s)
+    = form_for(:money_deposits, :action => url(:controller => 'money_deposits', :action => 'bulk_record_varification', :location_id => location_id), :method => :post, :class => 'bank_deposites') do
+      %h2{:onclick => "jQuery('.biz_#{location_id}').slideToggle(); return false;", :style => "cursor:pointer;"}= location.name
+      %div{:class => "fg-toolbar ui-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix biz_#{location_id}", :style => "display:none"}
+        %table.report.nojs
+          %tr
+            %td
+              Repayment
+            %th
+              - repayments = reporting_facade.total_dues_collected_and_collectable_per_location_on_date(location_id, @date)
+              = repayments[:schedule_total_due].blank? ? MoneyManager.default_zero_money : repayments[:schedule_total_due]
+            %td
+              Pending Varified
+            %th
+              - p_amount = money_deposits.select{|l| l.verification_status == :pending_verification}.map(&:deposit_money_amount)
+              = p_amount.blank? ? MoneyManager.default_zero_money : p_amount.sum
+            %td
+              Rejected
+            %th
+              - r_amount = money_deposits.select{|l| l.verification_status == :verified_rejected}.map(&:deposit_money_amount)
+              = r_amount.blank? ? MoneyManager.default_zero_money : r_amount.sum
+            %td
+              Varified
+            %th
+              - v_amount = money_deposits.select{|l| l.verification_status == :verified_confirmed}.map(&:deposit_money_amount)
+              = v_amount.blank? ? MoneyManager.default_zero_money : v_amount.sum
+      %table.dataTable.weeksheet.report.nojs
+        %thead
+          %tr
+            %th
+              = "Bank"
+            %th
+              = "Branch"
+            %th
+              = "Accounts"
+            %th
+              = "Amount"
+            %th
+              = "Verification status"
+            %th
+              = "Verified by"
+            %th
+              = "Verified on"
+            %th
+              Select All
+              %br
+              = check_box :name => 'select_all', :onclick => "check_all_box(this, 'biz_varify_#{location_id}')"
+        - money_deposits.each do |money_deposit|
+          %tr
+            %td
+              = money_deposit.bank_account.bank_branch.bank.name
+            %td
+              = money_deposit.bank_account.bank_branch.name
+            %td
+              = money_deposit.bank_account.name
+            %td
+              = money_deposit.deposit_money_amount.to_s
+            %td
+              = money_deposit.verification_status.blank? ? 'Pending' : money_deposit.verification_status.to_s.humanize
+            %td
+              = money_deposit.verified_by_staff_id.blank? ? '-' : money_deposit.varified_by_staff.name
+            %td
+              = money_deposit.verified_on.blank? ? '-' : money_deposit.verified_on
+            %td{:style => "text-align:center"}
+              - if money_deposit.varified?
+                Varified
+              - else
+                = check_box :name => 'money_deposit[varified]', :value => money_deposit.id, :class => "biz_varify_#{location_id}"
+      %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+        %table.form{:style => "text-align:right;width:100%;"}
+          %tfoot
+            %tr
+              %th
+                Verified on :-
+              %th
+                = @date
+                = hidden_field :name => "money_deposit[on_date]", :value => @date
+              %th
+                Verification status :-
+              %th
+                = select :name => "money_deposit[verification_status]", :collection => Constants::MoneyDepositVerificationStatus::CHOOSE_VERIFICATION_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select Status'
+              %th
+                Verified by :-
+              %th
+                = select :name => "money_deposit[performed_by]", :text_method => :name, :value_method => :id, :collection => [staff], :prompt => "Select staff member", :selected => staff.id.to_s
+              %th
+                = submit 'Save'

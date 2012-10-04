@@ -110,5 +110,54 @@ class MoneyDeposits < Application
     end
   end
 
+  def get_money_deposits
+    @money_deposits = []
+    @date = params[:on_date].blank? ? get_effective_date : params[:on_date]
+    if params[:submit]
+      if params[:location_ids].blank?
+        @money_deposits = MoneyDeposit.all(:created_on => @date, :order => [:created_on.desc])
+      else
+        @money_deposits = MoneyDeposit.all(:at_location_id => params[:location_ids], :created_on => @date, :order => [:created_on.desc])
+      end
+    end
+    display @money_deposits
+  end
+
+  def bulk_record_varification
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+    @message = {:error => [], :notice => []}
+
+    # GATE-KEEPING
+    money_deposit      = params[:money_deposit]
+    verification_status = money_deposit[:verification_status]
+    verified_by = money_deposit[:performed_by]
+    verified_on = money_deposit[:on_date]
+    @at_location_id = params[:location_id]
+
+    # VALIDATIONS
+    @message[:error] << "Verification status must not be blank" if verification_status.blank?
+    @message[:error] << "Verified by staff member must not be blank" if verified_by.blank?
+    @message[:error] << "Verified on date must not be future date" if Date.parse(verified_on) > Date.today
+    @message[:error] << "Please select Money Deposit for Varification" if money_deposit[:varified].blank?
+
+    # OPERATIONS-PERFORMED
+    if @message[:error].blank?
+      begin
+        money_deposit_ids = money_deposit[:varified]
+        is_saved = MoneyDeposit.all(:id => money_deposit_ids).update(:verification_status => verification_status, :verified_on => verified_on, :verified_by_staff_id => verified_by)
+        if is_saved
+          @message = {:notice => "Verification status successfuly marked"}
+        else
+          @message[:error] << @errors.to_s
+        end
+      rescue => ex
+        @message[:error] << ex.message
+      end
+    end
+    
+    # RENDER/RE-DIRECT
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect resource(:money_deposits, :get_money_deposits, :on_date => verified_on, :location_ids => @at_location_id, :submit => 'Go'), :message => @message
+  end
   
 end
