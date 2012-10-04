@@ -31,13 +31,16 @@
     %td
       = @funder.portfolios.size
 
-%div.tab_container
+%div.tab_container.shaded
   %ul.tabs
-    %li#funding_lines
-      Funding Lines
+    %li#funding_lines Funding Lines
+    %li#history History
     -# %li#portfolios
     -#   Portfolios
   %div.tab
+    %br
     = partial "funding_lines/list"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
   -# %div.tab
   -#   = partial "portfolios/list"

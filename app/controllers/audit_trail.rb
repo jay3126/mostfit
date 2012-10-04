@@ -19,6 +19,9 @@ class AuditTrails < Application
     model = "SimpleFeeProduct" if (params[:audit_for][:controller] == "simple_fee_products")
     model = "SimpleInsurancePolicy" if (params[:audit_for][:controller] == "simple_insurance_policies")
     model = "LocationLevel" if (params[:audit_for][:controller] == "location_levels")
+    model = "Funder" if (params[:audit_for][:controller] == "funders")
+    model = "FundingLine" if (params[:audit_for][:controller] == "funding_lines")
+    model = "Tranch" if (params[:audit_for][:controller] == "tranches")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")
@@ -37,6 +40,7 @@ class AuditTrails < Application
     if model == "Lending"
       model = ["Lending", @obj.class.to_s]
     end
+
     @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
     partial "audit_trails/list", :layout => false
   end
