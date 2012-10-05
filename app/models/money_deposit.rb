@@ -21,6 +21,7 @@ class MoneyDeposit
   belongs_to :staff_member, :child_key => [:created_by_staff_id], :model => 'StaffMember'
 
   def varified_by_staff; StaffMember.get(self.verified_by_staff_id); end;
+  def location; BizLocation.get(self.at_location_id); end;
   validates_present :created_by_staff_id
 
   def money_amounts; [:amount]; end
@@ -43,6 +44,11 @@ class MoneyDeposit
 
   def varified?
     self.verification_status == VERIFIED_CONFIRMED
+  end
+
+  def self.location_amount_on_status(status, on_date = Date.today)
+    deposits = all(:verification_status => status, :created_on => on_date)
+    deposits.blank? ? MoneyManager.default_zero_money : deposits.map(&:deposit_money_amount).sum
   end
 
   validates_with_method  :created_on, :method => :deposit_not_in_future?

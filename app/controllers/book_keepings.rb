@@ -5,26 +5,20 @@ class BookKeepings < Application
     render :index
   end
 
-  def eod_accounting
-    @message         = {}
-    @cost_centers    = []
-    @ledgers         = []
-    @date            = params[:on_date]
-    cost_center_ids  = params[:cost_center_ids]
-    @message[:error] = "Please Select Cost Center" if cost_center_ids.blank?
-    @message[:error] = "Date cannot be blank" if @date.blank?
-
-    if @message.blank?
-      @date           = Date.parse @date
-      @cost_centers   = CostCenter.all(:id => cost_center_ids) unless cost_center_ids.blank?
-      @cost_centers.each{|c_center| @ledgers << c_center.get_sum_of_balances_cost_center(@date).first}
-      @ledgers = @ledgers.flatten.compact.uniq
-    end
-    display @cost_centers
+  def eod_process
+    @locations = BizLocation.all('location_level.level' => 1)
+    display @locations
   end
 
-  def update_accounting_status_on_date
-
+  def perform_eod_process
+    message           = {:error => [], :notice => []}
+    @locations        = BizLocation.all('location_level.level' => 1)
+    location_ids      = params[:location_ids]
+    @perform_location = location_ids.blank? ? [] : @locations.select{|s| location_ids.include?(s.id)}
+    message[:error]   = "Please Select Branch For EOD Process" if location_ids.blank?
+    message[:notice]  = "EOD Process Started" if message[:error].blank?
+    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
+    redirect :eod_process, :message => message
   end
 
 end # BookKeeping

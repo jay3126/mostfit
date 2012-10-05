@@ -132,7 +132,7 @@ class MoneyDeposits < Application
     verification_status = money_deposit[:verification_status]
     verified_by = money_deposit[:performed_by]
     verified_on = money_deposit[:on_date]
-    @at_location_id = params[:location_id]
+    @location_ids = params[:location_ids]
 
     # VALIDATIONS
     @message[:error] << "Verification status must not be blank" if verification_status.blank?
@@ -144,6 +144,7 @@ class MoneyDeposits < Application
     if @message[:error].blank?
       begin
         money_deposit_ids = money_deposit[:varified]
+        debugger
         is_saved = MoneyDeposit.all(:id => money_deposit_ids).update(:verification_status => verification_status, :verified_on => verified_on, :verified_by_staff_id => verified_by)
         if is_saved
           @message = {:notice => "Verification status successfuly marked"}
@@ -157,7 +158,7 @@ class MoneyDeposits < Application
     
     # RENDER/RE-DIRECT
     @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
-    redirect resource(:money_deposits, :get_money_deposits, :on_date => verified_on, :location_ids => @at_location_id, :submit => 'Go'), :message => @message
+    redirect resource(:money_deposits, :get_money_deposits, :on_date => verified_on, :location_ids => @location_ids, :submit => 'Go'), :message => @message
   end
   
 end
