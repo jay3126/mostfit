@@ -52,8 +52,6 @@
             - if response.result_status == "cleared"
               =link_to "View completed #{@checklist.checklist_type.name} checklist",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
             - else
-              -#- debugger
-              -#=link_to "Edit #{@checklist.checklist_type.name} checklist", url(:checklister_slice_fill_in_checklist, :checklist_id=>@checklist.id, :referral_url=>params[:referral_url], :is_edit => 'true'), :class=>"greenButton"
               =link_to "Edit #{@checklist.checklist_type.name} checklist", url(:checklister_slice_edit_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
 
 

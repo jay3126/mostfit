@@ -33,13 +33,15 @@
             DeDupe
           %td
             Remark
-      - if  count==2
-        - (1).times do |i|
+      - if count==2
+        -#- (1).times do |i|
+        -i=0
+        - loan_file.loan_applications.each do |loan_application|
           -#-(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
-          -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+          -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+          -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+          -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+          -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
 
 
           -if count==1 or count==3
@@ -64,33 +66,35 @@
           -if !checkboxpoint.nil?
             -#%td
             -#  ="#{checkboxpoint.name}"
-            - loan_file.loan_applications.each do |loan_application|
-              %tr
-                %td
-                  = "#{loan_application.client_name}"
-                  -checkboxpoint.checkboxpoint_options.each do |option|
+            -#- loan_file.loan_applications.each do |loan_application|
+            %tr
+              %td
+                = "#{loan_application.client_name}"
+                -checkboxpoint.checkboxpoint_options.each do |option|
+                  %td
+                    -#=check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:disabled=>false
+                    - debugger
+                    =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
+
+
+              -if !free_text.nil?
+                -if count!=2
+                  %td{:width=>"70px"}
+
+                    =" #{free_text.name}"
+
+                -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                -if free_text_filling.nil?
+                  -@comment="----NA----"
+                -else
+                  -@comment=free_text_filling.comment
+                -if free_text.name.downcase=="date"
+                  %td
+                    =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
+                -else
+                  - (1).times do |f|
                     %td
-                      =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
-
-
-                -if !free_text.nil?
-                  -if count!=2
-                    %td{:width=>"70px"}
-
-                      =" #{free_text.name}"
-
-                  -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-                  -if free_text_filling.nil?
-                    -@comment="----NA----"
-                  -else
-                    -@comment=free_text_filling.comment
-                  -if free_text.name.downcase=="date"
-                    %td
-                      =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
-                  -else
-                    - (1).times do |f|
-                      %td
-                        =text_field :name=>"free_text_#{free_text.id}_#{loan_application.id}".to_sym,:value=>@comment,:disabled=>false
+                      =text_field :name=>"free_text_#{free_text.id}_#{loan_application.id}".to_sym,:value=>@comment,:disabled=>false
           -if !dropdownpoint.nil?
             %td
               =" #{dropdownpoint.name}"
@@ -98,6 +102,7 @@
               =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
 
         -count=count+1
+        - i +=1
 
       - else
         -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
@@ -124,8 +129,18 @@
                 Not Attempted
               -else
                 -#- debugger
-                =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
+                -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
                 -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? 'checked' : nil,:disabled=>true
+                - if checkpoint_filling.status?
+                  = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => checkpoint_filling.status?
+                  Yes
+                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0
+                  No
+                - else
+                  = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1
+                  Yes
+                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => checkpoint_filling.status?
+                  No
           -if !checkboxpoint.nil?
             %td
               ="#{checkboxpoint.name}"
@@ -159,6 +174,14 @@
               =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
 
         -count=count+1
+
+
+= link_to_with_rights "Update", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'add grey_button'
+
+%br
+%br
+%br
+=link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 
 
 

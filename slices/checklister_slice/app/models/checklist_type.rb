@@ -323,24 +323,24 @@ class ChecklistType
 
     @section2=Section.create!(:section_type_id => @section_type2.id, :instructions => "Please Fill in the answers Below:", :checklist_id => @checklist.id, :name => "Section2", :created_at => Date.today)
     #repeacted 15 times
-    final_sequence=0
-    15.times do |i|
-
-      @checkboxpoint1=Checkboxpoint.create!(:section_id => @section2.id, :name => "GS#{(((i+5)%5)+1)}-#{(i%5)+1}", :sequence_number => (final_sequence+1), :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Address proof", :sequence_number => 1, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "ID proof", :sequence_number => 2, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Age", :sequence_number => 3, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Ration Card", :sequence_number => 4, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Extra Photo", :sequence_number => 5, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Member/Guarantor sign ", :sequence_number => 6, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "BM/RO/AO sign ", :sequence_number => 7, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Term Sheet", :sequence_number => 8, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "DPN", :sequence_number => 9, :created_at => Date.today)
-      @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "DeDupe", :sequence_number => 10, :created_at => Date.today)
-      @free_text4=FreeText.create!(:section_id => @section2.id, :name => "Remark", :sequence_number => (final_sequence+2), :created_at => Date.today)
-      final_sequence=final_sequence+2
-
-    end
+    #final_sequence=0
+    #15.times do |i|
+    #
+    #  @checkboxpoint1=Checkboxpoint.create!(:section_id => @section2.id, :name => "GS#{(((i+5)%5)+1)}-#{(i%5)+1}", :sequence_number => (final_sequence+1), :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Address proof", :sequence_number => 1, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "ID proof", :sequence_number => 2, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Age", :sequence_number => 3, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Ration Card", :sequence_number => 4, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Extra Photo", :sequence_number => 5, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Member/Guarantor sign ", :sequence_number => 6, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "BM/RO/AO sign ", :sequence_number => 7, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "Term Sheet", :sequence_number => 8, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "DPN", :sequence_number => 9, :created_at => Date.today)
+    #  @checkboxpoint_option1=CheckboxpointOption.create!(:checkboxpoint_id => @checkboxpoint1.id, :name => "DeDupe", :sequence_number => 10, :created_at => Date.today)
+    #  @free_text4=FreeText.create!(:section_id => @section2.id, :name => "Remark", :sequence_number => (final_sequence+2), :created_at => Date.today)
+    #  final_sequence=final_sequence+2
+    #
+    #end
 
 
     #section 3

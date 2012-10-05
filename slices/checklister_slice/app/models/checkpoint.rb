@@ -7,6 +7,7 @@ class Checkpoint
 
   property :created_at, DateTime,:nullable=>false,:default=>Date.today
   property :deleted_at, DateTime
+  property :loan_application_id, Integer
 
 
   belongs_to :section
