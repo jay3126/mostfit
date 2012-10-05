@@ -21,6 +21,7 @@ class MoneyDeposit
   belongs_to :staff_member, :child_key => [:created_by_staff_id], :model => 'StaffMember'
 
   def varified_by_staff; StaffMember.get(self.verified_by_staff_id); end;
+  def location; BizLocation.get(self.at_location_id); end;
   validates_present :created_by_staff_id
 
   def money_amounts; [:amount]; end
