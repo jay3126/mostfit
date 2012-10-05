@@ -5,6 +5,6 @@
   = partial :fields, :submit_text => "Save changes", :cancel_link => url_for_loan(@loan, 'payments')
 
 %div.greytext
-  This form is does not perform a normal edit. Payment #{@payment.id} will be deleted and a new one will be created with parameters below 
+  This form does not perform a normal edit. Payment #{@payment.id} will be deleted and a new one will be created with parameters below 
 %br
 = link_to_with_rights 'Back', url_for_loan(@loan, 'payments')

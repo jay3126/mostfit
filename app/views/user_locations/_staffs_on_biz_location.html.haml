@@ -11,7 +11,7 @@
 %br
 - if @staff_postings.count == 0
   %p
-    %i No Staff Posting have been created yet.
+    %i No Staff Posting has been created yet.
 - else
   - check_disabled = LocationHoliday.holiday_applies?(@biz_location, get_effective_date)
   = form_for(:user_locations, :action => url(:controller => :staff_attendances, :action => :create), :disabled => check_disabled) do

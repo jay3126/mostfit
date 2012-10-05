@@ -18,7 +18,7 @@
 %br
 - if @scv.blank?
   %p
-    %i No SCV have been created yet.
+    %i No SCV has been created yet.
 - else
   = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :save_location_scv, :id => @biz_location.id)) do
     %table.report.weeksheet.nojs.scv

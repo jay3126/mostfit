@@ -9,7 +9,7 @@
       = link_to 'Add New Group', '#', :class => 'add grey_button', :onclick => "jQuery('#new_client_group_form').toggle(); return false;" unless (params[:action] == "edit")
   %tr
     %th
-      Name:
+      Name
     %td
       = text_field :name, :size => 40
   %tr
@@ -44,7 +44,7 @@
       = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES.map{|x| [x.to_s, x.to_s.humanize]}
   %tr
     %th
-      Date of birth:
+      Date of birth
     %td
       = date_select_for @client, :date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
@@ -54,37 +54,37 @@
       = date_select 'client[date_joined]', @client.date_joined.nil? ? Date.today : @client.date_joined, {:max_date => Date.today, :id => "date_joined"}
   %tr
     %th
-      Spouse name:
+      Spouse name
     %td
       = text_field :spouse_name, :size => 40
   %tr
     %th
-      Spouse Date of Birth:
+      Spouse Date of Birth
     %td
       = date_select_for @client, :spouse_date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
-      Guarantor name:
+      Guarantor name
     %td
       = text_field :guarantor_name, :size => 40
   %tr
     %th
-      Guarantor Date of Birth:
+      Guarantor Date of Birth
     %td
       = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
-      Guarantor relationship:
+      Guarantor relationship
     %td
       = select :guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Address:
+      Address
     %td
       = text_area :address, :rows => 6, :cols => 38
   %tr
     %th
-      State:
+      State
     %td
       - all_states = BizLocation.get_state_locations
       - if @client.new?
@@ -95,12 +95,12 @@
       = select :state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => "---", :selected => state_name.downcase
   %tr
     %th
-      Pincode:
+      Pincode
     %td
       = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
   %tr
     %th
-      Telephone number:
+      Telephone number
     %td
       = text_field :telephone_number
   %tr
@@ -120,7 +120,7 @@
       = text_field :family_income
   %tr
     %th
-      Occupation:
+      Occupation
     %td
       = select :occupation_id, :collection => Occupation.all.collect{|occ| [occ.id, occ.name]}, :prompt => "Select"
   %tr
@@ -135,18 +135,18 @@
       = select :psl_sub_category_id, :collection => nil, :value_method => :id, :text_method => :name, :prompt => "Select", :id => 'psl_sub_category_selector'
   %tr
     %th
-      Caste:
+      Caste
     %td
       = select :caste, :collection => Constants::Masters::CASTE_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Religion:
+      Religion
     %td
       = select :religion, :collection => Constants::Masters::RELIGION_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   - if not @client.new?
     %tr
       %th
-        Active:
+        Active
       %td
         = check_box :active
         &nbsp;&nbsp;

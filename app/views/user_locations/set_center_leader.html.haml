@@ -16,12 +16,12 @@
 .shaded
   - if @customers.blank?
     %p
-      %i No Client Mapping have been created yet.
+      %i No Client Mapping has been created yet.
   - else
     %i
-      %b Note: The clients which do not have active loans are not eligible for center leader
+      %b Note: The clients who do not have an active loan are not eligible for center leader
       %br
-      %b Note: The clients which has death event registered will not be shown in this list
+      %b Note: The clients who have a death event registered will not be shown in this list
     %h3= "Current Center Leader: Client ID = #{@client.id}, Client Name = #{@client.name}" unless @client.blank?
     = form(:action => url(:controller => :user_locations, :action => :record_center_leader)) do
       = hidden_field :name => "biz_location_id", :value => @biz_location.id

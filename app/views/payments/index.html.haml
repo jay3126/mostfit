@@ -270,7 +270,7 @@
       %h2== Repayments #{link_to_with_rights 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add grey_button"}
       - if @payments.blank?
         %p
-          %i No repayments have been made so far.
+          %i No repayments made so far.
       - else
         = partial "payments/list", {:pmts => @payments, :context => :received}
     - if @loan.insurance_policy

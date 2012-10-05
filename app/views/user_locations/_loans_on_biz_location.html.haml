@@ -11,14 +11,14 @@
 
 - if params[:controller] == "new_clients" && !client_facade.is_client_active?(@client)
   %i
-    = "Note: Client is Not eligible to Apply New loan, Death event has been registered on client (#{client_facade.death_event_filed_for(@client)} Death)"
+    = "Note: Client is Not eligible to Apply for New loan, Death event has been registered on client (#{client_facade.death_event_filed_for(@client)} Death)"
 - else
   = link_to_with_rights 'Add Loan', resource(:lending_products, :biz_location_id => @biz_location.id, :client_id => "#{@client.blank? ? '' : @client.id}" ), :class => "add grey_button"
 
 %br
 - if @lendings.blank?
   %p
-    %i No Loans Mapping have been created yet.
+    %i No Loan Mapping has been created yet.
 - else
   %table.report.weeksheet.nojs.center_loan
     %thead

@@ -1,7 +1,7 @@
 %h2== Repayments #{link_to_with_rights 'new repayment', url_for_loan(@loan, 'payments/new'), :class => "add"}
 - if @payments.blank?
   %p
-    %i No repayments have been made so far.
+    %i No repayments made so far.
 - else
 / %a{:href => "#", :onclick => "javascript:$('.checkbox').attr('checked',true); return false"} check all
 / %a{:href => "#", :onclick => "javascript:$('.checkbox').attr('checked',false); return false"} uncheck all

@@ -5,7 +5,7 @@
 
 - if @staff_members.blank?
   %p
-    %i No staff members been created yet.
+    %i No staff members have been created yet.
 - else
   %table.narrow.form{ :width => '100%' }
     %thead

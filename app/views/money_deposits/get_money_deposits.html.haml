@@ -21,7 +21,7 @@
             = submit "Go"
 %br
 - if @money_deposits.blank?
-  No Money Deposit
+  No Money Deposits
 - else
   - staff = session.user.staff_member
   - @date = Date.parse(@date) if @date.class != Date
@@ -39,7 +39,7 @@
               - repayments = reporting_facade.total_dues_collected_and_collectable_per_location_on_date(location_id, @date)
               = repayments[:schedule_total_due].blank? ? MoneyManager.default_zero_money : repayments[:schedule_total_due]
             %td
-              Pending Varified
+              Pending Verified
             %th
               - p_amount = money_deposits.select{|l| l.verification_status == :pending_verification}.map(&:deposit_money_amount)
               = p_amount.blank? ? MoneyManager.default_zero_money : p_amount.sum
