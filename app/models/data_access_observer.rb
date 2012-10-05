@@ -1,6 +1,6 @@
 class DataAccessObserver
   include DataMapper::Observer
-  observe *(DataMapper::Model.descendants.to_a - [AuditTrail] + [BizLocation, ClientGroup, Client, Lending, PaymentTransaction, StaffMember, SimpleFeeProduct, SimpleInsurancePolicy, CenterCycle, Mfi, LocationLevel, Funder, FundingLine, Tranch, ThirdParty, LoanPurpose, Occupation, ClientGroup, PrioritySectorList, PslSubCategory, DocumentType, StockRegister]).uniq # strange bug where observer drops some of the descnedants.
+  observe *(DataMapper::Model.descendants.to_a - [AuditTrail] + [BizLocation, ClientGroup, Client, Lending, PaymentTransaction, StaffMember, SimpleFeeProduct, SimpleInsurancePolicy, CenterCycle, Mfi, LocationLevel, Funder, FundingLine, Tranch, ThirdParty, LoanPurpose, Occupation, ClientGroup, PrioritySectorList, PslSubCategory, DocumentType, StockRegister, AssetCategory, AssetSubCategory, AssetType]).uniq # strange bug where observer drops some of the descnedants.
   
   def self.insert_session(id)
     @_session = ObjectSpace._id2ref(id)

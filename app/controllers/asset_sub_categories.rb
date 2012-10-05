@@ -6,13 +6,6 @@ class AssetSubCategories < Application
     display @asset_sub_categories
   end
 
-  #auto-generated
-  #def show(id)
-  #  @asset_sub_category = AssetSubCategory.get(id)
-  #  raise NotFound unless @asset_sub_category
-  #  display @asset_sub_category
-  #end
-
   def show
     @asset_sub_category = AssetSubCategory.get params[:id]
     @asset_types =  @asset_sub_category.asset_types
@@ -32,24 +25,13 @@ class AssetSubCategories < Application
     display @asset_sub_category
   end
 
-  #auto-generated
-  #def create(asset_sub_category)
-  #  @asset_sub_category = AssetSubCategory.new(asset_sub_category)
-  #  if @asset_sub_category.save
-  #    redirect resource(@asset_sub_category), :message => {:notice => "AssetSubCategory was successfully created"}
-  #  else
-  #    message[:error] = "AssetSubCategory failed to be created"
-  #    render :new
-  #  end
-  #end
-
   def create
     @asset_category = AssetCategory.get(params[:asset_category_id])
     @asset_sub_category = @asset_category.asset_sub_categories.new(:name => params[:name])
     if @asset_sub_category.save
-      redirect resource(@asset_category), :message => {:notice => "Save Successfully"}
+      redirect url("asset_categories/#{@asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_sub_category.id}"), :message => {:notice => "Asset Sub-Category: '#{@asset_sub_category.name} (id: #{@asset_sub_category.id})' was successfully created"}
     else
-      redirect resource(@asset_category), :message => {:error => error_messages(@asset_sub_category)}
+      redirect resource(@asset_category), :message => {:error => "Asset Sub-Category failed to be created because : #{@asset_sub_category.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
 
@@ -57,7 +39,7 @@ class AssetSubCategories < Application
     @asset_sub_category = AssetSubCategory.get(id)
     raise NotFound unless @asset_sub_category
     if @asset_sub_category.update(asset_sub_category)
-       redirect resource(@asset_sub_category)
+      redirect url("asset_categories/#{@asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_sub_category.id}"), :message => {:notice => "Asset Sub-Category: '#{@asset_sub_category.name} (id: #{@asset_sub_category.id})' was successfully updated"}
     else
       display @asset_sub_category, :edit
     end

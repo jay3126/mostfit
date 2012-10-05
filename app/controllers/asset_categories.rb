@@ -6,13 +6,6 @@ class AssetCategories < Application
     display @asset_categories
   end
 
-  #auto-generated
-  #def show(id)
-  #  @asset_category = AssetCategory.get(id)
-  #  raise NotFound unless @asset_category
-  #  display @asset_category
-  #end
-
   def show
     @asset_category = AssetCategory.get params[:id]
     @asset_sub_categories = @asset_category.asset_sub_categories
@@ -32,32 +25,20 @@ class AssetCategories < Application
     display @asset_category
   end
 
-  #auto-generated
-  #def create(asset_category)
-  #  @asset_category = AssetCategory.new(asset_category)
-  #  if @asset_category.save
-  #    redirect resource(@asset_category), :message => {:notice => "AssetCategory was successfully created"}
-  #  else
-  #    message[:error] = "AssetCategory failed to be created"
-  #    render :new
-  #  end
-  #end
-
   def create
-    @asset_category = AssetCategory.new({:name=> params[:name]})
+    @asset_category = AssetCategory.new({:name => params[:name]})
     if @asset_category.save
-      redirect resource(:asset_categories), :message => {:notice => "Save Successfully"}
+      redirect resource(@asset_category), :message => {:notice => "Asset Category: '#{@asset_category.name} (id: #{@asset_category.id})' was successfully created"}
     else
-      redirect resource(:asset_categories), :message => {:error => error_messages(@asset_category)}
+      redirect resource(:asset_categories), :message => {:error => "Asset Category failed to be created because : #{@asset_category.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
-
 
   def update(id, asset_category)
     @asset_category = AssetCategory.get(id)
     raise NotFound unless @asset_category
     if @asset_category.update(asset_category)
-       redirect resource(@asset_category)
+      redirect resource(@asset_category), :message => {:notice => "Asset Category: '#{@asset_category.name} (id: #{@asset_category.id})' was successfully updated"}
     else
       display @asset_category, :edit
     end

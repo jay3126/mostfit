@@ -6,13 +6,6 @@ class AssetTypes < Application
     display @asset_types
   end
 
-  #auto-generated
-  #def show(id)
-  #  @asset_type = AssetType.get(id)
-  #  raise NotFound unless @asset_type
-  #  display @asset_type
-  #end
-
   def show
     @asset_type = AssetType.get params[:id]
     display @asset_type
@@ -31,24 +24,13 @@ class AssetTypes < Application
     display @asset_type
   end
 
-  #auto-generated
-  #def create(asset_type)
-  #  @asset_type = AssetType.new(asset_type)
-  #  if @asset_type.save
-  #    redirect resource(@asset_type), :message => {:notice => "AssetType was successfully created"}
-  #  else
-  #    message[:error] = "AssetType failed to be created"
-  #    render :new
-  #  end
-  #end
-
   def create
     @asset_sub_category = AssetSubCategory.get(params[:asset_sub_category_id])
     @asset_type =  @asset_sub_category.asset_types.new(:name => params[:name])
     if @asset_type.save
-      redirect resource(@asset_sub_category.asset_category,@asset_sub_category), :message => {:notice => "Save Successfully"}
+      redirect url("asset_categories/#{@asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_sub_category.id}/asset_types/#{@asset_type.id}"), :message => {:notice => "Asset Type: '#{@asset_type.name} (id: #{@asset_type.id})' was successfully created"}
     else
-      redirect resource(@asset_sub_category.asset_category,@asset_sub_category), :message => {:error => error_messages(@asset_type)}
+      redirect request.referer, :message => {:error => "Asset Type failed to be created because : #{@asset_type.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
 
@@ -56,7 +38,7 @@ class AssetTypes < Application
     @asset_type = AssetType.get(id)
     raise NotFound unless @asset_type
     if @asset_type.update(asset_type)
-       redirect resource(@asset_type)
+      redirect url("asset_categories/#{@asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_sub_category.id}/asset_types/#{@asset_type.id}"), :message => {:notice => "Asset Type: '#{@asset_type.name} (id: #{@asset_type.id})' was successfully updated"}
     else
       display @asset_type, :edit
     end
@@ -71,7 +53,5 @@ class AssetTypes < Application
       raise InternalServerError
     end
   end
-
-
 
 end # AssetTypes

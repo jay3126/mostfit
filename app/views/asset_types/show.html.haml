@@ -1,39 +1,62 @@
-%h1
-  = "Asset Type :- #{@asset_type.name}"
--#.shaded
--#  .menu-strip
--#    = link_to_with_rights 'Add Asset Type',resource(:money_deposits), :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
--#    = #partial 'bank_accounts/form'
--#%br
--#%hr
--#
--#.shaded
--#  %h2
--#    = "Bank Account Deposites"
--#  %table.form{:style => "width:100%;"}
--#    %thead
--#      %tr
--#        %th
--#          = "ID"
--#        %th
--#          = "Amount"
--#        %th
--#          = "Created By User"
--#        %th
--#          = "Manage By Staff"
--#        %th
--#          = "Created Date"
--#    %tbody
--#      - @money_deposits.each do |md|
--#        %tr
--#          %td
--#            = md.id
--#          %td
--#            = md.amount
--#          %td
--#            = md.user.name
--#          %td
--#            = md.staff_member.name
--#          %td
--#            = md.created_at.strftime('%d/%m/%Y')
--#%br
+%h1 Details of Asset Type: #{@asset_type.name}
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url("asset_categories/#{@asset_type.asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_type.asset_sub_category.id}"), :class => "grey_button"
+
+%table.tall.shaded
+  %tr
+    %th
+      Id
+    %td
+      = @asset_type.id
+  %tr
+    %th
+      Name
+    %td
+      = @asset_type.name
+  %tr
+    %th
+      Asset Sub-Category
+    %td
+      = link_to_with_rights @asset_type.asset_sub_category.name, url("asset_categories/#{@asset_type.asset_sub_category.asset_category.id}/asset_sub_categories/#{@asset_type.asset_sub_category.id}")
+  %tr
+    %th
+      Asset Category
+    %td
+      = link_to_with_rights @asset_type.asset_sub_category.asset_category.name, url("asset_categories/#{@asset_type.asset_sub_category.asset_category.id}")
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#history History
+
+  %div.tab
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @asset_type.id
+      - model = "AssetType"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              = diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

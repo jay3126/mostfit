@@ -1,29 +1,48 @@
-%h1
-  = "Asset Category :- #{@asset_category.name}"
-.shaded
-  .menu-strip
-    = link_to_with_rights 'Add Asset Sub-category','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
-    %br
-    %br
-    = partial 'asset_sub_categories/form'
-%br
-%hr
+%h1 Details of Asset Category: #{@asset_category.name}
 
-.shaded
-  %h2
-    = "Asset Sub-categories"
-  %table.form{:style => "width:100%;"}
-    %thead
-      %tr
-        %th
-          = "ID"
-        %th
-          = "Name"
-    %tbody
-      - @asset_sub_categories.each do |asbc|
+.menu-strip{:style => "width:28%;"}
+  = link_to_with_rights 'Add Asset Sub-category','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:asset_categories), :class => "grey_button"
+  %br
+
+= partial 'asset_sub_categories/form'
+
+%table.tall.shaded
+  %tr
+    %th
+      Id
+    %td
+      = @asset_category.id
+  %tr
+    %th
+      Name
+    %td
+      = @asset_category.name
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#asset_sub_categories
+      Asset Sub-Categories
+    %li#history
+      History
+
+  %div.tab
+    %h2 List of Asset Sub-category under Asset Category - #{@asset_category.name}
+    %table.dataTable.report.weeksheet.nojs
+      %thead
         %tr
-          %td
-            = asbc.id
-          %td
-            = link_to asbc.name, resource(@asset_category,asbc)
-%br
+          %th
+            = "ID"
+          %th
+            = "Name"
+      %tbody
+        - @asset_sub_categories.each do |asbc|
+          %tr
+            %td
+              = asbc.id
+            %td
+              = link_to asbc.name, resource(@asset_category,asbc)
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

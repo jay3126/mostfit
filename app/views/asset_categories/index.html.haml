@@ -5,13 +5,12 @@
   &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
-%br
 = partial 'form'
 %br
 
 .shaded
   - if @asset_categories && !@asset_categories.empty?
-    %table.form{:style => "width:100%;"}
+    %table.dataTable.report.weeksheet.nojs
       %thead
         %tr
           %th

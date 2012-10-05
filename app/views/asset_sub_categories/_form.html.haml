@@ -1,5 +1,15 @@
-#new_form{:style => "#{@asset_sub_categories.blank? ? 'display : true' : 'display : none'}"}
-  %form{:action => url(:controller => :asset_sub_categories, :action => :create, :asset_category_id => @asset_category.id), :method => :post}
-    Name
-    = text_field :name
-    = submit "Save"
+#new_form{:style => "display:none;"}
+  .shaded{:style => "width:30%;"}
+    %form{:action => url(:controller => :asset_sub_categories, :action => :create, :asset_category_id => @asset_category.id), :method => :post}
+      %table.tall.shaded
+        %tr
+          %th
+            Name
+          %td
+            = text_field :name
+      = submit "Save"
+      &nbsp;&nbsp;
+      %b
+        Or
+      &nbsp;&nbsp;
+      = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#new_form').hide();", :class => "grey_button"
