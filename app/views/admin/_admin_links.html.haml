@@ -7,7 +7,7 @@
         %li
           = link_to_with_rights 'Profile and system-wide policies', url(:controller => "admin", :action => "edit"), :class => 'admin icon'
         %li
-          //= link_to_with_rights 'Holidays', url(:controller => 'holidays', :action => "index"), :class => 'icon holiday'
+          = link_to_with_rights 'Holiday', resource(:location_holidays), :class => 'icon holiday'
         %li
           //= link_to_with_rights 'Holiday Calendars', url(:controller => 'holiday_calendars', :action => "index"), :class => 'icon holiday'
     .admin-box
@@ -90,13 +90,11 @@
       %li
         = link_to_with_rights 'Stock Master', resource(:stock_registers), :class => 'report icon'
       %li
-        = link_to_with_rights 'Asset Master', resource(:asset_registers), :class => 'report icon'
-      %li
         = link_to_with_rights 'Asset Categories', resource(:asset_categories), :class => 'report icon'
       %li
-        = link_to_with_rights 'Reason Master', resource(:reasons), :class => 'report icon'
+        = link_to_with_rights 'Asset Master', resource(:asset_registers), :class => 'report icon'     
       %li
-        = link_to_with_rights 'Holiday', resource(:location_holidays), :class => 'icon holiday'
+        = link_to_with_rights 'Reason Master', resource(:reasons), :class => 'report icon'
 
   .admin-box
     -# %h2 Data Administration
