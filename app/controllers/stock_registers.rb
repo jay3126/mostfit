@@ -52,7 +52,11 @@ class StockRegisters < Application
     stock_register = {:manager_staff_id => params[:manager_staff_id], :stock_quantity => params[:stock_quantity], :stock_code => params[:stock_code], :stock_name => params[:stock_name], :biz_location_id => params[:biz_location_id], :bill_number => params[:bill_number], :bill_date => params[:stock_register][:bill_date], :date_of_entry => params[:stock_register][:date_of_entry]}
     @stock_register = StockRegister.new(stock_register)
     if @stock_register.save
-      redirect(params[:return] || url("user_locations/show/#{@stock_register.biz_location_id}"), :message => {:notice => "Stock entry was successfully entered"})
+      if request.referer.include?("user_locations")
+        redirect url("user_locations/show/#{@stock_register.biz_location_id}"), :message => {:notice => "Stock entry of '#{@stock_register.stock_name}' was successfully created"}
+      else
+        redirect resource(@stock_register), :message => {:notice => "Stock entry of '#{@stock_register.stock_name}' was successfully created"}
+      end
     else
       message[:error] = "Stock entry failed to be entered"
       render :new #error message will show
@@ -63,7 +67,11 @@ class StockRegisters < Application
     @stock_register = StockRegister.get(id)
     raise NotFound unless @stock_register
     if @stock_register.update(stock_register)
-      redirect(params[:return] || url("user_locations/show/#{@stock_register.biz_location_id}" + "#stock_register"), :message => {:notice => "Stock entry was successfully updated"})
+      if request.referer.include?("edit_from_biz_location")
+        redirect url("user_locations/show/#{@stock_register.biz_location_id}"), :message => {:notice => "Stock entry of '#{@stock_register.stock_name}' was successfully updated"}
+      else
+        redirect resource(@stock_register), :message => {:notice => "Stock entry of '#{@stock_register.stock_name}' was successfully updated"}
+      end
     else
       display @stock_register, :edit 
     end
@@ -74,7 +82,7 @@ class StockRegisters < Application
     raise NotFound unless @stock_register
     @biz_location_id = @stock_register.biz_location_id
     if @stock_register.destroy
-      redirect(params[:return] || url("user_locations/show/#{@biz_location_id}" + "#stock_register"), :message => {:notice => "Stock entry was successfully deleted"})
+      redirect url("user_locations/show/#{@biz_location_id}"), :message => {:notice => "Stock entry was successfully deleted"}
     else
       raise InternalServerError
     end

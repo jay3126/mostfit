@@ -29,6 +29,7 @@ class AuditTrails < Application
     model = "PrioritySectorList" if (params[:audit_for][:controller] == "priority_sector_lists")
     model = "PslSubCategory" if (params[:audit_for][:controller] == "psl_sub_categories")
     model = "DocumentType" if (params[:audit_for][:controller] == "document_types")
+    model = "StockRegister" if (params[:audit_for][:controller] == "stock_registers")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")

@@ -1,11 +1,10 @@
-%br
 %h1 Stock Details for : #{@stock_register.biz_location.name}
-%br
+
 .menu-strip{:style => "width: 28%;"}
   = link_to_with_rights "Edit stock details", resource(@stock_register, :edit), :class => "edit grey_button"
   &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:stock_registers), :class => "grey_button"
-%br
+
 %table.tall.shaded
   %tr
     %th
@@ -42,3 +41,39 @@
       Stock Details entered by
     %td
       = link_to_with_rights @stock_register.manager.name, url(:quick_link, "staff_members", @stock_register.manager_staff_id)
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#history History
+
+  %div.tab
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @stock_register.id
+      - model = "StockRegister"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              = diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"
