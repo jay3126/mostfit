@@ -30,9 +30,9 @@ class LoanPurposes < Application
   def create(loan_purpose)
     @loan_purpose = LoanPurpose.new(loan_purpose)
     if @loan_purpose.save
-      redirect resource(@loan_purpose), :message => {:notice => "LoanPurpose was successfully created"}
+      redirect resource(@loan_purpose), :message => {:notice => "Loan Purpose: '#{@loan_purpose.name} (id: #{@loan_purpose.id})' was successfully created"}
     else
-      message[:error] = "LoanPurpose failed to be created"
+      message[:error] = "Loan Purpose failed to be created"
       render :new
     end
   end
@@ -41,7 +41,7 @@ class LoanPurposes < Application
     @loan_purpose = LoanPurpose.get(id)
     raise NotFound unless @loan_purpose
     if @loan_purpose.update(loan_purpose)
-       redirect resource(@loan_purpose)
+      redirect resource(@loan_purpose), :message => {:notice => "Loan Purpose: '#{@loan_purpose.name} (id: #{@loan_purpose.id})' was updated successfully"}
     else
       display @loan_purpose, :edit
     end

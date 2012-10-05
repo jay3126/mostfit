@@ -23,6 +23,12 @@ class AuditTrails < Application
     model = "FundingLine" if (params[:audit_for][:controller] == "funding_lines")
     model = "Tranch" if (params[:audit_for][:controller] == "tranches")
     model = "ThirdParty" if (params[:audit_for][:controller] == "third_parties")
+    model = "LoanPurpose" if (params[:audit_for][:controller] == "loan_purposes")
+    model = "Occupation" if (params[:audit_for][:controller] == "occupations")
+    model = "ClientGroup" if (params[:audit_for][:controller] == "client_groups")
+    model = "PrioritySectorList" if (params[:audit_for][:controller] == "priority_sector_lists")
+    model = "PslSubCategory" if (params[:audit_for][:controller] == "psl_sub_categories")
+    model = "DocumentType" if (params[:audit_for][:controller] == "document_types")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")

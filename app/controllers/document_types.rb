@@ -29,7 +29,7 @@ class DocumentTypes < Application
     parent_models  = params[:parent_models].blank? ? '' : params[:parent_models].join(',')
     @document_type = DocumentType.new(:name => params[:document_type][:name], :parent_models => parent_models )
     if @document_type.save
-      redirect resource(:document_types), :message => {:notice => "DocumentType was successfully created"}
+      redirect resource(@document_type), :message => {:notice => "Document Type: '#{@document_type.name} (id: #{@document_type.id})' was successfully created"}
     else
       message[:error] = "DocumentType failed to be created"
       render :new
@@ -40,7 +40,7 @@ class DocumentTypes < Application
     @document_type = DocumentType.get(id)
     raise NotFound unless @document_type
     if @document_type.update(document_type)
-       redirect resource(:document_types)
+      redirect resource(@document_type), :message => {:notice => "Document Type: '#{@document_type.name} (id: #{@document_type.id})' was successfully updated"}
     else
       display @document_type, :edit
     end

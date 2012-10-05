@@ -1,11 +1,14 @@
-%h1
-  = I18n.t "occupation.edit.title", :default => "Edit Occupation"
+%h1 Edit the details of Occupation: #{@occupation.name}
 
-= link_to_with_rights I18n.t("occupation.edit.back", :default => "Back"), url(:occupations)
 = error_messages_for @occupation
 
 = form_for(@occupation, :action => url(:occupation, @occupation)) do
   = partial :fields
   = submit I18n.t "occupation.edit.update", :default => "Update"
-
-= link_to_with_rights I18n.t("occupation.edit.show", :default => "Show"), url(:occupation, @occupation)
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights I18n.t("occupation.edit.cancel", :default => "Cancel"), url(:occupation, @occupation), :class => "grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights I18n.t("occupation.edit.back", :default => "Back"), url(:occupations), :class => "grey_button"

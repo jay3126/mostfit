@@ -48,7 +48,7 @@ class ClientGroups < Application
       elsif params[:new_group_from_biz_location]
         redirect url("new_clients/new?biz_location_id=#{@biz_location_id}"), :message => {:notice => "Client Group : '#{@client_group.name} ( Id: #{@client_group.id})' was successfully created"}
       else
-        request.xhr? ? display(@client_group) : redirect(:client_groups, :message => {:notice => "Client Group : '#{@client_group.name} ( Id: #{@client_group.id})' was successfully created"})
+        redirect resource(@client_group), :message => {:notice => "Client Group: '#{@client_group.name} ( Id: #{@client_group.id})' was successfully created"}
       end
     else
       if params[:format] and API_SUPPORT_FORMAT.include?(params[:format])
@@ -66,13 +66,13 @@ class ClientGroups < Application
     @client_group = ClientGroup.get(id)
     raise NotFound unless @client_group
     @client_group.attributes = client_group
-    @client_group.biz_location = BizLocation.get(client_group[:biz_location_id])
+    @client_group.biz_location = BizLocation.get(params[:biz_location_id])
     if @client_group.save
-      message  = {:notice => "Client Group was successfully edited"}      
+      message  = {:notice => "Client Group: '#{@client_group.name} (id: #{@client_group.id})' was successfully updated"}      
       if params[:return] and not params[:return].blank?
         redirect(params[:return], :message => message)
       else
-        (@biz_location) ? redirect(resource(@client_group.biz_location), :message => message) : redirect(resource(@client_group), :message => message)
+        redirect(resource(@client_group), :message => message)
       end
     else
       display @client_group, :edit
