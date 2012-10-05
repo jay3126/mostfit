@@ -24,6 +24,7 @@
   No Money Deposit
 - else
   - staff = session.user.staff_member
+  - @date = Date.parse(@date) if @date.class != Date
   - @money_deposits = @money_deposits.group_by{|md| md.at_location_id}
   - @money_deposits.each do |location_id, money_deposits|
     - location = BizLocation.get(location_id.to_s)
