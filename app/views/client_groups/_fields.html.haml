@@ -10,7 +10,8 @@
         %br
           %span.greytext Select the center under which this client group is being created.
       - else
-        = @client_group.biz_location.name
+        = @client_group.biz_location.name rescue "Not attached to any Center"
+        = hidden_field :name => :biz_location_id, :value => @client_group.biz_location.id
   %tr
     %th
       Staff Member:
@@ -34,6 +35,9 @@
       Maximum clients:
     %td
       = text_field :number_of_members, :size => 3
+      %br
+        %span.greytext
+          maximum number allowed to enter is 20.
 
 = submit submit_text
 &nbsp;&nbsp;
