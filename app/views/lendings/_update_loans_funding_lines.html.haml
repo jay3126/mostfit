@@ -12,7 +12,7 @@
 - lendings = @lendings
 - if lendings.blank?
   .shaded
-    %h3 No loan exists
+    %h3 No loans exist
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_loans_funding_lines)) do
     %table.report.weeksheet.nojs.update_funding_lines

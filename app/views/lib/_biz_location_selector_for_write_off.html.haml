@@ -20,7 +20,7 @@
             = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id]
         - if date.blank?
           %td
-            Days Past Dues:
+            Days Past Due:
           %td
             = text_field :name => "on_days", :value => @due_days
         - else

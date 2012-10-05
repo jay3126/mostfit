@@ -1,8 +1,8 @@
 - center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
 - if @center.nil?
-  %h3 Select branch and center to create new loan application for new loan applicant
+  %h3 Select branch and center to create new loan applications for new loan applicants
 - elsif (center_cycle_number == 0) 
-  %h3 No Center cycle currently exists for this center. Please create one from the center show page
+  %h3 No Center cycle exists for this center. Please create one from the center show page
 - else
   - loan_application = @loan_application.blank? ? LoanApplication.new : @loan_application
   %h2

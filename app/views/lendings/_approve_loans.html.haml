@@ -11,7 +11,7 @@
 
 - if lendings.blank?
   %h3
-    No loan exists
+    No loans exist
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_lending_approve_to_disburse)) do
     %table.report.weeksheet.nojs.approve_loan

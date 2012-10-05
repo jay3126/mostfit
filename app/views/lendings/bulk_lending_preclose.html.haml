@@ -5,7 +5,7 @@
     });
   });
 
-%h1 Bulk Preclosure of Loan
+%h1 Bulk Preclosure of Loans
 .menu-strip{:style => "width:8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 %br
@@ -17,7 +17,7 @@
   %h2= "Preclose Loans On #{@date}"
   - if @lendings.blank?
     %h3
-      No loan exists
+      No loans exist
   - else
     = form_for(:lendings, :action => url(:controller => :lendings, :action => :record_bulk_lending_preclose)) do
       = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
