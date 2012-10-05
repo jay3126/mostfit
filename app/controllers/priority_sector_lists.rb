@@ -28,7 +28,7 @@ class PrioritySectorLists < Application
   def create(priority_sector_list)
     @priority_sector_list = PrioritySectorList.new(priority_sector_list)
     if @priority_sector_list.save
-      redirect resource(@priority_sector_list), :message => {:notice => "PrioritySectorList was successfully created"}
+      redirect resource(@priority_sector_list), :message => {:notice => "Priority Sector List: '#{@priority_sector_list.name} (id: #{@priority_sector_list.id})' was successfully created"}
     else
       message[:error] = "PrioritySectorList failed to be created"
       render :new
@@ -39,7 +39,7 @@ class PrioritySectorLists < Application
     @priority_sector_list = PrioritySectorList.get(id)
     raise NotFound unless @priority_sector_list
     if @priority_sector_list.update(priority_sector_list)
-       redirect resource(@priority_sector_list)
+      redirect resource(@priority_sector_list), :message => {:notice => "Priority Sector List: '#{@priority_sector_list.name} (id: #{@priority_sector_list.id})' was successfully updated"}
     else
       display @priority_sector_list, :edit
     end

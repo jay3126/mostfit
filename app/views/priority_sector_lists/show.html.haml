@@ -3,7 +3,7 @@
   = @priority_sector_list.name
 
 .menu-strip{:style => "width: 20%;"}
-  = link_to I18n.t("priority_sector_list.show.edit", :default => "Edit"),  url(:edit_priority_sector_list,  @priority_sector_list), :class => "grey_button"
+  = link_to I18n.t("priority_sector_list.show.edit", :default => "Edit"),  url(:edit_priority_sector_list,  @priority_sector_list), :class => "edit grey_button"
   &nbsp;&nbsp;
   = link_to I18n.t("priority_sector_list.show.back", :default => "Back"), url(:priority_sector_lists), :class => "grey_button"
 
@@ -23,3 +23,39 @@
       = I18n.t"priority_sector_list.show.code", :default => "Code"   
     %td
       = @priority_sector_list.code.blank? ? '-' : @priority_sector_list.code
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#history History
+
+  %div.tab
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @priority_sector_list.id
+      - model = "PrioritySectorList"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              = diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

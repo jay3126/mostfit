@@ -26,6 +26,8 @@ class AuditTrails < Application
     model = "LoanPurpose" if (params[:audit_for][:controller] == "loan_purposes")
     model = "Occupation" if (params[:audit_for][:controller] == "occupations")
     model = "ClientGroup" if (params[:audit_for][:controller] == "client_groups")
+    model = "PrioritySectorList" if (params[:audit_for][:controller] == "priority_sector_lists")
+    model = "PslSubCategory" if (params[:audit_for][:controller] == "psl_sub_categories")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")

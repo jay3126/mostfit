@@ -28,7 +28,7 @@ class PslSubCategories < Application
   def create(psl_sub_category)
     @psl_sub_category = PslSubCategory.new(psl_sub_category)
     if @psl_sub_category.save
-      redirect resource(@psl_sub_category), :message => {:notice => "PSL SubCategory was successfully created"}
+      redirect resource(@psl_sub_category), :message => {:notice => "PSL Sub Category: '#{@psl_sub_category.name} (id: #{@psl_sub_category.id})' was successfully created"}
     else
       message[:error] = "PSL SubCategory failed to be created"
       render :new
@@ -39,7 +39,7 @@ class PslSubCategories < Application
     @psl_sub_category = PslSubCategory.get(id)
     raise NotFound unless @psl_sub_category
     if @psl_sub_category.update(psl_sub_category)
-       redirect resource(@psl_sub_category)
+      redirect resource(@psl_sub_category), :message => {:notice => "PSL Sub Category: '#{@psl_sub_category.name} (id: #{@psl_sub_category.id})' was successfully updated"}
     else
       display @psl_sub_category, :edit
     end
