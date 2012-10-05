@@ -144,7 +144,6 @@ class MoneyDeposits < Application
     if @message[:error].blank?
       begin
         money_deposit_ids = money_deposit[:varified]
-        debugger
         is_saved = MoneyDeposit.all(:id => money_deposit_ids).update(:verification_status => verification_status, :verified_on => verified_on, :verified_by_staff_id => verified_by)
         if is_saved
           @message = {:notice => "Verification status successfuly marked"}
