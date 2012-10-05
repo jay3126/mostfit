@@ -1,11 +1,9 @@
 %h1 Loan Purpose : #{@loan_purpose.name}
-%br
 
 .menu-strip{:style => "width: 15%;"}
   = link_to_with_rights I18n.t("loan_purpose.show.edit", :default => "Edit"), url(:edit_loan_purpose, @loan_purpose), :class => "edit grey_button"
   &nbsp;&nbsp;
   = link_to_with_rights I18n.t("loan_purpose.show.back", :default => "Back"), url(:loan_purposes), :class => "grey_button"
-%br
 
 %table.tall.shaded
   %tr.odd
@@ -16,3 +14,39 @@
     %th
       = I18n.t"loan_purpose.show.name", :default => "Name"
     %td=@loan_purpose.name
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#history History
+
+  %div.tab
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @loan_purpose.id
+      - model = "LoanPurpose"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              = diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

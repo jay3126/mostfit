@@ -1,8 +1,8 @@
 %h1
-  = I18n.t "occupation.index.title", :default => "List Of Occupations"
+  = I18n.t "occupation.index.list_of_occupations", :default => "List Of Occupations"
 
 .menu-strip{:style => "width: 30%;"}
-  = link_to_with_rights I18n.t("occupation.index.add_an_occupation", :default => "Add an Occupation"), url(:new_occupation), :class => 'add grey_button'
+  = link_to_with_rights "Add an Occupation", url(:new_occupation), :class => 'add grey_button'
   &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 %br
@@ -23,10 +23,8 @@
       %td
         = occupation.id
       %td
-        = occupation.name
+        = link_to_with_rights occupation.name, url(:occupation, occupation)
       %td
         = occupation.code
       %td
-        = link_to_with_rights I18n.t("occupation.index.show", :default => "Show"), url(:occupation, occupation)
-        |
         = link_to_with_rights I18n.t("occupation.index.edit", :default => "Edit"), url(:edit_occupation,  occupation)

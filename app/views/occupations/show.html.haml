@@ -1,18 +1,56 @@
-%h1
-  = I18n.t "occupation.show.title", :default => "Occupation"
-%table
+%h1 Occupation: #{@occupation.name}
+
+.menu-strip{:style => "width:15%;"}
+  = link_to_with_rights "Edit", url(:edit_occupation,  @occupation), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:occupations), :class => "grey_button"
+
+%table.tall.shaded
   %tr.odd
-    %td
+    %th
       = I18n.t"occupation.show.id", :default => "Id"   
     %td=@occupation.id
   %tr
-    %td
+    %th
       = I18n.t"occupation.show.name", :default => "Name"   
     %td=@occupation.name
   %tr.odd
-    %td
+    %th
       = I18n.t"occupation.show.code", :default => "Code"   
     %td=@occupation.code.blank? ? '-' : @occupation.code
-= link_to_with_rights I18n.t("occupation.show.edit", :default => "Edit"),  url(:edit_occupation,  @occupation)
-|
-= link_to_with_rights I18n.t("occupation.show.back", :default => "Back"), url(:occupations)
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#history History
+
+  %div.tab
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @occupation.id
+      - model = "Occupation"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              = diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

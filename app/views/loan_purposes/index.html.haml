@@ -1,5 +1,5 @@
 %h1
-  = I18n.t "loan_purpose.index.loan_purpose", :default => "Loan Purpose"
+  = I18n.t "loan_purpose.index.list_of_loan_purpose", :default => "List of Loan Purpose"
 
 .menu-strip{:style => "width: 30%;"}
   = link_to I18n.t("loan_purpose.index.new", :default => "Add a loan purpose"), url(:new_loan_purpose), :class => 'add grey_button'
@@ -7,7 +7,7 @@
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 %br
 - unless @loan_purposes.blank?
-  %table.narrow
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
         %th
@@ -21,10 +21,8 @@
         %td
           = loan_purpose.id
         %td
-          = loan_purpose.name
+          = link_to_with_rights loan_purpose.name, url(:loan_purpose, loan_purpose)
         %td
-          = link_to_with_rights I18n.t("loan_purpose.index.show", :default => "Show"), url(:loan_purpose, loan_purpose)
-          |
           = link_to_with_rights I18n.t("loan_purpose.index.edit", :default => "Edit"), url(:edit_loan_purpose, loan_purpose)
 - else
   %h3 No loan purpose has been created
