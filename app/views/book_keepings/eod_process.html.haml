@@ -1,0 +1,29 @@
+%h1== EOD Process on #{get_effective_date}
+= form_for(:book_keepings, :action => resource(:book_keepings, :perform_eod_process), :method => :get) do
+  %table.dataTable.weeksheet.report.nojs
+    %thead
+      %th
+        Branch Name
+      %th
+        Status
+      %th
+        Process Status
+      %th
+        Select All
+        %br
+        = check_box :name => 'select_all'
+    - @locations.each do |location|
+      - pending_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::PENDING_VERIFICATION, get_effective_date)
+      - varify_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::VERIFIED_REJECTED, get_effective_date)
+      %tr
+        %td
+          = location.name
+        %td
+          = pending_amount == varify_amount ? "Valid For EOD Process" : "Not Valid For EOD Process"
+        %td
+          Pending
+        %td{:style => "text-align:center"}
+          = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount
+  = submit 'Start'
+
+

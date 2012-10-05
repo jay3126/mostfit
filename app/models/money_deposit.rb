@@ -46,6 +46,11 @@ class MoneyDeposit
     self.verification_status == VERIFIED_CONFIRMED
   end
 
+  def self.location_amount_on_status(status, on_date = Date.today)
+    deposits = all(:verification_status => status, :created_on => on_date)
+    deposits.blank? ? MoneyManager.default_zero_money : deposits.map(&:deposit_money_amount).sum
+  end
+
   validates_with_method  :created_on, :method => :deposit_not_in_future?
 
   def deposit_not_in_future?

@@ -192,7 +192,9 @@ module Constants
 
   module MoneyDepositVerificationStatus
 
-    PENDING_VERIFICATION = :pending_verification; VERIFIED_REJECTED = :verified_rejected; VERIFIED_CONFIRMED = :verified_confirmed
+    PENDING_VERIFICATION = :pending_verification 
+    VERIFIED_REJECTED = :verified_rejected
+    VERIFIED_CONFIRMED = :verified_confirmed
     MONEY_DEPOSIT_VERIFICATION_STATUSES = [ PENDING_VERIFICATION, VERIFIED_REJECTED, VERIFIED_CONFIRMED ]
     CHOOSE_VERIFICATION_STATUS = MONEY_DEPOSIT_VERIFICATION_STATUSES - [PENDING_VERIFICATION]
     
