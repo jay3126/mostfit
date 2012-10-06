@@ -73,11 +73,14 @@ module BookKeeper
     receipt_type = RECEIPT
     on_product_type, on_product_id = LENDING, loan.id
     by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
-    accounted_at = (LoanAdministration.get_accounted_at(loan.id, on_date)).id
+    locations = LoanAdministration.get_locations(loan.id, on_date)
+    raise ArgumentError, "Location is not defined on #{on_date} for Loan(#{loan.id})" if locations.blank?
+    accounted_at = locations[:accounted_at].id
+    performed_at = locations[:administered_at].id
     effective_on = on_date
 
-    accrue_principal = AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
-    accrue_interest  = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+    accrue_principal = AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+    accrue_interest  = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
   end
 
   def accrue_broken_period_interest_receipts_on_loan(loan, on_date)
@@ -87,10 +90,12 @@ module BookKeeper
     receipt_type = RECEIPT
     on_product_type, on_product_id = LENDING, loan.id
     by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
-    accounted_at = (LoanAdministration.get_accounted_at(loan.id, on_date)).id
-    effective_on = on_date
+    locations = LoanAdministration.get_locations(loan.id, on_date)
+    raise ArgumentError, "Location is not defined on #{on_date} for Loan(#{loan.id})" if locations.blank?
+    accounted_at = locations[:accounted_at].id
+    performed_at = locations[:administered_at].id
 
-    accrue_broken_period_interest_receipt = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+    accrue_broken_period_interest_receipt = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
   end
 
   def reverse_all_broken_period_interest_receipts(on_date)

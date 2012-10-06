@@ -132,6 +132,41 @@ class BizLocation
     location_map
   end
 
+  def business_eod_on_date(on_date = Date.today)
+    total_disbursment = MoneyManager.default_zero_money
+    dis_locations = 0
+    clients = 0
+    cgt1_members = []
+    cgt2_members = []
+    grt_centers = []
+    grt_members = []
+    apo_members = []
+    hm_approve = []
+    ops_centers = []
+    ops_members = []
+    locations = self.location_level.level == 0 ? [self] : LocationLink.all_children(self, on_date)
+    center_locations = locations.blank? ? [] : locations.select{|l| l.location_level.level == 0}
+    repayments = center_locations.blank? ? [] : PaymentTransaction.all(:effective_on => on_date, :on_product_type => :lending, :on_product_id => self.id, :payment_towards => :payment_towards_loan_disbursement, :performed_at => center_locations.map(&:id))
+    unless repayments.blank?
+      total_disbursment = repayments.map(&:payment_money_amount).sum
+      dis_locations = repayments.map(&:performed_at).uniq.count
+      clients = repayments.map(&:by_counterparty_id).uniq.count
+    end
+    center_locations.each do |center|
+      center_cycle = CenterCycle.first(:center_id => center.id, :created_at.lte => on_date, :order => [:cycle_number.desc])
+      unless center_cycle.blank?
+        cgt1_members << center_cycle.loan_applications if center_cycle.cgt_date_one == on_date
+        cgt2_members << center_cycle.loan_applications if center_cycle.cgt_date_two == on_date
+        grt_members << center_cycle.loan_applications if center_cycle.grt_completed_on == on_date
+        grt_centers << center if center_cycle.grt_completed_on == on_date
+      end
+    end
+    {:total_disbursment => total_disbursment, :disbursment_locations => dis_locations, :disbursment_clients => clients,
+      :hm_approve => hm_approve.uniq.count, :apo_members => apo_members.uniq.count, :cgt1_members => cgt1_members.uniq.count,
+      :cgt2_members => cgt2_members.uniq.count, :grt_members => grt_members.uniq.count, :grt_centers => grt_centers.uniq.count,
+      :ops_centers => ops_centers.uniq.count, :ops_members => ops_members.uniq.count}
+  end
+
   def location_eod_summary(user, on_date = Date.today)
     location_ids = self.location_level.level == LocationLevel::NOMINAL_BRANCH_LEVEL ? [self.id] : LocationLink.get_children(self, on_date).map(&:id)
     reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)

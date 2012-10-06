@@ -49,8 +49,8 @@ class EodProcess
       loans.each do |loan|
         LoanDueStatus.generate_due_status_records_till_date(loan.id, self.on_date)
         bk.accrue_all_receipts_on_loan_till_date(loan, self.on_date) if loan.is_outstanding?
-        accrual_transaction = all_accrual_transactions.select{|a| a.on_product_type == :lending && a.on_product_id == loan.id}
-        bk.account_for_accrual(accrual_transaction) unless accrual_transaction.blank?
+        accrual_transactions = all_accrual_transactions.select{|a| a.on_product_type == :lending && a.on_product_id == loan.id}
+        accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
         get_loan_facade(user).adjust_advance(self.on_date, loan.id) if loan.is_outstanding? && loan_ids_for_advance.include?(loan.id)
       end
       self.update(:completed_at => Time.now, :status => COMPLETED)

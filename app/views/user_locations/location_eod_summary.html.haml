@@ -28,6 +28,7 @@
 %br
 %h1 Business EOD Summary
 %br
+- business_eod = @biz_location.business_eod_on_date(date)
 %table.branch_b_eod.report.weeksheet
   %thead
     %tr
@@ -75,29 +76,29 @@
       %th
   %tr
     %td
-      = '-'
+      = business_eod[:hm_approve]
+    %td
+      = business_eod[:apo_members]
+    %td
+      = business_eod[:cgt1_members]
+    %td
+      = business_eod[:cgt2_members]
+    %td
+      = business_eod[:grt_centers]
+    %td
+      = business_eod[:grt_members]
+    %td
+      = business_eod[:ops_centers]
+    %td
+      = business_eod[:ops_members]
     %td
       = '-'
     %td
-      = '-'
+      = business_eod[:disbursment_locations]
     %td
-      = '-'
+      = business_eod[:disbursment_clients]
     %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
-    %td
-      = '-'
+      = business_eod[:total_disbursment]
     %td
       = '-'
     %td

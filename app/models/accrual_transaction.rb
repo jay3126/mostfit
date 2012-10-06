@@ -12,6 +12,7 @@ class AccrualTransaction
   property :on_product_id,           Integer, :nullable => false
   property :by_counterparty_type,    Enum.send('[]', *COUNTERPARTIES), :nullable => false
   property :by_counterparty_id,      *INTEGER_NOT_NULL
+  property :performed_at,            *INTEGER_NOT_NULL
   property :accounted_at,            *INTEGER_NOT_NULL
   property :effective_on,            *DATE_NOT_NULL
   property :created_at,              *CREATED_AT
@@ -25,15 +26,15 @@ class AccrualTransaction
     PRODUCT_ACTIONS_FOR_ACCRUAL_TRANSACTIONS[self.on_product_type][self.accrual_temporal_type][self.accrual_allocation_type]
   end
   
-  def self.record_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
-    Validators::Arguments.not_nil?(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
-    accrual = to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+  def self.record_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+    Validators::Arguments.not_nil?(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+    accrual = to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
     recorded_accrual = first_or_create(accrual)
     raise Errors::DataError, recorded_accrual.errors.first.first unless recorded_accrual.saved?
     recorded_accrual
   end
 
-  def self.to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, accounted_at, effective_on, accrual_temporal_type)
+  def self.to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
     accrual = {}
     accrual[:accrual_allocation_type] = accrual_allocation_type
     accrual[:amount] = money_amount.amount
@@ -43,6 +44,7 @@ class AccrualTransaction
     accrual[:on_product_type] = on_product_type
     accrual[:by_counterparty_type] = by_counterparty_type
     accrual[:by_counterparty_id] = by_counterparty_id
+    accrual[:performed_at] = performed_at
     accrual[:accounted_at] = accounted_at
     accrual[:effective_on] = effective_on
     accrual[:accrual_temporal_type] = accrual_temporal_type
