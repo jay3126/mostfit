@@ -1,31 +1,64 @@
-%h1== Reason:- #{@reason.name}
-= link_to 'Edit', '#', :onclick => "jQuery('.reason_div').toggle();", :class => "add grey_button"
+%h1== Details of Reason: #{@reason.name}
+
+.menu-strip{:style => "width:15%;"}
+  = link_to 'Edit', '#', :onclick => "jQuery('.reason_div').toggle();", :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:reasons), :class => "grey_button"
+
 .reason_div{:style => 'display:none'}
   = form_for(@reason, :id => "reason_form", :action => resource(@reason)) do
-    = text_field :name
-    = submit 'Update'
-%h2 Remarks
-%table.datatable.report.weeksheet.nojs
-  %thead
+    %table.tall.shaded
+      %tr
+        %th
+          Reason Name
+        %td
+          = text_field :name
+        %td
+          = submit 'Update'
+
+%table.tall.shaded
+  %tr
     %th
-      ID
-    %th
-      Remark On Type
-    %th
-      Remark On ID
-    %th
-      Remark
+      Reason Name
+    %td
+      = @reason.name
+  %tr
     %th
       Created At
-  - @reason.comments.each do |comment|
-    %tr
-      %td
-        = comment.id
-      %td
-        = comment.commentable_class
-      %td
-        = comment.commentable_id
-      %td
-        = comment.text
-      %td
-        = comment.created_at
+    %td
+      = @reason.created_at
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#remarks Remarks
+    %li#history History
+
+  %div.tab
+    %br
+    %table.datatable.report.weeksheet.nojs
+      %thead
+        %th
+          ID
+        %th
+          Remark On Type
+        %th
+          Remark On ID
+        %th
+          Remark
+        %th
+          Created At
+      - @reason.comments.each do |comment|
+        %tr
+          %td
+            = comment.id
+          %td
+            = comment.commentable_class
+          %td
+            = comment.commentable_id
+          %td
+            = comment.text
+          %td
+            = comment.created_at
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

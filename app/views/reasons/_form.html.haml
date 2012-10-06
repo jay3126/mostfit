@@ -1,4 +1,10 @@
 - reason = Reason.new
 = form_for(reason, :id => "reasons_form", :action => resource(:reasons)) do
-  = text_field :name
-  = submit 'Save'
+  %table.tall.shaded
+    %tr
+      %th
+        Reason Name
+      %td
+        = text_field :name
+      %td
+        = submit 'Save'
