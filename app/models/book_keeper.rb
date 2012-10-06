@@ -58,6 +58,11 @@ module BookKeeper
     end
   end
 
+  def accrue_all_receipts_on_loan_till_date(loan, till_date)
+    loan_schedules = loan.schedule_dates.select{|date| date <= till_date}
+    loan_schedules.each{|date| accrue_all_receipts_on_loan(loan, date)}
+  end
+
   def accrue_regular_receipts_on_loan(loan, on_date)
     return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
     amortization_on_date = loan.get_scheduled_amortization(on_date)

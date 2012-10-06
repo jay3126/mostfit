@@ -200,6 +200,15 @@ module Constants
     
   end
 
+  module EODProcessVerificationStatus
+
+    PENDING = :pending
+    IN_PROCESS = :in_process
+    COMPLETED = :completed
+    EOD_VERIFICATION_STATUSES = [ PENDING, IN_PROCESS, COMPLETED ]
+
+  end
+
   # points in space
   module Space
 
