@@ -1,5 +1,14 @@
 :javascript
-  $('table.branch_eod').dataTable({
+  $('table.branch_a_eod').dataTable({
+      "sScrollX": "100%",
+      "bPaginate": false,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
+    });
+  $('table.branch_b_eod').dataTable({
       "sScrollX": "100%",
       "bPaginate": false,
       "bJQueryUI": true,
@@ -10,29 +19,130 @@
     });
 
 %br
+- date = params[:eod_date]||get_effective_date
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
   = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :show, :id => @biz_location.id)+'#branch_eod_summary', :method => :get) do
     Change date
-    = date_select "eod_date", params[:eod_date]||get_effective_date
+    = date_select "eod_date", date
     = submit "Go"
 %br
-%h1 LOCATION EOD SUMMARY
+%h1 Business EOD Summary
 %br
-%table.branch_eod.report.weeksheet
+%table.branch_b_eod.report.weeksheet
   %thead
     %tr
-      %th{:style => 'width:349px;'}
-        Name
       %th
-        Sum
+        = "HM Aprvd (frm #{date})"
+      %th{:colspan => 3}
+        No. Of Members
+      %th{:colspan => 2}
+        GRT
+      %th{:colspan => 2}
+        OPS
       %th
-        Count
-  - @eod_summary.each do |key, value|
-    - next if value.blank?
+        Target()
+      %th{:colspan => 3}
+        Disbursment
+      %th
+        Achv%
+      %th
+        Total
     %tr
-      %td
-        = key.humanize
-      %td
-        = value.class == Hash ? value[:total_amount].to_s : value
-      %td
-        = value.class == Hash ? value[:count] : '-'
+      %th
+      %th
+        AO CPV
+      %th
+        CGT-1
+      %th
+        CGT-2
+      %th
+        No. Of Center
+      %th
+        No. Of Member
+      %th
+        No. Of Center
+      %th
+        No. Of Member
+      %th
+        No. Of Member
+      %th
+        No. Of Center
+      %th
+        No. Of Member
+      %th
+        Disbursment Amount
+      %th
+      %th
+  %tr
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+
+%br
+%h1 Attendance & Collection
+%br
+%table.branch_a_eod.report.weeksheet
+  %thead
+    %tr
+      %th
+        No. of Center
+      %th
+        Total Member
+      %th
+        Member Absent
+      %th
+        Abs%
+      %th
+        Collectable Amount
+      %th
+        Coll Amount
+      %th
+        Coll %
+      %th
+        Due Amount
+      %th
+        Remark
+  %tr
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
+    %td
+      = '-'
