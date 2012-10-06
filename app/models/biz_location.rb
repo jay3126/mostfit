@@ -24,6 +24,7 @@ class BizLocation
   has n, :visit_schedules
   has n, :client_groups
   has n, :bank_branches
+  has n, :eod_processes
 
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name

@@ -15,15 +15,19 @@
     - @locations.each do |location|
       - pending_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::PENDING_VERIFICATION, get_effective_date)
       - varify_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::VERIFIED_REJECTED, get_effective_date)
+      - eod = location.eod_processes.first(:on_date => get_effective_date)
       %tr
         %td
           = location.name
         %td
           = pending_amount == varify_amount ? "Valid For EOD Process" : "Not Valid For EOD Process"
         %td
-          Pending
+          = eod.status.humanize rescue '-'
         %td{:style => "text-align:center"}
-          = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount
+          - if eod.status == Constants::EODProcessVerificationStatus::PENDING
+            = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount
+          - else
+            = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true
   = submit 'Start'
 
 
