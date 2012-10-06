@@ -37,7 +37,7 @@ class ReportingFacade < StandardFacade
   def total_dues_collected_and_collectable_per_location_on_date(at_location_id, on_date = Date.today)
     result = {}
     schedule_principal_due = schedule_interest_due = schedule_total_due = MoneyManager.default_zero_money
-    principal_collected = interest_collected = total_collected = MoneyManager.default_zero_money
+    principal_collected = interest_collected = total_collected = overdue = MoneyManager.default_zero_money
     biz_location = BizLocation.get at_location_id
     if biz_location.location_level.level == 0
       loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
@@ -50,9 +50,10 @@ class ReportingFacade < StandardFacade
       schedule_total_due += (loan.scheduled_total_due(on_date) || MoneyManager.default_zero_money)
       principal_collected += (loan.principal_received_on_date(on_date) || MoneyManager.default_zero_money)
       interest_collected += (loan.interest_received_on_date(on_date) || MoneyManager.default_zero_money)
+      overdue           += (loan.overdue_amount(on_date) || MoneyManager.default_zero_money)
       total_collected += (principal_collected + interest_collected)
     end
-    result = {:schedule_principal_due => schedule_principal_due, :schedule_interest_due => schedule_interest_due, :schedule_total_due => schedule_total_due, :principal_collected => principal_collected, :interest_collected => interest_collected, :total_collected => total_collected}
+    result = {:overdue_amount => overdue, :schedule_principal_due => schedule_principal_due, :schedule_interest_due => schedule_interest_due, :schedule_total_due => schedule_total_due, :principal_collected => principal_collected, :interest_collected => interest_collected, :total_collected => total_collected}
   end
 
   #this function will give back the list of staff_members per location.
@@ -220,6 +221,18 @@ class ReportingFacade < StandardFacade
       principal_outstanding_including_overdues = interest_outstanding_including_overdues = MoneyManager.default_zero_money
     end
     result = {:principal_outstanding_including_overdues => principal_outstanding_including_overdues, :interest_outstanding_including_overdues => interest_outstanding_including_overdues}
+  end
+
+  def overdue_amount_for_location(at_location_id, on_date = Date.today)
+    biz_location = BizLocation.get at_location_id
+    overdue_amount = MoneyManager.default_zero_money
+    if biz_location.location_level.level == 0
+      loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
+    else
+      loans = LoanAdministration.get_loans_accounted(at_location_id, on_date).compact
+    end
+    loans.each{|loan| overdue_amount +=loan.overdue_amount(on_date)}
+    overdue_amount
   end
 
   #this functions gives the repayments details till date.
@@ -805,9 +818,9 @@ class ReportingFacade < StandardFacade
     location_ids_array.each { |at_location_id|
       all_loans_at_location = []
       case accounted_or_administered_choice
-        when Constants::Loan::ACCOUNTED_AT then all_loans_at_location = LoanAdministration.get_loans_accounted(at_location_id, on_date)
-        when Constants::Loan::ADMINISTERED_AT then all_loans_at_location = LoanAdministration.get_loans_administered(at_location_id, on_date)
-        else raise ArgumentError, "Please specify whether loans accounted or loans administered are needed"
+      when Constants::Loan::ACCOUNTED_AT then all_loans_at_location = LoanAdministration.get_loans_accounted(at_location_id, on_date)
+      when Constants::Loan::ADMINISTERED_AT then all_loans_at_location = LoanAdministration.get_loans_administered(at_location_id, on_date)
+      else raise ArgumentError, "Please specify whether loans accounted or loans administered are needed"
       end
       all_outstanding_loans_at_location = all_loans_at_location.select {|loan| loan.is_outstanding_on_date?(on_date)}
       all_loan_ids_grouped_by_location[at_location_id] = get_ids(all_outstanding_loans_at_location)

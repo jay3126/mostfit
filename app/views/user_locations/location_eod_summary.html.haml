@@ -28,7 +28,9 @@
 %br
 %h1 Business EOD Summary
 %br
-- business_eod = @biz_location.business_eod_on_date(date)
+- eod = @biz_location.business_eod_on_date(date)
+- business_eod = eod[:business_eod]
+- collection_eod = eod[:collection_eod]
 %table.branch_b_eod.report.weeksheet
   %thead
     %tr
@@ -121,29 +123,28 @@
       %th
         Collectable Amount
       %th
-        Coll Amount
+        Collected Amount
       %th
-        Coll %
+        Collection %
       %th
         Due Amount
       %th
         Remark
   %tr
     %td
-      = '-'
+      = collection_eod[:total_centers]
     %td
-      = '-'
+      = collection_eod[:total_clients]
     %td
-      = '-'
+      = collection_eod[:client_absent]
     %td
-      = '-'
+      = collection_eod[:client_absent_in_presentage]
     %td
-      = '-'
+      = collection_eod[:collectable_amt]
     %td
-      = '-'
+      = collection_eod[:collected_amt]
     %td
-      = '-'
+      = collection_eod[:collected_in_presentage]
     %td
-      = '-'
+      = collection_eod[:overdue_amt]
     %td
-      = '-'

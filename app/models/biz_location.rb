@@ -133,7 +133,16 @@ class BizLocation
   end
 
   def business_eod_on_date(on_date = Date.today)
+    eod = {:business_eod => {}, :collection_eod => {}}
     total_disbursment = MoneyManager.default_zero_money
+    center_locations = []
+    total_clients = []
+    absent_clients = []
+    abs_in_presentage = 0
+    collectable_amt = MoneyManager.default_zero_money
+    collected_amt = MoneyManager.default_zero_money
+    collected_in_persentage = 0
+    overdue_amt = MoneyManager.default_zero_money
     dis_locations = 0
     clients = 0
     cgt1_members = []
@@ -144,6 +153,7 @@ class BizLocation
     hm_approve = []
     ops_centers = []
     ops_members = []
+    user = User.first
     locations = self.location_level.level == 0 ? [self] : LocationLink.all_children(self, on_date)
     center_locations = locations.blank? ? [] : locations.select{|l| l.location_level.level == 0}
     repayments = center_locations.blank? ? [] : PaymentTransaction.all(:effective_on => on_date, :on_product_type => :lending, :on_product_id => self.id, :payment_towards => :payment_towards_loan_disbursement, :performed_at => center_locations.map(&:id))
@@ -160,11 +170,26 @@ class BizLocation
         grt_members << center_cycle.loan_applications if center_cycle.grt_completed_on == on_date
         grt_centers << center if center_cycle.grt_completed_on == on_date
       end
+      total_clients << ClientAdministration.get_clients_administered(center.id, on_date)
+      absent_clients << total_clients.select{|client| AttendanceRecord.was_present?(center.id, client, on_date)==false}
+      payment_collection = get_reporting_facade(user).total_dues_collected_and_collectable_per_location_on_date(self.id, on_date)
+      collectable_amt += payment_collection[:schedule_total_due]
+      collected_amt += payment_collection[:total_collected]
+      overdue_amt += payment_collection[:overdue_amount]
     end
-    {:total_disbursment => total_disbursment, :disbursment_locations => dis_locations, :disbursment_clients => clients,
+    absent_clients = absent_clients.flatten.uniq.count
+    total_clients = total_clients.flatten.uniq.count
+    abs_in_presentage = (absent_clients/total_clients)*100 if total_clients > 0
+    collected_in_persentage = (collected_amt.amount.to_i/collectable_amt.amount.to_i)*100 if collectable_amt > MoneyManager.default_zero_money
+    eod[:collection_eod] = {:total_centers => center_locations.flatten.uniq.count, :total_clients => total_clients, :client_absent => absent_clients,
+      :client_absent_in_presentage => "#{abs_in_presentage}%", :collectable_amt => collectable_amt, :collected_amt => collected_amt,
+      :collected_in_presentage => "#{collected_in_persentage}%", :overdue_amt => overdue_amt
+    }
+    eod[:business_eod] = {:total_disbursment => total_disbursment, :disbursment_locations => dis_locations, :disbursment_clients => clients,
       :hm_approve => hm_approve.uniq.count, :apo_members => apo_members.uniq.count, :cgt1_members => cgt1_members.uniq.count,
       :cgt2_members => cgt2_members.uniq.count, :grt_members => grt_members.uniq.count, :grt_centers => grt_centers.uniq.count,
       :ops_centers => ops_centers.uniq.count, :ops_members => ops_members.uniq.count}
+    eod
   end
 
   def location_eod_summary(user, on_date = Date.today)
@@ -208,5 +233,9 @@ class BizLocation
   ###############
   # Search Ends #
   ###############
+
+  def get_reporting_facade(user)
+    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
+  end
   
 end

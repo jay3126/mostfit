@@ -60,8 +60,13 @@ class AttendanceRecord
     all(:at_location => at_location_id, :on_date => on_date)
   end
 
-  def self.get_attendance_status_of_staff_member(at_location_id, staff_id, on_date)
-    first(:at_location => at_location_id, :staff_member_id => staff_id, :on_date => on_date)
+  def self.get_attendance(at_location_id, counterparty, on_date)
+    first(:at_location => at_location_id, :counterparty_type => counterparty.class.name, :counterparty_id => counterparty.id, :on_date => on_date)
+  end
+
+  def self.was_present?(at_location_id, counterparty, on_date)
+    attendance_record = get_attendance(at_location_id, counterparty, on_date)
+    attendance_record.blank? ? false : attendance_record.attendance == PRESENT_ATTENDANCE_STATUS
   end
 
   def self.to_attendance(for_staff_id, was_present, on_date, at_location_id, performed_by_id, recorded_by_id)
