@@ -2,6 +2,13 @@
 - loan_file = LoanFile.get(loan_file_id)
 - no_of_loan_applications = loan_file.loan_applications.size
 
+%script{:type => "text/javascript"}
+  $(function(){
+  ("select").datepicker();
+  });
+
+
+
 %p
   -count=1
   -@sections.each do |section|
@@ -94,7 +101,7 @@
                 -else
                   - (1).times do |f|
                     %td
-                      =text_field :name=>"free_text_#{free_text.id}_#{loan_application.id}".to_sym,:value=>@comment,:disabled=>false
+                      =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
           -if !dropdownpoint.nil?
             %td
               =" #{dropdownpoint.name}"
@@ -139,7 +146,7 @@
                 - else
                   = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1
                   Yes
-                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => checkpoint_filling.status?
+                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => true
                   No
           -if !checkboxpoint.nil?
             %td
@@ -162,26 +169,28 @@
               -@comment=free_text_filling.comment
             -if free_text.name.downcase=="date"
               %td
-                =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
+                -#- date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
+                = date_select "free_text_#{free_text.id}".to_sym, @comment, :max_date => Date.today
+                -#=text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
             -else
               %td
-
                 =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
           -if !dropdownpoint.nil?
             %td
               =" #{dropdownpoint.name}"
             %td
               =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+              = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id, :dropdownpoint_id=>@dropdownpoint.id)
 
         -count=count+1
 
+  %p
+    = check_box :name => "result_status", :boolean => true, :checked => false
+    Cleared?
 
-= link_to_with_rights "Update", url(:controller => :new_clients, :action => :create_clients_for_loan_file, :loan_file_id => @loan_file.id), :class => 'add grey_button'
+  %br
+  = link_to_with_rights "Update", url(:controller => :checklists, :action => :capture_checklist_data, :checklist_id => @checklist.id), :class => 'greenButton'
 
-%br
-%br
-%br
-=link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 
 
 

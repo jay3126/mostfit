@@ -199,7 +199,14 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
       end
 
-      @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
+
+      @response=Response.first(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id)
+      if @response.blank?
+        @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
+      else
+        raise Exception
+      end
+
       ChecklistLocation.first_or_create(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
       ChecklistLocation.first_or_create(:location_id => params[:loc2_id], :type => params[:loc2_type], :response_id => @response.id, :name => params[:loc2_name], :created_at => Date.today)
 
@@ -211,31 +218,40 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
         #save all the yes/no questions
         section.checkpoints.each do |checkpoint|
-
           if !params["checkpoint_#{checkpoint.id}".to_sym].blank?
-            @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
+            @checkpoint_filling= checkpoint.checkpoint_fillings.first(:response_id => @response.id)
+            if @checkpoint_filling.blank?
+              @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
+            end
           end
-
         end
+
         #save all the free texts
         section.free_texts.each do |free_text|
           if !params["free_text_#{free_text.id}".to_sym].blank?
-            @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
+            @free_text_filling=free_text.free_text_fillings.first(:response_id => @response.id)
+            if @free_text_filling.blank?
+              @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
+            end
           end
         end
 
         #save all drop downs
-
         section.dropdownpoints.each do |drop_down|
-
-          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id, :model_record_name => Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
+          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.first(:response_id => @response.id)
+          if @dropdownpoint_filling.blank?
+            @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id, :model_record_name => Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
+          end
         end
 
         #save all checkbox points
         section.checkboxpoints.each do |checkbox_point|
           checkbox_point.checkboxpoint_options.each do |option|
             if !params["option#{option.id}".to_sym].blank?
-              @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
+              @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.first(:response_id => @response.id)
+              if @checkboxpoint_option_filling.blank?
+                @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
+              end
             end
           end
         end
