@@ -10,7 +10,7 @@
         - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
         - branch_collection = location_facade.all_nominal_branches
         = select :biz_location_id, :collection => branch_collection.map{|b| [b.id, b.name]}, :prompt => "Select Branch"
-        %span.greytext select the branch for entering the Stock Details
+        %span.greytext select the branch for entering the Asset Details
   %tr
     %th
       Issue To

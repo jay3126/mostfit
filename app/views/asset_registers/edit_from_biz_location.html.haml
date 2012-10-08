@@ -2,14 +2,15 @@
 - cancel_url = params[:return] ? params[:return] : resource(@asset_register)
 = error_messages_for @asset_register
 
+%h1 Edit the Asset details of #{@asset_register.name_of_the_item} of branch: #{@asset_register.biz_location.name}
 = form_for(@asset_register, :action => form_url, :class => "") do
-  %h1 Asset Register
+  = hidden_field :biz_location_id
   = error_messages_for @asset_register
   %fieldset
-    = partial "asset_registers/edit_fields"
+    = partial "asset_registers/edit_fields_from_biz_location"
     = submit "Save changes"
     &nbsp;&nbsp;
     %b
       Or
     &nbsp;&nbsp;
-    = link_to 'Cancel', url(:asset_registers), :class => "grey_button"
+    = link_to 'Cancel', url("user_locations/show/#{@asset_register.biz_location.id}"+"#asset_register"), :class => "grey_button"

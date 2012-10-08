@@ -1,14 +1,14 @@
-%h1 List of Assets
+%h1 List of Assets in Branch: #{@biz_location.name}
 
-.menu-strip{:style => "width: 30%;"}
-  = link_to_with_rights "Enter new Asset details", resource(:asset_registers, :new, {:biz_location_id => params[:biz_location_id]}), :class => "add grey_button"
-  &nbsp;&nbsp;
-  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
-%br
+.menu-strip{:style => "width: 23%;"}
+  = link_to_with_rights "Enter new Asset details", '#', :onclick => "jQuery('#new_asset_register_form_from_biz_location').toggle(); return false;", :class => "add grey_button"
 
-- if @asset_registers.blank?
+%div#new_asset_register_form_from_biz_location(style = "display : none")
+  = partial "asset_registers/new_asset_register_form_from_biz_location"
+
+- if AssetRegister.all(:biz_location_id => @biz_location.id).blank?
   %p
-    %i No data to display. Please enter the details to the Asset Register.
+    %i No data to display. Please enter the details to view the Asset Register.
 - else
   %table.dataTable.report.weeksheet.nojs
     %thead
@@ -33,7 +33,7 @@
         %th Date
         %th Actions
 
-    - for asset_register in @asset_registers
+    - AssetRegister.all(:biz_location_id => @biz_location.id).each do |asset_register|
       %tr{ :class => cycle('odd', '') }
         %td
           = link_to_with_rights asset_register.id, resource(asset_register)
@@ -72,15 +72,10 @@
         %td
           = asset_register.date
         %td
-          = link_to_with_rights "show", resource(asset_register)
+          = link_to_with_rights "show", url(:controller => "asset_registers", :action => :show_from_biz_location, :id => asset_register.id)
           %br
-          = link_to_with_rights 'edit', resource(asset_register, :edit)          
+          = link_to_with_rights 'edit', url(:controller => "asset_registers", :action => :edit_from_biz_location, :id => asset_register.id)
 
     %tfoot
       %tr
         %td{ :colspan => 10 }
-
-  = paginate @asset_registers
-  &nbsp;&nbsp;
-  - if @biz_location
-    = link_to 'Back', url("user_locations/show/#{asset_register.biz_location.id}"), :class => "grey_button"

@@ -1,0 +1,106 @@
+%table.tall.shaded
+  %tr
+    %th
+      Branch
+    %td
+      - if params[:action] == "edit_from_biz_location"
+        = @asset_register.biz_location.name
+        = hidden_field :name => :biz_location_id, :value => @biz_location.id
+      - else
+        = @biz_location.name
+        = hidden_field :name => :biz_location_id, :value => @biz_location.id
+  %tr
+    %th
+      Issue To
+    %td
+      = text_field :name
+      %span.greytext enter the name to whom the asset type is being issued
+  %tr
+    %th
+      Issue Date
+    %td
+      = date_select 'asset_register[issue_date]', @asset_register.blank? ? Date.today : @asset_register.issue_date, {:id => 'issue_date'}
+      %span.greytext select the issue date of asset
+  %tr
+    %th
+      Issued By
+    %td
+      - staff_member = []
+      - @staff_postings = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date)
+      - @staff_postings.each do |staff_posting|
+        - staff_member << staff_posting.staff_assigned
+      = select :manager_staff_id, :collection => staff_member.flatten.map{|s| [s.id, s.name]}, :prompt => "choose staff member"
+      %span.greytext select the staff member who is entering the details
+  %tr
+    %th
+      Asset Category
+    %td
+      - if (@asset_register and @asset_register.asset_category)
+        = @asset_register.asset_category.name
+        = hidden_field :name => :asset_category_id, :value => @asset_register.asset_category.id
+      - else
+        = select :asset_category_id, :collection => AssetCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Category"
+  %tr
+    %th
+      Asset Sub-category
+    %td
+      - if (@asset_register and @asset_register.asset_sub_category)
+        = @asset_register.asset_sub_category.name
+        = hidden_field :name => :asset_sub_category_id, :value => @asset_register.asset_sub_category.id
+      - else
+        = select :asset_sub_category_id, :collection => AssetSubCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Sub-category"
+  %tr
+    %th
+      Asset Type
+    %td
+      - if (@asset_register and @asset_register.asset_type)
+        = @asset_register.asset_type.name
+        = hidden_field :name => :asset_type_id, :value => @asset_register.asset_type.id
+      - else
+        = select :asset_type_id, :collection => AssetType.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Type"
+  %tr
+    %th
+      Name of the item
+    %td
+      = text_field :name_of_the_item
+  %tr
+    %th
+      Tag number
+    %td
+      = text_field :tag_no
+  %tr
+    %th
+      Name of the vendor
+    %td
+      = text_field :name_of_the_vendor
+  %tr
+    %th
+      Invoice number
+    %td
+      = text_field :invoice_number
+  %tr
+    %th
+      Invoice date
+    %td
+      = date_select 'asset_register[invoice_date]', @asset_register.blank? ? Date.today : @asset_register.invoice_date, {:id => 'invoice_date'}
+      %span.greytext select the date of invoice
+  %tr
+    %th
+      Make
+    %td
+      = text_field :make
+  %tr
+    %th
+      Model
+    %td
+      = text_field :asset_model
+  %tr
+    %th
+      Serial number
+    %td
+      = text_field :serial_no
+  %tr
+    %th
+      Date
+    %td
+      = date_select 'asset_register[date]', @asset_register.blank? ? Date.today : @asset_register.date, {:id => 'date'}

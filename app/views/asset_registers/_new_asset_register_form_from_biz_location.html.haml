@@ -1,0 +1,13 @@
+- form_url = resource(:asset_registers, {:return => params[:return]})
+= error_messages_for @asset_register
+
+%h2 Enter the details of new Asset for Branch: #{@biz_location.name}
+= form_for(@asset_register, :action => form_url) do
+  = partial "asset_registers/fields_from_biz_location"
+  = submit "Submit Details"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to 'Cancel', '#', :onclick => "jQuery('#new_asset_register_form_from_biz_location').hide(); return false;", :class => "grey_button"
+%br

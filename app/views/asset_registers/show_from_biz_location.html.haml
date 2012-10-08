@@ -1,9 +1,9 @@
 %h1 Overview of Asset: #{@asset_register.name_of_the_item}
 
 .menu-strip{:style => "width:23%;"}
-  = link_to_with_rights "Edit Asset details", resource(@asset_register, :edit), :class => "edit grey_button"
+  = link_to_with_rights "Edit Asset details", url(:controller => "asset_registers", :action => :edit_from_biz_location, :id => @asset_register.id), :class => "edit grey_button"
   &nbsp;&nbsp;
-  = link_to_with_rights "Back", url(:asset_registers), :class => "grey_button"
+  = link_to_with_rights "Back", url("user_locations/show/#{@asset_register.biz_location.id}" + "#asset_register"), :class => "grey_button"
 
 %table.tall.shaded
   %tr

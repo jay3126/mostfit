@@ -37,13 +37,13 @@
     %th
       Invoice Date
     %td
-      = date_select  'stock_register[bill_date]', Date.today, {:id => 'bill_date'}
+      = date_select  'stock_register[bill_date]', @stock_register.blank? ? Date.today : @stock_register.bill_date, {:id => 'bill_date'}
       %span.greytext select the bill date of stock
   %tr
     %th
       Date of Stock Entry
     %td
-      = date_select 'stock_register[date_of_entry]', Date.today, {:id => 'date_of_entry'}
+      = date_select 'stock_register[date_of_entry]', @stock_register.blank? ? Date.today : @stock_register.date_of_entry, {:id => 'date_of_entry'}
       %span.greytext select date of stock entry
   %tr
     %th

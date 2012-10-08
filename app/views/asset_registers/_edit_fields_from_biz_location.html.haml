@@ -3,8 +3,12 @@
     %th
       Branch
     %td
-      = @asset_register.biz_location.name
-      = hidden_field :name => :biz_location_id, :value => @biz_location.id
+      - if params[:action] == "edit_from_biz_location"
+        = @asset_register.biz_location.name
+        = hidden_field :name => :biz_location_id, :value => @biz_location.id
+      - else
+        = @biz_location.name
+        = hidden_field :name => :biz_location_id, :value => @biz_location.id
   %tr
     %th
       Issue To
