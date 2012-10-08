@@ -20,6 +20,7 @@
         %td First Payment Date
         %td Last Payment Date
         %td Assignment Type
+        %td
     - @tranches.each do |tranch|
       %tr
         %td
@@ -36,3 +37,5 @@
           = tranch.last_payment_date
         %td
           = tranch.assignment_type
+        %td
+          = link_to_with_rights 'Edit', resource(@funder, @funding_line, tranch, :edit)

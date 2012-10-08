@@ -1,0 +1,12 @@
+%h1 Edit Tranch Funder: #{@funder.name} Funding Line: #{@funding_line.name} Tranch: #{@tranch.tranch_money_amount}@#{@tranch.interest_rate}
+
+= error_messages_for @tranch
+
+= form_for(@tranch, :action => resource(@funder, @funding_line, @tranch)) do
+  = partial :fields
+  = submit "Save changes"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Cancel', url("new_tranches/list/#{@funding_line.id}"), :class => "grey_button"
