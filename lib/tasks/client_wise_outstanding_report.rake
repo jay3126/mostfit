@@ -22,7 +22,7 @@ namespace :mostfit do
     date3 = Date.new(2012, 10, 01)
 
     f = File.open("tmp/client_wise_outstanding_report_#{DateTime.now.to_s}.csv", "w")
-    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Gender\", \"Loan Id\", \"Loan Amount\", \"Loan Status\", \"Cycle No.\", \"Interest Rate\", \"Disbursal Date\", \"First Payment Date\", \"Loan Tenure\", \"Installment Frequency\", \"Loan Product\", \"Principal Outstanding as on 26th Sept 2012\", \"Principal Outstanding as on 27th Sept 2012\", \"Principal Outstanding as on 1st Oct 2012\", \"Interest Outstanding as on 26th Sept 2012\", \"Interest Outstanding as on 27th Sept 2012\", \"Interest Outstanding as on 1st Oct 2012\"")
+    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Gender\", \"Loan Id\", \"Loan Amount\", \"Loan Status\", \"Cycle No.\", \"Interest Rate\", \"Disbursal Date\", \"Scheduled First Payment Date\", \"Actual First Payment Date\", \"Loan Tenure\", \"Installment Frequency\", \"Loan Product\", \"Principal Outstanding as on 26th Sept 2012\", \"Principal Outstanding as on 27th Sept 2012\", \"Principal Outstanding as on 1st Oct 2012\", \"Interest Outstanding as on 26th Sept 2012\", \"Interest Outstanding as on 27th Sept 2012\", \"Interest Outstanding as on 1st Oct 2012\"")
 
     loan_ids.each do |l|
       loan = Loan.get(l)
@@ -43,7 +43,8 @@ namespace :mostfit do
         interest_outstanding_as_on_date1 = loan.actual_outstanding_interest_on(date1)
         interest_outstanding_as_on_date2 = loan.actual_outstanding_interest_on(date2)
         interest_outstanding_as_on_date3 = loan.actual_outstanding_interest_on(date3)
-        loan_first_repayment_date = loan.scheduled_first_payment_date
+        loan_scheduled_first_repayment_date = loan.scheduled_first_payment_date
+        loan_actual_first_repayment_date = loan.payments(:type => [:principal, :interest]).min(:received_on)
 
         client = Client.get(loan.client_id)
         client_id = client.id
@@ -58,7 +59,7 @@ namespace :mostfit do
         branch_id = branch.id
         branch_name = branch.name
       
-        f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", \"#{client_gender}\", #{loan_id}, #{loan_amount}, \"#{loan_status}\", #{loan_cycle_number}, #{loan_interest_rate}, #{loan_disbursal_date}, #{loan_first_repayment_date}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_product}\", #{principal_outstanding_as_on_date1}, #{principal_outstanding_as_on_date2}, #{principal_outstanding_as_on_date3}, #{interest_outstanding_as_on_date1}, #{interest_outstanding_as_on_date2}, #{interest_outstanding_as_on_date3}")
+        f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", \"#{client_gender}\", #{loan_id}, #{loan_amount}, \"#{loan_status}\", #{loan_cycle_number}, #{loan_interest_rate}, #{loan_disbursal_date}, #{loan_scheduled_first_repayment_date}, #{loan_actual_first_repayment_date}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_product}\", #{principal_outstanding_as_on_date1}, #{principal_outstanding_as_on_date2}, #{principal_outstanding_as_on_date3}, #{interest_outstanding_as_on_date1}, #{interest_outstanding_as_on_date2}, #{interest_outstanding_as_on_date3}")
       end
     end
     f.close
