@@ -15,4 +15,7 @@ class NewTranch
   property :created_at,          *CREATED_AT
 
   belongs_to :new_funding_line
+
+  def money_amounts; [:amount]; end
+  def tranch_money_amount; to_money_amount(:amount); end
 end

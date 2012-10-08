@@ -8,7 +8,9 @@ Merb::Router.prepare do
   end
 
   resources :new_funders do
-    resources :new_funding_lines
+    resources :new_funding_lines do
+      resources :new_tranches
+    end
   end
 
   resources :psl_sub_categories

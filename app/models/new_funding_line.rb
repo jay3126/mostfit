@@ -15,4 +15,7 @@ class NewFundingLine
   def money_amounts; [:amount]; end
   def funding_line_money_amount; to_money_amount(:amount); end
 
+  def name
+    "#{new_funder.name}: #{funding_line_money_amount}"
+  end
 end

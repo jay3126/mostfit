@@ -1,0 +1,26 @@
+%table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Funder
+    %td
+      = @funding_line.funder.name
+  %tr.odd
+    %th.odd amount
+    %td
+      = @funding_line.amount
+  %tr.even
+    %th.even interest
+    %td
+      = @funding_line.interest_percentage
+      \%
+  %tr.odd
+    %th.odd disbursal
+    %td
+      = @funding_line.disbursal_date
+  %tr.even
+    %th.even first payment
+    %td
+      = @funding_line.first_payment_date
+  %tr.odd
+    %th.odd last payment
+    %td
+      = @funding_line.last_payment_date

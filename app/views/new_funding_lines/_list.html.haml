@@ -19,6 +19,6 @@
         %td
           = funding_line.sanction_date
         %td
-          =# link_to_with_rights("View Tranches","/tranches/list/#{funding_line.id}")
+          = link_to_with_rights("View Tranches","/new_tranches/list/#{funding_line.id}")
         %td
           = link_to_with_rights 'Edit Funding Line', resource(@funder,funding_line,:edit), :class => "edit grey_button"

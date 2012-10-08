@@ -1,0 +1,32 @@
+%table.tall.shaded
+  %tr
+    %th
+      Amount
+    %td
+      = text_field :amount
+  %tr
+    %th
+      Interest Rate
+    %td
+      = text_field :interest_rate
+      = "%"
+  %tr
+    %th
+      Disbursal Date
+    %td
+      = date_select_for @tranch, :disbursal_date
+  %tr
+    %th
+      First Payment Date
+    %td
+      = date_select_for @tranch, :first_payment_date
+  %tr
+    %th
+      Last Payment Date
+    %td
+      = date_select_for @tranch, :last_payment_date, :max_date => Date.today + 3650
+  %tr
+    %th
+      Assignment Type
+    %td
+      = select :assignment_type, :collection => Constants::TranchAssignment::TRANCH_ASSIGNMENT_TYPES.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'

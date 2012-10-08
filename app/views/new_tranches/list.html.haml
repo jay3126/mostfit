@@ -1,0 +1,38 @@
+%h1 List of Tranches under Funding Line: #{@funding_line.name}
+
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights 'Create a new tranch', resource(@funder, @funding_line, :new_tranches, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url("new_funders/#{@funding_line.new_funder.id}"), :class => "grey_button"
+
+
+- if @tranches.blank?
+  %p
+    %i No tranches have been created yet.
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %td Tranch ID
+        %td Amount
+        %td Interest Rate
+        %td Disbursal Date
+        %td First Payment Date
+        %td Last Payment Date
+        %td Assignment Type
+    - @tranches.each do |tranch|
+      %tr
+        %td
+          = tranch.id
+        %td
+          = tranch.tranch_money_amount
+        %td
+          = tranch.interest_rate
+        %td
+          = tranch.disbursal_date
+        %td
+          = tranch.first_payment_date
+        %td
+          = tranch.last_payment_date
+        %td
+          = tranch.assignment_type
