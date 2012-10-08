@@ -9,6 +9,7 @@
   = link_to_with_rights "Create new Cheque Book", '#', :onclick =>"jQuery('#new_cheque_book').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
   = link_to 'Back', url(:cheque_books), :class => "grey_button"
+
 #new_cheque_book(style = "display : none")
   = form_for(@cheque_book, :controller => :cheque_books, :action => :create) do
     %table.tall.shaded
@@ -52,32 +53,41 @@
     = link_to_with_rights "Cancel", '#', :onclick =>"jQuery('#new_cheque_book').hide(); return false;", :class => "grey_button"    
 %br
 
-%h1 Existing Cheque Books for : #{@bank_account.name}
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Cheque Book Id
-      %th
-        Cheque Book
-      %th
-        Cheque Book Issue Date
-      %th
-        Bank Account Name
-      %th
-        Bank Account Number
+%div.tab_container.shaded
+  %ul.tabs
+    %li#cheque_books Cheque Books
+    %li#history History
 
-  %tbody
-    - @cheque_books.each do |book|
-      %tr
-        %td
-          = book.id
-        %td
-          = link_to_with_rights book.serial_no, url(:controller => "cheque_books", :action => "show", :id => book.id)
-        %td
-          = book.issue_date
-        %td
-          = book.bank_account.name
-        %td
-          = book.bank_account.account_no
-%br
+  %div.tab
+    %h1 Existing Cheque Books for : #{@bank_account.name}
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %th
+            Cheque Book Id
+          %th
+            Cheque Book
+          %th
+            Cheque Book Issue Date
+          %th
+            Bank Account Name
+          %th
+            Bank Account Number
+
+      %tbody
+        - @cheque_books.each do |book|
+          %tr
+            %td
+              = book.id
+            %td
+              = link_to_with_rights book.serial_no, url(:controller => "cheque_books", :action => "show", :id => book.id)
+            %td
+              = book.issue_date
+            %td
+              = book.bank_account.name
+            %td
+              = book.bank_account.account_no
+    %br
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
