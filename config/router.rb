@@ -7,6 +7,10 @@ Merb::Router.prepare do
     end
   end
 
+  resources :new_funders do
+    resources :new_funding_lines
+  end
+
   resources :psl_sub_categories
   resources :priority_sector_lists
 

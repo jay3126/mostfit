@@ -1,0 +1,17 @@
+%h1
+  List Of Funders
+.menu-strip{:style => "width: 30%;"}
+  = link_to_with_rights 'Create New Funder', '#', :onclick => "jQuery('#create_funder').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
+#create_funder{:style => "display:none;"}
+  = error_messages_for @funder
+  = form_for(@funder, :action => url(:new_funders)) do
+    = partial :fields
+    = submit "Create"
+    %b
+      Or
+    = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#create_funder').toggle(); return false;", :class => "grey_button"
+%br
+= partial :list

@@ -1,0 +1,11 @@
+%table.tall.shaded
+  %tr
+    %th
+      Amount
+    %td
+      = text_field :amount
+  %tr
+    %th
+      Sanction Date
+    %td
+      = date_select_for @funding_line, :sanction_date

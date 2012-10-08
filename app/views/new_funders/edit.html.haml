@@ -1,0 +1,11 @@
+%h1= "Edit Funder: #{@funder.name}"
+
+= error_messages_for @funder
+= form_for(@funder, :action => resource(@funder)) do
+  = partial :fields
+  = submit "Update"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", url("new_funders/#{@funder.id}"), :class => "grey_button"

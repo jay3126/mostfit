@@ -1,0 +1,10 @@
+%h1 Create a new funding line for Funder: #{@funder.name}
+= error_messages_for @funding_line
+= form_for(:new_funding_lines, :action => resource(@funder,:new_funding_lines)) do
+  = partial :fields
+  = submit "Create funding line"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", url(:new_funders), :class => "grey_button"

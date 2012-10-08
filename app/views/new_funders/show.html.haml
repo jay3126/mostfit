@@ -1,0 +1,30 @@
+%h1
+  = "Funder: <i>#{@funder.name}</i>"
+
+.menu-strip{:style => "width: 50%;"}
+  = link_to_with_rights 'Edit Funder', resource(@funder, :edit), :class => "edit grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Create New Funding Line", resource(@funder, :new_funding_lines, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:new_funders), :class => "grey_button"
+
+%table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
+  %tr.even
+    %th.even Funder Name
+    %td
+      = @funder.name
+      == (id: #{@funder.id})
+  %tr.odd
+    %th.odd Total Funding lines
+    %td
+      = @funder.new_funding_lines.size
+
+%div.tab_container.shaded
+  %ul.tabs
+    %li#funding_lines Funding Lines
+    %li#history History
+  %div.tab
+    %br
+    = partial "new_funding_lines/list"
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

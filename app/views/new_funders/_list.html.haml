@@ -1,0 +1,26 @@
+- if @funders.blank?
+  #container_form
+    .shaded
+      No funders created
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th ID
+        %th Name
+        %th Funding Lines
+        %th
+    - @funders.each do |funder|
+      %tr
+        %td
+          = funder.id
+        %td
+          = link_to_with_rights funder.name, resource(funder)
+        %td
+          = funder.new_funding_lines.size rescue 0
+        %td
+          = link_to_with_rights 'Edit', resource(funder, :edit)
+          %br
+          =# link_to_with_rights 'New Funding Line', resource(funder, :new_funding_lines, :new)
+          =# link_to_with_rights 'Edit Funding Line', resource(@funder,funding_line,:edit), :class => "edit grey_button"
+          = link_to_with_rights 'New Funding Line', resource(funder, :new_funding_lines, :new)
