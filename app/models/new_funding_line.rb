@@ -7,10 +7,11 @@ class NewFundingLine
   property :currency,       *CURRENCY
   property :sanction_date,  *DATE
   property :created_by,     Integer
-  property :created_at,     DateTime, :nullable => false, :default => DateTime.now
+  property :created_at,     *CREATED_AT
 
   belongs_to :new_funder
-
+  has n, :new_tranches
+  
   def money_amounts; [:amount]; end
   def funding_line_money_amount; to_money_amount(:amount); end
 

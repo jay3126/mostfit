@@ -209,6 +209,11 @@ module Constants
 
   end
 
+  module TranchAssignment
+    NOT_ASSIGNED = "not_assigned"; SECURITIZATION_TYPE = "securitization"; ENCUMBRANCE_TYPE = "encumbrance"
+    TRANCH_ASSIGNMENT_TYPES = [NOT_ASSIGNED, SECURITIZATION_TYPE, ENCUMBRANCE_TYPE]
+  end
+
   # points in space
   module Space
 

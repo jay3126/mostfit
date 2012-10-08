@@ -21,12 +21,3 @@
       %th{:align => "left"} Sanction Date
       %td
         = @funding_line.sanction_date
-
-%div.tab_container.shaded
-  %ul.tabs
-    %li#loans Loans
-    %li#history History
-
-  %div.tab
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
