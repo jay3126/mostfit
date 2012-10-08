@@ -4,8 +4,12 @@
     $('.select_location').attr('checked',$(this).attr('checked'))});
   });
 
-%h1== Holiday:- #{@holiday.name}
-= link_to_with_rights 'Edit', resource(@holiday, :edit), :class => "_remote_ add grey_button"
+%h1== Overview of Holiday: #{@holiday.name}
+
+= link_to_with_rights "Back", url(:location_holidays), :class => "grey_button"
+&nbsp;&nbsp;
+= link_to_with_rights 'Edit holiday details', resource(@holiday, :edit), :class => "_remote_ edit grey_button"
+
 %table.loan{ :style => "width:50%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even
     %th.even Name
@@ -21,39 +25,49 @@
       = @holiday.move_work_to_date
   %tr.odd
     %th.odd By Staff Member
-    %td= @holiday.performed_by_staff.name
+    %td= link_to_with_rights @holiday.performed_by_staff.name, url("staff_members/#{@holiday.performed_by_staff.id}")
 
-%h2 Location
-= form_for(@holiday, :id => "reason_form", :action => url(:controller => 'location_holidays', :action => :destroy, :id => @holiday.id)) do
-  %table.datatable.report.weeksheet.nojs
-    %thead
-      %th
-        Select All
-        %br
-        = check_box :name => 'select_all', :value => true, :id => 'toggle_select_all'
-      %th
-        ID
-      %th
-        Location Name
-      %th
-        Location Level
-      %th
-        Parent Location Name
-      %th
-        Creation Date
-    - @holiday.biz_locations.each do |location|
-      %tr
-        %td
-          = check_box :name => 'location_holiday[]', :value => location.id, :class => 'select_location'
-        %td
-          = location.id
-        %td
-          = location.name
-        %td
-          = location.location_level.name
-        %td
-          - parent = LocationLink.get_parent(location)
-          = parent.blank? ? '-' : parent.name
-        %td
-          = location.creation_date
-  = submit 'Delete'
+%div.tab_container.shaded
+  %ul.tabs
+    %li#location Location
+    %li#history History
+
+  %div.tab
+    %br
+    = form_for(@holiday, :id => "reason_form", :action => url(:controller => 'location_holidays', :action => :destroy, :id => @holiday.id)) do
+      %table.datatable.report.weeksheet.nojs
+        %thead
+          %th
+            Select All
+            %br
+              = check_box :name => 'select_all', :value => true, :id => 'toggle_select_all'
+          %th
+            ID
+          %th
+            Location Name
+          %th
+            Location Level
+          %th
+            Parent Location Name
+          %th
+            Creation Date
+        - @holiday.biz_locations.each do |location|
+          %tr
+            %td
+              = check_box :name => 'location_holiday[]', :value => location.id, :class => 'select_location'
+            %td
+              = location.id
+            %td
+              = location.name
+            %td
+              = location.location_level.name
+            %td
+              - parent = LocationLink.get_parent(location)
+              = parent.blank? ? '-' : parent.name
+            %td
+              = location.creation_date
+      %br
+      = submit 'Delete'
+
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

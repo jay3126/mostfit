@@ -1,7 +1,7 @@
 :javascript
   jQuery("select.multiple").multiSelect();
 = form_for(@holiday, :id => "reason_form", :action => resource(@holiday)) do
-  %table.tall
+  %table.tall.shaded
     %tr
       %th
         Name
@@ -22,4 +22,9 @@
         For Location
       %td
         = select :name => 'biz_location', :collection => BizLocation.all-@holiday.biz_locations, :text_method => :name, :value_method => :id, :class => 'multiple'
-  = submit 'Update'
+  = submit 'Update', :class => "grey_button"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", resource(@holiday), :class => "grey_button"

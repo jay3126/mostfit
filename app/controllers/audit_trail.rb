@@ -35,6 +35,7 @@ class AuditTrails < Application
     model = "AssetType" if (params[:audit_for][:controller] == "asset_types")
     model = "Reason" if (params[:audit_for][:controller] == "reasons")
     model = "AssetRegister" if (params[:audit_for][:controller] == "asset_registers")
+    model = "LocationHoliday" if (params[:audit_for][:controller] == "location_holidays")
     model = "Lending" if not ["BizLocation", "Lending", "Client", "PaymentTransaction"].include?(model) and /Lending^/.match(model)   
 
     if (params[:audit_for][:controller] == "center_cycles")
