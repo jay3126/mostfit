@@ -8,188 +8,195 @@
   });
 
 
-
-%p
-  -count=1
-  -@sections.each do |section|
-    %hr
-    %table{:cellspacing=>"3px", :cellpadding=>"2px",:border=>" 2"}
-      -if count==2
-        %tr
-          %td
-            Name
-          %td
-            Address Proof
-          %td
-            ID Proof
-          %td
-            Age
-          %td
-            Ration Card
-          %td
-            Extra Photo
-          %td
-            Member/Guarantor sign
-          %td
-            BM/RO/AO sign
-          %td
-            Term sheet
-          %td
-            DPN
-          %td
-            DeDupe
-          %td
-            Remark
-      - if count==2
-        -#- (1).times do |i|
-        -i=0
-        - loan_file.loan_applications.each do |loan_application|
-          -#-(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
-          -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
-          -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
-          -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>loan_application.id)
-          -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
-
-
-          -if count==1 or count==3
-            -if i%3==0
-              %tr.question_cell
-
-          -else
-            -if i%2==0
-              %tr.question_cell
-
-          -if !checkpoint.nil?
-            %td
-              =" #{checkpoint.name}"
-            %td
-              -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
-              -if checkpoint_filling.nil?
-                Not Attempted
-              -else
-                -#- debugger
-                =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
-                -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? ':checked' : nil,:disabled=>true
-          -if !checkboxpoint.nil?
-            -#%td
-            -#  ="#{checkboxpoint.name}"
-            -#- loan_file.loan_applications.each do |loan_application|
-            %tr
-              %td
-                = "#{loan_application.client_name}"
-                -checkboxpoint.checkboxpoint_options.each do |option|
-                  %td
-                    -#=check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:disabled=>false
-                    - debugger
-                    =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
-
-
-              -if !free_text.nil?
-                -if count!=2
-                  %td{:width=>"70px"}
-
-                    =" #{free_text.name}"
-
-                -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-                -if free_text_filling.nil?
-                  -@comment="----NA----"
-                -else
-                  -@comment=free_text_filling.comment
-                -if free_text.name.downcase=="date"
-                  %td
-                    =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
-                -else
-                  - (1).times do |f|
-                    %td
-                      =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
-          -if !dropdownpoint.nil?
-            %td
-              =" #{dropdownpoint.name}"
-            %td
-              =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
-
-        -count=count+1
-        - i +=1
-
-      - else
-        -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
-          -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
-          -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-
-
-          -if count==1 or count==3
-            -if i%3==0
-              %tr.question_cell
-
-          -else
-            -if i%2==0
-              %tr.question_cell
-
-          -if !checkpoint.nil?
-            %td
-              =" #{checkpoint.name}"
-            %td
-              -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
-              -if checkpoint_filling.nil?
-                Not Attempted
-              -else
-                -#- debugger
-                -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
-                -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? 'checked' : nil,:disabled=>true
-                - if checkpoint_filling.status?
-                  = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => checkpoint_filling.status?
-                  Yes
-                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0
-                  No
-                - else
-                  = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1
-                  Yes
-                  = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => true
-                  No
-          -if !checkboxpoint.nil?
-            %td
-              ="#{checkboxpoint.name}"
-              -checkboxpoint.checkboxpoint_options.each do |option|
+.shaded
+  #form_section
+    = form(:action => url(:checklister_slice_edit_checklist_data) ) do
+      %table.form{:style => "width:100%;"}
+      %p
+        -count=1
+        -@sections.each do |section|
+          %hr
+          .section_block
+            %h2
+          %table{:cellspacing=>"3px", :cellpadding=>"2px",:border=>" 2"}
+            -if count==2
+              %tr
                 %td
-                  =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
+                  Name
+                %td
+                  Address Proof
+                %td
+                  ID Proof
+                %td
+                  Age
+                %td
+                  Ration Card
+                %td
+                  Extra Photo
+                %td
+                  Member/Guarantor sign
+                %td
+                  BM/RO/AO sign
+                %td
+                  Term sheet
+                %td
+                  DPN
+                %td
+                  DeDupe
+                %td
+                  Remark
+            - if count==2
+              -#- (1).times do |i|
+              -i=0
+              - loan_file.loan_applications.each do |loan_application|
+                -#-(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
+                -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+                -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+                -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>loan_application.id)
+                -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>loan_application.id)
 
 
-          -if !free_text.nil?
-            -if count!=2
-              %td{:width=>"70px"}
+                -if count==1 or count==3
+                  -if i%3==0
+                    %tr.question_cell
 
-                =" #{free_text.name}"
+                -else
+                  -if i%2==0
+                    %tr.question_cell
 
-            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-            -if free_text_filling.nil?
-              -@comment="----NA----"
-            -else
-              -@comment=free_text_filling.comment
-            -if free_text.name.downcase=="date"
-              %td
-                -#- date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
-                = date_select "free_text_#{free_text.id}".to_sym, @comment, :max_date => Date.today
-                -#=text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
-            -else
-              %td
-                =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
-          -if !dropdownpoint.nil?
-            %td
-              =" #{dropdownpoint.name}"
-            %td
-              =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
-              = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id, :dropdownpoint_id=>@dropdownpoint.id)
+                -if !checkpoint.nil?
+                  %td
+                    =" #{checkpoint.name}"
+                  %td
+                    -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+                    -if checkpoint_filling.nil?
+                      Not Attempted
+                    -else
+                      -#- debugger
+                      =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
+                      -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? ':checked' : nil,:disabled=>true
+                -if !checkboxpoint.nil?
+                  -#%td
+                  -#  ="#{checkboxpoint.name}"
+                  -#- loan_file.loan_applications.each do |loan_application|
+                  %tr
+                    %td
+                      = "#{loan_application.client_name}"
+                      -checkboxpoint.checkboxpoint_options.each do |option|
+                        %td
+                          -#=check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:disabled=>false
+                          -#- debugger
+                          =check_box :name=>"checkboxpoint_option_filling_#{option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
 
-        -count=count+1
 
-  %p
-    = check_box :name => "result_status", :boolean => true, :checked => false
-    Cleared?
+                    -if !free_text.nil?
+                      -if count!=2
+                        %td{:width=>"70px"}
 
-  %br
-  = link_to_with_rights "Update", url(:controller => :checklists, :action => :capture_checklist_data, :checklist_id => @checklist.id), :class => 'greenButton'
+                          =" #{free_text.name}"
+
+                      -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                      -if free_text_filling.nil?
+                        -@comment="----NA----"
+                      -else
+                        -@comment=free_text_filling.comment
+                      -if free_text.name.downcase=="date"
+                        %td
+                          =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                      -else
+                        - (1).times do |f|
+                          %td
+                            =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                -if !dropdownpoint.nil?
+                  %td
+                    =" #{dropdownpoint.name}"
+                  %td
+                    =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+
+              -count=count+1
+              - i +=1
+
+            - else
+              -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
+                -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+                -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+                -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+                -checkboxpoint=Checkboxpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+
+
+                -if count==1 or count==3
+                  -if i%3==0
+                    %tr.question_cell
+
+                -else
+                  -if i%2==0
+                    %tr.question_cell
+
+                -if !checkpoint.nil?
+                  %td
+                    =" #{checkpoint.name}"
+                  %td
+                    -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+                    -if checkpoint_filling.nil?
+                      Not Attempted
+                    -else
+                      -#- debugger
+                      -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
+                      -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? 'checked' : nil,:disabled=>true
+                      - if checkpoint_filling.status?
+                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}",:value => 1, :checked => checkpoint_filling.status?
+                        Yes
+                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}", :value => 0
+                        No
+                      - else
+                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}",:value => 1
+                        Yes
+                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}", :value => 0, :checked => true
+                        No
+                -if !checkboxpoint.nil?
+                  %td
+                    ="#{checkboxpoint.name}"
+                    -checkboxpoint.checkboxpoint_options.each do |option|
+                      %td
+                        =check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
+
+
+                -if !free_text.nil?
+                  -if count!=2
+                    %td{:width=>"70px"}
+
+                      =" #{free_text.name}"
+
+                  -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                  -if free_text_filling.nil?
+                    -@comment="----NA----"
+                  -else
+                    -@comment=free_text_filling.comment
+                  -if free_text.name.downcase=="date"
+                    %td
+                      -#- date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
+                      = date_select "free_text_filling_#{free_text_filling.id}".to_sym, @comment, :max_date => Date.today
+                      -#=text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
+                  -else
+                    %td
+                      =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                -if !dropdownpoint.nil?
+                  %td
+                    =" #{dropdownpoint.name}"
+                  %td
+                    =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+                    -#= select :name => "dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id, :dropdownpoint_id=>@dropdownpoint.id)
+                    = select :name => "dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+
+              -count=count+1
+
+        %p
+          = check_box :name => "result_status", :boolean => true, :checked => false
+          Cleared?
+          %br
+          = submit "Update", :class=>"greenButton"
+        -#%br
+        -#= link_to_with_rights "Update", url(:controller => :checklists, :action => :capture_checklist_data, :checklist_id => @checklist.id), :class => 'greenButton'
 
 
 

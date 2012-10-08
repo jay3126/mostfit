@@ -122,7 +122,8 @@
           %td
             =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
 
-
+%br
+=link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 
 
 

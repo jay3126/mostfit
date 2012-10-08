@@ -74,7 +74,7 @@ if defined?(Merb::Plugins)
       scope.match('/responses/view_response/:id').to(:controller => 'responses', :action => 'view_response').name(:view_response)
       scope.match('/responses/edit_response/:id').to(:controller => 'responses', :action => 'edit_response').name(:edit_response)
       scope.match('/responses/view_report/:id').to(:controller => 'responses', :action => 'view_report').name(:view_report)
-
+      scope.match('/checklists/edit_checklist_data').to(:controller => 'checklists', :action => 'edit_checklist_data').name(:edit_checklist_data)
 
      # example of a named route
 #      scope.match('/index(.:format)').to(:controller => 'main', :action => 'index').name(:index)

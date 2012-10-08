@@ -9,7 +9,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     begin
       verify_parameters(params)
 
-
+      #debugger
       @checklist_type=ChecklistType.get(params[:checklist_type_id].to_i)
 
 
@@ -203,8 +203,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       @response=Response.first(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id)
       if @response.blank?
         @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
-      else
-        raise Exception
       end
 
       ChecklistLocation.first_or_create(:location_id => params[:loc1_id], :type => params[:loc1_type], :response_id => @response.id, :name => params[:loc1_name], :created_at => Date.today)
@@ -275,6 +273,16 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     #@sample=params
     #display @sample
+
+
+  end
+
+
+  def edit_checklist_data
+
+    #debugger
+    @sample_edit=params
+    display @sample_edit
 
 
   end
