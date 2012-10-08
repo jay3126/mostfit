@@ -1,9 +1,10 @@
-%h1 Details for funding line #{@funding_line.id} by #{@funding_line.funder.name}
+%h1
+  = "Details for funding line #{@funding_line.id} by #{@funding_line.new_funder.name}"
 
 .menu-strip{:style => "width: 25%;"}
-  = link_to_with_rights 'Edit Funding Line', resource(@funding_line.funder, @funding_line, :edit), :class => "edit grey_button"
+  = link_to_with_rights 'Edit Funding Line', resource(@funding_line.new_funder, @funding_line, :edit), :class => "edit grey_button"
   &nbsp;&nbsp;
-  = link_to_with_rights "Back", url("funders/#{@funding_line.funder.id}"), :class => "grey_button"
+  = link_to_with_rights "Back", url("new_funders/#{@funding_line.new_funder.id}"), :class => "grey_button"
 
 %table.tall.shaded
   %tbody
@@ -15,25 +16,11 @@
     %tr
       %th{:align => "left"} Amount
       %td
-        %b= @funding_line.amount
+        %b= @funding_line.funding_line_money_amount.to_s
     %tr
-      %th{:align => "left"} Interest
+      %th{:align => "left"} Sanction Date
       %td
-        %b
-          = @funding_line.interest_percentage
-          \%
-    %tr
-      %th{:align => "left"} Disbursal Date
-      %td
-        = @funding_line.disbursal_date
-    %tr
-      %th{:align => "left"} First Payment Date
-      %td
-        = @funding_line.first_payment_date
-    %tr
-      %th{:align => "left"} Last Payment Date
-      %td
-        = @funding_line.last_payment_date
+        = @funding_line.sanction_date
 
 %div.tab_container.shaded
   %ul.tabs

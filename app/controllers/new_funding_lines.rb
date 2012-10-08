@@ -6,8 +6,8 @@ class NewFundingLines < Application
     display @funding_lines
   end
 
-  def show(id)
-    @funding_line = FundingLine.get(id)
+  def show
+    @funding_line = NewFundingLine.get(params[:id])
     raise NotFound unless @funding_line
     display @funding_line
   end
@@ -49,15 +49,19 @@ class NewFundingLines < Application
     display @funding_line
   end
 
-  def update(id, funding_line)
-    funding_line[:interest_rate] = funding_line[:interest_rate].to_f / 100
-    @funding_line = FundingLine.get(id)
+  def update
+    @funding_line = NewFundingLine.get(params[:id])
     raise NotFound unless @funding_line
-    @funder = Funder.get(params[:funder_id])
-    if @funding_line.update_attributes(funding_line)
-      redirect url("funders/#{@funder.id}/funding_lines/#{@funding_line.id}"), :message => {:notice => "Funding Line details updated successfully"}
+    @funder = NewFunder.get(params[:new_funder_id])
+    amount_str = params[:new_funding_line][:amount]
+    @money = MoneyManager.get_money_instance(amount_str)
+    amount = @money.amount
+    currency = @money.currency
+    sanction_date = params[:new_funding_line][:sanction_date]
+    if @funding_line.update_attributes({:amount => amount, :currency => currency, :new_funder_id => @funder.id, :created_by => session.user.id, :sanction_date => sanction_date})
+      redirect url("new_funders/#{@funder.id}/new_funding_lines/#{@funding_line.id}"), :message => {:notice => "Funding Line details updated successfully"}
     else
-      redirect url("funders/#{@funder.id}/funding_lines/#{@funding_line.id}/edit"), :message => {:error => "Details of Funding Line cannot be updated because: #{@funding_line.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
+      redirect url("new_funders/#{@funder.id}/new_funding_lines/#{@funding_line.id}/edit"), :message => {:error => "Details of Funding Line cannot be updated because: #{@funding_line.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
 
