@@ -26,6 +26,9 @@ namespace :mostfit do
         #Setup cost centers
         CostCenter.setup_cost_centers
 
+        #Setup Default Accounting period
+        AccountingPeriod.create_default_accounting_period("Accounting Period For #{Date.today}")
+
         #Setup chart of accounts
         coa_file_name = File.join(Merb.root, 'config', 'accounts.yml')
         chart_of_accounts = File.read(coa_file_name)

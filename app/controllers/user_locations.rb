@@ -165,7 +165,7 @@ class UserLocations < Application
     @date = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
     @biz_location = BizLocation.get params[:id]
     @user = session.user
-    @eod_summary = @biz_location.location_eod_summary(@user, @date)
+    @eod_summary = @biz_location.business_eod_on_date(@date)
     render :template => 'user_locations/location_eod_summary', :layout => layout?
   end
 

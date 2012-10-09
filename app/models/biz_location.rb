@@ -156,7 +156,7 @@ class BizLocation
     user = User.first
     locations = self.location_level.level == 0 ? [self] : LocationLink.all_children(self, on_date)
     center_locations = locations.blank? ? [] : locations.select{|l| l.location_level.level == 0}
-    repayments = center_locations.blank? ? [] : PaymentTransaction.all(:effective_on => on_date, :on_product_type => :lending, :on_product_id => self.id, :payment_towards => :payment_towards_loan_disbursement, :performed_at => center_locations.map(&:id))
+    repayments = center_locations.blank? ? [] : PaymentTransaction.all(:effective_on => on_date, :on_product_type => :lending, :payment_towards => :payment_towards_loan_disbursement, :performed_at => center_locations.map(&:id))
     unless repayments.blank?
       total_disbursment = repayments.map(&:payment_money_amount).sum
       dis_locations = repayments.map(&:performed_at).uniq.count

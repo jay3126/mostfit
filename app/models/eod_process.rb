@@ -19,10 +19,6 @@ class EodProcess
   belongs_to :user, :child_key => [:created_by], :model => 'User'
   belongs_to :staff_member, :child_key => [:performed_by], :model => 'StaffMember'
 
-  def eod_process_on_date(on_date = Date.today)
-
-  end
-
   def self.eod_process_for_location(location_ids, performed_by_id, created_by_id, on_date = Date.today)
     biz_locations = BizLocation.all(:id => location_ids)
     biz_locations.each do |location|

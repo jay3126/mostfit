@@ -127,4 +127,9 @@ class AccountingPeriod
     end
     return true
   end
+
+  #create default accounting period at accounting setup
+  def self.create_default_accounting_period(name, begin_date = Date.today)
+    first_or_create(:name => name, :begin_date => begin_date)
+  end
 end

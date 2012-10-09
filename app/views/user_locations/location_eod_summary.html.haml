@@ -19,18 +19,17 @@
     });
 
 %br
-- date = params[:eod_date]||get_effective_date
+- date = params[:date]||get_effective_date
 %div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
   = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :show, :id => @biz_location.id)+'#branch_eod_summary', :method => :get) do
     Change date
-    = date_select "eod_date", date
+    = date_select "date", date
     = submit "Go"
 %br
 %h1 Business EOD Summary
 %br
-- eod = @biz_location.business_eod_on_date(date)
-- business_eod = eod[:business_eod]
-- collection_eod = eod[:collection_eod]
+- business_eod = @eod_summary[:business_eod]
+- collection_eod = @eod_summary[:collection_eod]
 %table.branch_b_eod.report.weeksheet
   %thead
     %tr
