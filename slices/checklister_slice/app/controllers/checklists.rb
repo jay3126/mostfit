@@ -135,6 +135,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     @checklist=Checklist.get(params[:checklist_id])
     @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
 
+
     parameter_hash=Hash.new
     parameter_hash[:checklist_type_id]=@checklist_type.id
     parameter_hash[:checklist_area]= 'healthcheck'
@@ -199,9 +200,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
       end
 
-
-      @response=Response.first(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id)
-      if @response.blank?
+      if @checklist_type.is_hc_checklist?
+        @response=Response.first(:target_entity_id => @target_entity.id, :checklist_id => @checklist.id)
+        if @response.blank?
+          @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
+        end
+      else
         @response=Response.create!(:target_entity_id => @target_entity.id, :filler_id => @filler.id, :checklist_id => @checklist.id, :value_date => Date.parse(params[:effective_date]), :created_at => Date.today, :completion_status => "complete", :result_status => @result_status.to_s)
       end
 
@@ -217,8 +221,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         #save all the yes/no questions
         section.checkpoints.each do |checkpoint|
           if !params["checkpoint_#{checkpoint.id}".to_sym].blank?
-            @checkpoint_filling= checkpoint.checkpoint_fillings.first(:response_id => @response.id)
-            if @checkpoint_filling.blank?
+            if @checklist_type.is_hc_checklist?
+              @checkpoint_filling= checkpoint.checkpoint_fillings.first(:response_id => @response.id)
+              if @checkpoint_filling.blank?
+                @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
+              end
+            else
               @checkpoint_filling= checkpoint.checkpoint_fillings.create!(:status => params["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
             end
           end
@@ -227,8 +235,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         #save all the free texts
         section.free_texts.each do |free_text|
           if !params["free_text_#{free_text.id}".to_sym].blank?
-            @free_text_filling=free_text.free_text_fillings.first(:response_id => @response.id)
-            if @free_text_filling.blank?
+            if @checklist_type.is_hc_checklist?
+              @free_text_filling=free_text.free_text_fillings.first(:response_id => @response.id)
+              if @free_text_filling.blank?
+                @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
+              end
+            else
               @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
             end
           end
@@ -236,8 +248,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
         #save all drop downs
         section.dropdownpoints.each do |drop_down|
-          @dropdownpoint_filling=drop_down.dropdownpoint_fillings.first(:response_id => @response.id)
-          if @dropdownpoint_filling.blank?
+          if @checklist_type.is_hc_checklist?
+            @dropdownpoint_filling=drop_down.dropdownpoint_fillings.first(:response_id => @response.id)
+            if @dropdownpoint_filling.blank?
+              @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id, :model_record_name => Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
+            end
+          else
             @dropdownpoint_filling=drop_down.dropdownpoint_fillings.create!(:model_record_id => params["drop_down_point_#{drop_down.id}".to_sym].to_i, :response_id => @response.id, :model_record_name => Kernel.const_get(drop_down.model_name).get(params["drop_down_point_#{drop_down.id}".to_sym].to_i).name)
           end
         end
@@ -246,8 +262,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         section.checkboxpoints.each do |checkbox_point|
           checkbox_point.checkboxpoint_options.each do |option|
             if !params["option#{option.id}".to_sym].blank?
-              @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.first(:response_id => @response.id)
-              if @checkboxpoint_option_filling.blank?
+              if @checklist_type.is_hc_checklist?
+                @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.first(:response_id => @response.id)
+                if @checkboxpoint_option_filling.blank?
+                  @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
+                end
+              else
                 @checkboxpoint_option_filling=option.checkboxpoint_option_fillings.create!(:status => params["option#{option.id}".to_sym].to_i, :response_id => @response.id)
               end
             end
@@ -280,7 +300,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
   def edit_checklist_data
 
-    #debugger
+    debugger
     @sample_edit=params
     display @sample_edit
 

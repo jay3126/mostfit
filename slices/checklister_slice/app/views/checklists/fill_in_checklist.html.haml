@@ -30,6 +30,9 @@
     ="#{@checklist.checklist_type.name}"
   %hr
 
+
+
+
   .shaded
     #form_section
       = form(:action => url(:checklister_slice_capture_checklist_data) ) do
@@ -64,19 +67,11 @@
               =label "Value Date"
             %td
               = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
-          - if @checklist.checklist_type.name == "Customer Calling"
-            %tr
-              %th
-                = label "Client telephone number"
-              %td
-                - if client_phone_number.blank?
-                  Not available
-                - else
-                  = text_field :phone_number, :value => client_phone_number
-                = link_to_with_rights "Update client details", url(:controller => "new_clients", :action => "edit", :id => @client.id)
+
         %p
 
           -@sections.each do |section|
+            .blank_section{:style => "position:relative; margin-top:18%;"}
             %hr
             .section_block
               %h2
@@ -148,9 +143,31 @@
         %p
           = submit "Create"
 
-
-
 %br
 %br
 %br
 =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
+%br
+-#.shaded
+#form_section{:style => "position:relative; margin-top:-260%; width:80%; margin-left:-2%; width:95%;"}
+  = form(:controller=> :new_clients, :action => :update_client_telephone_number ) do
+    %table{:style => "width:100%;"}
+      - if @checklist.checklist_type.name == "Customer Calling"
+        %tr
+          %td
+            =hidden_field :client_id, :value=>client_object.id
+        %tr
+          %th
+            = label "Client telephone number"
+          %td
+            - if client_phone_number.blank?
+              -#Not available
+              = text_field :telephone_number
+            - else
+              = text_field :phone_number, :value => client_phone_number
+            -#= link_to_with_rights "Update client details", url(:controller => "new_clients", :action => "edit", :id => @client.id)
+    %p{:style => "margin-left:30%;"}
+      = submit "Update telephone number"
+
+
+
