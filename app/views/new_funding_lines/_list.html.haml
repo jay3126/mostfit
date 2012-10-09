@@ -8,7 +8,7 @@
         %th Id
         %th Amount
         %th Sanction Date
-        %th Total Tranches
+        %th Tranches
         %th
     - @funding_lines.each do |funding_line|
       %tr{ :class => cycle('odd','') }
@@ -19,8 +19,6 @@
         %td
           = funding_line.sanction_date
         %td
-          = funding_line.new_tranches.size rescue "0"
+          = link_to_with_rights("Tranches (#{funding_line.new_tranches.size rescue "0"})","/new_tranches/list/#{funding_line.id}")
         %td
-          = link_to_with_rights("View Tranches","/new_tranches/list/#{funding_line.id}")
-          %br
-          = link_to_with_rights 'Edit Funding Line', resource(@funder,funding_line,:edit)
+          = link_to_with_rights 'Edit', resource(@funder,funding_line,:edit)
