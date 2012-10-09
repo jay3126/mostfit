@@ -31,14 +31,13 @@ class NewFundingLines < Application
     # VALIDATIONS
     @errors << "Amount must not be blank" if amount_str.blank?
     @errors << "Sanction date must not be blank" if sanction_date.blank?
-
     # OPERATIONS-PERFORMED
     if @errors.blank?
       begin
         @money = MoneyManager.get_money_instance(amount_str)
         amount = @money.amount
         currency = @money.currency
-        @funding_line = @funder.new_funding_lines.new({:amount => amount, :currency => currency, :new_funder_id => funder_id, :created_by => session.user.id, :sanction_date => sanction_date})
+        @funding_line = @funder.new_funding_lines.create({:amount => amount, :currency => currency, :new_funder_id => funder_id, :created_by => session.user.id, :sanction_date => sanction_date})
         message = {:notice => "Funding Line was successfully created"}
       rescue => ex
         message = {:error => ex.message}
