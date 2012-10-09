@@ -37,19 +37,25 @@ class NewTranches < Application
   
   def create
     # GATE-KEEPING
+    funding_line_id     = params[:new_funding_line_id]
+    funder_id           = params[:new_funder_id]
+    amount_str          = params[:amount]
+    interest_rate       = params[:interest_rate]
+    first_payment_date  = params[:new_tranch][:first_payment_date]
+    disbursal_date      = params[:new_tranch][:disbursal_date]
+    last_payment_date   = params[:new_tranch][:last_payment_date].blank? ? nil : params[:new_tranch][:last_payment_date]
+    assignment_type     = params[:assignment_type]
+
+    # INITIALIZATIONS
     @errors = []
-    funding_line_id  = params[:new_funding_line_id]
-    funder_id = params[:new_funder_id]
-    assignment_type = params[:assignment_type]
-    last_payment_date = params[:new_tranch][:last_payment_date]
-    disbursal_date = params[:new_tranch][:disbursal_date]
-    first_payment_date = params[:new_tranch][:first_payment_date]
-    interest_rate = params[:interest_rate]
-    amount_str = params[:amount]
+    @funding_line = NewFundingLine.get funding_line_id
+    @funder = NewFunder.get funder_id
+    
+    # VALIDATIONS
+    @errors << "Amount must not be blank" if amount_str.blank?
+
     # OPERATIONS-PERFORMED
-    if @errors.empty?
-      @funding_line = NewFundingLine.get funding_line_id
-      @funder = NewFunder.get funder_id
+    if @errors.blank?
       @money = MoneyManager.get_money_instance(amount_str)
       amount = @money.amount
       currency = @money.currency
@@ -59,9 +65,13 @@ class NewTranches < Application
         message[:notice] = "Tranch created successfully"
         redirect("/new_tranches/list/#{funding_line_id}", :message => {:notice => "Tranch successfully created"})
       else
-        message[:error] = @tranch.errors.first.to_s
         render :new
       end
+    else
+      @tranch = @funding_line.new_tranches.new({:amount => amount, :currency => currency, :interest_rate => interest_rate, :disbursal_date => disbursal_date,
+          :first_payment_date => first_payment_date, :last_payment_date => last_payment_date, :assignment_type => assignment_type, :created_by => session.user.id})
+      message[:error] = @errors.flatten.join(', ')
+      render :new
     end
   end
   

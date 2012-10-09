@@ -22,9 +22,6 @@
 %div.tab_container.shaded
   %ul.tabs
     %li#funding_lines Funding Lines
-    %li#history History
   %div.tab
     %br
     = partial "new_funding_lines/list"
-  %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

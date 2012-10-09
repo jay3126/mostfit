@@ -29,4 +29,4 @@
     %th
       Assignment Type
     %td
-      = select :assignment_type, :collection => Constants::TranchAssignment::TRANCH_ASSIGNMENT_TYPES.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => 'Select'
+      = select :assignment_type, :collection => Constants::TranchAssignment::TRANCH_ASSIGNMENT_TYPES.map{|x| [x.to_s, x.to_s.humanize]}
