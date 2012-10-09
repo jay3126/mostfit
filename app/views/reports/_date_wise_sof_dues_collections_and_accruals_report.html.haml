@@ -3,7 +3,9 @@
   %thead
     %tr
       %th
+        Txn Date
       %th
+        Branch Name        
       %th{:colspan => 3}
         DUES
       %th{:colspan => 7}
@@ -33,9 +35,7 @@
         Outstanding
     %tr
       %th
-        Source of Fund
       %th
-        Txn Date
       %th
         Principal
       %th
@@ -64,15 +64,15 @@
         Principal
   %tbody
     - @default_currency ||= MoneyManager.get_default_currency
-    - @data.each do |branch, branch_values|
+    - @data.sort_by{|x| x[0]}.each do |branch, branch_values|
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
-      - branch_values.sort.each do |key, values|
+      - branch_values.sort_by{|x| x[1][:on_date]}.each do |key, values|
         %tr
           %td
             %b
-              = values[:sof_name]
+              = values[:on_date]
           %td
-            = values[:on_date]
+            = values[:branch_name]
           %td
             = values[:dues_emi_principal]
             - accumulate_row_values[:dues_emi_principal] += values[:dues_emi_principal]
