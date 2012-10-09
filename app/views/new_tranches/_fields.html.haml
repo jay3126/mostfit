@@ -3,7 +3,7 @@
     %th
       Amount
     %td
-      = text_field :amount
+      = text_field :amount, :value => @tranch.amount.blank? ? '' : @tranch.tranch_money_amount.to_regular_amount
   %tr
     %th
       Interest Rate

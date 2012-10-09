@@ -17,6 +17,7 @@ class NewTranch
   belongs_to :new_funding_line
 
   validates_with_method  :disbursal_date,       :method => :disbursal_not_in_past?
+  validates_with_method  :disbursal_date,       :method => :disbursal_not_before_sanction?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_equalto_disbursal?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_before_disbursal?
   validates_with_method  :last_payment_date,    :method => :last_payment_not_before_first_payment_or_disbursal?
@@ -33,15 +34,19 @@ class NewTranch
   end
 
   def first_payment_not_before_disbursal?
-    return ((!first_payment_date.blank? && first_payment_date < disbursal_date)) ? [false, "First payment date must not before disbursal date"] : true
+    return ((!first_payment_date.blank? && first_payment_date < disbursal_date)) ? [false, "First payment date must not before disbursal date "] : true
   end
 
   def first_payment_not_equalto_disbursal?
-    return ((!first_payment_date.blank? && first_payment_date == disbursal_date)) ? [false, "First payment date must not equal to disbursal date"] : true
+    return ((!first_payment_date.blank? && first_payment_date == disbursal_date)) ? [false, "First payment date must not equal to disbursal date "] : true
   end
 
   def last_payment_not_before_first_payment_or_disbursal?
-    return (!last_payment_date.blank? && ((last_payment_date < disbursal_date) || (last_payment_date < first_payment_date))) ? [false, "Last payment date must not before disbursal date or First Payment date"] : true
+    return (!last_payment_date.blank? && ((last_payment_date < disbursal_date) || (last_payment_date < first_payment_date))) ? [false, "Last payment date must not before disbursal date or First Payment date "] : true
   end
 
+  def disbursal_not_before_sanction?
+    return (!disbursal_date.blank? && disbursal_date < self.new_funding_line.sanction_date) ? [false, "Disbursal date must not before Funding line sanction date "] : true
+  end
+  
 end

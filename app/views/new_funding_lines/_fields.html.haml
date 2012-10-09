@@ -3,7 +3,7 @@
     %th
       Amount
     %td
-      = text_field :amount
+      = text_field :amount, :value => @funding_line.amount.blank? ? '' : @funding_line.funding_line_money_amount.to_regular_amount
   %tr
     %th
       Sanction Date
