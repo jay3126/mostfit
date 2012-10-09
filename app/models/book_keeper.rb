@@ -34,7 +34,8 @@ module BookKeeper
 
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
-    Voucher.create_generated_voucher(total_amount, payment_transaction.receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation)
+    receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT
+    Voucher.create_generated_voucher(total_amount, receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation)
   end
 
   def self.can_accrue_on_loan_on_date?(loan, on_date)
