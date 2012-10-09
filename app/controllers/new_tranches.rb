@@ -84,7 +84,7 @@ class NewTranches < Application
     amount_str = params[:new_tranch][:amount]
 
     # OPERATIONS-PERFORMED
-    @tranch = NewTranch.get params[:id]
+    @tranch = NewTranch.get tranch_id
     @funding_line = NewFundingLine.get funding_line_id
     @funder = NewFunder.get funder_id
     @money = MoneyManager.get_money_instance(amount_str)
@@ -93,7 +93,7 @@ class NewTranches < Application
     update_tranch = @tranch.update_attributes({:amount => amount, :currency => currency, :interest_rate => interest_rate, :disbursal_date => disbursal_date,
         :first_payment_date => first_payment_date, :last_payment_date => last_payment_date, :assignment_type => assignment_type, :created_by => session.user.id})
     if update_tranch
-      redirect("/tranches/list/#{funding_line_id}", :message => {:notice => "Tranch successfully updated"})
+      redirect("/new_tranches/list/#{funding_line_id}", :message => {:notice => "Tranch successfully updated"})
+    end
   end
-end
 end
