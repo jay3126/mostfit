@@ -18,6 +18,8 @@
       %th
         Center Name
       %th
+        Creation Date
+      %th
         No. Of Clients
       %th
         Action
@@ -38,6 +40,8 @@
             = link_to_with_rights client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => client_group.biz_location.id)
           - else
             Not Attached to any Center
+        %td
+          = client_group.creation_date
         %td
           = client_group.clients.count
         %td

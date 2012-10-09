@@ -1,5 +1,6 @@
 class ClientGroup
   include DataMapper::Resource
+  include Constants::Properties
 
   #before :valid?, :add_created_by_staff_member
 
@@ -8,6 +9,8 @@ class ClientGroup
   property :number_of_members, Integer, :nullable => true, :min => 1, :max => 20, :default => 5
   property :code,              String, :length => 100, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
+  property :created_at, *CREATED_AT
+  property :creation_date, Date, :nullable => false, :default => Date.today
 
   validates_length      :code, :min => 1, :max => 100
 

@@ -24,6 +24,11 @@
         = "Not Attached to any Center"
       - else
         = link_to_with_rights @client_group.biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @client_group.biz_location.id)
+  %tr.even
+    %th.even
+      Creation Date
+    %td
+      = @client_group.creation_date
 
 %div.tab_container.shaded
   %ul.tabs

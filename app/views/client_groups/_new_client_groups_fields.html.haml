@@ -26,6 +26,11 @@
       %span.greytext a two letter unique code for the group
   %tr
     %th
+      Creation Date:
+    %td
+      = date_select_for @client_group, :creation_date, :max_date => Date.today
+  %tr
+    %th
       Maximum clients:
     %td
       = text_field :number_of_members, :size => 3
