@@ -24,7 +24,7 @@
       = text_field :code, :size => 10
       %br/
       %span.greytext a two letter unique code for the group
-  - if @client_group.new?
+  - if @client.new?
     %tr
       %th
         Creation Date:
@@ -41,3 +41,6 @@
       Maximum clients:
     %td
       = text_field :number_of_members, :size => 3
+      %br
+        %span.greytext
+          maximum number allowed to enter is 20.

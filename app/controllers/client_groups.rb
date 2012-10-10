@@ -35,10 +35,10 @@ class ClientGroups < Application
 
   def create
     only_provides :html, :json, :xml
-    if params[:client_group]
+    if (request.referer.include?("client_groups") and params[:client_group])
       client_group = params[:client_group]
     else
-      client_group = {:name => params[:name], :code => params[:code], :number_of_members => params[:number_of_members], :biz_location_id => params[:biz_location_id], :created_by_staff_member_id => params[:created_by_staff_member_id]}
+      client_group = {:name => params[:name], :code => params[:code], :number_of_members => params[:number_of_members], :biz_location_id => params[:biz_location_id], :created_by_staff_member_id => params[:created_by_staff_member_id], :creation_date => params[:client_group][:creation_date]}
     end
     @biz_location_id = params[:biz_location_id]
     @client_group = ClientGroup.new(client_group)
