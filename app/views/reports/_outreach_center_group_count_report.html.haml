@@ -1,0 +1,36 @@
+= partial :form
+%table.tall.shaded{:style => "width:50%;"}
+  %tr
+    %th
+    %th
+      Number of Centers
+    %th
+      Number of Groups
+  %tr
+    %th
+      At Beginning of period
+    %td
+      = @data[:centers_count_at_beginning_of_date_range]
+    %td
+      = @data[:client_groups_count_at_beginning_of_date_range]
+  %tr
+    %th
+      New joined during period      
+    %td
+      = @data[:centers_created_in_date_range]
+    %td
+      = @data[:client_groups_created_in_date_range]
+  %tr
+    %th
+      Closed during period
+    %td
+      = @data[:centers_closed_during_date_range]
+    %td
+      = @data[:client_groups_closed_during_date_range]
+  %tr
+    %th
+      At period end
+    %td
+      = @data[:centers_count_at_end_of_date_range]
+    %td
+      = @data[:client_groups_count_at_end_of_date_range]
