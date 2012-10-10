@@ -13,6 +13,8 @@ class Ledgers < Application
     raise NotFound unless @ledger
     @date = Date.today
     @date = Date.parse(params[:date]) unless params[:date].blank?
+    @cost_center_id = params[:cost_center_id]
+    @vouchers = @ledger.get_vouchers(@date, @cost_center_id)
     display @ledger
   end
 

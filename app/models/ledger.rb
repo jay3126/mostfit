@@ -22,6 +22,7 @@ class Ledger
 
   has n, :ledger_postings
   has n, :posting_rules
+  has n, :vouchers, :through => :ledger_postings
   belongs_to :account_group, :nullable => true
   belongs_to :accounts_chart
   belongs_to :ledger_classification, :nullable => true
@@ -32,28 +33,39 @@ class Ledger
   validates_present :name, :account_type, :open_on, :opening_balance_amount, :opening_balance_currency, :opening_balance_effect
 
   # Returns the opening balance, and the date on which such opening balance was set for the account
-  def opening_balance_and_date
+  def opening_balance_and_date(cost_center_id = nil)
     [LedgerBalance.to_balance_obj(opening_balance_amount, opening_balance_currency, opening_balance_effect), open_on]
   end
   
   # Returns the balance for the ledger on a specified date
   # If such date is before the date that the account is 'open', the balance is nil
-  def balance(on_date = Date.today)
+  def balance(on_date = Date.today, cost_center_id = nil)
     opening_balance, open_date = opening_balance_and_date
+    cost_center_postings = []
     return nil if on_date < open_date
     
     postings = Voucher.get_postings(self, on_date)
-    LedgerBalance.add_balances(opening_balance, *postings)
+    if cost_center_id.blank?
+      cost_center_postings = postings
+    else
+      biz_location = CostCenter.get(cost_center_id).biz_location
+      biz_location_id = biz_location.blank? ? nil : biz_location.id
+      postings.group_by{|posting| posting.voucher}.each do |voucher, postings|
+        cost_center_postings << postings if !postings.blank? && postings.map(&:accounted_at).include?(biz_location_id)
+      end
+      cost_center_postings.flatten!
+    end
+    LedgerBalance.add_balances(opening_balance, *cost_center_postings)
   end
 
   # Returns the opening balance on the ledger on a given date
   # The opening balance is the balance computed on the ledger before any new entries have been posted to it on the date
-  def opening_balance(on_date = Date.today)
+  def opening_balance(on_date = Date.today, cost_center_id = nil)
     opening_balance, open_date = opening_balance_and_date
     return nil if on_date < open_date
     return opening_balance if on_date == open_date
     previous_day = on_date - 1
-    balance(previous_day)
+    balance(previous_day, cost_center_id)
   end
 
   # Given a hash of accounts (such as one read from a .yml configuration file), this method creates a basic set of ledgers
@@ -74,7 +86,7 @@ class Ledger
       type_sym = type.to_sym
       opening_balance_effect = DEFAULT_EFFECTS_BY_TYPE[type_sym]
       ledgers.each { |account_name|
-        Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, 
+        Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, :manual_voucher_permitted => true,
           :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart)
       }
     }
@@ -133,6 +145,20 @@ class Ledger
     name = "#{ledger_classification} #{counterparty_type}: #{counterparty_id}"
     name += " for #{product_type}: #{product_id}" if (product_type and product_id)
     name
+  end
+
+  def get_vouchers(till_date = Date.today, cost_center_id = nil)
+    ledger_vouchers = []
+    if cost_center_id.blank?
+      ledger_vouchers = self.vouchers.all(:effective_on.lte => till_date)
+    else
+      biz_location    = CostCenter.get(cost_center_id).biz_location
+      biz_location_id = biz_location.blank? ? nil : biz_location.id
+      self.ledger_postings.group_by{|posting| posting.voucher}.each do |voucher, postings|
+        ledger_vouchers << voucher if voucher.effective_on <= till_date && !postings.blank? && postings.map(&:accounted_at).include?(biz_location_id)
+      end
+    end
+    ledger_vouchers.flatten.blank? ? ledger_vouchers.flatten : ledger_vouchers.flatten.compact
   end
 
 end

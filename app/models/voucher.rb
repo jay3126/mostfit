@@ -28,6 +28,15 @@ class Voucher
   def performed_at_location; BizLocation.get(self.performed_at); end
   def accounted_at_location; BizLocation.get(self.accounted_at); end
 
+  def cost_center?(cost_center_id)
+    if cost_center_id.blank?
+      return false
+    else
+      cost_center =CostCenter.get(cost_center_id)
+      self.ledger_postings.map(&:accounted_at).include?(cost_center.biz_location_id)
+    end
+  end
+
   def manual_voucher_permitted?
     return true unless self.generated_mode == MANUAL_VOUCHER
     self.ledger_postings.any? {|posting| (not (posting.ledger.manual_voucher_permitted?))} ? [false, "One or more ledgers do not permit manual vouchers"] :

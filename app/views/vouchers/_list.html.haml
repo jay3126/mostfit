@@ -34,8 +34,9 @@
             %td{:rowspan => postings_count}
               = voucher.narration
             %td
-              - cost_center = p.accounted_at_location.cost_center
-              = cost_center.blank? ? '' : cost_center.name
+              - biz_location = p.accounted_at_location
+              - cost_center = biz_location.blank? ? CostCenter.first : biz_location.cost_center
+              = cost_center.blank? ? '-' : cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?
             %td
@@ -46,7 +47,8 @@
         - else
           %tr
             %td
-              - cost_center = p.accounted_at_location.cost_center
+              - biz_location = p.accounted_at_location
+              - cost_center = biz_location.blank? ? CostCenter.first : biz_location.cost_center
               = cost_center.blank? ? '' : cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?

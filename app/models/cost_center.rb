@@ -39,7 +39,7 @@ class CostCenter
     biz_location = self.biz_location
     if biz_location.blank?
       all_ledgers = Ledger.all
-      all_ledgers = all_ledgers.select{|l| !l.ledger_postings.blank?}
+      all_ledgers = all_ledgers.select{|l|  !l.ledger_postings.blank?}
     else
       child_locations = LocationLink.all_children(biz_location) << biz_location
       centers = child_locations.select{|l| l.location_level.level == 1}.uniq
@@ -55,12 +55,12 @@ class CostCenter
       end
       all_ledgers = ledger_postings.blank? ? [] : ledger_postings.map(&:ledger).uniq
     end
-    all_ledgers = all_ledgers.select{|s| s.created_at <= till_date}
+    all_ledgers = all_ledgers.select{|s| Date.parse(s.created_at.to_s) <= till_date && !s.vouchers.select{|v| v.cost_center?(self.id)}.blank?}
     unless all_ledgers.blank?
       currency_in_use = all_ledgers.first.balance(Date.today).currency
       zero_balance    = LedgerBalance.zero_debit_balance(currency_in_use)
       all_ledgers.group_by{|l| [l.account_type]}.each do |account_type, ledgers|
-        account_type_balance[account_type.first] = ledgers.inject(zero_balance) { |sum, ledger| sum + ledger.balance(Date.today) }
+        account_type_balance[account_type.first] = ledgers.inject(zero_balance) { |sum, ledger| sum + ledger.balance(Date.today, self.id) }
       end
     end
     return all_ledgers, account_type_balance

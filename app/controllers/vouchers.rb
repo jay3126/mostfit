@@ -45,8 +45,9 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(credit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      accounted_at = CostCenter.get(credit_posting["cost_center_id"].to_i).biz_location.id rescue nil
-      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger, accounted_at)
+      credit_biz_location = CostCenter.get(credit_posting["cost_center_id"].to_i).biz_location
+      credit_accounted_at = credit_biz_location.blank? ? nil : credit_biz_location.id
+      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger, credit_accounted_at)
     end
     debit_accounts = params['debit_accounts']
     debit_accounts.each do |debit_posting|
@@ -54,8 +55,9 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(debit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      accounted_at = CostCenter.get(debit_posting["cost_center_id"].to_i).biz_location.id rescue nil
-      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger, accounted_at)
+      debit_biz_location = CostCenter.get(debit_posting["cost_center_id"].to_i).biz_location
+      debit_accounted_at = debit_biz_location.blank? ? nil : debit_biz_location.id
+      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger, debit_accounted_at)
     end
     accounting_facade = AccountingFacade.new(session.user)
 
@@ -64,7 +66,9 @@ class Vouchers < Application
       if params["form_submit"] == "Create and Continue"
         redirect url(:controller => "vouchers", :action => "new"), :message => {:notice => "Voucher was successfully created"}
       else
-        redirect resource(@voucher), :message => {:notice => "Voucher was successfully created"}
+        ledger = @voucher.ledger_postings.first.ledger
+        cost_center_id = params['credit_accounts'].first["cost_center_id"]
+        redirect resource(ledger, :cost_center_id => cost_center_id), :message => {:notice => "Voucher was successfully created"}
       end
     else
       message[:error] = "Voucher failed to be created"

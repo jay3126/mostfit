@@ -16,12 +16,12 @@ class AccountingFacade < StandardFacade
     book_keeper.get_ledger(by_ledger_id)
   end
 
-  def get_ledger_opening_balance_and_date(by_ledger_id)
-    book_keeper.get_ledger_opening_balance_and_date(by_ledger_id)
+  def get_ledger_opening_balance_and_date(by_ledger_id, cost_center_id = nil)
+    book_keeper.get_ledger_opening_balance_and_date(by_ledger_id, cost_center_id)
   end
 
-  def get_current_ledger_balance(by_ledger_id)
-    book_keeper.get_current_ledger_balance(by_ledger_id)
+  def get_current_ledger_balance(by_ledger_id, cost_center_id = nil)
+    book_keeper.get_current_ledger_balance(by_ledger_id, cost_center_id)
   end
 
   def get_historical_ledger_balance(by_ledger_id, on_date)

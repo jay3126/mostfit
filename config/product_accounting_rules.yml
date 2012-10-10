@@ -53,9 +53,3 @@ loan_fee_receipt:
     total_received: customer_cash
   credit:
     total_received: customer_loan_fee_receipt
-loan_due_generation:
-  debit:
-    total_received: customer_cash
-  credit:
-    principal_received: customer_loan_due_principal_receipt
-    interest_received: customer_loan_due_interest_receipt

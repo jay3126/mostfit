@@ -129,20 +129,20 @@ module BookKeeper
     Ledger.get(by_ledger_id)
   end
 
-  def get_ledger_opening_balance_and_date(by_ledger_id)
+  def get_ledger_opening_balance_and_date(by_ledger_id, cost_center_id = nil)
     ledger = get_ledger(by_ledger_id)
     raise Errors::DataMissingError, "Unable to locate ledger by ID: #{by_ledger_id}" unless ledger
-    ledger.opening_balance_and_date
+    ledger.opening_balance_and_date(cost_center_id = nil)
   end
 
-  def get_current_ledger_balance(by_ledger_id)
-    get_historical_ledger_balance(by_ledger_id, Date.today)
+  def get_current_ledger_balance(by_ledger_id, cost_center_id = nil)
+    get_historical_ledger_balance(by_ledger_id, Date.today, cost_center_id)
   end
 
-  def get_historical_ledger_balance(by_ledger_id, on_date)
+  def get_historical_ledger_balance(by_ledger_id, on_date, cost_center_id = nil)
     ledger = get_ledger(by_ledger_id)
     raise Errors::DataMissingError, "Unable to locate ledger by ID: #{by_ledger_id}" unless ledger
-    ledger.balance(on_date)
+    ledger.balance(on_date, cost_center_id)
   end
 
 end

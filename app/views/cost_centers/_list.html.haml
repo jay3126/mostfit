@@ -15,7 +15,7 @@
             - ledgers.each do |ledger|
               %tr
                 %td
-                  = link_to_with_rights "#{ledger.name}(#{ledger.balance})", resource(ledger)
+                  = link_to_with_rights "#{ledger.name}(#{ledger.balance(Date.today, @cost_center.id)})", resource(ledger, :cost_center_id => @cost_center.id)
           - else
             %tr
               %td
