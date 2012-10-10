@@ -24,11 +24,18 @@
       = text_field :code, :size => 10
       %br/
       %span.greytext a two letter unique code for the group
-  %tr
-    %th
-      Creation Date:
-    %td
-      = date_select_for @client_group, :creation_date, :max_date => Date.today
+  - if @client_group.new?
+    %tr
+      %th
+        Creation Date:
+      %td
+        = date_select 'client_group[creation_date]', Date.today, {:id => 'creation_date'}
+  - else
+    %tr
+      %th
+        Creation Date:
+      %td
+        = date_select 'client_group[creation_date]', @client_group.creation_date, {:id => 'creation_date'}
   %tr
     %th
       Maximum clients:
