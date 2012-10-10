@@ -1,5 +1,7 @@
 %h2= "Checklist Filled  by #{@filler.name}"
-
+-#- unless message[:error].blank?
+-#  .error
+-#    = message[:error]
 -if @checklist.checklist_type.is_pa_checklist?
   %table.dataTable.report.weeksheet.nojs
     %tr

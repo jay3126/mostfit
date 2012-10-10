@@ -2,6 +2,10 @@
 - loan_file = LoanFile.get(loan_file_id)
 - no_of_loan_applications = loan_file.loan_applications.size
 
+- unless message[:error].blank?
+  .error
+    = message[:error]
+
 %script{:type => "text/javascript"}
   $(function(){
   ("select").datepicker();
@@ -10,7 +14,7 @@
 
 .shaded
   #form_section
-    = form(:action => url(:checklister_slice_edit_checklist_data) ) do
+    = form(:action => url(:checklister_slice_edit_checklist_data, :checklist_id => @checklist.id) ) do
       %table.form{:style => "width:100%;"}
       %p
         -count=1
@@ -86,7 +90,7 @@
                         %td
                           -#=check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:disabled=>false
                           -#- debugger
-                          =check_box :name=>"checkboxpoint_option_filling_#{option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.id}".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
+                          =check_box :name=>"checkboxpoint_option_fillings[checkboxpoint_option_filling_#{option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.id}]".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
 
 
                     -if !free_text.nil?
@@ -102,11 +106,11 @@
                         -@comment=free_text_filling.comment
                       -if free_text.name.downcase=="date"
                         %td
-                          =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                          =text_field :name=>"free_text_fillings_t2[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>@comment,:disabled=>false
                       -else
                         - (1).times do |f|
                           %td
-                            =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                            =text_field :name=>"free_text_fillings_t2[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>@comment,:disabled=>false
                 -if !dropdownpoint.nil?
                   %td
                     =" #{dropdownpoint.name}"
@@ -144,14 +148,14 @@
                       -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
                       -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? 'checked' : nil,:disabled=>true
                       - if checkpoint_filling.status?
-                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}",:value => 1, :checked => checkpoint_filling.status?
+                        = radio_button :name => "checkpoint_fillings[checkpoint_filling_#{checkpoint_filling.id}]",:value => 1, :checked => checkpoint_filling.status?
                         Yes
-                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}", :value => 0
+                        = radio_button :name => "checkpoint_fillings[checkpoint_filling_#{checkpoint_filling.id}]", :value => 0
                         No
                       - else
-                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}",:value => 1
+                        = radio_button :name => "checkpoint_fillings[checkpoint_filling_#{checkpoint_filling.id}]",:value => 1
                         Yes
-                        = radio_button :name => "checkpoint_filling_#{checkpoint_filling.id}", :value => 0, :checked => true
+                        = radio_button :name => "checkpoint_fillings[checkpoint_filling_#{checkpoint_filling.id}]", :value => 0, :checked => true
                         No
                 -if !checkboxpoint.nil?
                   %td
@@ -175,23 +179,23 @@
                   -if free_text.name.downcase=="date"
                     %td
                       -#- date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
-                      = date_select "free_text_filling_#{free_text_filling.id}".to_sym, @comment, :max_date => Date.today
+                      = date_select "free_text_fillings_t1n3[free_text_filling_#{free_text_filling.id}]".to_sym, @comment, :max_date => Date.today
                       -#=text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>false
                   -else
                     %td
-                      =text_field :name=>"free_text_filling_#{free_text_filling.id}".to_sym,:value=>@comment,:disabled=>false
+                      =text_field :name=>"free_text_fillings_t1n3[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>@comment,:disabled=>false
                 -if !dropdownpoint.nil?
                   %td
                     =" #{dropdownpoint.name}"
                   %td
                     =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
                     -#= select :name => "dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id, :dropdownpoint_id=>@dropdownpoint.id)
-                    = select :name => "dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+                    = select :name => "dropdownpoint_fillings[dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}]".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|x.name}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
 
               -count=count+1
 
         %p
-          = check_box :name => "result_status", :boolean => true, :checked => false
+          = check_box :name => "result_status", :value => @response.id, :checked => false
           Cleared?
           %br
           = submit "Update", :class=>"greenButton"
