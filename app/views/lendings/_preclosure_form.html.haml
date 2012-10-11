@@ -11,6 +11,15 @@
   = hidden_field :name => "payment_towards", :value => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
   = hidden_field :name => "product_action", :value => Constants::Transaction::LOAN_PRECLOSURE
   = hidden_field :name => "effective_on", :value => preclose_on_date
+  - advance_amount = @lending.current_advance_available
+  - loan_principal = @lending.actual_principal_outstanding
+  - advance_principal = loan_principal >= advance_amount ? advance_amount : loan_principal
+  - advance_interest = loan_principal < advance_amount ? advance_amount-loan_principal : MoneyManager.default_zero_money
+  - actual_principal = loan_principal < advance_amount ? MoneyManager.default_zero_money : loan_principal-advance_amount
+  - from_date = @lending.most_recent_payment_transaction_on_date
+  - to_date = Date.parse(preclose_on_date)
+  - loan_interest = @lending.interest_for_preclose(to_date)
+  - acutal_interest = loan_interest < advance_interest ? advance_interest : loan_interest-advance_interest
   %table.tall.form
     %tr
       %th
@@ -19,9 +28,16 @@
         = preclose_on_date
     %tr
       %th
+        Advance Balance
+      %td
+        = advance_amount
+    %tr
+      %th
         Principal due
       %td
-        = text_field :name => "specific_principal_amount", :value => @lending.actual_principal_outstanding.to_s, :readonly => true, :class => 'weeksheet_total'
+        = text_field :name => "specific_principal_amount", :value => actual_principal.to_s, :readonly => true, :class => 'weeksheet_total'
+        %span.greytext
+          = "-" + advance_principal.to_s + '(advance)'
     %tr
       %th
         Interest due
@@ -31,7 +47,7 @@
         - actual_interest = @lending.interest_for_preclose(to_date)
         = text_field :name => "specific_interest_amount", :value => actual_interest, :class => 'weeksheet_total', :onkeyup => "update_total_amount('INR');"
         %span.greytext
-          = actual_interest
+          = "-" + advance_interest.to_s + '(advance)'
     %tr
       %th
         Preclosure penalty
@@ -57,7 +73,7 @@
         %b= "Total:"
       %td
         #weeksheet_total_amount
-          %b= @lending.actual_principal_outstanding + actual_interest
+          %b= advance_amount+actual_principal+acutal_interest
     %tr
       %td
         = submit 'Preclose', :class => "greenButton"

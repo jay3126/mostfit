@@ -652,7 +652,7 @@ class Lending
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################
 
-  def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil, fee_instance_id = nil)
+  def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil, fee_instance_id = nil, adjust_complete_advance = false)
     is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
 
     is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
@@ -669,6 +669,7 @@ class Lending
     end
 
     allocation = nil
+    @adjust_complete_advance = adjust_complete_advance
     case loan_action
     when LOAN_DISBURSEMENT then allocation = disburse(payment_transaction)
     when LOAN_REPAYMENT then allocation = repay(payment_transaction)
@@ -971,29 +972,36 @@ class Lending
     end
 
     #TODO handle scenario where repayment is received between schedule dates
+    if @adjust_complete_advance == true
+      principal_due = self.actual_principal_outstanding
+      interest = total_amount >= principal_due ? total_amount-principal_due : zero_money_amount
+      principal = total_amount >= principal_due ? total_amount-interest : total_amount
+      resulting_allocation[PRINCIPAL_RECEIVED] = principal
+      resulting_allocation[INTEREST_RECEIVED]  = interest
+      resulting_allocation[ADVANCE_ADJUSTED] = total_amount
+    else
+      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) : self.actual_total_due(on_date)
+       
+      only_principal_and_interest = [_actual_total_due, total_amount].min
 
-    _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) :
-      self.actual_total_due(on_date)
-    only_principal_and_interest = [_actual_total_due, total_amount].min
+      advance_to_allocate = zero_money_amount
+      unless adjust_advance
+        advance_to_allocate = (total_amount > only_principal_and_interest) ?
+          (total_amount - only_principal_and_interest) : zero_money_amount
+      end
 
-    advance_to_allocate = zero_money_amount
-    unless adjust_advance
-      advance_to_allocate = (total_amount > only_principal_and_interest) ?
-        (total_amount - only_principal_and_interest) : zero_money_amount
-    end
+      fresh_allocation = allocate_principal_and_interest(only_principal_and_interest, on_date)
 
-    fresh_allocation = allocate_principal_and_interest(only_principal_and_interest, on_date)
+      resulting_allocation[PRINCIPAL_RECEIVED] = fresh_allocation[:principal]
+      resulting_allocation[INTEREST_RECEIVED]  = fresh_allocation[:interest]
+      total_principal_and_interest_allocated   = fresh_allocation[:principal] + fresh_allocation[:interest]
 
-    resulting_allocation[PRINCIPAL_RECEIVED] = fresh_allocation[:principal]
-    resulting_allocation[INTEREST_RECEIVED]  = fresh_allocation[:interest]
-    total_principal_and_interest_allocated   = fresh_allocation[:principal] + fresh_allocation[:interest]
-
-    advance_to_allocate += fresh_allocation[:amount_not_allocated] unless adjust_advance
-    resulting_allocation[ADVANCE_RECEIVED] = advance_to_allocate
+      advance_to_allocate += fresh_allocation[:amount_not_allocated] unless adjust_advance
+      resulting_allocation[ADVANCE_RECEIVED] = advance_to_allocate
     
-    advance_adjusted = adjust_advance ? total_principal_and_interest_allocated : zero_money_amount
-    resulting_allocation[ADVANCE_ADJUSTED] = advance_adjusted
-
+      advance_adjusted = adjust_advance ? total_principal_and_interest_allocated : zero_money_amount
+      resulting_allocation[ADVANCE_ADJUSTED] = advance_adjusted
+    end
     Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
   end
 

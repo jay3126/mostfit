@@ -94,8 +94,8 @@ class LoanManager
     payment_on_loan.is_payment_permitted?(payment_transaction)
   end
 
-  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
-    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id, adjust_complete_advance =false)
+    get_loan(on_loan_id).allocate_payment(payment_transaction, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id, adjust_complete_advance)
   end
 
   def adjust_advance(on_date, on_loan_id, performed_by_id, using_payment_facade)
@@ -123,4 +123,22 @@ class LoanManager
     using_payment_facade.record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
   end
 
+  def adjust_advance_for_perclose(on_date, on_loan_id, performed_by_id, using_payment_facade)
+    loan = get_loan(on_loan_id)
+    advance_balance = loan.current_advance_available
+    raise Errors::BusinessValidationError, "Advance balance is not available on the loan on the date: #{on_date}" unless (advance_balance > loan.zero_money_amount)
+
+    receipt_type = Constants::Transaction::CONTRA
+    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT
+    on_product_type = Constants::Products::LENDING
+    on_product_id   = on_loan_id
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+    performed_at = (loan.administered_at(on_date)).id
+    accounted_at = (loan.accounted_at(on_date)).id
+    performed_by = performed_by_id
+    effective_on = on_date
+    product_action = Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT
+
+    using_payment_facade.record_adjust_advance_payment(advance_balance, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, true)
+  end
 end
