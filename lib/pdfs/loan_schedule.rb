@@ -240,11 +240,104 @@ module Pdf
       return pdf
     end
 
+    def generate_approve_loans_sheet_pdf(user_id, date = Date.today)
+      date = Date.parse(date.to_s) if date.class != Date
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
+      meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
+      lendings        = location_facade.get_loans_administered(self.id, date).compact
+      raise ArgumentError,"No loans exists for generate pdf" if lendings.blank?
+      folder   = File.join(Merb.root, "doc", "pdfs", "company","centers","#{self.name}")
+      FileUtils.mkdir_p(folder)
+      filename = File.join(folder, "approve_loans_#{self.name}_#{Time.now}.pdf")
+      pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
+      pdf.select_font "Times-Roman"
+      pdf.info.title = "approve_loans_#{self.name}_#{Time.now}"
+      pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
+      pdf.text "Approved Loans For #{self.name} on #{date}", :font_size => 20, :justification => :center
+      pdf.text("\n")
+      lendings            = lendings.select{|lending| lending.is_approved? }
+      location_manage     = location_facade.location_managed_by_staff(self.id, date)
+      staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
+      meeting             = meeting_facade.get_meeting(self, date)
+      meeting_status      = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+      table1              = PDF::SimpleTable.new
+      table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{self.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{self.name}"},
+        {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
+        {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{self.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"},
+      ]
+
+      table1.column_order  = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
+      table1.show_lines    = :none
+      table1.shade_rows    = :none
+      table1.show_headings = false
+      table1.shade_headings = true
+      table1.orientation   = :center
+      table1.position      = :center
+      table1.heading_font_size = 16
+      table1.font_size         = 14
+      table1.header_gap = 20
+      table1.width = 830
+      table1.render_on(pdf)
+      pdf.text("\n")
+      table      = PDF::SimpleTable.new
+      table.data = []
+      tot_amount = MoneyManager.default_zero_money
+      loan_row_count=1
+      if lendings.blank?
+        pdf.text "No Loans are exists on Approve state", :font_size => 20
+      else
+        lendings.each do |lending|
+          installment_due = lending.scheduled_total_due(date)
+          client        = lending.borrower
+          client_name  = client.name unless client.blank?
+          client_group = client.client_group.blank? ? 'Nothing' : client.client_group.name
+          table.data.push({
+              "S. No."        => loan_row_count,
+              "Group"         => client_group,
+              "Customer Name" => client_name,
+              "Loan LAN No."  => lending.lan,
+              "POS"           => '',
+              "Inst. Date"    => '',
+              "Inst. No."     => '',
+              "Overdue"       => '',
+              "Inst. Due"     => installment_due.to_s,
+              "Inst. Paid"    => '',
+              "Attendance"    => ''
+            })
+          loan_row_count += 1
+          tot_amount += installment_due
+        end
+        table.data.push({"Group" => 'Total Amount', "Inst. Due" => tot_amount.to_s})
+        table.column_order      = ["S. No.", "Group", "Loan LAN No.", "Customer Name", "POS", "Inst. No.", "Overdue", "Inst. Due", "Inst. Paid", "Attendance"]
+        table.show_lines        = :all
+        table.show_headings     = true
+        table.shade_rows        = :none
+        table.shade_headings    = true
+        table.orientation       = :center
+        table.position          = :center
+        table.heading_font_size = 16
+        table.font_size         = 12
+        table.header_gap        = 10
+        table.maximum_width     = 830
+        table.columns["Loan LAN No."]  = PDF::SimpleTable::Column.new("Loan LAN No.")
+        table.columns["Customer Name"] = PDF::SimpleTable::Column.new("Customer Name")
+        table.columns["Inst. No."]     = PDF::SimpleTable::Column.new("Inst. No.")
+        table.columns["POS"]           = PDF::SimpleTable::Column.new("POS")
+        table.columns["Loan LAN No."].width  = 120
+        table.columns["Inst. No."].width  = 50
+        table.columns["Customer Name"].width  = 120
+        table.columns["POS"].width  = 80
+        table.render_on(pdf)
+      end
+      pdf.save_as(filename)
+      pdf
+    end
+
     def location_loan_product_receipts_pdf(user_id, on_date)
       location_facade  = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
-      meeting_facade   = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       all_lendings     = location_facade.get_loans_administered(self.id, on_date).compact.select{|l| l.is_outstanding?}
-      lending_products = LendingProduct.all
+      lendings_by_group = all_lendings.group_by{|l| l.lending_product}
+      raise ArgumentError,"No loans exists for generate pdf" if all_lendings.blank?
       pdf              = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
       pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 12, :justification => :left
@@ -277,17 +370,16 @@ module Pdf
       pdf.text("\n")
       count = 1
 
-      if lending_products.count > 0
+      if all_lendings.count > 0
         table      = PDF::SimpleTable.new
         table.data = []
         members    = 0
         tot_amount = MoneyManager.default_zero_money
         lendings   = []
-        lendings_by_group = all_lendings.group_by{|l| l.lending_product}
-        lending_products.each do |lending_product|
+        
+        lendings_by_group.each do |lending_product, lendings|
           product_fee_amount = MoneyManager.default_zero_money
           total_fee_amount   = MoneyManager.default_zero_money
-          lendings           = lendings_by_group[lending_product]
           fee_products       = FeeAdministration.get_lending_fee_products(lending_product)
           fee_instances      = lendings.blank? ? [] : FeeInstance.all_fee_instances_on_loan(lendings.map(&:id))
           product_name       = lending_product.name
