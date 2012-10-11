@@ -125,7 +125,8 @@ module Pdf
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
         pdf.info.title = "due_generation_#{branch.name}_#{Time.now}"
-        pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 24, :justification => :center
+        pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
+        pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
         pdf.text("\n")
 
         create_new_page = false
@@ -142,7 +143,8 @@ module Pdf
             pdf.start_new_page if idx > 0
             table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{branch.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{location.name}"},
               {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
-              {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{location.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"}
+              {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{location.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"},
+              {"col1"=>"<b>Meeting Start Time</b>", "col_s1"=>":", "col2"=>"", "col3"=>"<b>Meeting End Time</b>","col_s2"=>":", "col4"=>""}
             ]
 
             table1.column_order  = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
@@ -169,24 +171,24 @@ module Pdf
                 installment_due = ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
                 overdue_amt = lending.overdue_amount(date)
                 table.data.push({
-                    "S. No."           => loan_row_count,
-                    "Group"            => ws.borrower_group_name,
-                    "Name"             => ws.borrower_name,
-                    "LAN"              => lending.lan,
-                    "POS"              => ws.loan_schedule_principal_outstanding,
-                    "Installment Date" => ws.loan_schedule_date,
-                    "Installment No."  => ws.loan_installment_number,
-                    "Overdue Amount"   => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
-                    "Installment Due"  => installment_due.to_s,
-                    "Installment Paid" => '',
-                    "Attendance"       => ''
+                    "S. No."        => loan_row_count,
+                    "Group"         => ws.borrower_group_name,
+                    "Customer Name" => ws.borrower_name,
+                    "Loan LAN No."  => lending.lan,
+                    "POS"           => ws.loan_schedule_principal_outstanding,
+                    "Inst. Date"    => ws.loan_schedule_date,
+                    "Inst. No."     => ws.loan_installment_number,
+                    "OD"     => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
+                    "Inst. Due"     => installment_due.to_s,
+                    "Inst. Paid"    => '',
+                    "Attendance"    => ''
                   })
                 loan_row_count += 1
                 tot_amount += ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
               end
             end
-            table.data.push({"Group" => 'Total', "Installment Due" => tot_amount.to_s})
-            table.column_order      = ["S. No.", "Group" , "LAN", "Name", "POS", "Installment Date", "Installment No.", "Overdue Amount", "Installment Due", "Installment Paid", "Attendance"]
+            table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
+            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
             table.show_lines        = :all
             table.show_headings     = true
             table.shade_rows        = :none
@@ -197,6 +199,12 @@ module Pdf
             table.font_size         = 12
             table.header_gap        = 10
             table.maximum_width     = 830
+            table.columns["Loan LAN No."]        = PDF::SimpleTable::Column.new("Loan LAN No.")
+            table.columns["Customer Name"]        = PDF::SimpleTable::Column.new("Customer Name")
+            table.columns["Installment No."]     = PDF::SimpleTable::Column.new("Installment No.")
+            table.columns["Loan LAN No."].width  = 215
+            table.columns["Installment No."].width  = 50
+            table.columns["Customer Name"].width  = 120
             table.render_on(pdf)
             idx += 1
           end
