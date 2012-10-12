@@ -297,6 +297,10 @@ class Lending
 
   def counterparty; self.borrower; end
 
+  def borrower_caste; (self.loan_borrower and self.loan_borrower.counterparty and (not self.loan_borrower.counterparty.nil?)) ? self.loan_borrower.counterparty.caste : nil; end
+
+  def borrower_religion; (self.loan_borrower and self.loan_borrower.counterparty and (not self.loan_borrower.counterparty.nil?)) ? self.loan_borrower.counterparty.religion : nil; end
+
   ############
   # Borrower # ends
   ############
