@@ -50,6 +50,7 @@ class Client
   property :claim_document_status,       Enum.send('[]', *CLAIM_DOCUMENTS_STATUS), :default => CLAIM_DOCUMENTS_PENDING
   property :claim_document_recieved_by,  Integer
   property :cliam_document_recieved_on,  Date
+  property :town_classification,           Enum.send('[]', *TOWN_CLASSIFICATION), :nullable => true, :default => DEFAULT_CLASSIFICATION
 
   has n, :simple_insurance_policies
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
