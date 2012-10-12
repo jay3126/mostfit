@@ -95,6 +95,11 @@
       = select :state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => "---", :selected => state_name.downcase
   %tr
     %th
+      Classification
+    %td
+      = select :town_classification, :collection => Constants::Masters::TOWN_CLASSIFICATION.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select town classification"
+  %tr
+    %th
       Pincode
     %td
       = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
