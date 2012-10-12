@@ -1,0 +1,87 @@
+= partial :form
+%h2 Loan Disbursement By Caste
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Caste
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_caste].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:caste_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos].to_s
+          - accumulate_row_values[:total_pos] += values[:total_pos]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos]
+
+%br
+%h2 Loan Disbursement By Religion
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Religion
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_religion].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:religion_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos].to_s
+          - accumulate_row_values[:total_pos] += values[:total_pos]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos]
+
+%br
