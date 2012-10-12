@@ -1,3 +1,8 @@
+:javascript
+  $(document).ready(function() {
+  $('#select_all').change(function() {
+    $('input.checkbox').attr('checked',$(this).attr('checked'))});
+  });
 %h1 Client Movement
 .menu-strip{:style => "width:8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
@@ -13,34 +18,42 @@
       %thead
         %tr
           %th
+            Select All
+            %br
+            = check_box :name => 'select_all'
+          %th
             id
           %th
             Name
           %th
             Effective on
-          %th
-            Move Client
-          %th
-            Staff by
-          %th
-            To Be Moved On
-          %th
-            Location
       - @client_admins.each do |client_admin|
         - client = client_admin.counterparty
         %tr
+          %td{:style => "text-align:center;"}
+            = check_box :name => 'client[move_client_ids][]', :value => client.id
           %td
             = client.id
           %td
             = link_to client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
           %td
             = client_admin.effective_on
-          %td
-            = radio_button :name => "client_id", :value => client.id
-          %td
-            = select :name => "client[#{client.id}][][performed_by]", :collection => StaffMember.all.aggregate(:id,:name)
-          %td
-            = date_select "client[#{client.id}][][effective_on]", client_admin.effective_on+1, {:id => "effective_on_#{client.id}", :min_date => client_admin.effective_on+1}
-          %td
-            = select :name=>"client[#{client.id}][][biz_location]", :collection => @child_locations.collect{|b| [b.id, b.name] }
-    = submit "Save"
+    %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+      %table.form{:style => "text-align:center;width:100%;"}
+        %thead
+          %tr
+            %th
+              Select Center
+            %th
+              = select :name=>"client[biz_location_id]", :collection => @child_locations.collect{|b| [b.id, b.name] }
+            %th
+              To Be Moved On:
+            %td
+              = date_select "move_on_date", get_effective_date
+            %th
+              Performed by:
+            %th
+              - staff_member  = session.user.staff_member
+              = select :name => "client[move_by_staff]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+            %th
+              = submit "Save"

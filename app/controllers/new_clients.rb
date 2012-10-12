@@ -216,38 +216,51 @@ class NewClients < Application
   end
 
   def update_client_location
-    @message        = {}
+    @message        = {:error => [], :notice => []}
+    assign_clients  = []
+    client_params   = params[:client]
     parent_location = params[:parent_biz_location]
     child_location  = params[:child_biz_location]
-    client_id       = params[:client_id]
+    client_ids      = client_params[:move_client_ids]
     effective_date  = params[:effective_date]
-    client_params   = params[:client][client_id].blank? ? [] : params[:client][client_id].first
-    @message        = {:error => "Please select client for assignment"} if client_params.blank?
+    move_date       = params[:move_on_date]
+    by_staff        = client_params[:move_by_staff]
+    recorded_by     = session.user.id
+    move_on_location = client_params[:biz_location_id]
+    @message[:error] << "Please select client for assignment" if client_ids.blank?
+    @message[:error] << "Please select Performed By" if by_staff.blank?
+    @message[:error] << "Date cannot be blank" if move_date.blank?
+    @message[:error] << "Please select Center" if move_on_location.blank?
 
     begin
       if @message[:error].blank?
-        administered_location = BizLocation.get client_params[:biz_location]
-        registered_location   = BizLocation.get parent_location
-        client                = Client.get client_id
-        performed_by          = client_params[:performed_by]
-        effective_on          = client_params[:effective_on]
-        recorded_by           = session.user.id
-        client                = ClientAdministration.assign(administered_location, registered_location, client, performed_by, recorded_by, effective_on)
-        if client.new?
-          @message = {:error => "Client assignment fails."}
-        else
-          @message = {:notice => "Client assignment successfully."}
+        client_ids.each do |client_id|
+          assignment = {}
+          assignment[:administered_at]   = move_on_location
+          assignment[:registered_at]     = parent_location
+          assignment[:counterparty_type] = :client
+          assignment[:counterparty_id]   = client_id
+          assignment[:effective_on]      = move_date
+          assignment[:performed_by]      = by_staff
+          assignment[:recorded_by]       = recorded_by
+          client_assign                  = ClientAdministration.new(assignment)
+          if client_assign.valid?
+            assign_clients << client_assign
+          else
+            @message[:error] << client_assign.errors.first.join("dd").map{|d| "Client #{client_id} :- #{d}"}.join("<br>")
+          end
+        end
+        if @message[:error].blank?
+          assign_clients.each{|assign_client| assign_client.save}
+          @message[:notice] = "Client assignment successfully"
         end
       end
     rescue => ex
       @message = {:error => "An error has occured: #{ex.message}"}
     end
-    
-    if @message[:error].blank?
-      redirect url(:controller => :new_clients, :action => :show, :id => client_id) , :message => @message
-    else
-      redirect url(:controller => :new_clients, :action => :index, :child_location_id => child_location, :parent_location_id => parent_location, :effective_date => effective_date) , :message => @message
-    end
+
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect url(:controller => :new_clients, :action => :index, :child_location_id => child_location, :parent_location_id => parent_location, :effective_date => effective_date) , :message => @message
   end
 
   def client_movement
