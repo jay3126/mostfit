@@ -469,8 +469,10 @@ class Lendings < Application
     if @errors.blank?
       begin
         fee_instances = FeeInstance.unpaid_loan_preclosure_fee_instance(@lending.id)
-        #payment_facade.record_ad_hoc_fee_receipt(fee_money_amount, fee_product, effective_on, @lending, performed_by) unless fee_money_amount.amount == 0
-        payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+        loan_facade.adjust_advance_for_perclose(effective_on, @lending.id) if @lending.current_advance_available > MoneyManager.default_zero_money
+        if total_money_amount > MoneyManager.default_zero_money
+          payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+        end
         fee_instances.each do |fee_instance|
           payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
         end

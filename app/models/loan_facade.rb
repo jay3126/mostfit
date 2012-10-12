@@ -152,12 +152,16 @@ class LoanFacade < StandardFacade
     loan_manager.is_payment_permitted?(payment_transaction)
   end
 
-  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, fee_instance_id = nil)
-    loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
+  def allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil, fee_instance_id = nil, adjust_complete_advance = false)
+    loan_manager.allocate_payment(payment_transaction, on_loan_id, with_loan_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id, adjust_complete_advance)
   end
 
   def adjust_advance(on_date, on_loan_id)
     loan_manager.adjust_advance(on_date, on_loan_id, native_performed_by_id, payment_facade)
+  end
+
+  def adjust_advance_for_perclose(on_date, on_loan_id)
+    loan_manager.adjust_advance_for_perclose(on_date, on_loan_id, native_performed_by_id, payment_facade)
   end
 
   def assign_locations_for_loan(administered_at, accounted_at, to_loan, performed_by, recorded_by, effective_on = Date.today)
