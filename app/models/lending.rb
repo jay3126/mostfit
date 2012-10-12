@@ -301,6 +301,10 @@ class Lending
 
   def borrower_religion; (self.loan_borrower and self.loan_borrower.counterparty and (not self.loan_borrower.counterparty.nil?)) ? self.loan_borrower.counterparty.religion : nil; end
 
+  def borrower_town_classification; (self.loan_borrower and self.loan_borrower.counterparty and (not self.loan_borrower.counterparty.nil?)) ? self.loan_borrower.counterparty.town_classification : nil; end
+
+  def borrower_psl; (self.loan_borrower and self.loan_borrower.counterparty and (not self.loan_borrower.counterparty.nil?) and (not self.loan_borrower.counterparty.priority_sector_list_id.nil?)) ? self.loan_borrower.counterparty.priority_sector_list_id : nil; end
+
   ############
   # Borrower # ends
   ############

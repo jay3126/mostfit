@@ -26,7 +26,8 @@
         %td
           = sl_no += 1
         %td
-          = values[:caste_name]
+          %b
+            = values[:caste_name]
         %td
           = values[:opening_balance]
           - opening_balance_count += values[:opening_balance]
@@ -87,7 +88,8 @@
         %td
           = sl_no += 1
         %td
-          = values[:religion_name]
+          %b
+            = values[:religion_name]
         %td
           = values[:opening_balance]
           - opening_balance_count += values[:opening_balance]
@@ -119,3 +121,315 @@
         = loan_preclosed_during_period_count
       %td
         = client_count_at_end_of_period_count
+
+%br
+%h2 Members By Loan Cycle Number
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Loan Cycle Number
+      %th
+        Opening Balance
+      %th
+        Add: New Loans during period
+      %th
+        Less: Loans matured during period
+      %th
+        Less: Loans closed during period
+      %th
+        Members at period end
+
+  %tbody
+    - sl_no = opening_balance_count = new_loan_count_added_during_period_count = loan_closed_during_period_count = 0
+    - loan_preclosed_during_period_count = client_count_at_end_of_period_count = 0
+    - @data[:members_by_loan_cycle].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:cycle_number]
+        %td
+          = values[:opening_balance]
+          - opening_balance_count += values[:opening_balance]
+        %td
+          = values[:new_loan_count_added_during_period]
+          - new_loan_count_added_during_period_count += values[:new_loan_count_added_during_period]
+        %td
+          = values[:loan_closed_during_period]
+          - loan_closed_during_period_count += values[:loan_closed_during_period]
+        %td
+          = values[:loan_preclosed_during_period]
+          - loan_preclosed_during_period_count += values[:loan_preclosed_during_period]
+        %td
+          = values[:client_count_at_end_of_period]
+          - client_count_at_end_of_period_count += values[:client_count_at_end_of_period]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = opening_balance_count
+      %td
+        = new_loan_count_added_during_period_count
+      %td
+        = loan_closed_during_period_count
+      %td
+        = loan_preclosed_during_period_count
+      %td
+        = client_count_at_end_of_period_count
+
+%br
+%h2 Members By Loan Product
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Loan Product
+      %th
+        Opening Balance
+      %th
+        Add: New Loans during period
+      %th
+        Less: Loans matured during period
+      %th
+        Less: Loans closed during period
+      %th
+        Members at period end
+
+  %tbody
+    - sl_no = opening_balance_count = new_loan_count_added_during_period_count = loan_closed_during_period_count = 0
+    - loan_preclosed_during_period_count = client_count_at_end_of_period_count = 0
+    - @data[:members_by_loan_product].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:loan_product]
+        %td
+          = values[:opening_balance]
+          - opening_balance_count += values[:opening_balance]
+        %td
+          = values[:new_loan_count_added_during_period]
+          - new_loan_count_added_during_period_count += values[:new_loan_count_added_during_period]
+        %td
+          = values[:loan_closed_during_period]
+          - loan_closed_during_period_count += values[:loan_closed_during_period]
+        %td
+          = values[:loan_preclosed_during_period]
+          - loan_preclosed_during_period_count += values[:loan_preclosed_during_period]
+        %td
+          = values[:client_count_at_end_of_period]
+          - client_count_at_end_of_period_count += values[:client_count_at_end_of_period]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = opening_balance_count
+      %td
+        = new_loan_count_added_during_period_count
+      %td
+        = loan_closed_during_period_count
+      %td
+        = loan_preclosed_during_period_count
+      %td
+        = client_count_at_end_of_period_count
+
+%br
+%h2 Members By Branch
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Branch
+      %th
+        Opening Balance
+      %th
+        Add: New Loans during period
+      %th
+        Less: Loans matured during period
+      %th
+        Less: Loans closed during period
+      %th
+        Members at period end
+
+  %tbody
+    - sl_no = opening_balance_count = new_loan_count_added_during_period_count = loan_closed_during_period_count = 0
+    - loan_preclosed_during_period_count = client_count_at_end_of_period_count = 0
+    - @data[:members_by_branch].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:opening_balance]
+          - opening_balance_count += values[:opening_balance]
+        %td
+          = values[:new_loan_count_added_during_period]
+          - new_loan_count_added_during_period_count += values[:new_loan_count_added_during_period]
+        %td
+          = values[:loan_closed_during_period]
+          - loan_closed_during_period_count += values[:loan_closed_during_period]
+        %td
+          = values[:loan_preclosed_during_period]
+          - loan_preclosed_during_period_count += values[:loan_preclosed_during_period]
+        %td
+          = values[:client_count_at_end_of_period]
+          - client_count_at_end_of_period_count += values[:client_count_at_end_of_period]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = opening_balance_count
+      %td
+        = new_loan_count_added_during_period_count
+      %td
+        = loan_closed_during_period_count
+      %td
+        = loan_preclosed_during_period_count
+      %td
+        = client_count_at_end_of_period_count
+
+%br
+%h2 Members By Classification
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Classification
+      %th
+        Opening Balance
+      %th
+        Add: New Loans during period
+      %th
+        Less: Loans matured during period
+      %th
+        Less: Loans closed during period
+      %th
+        Members at period end
+
+  %tbody
+    - sl_no = opening_balance_count = new_loan_count_added_during_period_count = loan_closed_during_period_count = 0
+    - loan_preclosed_during_period_count = client_count_at_end_of_period_count = 0
+    - @data[:members_by_classification].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:classification_name]
+        %td
+          = values[:opening_balance]
+          - opening_balance_count += values[:opening_balance]
+        %td
+          = values[:new_loan_count_added_during_period]
+          - new_loan_count_added_during_period_count += values[:new_loan_count_added_during_period]
+        %td
+          = values[:loan_closed_during_period]
+          - loan_closed_during_period_count += values[:loan_closed_during_period]
+        %td
+          = values[:loan_preclosed_during_period]
+          - loan_preclosed_during_period_count += values[:loan_preclosed_during_period]
+        %td
+          = values[:client_count_at_end_of_period]
+          - client_count_at_end_of_period_count += values[:client_count_at_end_of_period]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = opening_balance_count
+      %td
+        = new_loan_count_added_during_period_count
+      %td
+        = loan_closed_during_period_count
+      %td
+        = loan_preclosed_during_period_count
+      %td
+        = client_count_at_end_of_period_count
+
+%br
+%h2 Members By PSL
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        PSL
+      %th
+        Opening Balance
+      %th
+        Add: New Loans during period
+      %th
+        Less: Loans matured during period
+      %th
+        Less: Loans closed during period
+      %th
+        Members at period end
+
+  %tbody
+    - sl_no = opening_balance_count = new_loan_count_added_during_period_count = loan_closed_during_period_count = 0
+    - loan_preclosed_during_period_count = client_count_at_end_of_period_count = 0
+    - @data[:members_by_psl].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:psl_name]
+        %td
+          = values[:opening_balance]
+          - opening_balance_count += values[:opening_balance]
+        %td
+          = values[:new_loan_count_added_during_period]
+          - new_loan_count_added_during_period_count += values[:new_loan_count_added_during_period]
+        %td
+          = values[:loan_closed_during_period]
+          - loan_closed_during_period_count += values[:loan_closed_during_period]
+        %td
+          = values[:loan_preclosed_during_period]
+          - loan_preclosed_during_period_count += values[:loan_preclosed_during_period]
+        %td
+          = values[:client_count_at_end_of_period]
+          - client_count_at_end_of_period_count += values[:client_count_at_end_of_period]
+
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = opening_balance_count
+      %td
+        = new_loan_count_added_during_period_count
+      %td
+        = loan_closed_during_period_count
+      %td
+        = loan_preclosed_during_period_count
+      %td
+        = client_count_at_end_of_period_count
+
+%br
