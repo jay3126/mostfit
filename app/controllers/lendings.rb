@@ -21,8 +21,10 @@ class Lendings < Application
     @lending_product  = LendingProduct.get params[:lending_product_id]
     @loan_borrower    = Client.get params[:client_id]
     @location         = BizLocation.get params[:biz_location_id] unless params[:biz_location_id].blank?
-    all_clients       = @lending_product.get_clients(get_effective_date, params[:biz_location_id]) if @loan_borrower.blank?
-    @clients          = all_clients.select{|c| client_facade.is_client_active?(c)}.compact
+    if @loan_borrower.blank?
+      all_clients       = @lending_product.get_clients(get_effective_date, params[:biz_location_id])
+      @clients          = all_clients.select{|c| client_facade.is_client_active?(c)}.compact
+    end
     disbursal_date    = @location.blank? ? get_effective_date : @location.center_disbursal_date
     @lending          = @lending_product.lendings.new(:scheduled_disbursal_date => disbursal_date)
     display @lending_product

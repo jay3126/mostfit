@@ -113,11 +113,11 @@ class LendingProduct
     if location_id.blank?
       locations.each{|location| clients << get_client_facade(User.first).get_clients_registered(location.id, on_date)}
     else
-      biz_location = BizLocation.get(location_id)
-      if biz_location.location_level.level == 0
-        clients = get_client_facade(User.first).get_clients_administered(location_id, on_date)
+      location = BizLocation.get(location_id)
+      if location.location_level.level == 0
+        clients = get_client_facade(User.first).get_clients_administered(location.id, on_date)
       else
-        clients = get_client_facade(User.first).get_clients_registered(location_id, on_date)
+        clients = get_client_facade(User.first).get_clients_registered(location.id, on_date)
       end
     end
     clients.flatten.blank? ? [] : clients.flatten.uniq.compact
