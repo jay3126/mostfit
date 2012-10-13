@@ -27,8 +27,8 @@
           = values[:disbursed_loan_count]
           - total_disbursed_loan_count += values[:disbursed_loan_count]
         %td
-          = values[:total_pos].to_s
-          - accumulate_row_values[:total_pos] += values[:total_pos]
+          = values[:total_pos_per_caste].to_s
+          - accumulate_row_values[:total_pos_per_caste] += values[:total_pos_per_caste]
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
@@ -39,7 +39,7 @@
       %td
         = total_disbursed_loan_count
       %td
-        = total_rows[:total_pos]
+        = total_rows[:total_pos_per_caste]
 
 %br
 %h2 Loan Disbursement By Religion
@@ -70,8 +70,8 @@
           = values[:disbursed_loan_count]
           - total_disbursed_loan_count += values[:disbursed_loan_count]
         %td
-          = values[:total_pos].to_s
-          - accumulate_row_values[:total_pos] += values[:total_pos]
+          = values[:total_pos_per_religion].to_s
+          - accumulate_row_values[:total_pos_per_religion] += values[:total_pos_per_religion]
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
@@ -82,6 +82,220 @@
       %td
         = total_disbursed_loan_count
       %td
-        = total_rows[:total_pos]
+        = total_rows[:total_pos_per_religion]
 
+%br
+%h2 Loan Disbursement By Loan Cycle Number
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Loan Cycle Number
+      %th
+        Disbursed Loan Count
+      %th
+        Total Amount Disbursed
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_loan_cycle].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:cycle_number]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_amount_disbursed].to_s
+          - accumulate_row_values[:total_amount_disbursed] += values[:total_amount_disbursed]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_amount_disbursed]
+
+%br
+%h2 Loan Disbursement By Loan Product
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Loan Product
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_loan_product].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:loan_product_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos_per_loan_product].to_s
+          - accumulate_row_values[:total_pos_per_loan_product] += values[:total_pos_per_loan_product]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos_per_loan_product]
+
+%br
+%h2 Loan Disbursement By Branch
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Branch
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_branch].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:branch_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos_per_branch].to_s
+          - accumulate_row_values[:total_pos_per_branch] += values[:total_pos_per_branch]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos_per_branch]
+
+%br
+%h2 Loan Disbursement By Classification
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        Classification
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_classification].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:classification_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos_per_classification].to_s
+          - accumulate_row_values[:total_pos_per_classification] += values[:total_pos_per_classification]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos_per_classification]
+
+%br
+%h2 Loan Disbursement By PSL
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Sl. No.
+      %th
+        PSL
+      %th
+        Disbursed Loan Count
+      %th
+        Total POS
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - sl_no = total_disbursed_loan_count = 0
+    - @data[:loan_disbursement_by_psl].each do |data, values|
+      %tr
+        %td
+          = sl_no += 1
+        %td
+          %b
+            = values[:psl_name]
+        %td
+          = values[:disbursed_loan_count]
+          - total_disbursed_loan_count += values[:disbursed_loan_count]
+        %td
+          = values[:total_pos_per_psl].to_s
+          - accumulate_row_values[:total_pos_per_psl] += values[:total_pos_per_psl]
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+      %td
+        = total_disbursed_loan_count
+      %td
+        = total_rows[:total_pos_per_psl]
 %br
