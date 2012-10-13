@@ -52,6 +52,11 @@
         Preclosure Penality
       %td
         = fee_penalities.map(&:name).join(',') unless fee_penalities.blank?
+    %tr.odd
+      %th.odd
+        Branch
+      %td
+        = @lending_product.get_assign_locations(get_effective_date).join(', ')
 
 %div.tab_container.shaded
   %ul.tabs

@@ -2,6 +2,7 @@
   $(document).ready(function() {
     $('#meeting_schedule').attr('checked', false);
     $('#location_level_selector option:first').attr('selected', true);
+    $('td.assign_products').find('input:checkbox').attr('checked', true);
     $('#meeting_schedule').change(function() {
       jQuery('.meeting_div').toggle();
     });
@@ -17,6 +18,7 @@
   });
 %h1 Edit the details of: #{@biz_location.name}
 = form_for(@biz_location, :action => resource(@biz_location,:update_biz_location)) do
+
   = hidden_field :location_level, :value => @biz_location.location_level.level
   %table.tall.shaded
     %tr
@@ -59,6 +61,19 @@
         Manage On Date
       %td
         = date_select 'on_date', get_effective_date
+    - if @biz_location.location_level.level == 1
+      - lending_products = @biz_location.lending_products
+      - unassign_lending_products = LendingProduct.all - lending_products
+      %tr
+        %th
+          Loan Product
+        %td.assign_products
+          = select :name => 'lending_product_ids', :collection => lending_products, :text_method => :name, :value_method => :id, :prompt => "Select Loan Product ", :class => 'multiple'
+      %tr
+        %th
+          Assign New Loan Product
+        %td
+          = select :name => 'new_lending_product_ids', :collection => unassign_lending_products, :text_method => :name, :value_method => :id, :prompt => "Select Loan Product ", :class => 'multiple'
     - if @biz_location.location_level.level == 0
       %tr{:class => 'center_meeting_div'}
         %td

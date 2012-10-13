@@ -1,7 +1,10 @@
 :javascript
   $(document).ready(function() {
     $('#meeting_schedule').attr('checked', false);
+    $('td').find('span,div').css('width','');
+    $('tr.l_product').find('span').text('Select Loan Product');
     $('#location_level_selector option:first').attr('selected', true);
+    $('tr.l_product').find('input:checkbox').removeAttr('checked');
     $('#meeting_schedule').change(function() {
       jQuery('.meeting_div').toggle();
     });
@@ -9,9 +12,19 @@
       if(jQuery(this).val()=='0'){
         jQuery('.center_meeting_div').show();
         jQuery('.date').show();
+        jQuery('.l_product').hide();
+        jQuery('tr.l_product').find('input:checkbox').removeAttr('checked');
+        jQuery('tr.l_product').find('span').text('Select Loan Product');
+      }else if(jQuery(this).val()=='1'){
+        jQuery('.center_meeting_div').hide();
+        jQuery('.date').hide();
+        jQuery('.l_product').show();
       }else{
         jQuery('.center_meeting_div').hide();
         jQuery('.date').hide();
+        jQuery('.l_product').hide();
+        jQuery('tr.l_product').find('input:checkbox').removeAttr('checked');
+        jQuery('tr.l_product').find('span').text('Select Loan Product');
       }
     });
   });
@@ -27,6 +40,11 @@
         Parent Location
       %td
         = select :name => 'parent_location_id', :collection =>  [], :prompt => "Select Location ", :id => 'parent_selector', :class => 'location'
+    %tr.l_product{:style => 'display:none'}
+      %th
+        Loan Product
+      %td
+        = select :name => 'lending_product_ids', :collection =>  LendingProduct.all, :text_method => :name, :value_method => :id, :prompt => "Select Loan Product ", :class => 'multiple', :style => "width:100%"
     %tr
       %th
         Name

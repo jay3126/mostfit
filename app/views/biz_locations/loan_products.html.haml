@@ -1,16 +1,16 @@
-%h1 Loan Products
+%h1== Loan Products for #{@location.name}
 .menu-strip{:style => "width: 30%;"}
-  = link_to "Add new Loan Product", url(:new_lending_product), :class => 'add grey_button'
+  = link_to "Add new Loan Product", url(:new_lending_product, :biz_location_id => @parent_location.id), :class => 'add grey_button'
   &nbsp;&nbsp;
-  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
-- unless @lending_products.blank?
+  = link_to_with_rights "Back", request.referer, :class => "grey_button"
+- if @lending_products.blank?
+  %h2== No Loan Product Assigned.
+- else
   %table.dataTable.weeksheet{:style => "width:100%"}
     %thead
       %tr
         %td
           Name
-        %td
-          Branch
         %td
           Amount
         %td
@@ -28,8 +28,6 @@
           %td
             = link_to_with_rights lp.name, resource(lp)
           %td
-            = locations.blank? ? '-' : locations.join(', ')
-          %td
             = lp.to_money[:amount]
           %td
             = lp.interest_rate
@@ -38,4 +36,4 @@
           %td
             = lp.tenure
           %td
-            = link_to_with_rights "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}", :biz_location_id => params[:biz_location_id])
+            = link_to_with_rights "Create Loan", resource(:lendings, :new, :lending_product_id => lp.id, :client_id => "#{@client.blank? ? '' : @client.id}", :biz_location_id => @location.id)

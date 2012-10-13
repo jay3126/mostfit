@@ -20,10 +20,9 @@ class Lendings < Application
   def new
     @lending_product  = LendingProduct.get params[:lending_product_id]
     @loan_borrower    = Client.get params[:client_id]
-    @counterparty_ids = ClientAdministration.all.aggregate(:counterparty_id)
     @location         = BizLocation.get params[:biz_location_id] unless params[:biz_location_id].blank?
-    all_clients       = @location.blank? ? Client.all(:id => @counterparty_ids) : client_facade.get_clients_administered(@location.id, get_effective_date)
-    @clients          = all_clients.collect{|c| c if client_facade.is_client_active?(c)}.compact
+    all_clients       = @lending_product.get_clients(get_effective_date, params[:biz_location_id]) if @loan_borrower.blank?
+    @clients          = all_clients.select{|c| client_facade.is_client_active?(c)}.compact
     disbursal_date    = @location.blank? ? get_effective_date : @location.center_disbursal_date
     @lending          = @lending_product.lendings.new(:scheduled_disbursal_date => disbursal_date)
     display @lending_product

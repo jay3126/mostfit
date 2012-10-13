@@ -872,7 +872,7 @@ $(document).ready(function(){
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
-  $("select.multiple").multiSelect();
+  $("select.multiple").multiSelect({selectAllText:jQuery(this).attr('prompt')});
   //Handling targets form
   jQuery('form').live('submit', function(){
     //    return date_validation();

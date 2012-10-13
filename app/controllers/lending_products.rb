@@ -11,6 +11,8 @@ class LendingProducts < Application
   end
 
   def new
+    @location = BizLocation.get(params[:biz_location_id]) unless params[:biz_location_id].blank?
+    @locations = location_facade.all_nominal_branches
     @lending_product = LendingProduct.new
     display @lending_product
   end
@@ -26,6 +28,7 @@ class LendingProducts < Application
     tenure               = params[:lending_product][:tenure]
     interest_rate        = params[:lending_product][:interest_rate]
     repayment_allocation = params[:lending_product][:repayment_allocation_strategy]
+    location_ids         = params[:location_ids]
     insurance_product_id = params[:insurance_product_id]
     fee_product_ids      = params[:fee_product_ids].blank? ? [] : params[:fee_product_ids]
     penalty_fee_ids      = params[:loan_preclosure_penalty_ids].blank? ? [] : params[:loan_preclosure_penalty_ids]
@@ -62,6 +65,9 @@ class LendingProducts < Application
         if lending_product.new?
           @message[:error] = lending_product.error.first.join(', ')
         else
+          location_ids.each do |location_id|
+            lending_product.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => get_effective_date, :performed_by => staff_id, :recorded_by => user_id )
+          end
           @message[:notice] = "Loan Product: '#{@lending_product.name} (Id: #{@lending_product.id})' created successfully"
         end
       rescue => ex

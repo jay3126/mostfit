@@ -22,6 +22,8 @@ class LendingProduct
   has 1, :loan_fee, 'SimpleFeeProduct', :parent_key => [:id], :child_key => [:loan_fee_id]
   has 1, :loan_preclosure_penalty, 'SimpleFeeProduct', :parent_key => [:id], :child_key => [:loan_preclosure_penalty_id]
   has n, :simple_insurance_products
+  has n, :lending_product_locations
+  has n, :biz_locations, :through => :lending_product_locations
 
   validates_is_unique :name
 
@@ -99,6 +101,30 @@ class LendingProduct
   # Return all loan product for particular loan amount
   def self.get_all_loan_product_for_loan_amount(loan_amount)
     LendingProduct.all(:amount => loan_amount)
+  end
+
+  def get_assign_locations(on_date = Date.today)
+    self.lending_product_locations.all(:effective_on.lte => on_date).map(&:biz_location)
+  end
+
+  def get_clients(on_date = Date.toady, location_id = nil)
+    clients = []
+    locations = get_assign_locations(on_date)
+    if location_id.blank?
+      locations.each{|location| clients << get_client_facade(User.first).get_clients_registered(location.id, on_date)}
+    else
+      biz_location = BizLocation.get(location_id)
+      if biz_location.location_level.level == 0
+        clients = get_client_facade(User.first).get_clients_administered(location_id, on_date)
+      else
+        clients = get_client_facade(User.first).get_clients_registered(location_id, on_date)
+      end
+    end
+    clients.flatten.blank? ? [] : clients.flatten.uniq.compact
+  end
+
+  def get_client_facade(user)
+    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, user)
   end
 
 end

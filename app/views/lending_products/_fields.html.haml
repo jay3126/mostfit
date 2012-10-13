@@ -42,7 +42,7 @@
       Currency
     %td
       %span.greytext
-      = select :name => "lending_product[currency]", :collection => Constants::Money::CURRENCIES.map {|currency| [currency]}
+      = select :name => "lending_product[currency]", :collection => [Constants::Money::INR.to_s]
   %tr
     %th
       Repayment frequency
@@ -69,3 +69,13 @@
       Repayment Allocation Strategy
     %td
       = select :repayment_allocation_strategy, :collection => Constants::LoanAmounts::LOAN_REPAYMENT_ALLOCATION_STRATEGIES.map{|las| [las, las.to_s.humanize]}
+  %tr
+    %th
+      Location
+    %td
+      %span.greytext
+      - if @location.blank?
+        = select :name => "location_ids", :collection => @locations, :text_method => :name, :value_method => :id, :selected => @location.id, :prompt => "Select Location", :class => 'multiple'
+      - else
+        = @location.name
+        = hidden_field :name => "location_ids[]", :value => @location.id

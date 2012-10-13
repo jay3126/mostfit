@@ -25,6 +25,8 @@ class BizLocation
   has n, :client_groups
   has n, :bank_branches
   has n, :eod_processes
+  has n, :lending_product_locations
+  has n, :lending_products, :through => :lending_product_locations
 
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name

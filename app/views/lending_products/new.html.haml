@@ -1,8 +1,10 @@
 - if @message && !@message[:error].blank?
   .error
     = @message[:error]
-%h1 Loan Product
-
+- if @location.blank?
+  %h1 Loan Product
+- else
+  %h1== Loan Product For #{@location.name}
 = form_for(@lending_product, :action => :create) do
   = partial :fields
   = submit "Create"
@@ -11,3 +13,4 @@
     Or
   &nbsp;&nbsp;
   = link_to_with_rights "Cancel", resource(:lending_products), :class => "grey_button"
+%br

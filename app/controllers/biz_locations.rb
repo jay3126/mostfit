@@ -28,6 +28,8 @@ class BizLocations < Application
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
     b_managed_by     = params[:managed_by]
+    l_product_ids    = params[:lending_product_ids]||[]
+    new_product_ids  = params[:new_lending_product_ids]||[]
     b_meeting        = params[:meeting_schedule]
     b_meeting_number = params[:meeting][:meeting_numbers].to_i
     b_frequency      = params[:meeting][:meeting_frequency]
@@ -67,6 +69,14 @@ class BizLocations < Application
             msi = MeetingScheduleInfo.new(b_frequency, disbursal_date, b_begins_hours, b_begins_minutes)
             meeting_facade.setup_meeting_schedule(@biz_location, msi, b_meeting_number)
           end
+          if b_level == '1'
+            @biz_location.lending_product_locations.each do |product|
+              product.destroy if l_product_ids.blank? || !l_product_ids.include?(product.lending_product_id)
+            end
+            new_product_ids.each do |product_id|
+              @biz_location.lending_product_locations.first_or_create(:lending_product_id => product_id, :effective_on => b_creation_date, :performed_by => performed_by.id, :recorded_by => recorded_by.id )
+            end
+          end
           message = {:notice => "#{@biz_location.location_level.name} : '#{@biz_location.name} (Id: #{@biz_location.id})' updated successfully"}
         else
           message = {:error => @biz_location.errors.first.join(', ')}
@@ -101,6 +111,7 @@ class BizLocations < Application
     b_address          = params[:biz_location][:biz_location_address]
     b_disbursal_date   = params[:biz_location][:center_disbursal_date].blank? ? '' : Date.parse(params[:biz_location][:center_disbursal_date])
     parent_location_id = params[:parent_location_id]
+    loan_product_ids   = params[:lending_product_ids]
     b_originator_by    = params[:biz_location][:originator_by]
     b_managed_by       = params[:managed_by]
     b_meeting          = params[:meeting_schedule]
@@ -143,6 +154,11 @@ class BizLocations < Application
               LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
             else
+              if b_level == '1'
+                loan_product_ids.each do |product_id|
+                  biz_location.lending_product_locations.first_or_create(:lending_product_id => product_id, :effective_on => b_creation_date, :performed_by => performed_by.id, :recorded_by => recorded_by.id )
+                end
+              end
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})' successfully created"
             end
             message = {:notice => msg}
@@ -273,6 +289,7 @@ class BizLocations < Application
     b_managed_by     = params[:managed_by]
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
+    loan_product_ids = params[:lending_product_ids]
     b_meeting        = params[:meeting_schedule]
     b_meeting_number = params[:meeting][:meeting_numbers].to_i
     b_frequency      = params[:meeting][:meeting_frequency]
@@ -312,6 +329,11 @@ class BizLocations < Application
             location_facade.create_center_cycle(b_creation_date, child_location.id)
             msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"
           else
+            if b_level == '1'
+              loan_product_ids.each do |product_id|
+                child_location.lending_product_locations.first_or_create(:lending_product_id => product_id, :effective_on => b_creation_date, :performed_by => performed_by.id, :recorded_by => recorded_by.id )
+              end
+            end
             msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created"
           end
           message = {:notice => msg}
@@ -324,7 +346,14 @@ class BizLocations < Application
     #REDIRECT/RENDER
     message[:error].blank? ? message.delete(:error) : message.delete(:notice)
     redirect url(:controller => :user_locations, :action => :show, :id => @parent_location.id), :message => message
+  end
 
+  def loan_products
+    @location = BizLocation.get(params[:id])
+    @parent_location = LocationLink.get_parent(@location, get_effective_date)
+    @client = Client.get(params[:client_id]) unless params[:client_id].blank?
+    @lending_products = @parent_location.lending_products
+    display @lending_products
   end
 
 end

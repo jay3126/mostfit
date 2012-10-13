@@ -1,5 +1,6 @@
 :javascript
   $(document).ready(function() {
+    $("select.multiple").multiSelect({selectAllText:jQuery(this).attr('prompt')});
     $('#meeting_schedule').change(function() {
       jQuery('.meeting_div').toggle();
     });
@@ -44,6 +45,12 @@
           %td
             Create Meeting Schedule
             = check_box :name => 'meeting_schedule', :value => true, :id => 'meeting_schedule'
+      - if @child_location_level.level == 1
+        %tr
+          %th
+            Loan Product
+          %td
+            = select :name => 'lending_product_ids', :collection =>  LendingProduct.all, :text_method => :name, :value_method => :id, :prompt => "Select Loan Product ", :class => 'multiple'
     %div{:style => "display:table-cell; width:42%;"}
       %table.tall
         %tr{:style => "display:none", :class => 'meeting_div'}
