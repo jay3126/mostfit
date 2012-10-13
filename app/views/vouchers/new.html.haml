@@ -6,5 +6,7 @@
       = partial :fields
       %p
         = submit "Create"
+        &nbsp;&nbsp;
         = submit "Create and Continue"
-    = link_to_with_rights 'Back', url(:vouchers)
+        &nbsp;&nbsp;
+        = link_to_with_rights 'Cancel', url(:vouchers), :class => "grey_button"

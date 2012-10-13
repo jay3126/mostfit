@@ -1,5 +1,8 @@
-%h1
-  Accounting Categories and Rules
+%h1 Accounting Categories and Rules
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+
 %table.shaded
   - @accounting_rules.each do |rule|
     %tr

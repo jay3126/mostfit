@@ -1,4 +1,8 @@
 %h1== EOD Process on #{get_effective_date}
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+
 = form_for(:book_keepings, :action => resource(:book_keepings, :perform_eod_process), :method => :get) do
   %table.dataTable.weeksheet.report.nojs
     %thead
@@ -28,6 +32,6 @@
             = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount
           - else
             = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true
+  %br
   = submit 'Start'
-
-
+%br

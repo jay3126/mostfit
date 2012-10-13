@@ -9,6 +9,11 @@
             = select :name => "accounts_chart_id", :collection => AccountsChart.all, :selected => params[:accounts_chart_id], :text_method => :name, :value_method => :id
           %td
             = submit "Go"
-%h1== Accounts Chart :- #{@accounts_chart.name}
-= link_to_with_rights 'Add new ledger', resource(:ledgers, :new), :class => 'add grey_button'
+%h1== Accounts Chart : #{@accounts_chart.name}
+
+.menu-strip{:style => "width:25%;"}
+  = link_to_with_rights 'Add new ledger', resource(:ledgers, :new), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+
 = partial :list

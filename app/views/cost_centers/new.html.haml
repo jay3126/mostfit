@@ -6,5 +6,8 @@
   = partial :fields
   %p
     = submit "Create"
-
-= link_to_with_rights 'Back', url(:cost_centers)
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights 'Cancel', url(:cost_centers), :class => "grey_button"

@@ -1,5 +1,7 @@
 .shaded
-  %h1 Ledger
+  %h1 Details of Ledger: #{@ledger.name}
+  .menu-strip{:style => "width:8%;"}
+    = link_to_with_rights "Back", url(:ledgers), :class => "grey_button"
   %table.tall.shaded
     %tr
       %th

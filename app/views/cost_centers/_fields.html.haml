@@ -1,13 +1,13 @@
 - biz_locations = CostCenter.all.map(&:biz_location).compact || []
 - all_locations = BizLocation.all.select{|l| l.location_level.level != 0 && !biz_locations.include?(l)}
-%table.form
+%table.tall.shaded
   %tr
-    %td
+    %th
       Name
     %td
       = text_field :name
   %tr
-    %td
+    %th
       Location
     %td
       = select :biz_location, :collection => all_locations.map{|f| [f.id,f.name.humanize]}

@@ -27,6 +27,11 @@
             = select :name => "cost_center_id", :collection => CostCenter.all, :selected => @cost_center.id.to_s, :text_method => :name, :value_method => :id, :id => 'cost_center_selector'
           %td
             = submit "Go"
-%h1== Cost Center :- #{@cost_center.name}
-= link_to_with_rights 'Add new Cost Center', resource(:cost_centers, :new), :class => 'add grey_button'
+%h1== Cost Center : #{@cost_center.name}
+
+.menu-strip{:style => "width:30%;"}
+  = link_to_with_rights 'Add new Cost Center', resource(:cost_centers, :new), :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+
 = partial :list

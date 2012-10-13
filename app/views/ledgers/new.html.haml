@@ -24,4 +24,9 @@
         Open on
       %td
         = date_select_for @ledger, :open_on
-  = submit "Create ledger" 
+  = submit "Create ledger"
+  &nbsp;&nbsp;
+  %b
+    Or
+  &nbsp;&nbsp;
+  = link_to_with_rights "Cancel", url(:ledgers), :class => "grey_button"
