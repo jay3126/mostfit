@@ -1,8 +1,11 @@
 %h1 List of Holidays
 - url = params[:biz_location_id].blank? ? resource(:location_holidays, :new) : resource(:location_holidays, :holiday_for_location, :biz_location_id => params[:biz_location_id])
 
-= link_to_with_rights "Back", url(:admin), :class => "grey_button"
-&nbsp;&nbsp;
-= link_to_with_rights 'Add Holiday', url , :class => "_remote_ add grey_button"
+- if request.referer.include?("user_locations")
+  = link_to_with_rights 'Add Holiday', url , :class => "_remote_ add grey_button"
+- else
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights 'Add Holiday', url , :class => "_remote_ add grey_button"
 
 = partial :list
