@@ -267,6 +267,14 @@ class Client
     active_loan
   end
 
+  def move_client?
+    facade = FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, User.first)
+    client_loans = facade.get_all_loans_for_counterparty(self)
+    loan_status = [:repaid_loan_status, :preclosed_loan_status]
+    loans = client_loans.select{|loan| !loan_status.include?(loan.status)}
+    loans.blank?
+  end
+
   private
   
   def convert_blank_to_nil

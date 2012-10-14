@@ -28,7 +28,7 @@ class LendingProducts < Application
     tenure               = params[:lending_product][:tenure]
     interest_rate        = params[:lending_product][:interest_rate]
     repayment_allocation = params[:lending_product][:repayment_allocation_strategy]
-    location_ids         = params[:location_ids]
+    location_ids         = params[:location_ids]||[]
     insurance_product_id = params[:insurance_product_id]
     fee_product_ids      = params[:fee_product_ids].blank? ? [] : params[:fee_product_ids]
     penalty_fee_ids      = params[:loan_preclosure_penalty_ids].blank? ? [] : params[:loan_preclosure_penalty_ids]

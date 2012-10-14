@@ -7,6 +7,7 @@ class NewClients < Application
       @parent_location = BizLocation.get params[:parent_location_id]
       @child_locations = location_facade.get_children(@parent_location, effective_date) - [@biz_location]
       @clients         = client_facade.get_clients_administered(@biz_location.id, effective_date)
+      @clients         = @clients.select{|client| client.move_client?}
       @client_admins   = @clients.collect{|client| ClientAdministration.get_current_administration(client)}
     end
     display @client_admins

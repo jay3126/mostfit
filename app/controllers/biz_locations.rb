@@ -111,7 +111,7 @@ class BizLocations < Application
     b_address          = params[:biz_location][:biz_location_address]
     b_disbursal_date   = params[:biz_location][:center_disbursal_date].blank? ? '' : Date.parse(params[:biz_location][:center_disbursal_date])
     parent_location_id = params[:parent_location_id]
-    loan_product_ids   = params[:lending_product_ids]
+    loan_product_ids   = params[:lending_product_ids]||[]
     b_originator_by    = params[:biz_location][:originator_by]
     b_managed_by       = params[:managed_by]
     b_meeting          = params[:meeting_schedule]
@@ -289,7 +289,7 @@ class BizLocations < Application
     b_managed_by     = params[:managed_by]
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
-    loan_product_ids = params[:lending_product_ids]
+    loan_product_ids = params[:lending_product_ids]||[]
     b_meeting        = params[:meeting_schedule]
     b_meeting_number = params[:meeting][:meeting_numbers].to_i
     b_frequency      = params[:meeting][:meeting_frequency]
