@@ -112,6 +112,10 @@ class User
     end
   end
 
+  def self.convert_xls_to_csv(file_path, file_name)
+    `ssconvert #{file_path} #{file_name}.csv`
+  end
+
  private
   def prevent_destroying_admin
     if id == 1
