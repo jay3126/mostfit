@@ -1,29 +1,29 @@
 - if @lending.is_outstanding? || @lending.is_written_off?
   = form_for(@lending, :action => url(:controller => :lendings, :action => :create_repayment_on_lending, :id => @lending.id), :method => "POST", :class => "tall shaded") do
-    %table
+    %table.tall
       %tr
-        %td
+        %th
           Payment Type
         %td
           = Constants::Transaction::RECEIPT.humanize
           = hidden_field :name => "payment_type", :value => Constants::Transaction::RECEIPT
       %tr
-        %td
+        %th
           Maximum Amount
         %td
           = @lending.maximum_to_be_collected
       %tr
-        %td
+        %th
           Payment Date
         %td
           = date_select "payment_date", get_effective_date, :max_date => Date.today
       %tr
-        %td
+        %th
           Payment Amount
         %td
           = text_field :name=> "payment_amount"
       %tr
-        %td
+        %th
           Payment by Staff
         %td
           = select :name=> "payment_by_staff", :text_method => :name, :value_method => :id, :collection => staff_members_on_location(get_effective_date, @lending.accounted_at_origin)

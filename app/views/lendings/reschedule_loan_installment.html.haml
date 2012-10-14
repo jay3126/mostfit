@@ -1,0 +1,15 @@
+%h2 Re-Schedule Installments
+- staff = session.user.staff_member
+= form_for(@lending, :action => resource(@lending,:save_reschedule_loan_installment)) do
+  %table.tall
+    %tr
+      %th
+        Effective Date
+      %td
+        = date_select 'effective_date', Date.today, :min_date => Date.today
+      %th
+        Re-Schedule First Date
+      %td
+        = date_select 'reschedule_first_date', Date.today, :min_date => Date.today
+      %th
+        = submit 'Save', :class => "greenButton"

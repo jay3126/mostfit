@@ -601,6 +601,41 @@ class Lendings < Application
     redirect resource(:lendings, :bulk_edit_funding_lines, :parent_location_id => branch_id, :child_location_id => center_id), :message => message
   end
 
+  def reschedule_loan_installment
+    @lending = Lending.get(params[:id])
+    display @lending, :layout => layout?
+  end
+
+  def save_reschedule_loan_installment
+    #INITIALIZING VARIABLES USED THOURGHTOUT
+    @message = {:error => [], :notice => []}
+
+    #GET-KEEPING
+    lending_id     = params[:id]
+    effective_date = params[:effective_date]
+    first_date     = params[:reschedule_first_date]
+    staff_id       = params[:staff_id]
+
+    # VALIDATIONS
+    @message[:error] << "Loan Id cannot blank" if lending_id.blank?
+    @message[:error] << "Effective Date cannot blank" if effective_date.blank?
+    @message[:error] << "Re-Schedule First Date cannot be blank" if first_date.blank?
+    @lending = Lending.get(lending_id)
+
+    if @message[:error].blank?
+      begin
+        first_date     = Date.parse(first_date)
+        effective_date = Date.parse(effective_date)
+        @lending.reschedule_installments(first_date, effective_date)
+      rescue => ex
+        @message[:error] = "An error has occured :- #{ex.message}"
+      end
+    end
+    @message = {:notice => "Loan Repayment Schedule Dates updated successfully."} if @message[:error].blank?
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect request.referer, :message => @message
+  end
+
   private
 
   def get_all_loans_eligible_for_sec_or_encum(params)

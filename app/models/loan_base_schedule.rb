@@ -107,6 +107,10 @@ class LoanBaseSchedule
     get_all_previous_amortization(later_date)
   end
 
+  def get_schedule_after_date(on_date)
+    self.base_schedule_line_items.all(:on_date.gte => on_date)
+  end
+
   ###########################
   # LOAN AMORTIZATION queries # ends
   ###########################
@@ -173,6 +177,7 @@ class BaseScheduleLineItem
   property SCHEDULED_INTEREST_OUTSTANDING,  *MONEY_AMOUNT
   property SCHEDULED_INTEREST_DUE,          *MONEY_AMOUNT
   property :currency,                       *CURRENCY
+  property :updated_at,                     *UPDATED_AT
   property :created_at,                     *CREATED_AT
 
   before :save, :date_change_according_to_holiday
@@ -218,7 +223,6 @@ class BaseScheduleLineItem
       principal_and_interest_installment = amortization[num]
       scheduled_principal_due            = principal_and_interest_installment[PRINCIPAL_AMOUNT].amount
       scheduled_interest_due             = principal_and_interest_installment[INTEREST_AMOUNT].amount
-
       repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency) if (num > 1)
 
       scheduled_principal_outstanding -= scheduled_principal_due

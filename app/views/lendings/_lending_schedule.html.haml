@@ -2,6 +2,7 @@
 - if @lending_schedules.blank?
   Loan schedule does not exist.
 - else
+  = link_to_with_rights "Re-Schedule Installment", resource(@lending,:reschedule_loan_installment), :class => '_remote_ add grey_button'
   %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
@@ -17,7 +18,9 @@
       - biz_location = @lending.administered_at_origin_location
       - @lending_schedules.each do |l_schedule|
         - holiday = LocationHoliday.get_origin_move_date(biz_location, l_schedule.on_date)
-        %tr{:style=>"background-color:#{holiday.blank? ? '' : 'PaleGoldenRod'}"}
+        - color = !holiday.blank? && holiday.location_holiday.on_date==l_schedule.actual_date ? 'PaleGoldenRod' : ''
+        - color = (holiday.blank? && l_schedule.actual_date != l_schedule.on_date) ? 'LightSeaGreen' : color
+        %tr{:style=>"background-color:#{color}"}
           %td
             %b= l_schedule.payment_type
           %td
@@ -41,4 +44,7 @@
             #holiday{:style => "display:table"}
               #h_color{:style=>"background-color:PaleGoldenRod; width:12px; height:12px;"}
               %div{:style => "display:table-cell;"}
-                &nbsp;Indicates that the Loan schedule is effected by holidays
+                &nbsp;Indicates that the Loan schedule is effected by holidays&nbsp
+              #s_color{:style=>"background-color:LightSeaGreen; width:12px; height:12px;"}
+              %div{:style => "display:table-cell;"}
+                &nbsp;Indicates that the Loan schedule is effected by Re-Scheduleing

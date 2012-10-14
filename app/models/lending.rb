@@ -284,6 +284,18 @@ class Lending
     self.loan_base_schedule.get_previous_and_current_amortization_items(for_date)
   end
 
+  def reschedule_installments(first_schedule_date, on_date = Date.today)
+    raise ArgumentError, "Effective Date(#{on_date}) cannot Past Date" if on_date < Date.today
+    raise ArgumentError, "First Schedule Date(#{first_schedule_date}) cannot Past Date" if first_schedule_date < Date.today
+    raise ArgumentError, "Effective Date(#{on_date}) cannot greated then First Schedule Date(#{first_schedule_date})" if first_schedule_date < on_date
+    loan_schedules = self.loan_base_schedule.get_schedule_after_date(on_date)
+    @updated_date = first_schedule_date
+    loan_schedules.each do |schedule|
+      schedule.update(:on_date => @updated_date)
+      @updated_date = Constants::Time.get_next_date(@updated_date, self.repayment_frequency)
+    end
+  end
+
   #######################
   # LOAN SCHEDULE DATES # ends
   #######################
