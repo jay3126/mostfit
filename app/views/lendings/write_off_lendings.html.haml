@@ -1,3 +1,9 @@
+:javascript
+  $(document).ready(function() {
+  $('#select_all').change(function() {
+    $('input.checkbox').attr('checked',$(this).attr('checked'))});
+  });
+
 %h1 Write Off Loans
 .menu-strip{:style => "width:8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
@@ -20,11 +26,11 @@
         %thead
           %tr
             %th
-              id
+              Loan Id
             %th
-              Administered At
+              = LocationLevel.first(:level => 0).name
             %th
-              Accounted At
+              = LocationLevel.first(:level => 1).name
             %th
               Borrower Name
             %th
@@ -46,7 +52,11 @@
             %th
               Days past due
             %th
-              Check Write off
+              Check to Write off
+              (Select All
+              %br
+                = check_box :name => 'select_all'
+              )
             %th
               On Date
         - @lendings.each do |lending|
@@ -58,7 +68,7 @@
             %td
               = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
             %td
-              = lending.loan_borrower.counterparty.name
+              = link_to_with_rights lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => lending.loan_borrower.counterparty.id)
             %td
               = lending.total_loan_disbursed.to_s
             %td
@@ -85,4 +95,6 @@
         %tfoot
           %tr.org_total
             %td{:colspan => 15}
-      = submit "Write Off Save"
+      %br
+        = submit "Write Off Loans"
+      %br
