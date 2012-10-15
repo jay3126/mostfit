@@ -222,6 +222,6 @@ class LocationHolidays < Application
     end
 
     @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
-    redirect resource(:location_holidays, :custom_calendar, :custom_calendar_year => params[:custom_calendar_year].to_s, :submit => 'Go'), @message
+    redirect resource(:location_holidays, :custom_calendar, :custom_calendar_year => params[:custom_calendar_year].to_s, :submit => 'Go'), :message => @message
   end
 end

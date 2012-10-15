@@ -4,9 +4,9 @@ module Constants
     # points in time
 
     MEETING_FREQUENCIES         =
-        [MarkerInterfaces::Recurrence::DAILY, MarkerInterfaces::Recurrence::WEEKLY, MarkerInterfaces::Recurrence::BIWEEKLY, MarkerInterfaces::Recurrence::MONTHLY]
+      [MarkerInterfaces::Recurrence::DAILY, MarkerInterfaces::Recurrence::WEEKLY, MarkerInterfaces::Recurrence::BIWEEKLY, MarkerInterfaces::Recurrence::MONTHLY]
     MEETING_FREQUENCIES_AS_DAYS =
-        { MarkerInterfaces::Recurrence::DAILY => 1, MarkerInterfaces::Recurrence::WEEKLY => 7, MarkerInterfaces::Recurrence::BIWEEKLY => 14 }
+      { MarkerInterfaces::Recurrence::DAILY => 1, MarkerInterfaces::Recurrence::WEEKLY => 7, MarkerInterfaces::Recurrence::BIWEEKLY => 14 }
 
     EARLIEST_MEETING_HOURS_ALLOWED      = 0; LATEST_MEETING_HOURS_ALLOWED = 23
     MEETING_HOURS_PERMISSIBLE_RANGE     = Range.new(EARLIEST_MEETING_HOURS_ALLOWED, LATEST_MEETING_HOURS_ALLOWED)
@@ -69,10 +69,14 @@ module Constants
     def self.get_next_date(from_date, frequency)
       if frequency == MarkerInterfaces::Recurrence::MONTHLY
         raise ArgumentError, "Date cannot be after the #{MONTHLY_MEETING_DATE_LIMIT} for monthly frequency" if from_date.day > MONTHLY_MEETING_DATE_LIMIT
-        return get_next_month_date(from_date)
+        date = get_next_month_date(from_date)
+      else
+        number_of_days = MEETING_FREQUENCIES_AS_DAYS[frequency]
+        date = from_date + number_of_days
       end
-      number_of_days = MEETING_FREQUENCIES_AS_DAYS[frequency]
-      from_date + number_of_days
+      custom_date = CustomCalender.first(:collection_date => date)
+      custom_move_date = custom_date.blank? ? '' : custom_date.on_date
+      custom_move_date.blank? ? date : custom_move_date
     end
 
     def self.ordered_dates(from_date, to_date)

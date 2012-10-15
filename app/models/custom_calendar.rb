@@ -24,7 +24,11 @@ class CustomCalendar
         attr[:holiday_name]    = data_values['holiday']
         attr[:recorded_by]     = recorded_by_id
         attr[:performed_by]    = performed_by_id
-        first_or_create(attr)
+        obj = first_or_create(attr)
+        unless attr[:holiday_name].blank?
+          move_date = data.values.select{|value| value['collection date'].split('/').map{|s| s.downcase}.include?(data_values['normal date'].downcase)}.first
+          LocationHoliday.first_or_create(:custom_calendar_id => obj.id, :name => attr[:holiday_name], :on_date => attr[:on_date], :move_work_to_date => Date.parse(move_date['normal date']+"-#{year}"), :performed_by => performed_by_id, :recorded_by => recorded_by_id) unless move_date.blank?
+        end
       end
     end
   end

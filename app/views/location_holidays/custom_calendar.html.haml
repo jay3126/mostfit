@@ -19,41 +19,44 @@
 %br
 %br
 %br
-#upload{:style => 'display:none', :class => 'shaded'}
+#upload{:style => "display:#{@custom_calendar_dates.blank? ? '' : 'none'}", :class => "shaded"}
   %h2 Upload Custom Calendar XLS File
   = form_for(:location_holidays, :action => resource(:location_holidays, :custom_calendar), :multipart => true, :class => "bold") do
     = text_field :name => "custom_calender_file", :type => :file, :size => '80'
     = submit 'Upload'
   = link_to 'Download Custom Calendar XLS Format File', resource(:location_holidays,:download_custom_calendar_format)
-- unless @custom_calendar_dates.blank?
-  %h2== Custom Calendar For Year-#{params[:custom_calendar_year]||get_effective_date.year}
-  %table.dataTable.report.weeksheet.nojs
-    %thead
-      %tr
-        %th
-          S. No.
-        %th
-          Day
-        %th
-          Normal Date
-        %th
-          Collection Date
-        %th
-          Holiday
-    - count = 1
-    - @custom_calendar_dates.sort_by{|d| d.on_date}.each do |data_value|
-      %tr
-        %td
-          = count
-        %td
-          = data_value.on_date.weekday.to_s.capitalize
-        %td
-          = data_value.on_date
-        %td
-          = data_value.collection_date
-        %td{:style => "width:20%"}
-          = data_value.holiday_name
-      - count += 1
+- unless @custom_calendar_dates.nil?
+  - if @custom_calendar_dates.blank?
+    %h2 Custom Calendar does not exists
+  - else
+    %h2== Custom Calendar For Year-#{params[:custom_calendar_year]||get_effective_date.year}
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %th
+            S. No.
+          %th
+            Day
+          %th
+            Normal Date
+          %th
+            Collection Date
+          %th
+            Holiday
+      - count = 1
+      - @custom_calendar_dates.sort_by{|d| d.on_date}.each do |data_value|
+        %tr
+          %td
+            = count
+          %td
+            = data_value.on_date.weekday.to_s.capitalize
+          %td
+            = data_value.on_date
+          %td
+            = data_value.collection_date
+          %td{:style => "width:20%"}
+            = data_value.holiday_name
+        - count += 1
 - if params[:submit] == 'Upload'
   - if @data.blank?
     %h2== No Custom Calendar yet.

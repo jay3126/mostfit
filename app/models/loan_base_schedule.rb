@@ -267,5 +267,4 @@ end
 
 class Amortization < Hash
   include Constants::LoanAmounts
-
 end

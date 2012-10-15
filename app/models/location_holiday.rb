@@ -15,10 +15,12 @@ class LocationHoliday
   has n, :holiday_administrations
   has n, :biz_locations, :through => :holiday_administrations
 
+  belongs_to :custom_calendar, :nullable => true
+
   validates_is_unique :name
   validates_is_unique :on_date, :scope => :move_work_to_date
 
-  validates_with_method :check_working_business_holiday?
+ # validates_with_method :check_working_business_holiday?
 
   def check_working_business_holiday?
     valid_dates = LocationHoliday.get_configuration_facade(User.first).permitted_business_days_in_month(self.move_work_to_date)
