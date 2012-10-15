@@ -82,4 +82,8 @@ class LoanAssignmentFacade < StandardFacade
     Securitization.all(search_options)
   end
 
+  def mark_loans_as_assigned(csv_filepath)
+    Securitization.mark_loans_as_assigned(csv_filepath)
+  end
+
 end
