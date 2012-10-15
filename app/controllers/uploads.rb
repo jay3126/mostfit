@@ -23,12 +23,20 @@ class Uploads < Application
   
   def create
     erase = params.has_key?(:erase)
-    if params[:file] and params[:file][:filename] and params[:file][:tempfile]
-      file      = Upload.make(params.merge(:user => session.user))
+    if params[:file].blank?
+      redirect url("uploads/new"), :message => {:error => "Please select a file"}
+    elsif (params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel")
+      redirect url("uploads/new"), :message => {:error => "Invalid File Selection"}
+    elsif (params[:file] and (not params[:file].blank?) and params[:file][:filename].split('.').last != "xls")
+      redirect url("uploads/new"), :message => {:error => "Invalid File Selection. Please select a valid Excel file (with .xls extension)"}
     else
-      render
-    end
-    redirect resource(:uploads), :message => {:notice => "File was sucessfully uploaded"}
+      if params[:file] and params[:file][:filename] and params[:file][:tempfile]
+        file = Upload.make(params.merge(:user => session.user))
+      else
+        render
+      end
+      redirect resource(:uploads), :message => {:notice => "File was sucessfully uploaded"}
+    end    
   end
 
   def show(id)
