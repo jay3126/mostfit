@@ -9,7 +9,7 @@
       = link_to 'Add New Group', '#', :class => 'add grey_button', :onclick => "jQuery('#new_client_group_form').toggle(); return false;" unless (params[:action] == "edit")
   %tr
     %th
-      Name
+      Name*
     %td
       = text_field :name, :size => 40
   %tr
@@ -24,7 +24,7 @@
       =  select :marital_status, :collection => Constants::Masters::MARITAL_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Ration Card
+      Ration Card*
     %td
       = text_field :reference, :size => 40
       %span.greytext
@@ -32,24 +32,24 @@
       = hidden_field :reference_type, :value => Constants::Masters::RATION_CARD
   %tr
     %th
-      ID Proof
+      ID Proof*
     %td
       = text_field :reference2, :size => 40
       %span.greytext
         (allowed only: a-z, A-Z, 0-9)
   %tr
     %th
-      ID Proof Type
+      ID Proof Type*
     %td
       = select :reference2_type, :collection => Constants::Masters::REFERENCE_TYPES.map{|x| [x.to_s, x.to_s.humanize]}
   %tr
     %th
-      Date of birth
+      Date of birth*
     %td
       = date_select_for @client, :date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
-      Date joined
+      Date joined*
     %td
       = date_select 'client[date_joined]', @client.date_joined.nil? ? Date.today : @client.date_joined, {:max_date => Date.today, :id => "date_joined"}
   %tr
@@ -64,12 +64,12 @@
       = date_select_for @client, :spouse_date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
-      Guarantor name
+      Guarantor name*
     %td
       = text_field :guarantor_name, :size => 40
   %tr
     %th
-      Guarantor Date of Birth
+      Guarantor Date of Birth*
     %td
       = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
@@ -79,12 +79,12 @@
       = select :guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Address
+      Address*
     %td
       = text_area :address, :rows => 6, :cols => 38
   %tr
     %th
-      State
+      State*
     %td
       - all_states = BizLocation.get_state_locations
       - if @client.new?
@@ -100,7 +100,7 @@
       = select :town_classification, :collection => Constants::Masters::TOWN_CLASSIFICATION.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select town classification"
   %tr
     %th
-      Pincode
+      Pincode*
     %td
       = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
   %tr
@@ -167,3 +167,8 @@
     %td
       = image_tag @client.picture.url(:medium)
       = file_field :picture
+  %tr
+    %th
+    %td  
+      &nbsp;&nbsp;
+      %span.greytext Fields marked * are compulsory

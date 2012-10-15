@@ -41,7 +41,7 @@
         = select :client_group_id, :collection => nil, :value_method => :id, :text_method => :name, :id => "client_group_selector"
   %tr
     %th
-      Name:
+      Name:*
     %td
       = text_field :name, :size => 40
       %br
@@ -68,28 +68,28 @@
       =  select :marital_status, :collection => Constants::Masters::MARITAL_STATUS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Ration Card
+      Ration Card*
     %td
       = text_field(:reference, :size => 40, :value => ((@client.reference.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference))
       = hidden_field :reference_type, :value => Constants::Masters::REFERENCE_TYPES[4]
   %tr
     %th
-      ID Proof
+      ID Proof*
     %td
       = text_field(:reference2, :size => 40, :value => ((@client.reference2.blank? and @center) ? "#{@branch.code}#{@center.code}" : @client.reference2))
   %tr
     %th
-      ID Proof Type
+      ID Proof Type*
     %td
       = select :reference2_type, :collection => Constants::Masters::REFERENCE2_TYPES.map{|x| [x.to_s, x.to_s.humanize]}
   %tr
     %th
-      Date of birth:
+      Date of birth:*
     %td
       = date_select_for @client, :date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %th
-      Date joined
+      Date joined*
     %td
       = date_select_for @client, :date_joined, :max_date => Date.today
   - if not @client.new? or (@client.new? and mfi = Mfi.first and mfi.allow_grt_date_on_form)
@@ -110,12 +110,12 @@
       = date_select_for @client, :spouse_date_of_birth, :nullable => true, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
     %th
-      Guarantor name:
+      Guarantor name:*
     %td
       = text_field :guarantor_name, :size => 40
   %tr
     %th
-      Guarantor Date of Birth:
+      Guarantor Date of Birth:*
     %td
       = date_select_for @client, :guarantor_dob, :min_date => Date.today-36500, :max_date => Date.today-1000
   %tr
@@ -125,17 +125,17 @@
       = select :guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.map{|x| [x.to_s, x.to_s.humanize]}, :prompt => "Select"
   %tr
     %th
-      Address:
+      Address:*
     %td
       = text_area :address, :rows => 6, :cols => 38
   %tr
     %th
-      State:    
+      State:*    
     %td
       = select :state, :collection => Constants::Masters::STATES.map{|x| [x.to_s, x]}, :prompt => "---"
   %tr
     %th
-      Pincode:
+      Pincode:*
     %td
       = text_field :pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
   %tr
