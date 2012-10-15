@@ -382,5 +382,26 @@ module Pdf
       return pdf
     end
   end
+  
+  module CsvRead
+    require 'fastercsv'
 
+    def csv_file_read(directory, file_name)
+      files = Dir.entries(directory).select{|d| d.split('.').include?('csv')}
+      file_options = {:headers => true}
+      loans_data = {} #this will be a hash of hashes where information against each loan will be stored.
+      count = 1
+      files.sort.each do |file|
+        file_path = File.join(directory, file)
+        FasterCSV.foreach(file_path, file_options) do |row|
+          loans_data[count] = {}
+          row.each do |record|
+            loans_data[count][record.first.strip.downcase] = record.last
+          end
+          count += 1
+        end
+      end
+      loans_data
+    end
+  end
 end

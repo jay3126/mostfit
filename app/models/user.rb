@@ -113,7 +113,7 @@ class User
   end
 
   def self.convert_xls_to_csv(file_path, file_name)
-    `ssconvert #{file_path} #{file_name}.csv`
+    `ssconvert -S #{file_path} #{file_name}.csv`
   end
 
  private

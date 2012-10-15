@@ -9,6 +9,8 @@
         %li
           = link_to_with_rights 'Holiday', resource(:location_holidays), :class => 'icon holiday'
         %li
+          = link_to_with_rights 'Custom Holiday', resource(:location_holidays, :custom_calendar), :class => 'icon holiday'
+        %li
           //= link_to_with_rights 'Holiday Calendars', url(:controller => 'holiday_calendars', :action => "index"), :class => 'icon holiday'
     .admin-box
       %h2 Manage geographical locations

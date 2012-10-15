@@ -185,4 +185,43 @@ class LocationHolidays < Application
     end
     redirect request.referer, :message => message
   end
+
+  def download_custom_calendar_format
+    send_file(File.join(Merb.root,'doc','custom_calendar','default_custom_calendar.xls'))
+  end
+
+  def custom_calendar
+    @data = {}
+    if params[:custom_calender_file].blank?
+      year = params[:custom_calendar_year]||get_effective_date.year
+      first_date = Date.parse("01-01-#{year}")
+      last_date = Date.parse("31-12-#{year}")
+      @custom_calendar_dates = CustomCalendar.all(:on_date => (first_date..last_date))
+    else
+      file_name = 'custome_calendar'
+      folder = File.join(Merb.root, "doc","custom_calendar","#{Date.today}")
+      filename = params[:custom_calender_file][:filename]
+      FileUtils.mkdir_p(folder)
+      filepath = File.join(folder, filename)
+      FileUtils.mv(params[:custom_calender_file][:tempfile].path, filepath)
+      User.convert_xls_to_csv(filepath, folder+"/#{file_name}")
+      @data = LocationHoliday.new.csv_file_read(folder, file_name)
+    end
+    display @data
+  end
+
+  def record_custom_calendar
+    @message = {:error => [], :notice => []}
+    recorded_by = session.user
+    performed_by = recorded_by.staff_member
+    begin
+      CustomCalendar.save_custom_calendar(performed_by.id, recorded_by.id, params[:custom_calendar_year], params[:custom_calendar])
+      @message[:notice] = "Custom Calendar saved successfully"
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect resource(:location_holidays, :custom_calendar, :custom_calendar_year => params[:custom_calendar_year].to_s, :submit => 'Go'), @message
+  end
 end

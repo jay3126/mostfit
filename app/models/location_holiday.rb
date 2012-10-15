@@ -2,6 +2,7 @@ class LocationHoliday
   include DataMapper::Resource
   include Constants::Space
   include Constants::Properties
+  include Pdf::CsvRead
   
   property :id,                 Serial
   property :name,               *NAME
