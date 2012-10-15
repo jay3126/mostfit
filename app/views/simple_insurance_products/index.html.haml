@@ -35,7 +35,7 @@
         %td
           = insurance_product.name
         %td
-          = insurance_product.insurance_for.humanize
+          = (insurance_product and insurance_product.insurance_for) ? insurance_product.insurance_for.humanize : "Not Specified" 
         %td
           = insurance_product.created_on
     %tfoot
