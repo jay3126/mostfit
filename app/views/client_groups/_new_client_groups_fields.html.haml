@@ -23,7 +23,7 @@
     %td
       = text_field :code, :size => 10
       %br/
-      %span.greytext a two letter unique code for the group
+      %span.greytext a two letter unique code
   - if @client.new?
     %tr
       %th
@@ -43,4 +43,4 @@
       = text_field :number_of_members, :size => 3
       %br
         %span.greytext
-          maximum number allowed to enter is 20.
+          maximum clients allowed is 20

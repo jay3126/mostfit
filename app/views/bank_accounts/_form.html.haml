@@ -13,10 +13,14 @@
           Name
         %td
           = text_field :name
-
+      %tr
+        %th 
+        %td
+          %span.greytext All fields are compulsory
     = submit "Save"
     &nbsp;&nbsp;
     %b
       Or
     &nbsp;&nbsp;
     = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#new_form').hide();", :class => "grey_button"
+
