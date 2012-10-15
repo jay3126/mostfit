@@ -41,8 +41,8 @@ class LoanAssignmentFacade < StandardFacade
     LoanAssignment.assign(loan_id, to_assignment, for_user.id)
   end
   
-  def assign_on_date(loan_id, to_assignment, on_date)
-    LoanAssignment.assign_on_date(loan_id, to_assignment, on_date, for_user.id)
+  def assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id)
+    LoanAssignment.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, for_user.id)
   end
 
   def assign_to_tranch_on_date(loan_id, to_tranch, on_date)

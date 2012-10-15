@@ -10,6 +10,9 @@ class LoanAssignment
   property :assignment_id,     *INTEGER_NOT_NULL
   property :assignment_status, Enum.send('[]', *LOAN_ASSIGNMENT_STATUSES), :nullable => false
   property :effective_on,      *DATE_NOT_NULL
+  property :funder_id,         *INTEGER_NOT_NULL
+  property :funding_line_id,   *INTEGER_NOT_NULL
+  property :tranch_id,         *INTEGER_NOT_NULL
   property :recorded_by,       *INTEGER_NOT_NULL
   property :created_at,        *CREATED_AT
   property :deleted_at,        *DELETED_AT
@@ -65,13 +68,16 @@ class LoanAssignment
     assignment
   end
 
-  def self.assign_on_date(loan_id, to_assignment, on_date, recorded_by)
+  def self.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, recorded_by)
     new_assignment                     = {}
     new_assignment[:loan_id]           = loan_id
     assignment_nature, assignment_id   = Resolver.resolve_loan_assignment(to_assignment)
     new_assignment[:assignment_nature] = assignment_nature
     new_assignment[:assignment_id]     = assignment_id
     new_assignment[:assignment_status] = ASSIGNED
+    new_assignment[:funder_id]         = funder_id
+    new_assignment[:funding_line_id]   = funding_line_id
+    new_assignment[:tranch_id]         = tranch_id
     new_assignment[:effective_on]      = on_date
     new_assignment[:recorded_by]       = recorded_by
 

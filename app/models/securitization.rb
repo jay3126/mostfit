@@ -81,7 +81,7 @@ class Securitization
               raise "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
             end
 
-            loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date])
+            loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
             loan_status, loan_error = "Success", ''
           rescue => ex
             loan_status, loan_error = 'Failure', ex.message
