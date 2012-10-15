@@ -1,8 +1,10 @@
-%h1== Fee : <i>#{@fee_product.name}</i>
-.menu-strip{:style => "width: 25%;"}
+%h1== Details of Fee : <i>#{@fee_product.name}</i>
+.menu-strip{:style => "width: 35%;"}
   = link_to 'Edit', '#', :onclick =>"jQuery('.show').toggle(); jQuery('.edit').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
   = link_to 'Add Amount', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:simple_fee_products), :class => "grey_button"
 = form_for(@fee_product, :action => resource(@fee_product), :method => 'put') do
   %table.tall.shaded
     %tr.even

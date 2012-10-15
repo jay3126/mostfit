@@ -12,6 +12,11 @@
   = form_for(@fee_product, :action => url(:controller => :simple_fee_products, :action => :create), :method => "POST", :class => "tall shaded") do
     = partial 'simple_fee_products/fields'
     = submit 'Save', :class => "greenButton"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", '#', :onclick =>"jQuery('#meeting_div').hide(); return false;", :class => 'grey_button'
 %br
 - if @fee_products.count == 0
   %p
