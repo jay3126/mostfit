@@ -1,6 +1,10 @@
 %h1
-  Lending Product :
+  Details of Loan Product :
   = @lending_product.name unless @lending_product.blank?
+
+  .menu-strip{:style => "width: 8%;"}
+    = link_to_with_rights "Back", url(:lending_products), :class => "grey_button"
+
 - unless @lending_product.blank?
   %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
     %tr.even
