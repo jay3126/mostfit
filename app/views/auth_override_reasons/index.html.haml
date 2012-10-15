@@ -19,7 +19,6 @@
           Activate / Deactivate
         %th{:style => "width: 20%;"}
           Action
-    %tbody
     - for auth_override_reason in @auth_override_reasons      
       %tr
         %td
@@ -28,11 +27,11 @@
           = auth_override_reason.active
         %td
           - if auth_override_reason.active
-            = link_to_with_rights 'Deactivate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add grey_button"
+            = link_to_with_rights 'Deactivate', url(:action => :change_state, :id => auth_override_reason.id), :class => "grey_button"
           - if !auth_override_reason.active
-            = link_to_with_rights 'Activate', url(:action => :change_state, :id => auth_override_reason.id), :class => "add grey_button"
+            = link_to_with_rights 'Activate', url(:action => :change_state, :id => auth_override_reason.id), :class => "grey_button"
         %td    
-          = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "add grey_button"
+          = link_to 'Delete', url(:action=>:destroy,:id=>auth_override_reason.id), :class => "grey_button"
     %tfoot
       %tr
         %td{ :colspan => 6 }
