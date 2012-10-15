@@ -13,6 +13,8 @@ class BizLocation
   property :originator_by, Integer
 
   belongs_to :location_level
+  belongs_to :upload, :nullable => true
+
   has n, :meeting_schedules, :through => Resource
   has 1, :address
   has n, :permitted_pin_codes, 'AddressPinCode'
@@ -31,6 +33,23 @@ class BizLocation
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name
   validates_present :name
+
+  def self.from_csv(row, headers)
+    location_level = LocationLevel.first(:name => row[headers[:location_level_name]])
+    raise ArgumentError, "Location Level(#{row[headers[:location_level_name]]}) does not exist" if location_level.blank?
+    obj = new(:name => row[headers[:name]],
+              :location_level => location_level, :creation_date => row[headers[:creation_date]], :upload_id => row[headers[:upload_id]])
+    if obj.save
+      parent_location_level = LocationLevel.first(:level => obj.location_level.level+1)
+      unless parent_location_level.blank?
+        parent_location = parent_location_level.biz_locations.first(:name => row[headers[:parent_location]])
+        LocationLink.assign(obj, parent_location, row[headers[:effective_date]]) unless parent_location.blank?
+      end
+      [true, obj]
+    else
+      [false, obj]
+    end
+  end
 
   def location_level_precedes_biz_location?
     Validators::Assignments.is_valid_assignment_date?(self.creation_date, self, self.location_level)
@@ -216,8 +235,8 @@ class BizLocation
     t_money_deposits_pending_verification = reporting_facade.total_money_deposited_pending_verification_until_date_at_locations(on_date, *location_ids)
 
     EodSummary.new(total_new_loan_application, loans_pending_approval, loans_approved_today, loans_scheduled_for_disbursement, loans_disbursed_today,
-      t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
-      t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
+                   t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
+                   t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
   end
 
   #################

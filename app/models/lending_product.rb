@@ -25,7 +25,37 @@ class LendingProduct
   has n, :lending_product_locations
   has n, :biz_locations, :through => :lending_product_locations
 
+  belongs_to :upload, :nullable => true
+
   validates_is_unique :name
+
+  #method for upload functionality.
+  def self.from_csv(row, headers)
+    user_id             = User.first.id
+    staff_id            = StaffMember.first.id
+    name                = row[headers[:name]]
+    tenure              = row[headers[:tenure]].to_i
+    upload_id           = row[headers[:upload_id]]
+    interest_rate       = row[headers[:interest_rate]]
+    repayment_frequency = row[headers[:repayment_frequency]]
+    allocation_strategy = row[headers[:repayment_allocation_strategy]]
+    
+    loan_money_amount   = MoneyManager.get_money_instance(row[headers[:amount]])
+    interest_amount     = MoneyManager.get_money_instance(row[headers[:interest_amount]])
+    principal_schedules = MoneyManager.get_money_instance(*row[headers[:principal_schedules]].split(','))
+    interest_schedules  = MoneyManager.get_money_instance(*row[headers[:interest_schedules]].split(','))
+
+    fee_products        = SimpleFeeProduct.all(:name => row[headers[:fee_products]], :fee_charged_on_type => 'fee_charged_on_loan').map(&:id)
+    insurance_proudcts  = SimpleFeeProduct.all(:name => row[headers[:insurance_products]], :fee_charged_on_type => 'premium_collected_on_insurance').map(&:id)
+    preclousre_proudcts = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]], :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
+    obj = create_lending_product(name, loan_money_amount, interest_amount, interest_rate, repayment_frequency, tenure, allocation_strategy, principal_schedules, interest_schedules, staff_id, user_id, fee_products+preclousre_proudcts, insurance_proudcts, upload_id)
+
+    if obj.save
+      [true, obj]
+    else
+      [false, obj]
+    end
+  end
 
   # Implementing MarkerInterfaces::Recurrence#frequency
   def frequency; self.repayment_frequency; end
@@ -43,10 +73,13 @@ class LendingProduct
       repayment_allocation_strategy,
       principal_amounts,
       interest_amounts,
-      by_user,
-      by_staff,
+      #by_user,
+      #by_staff,
+      staff_id,
+      user_id,
       fee_products = [],
-      insurance_product = nil
+      insurance_product = nil,
+      upload_id = nil
     )
     Validators::Amortization.is_valid_amortization?(tenure, standard_loan_money_amount, total_interest_applicable_money_amount, principal_amounts, interest_amounts)
 
@@ -59,6 +92,7 @@ class LendingProduct
     product[:tenure] = tenure
     product[:repayment_allocation_strategy] = repayment_allocation_strategy
     product[:simple_insurance_products] = [insurance_product] unless insurance_product.blank?
+    product[:upload_id] = upload_id unless upload_id.blank?
     new_product = first_or_create(product)
     raise Errors::DataError, new_product.errors.first.first unless new_product.saved?
 
@@ -66,7 +100,8 @@ class LendingProduct
     LoanScheduleTemplate.create_schedule_template(name, standard_loan_money_amount, total_interest_applicable_money_amount, tenure, repayment_frequency, new_product, principal_and_interest_amounts)
     unless fee_products.blank?
       fee_products.each do |fee_id|
-        FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, by_staff, by_user)
+        #FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, by_staff, by_user)
+        FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, staff_id, user_id)
       end
     end
     new_product

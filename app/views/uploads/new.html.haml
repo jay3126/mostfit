@@ -1,21 +1,24 @@
-%h1
-  Mostfit data upload
+%h1 Mostfit data upload
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:uploads), :class => "grey_button"
+
 %p
   Upload information for your past operations here, and you are ready to begin using Mostfit 
 %p
   Download 
-  %a{:href => "/upload_data.xls"}
+  %a{:href => "/new_upload_data.xls"}
     sample spreadsheet
 %fieldset
   %p
     The spreadsheet can contain tabs for one or more of the following:
     %ol
       %li
+        Location Levels
+      %li
         Staff members
       %li
-        Branches
-      %li
-        Centers
+        BizLocations
       %li
         Clients
       %li
@@ -24,8 +27,6 @@
         Payments
       %li
         Loan products
-      %li
-        Repayment Styles
       %br
 = form_for(@upload, :action => resource(:uploads), :multipart => true, :class => "bold") do
   = partial :fields

@@ -25,8 +25,16 @@ class LocationLevel
   validates_is_unique :name
 
   has n, :biz_locations
+  belongs_to :upload, :nullable => true
 
   def created_on; self.creation_date; end
+
+  #method for upload functionality.
+  def self.from_csv(row, headers)
+    obj = new(:name => row[headers[:name]], :level => row[headers[:level]], :creation_date => row[headers[:creation_date]],
+              :upload_id => row[headers[:upload_id]])
+    [obj.save, obj]
+  end
 
   # This initialises the basic location levels needed, and must be invooked at startup
   def self.setup_defaults

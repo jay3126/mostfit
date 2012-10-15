@@ -1,7 +1,6 @@
 class Uploads < Application
 
   before do
-    #raise NotAcceptable unless Mfi.first.system_state == :migration
     if Mfi.first.system_state != :migration
       redirect(url(:admin), :message => {:error => "System must be in migration state for using the data upload functionality."})
     end
@@ -29,7 +28,7 @@ class Uploads < Application
     else
       render
     end
-    redirect resource(:uploads)
+    redirect resource(:uploads), :message => {:notice => "File was sucessfully uploaded"}
   end
 
   def show(id)
@@ -44,7 +43,7 @@ class Uploads < Application
     Merb.run_later do
       @upload.cont
     end
-    redirect resource(@upload), :message => {:notice => "Started processing"}
+    redirect resource(@upload), :message => {:notice => "Started processing. Click 'Refresh' button to check status of upload"}
   end
   
   def stop(id)
@@ -64,9 +63,7 @@ class Uploads < Application
       @upload.reload(params[:model])
     }
     redirect resource(@upload)
-  end    
-
-
+  end
 
   def reset(id)
     @upload = Upload.get(id)
@@ -79,7 +76,12 @@ class Uploads < Application
   def error_log
     @upload = Upload.get(params[:id])
     raise Notfound unless @upload
-    "<pre>" + File.read(File.join("uploads", @upload.directory, "#{params[:model]}_errors.csv")) + "</pre>"
+    fn = File.join("uploads", @upload.directory, "#{params[:model]}_errors.csv")
+    if File.exists?(fn)
+      "<pre>" + File.read(fn) + "</pre>"
+    else
+      redirect resource(@upload), :message => {:notice => "No error's were encountered while uploading #{params[:model].to_s} data so no error log file created."}
+    end
   end
 
   def edit(id)
@@ -106,8 +108,5 @@ class Uploads < Application
     raise NotFound unless @upload
     "<pre>" + File.read(File.join(Merb.root, "uploads",@upload.directory, params[:filename])) + "</pre>"
   end
-
-    
-
   
 end

@@ -118,6 +118,14 @@
           %li
             = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
 
+  - if Mfi.first.system_state == :migration
+    %div.clearfix
+      .admin-box
+        %h2 Data Migration
+        %ul.icon_links
+          %li
+            = link_to_with_rights 'Upload data', url(:controller => 'uploads'), :class => 'upload icon'
+
     -# %h2 API Use
     -# %ul
     -#   %li

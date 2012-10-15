@@ -15,6 +15,7 @@ class StaffMember
 
   # no designations, they are derived from the relations it has
   belongs_to :designation
+  belongs_to :upload, :nullable => true
 
   belongs_to :origin_home_location, :model => 'BizLocation', :child_key => [:origin_home_location_id], :nullable => true
 
@@ -68,9 +69,10 @@ class StaffMember
 
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
-    obj = new(:name => row[headers[:name]], :user => user, :creation_date => Date.today,
-              :gender => row[headers[:gender]],
-              :mobile_number => mobile, :active => true, :upload_id => row[headers[:upload_id]])
+    designation = Designation.first 
+    obj = new(:name => row[headers[:name]], :user => user, :creation_date => row[headers[:joining_date]],
+              :gender => row[headers[:gender]], :employee_id => row[headers[:employee_id]],
+              :mobile_number => mobile, :active => true, :designation => designation, :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end
 

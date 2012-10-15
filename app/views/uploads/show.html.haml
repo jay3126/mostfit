@@ -1,9 +1,20 @@
-%h1 Upload
-.menu-strip{:class => "width:100%"}
+%h1 Details of Upload of filename: #{@upload.filename}
+
+.menu-strip{:style => "width:80%;"}
+  = link_to 'Continue', url(:continue_upload, @upload), :class => "greenButton"
+  &nbsp;&nbsp;
   = link_to_with_rights 'Reset and Delete all Data', url(:reset_upload, @upload, :delete => 1), :class => "cancelButton"
+  &nbsp;&nbsp;
   = link_to_with_rights 'Reupload', url(:edit_upload, @upload), :class => "cancelButton"
+  &nbsp;&nbsp;
   = link_to_with_rights 'Extract', url(:extract_upload, @upload), :class => "cancelButton"
+  &nbsp;&nbsp;
   = link_to_with_rights 'Stop', url(:stop_upload, @upload), :class => "cancelButton"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Refresh", resource(@upload), :class => "greenButton"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:uploads), :class => "greenButton"
+
 %table.tall
   %tr
     %th
@@ -66,7 +77,7 @@
       %li
         = @upload.send(model).count
         = "/"
-        = file_wcs[model]
+        = file_wcs[model].to_i - 1
         = model
         = link_to_with_rights 'retry', url(:reload_upload, @upload, :model => model.to_s)
         &bull;
@@ -78,8 +89,8 @@
   %ul
     - Upload::MODELS.each do |model|
       %li
-        - link_text =  "#{file_error_wcs[model]} #{model.to_s}"
+        - if file_error_wcs[model].to_i > 0
+          - link_text =  "#{file_error_wcs[model].to_i - 1} #{model.to_s}"
+        - else
+          - link_text =  "#{file_error_wcs[model]} #{model.to_s}"
         = link_to_with_rights link_text, url(:controller => :uploads, :action => :error_log, :model => model, :id => @upload.id), :target => "_blank"
-.admin-box
-  %h2 Checks
-  = link_to_with_rights "#{@upload.checkers(:ok => false).count} failed checks", resource(@upload, :checkers)

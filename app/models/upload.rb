@@ -16,9 +16,9 @@ class Upload
 
   belongs_to :user
 
-  has n, :checkers
 
-  MODELS = [:staff_members, :repayment_styles, :loan_products, :funding_lines, :branches, :centers, :client_groups, :clients, :loans]
+  #MODELS = [:staff_members, :repayment_styles, :loan_products, :funding_lines, :branches, :centers, :client_groups, :clients, :loans]
+  MODELS = [:location_levels, :staff_members, :biz_locations, :simple_fee_products, :lending_products]
 
   if Mfi.first.system_state == :migration
     MODELS.each do |model|
@@ -37,9 +37,28 @@ class Upload
     # our intializer parses the params and moves the tempfile to a sane location
     require 'digest/md5'
     md5sum = Digest::MD5.hexdigest(params[:file][:tempfile].read)
-    u = Upload.first_or_new(:filename => params[:file][:filename], :user => params[:user], :md5sum => md5sum)
+    u = Upload.first_or_new(:filename => params[:file][:filename], :user => params[:user], :md5sum => md5sum)    
     u.save if u.new?
     u.move(params[:file][:tempfile].path)
+  end
+
+  def self._make(params)
+    # params should have {:file => {:tempfile => tmpfile_handle, :filename => :actual_file_name}, :user => User.xxx}
+    # our intializer parses the params and moves the tempfile to a sane location
+    require 'digest/md5'
+    md5sum = Digest::MD5.hexdigest(params[:file][:tempfile].read)
+    u = Upload.first_or_new(:filename => params[:file][:filename], :user => params[:user], :md5sum => md5sum)
+    if u.new?
+      u.save
+      tempfile = params[:file][:tempfile].path
+      directory = u.directory
+      filename = u.filename
+      File.makedirs(File.join(Merb.root, "uploads", directory))
+      FileUtils.mv(tempfile, File.join(Merb.root, "uploads", directory, filename))
+      u.state = :uploaded
+      u.save
+      u.cont
+    end
   end
 
   def excel_file
@@ -63,7 +82,7 @@ class Upload
     MODELS.each do |model|
       fn = File.join("uploads", directory, "#{model}_errors.csv")
       if File.exists?(fn)
-        error_rows = `wc -l #{fn} | awk -F" " '{print $1}'`.to_i
+        error_rows = `wc -l #{fn} | awk -F" " '{print $1}'`.to_i - 1
         next if error_rows == 0
         link_text +=  "#{error_rows} #{model.to_s} "
       end
@@ -194,7 +213,7 @@ class Upload
       error_file = File.open(error_filename,"w")
       next unless file_name = csv_file_for(model)                                                             # no CSV file? next!
       model = Kernel.const_get(model.to_s.singularize.camel_case)
-      if [Branch, Center, Client, Loan].include?(model) and StaffMember.count == 0                       # some models need staff members
+      if [BizLocation, Client].include?(model) and StaffMember.count == 0                       # some models need staff members
         @log.error("No point continuing with #{model} without any staff members")
         next 
       end
