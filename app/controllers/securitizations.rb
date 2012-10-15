@@ -101,7 +101,15 @@ class Securitizations < Application
 
     # OPERATION PERFORMED
     if @errors.blank?
-      # TODO
+      filename = params[:file][:filename]
+      xls_folder = File.join("#{Merb.root}/public/uploads", "loan_assignments", "uploaded_xls")
+      FileUtils.mkdir_p(xls_folder)
+      xls_filepath = File.join(xls_folder, filename)
+      FileUtils.mv(params[:file][:tempfile].path, xls_filepath)
+
+      csv_folder = File.join("#{Merb.root}/public/uploads", "loan_assignments", "converted_csv")
+      FileUtils.mkdir_p(csv_folder)
+      User.convert_xls_to_csv(xls_filepath, "#{csv_folder}/loan_assignment")
     end
 
     # RENDER/RE-DIRECT
