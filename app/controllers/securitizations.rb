@@ -190,7 +190,7 @@ class Securitizations < Application
               
             begin
               if funder.blank? || funding_line.blank? || tranch.blank? || tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
-                msg << "No relation with given Funder, Funding Line and Tranch ID(IDs Mismatch)"
+                msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID"
               end
 
               if assignment_type == "s"
@@ -201,9 +201,12 @@ class Securitizations < Application
                 msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
               end
 
-              loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
-              @sucessfully_uploaded_records += 1
-              loan_status, loan_error = "Success", ''
+              if msg.blank?
+                loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
+                @sucessfully_uploaded_records += 1
+                loan_status, loan_error = "Success", ''
+              end
+
               @errors << "Loan ID #{id}: #{msg.flatten.join(', ')}" unless msg.blank?
             rescue => ex
               @failed_records += 1
