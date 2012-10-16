@@ -1,23 +1,24 @@
-%div.tab_container
-  %ul.tabs
-    %li#basic_info Basic info
-  %div.tab
-    %table
-      %tr
-        %td
-          = form_for(@client, :action => url(:controller => :new_clients, :action=> :create), :multipart => true) do
-            = hidden_field :name => :client_type, :value => @client.class
-            = hidden_field :name => :biz_location, :value => @biz_location.id
-            = partial 'new_clients/fields'
-            = submit "Add client", :class => "grey_button"
-            = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"
-        %td
-          #new_client_group_form{:style => "display : #{@biz_location.client_groups.blank? ? false : 'none' }", :class => 'tall shaded'}
-            = form_for(@client_group, :action => url(:client_groups)) do
-              = partial 'client_groups/new_client_groups_fields'
-              = submit 'Save'
-              &nbsp;&nbsp;
-              %b
-                Or
-              &nbsp;&nbsp;
-              = link_to_with_rights 'Cancel', '#', :class => "grey_button", :onclick => "jQuery('#new_client_group_form').hide(); return false;"
+%h1 Basic Info
+%table.shaded
+  %tr
+    %td
+      = form_for(@client, :action => url(:controller => :new_clients, :action=> :create), :multipart => true) do
+        = hidden_field :name => :client_type, :value => @client.class
+        = hidden_field :name => :biz_location, :value => @biz_location.id
+        = partial 'new_clients/fields'
+        = submit "Add client", :class => "grey_button"
+        &nbsp;&nbsp;
+        %b
+          Or
+        &nbsp;&nbsp;
+        = link_to_with_rights 'Cancel', params[:return], :class => "grey_button"
+    %td
+      #new_client_group_form{:style => "display : #{@biz_location.client_groups.blank? ? false : 'none' }", :class => 'tall shaded'}
+        = form_for(@client_group, :action => url(:client_groups)) do
+          = partial 'client_groups/new_client_groups_fields'
+          = submit 'Save'
+          &nbsp;&nbsp;
+          %b
+            Or
+          &nbsp;&nbsp;
+          = link_to_with_rights 'Cancel', '#', :class => "grey_button", :onclick => "jQuery('#new_client_group_form').hide(); return false;"
