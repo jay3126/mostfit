@@ -161,44 +161,36 @@ class Securitizations < Application
             assignment_type_id = data[:assignment_type_id]
 
             # VALIDATIONS
+            msg << "Effective on date must not be blank" if effective_on_date.blank?
+
             funder = NewFunder.get funder_id
-            if funder.blank?
-              msg << "Funder ID not found"
-            end
+            msg << "Funder ID not found" if funder.blank?
 
             funding_line = NewFundingLine.get funding_line_id
-            if funding_line.blank?
-              msg << "Funding Line ID not found"
-            end
+            msg << "Funding Line ID not found" if funding_line.blank?
 
             tranch = NewTranch.get tranch_id
-            if tranch.blank?
-              msg << "Tranch ID not found"
-            end
+            msg << "Tranch ID not found" if tranch.blank?
 
-            if assignment_type.blank?
-              msg << "Assignment type must not be blank"
-            end
+            msg << "Assignment type must not be blank" if assignment_type.blank?
 
-            if (assignment_type != "s" && assignment_type != "e")
-              msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance)"
-            end
-              
-            if assignment_type_id.blank?
-              msg << "Assignment type id must not be blank"
-            end
+            msg << "Assignment type id must not be blank" if assignment_type_id.blank?
               
             begin
-              if funder.blank? || funding_line.blank? || tranch.blank? || tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
-                msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID"
+              unless funder.blank? || funding_line.blank? || tranch.blank?
+                msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID" if tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
               end
 
-              if assignment_type == "s"
-                assignment_type_object = Securitization.get assignment_type_id
-                msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
-              else
-                assignment_type_object = Encumberance.get assignment_type_id
-                msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+              unless assignment_type.blank? || assignment_type_id.blank?
+                msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance)" if (assignment_type != "s" && assignment_type != "e")
+
+                if assignment_type == "s"
+                  assignment_type_object = Securitization.get assignment_type_id
+                  msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                else
+                  assignment_type_object = Encumberance.get assignment_type_id
+                  msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                end
               end
 
               if msg.blank?
