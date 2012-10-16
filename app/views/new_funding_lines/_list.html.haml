@@ -9,16 +9,19 @@
         %th Amount
         %th Sanction Date
         %th Tranches
-        %th
+        %th Action
     - @funding_lines.each do |funding_line|
       %tr{ :class => cycle('odd','') }
         %td
-          = funding_line.id
+          = link_to_with_rights funding_line.id, url(:controller => :new_funding_lines, :action => :show, :id => funding_line.id)
         %td
-          = funding_line.funding_line_money_amount.to_s
+          = link_to_with_rights funding_line.funding_line_money_amount.to_s, url(:controller => :new_funding_lines, :action => :show, :id => funding_line.id)
         %td
           = funding_line.sanction_date
         %td
           = link_to_with_rights("Tranches (#{funding_line.new_tranches.size rescue "0"})","/new_tranches/list/#{funding_line.id}")
         %td
           = link_to_with_rights 'Edit', resource(@funder,funding_line,:edit)
+          &nbsp;&nbsp;
+          %br
+            = link_to_with_rights "New Tranch", url("new_funders/#{@funder.id}/new_funding_lines/#{funding_line.id}/new_tranches/new")

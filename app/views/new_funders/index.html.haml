@@ -1,5 +1,5 @@
-%h1
-  List Of Funders
+%h1 List Of Funders
+
 .menu-strip{:style => "width: 30%;"}
   = link_to_with_rights 'Create New Funder', '#', :onclick => "jQuery('#create_funder').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
@@ -10,8 +10,10 @@
   = form_for(@funder, :action => url(:new_funders)) do
     = partial :fields
     = submit "Create"
+    &nbsp;&nbsp;
     %b
       Or
+    &nbsp;&nbsp;
     = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#create_funder').toggle(); return false;", :class => "grey_button"
 %br
 = partial :list

@@ -9,7 +9,7 @@ class NewTranches < Application
 
     # OPERATIONS PERFORMED
     begin
-      @tranches = @funding_line.new_tranches(:order => [ :created_at .asc ])
+      @tranches = @funding_line.new_tranches(:order => [:created_at.asc])
     rescue => ex
       @errors << ex.message
     end

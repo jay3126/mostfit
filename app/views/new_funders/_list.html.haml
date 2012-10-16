@@ -9,7 +9,7 @@
         %th ID
         %th Funder Name
         %th Funding Lines
-        %th
+        %th Actions
     - @funders.each do |funder|
       %tr
         %td
@@ -20,3 +20,5 @@
           = link_to_with_rights "Funding Lines (#{funder.new_funding_lines.size rescue 0})", resource(funder, :new_funding_lines, :new)
         %td
           = link_to_with_rights 'Edit', resource(funder, :edit)
+          %br
+            = link_to_with_rights 'New Funding Line', resource(funder, :new_funding_lines, :new)
