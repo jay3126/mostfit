@@ -15,6 +15,16 @@
   %form{:action => url(:controller => :securitizations, :action => :upload_loan_assignment_file), :enctype => "multipart/form-data", :method => "post"}
     %input{:name => "file", :size => "80", :type => "file"}
     %input{:type => "submit", :value => "Upload"}
+  %table
+    %tr{:style => "text-align:left;"}
+      %th Total number of records in file
+      %td= @total_records.blank? ? "N/A" : @total_records
+    %tr{:style => "text-align:left;"}
+      %th Number of records successfully uploaded
+      %td= @sucessfully_uploaded_records.blank? ? "N/A" : @sucessfully_uploaded_records
+    %tr{:style => "text-align:left;"}
+      %th Number of records failed to upload
+      %td= @failed_records.blank? ? "N/A" : @failed_records
 %br
 .shaded
   %h2 Assigned Loans
