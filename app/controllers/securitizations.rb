@@ -116,7 +116,6 @@ class Securitizations < Application
         csv_filepath = File.join(csv_folder, "loan_assignment")
 
         User.convert_xls_to_csv(xls_filepath, csv_filepath)
-        # loan_assignment_facade.mark_loans_as_assigned("#{csv_filepath}.csv.0")
 
         fq_file_path = "#{csv_filepath}.csv.0"
         output_folder = File.join("#{Merb.root}/public/uploads/loan_assignments", "results")
