@@ -1,7 +1,10 @@
-%table.tall.shaded
+
+%i
+  %b Note: Fields marked * are compulsory
+%table.tall.shaded  
   %tr
     %th
-      Branch
+      Branch*
     %td
       - if @biz_location
         = @biz_location.name
@@ -13,18 +16,18 @@
         %span.greytext select branch for entering the Asset Details
   %tr
     %th
-      Issue To
+      Issue To*
     %td
       = text_field :name
       %span.greytext name of the Staff member to whom the asset is being issued
   %tr
     %th
-      Issue Date
+      Issue Date*
     %td
       = date_select_for @asset_register, :issue_date
   %tr
     %th
-      Issued By
+      Issued By*
     %td
       - if @biz_location
         - staff_member = []
@@ -38,7 +41,7 @@
         %span.greytext select the staff member who issued the asset
   %tr
     %th
-      Asset Category
+      Asset Category*
     %td
       - if @asset_category
         = @asset_category.name
@@ -47,7 +50,7 @@
         = select :asset_category_id, :collection => AssetCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Category"
   %tr
     %th
-      Asset Sub-category
+      Asset Sub-category*
     %td
       - if @asset_sub_category
         = @asset_sub_category.name
@@ -56,7 +59,7 @@
         = select :asset_sub_category_id, :collection => AssetSubCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Sub-category"
   %tr
     %th
-      Asset Type
+      Asset Type*
     %td
       - if @asset_type
         = @asset_type.name
@@ -65,12 +68,12 @@
         = select :asset_type_id, :collection => AssetType.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Type"
   %tr
     %th
-      Name of the item
+      Name of the item*
     %td
       = text_field :name_of_the_item
   %tr
     %th
-      Tag number
+      Tag number*
     %td
       = text_field :tag_no
   %tr

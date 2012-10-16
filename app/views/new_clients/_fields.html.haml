@@ -1,4 +1,6 @@
 = hidden_field :created_by_staff, :value => @staff.id
+%i
+%b Note: Feilds marked * are compulsory
 %table.tall.shaded
   %tr
     %th
@@ -170,8 +172,3 @@
     %td
       = image_tag @client.picture.url(:medium)
       = file_field :picture
-  %tr
-    %th
-    %td  
-      &nbsp;&nbsp;
-      %span.greytext Fields marked * are compulsory
