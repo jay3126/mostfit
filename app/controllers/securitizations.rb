@@ -145,7 +145,7 @@ class Securitizations < Application
         end
 
         @total_records = loans_data.keys.size
-        FasterCSV.open(file_to_write, "w"){ |fastercsv|
+        FasterCSV.open(file_to_write, "w") do |fastercsv|
           fastercsv << [ 'Loan ID', 'Effective On', 'Funder ID', 'Funding line ID', 'Tranch ID', 'Assignment type', 'Assignment type ID', 'Status', 'Error' ]
           record_no = 0
           loans_data.each do |id, data|
@@ -197,16 +197,18 @@ class Securitizations < Application
                 @sucessfully_uploaded_records += 1
                 loan_status, loan_error = "Success", ''
               end
-
-              @errors << "Loan ID #{id}: #{msg.flatten.join(', ')}" unless msg.blank?
+              unless msg.blank?
+                @failed_records += 1
+                @errors << "Loan IsD #{id}: #{msg.flatten.join(', ')}"
+              end
             rescue => ex
               @failed_records += 1
               @errors << "Loan ID #{id}: #{ex.message}, #{msg.flatten.join(', ')}"
               loan_status, loan_error = 'Failure', "#{ex.message}, #{msg.flatten.join(', ')}"
             end
-            fastercsv << [id, data[:effective_on_date], data[:funder_id], data[:funding_line_id], data[:tranch_id], data[:assignment_type], data[:assignment_type_id], loan_status, loan_error]
+            fastercsv << [id, effective_on_date, funder_id, funding_line_id, tranch_id, assignment_type, assignment_type_id, loan_status, loan_error]
           end
-        }
+        end
 
       rescue => ex
         @errors << ex.message
