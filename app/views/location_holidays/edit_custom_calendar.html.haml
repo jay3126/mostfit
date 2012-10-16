@@ -1,3 +1,8 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_all').change(function() {
+    $('.custom_calendar_box').attr('checked',$(this).attr('checked'))});
+  });
 %h2== Custom Calendar For Year-#{params[:custom_calendar_year]||get_effective_date.year}
 = form_for(:location_holidays, :action => resource(:location_holidays, :update_custom_calendar)) do
   = hidden_field :name => 'custom_calendar_year', :value => @custom_year
@@ -7,7 +12,7 @@
         %th
           Select All
           %br
-          = check_box :name => 'select_all'
+          = check_box :name => 'select_all', :id => 'toggle_select_all'
         %th
           S. No.
         %th
@@ -22,7 +27,7 @@
     - @custom_calendar_dates.sort_by{|d| d.on_date}.each do |data_value|
       %tr
         %td{:style => 'text-align:center'}
-          = check_box :name => "custom_calendar[#{data_value.id}][update_calendar]", :value => data_value.id
+          = check_box :name => "custom_calendar[#{data_value.id}][update_calendar]", :value => data_value.id, :class => 'custom_calendar_box'
         %td
           = count
         %td

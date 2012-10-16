@@ -886,6 +886,15 @@ class Lending
     eligible_loans
   end
 
+  def update_loan_shechdule_according_calendar_holiday(on_date, move_date, after_date = Date.today)
+    on_date = on_date.class == Date ? on_date : Date.parse(on_date)
+    move_date = move_date.class == Date ? move_date : Date.parse(move_date)
+    after_date = after_date.class == Date ? after_date : Date.parse(after_date)
+    loan_schedules = self.loan_base_schedule.get_schedule_after_date(after_date)
+    schedules = loan_schedules.select{|s| s.on_date == on_date}
+    schedules.each{|schedule| schedule.update(:on_date => move_date)}
+  end
+
   private
 
   def get_loan_fee_product
