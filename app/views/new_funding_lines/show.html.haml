@@ -28,6 +28,45 @@
     %li#history History
 
   %div.tab
+    %br
+    - @tranches = @funding_line.new_tranches(:order => [:created_at.asc])
+    - if @tranches.blank?
+      %p
+        %i No tranches have been created yet.
+    - else
+      %table.dataTable.report.weeksheet.nojs
+        %thead
+          %tr
+            %td Tranch ID
+            %td Amount
+            %td Interest Rate
+            %td Disbursal Date
+            %td First Payment Date
+            %td Last Payment Date
+            %td Assignment Type
+            %td Action
+        - @tranches.each do |tranch|
+          %tr
+            %td
+              = link_to_with_rights tranch.id, url(:controller => :new_tranches, :action => :show, :id => tranch.id)
+            %td
+              = link_to_with_rights tranch.tranch_money_amount, url(:controller => :new_tranches, :action => :show, :id => tranch.id)
+            %td
+              = tranch.interest_rate
+            %td
+              = tranch.disbursal_date
+            %td
+              = tranch.first_payment_date
+            %td
+              = tranch.last_payment_date
+            %td
+              = tranch.assignment_type.humanize rescue nil
+            %td
+              = link_to_with_rights 'Edit', resource(@funding_line.new_funder, @funding_line, tranch, :edit)
+              &nbsp;&nbsp;
+              %br
+                = link_to_with_rights "New Tranch", url("new_funders/#{@funding_line.new_funder.id}/new_funding_lines/#{@funding_line.id}/new_tranches/new")
+
   %div.tab
     %br
     %table.report.nojs{:width => "100%"}

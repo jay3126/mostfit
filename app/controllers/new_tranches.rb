@@ -1,5 +1,11 @@
 class NewTranches < Application
 
+  def show(id)
+    @tranch = NewTranch.get(params[:id])
+    raise NotFound unless @tranch
+    display @tranch
+  end
+
   def list
     # GATE-KEEPING
     @errors = []
