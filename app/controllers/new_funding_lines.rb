@@ -38,7 +38,11 @@ class NewFundingLines < Application
         amount = @money.amount
         currency = @money.currency
         @funding_line = @funder.new_funding_lines.create({:amount => amount, :currency => currency, :new_funder_id => funder_id, :created_by => session.user.id, :sanction_date => sanction_date})
-        message = {:notice => "Funding Line was successfully created"}
+        if @funding_line.valid?
+          message = {:notice => "Funding Line was successfully created"}
+        else
+          message = {:error => @funding_line.errors.first}
+        end
       rescue => ex
         message = {:error => ex.message}
       end
