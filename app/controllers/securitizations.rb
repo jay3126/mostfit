@@ -93,11 +93,11 @@ class Securitizations < Application
   def upload_loan_assignment_file
     # INITIALIZATIONS
     @errors = []
-    msg = []
     @loan_assignments = LoanAssignment.all
     @total_records = 0
     @sucessfully_uploaded_records = 0
     @failed_records = 0
+
     # VALIDATIONS
     @errors << "Please select file" if params[:file].blank?
     @errors << "Invalid file selection (Accepts .xls extension file only)" if params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel"
@@ -148,7 +148,10 @@ class Securitizations < Application
         @total_records = loans_data.keys.size
         FasterCSV.open(file_to_write, "w"){ |fastercsv|
           fastercsv << [ 'Loan ID', 'Effective On', 'Funder ID', 'Funding line ID', 'Tranch ID', 'Assignment type', 'Assignment type ID', 'Status', 'Error' ]
+          record_no = 0
           loans_data.each do |id, data|
+            msg = []
+            record_no += 1
             loan_status, loan_error = "Not known", "Not known"
             effective_on_date  = data[:effective_on_date]
             funder_id          = data[:funder_id]
@@ -201,10 +204,10 @@ class Securitizations < Application
               loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
               @sucessfully_uploaded_records += 1
               loan_status, loan_error = "Success", ''
-              @errors << "#{msg.flatten.join(', ')}" unless msg.blank?
+              @errors << "Loan ID #{id}: #{msg.flatten.join(', ')}" unless msg.blank?
             rescue => ex
               @failed_records += 1
-              @errors << "#{ex.message}, #{msg.flatten.join(', ')}"
+              @errors << "Loan ID #{id}: #{ex.message}, #{msg.flatten.join(', ')}"
               loan_status, loan_error = 'Failure', "#{ex.message}, #{msg.flatten.join(', ')}"
             end
             fastercsv << [id, data[:effective_on_date], data[:funder_id], data[:funding_line_id], data[:tranch_id], data[:assignment_type], data[:assignment_type_id], loan_status, loan_error]
