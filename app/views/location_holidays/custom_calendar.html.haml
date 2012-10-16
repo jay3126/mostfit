@@ -30,6 +30,8 @@
     %h2 Custom Calendar does not exists
   - else
     %h2== Custom Calendar For Year-#{params[:custom_calendar_year]||get_effective_date.year}
+    %div{:id => 'edit_custom_calendar', :style => "text-align:right"}
+      = link_to_with_rights "Edit", resource(:location_holidays, :edit_custom_calendar, :custom_calendar_year => params[:custom_calendar_year]), :class => 'add grey_button'
     %table.dataTable.report.weeksheet.nojs
       %thead
         %tr

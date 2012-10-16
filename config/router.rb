@@ -55,7 +55,7 @@ Merb::Router.prepare do
   end
   resources :money_deposits, :id => %r(\d+), :collection => {:bulk_record_varification => [:get,:post],:get_money_deposits => [:get], :get_bank_branches => [:get], :get_bank_accounts => [:get], :mark_verification => [:get]}
   resources :holiday_calendars
-  resources :location_holidays, :id => %r(\d+), :collection => {:download_custom_calendar_format => [:get], :record_custom_calendar => [:get, :post], :custom_calendar => [:get], :holiday_for_location => [:get], :create_holiday_for_location => [:put]}
+  resources :location_holidays, :id => %r(\d+), :collection => {:edit_custom_calendar => [:get], :update_custom_calendar => [:get, :post], :download_custom_calendar_format => [:get], :record_custom_calendar => [:get, :post], :custom_calendar => [:get], :holiday_for_location => [:get], :create_holiday_for_location => [:put]}
 
   resources :api_accesses
   resources :monthly_targets

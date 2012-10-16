@@ -210,6 +210,40 @@ class LocationHolidays < Application
     display @data
   end
 
+  def edit_custom_calendar
+    @custom_year = params[:custom_calendar_year]||get_effective_date.year
+    first_date = Date.parse("01-01-#{@custom_year}")
+    last_date = Date.parse("31-12-#{@custom_year}")
+    @custom_calendar_dates = CustomCalendar.all(:on_date => (first_date..last_date))
+    display @custom_calendar_dates
+  end
+
+  def update_custom_calendar
+    @message = {:error => [], :notice => []}
+    cc_params = params[:custom_calendar]
+    valid_params = cc_params.select{|key, value| value[:update_calendar]==key}.map(&:last)
+    @message[:error] << 'Please Select Custom Calendar Date For Updated' if valid_params.blank?
+
+    if @message[:error].blank?
+      begin
+        valid_params.each do |values|
+          obj = CustomCalendar.get(values[:update_calendar])
+          unless obj.blank?
+            obj.collection_date = values[:collection_date].blank? ? nil : Date.parse(values[:collection_date])
+            obj.holiday_name = values[:holiday_name]
+            obj.save
+          end
+        end
+      rescue => ex
+        @message = {:error => "An error has occured: #{ex.message}"}
+      end
+      @message[:notice] = "Custom Calendar updated successfully"
+    end
+
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect resource(:location_holidays, :edit_custom_calendar, :custom_calendar_year => params[:custom_calendar_year].to_s), :message => @message
+  end
+
   def record_custom_calendar
     @message = {:error => [], :notice => []}
     recorded_by = session.user

@@ -74,7 +74,7 @@ module Constants
         number_of_days = MEETING_FREQUENCIES_AS_DAYS[frequency]
         date = from_date + number_of_days
       end
-      custom_date = CustomCalender.first(:collection_date => date)
+      custom_date = CustomCalendar.first(:collection_date => date)
       custom_move_date = custom_date.blank? ? '' : custom_date.on_date
       custom_move_date.blank? ? date : custom_move_date
     end
