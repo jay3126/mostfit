@@ -93,6 +93,7 @@ class Securitizations < Application
   def upload_loan_assignment_file
     # INITIALIZATIONS
     @errors = []
+    msg = []
     @loan_assignments = LoanAssignment.all
 
     # VALIDATIONS
@@ -110,14 +111,106 @@ class Securitizations < Application
 
         csv_folder = File.join("#{Merb.root}/public/uploads", "loan_assignments", "converted_csv")
         FileUtils.mkdir_p(csv_folder)
-        User.convert_xls_to_csv(xls_filepath, "#{csv_folder}/loan_assignment")
-        loan_assignment_facade.mark_loans_as_assigned("#{csv_folder}/loan_assignment.csv")
+        csv_filepath = File.join(csv_folder, "loan_assignment")
+
+        User.convert_xls_to_csv(xls_filepath, csv_filepath)
+        # loan_assignment_facade.mark_loans_as_assigned("#{csv_filepath}.csv.0")
+
+        fq_file_path = "#{csv_filepath}.csv.0"
+        output_folder = File.join("#{Merb.root}/public/uploads/loan_assignments", "results")
+        FileUtils.mkdir_p(output_folder)
+        file_to_write = File.join(output_folder, "loan_assignments" + ".results.csv")
+        file_options = {:headers => true}
+
+        loans_data = {}
+        FasterCSV.foreach(fq_file_path, file_options) do |row|
+          loan_id_str        = row["Loan ID"]
+          effective_on_str   = row["Effective on"]
+          funder_id          = row["Funder ID"]
+          funding_line_id    = row["Funding line ID"]
+          tranch_id          = row["Tranch ID"]
+          assignment_type    = row["Assignment type"]
+          assignment_type_id = row["Assignment type ID"]
+          loan_id = loan_id_str.to_i
+          effective_on_date = Date.parse(effective_on_str)
+          loans_data[loan_id] = {
+            :effective_on_date  => effective_on_date,
+            :funder_id          => funder_id,
+            :funding_line_id    => funding_line_id,
+            :tranch_id          => tranch_id,
+            :assignment_type    => assignment_type,
+            :assignment_type_id => assignment_type_id
+          }
+        end
+
+        FasterCSV.open(file_to_write, "w"){ |fastercsv|
+          fastercsv << [ 'Loan ID', 'Effective On', 'Funder ID', 'Funding line ID', 'Tranch ID', 'Assignment type', 'Assignment type ID', 'Status', 'Error' ]
+          loans_data.each do |id, data|
+            loan_status, loan_error = "Not known", "Not known"
+            effective_on_date  = data[:effective_on_date]
+            funder_id          = data[:funder_id]
+            funding_line_id    = data[:funding_line_id]
+            tranch_id          = data[:tranch_id]
+            assignment_type    = data[:assignment_type]
+            assignment_type_id = data[:assignment_type_id]
+
+            # VALIDATIONS
+            funder = NewFunder.get funder_id
+            if funder.blank?
+              msg << "Funder ID not found"
+            end
+
+            funding_line = NewFundingLine.get funding_line_id
+            if funding_line.blank?
+              msg << "Funding Line ID not found"
+            end
+
+            tranch = NewTranch.get tranch_id
+            if tranch.blank?
+              msg << "Tranch ID not found"
+            end
+
+            if assignment_type.blank?
+              msg << "Assignment type must not be blank"
+            end
+
+            if (assignment_type != "s" && assignment_type != "e")
+              msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance)"
+            end
+              
+            if assignment_type_id.blank?
+              msg << "Assignment type id must not be blank"
+            end
+              
+            begin
+              if funder.blank? || funding_line.blank? || tranch.blank? || tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
+                msg << "No relation with given Funder, Funding Line and Tranch ID(IDs Mismatch)"
+              end
+
+              if assignment_type == "s"
+                assignment_type_object = Securitization.get assignment_type_id
+                msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+              else
+                assignment_type_object = Encumberance.get assignment_type_id
+                msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+              end
+
+              loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
+              loan_status, loan_error = "Success", ''
+              @errors << "#{msg.flatten.join(', ')}" unless msg.blank?
+            rescue => ex
+              @errors << "#{ex.message}, #{msg.flatten.join(', ')}"
+              loan_status, loan_error = 'Failure', "#{ex.message}, #{msg.flatten.join(', ')}"
+            end
+            fastercsv << [id, data[:effective_on_date], data[:funder_id], data[:funding_line_id], data[:tranch_id], data[:assignment_type], data[:assignment_type_id], loan_status, loan_error]
+          end
+        }
+
       rescue => ex
         @errors << ex.message
       end
     end
 
-    # RENDER/RE-DIRECT
     render :loan_assignments
   end
 
