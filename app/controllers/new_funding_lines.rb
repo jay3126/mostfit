@@ -12,6 +12,23 @@ class NewFundingLines < Application
     display @funding_line
   end
 
+  def list
+    # GATE-KEEPING
+    @errors = []
+    funder_id = params[:id]
+    @funder = NewFunder.get funder_id
+
+    # OPERATIONS PERFORMED
+    begin
+      @funding_lines = @funder.new_funding_lines(:order => [:created_at.asc])
+    rescue => ex
+      @errors << ex.message
+    end
+
+    # RENDER/RE-DIRECT
+    display [@funding_line, @funder]
+  end
+
   def new
     @funder = NewFunder.get(params[:new_funder_id])
     @funding_line = NewFundingLine.new

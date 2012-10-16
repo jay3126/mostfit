@@ -1,0 +1,35 @@
+%h1 List of Funding Lines under Funder: #{@funder.name}
+
+.menu-strip{:style => "width: 40%;"}
+  = link_to_with_rights 'Create a new funding line', resource(@funder, :new_funding_lines, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:new_funders), :class => "grey_button"
+
+%br
+- if @funding_lines.blank?
+  %p
+    %i No funding lines have been created yet.
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th Id
+        %th Amount
+        %th Sanction Date
+        %th Tranches
+        %th Action
+    - @funding_lines.each do |funding_line|
+      %tr{ :class => cycle('odd','') }
+        %td
+          = link_to_with_rights funding_line.id, url(:controller => :new_funding_lines, :action => :show, :id => funding_line.id)
+        %td
+          = link_to_with_rights funding_line.funding_line_money_amount.to_s, url(:controller => :new_funding_lines, :action => :show, :id => funding_line.id)
+        %td
+          = funding_line.sanction_date
+        %td
+          = link_to_with_rights("Tranches (#{funding_line.new_tranches.size rescue "0"})","/new_tranches/list/#{funding_line.id}")
+        %td
+          = link_to_with_rights 'Edit', resource(@funder,funding_line,:edit)
+          &nbsp;&nbsp;
+          %br
+            = link_to_with_rights "New Tranch", url("new_funders/#{@funder.id}/new_funding_lines/#{funding_line.id}/new_tranches/new")

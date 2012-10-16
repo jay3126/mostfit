@@ -17,7 +17,7 @@
         %td
           = link_to_with_rights funder.name, resource(funder)
         %td
-          = link_to_with_rights "Funding Lines (#{funder.new_funding_lines.size rescue 0})", resource(funder, :new_funding_lines, :new)
+          = link_to_with_rights "Funding Lines (#{funder.new_funding_lines.size rescue 0})", url("new_funding_lines/list/#{funder.id}")
         %td
           = link_to_with_rights 'Edit', resource(funder, :edit)
           %br
