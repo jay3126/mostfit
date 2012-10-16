@@ -10,13 +10,13 @@
         - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
         - branch_collection = location_facade.all_nominal_branches
         = select :biz_location_id, :collection => branch_collection.map{|b| [b.id, b.name]}, :prompt => "Select Branch"
-        %span.greytext select the branch for entering the Asset Details
+        %span.greytext select branch for entering the Asset Details
   %tr
     %th
       Issue To
     %td
       = text_field :name
-      %span.greytext enter the name to whom the asset type is being issued
+      %span.greytext name of the Staff member to whom the asset is being issued
   %tr
     %th
       Issue Date
@@ -35,7 +35,7 @@
         %span.greytext select the staff member who is entering the details
       - else
         = select :manager_staff_id, :collection => StaffMember.all(:order => [:name]).select{|s| s.user.blank?}, :prompt => "choose staff member", :text_method => :name, :value_method => :id
-        %span.greytext select the staff member who is issuing the asset
+        %span.greytext select the staff member who issued the asset
   %tr
     %th
       Asset Category

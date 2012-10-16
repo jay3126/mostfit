@@ -54,4 +54,4 @@
       - @staff_postings.each do |staff_posting|
         - staff_member << staff_posting.staff_assigned
       = select :manager_staff_id, :collection => staff_member.map{|s| [s.id, s.name]}, :prompt => "choose staff member"
-      %span.greytext select the person who is entering the details
+      %span.greytext select the staff member who is entering the details

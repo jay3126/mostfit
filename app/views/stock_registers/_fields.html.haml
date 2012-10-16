@@ -48,4 +48,4 @@
       Stock Details Entered By
     %td
       = select :manager_staff_id, :collection => StaffMember.all(:order => [:name]).select{|s| s.user.blank?}, :prompt => "choose staff member", :text_method => :name, :value_method => :id
-      %span.greytext select the person who is entering the details
+      %span.greytext select the staff member who is entering the details
