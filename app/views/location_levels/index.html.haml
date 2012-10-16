@@ -1,5 +1,4 @@
-%h1
-  Location Level
+%h1 List of Location Level's
 
 .menu-strip{:style => "width: 30%;"}
   = link_to 'Add New Location Level', '#', :class => 'add grey_button', :onclick => "jQuery('#location_level').toggle(); return false;"
@@ -31,4 +30,3 @@
           = link_to location_level.name, resource(location_level)
         %td
           = location_level.creation_date
-

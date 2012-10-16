@@ -17,5 +17,4 @@
         %td
           = submit 'Save'
         %td
-          = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
-
+          = link_to_with_rights 'Cancel', '#', :onclick => "jQuery('#location_level').hide(); return false;", :class => "grey_button"
