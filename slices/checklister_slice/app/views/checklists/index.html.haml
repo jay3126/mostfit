@@ -31,7 +31,7 @@
 
 
   - for checklist in @checklists
-    - response = checklist.get_response(@target_entity_type, @target_entity_id)
+    - response = checklist.responses.blank? ? nil : checklist.responses.last
     %tr
       %td
         =checklist.name
@@ -81,6 +81,3 @@
 %br
 %br
 =link_to "Back",params[:referral_url],:class=>"greenButton"
-
-
-
