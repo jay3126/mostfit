@@ -47,7 +47,7 @@
           %tr{:style => "text-align:left;"}
             %td= link_to_with_rights la.loan_id, resource(loan)
             %td= loan.lan
-            %td= loan_assignment_facade.get_loan_assigned_to(la.loan_id, Date.today).loan_assignment_instance.to_s
+            %td= loan_assignment_facade.loan_assignment_status_message(la.loan_id)
             %td= "#{funder.name} (Id: #{funder.id})" rescue nil
             %td= "#{funding_line.name} (Id: #{funding_line.id})" rescue nil
             %td= "#{tranch.name} (Id: #{tranch.id})" rescue nil
