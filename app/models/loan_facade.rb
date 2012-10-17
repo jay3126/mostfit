@@ -192,6 +192,10 @@ class LoanFacade < StandardFacade
     Lending.loans_eligible_for_sec_or_encum(center_id)
   end
 
+  def is_loan_eligible_for_loan_assignments?(loan_id)
+    Lending.is_loan_eligible_for_loan_assignments?(loan_id)
+  end
+
   def get_funder_assigned_to_loan(lending_id)
     FundingLineAddition.get_funder_assigned_to_loan(lending_id)
   end

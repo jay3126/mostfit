@@ -162,22 +162,23 @@ class Securitizations < Application
             assignment_type_id = data[:assignment_type_id]
 
             # VALIDATIONS
-            msg << "Effective on date must not be blank" if effective_on_date.blank?
+            is_loan_eligible = loan_facade.is_loan_eligible_for_loan_assignments?(id)
+            if is_loan_eligible
+              msg << "Effective on date must not be blank" if effective_on_date.blank?
 
-            funder = NewFunder.get funder_id
-            msg << "Funder ID not found" if funder.blank?
+              funder = NewFunder.get funder_id
+              msg << "Funder ID not found" if funder.blank?
 
-            funding_line = NewFundingLine.get funding_line_id
-            msg << "Funding Line ID not found" if funding_line.blank?
+              funding_line = NewFundingLine.get funding_line_id
+              msg << "Funding Line ID not found" if funding_line.blank?
 
-            tranch = NewTranch.get tranch_id
-            msg << "Tranch ID not found" if tranch.blank?
+              tranch = NewTranch.get tranch_id
+              msg << "Tranch ID not found" if tranch.blank?
 
-            msg << "Assignment type must not be blank" if assignment_type.blank?
+              msg << "Assignment type must not be blank" if assignment_type.blank?
 
-            msg << "Assignment type id must not be blank" if assignment_type_id.blank?
+              msg << "Assignment type id must not be blank" if assignment_type_id.blank?
               
-            begin
               unless funder.blank? || funding_line.blank? || tranch.blank?
                 msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID" if tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
               end
@@ -193,7 +194,11 @@ class Securitizations < Application
                   msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
                 end
               end
-
+            else
+              msg << "Loan is not eligible for assignment"
+            end
+            
+            begin
               if msg.blank?
                 loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
                 loan_facade.assign_tranch_to_loan(id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
@@ -202,7 +207,7 @@ class Securitizations < Application
               end
               unless msg.blank?
                 @failed_records += 1
-                @errors << "Loan IsD #{id}: #{msg.flatten.join(', ')}"
+                @errors << "Loan ID #{id}: #{msg.flatten.join(', ')}"
               end
             rescue => ex
               @failed_records += 1
