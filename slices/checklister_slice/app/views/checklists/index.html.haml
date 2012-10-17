@@ -31,7 +31,7 @@
 
 
   - for checklist in @checklists
-    - response = checklist.responses.blank? ? nil : checklist.responses.last
+    - response = checklist.get_response(@target_entity_type, @target_entity_id)
     %tr
       %td
         =checklist.name
