@@ -258,9 +258,10 @@ class BaseScheduleLineItem
   end
 
   def date_change_according_to_holiday
-    location = self.loan_base_schedule.lending.administered_at_origin_location
-    holiday = LocationHoliday.get_any_holiday(location, self.on_date)
-    self.on_date = holiday.move_work_to_date unless holiday.blank?
+    custom_date  = Constants::Time.get_date_according_custom_caledar(self.on_date)
+    location     = self.loan_base_schedule.lending.administered_at_origin_location
+    holiday      = LocationHoliday.get_any_holiday(location, custom_date)
+    self.on_date = holiday.blank? ? custom_date : holiday.move_work_to_date
   end
 
 end

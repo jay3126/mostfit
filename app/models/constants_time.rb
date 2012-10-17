@@ -74,9 +74,13 @@ module Constants
         number_of_days = MEETING_FREQUENCIES_AS_DAYS[frequency]
         date = from_date + number_of_days
       end
-      custom_date = CustomCalendar.first(:collection_date => date)
+      date
+    end
+
+    def self.get_date_according_custom_caledar(on_date)
+      custom_date = CustomCalendar.first(:collection_date => on_date)
       custom_move_date = custom_date.blank? ? '' : custom_date.on_date
-      custom_move_date.blank? ? date : custom_move_date
+      custom_move_date.blank? ? on_date : custom_move_date
     end
 
     def self.ordered_dates(from_date, to_date)

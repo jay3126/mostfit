@@ -7,7 +7,7 @@
       %th
         Client
       %td
-        = select :name=>'loan_borrower', :collection => @clients.collect{|c| [c.id, c.name]}
+        = select :name=>'loan_borrower', :collection => @clients||[], :text_method => :name, :value_method => :id
   - else
     = hidden_field :name=>'loan_borrower', :value => @loan_borrower.id
   %tr

@@ -50,8 +50,8 @@ class EodProcess
         accrual_transactions = all_accrual_transactions.select{|a| a.on_product_type == :lending && a.on_product_id == loan.id}
         accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
         get_loan_facade(user).adjust_advance(self.on_date, loan.id) if loan.is_outstanding? && loan_ids_for_advance.include?(loan.id)
-        custom_loan_dates = custom_calendars.select{|s| loan_schedules.map(&:on_date).include?(s.on_dat)}
-        custom_loan_dates.each{|cd| loan.update_loan_shechdule_according_calendar_holiday(cd.on_date, cd.collection_date, self.date)}
+        custom_loan_dates = custom_calendars.select{|s| loan_schedules.map(&:on_date).include?(s.on_date) && !s.collection_date.blank?}
+        custom_loan_dates.each{|cd| loan.update_loan_shechdule_according_calendar_holiday(cd.on_date, cd.collection_date, self.on_date)}
       end
       self.update(:completed_at => Time.now, :status => COMPLETED)
     }
