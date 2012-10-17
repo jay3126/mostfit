@@ -1,49 +1,81 @@
-!!!
-%html
+!!! Strict
+%html{ "xml:lang" => "en", :lang => "en", :xmlns => "http://www.w3.org/1999/xhtml" }
   %head
-    %title CheckList
-    
-    %link{:href => stylesheet_path('master1.css'), :type => "text/css", :rel => "stylesheet"}
-    %link{:href => stylesheet_path('style.css'), :type => "text/css", :rel => "stylesheet"}
-    %link{:href => stylesheet_path('data_table.css'), :type => "text/css", :rel => "stylesheet"}
-    //%link{:href => stylesheet_path('print.css'), :type => "text/css", :rel => "stylesheet"}
-    //%link{:href => stylesheet_path('screen.css'), :type => "text/css", :rel => "stylesheet"}
-
-
-    %link{:href => stylesheet_path('notify-osd.css'), :type => "text/css", :rel => "stylesheet"}
-    %link{:href => stylesheet_path('jquery-ui.css'), :type => "text/css", :rel => "stylesheet"}
-
-    %script{:src => "../javascripts/jquery.js", :type => "text/javascript"}
-    %script{:src => javascript_path('jquery.js'), :type => "text/javascript"}
-    %script{:src => javascript_path('master.js'), :type => "text/javascript"}
-    %script{:src => javascript_path('notify-osd.js'), :type => "text/javascript"}
-    %script{:src => javascript_path('jquery-ui.min.js'), :type => "text/javascript"}
-    %script{:src => javascript_path('jquery.dataTables.js'), :type => "text/javascript"}
-
-    %script{:src => javascript_path("application_old.js"), :type => "text/javascript"}
-
-
+    %meta{ :content => "text/html; charset=utf-8", "http-equiv" => "content-type" }
+    %title
+      = page_title_str = page_title
+    %link{ :rel => "icon", :type => "image/ico", :href => "/favicon.ico" }
+    = css_include_tag :screen, :media => "screen, projection"
+    = css_include_tag :print, :media => "print"
+    /= css_include_tag :style, :media => "screen, projection"
+    %link{:rel => "stylesheet/less", :type => "text/css", :href => "/stylesheets/style.less"}
+    = css_include_tag :extra
+    = css_include_tag "jquery-ui", :media => "screen, projection"
+    = css_include_tag :chosen
+    = css_include_tag :data_table
+    = css_include_tag 'jquery.multiSelect.css'
+    =# css_include_tag 'jquery.dataTable'
+    = js_include_tag :jquery, :application, :swfobject, "jquery.highlight.js", "jquery.floatheader.min.js", "jquery-ui.min.js", "chosen/chosen/chosen.jquery.js", "less.js", "jquery.dataTables.js"
+    = js_include_tag 'jquery.multiSelect.js', 'jquery.bgiframe.min.js'
   %body
-    #overlay
-    
-    #container
-      #desc
-        -if !@checklist.nil?
-          ="Checklist : #{@checklist.name}"
-        -else
-          ="Checklists"
-
-      #logout
-        %p.pc
-          == Welcome, #{session.user.login} ( as #{session.user.role})
-          |
-          %a{:href => "/logout", :title => "Logout"} Logout
-      #w
-
-      %div{:id=>"main"}
-      =catch_content :for_layout
-
-    #bottom-message-drawer
-      #bottom-message
-        #bottom-message-inside
-          %span
+    #header
+      %h1.logo
+        - if mfi = Mfi.first
+          %span{:style => "color: #{mfi.color||'green'};"}
+            - if mfi.logo_name and not mfi.logo_name.blank?
+              = image_tag("logos/#{mfi.logo_name}", :height => 50)
+            - if mfi.name
+              = mfi.name
+            - else
+              MOSTFIT
+        - else
+          MOSTFIT
+      #green-header
+        - if session.authenticated?
+          #navigation
+            = link_to_with_class('Home', resource(:home))
+            //= link_to_with_class('Loans', '#')
+            = link_to_with_class('Sourcing', url(:loan_applications))
+            //= link_to_with_class('Collections', '#')
+            = link_to_with_class('Configuration', url(:admin))
+            = link_to_with_class('Accounting', url(:controller => :book_keeping, :action => :index))
+            //= link_to_with_class('Dashboard', url(:dashboard))
+            = link_to_with_class('Reports', url(:reports))
+          #header_search_div
+            %form._remote_{:action => '/search', :class => 'search', :method => "POST", :style => "float:left;", :id => "search-form"}
+              %input{:name => 'query', :value => params[:query], :autocomplete => "off"}
+              %input{:type => 'hidden', :name => '_target_', :value => "content p:first"}
+    #breadcrums
+      #login
+        - if session.authenticated?
+          = current_user_info
+        - else
+          existing users can
+          %b= link_to 'login', url(:login)
+          to proceed
+    - if (params[:controller] == "loan_applications" && (params[:action] != "index" && params[:action] != "show" && params[:action] != "edit" && params[:action] != "loan_application_list")) || params[:controller] == "overlap_report_requests" || params[:controller] == "overlap_report_responses" || params[:controller] == "loan_authorizations" || params[:controller] == "client_verifications" || params[:controller] == "loan_files" || params[:controller] == "center_cycles"
+      = partial "layout/loan_application_workflow_header"
+    #content
+      .container
+        %p
+        - if message
+          #flash-messages.span-17.prefix-5.suffix-5.last
+            - message.each do |key, value|
+              .flash{ :class => key.to_s }
+                %p= value.gsub("\n", "<br/>")
+        - if request.exceptions
+          - @exceptions = request.exceptions.dup
+          .error
+            - request.exceptions.each do |e|
+              = e.message
+        = catch_content :for_layout
+    #footer
+      %p{:style => "position: relative; right: 10%; float: right;"}
+        - if session.authenticated? and session.user.role == :admin and Merb.env == "development"
+          %form{:action => "/admin/proxy_logon", :method => :post}
+            login as
+            = select :user_id, :collection => User.all(:order => [:login]).map{|u| [u.id, u.login]}, :class => 'field'
+            = submit "go"
+      %p{:style => "position: relative; right: 10%; float: right;"}
+        =image_tag("/images/mostfit_logo.png", :height => 80)
+      == &copy; 2010 Intellecap &mdash; This software is released under the #{link_to 'GNU Affero General Public License', 'http://www.gnu.org/licenses/agpl.html'}.

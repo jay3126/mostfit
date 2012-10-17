@@ -145,7 +145,7 @@
                       = "#{loan_application.client_name}"
                       - checkboxpoint.checkboxpoint_options.each do |option|
                         %td
-                          = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)
+                          = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1), :class => "check_box_#{loan_application.id}"
                   - if !free_text.nil?
                     - if count!= 2
                       %td{:width=>"70px"}
@@ -316,7 +316,6 @@
                         - else
                           - date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
                         = date_select "free_text_#{free_text.id}".to_sym, date_value, :max_date => Date.today
-                        -#= "#{section.name}"
                     - else
                       %td
                         = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
@@ -341,3 +340,4 @@
         Cleared?
         %br
         = submit "Create"
+        = link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"

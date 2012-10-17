@@ -143,10 +143,7 @@
                     =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym]
                   -else
                     =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value"
-
-
-
-
-
       %p
         = submit "Create"
+        = link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
+
