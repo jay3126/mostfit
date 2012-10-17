@@ -86,6 +86,8 @@
             - if count == 2
               %tr
                 %td
+                  Select All
+                %td
                   Name
                 %td
                   Address Proof
@@ -112,15 +114,7 @@
             - if loan_file_name == "LoanFile"
               - if count == 2
                 - i = 0
-                -#- debugger
-
-
-
                 - loan_applications_of_loan_file.each do |loan_application|
-                  -#- checkpoint = Checkpoint.first(:section_id => section.id, :loan_application_id => loan_application.id)
-                  -#- dropdownpoint = Dropdownpoint.first(:section_id => section.id, :sequence_number => (i+1))
-
-
                   - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => loan_application.id)
                   - checkboxpoint = Checkboxpoint.create!(:section_id => section.id, :name => "#{loan_application.client_name}", :sequence_number => loan_application.id, :created_at => Date.today) if checkboxpoint.blank?
 
@@ -139,8 +133,6 @@
                   - free_text = FreeText.first(:section_id => section.id, :sequence_number => loan_application.id)
                   - free_text = FreeText.create!(:section_id => section.id, :name => "Remark", :sequence_number => loan_application.id, :created_at => Date.today) if free_text.blank?
 
-
-                  -#- debugger
                   - if i%2 == 0
                     %tr.question_cell
                   - else
@@ -148,8 +140,9 @@
 
                   - if !checkboxpoint.nil?
                     %td
+                      = check_box :name => "select_all", :onclick => "jQuery('.check_box_#{loan_application.id}').attr('checked', this.checked);"
+                    %td
                       = "#{loan_application.client_name}"
-                      -#- debugger
                       - checkboxpoint.checkboxpoint_options.each do |option|
                         %td
                           = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)

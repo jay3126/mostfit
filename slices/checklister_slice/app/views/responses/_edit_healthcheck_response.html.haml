@@ -26,6 +26,8 @@
             -if count==2
               %tr
                 %td
+                  Select All
+                %td
                   Name
                 %td
                   Address Proof
@@ -67,8 +69,9 @@
                 -else
                   -if i%2==0
                     %tr.question_cell
-
+                  
                 -if !checkpoint.nil?
+
                   %td
                     =" #{checkpoint.name}"
                   %td
@@ -85,12 +88,14 @@
                   -#- loan_file.loan_applications.each do |loan_application|
                   %tr
                     %td
+                      = check_box :name => "select_all", :onclick => "jQuery('.check_box_#{loan_application.id}').attr('checked', this.checked);"
+                    %td
                       = "#{loan_application.client_name}"
                       -checkboxpoint.checkboxpoint_options.each do |option|
                         %td
                           -#=check_box :name=>"option#{option.id}".to_sym  ,:boolean=>true,:disabled=>false
                           -#- debugger
-                          =check_box :name=>"checkboxpoint_option_fillings[checkboxpoint_option_filling_#{option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.id}]".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false
+                          =check_box :name=>"checkboxpoint_option_fillings[checkboxpoint_option_filling_#{option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.id}]".to_sym  ,:boolean=>true,:checked=>(option.checkboxpoint_option_fillings.all(:response_id=>@response.id).first.status?),:disabled=>false, :class => "check_box_#{loan_application.id}"
 
 
                     -if !free_text.nil?
