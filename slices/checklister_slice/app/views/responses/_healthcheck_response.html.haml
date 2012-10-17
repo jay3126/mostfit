@@ -84,9 +84,8 @@
                     -@comment="----NA----"
                   -else
                     -@comment=free_text_filling.comment
-                  -if free_text.name.downcase=="date"
-                    %td
-                      =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+                  %td
+                    =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
                 -else
                   - (1).times do |f|
                     %td

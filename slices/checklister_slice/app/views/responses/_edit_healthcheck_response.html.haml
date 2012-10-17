@@ -99,18 +99,10 @@
 
                           =" #{free_text.name}"
 
-                      -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-                      -if free_text_filling.nil?
-                        -@comment="----NA----"
-                      -else
-                        -@comment=free_text_filling.comment
-                      -if free_text.name.downcase=="date"
-                        %td
-                          =text_field :name=>"free_text_fillings_t2[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>@comment,:disabled=>false
-                      -else
-                        - (1).times do |f|
-                          %td
-                            =text_field :name=>"free_text_fillings_t2[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>@comment,:disabled=>false
+                      - free_text_filling = FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                      - free_text_filling = free_text.free_text_fillings.create!(:response_id => @response.id, :comment => '') if free_text_filling.blank?
+                      %td
+                        =text_field :name=>"free_text_fillings_t2[free_text_filling_#{free_text_filling.id}]".to_sym,:value=>free_text_filling.comment,:disabled=>false
                 -if !dropdownpoint.nil?
                   %td
                     =" #{dropdownpoint.name}"
@@ -171,7 +163,8 @@
 
                       =" #{free_text.name}"
 
-                  -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                  - free_text_filling = FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                  - free_text_filling = free_text.free_text_fillings.create!(:response_id => @response.id, :comment => '') if free_text_filling.blank?
                   -if free_text_filling.nil?
                     -@comment="----NA----"
                   -else
@@ -198,6 +191,7 @@
           = check_box :name => "result_status", :value => @response.id, :checked => false
           Cleared?
           %br
+          = hidden_field :name => 'request_url', :value => request.referer
           = submit "Update", :class=>"greenButton"
         -#%br
         -#= link_to_with_rights "Update", url(:controller => :checklists, :action => :capture_checklist_data, :checklist_id => @checklist.id), :class => 'greenButton'

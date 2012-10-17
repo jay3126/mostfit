@@ -153,7 +153,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:effective_date]= params[:effective_date]
     parameter_hash[:staff_id]= params[:staff_id]
     parameter_hash[:staff_name]= params[:staff_name]
-    parameter_hash[:staff_role]= "support",
+    parameter_hash[:staff_role]= "support"
     parameter_hash[:referral_url]= params[:referral_url]
 
     if @checklist_type.name == "Surprise Center Visit"
@@ -300,46 +300,42 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
   def edit_checklist_data
 
-
-    if params[:result_status].blank?
-      message[:error] = "Please, mark the clear field."
-    else
-      @checklist = Checklist.get params[:checklist_id]
-      @checkpoint_fillings = params[:checkpoint_fillings]
-      @checkpoint_fillings.each do |checkpoint_filling_id, value|
-        id = checkpoint_filling_id.split("_").last
-        CheckpointFilling.get(id).update(:status => value)
-      end
-
-      @checkboxpoint_option_fillings = params[:checkboxpoint_option_fillings]
-      @checkboxpoint_option_fillings.each do |checkboxpoint_option_filling_id, value|
-        id = checkboxpoint_option_filling_id.split("_").last
-        CheckboxpointOptionFilling.get(id).update(:status => value)
-      end
-
-      @free_text_fillings_t2 = params[:free_text_fillings_t2]
-      @free_text_fillings_t2.each do |free_text_filling_id, value|
-        id = free_text_filling_id.split("_").last
-        FreeTextFilling.get(id).update(:comment => value)
-      end
-
-      @free_text_fillings_t1n3 = params[:free_text_fillings_t1n3]
-      @free_text_fillings_t1n3.each do |free_text_filling_id, value|
-        id = free_text_filling_id.split("_").last
-        FreeTextFilling.get(id).update(:comment => value)
-      end
-
-      @dropdownpoint_fillings = params[:dropdownpoint_fillings]
-      @dropdownpoint_fillings.each do |dropdownpoint_filling_id, value|
-        id = dropdownpoint_filling_id.split("_").last
-        DropdownpointFilling.get(id).update(:model_record_name => value)
-      end
-
-      Response.get(params[:result_status]).update(:result_status => 'cleared') unless params[:result_status].blank?
+    message = {}
+    @checklist = Checklist.get params[:checklist_id]
+    @checkpoint_fillings = params[:checkpoint_fillings]||[]
+    @checkpoint_fillings.each do |checkpoint_filling_id, value|
+      id = checkpoint_filling_id.split("_").last
+      CheckpointFilling.get(id).update(:status => value)
     end
+
+    @checkboxpoint_option_fillings = params[:checkboxpoint_option_fillings]||[]
+    @checkboxpoint_option_fillings.each do |checkboxpoint_option_filling_id, value|
+      id = checkboxpoint_option_filling_id.split("_").last
+      CheckboxpointOptionFilling.get(id).update(:status => value)
+    end
+
+    @free_text_fillings_t2 = params[:free_text_fillings_t2]||[]
+    @free_text_fillings_t2.each do |free_text_filling_id, value|
+      id = free_text_filling_id.split("_").last
+      FreeTextFilling.get(id).update(:comment => value)
+    end
+
+    @free_text_fillings_t1n3 = params[:free_text_fillings_t1n3]||[]
+    @free_text_fillings_t1n3.each do |free_text_filling_id, value|
+      id = free_text_filling_id.split("_").last
+      FreeTextFilling.get(id).update(:comment => value)
+    end
+
+    @dropdownpoint_fillings = params[:dropdownpoint_fillings]||[]
+    @dropdownpoint_fillings.each do |dropdownpoint_filling_id, value|
+      id = dropdownpoint_filling_id.split("_").last
+      DropdownpointFilling.get(id).update(:model_record_name => value)
+    end
+
+    Response.get(params[:result_status]).update(:result_status => 'cleared') unless params[:result_status].blank?
     #debugger
     if message[:error].blank?
-      redirect resource(@checklist), :message => {:notice => 'Checklist updated'}
+      redirect params[:request_url], :message => {:notice => 'Checklist updated'}
     else
       redirect request.referer, :message => message
     end
