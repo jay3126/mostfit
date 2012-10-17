@@ -184,12 +184,12 @@ class Securitizations < Application
               end
 
               unless assignment_type.blank? || assignment_type_id.blank?
-                msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance)" if (assignment_type != "s" && assignment_type != "e")
+                msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)" if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
 
                 if assignment_type == "s"
                   assignment_type_object = Securitization.get assignment_type_id
                   msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
-                else
+                elsif (assignment_type == "e" || assignment_type == "ae")
                   assignment_type_object = Encumberance.get assignment_type_id
                   msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
                 end
@@ -200,7 +200,8 @@ class Securitizations < Application
             
             begin
               if msg.blank?
-                loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
+                additional_encumbered = assignment_type == "ae" ? true : false
+                loan_assignment_facade.assign_on_date(id, assignment_type_object, effective_on_date, funder_id, funding_line_id, tranch_id, additional_encumbered)
                 loan_facade.assign_tranch_to_loan(id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
                 @sucessfully_uploaded_records += 1
                 loan_status, loan_error = "Success", ''

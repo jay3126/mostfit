@@ -4,18 +4,19 @@ class LoanAssignment
 
   # A LoanAssignment indicates that a specific loan has now been marked to either a securitization or an encumberance effective_on date
 
-  property :id,                Serial
-  property :loan_id,           *INTEGER_NOT_NULL
-  property :assignment_nature, Enum.send('[]', *LOAN_ASSIGNMENT_NATURE), :nullable => false
-  property :assignment_id,     *INTEGER_NOT_NULL
-  property :assignment_status, Enum.send('[]', *LOAN_ASSIGNMENT_STATUSES), :nullable => false
-  property :effective_on,      *DATE_NOT_NULL
-  property :funder_id,         *INTEGER_NOT_NULL
-  property :funding_line_id,   *INTEGER_NOT_NULL
-  property :tranch_id,         *INTEGER_NOT_NULL
-  property :recorded_by,       *INTEGER_NOT_NULL
-  property :created_at,        *CREATED_AT
-  property :deleted_at,        *DELETED_AT
+  property :id,                       Serial
+  property :loan_id,                  *INTEGER_NOT_NULL
+  property :assignment_nature,        Enum.send('[]', *LOAN_ASSIGNMENT_NATURE), :nullable => false
+  property :assignment_id,            *INTEGER_NOT_NULL
+  property :assignment_status,        Enum.send('[]', *LOAN_ASSIGNMENT_STATUSES), :nullable => false
+  property :effective_on,             *DATE_NOT_NULL
+  property :funder_id,                *INTEGER_NOT_NULL
+  property :funding_line_id,          *INTEGER_NOT_NULL
+  property :tranch_id,                *INTEGER_NOT_NULL
+  property :is_additional_encumbered, Boolean, :default => false
+  property :recorded_by,              *INTEGER_NOT_NULL
+  property :created_at,               *CREATED_AT
+  property :deleted_at,               *DELETED_AT
 
   validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?, :effective_after_assignment_date?
 
@@ -68,7 +69,7 @@ class LoanAssignment
     assignment
   end
 
-  def self.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, recorded_by)
+  def self.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, recorded_by, additional_encumbered = false)
     new_assignment                     = {}
     new_assignment[:loan_id]           = loan_id
     assignment_nature, assignment_id   = Resolver.resolve_loan_assignment(to_assignment)
@@ -80,6 +81,7 @@ class LoanAssignment
     new_assignment[:tranch_id]         = tranch_id
     new_assignment[:effective_on]      = on_date
     new_assignment[:recorded_by]       = recorded_by
+    new_assignment[:is_additional_encumbered] = additional_encumbered
 
     assignment = create(new_assignment)
     raise Errors::DataError, assignment.errors.first.first unless assignment.saved?
@@ -132,6 +134,10 @@ class LoanAssignment
   def self.get_loan_assignment_status(for_loan_id, on_date)
     assignment = get_loan_assigned_to(for_loan_id, on_date)
     assignment ? assignment.assignment_nature : NOT_ASSIGNED
+  end
+
+  def loan_assignment_status
+    is_additional_encumbered ? loan_assignment_instance.additional_encumbered_to_s : loan_assignment_instance.to_s
   end
 
 end

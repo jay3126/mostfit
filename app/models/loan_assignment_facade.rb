@@ -41,8 +41,8 @@ class LoanAssignmentFacade < StandardFacade
     LoanAssignment.assign(loan_id, to_assignment, for_user.id)
   end
   
-  def assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id)
-    LoanAssignment.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, for_user.id)
+  def assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, additional_encumbered = false)
+    LoanAssignment.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, for_user.id, additional_encumbered)
   end
 
   def assign_to_tranch_on_date(loan_id, to_tranch, on_date)
@@ -80,6 +80,17 @@ class LoanAssignmentFacade < StandardFacade
 
   def list_securitization(search_options = {})
     Securitization.all(search_options)
+  end
+
+  def loan_assignment_status_message(loan_id, on_date = Date.today)
+    loan_assigned_to = get_loan_assigned_to(loan_id, on_date)
+    return loan_assigned_to.nil? ? "Not Assigned" : loan_assignment_status(loan_assigned_to)
+  end
+
+  private
+
+  def loan_assignment_status(loan_assigned_to)
+    loan_assigned_to.loan_assignment_status
   end
 
 end
