@@ -204,6 +204,10 @@ class LoanFacade < StandardFacade
     FundingLineAddition.get_tranch_assigned_to_loan(lending_id)
   end
 
+  def assign_tranch_to_loan(loan_id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
+    FundingLineAddition.assign_tranch_to_loan(loan_id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
+  end
+
   private
 
   # LoanManager instance

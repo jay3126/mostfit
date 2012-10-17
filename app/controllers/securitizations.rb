@@ -97,6 +97,8 @@ class Securitizations < Application
     @total_records = 0
     @sucessfully_uploaded_records = 0
     @failed_records = 0
+    applied_by_staff = recorded_by_user = get_session_user_id
+    applied_on_date = get_effective_date
 
     # VALIDATIONS
     @errors << "Please select file" if params[:file].blank?
@@ -194,6 +196,7 @@ class Securitizations < Application
 
               if msg.blank?
                 loan_assignment_facade.assign_on_date(id, assignment_type_object, data[:effective_on_date], funder_id, funding_line_id, tranch_id)
+                loan_facade.assign_tranch_to_loan(id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
                 @sucessfully_uploaded_records += 1
                 loan_status, loan_error = "Success", ''
               end
