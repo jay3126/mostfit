@@ -185,13 +185,20 @@ class Securitizations < Application
 
               unless assignment_type.blank? || assignment_type_id.blank?
                 msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)" if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
-
                 if assignment_type == "s"
-                  assignment_type_object = Securitization.get assignment_type_id
-                  msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                  if tranch.assignment_type == "securitization"
+                    assignment_type_object = Securitization.get assignment_type_id
+                    msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                  else
+                    msg << "Tranch ID: #{tranch.id} can only be used for Securitization"
+                  end
                 elsif (assignment_type == "e" || assignment_type == "ae")
-                  assignment_type_object = Encumberance.get assignment_type_id
-                  msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                  if tranch.assignment_type == "encumbrance"
+                    assignment_type_object = Encumberance.get assignment_type_id
+                    msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                  else
+                    msg << "Tranch ID: #{tranch.id} can only be used for Encumbrance"
+                  end
                 end
               end
             else
