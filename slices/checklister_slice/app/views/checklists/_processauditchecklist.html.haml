@@ -131,10 +131,8 @@
                     %td
                       =date_select "free_text_#{free_text.id}".to_sym, Date.today, :max_date => Date.today
                   -else
-                    %tr
-
-                      %td
-                        =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
+                    %td
+                      =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
               -elsif !dropdownpoint.nil?
                 %td{:width=>"800px"}
                   ="#{i+1} . #{dropdownpoint.name}"
