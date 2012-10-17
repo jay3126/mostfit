@@ -3,38 +3,51 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-= form_for(@tranch, :action => url(:controller => :tranches, :action => :loans_for_tranch_on_date, :id => @tranch.id)) do
-  %h1
-    List of Loans assigned to Tranch: #{@tranch.name}
 
-  .menu-strip{:style => "width: 10%;"}
-    = link_to_with_rights "Back", request.referer, :class => "grey_button"
+%h1 Details of Tranch: #{@tranch.name}
 
-  %table.tall.shaded
-    %tr
-      %th
-        Name
-      %td
-        = @tranch.name
-    - unless @total_money.blank?
-      %tr
-        %th
-          Portfolio scheduled value (Scheduled total outstanding)
-        %td
-          = "#{@total_money[:scheduled_total_outstanding].to_s} as on #{@date}" 
-      %tr
-        %th 
-          Portfolio actual value (Actual total outstanding)
-        %td
-          = "#{@total_money[:actual_total_outstanding].to_s} as on #{@date}"
-    %tr
-      %th
-        Date
-      %td
-        = date_select 'tranch_date', @date.blank? ? get_effective_date : @date, :min_date => @tranch.date_of_commencement, :max_date => Date.today
+- @funder = @tranch.new_funding_line.new_funder
+- @funding_line = @tranch.new_funding_line
 
-  = submit 'Go'
-%br
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url("new_funders/#{@funder.id}/new_funding_lines/#{@funding_line.id}"), :class => "grey_button"
+
+%table.tall.shaded
+  %tr
+    %th
+      Tranch ID
+    %td
+      = @tranch.id
+  %tr
+    %th
+      Amount
+    %td
+      = @tranch.tranch_money_amount
+  %tr
+    %th
+      Interest Rate
+    %td
+      = @tranch.interest_rate
+  %tr
+    %th
+      Disbursal Date
+    %td
+      = @tranch.disbursal_date
+  %tr
+    %th
+      First Payment Date
+    %td
+      = @tranch.first_payment_date
+  %tr
+    %th
+      Last Payment Date
+    %td
+      = @tranch.last_payment_date
+  %tr
+    %th
+      Assignment Type
+    %td
+      = @tranch.assignment_type.humanize rescue nil
 
 %div.tab_container.shaded
   %ul.tabs
@@ -106,4 +119,34 @@
             %td{:colspan => 13}
 
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+    %br
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @tranch.id
+      - model = "NewTranch"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              /= diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

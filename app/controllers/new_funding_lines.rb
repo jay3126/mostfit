@@ -12,6 +12,23 @@ class NewFundingLines < Application
     display @funding_line
   end
 
+  def list
+    # GATE-KEEPING
+    @errors = []
+    funder_id = params[:id]
+    @funder = NewFunder.get funder_id
+
+    # OPERATIONS PERFORMED
+    begin
+      @funding_lines = @funder.new_funding_lines(:order => [:created_at.asc])
+    rescue => ex
+      @errors << ex.message
+    end
+
+    # RENDER/RE-DIRECT
+    display [@funding_line, @funder]
+  end
+
   def new
     @funder = NewFunder.get(params[:new_funder_id])
     @funding_line = NewFundingLine.new
@@ -38,7 +55,11 @@ class NewFundingLines < Application
         amount = @money.amount
         currency = @money.currency
         @funding_line = @funder.new_funding_lines.create({:amount => amount, :currency => currency, :new_funder_id => funder_id, :created_by => session.user.id, :sanction_date => sanction_date})
-        message = {:notice => "Funding Line was successfully created"}
+        if @funding_line.valid?
+          message = {:notice => "Funding Line was successfully created"}
+        else
+          message = {:error => @funding_line.errors.first}
+        end
       rescue => ex
         message = {:error => ex.message}
       end

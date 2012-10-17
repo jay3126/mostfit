@@ -1,3 +1,11 @@
+%h1 List of Funding Lines under Funder: #{@funder.name}
+
+.menu-strip{:style => "width: 40%;"}
+  = link_to_with_rights 'Create a new funding line', resource(@funder, :new_funding_lines, :new), :class => "add grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:new_funders), :class => "grey_button"
+
+%br
 - if @funding_lines.blank?
   %p
     %i No funding lines have been created yet.

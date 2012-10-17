@@ -18,7 +18,7 @@ class Upload
 
 
   #MODELS = [:staff_members, :repayment_styles, :loan_products, :funding_lines, :branches, :centers, :client_groups, :clients, :loans]
-  MODELS = [:location_levels, :staff_members, :biz_locations, :simple_fee_products, :lending_products]
+  MODELS = [:location_levels, :staff_members, :biz_locations, :simple_fee_products, :lending_products, :client_groups, :clients]
 
   if Mfi.first.system_state == :migration
     MODELS.each do |model|

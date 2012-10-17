@@ -42,7 +42,7 @@ class NewFunders < Application
     @funder = NewFunder.get(params[:id])
     raise NotFound unless @funder
     if @funder.update_attributes(params[:new_funder])
-      redirect resource(:new_funders), :message => {:notice => "Funder #{@funder.name} was successfully updated"}
+      redirect resource(@funder), :message => {:notice => "Funder #{@funder.name} was successfully updated"}
     else
       display @funder, :edit
     end

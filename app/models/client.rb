@@ -65,6 +65,7 @@ class Client
   belongs_to :psl_sub_category,     :nullable => true
   belongs_to :created_by_staff,     :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :created_by,           :child_key => [:created_by_user_id],    :model => 'User'
+  belongs_to :upload, :nullable => true
 
   validates_with_method :is_there_space_in_the_client_group?
 
@@ -103,34 +104,34 @@ class Client
 
   def self.from_csv(row, headers)
     if center_attr = row[headers[:center]].strip
-      if center   = Center.first(:name => center_attr)
-      elsif center   = Center.first(:code => center_attr)
+      if center   = BizLocation.first(:name => center_attr)
       elsif /\d+/.match(center_attr)
-        center   = Center.get(center_attr)
+        center   = BizLocation.get(center_attr)
       end
     end
-    raise ArgumentError.new("No center with code/id #{center_attr}") unless center
-    branch         = center.branch
-    #creating group either on group ccode(if a group sheet is present groups should be already in place) or based on group name
+    raise ArgumentError.new("No center with id #{center_attr}") unless center
+    branch = LocationLink.get_parent(center, Date.parse(row[headers[:date_joined]]))
+    #creating group either on group code(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
       client_group  =  ClientGroup.first(:code => row[headers[:group_code]].strip)
-    elsif headers[:group] and row[headers[:group]]
-      name          = row[headers[:group]].strip
-      client_group  = ClientGroup.first(:name => name)||ClientGroup.create(:name => name, :center => center, :code => name.split(' ').join, :upload_id => row[headers[:upload_id]])
+    elsif headers[:client_group] and row[headers[:client_group]]
+      name          = row[headers[:client_group]].strip
+      client_group  = ClientGroup.first(:name => name)||ClientGroup.create(:name => name, :biz_location_id => center.id, :code => name.split(' ').join, :upload_id => row[headers[:upload_id]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id, :creation_date => Date.parse(row[headers[:date_joined]]))
     else
       client_group  = nil
     end
-    # client_type     = ClientType.first||ClientType.create(:type => "Standard")
-    grt_date        = row[headers[:grt_date]] ? Date.parse(row[headers[:grt_date]]) : nil
-    keys = [:reference, :name, :spouse_name, :date_of_birth, :address, :date_joined, :center, :grt_date, :created_by_staff, :group]
-    missing_keys = keys - headers.keys
-    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
-    hash = {:reference => row[headers[:reference]], :name => row[headers[:name]], :spouse_name => row[headers[:spouse_name]],
-      :date_of_birth => Date.parse(row[headers[:date_of_birth]]), :address => row[headers[:address]],
-      :date_joined => row[headers[:date_joined]], :center => center, :grt_pass_date => grt_date, :created_by => User.first,
-      :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :client_group => client_group, :upload_id => row[headers[:upload_id]]}
-    obj             = new(hash)
+
+    hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]],
+      :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]],
+      :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
+      :date_joined => Date.parse(row[headers[:date_joined]]), :client_group => client_group,
+      :center_id => BizLocation.first(:name => row[headers[:center]]).id, :guarantor_name => row[headers[:guarantor_name]],
+      :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
+      :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
+      :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
+      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]]}
+
+    obj = create_client(hash, center.id, branch.id)
     [obj.save!, obj]
   end
 

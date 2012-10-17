@@ -21,6 +21,7 @@ class NewTranch
   validates_with_method  :first_payment_date,   :method => :first_payment_not_equalto_disbursal?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_before_disbursal?
   validates_with_method  :last_payment_date,    :method => :last_payment_not_before_first_payment_or_disbursal?
+  validates_with_method  :assignment_type,      :method => :tranch_assignment_not_blank?
   validates_present      :amount, :interest_rate, :disbursal_date, :first_payment_date, :assignment_type
 
   def money_amounts; [:amount]; end
@@ -52,5 +53,8 @@ class NewTranch
   def disbursal_not_before_sanction?
     return (!disbursal_date.blank? && disbursal_date < self.new_funding_line.sanction_date) ? [false, "Disbursal date must not before Funding line sanction date "] : true
   end
-  
+
+  def tranch_assignment_not_blank?
+    return (assignment_type == Constants::TranchAssignment::NOT_ASSIGNED) ? [false, "Tranch must be either Securitized or Encumbered"] : true
+  end
 end

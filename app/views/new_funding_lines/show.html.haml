@@ -1,5 +1,5 @@
 %h1
-  = "Details for funding line #{@funding_line.id} by #{@funding_line.new_funder.name}"
+  = "Details of funding line #{@funding_line.id} by #{@funding_line.new_funder.name}"
 
 .menu-strip{:style => "width: 25%;"}
   = link_to_with_rights 'Edit Funding Line', resource(@funding_line.new_funder, @funding_line, :edit), :class => "edit grey_button"
@@ -21,3 +21,81 @@
       %th{:align => "left"} Sanction Date
       %td
         = @funding_line.sanction_date
+
+%div.tab_container
+  %ul.tabs
+    %li#tranches Tranches
+    %li#history History
+
+  %div.tab
+    %br
+    - @tranches = @funding_line.new_tranches(:order => [:created_at.asc])
+    - if @tranches.blank?
+      %p
+        %i No tranches have been created yet.
+    - else
+      %table.dataTable.report.weeksheet.nojs
+        %thead
+          %tr
+            %td Tranch ID
+            %td Amount
+            %td Interest Rate
+            %td Disbursal Date
+            %td First Payment Date
+            %td Last Payment Date
+            %td Assignment Type
+            %td Action
+        - @tranches.each do |tranch|
+          %tr
+            %td
+              = link_to_with_rights tranch.id, url(:controller => :new_tranches, :action => :show, :id => tranch.id)
+            %td
+              = link_to_with_rights tranch.tranch_money_amount, url(:controller => :new_tranches, :action => :show, :id => tranch.id)
+            %td
+              = tranch.interest_rate
+            %td
+              = tranch.disbursal_date
+            %td
+              = tranch.first_payment_date
+            %td
+              = tranch.last_payment_date
+            %td
+              = tranch.assignment_type.humanize rescue nil
+            %td
+              = link_to_with_rights 'Edit', resource(@funding_line.new_funder, @funding_line, tranch, :edit)
+              &nbsp;&nbsp;
+              %br
+                = link_to_with_rights "New Tranch", url("new_funders/#{@funding_line.new_funder.id}/new_funding_lines/#{@funding_line.id}/new_tranches/new")
+
+  %div.tab
+    %br
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @funding_line.id
+      - model = "NewFundingLine"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              /= diff_display(trail.changes, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"

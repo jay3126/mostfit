@@ -1,0 +1,42 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_all').change(function() {
+    $('.custom_calendar_box').attr('checked',$(this).attr('checked'))});
+  });
+%h2== Custom Calendar For Year-#{params[:custom_calendar_year]||get_effective_date.year}
+= form_for(:location_holidays, :action => resource(:location_holidays, :update_custom_calendar)) do
+  = hidden_field :name => 'custom_calendar_year', :value => @custom_year
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th
+          Select All
+          %br
+          = check_box :name => 'select_all', :id => 'toggle_select_all'
+        %th
+          S. No.
+        %th
+          Day
+        %th
+          Normal Date
+        %th
+          Collection Date
+        %th
+          Holiday
+    - count = 1
+    - @custom_calendar_dates.sort_by{|d| d.on_date}.each do |data_value|
+      %tr
+        %td{:style => 'text-align:center'}
+          = check_box :name => "custom_calendar[#{data_value.id}][update_calendar]", :value => data_value.id, :class => 'custom_calendar_box'
+        %td
+          = count
+        %td
+          = data_value.on_date.weekday.to_s.capitalize
+        %td
+          = data_value.on_date
+        %td
+          = date_select "custom_calendar[#{data_value.id}][collection_date]", data_value.collection_date, {:id => "custom_calendar_#{data_value.id}"}
+        %td{:style => "width:20%"}
+          = text_field :name => "custom_calendar[#{data_value.id}][holiday_name]", :value => data_value.holiday_name
+      - count += 1
+  = submit "Update"

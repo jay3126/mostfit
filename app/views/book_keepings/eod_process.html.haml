@@ -1,3 +1,8 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_all').change(function() {
+    $('.eod_div').attr('checked',$(this).attr('checked'))});
+  });
 %h1== EOD Process on #{get_effective_date}
 
 .menu-strip{:style => "width:8%;"}
@@ -15,7 +20,7 @@
       %th
         Select All
         %br
-        = check_box :name => 'select_all'
+        = check_box :name => 'select_all', :id => 'toggle_select_all'
     - @locations.each do |location|
       - pending_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::PENDING_VERIFICATION, get_effective_date)
       - varify_amount = MoneyDeposit.location_amount_on_status(Constants::MoneyDepositVerificationStatus::VERIFIED_REJECTED, get_effective_date)
@@ -29,7 +34,7 @@
           = eod.status.humanize rescue '-'
         %td{:style => "text-align:center"}
           - if eod.status == Constants::EODProcessVerificationStatus::PENDING
-            = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount
+            = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount, :class => 'eod_div'
           - else
             = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true
   %br
