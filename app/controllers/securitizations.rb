@@ -86,14 +86,13 @@ class Securitizations < Application
   end
 
   def loan_assignments
-    @loan_assignments = LoanAssignment.all
+    @loan_assignments = get_all_loan_assignments
     render
   end
 
   def upload_loan_assignment_file
     # INITIALIZATIONS
     @errors = []
-    @loan_assignments = LoanAssignment.all
     @total_records = 0
     @sucessfully_uploaded_records = 0
     @failed_records = 0
@@ -184,29 +183,21 @@ class Securitizations < Application
                 msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID" if tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
               end
               unless assignment_type.blank? || assignment_type_id.blank?
-                #.........................................need to refactor
-                if (loan_assignment.is_additional_encumbered)
-                  assignment_type_object = Encumberance.get assignment_type_id
-                  msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
+                  msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
                 else
-                  if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
-                    msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
+                  if (loan_assignment && loan_assignment.is_additional_encumbered) || (assignment_type == "e" && tranch.assignment_type == "encumbrance") || (assignment_type == "ae")
+                    assignment_type_object = Encumberance.get assignment_type_id
+                    msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
                   else
                     if (assignment_type == "s" && tranch.assignment_type == "securitization")
                       assignment_type_object = Securitization.get assignment_type_id
                       msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
-                    elsif (assignment_type == "e" && tranch.assignment_type == "encumbrance")
-                      assignment_type_object = Encumberance.get assignment_type_id
-                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
-                    elsif (assignment_type == "ae")
-                      assignment_type_object = Encumberance.get assignment_type_id
-                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
                     else
                       msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
                     end
                   end
                 end
-                #.........................................need to refactor
               end
             else
               msg << "Loan is not eligible for assignment"
@@ -216,7 +207,7 @@ class Securitizations < Application
               if msg.blank?
                 additional_encumbered = assignment_type == "ae" ? true : false
                 loan_assignment_facade.assign_on_date(id, assignment_type_object, effective_on_date, funder_id, funding_line_id, tranch_id, additional_encumbered)
-                loan_facade.assign_tranch_to_loan(id, funding_line_id, tranch_id, applied_by_staff, applied_on_date, recorded_by_user)
+                loan_facade.assign_tranch_to_loan(id, funding_line_id, tranch_id, applied_by_staff, effective_on_date, recorded_by_user)
                 @sucessfully_uploaded_records += 1
                 loan_status, loan_error = "Success", ''
               end
@@ -232,17 +223,28 @@ class Securitizations < Application
             fastercsv << [id, effective_on_date, funder_id, funding_line_id, tranch_id, assignment_type, assignment_type_id, loan_status, loan_error]
           end
         end
-
       rescue => ex
         @errors << ex.message
       end
     end
-
+    @loan_assignments = get_all_loan_assignments
     render :loan_assignments
   end
 
   def download_xls_file_format
     send_file('public/loan_assignment_file_format.xls', :filename => ('public/loan_assignment_file_format.xls'.split("/")[-1].chomp))
+  end
+
+  private
+
+  def get_all_loan_assignments
+    loan_assignments = []
+    all_loan_assignments = LoanAssignment.all
+    aggregated_ids = all_loan_assignments.aggregate(:loan_id)
+    aggregated_ids.each do |loan_id|
+      loan_assignments << LoanAssignment.all(:loan_id => loan_id).last
+    end
+    loan_assignments
   end
 
 end
