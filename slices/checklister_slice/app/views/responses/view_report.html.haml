@@ -1,41 +1,31 @@
 -total_score=0
 -max_score=0
-%table.dataTable.report.weeksheet.nojs
+%table{:style =>"width:100%", :class => "tall report nojs weeksheet"}
   %tr
+    %th{:style => "width:50%"}
+      Effective Date
     %td
-      Effective Date:
-    %td
-      %b
-        =@response.value_date.strftime("%b %e")
+      =@response.value_date.strftime("%b %e %Y ")
   %tr
+    %th
+      =@response.checklist_locations.first.type
     %td
-      =@response.checklist_locations.first.type+":"
-    %td
-      %b
-        =@response.checklist_locations.first.name
+      =@response.checklist_locations.first.name
   %tr
+    %th
+      =@response.checklist_locations.last.type
     %td
-      =@response.checklist_locations.last.type+":"
-    %td
-      %b
-        =@response.checklist_locations.last.name
-  %tr
-    %td
+      =@response.checklist_locations.last.name
+  %tr{:style => "display:#{['Branch', 'Center'].include?(@response.target_entity.type) ? 'none' : ''}"}
+    %th
       =@response.target_entity.type
     %td
-      %b
-        =@response.target_entity.name
+      =@response.target_entity.name
   %tr
-    %td
+    %th
       Filled On
     %td
-      %b
-        =@response.created_at.strftime("%b %e %Y ")
-
-
-
-
-
+      =@response.created_at.strftime("%b %e %Y ")
   -@sections.each do |section|
     %hr
     .section_block
@@ -44,57 +34,48 @@
           %u
             =section.name
         %br
-      =section.instructions
-
-    -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
-    -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-    -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-    -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
-      %table{:cellspacing=>"3px", :cellpadding=>"3px"}
-        %tr.question_cell
-
-        -if !checkpoint.nil?
-          %td{:width=>"800px"}
-            ="#{i+1} . #{checkpoint.name}"
+    %table.tall.report.nojs
+      -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+        -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+        -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+        -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+        %tr{:style => "text-align:left;"}
           %td
-            -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
-            -if checkpoint_filling.nil?
-              Not Attempted
-            -else
-              =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
-        -elsif !free_text.nil?
-          %td{:width=>"800px"}
-            ="#{i+1} .  #{free_text.name}"
+            = i+1
+          -if !checkpoint.nil?
+            %td{:width=>"800px"}
+              ="#{checkpoint.name}"
+            %td
+              -checkpoint_filling=CheckpointFilling.all(:checkpoint_id=>checkpoint.id,:response_id=>@response.id).first
+              -if checkpoint_filling.nil?
+                Not Attempted
+              -else
+                =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>true
+          -elsif !free_text.nil?
+            %td{:width=>"800px"}
+              ="#{free_text.name}"
 
-            -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
-            -if free_text_filling.nil?
-              -@comment=""
-            -else
-              -@comment=free_text_filling.comment
-            -if free_text.name.downcase=="date"
-              %td
-                =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
-            -else
-              %td
-                =text_area @comment ,:name=>"free_text_#{free_text.id}".to_sym,:disabled=>true
-
-
-        -elsif !dropdownpoint.nil?
-          %td{:width=>"400px"}
-            ="#{i+1} . #{dropdownpoint.name}"
-          %td{:width=>"400px"}
-            =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
-          %td
-            -max_score=max_score+Kernel.const_get(dropdownpoint.model_name).max(:marks)
-
-            -score=Kernel.const_get(dropdownpoint.model_name).all(:name=>dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name).first.marks.to_i
-            -total_score=total_score+score
-
-
-
+              -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+              -if free_text_filling.nil?
+                -@comment=""
+              -else
+                -@comment=free_text_filling.comment
+              -if free_text.name.downcase=="date"
+                %td
+                  =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
+              -else
+                %td
+                  =text_area @comment ,:name=>"free_text_#{free_text.id}".to_sym,:disabled=>true
+          -elsif !dropdownpoint.nil?
+            %td{:width=>"400px"}
+              ="#{dropdownpoint.name}"
+            %td{:width=>"400px"}
+              =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
+              -max_score=max_score+Kernel.const_get(dropdownpoint.model_name).max(:marks)
+              -score=Kernel.const_get(dropdownpoint.model_name).all(:name=>dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name).first.marks.to_i
+              -total_score=total_score+score
 %h2
   ="Total Score: #{total_score}/#{max_score}"
 
 %h4
-  =#link_to "Back",params[:referral_url]
   =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"

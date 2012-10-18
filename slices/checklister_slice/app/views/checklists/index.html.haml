@@ -42,6 +42,9 @@
             <b>Status</b>
         %th
           <b>Links</b>
+        -if @checklist_type.is_ba_checklist?
+          %th
+            <b>Report</b>
 
     - for response in @responses
       - checklist = response.checklist
@@ -62,6 +65,9 @@
             = link_to "View completed #{checklist.checklist_type.name} checklist",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
           - else
             = link_to "Edit #{checklist.checklist_type.name} checklist", url(:checklister_slice_edit_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
+        - if @checklist_type.is_ba_checklist?
+          %td
+            =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>checklist.id),:class=>"greenButton"
 %br
 %br
 %br
