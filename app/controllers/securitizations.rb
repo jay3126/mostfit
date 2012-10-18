@@ -116,8 +116,8 @@ class Securitizations < Application
         csv_filepath = File.join(csv_folder, "loan_assignment")
 
         User.convert_xls_to_csv(xls_filepath, csv_filepath)
-
-        fq_file_path = "#{csv_filepath}.csv.0"
+        converted_csv_file = Dir.entries(csv_folder).select{|d| d.split('.').include?('csv')}.to_s
+        fq_file_path = File.join(csv_folder, converted_csv_file)
         output_folder = File.join("#{Merb.root}/public/uploads/loan_assignments", "results")
         FileUtils.mkdir_p(output_folder)
         file_to_write = File.join(output_folder, "loan_assignments" + ".results.csv")
