@@ -153,6 +153,7 @@ class Securitizations < Application
           loans_data.each do |id, data|
             msg = []
             record_no += 1
+            loan_assignment = loan_assignment_facade.get_loan_assigned_to(id, Date.today)
             loan_status, loan_error = "Not known", "Not known"
             effective_on_date  = data[:effective_on_date]
             funder_id          = data[:funder_id]
@@ -182,24 +183,30 @@ class Securitizations < Application
               unless funder.blank? || funding_line.blank? || tranch.blank?
                 msg << "No relation with exists between Funder ID - Funding Line ID - Tranch ID" if tranch.new_funding_line.id != funding_line.id || funding_line.new_funder.id != funder.id
               end
-
               unless assignment_type.blank? || assignment_type_id.blank?
-                msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)" if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
-                if assignment_type == "s"
-                  if tranch.assignment_type == "securitization"
-                    assignment_type_object = Securitization.get assignment_type_id
-                    msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                #.........................................need to refactor
+                if (loan_assignment.is_additional_encumbered)
+                  assignment_type_object = Encumberance.get assignment_type_id
+                  msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                else
+                  if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
+                    msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
                   else
-                    msg << "Tranch ID: #{tranch.id} can only be used for Securitization"
-                  end
-                elsif (assignment_type == "e" || assignment_type == "ae")
-                  if tranch.assignment_type == "encumbrance"
-                    assignment_type_object = Encumberance.get assignment_type_id
-                    msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
-                  else
-                    msg << "Tranch ID: #{tranch.id} can only be used for Encumbrance"
+                    if (assignment_type == "s" && tranch.assignment_type == "securitization")
+                      assignment_type_object = Securitization.get assignment_type_id
+                      msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    elsif (assignment_type == "e" && tranch.assignment_type == "encumbrance")
+                      assignment_type_object = Encumberance.get assignment_type_id
+                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    elsif (assignment_type == "ae")
+                      assignment_type_object = Encumberance.get assignment_type_id
+                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    else
+                      msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
+                    end
                   end
                 end
+                #.........................................need to refactor
               end
             else
               msg << "Loan is not eligible for assignment"
