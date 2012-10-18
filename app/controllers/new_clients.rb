@@ -269,11 +269,13 @@ class NewClients < Application
   def update_client_telephone_number
     client = Client.get(params[:id])
     client.telephone_number = params[:phone_number]
+    default_text = "<div style='margin-top: 0pt; float: right;', onclick="+"jQuery('div.flash').remove();"+"><a class='closeNotice' href='#'>[X]</a></div>"
     if client.save
-      return "Client Phone Number Updated"
+      message = "<div class='flash notice'>#{default_text}Client Phone Number Updated</div>"
     else
-      redirect request.referer, :message => {:error => client.errors.first.join('<br>')}
+      message = "<div class='flash error'>#{default_text}#{client.errors.first.join('<br>')}</div>"
     end
+    message
   end
 
   def client_movement

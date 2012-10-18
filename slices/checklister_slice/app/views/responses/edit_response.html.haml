@@ -96,7 +96,7 @@
             ="#{i+1} . #{dropdownpoint.name}"
           %td
             =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
-=link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
+  =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 
 
 

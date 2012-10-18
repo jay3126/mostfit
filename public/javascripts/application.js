@@ -105,6 +105,38 @@ function fillOptions(id, select){
     }
   });
 }
+
+function update_phone_number(obj){
+  var inner_div = "<div style='margin-top: 0pt; float: right;', onclick="+"jQuery('div.flash').remove();"+"><a class='closeNotice' href='#'>[X]</a></div>"
+  var p_number = jQuery('.text_phone_no').attr('value');
+  jQuery('.error, .notice').remove();
+  if(p_number!=''){
+    $(obj).after("<img id='spinner' src='/images/spinner.gif' />");
+    $.ajax({
+      type: "GET",
+      dataType: "json",
+      url: jQuery(obj).attr('url')+'?phone_number='+p_number+".json",
+      success: function(data){
+        jQuery("div#flash-messages").append("<div class='flash notice'>"+inner_div+data+"</div>");
+        jQuery("#spinner").remove();
+      },
+      beforeSend: function(){
+        $('#spinner').show();
+      },
+      error: function(xhr, text, errorThrown){
+        txt = xhr.responseText;
+        jQuery("div#flash-messages").append(txt);
+      },
+      complete: function(){
+        $('#spinner').hide();
+      }
+    });
+  }
+  else{
+    jQuery("div#flash-messages").append("<div class='flash error'>"+inner_div+'<p>Client Phone Number cannot be blank</p>'+"</div>");
+  }
+}
+
 function fillCode(center_id, group_id){
   $.ajax({
     type: "GET",
@@ -841,20 +873,8 @@ function add_text_field(){
     "</td></tr>");
 }
 
-function fillFundingLines(obj_id){
-  $.ajax({
-    type: "GET",
-    url: "/funders/funding_lines_tranches",
-    data : {
-      'funding_line_id' : $("#funding_line_selector_"+obj_id).val()
-    },
-    success: function(data) {
-      $("#tranch_selector_"+obj_id).html(data);
-    }
-  });
-}
-
 $(document).ready(function(){
+  
   dataTables();
   create_remotes();
   attachFormRemote();
@@ -873,6 +893,9 @@ $(document).ready(function(){
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
   $("select.multiple").multiSelect({selectAllText:jQuery(this).attr('prompt')});
+  $("#update_p_no").click(function(){
+    update_phone_number(this);
+  });
   //Handling targets form
   jQuery('form').live('submit', function(){
     //    return date_validation();

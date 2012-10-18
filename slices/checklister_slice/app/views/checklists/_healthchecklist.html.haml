@@ -19,46 +19,35 @@
 .shaded
   #form_section
     = form(:action => url(:checklister_slice_capture_checklist_data) ) do
-      %table.form{:style => "width:100%;"}
+      %table{:style => "width:100%;", :class => 'tall'}
         %tr
-          %td
+          %th
             = label " Staff Member:"
           %td
             = text_field :name => :staff_name ,:value => params[:staff_name], :disabled => true
             = hidden_field :staff_name, :value => params[:staff_name]
-          %td
+          %th
             = label params[:target_entity_type]
           %td
             = text_field :target_entity_name, :value => params[:target_entity_name], :disabled => true
             = hidden_field :target_entity_name, :value => params[:target_entity_name]
         %tr
-          %td
-          %td
-        %tr
-        %tr
-        %tr
-        %tr
-          %td
+          %th
             = label params[:loc1_type]
           %td
             = text_field :loc1_name,:value=>params[:loc1_name],:disabled=>true
             = hidden_field :loc1_name,:value=>params[:loc1_name]
-          %td
+          %th
             = label params[:loc2_type]
           %td
             = text_field :loc2_name,:value=>params[:loc2_name],:disabled=>true
             = hidden_field :loc2_name,:value=>params[:loc2_name]
         %tr
-          %td
-          %td
-        %tr
-        %tr
-        %tr
-          %td
+          %th
             = label "Value Date"
           %td
             = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
-          %td
+          %th
             Member Count
           %td
             = params[:no_of_applications]
@@ -80,39 +69,37 @@
           = hidden_field :loc2_type, :value => params[:loc2_type]
           = hidden_field :no_of_applications, :value => params[:no_of_applications]
           = hidden_field :referral_url, :value => params[:referral_url]
-
-
-          %table{:cellspacing => "3px", :cellpadding => "2px",:border => " 2"}
-            - if count == 2
-              %tr
-                %td
-                  Select All
-                %td
-                  Name
-                %td
-                  Address Proof
-                %td
-                  ID Proof
-                %td
-                  Age
-                %td
-                  Ration Card
-                %td
-                  Extra Photo
-                %td
-                  Member/Guarantor sign
-                %td
-                  BM/RO/AO sign
-                %td
-                  Term sheet
-                %td
-                  DPN
-                %td
-                  DeDupe
-                %td
-                  Remark
-            - if loan_file_name == "LoanFile"
-              - if count == 2
+          - if count == 2
+            %table.report.nojs
+              %thead
+                %tr
+                  %td
+                    Select All
+                  %td
+                    Name
+                  %td
+                    Address Proof
+                  %td
+                    ID Proof
+                  %td
+                    Age
+                  %td
+                    Ration Card
+                  %td
+                    Extra Photo
+                  %td
+                    Member/Guarantor sign
+                  %td
+                    BM/RO/AO sign
+                  %td
+                    Term sheet
+                  %td
+                    DPN
+                  %td
+                    DeDupe
+                  %td
+                    Remark
+              - if loan_file_name == "LoanFile"
                 - i = 0
                 - loan_applications_of_loan_file.each do |loan_application|
                   - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => loan_application.id)
@@ -160,22 +147,20 @@
                     - else
                       %td
                         = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
-
-                - i += 1
-              - else
+                  - i += 1
+              - count +=1
+          - else
+            %table{:style =>"width:99%", :class => "tall"}
+              %tr
                 - (section.checkpoints.count + section.dropdownpoints.count + section.free_texts.count + section.checkboxpoints.count).times do |i|
                   - checkpoint = Checkpoint.first(:section_id => section.id, :sequence_number => (i+1))
                   - dropdownpoint = Dropdownpoint.first(:section_id => section.id, :sequence_number => (i+1))
                   - free_text = FreeText.first(:section_id => section.id, :sequence_number => (i+1))
                   - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - if count == 1 or count == 3
-                    - if i%3 == 0
-                      %tr.question_cell
-                  - else
-                    - if i%2 == 0
-                      %tr.question_cell
+                  - if i%4 == 0
+                    %tr.question_cell
                   - if !checkpoint.nil?
-                    %td
+                    %th
                       = "#{checkpoint.name}"
                     %td
                       = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
@@ -183,15 +168,14 @@
                       = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
                       No
                   - if !checkboxpoint.nil?
-                    %td
+                    %th
                       = "#{checkboxpoint.name}"
-
                       - checkboxpoint.checkboxpoint_options.each do |option|
                         %td
                           = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)
                   - if !free_text.nil?
                     - if count!= 2
-                      %td{:width=>"70px"}
+                      %th{:width=>"70px"}
                         = "#{free_text.name}"
                     - if free_text.name.downcase == "date"
                       %td
@@ -204,7 +188,7 @@
                       %td
                         = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
                   - if !dropdownpoint.nil?
-                    %td
+                    %th
                       = "#{dropdownpoint.name}"
                     %td
                       - if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
@@ -212,129 +196,7 @@
                       - else
                         - staff = session.user.staff_member
                         = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :prompt => "Select A Value From", :selected => staff.id.to_s
-              - count = count + 1
-            - else
-              -#puts "Loan file."
-              -#- debugger
-              - if @checklist_type.is_hc_checklist? and count==2
-                - (section.free_texts.count).times do |i|
-
-
-                  - checkpoint = Checkpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - dropdownpoint = Dropdownpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - free_text = FreeText.first(:section_id => section.id, :sequence_number => (i+1))
-                  - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - if count == 1 or count == 3
-                    - if i%3 == 0
-                      %tr.question_cell
-                  - else
-                    - if i%2 == 0
-                      %tr.question_cell
-                  - if !checkpoint.nil?
-                    %td
-                      = "#{checkpoint.name}"
-                      -#= "#{section.name}"
-                    %td
-                      = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                      Yes
-                      = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                      No
-                  - if !checkboxpoint.nil?
-                    - loan_applications_of_loan_file.each do |loan_application|
-                      %tr
-                        %td
-                          = "#{loan_application.client_name}"
-                        - checkboxpoint.checkboxpoint_options.each do |option|
-                          %td
-                            = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)
-                  - if !free_text.nil?
-                    - if count!= 2
-                      %td{:width=>"70px"}
-                        = "#{free_text.name}"
-                        -#= "#{section.name}"
-                    - if free_text.name.downcase == "date"
-                      %td
-                        - if params["free_text_#{free_text.id}".to_sym].blank?
-                          - date_value = Date.today
-                        - else
-                          - date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
-                        = date_select "free_text_#{free_text.id}".to_sym, date_value, :max_date => Date.today
-                        -#= "#{section.name}"
-                      - else
-                        %td
-                          = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
-                          -#= "#{section.name}"
-                  - if !dropdownpoint.nil?
-                    %td
-                      = "#{dropdownpoint.name}"
-                    %td
-                      - if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
-                        = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym, :collection => Kernel.const_get(dropdownpoint.model_name).all, :value_method => :id, :text_method => :name, :selected => params["drop_down_point_#{dropdownpoint.id}".to_sym]
-                        -#= "#{section.name}"
-                      - else
-                        = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :prompt => "Select A Value From"
-                        -#= "#{section.name}"
-                - count = count + 1
-              - elsif @checklist_type.is_hc_checklist? and count!=2
-                - (section.checkpoints.count + section.dropdownpoints.count + section.free_texts.count + section.checkboxpoints.count).times do |i|
-                  - checkpoint = Checkpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - dropdownpoint = Dropdownpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - free_text = FreeText.first(:section_id => section.id, :sequence_number => (i+1))
-                  - checkboxpoint = Checkboxpoint.first(:section_id => section.id, :sequence_number => (i+1))
-                  - if count == 1 or count == 3
-                    - if i%3 == 0
-                      %tr.question_cell
-                  - else
-                    - if i%2 == 0
-                      %tr.question_cell
-                  - if !checkpoint.nil?
-                    %td
-                      = "#{checkpoint.name}"
-                      -#= "#{section.name}"
-                    %td
-                      = radio_button :name => "checkpoint_#{checkpoint.id}",:value => 1, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                      Yes
-                      = radio_button :name => "checkpoint_#{checkpoint.id}", :value => 0, :checked => (params["checkpoint_#{checkpoint.id}".to_sym].to_i == 0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                      No
-                  - if !checkboxpoint.nil?
-                    - loan_applications_of_loan_file.each do |loan_application|
-                      %tr
-                        %td
-                          = "#{loan_application.client_name}"
-                        - checkboxpoint.checkboxpoint_options.each do |option|
-                          %td
-                            = check_box :name => "option#{option.id}".to_sym, :boolean => true, :checked => (params["option#{option.id}".to_sym].to_i == 1)
-                  - if !free_text.nil?
-                    - if count!= 2
-                      %td{:width=>"70px"}
-                        = "#{free_text.name}"
-                        -#= "#{section.name}"
-                    - if free_text.name.downcase == "date"
-                      %td
-                        - if params["free_text_#{free_text.id}".to_sym].blank?
-                          - date_value = Date.today
-                        - else
-                          - date_value = Date.parse(params["free_text_#{free_text.id}".to_sym])
-                        = date_select "free_text_#{free_text.id}".to_sym, date_value, :max_date => Date.today
-                    - else
-                      %td
-                        = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
-                        -#= "#{section.name}"
-                  - if !dropdownpoint.nil?
-                    %td
-                      = "#{dropdownpoint.name}"
-                    %td
-                      - if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
-                        = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym, :collection => Kernel.const_get(dropdownpoint.model_name).all, :value_method => :id, :text_method => :name, :selected => params["drop_down_point_#{dropdownpoint.id}".to_sym]
-                        -#= "#{section.name}"
-                      - else
-                        = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]}, :prompt => "Select A Value From"
-                        -#= "#{section.name}"
-
-
-                - count = count + 1
-              - else
-                puts "Not a HealthChecklist"
+            - count = count + 1
       %p
         = check_box :name => "result_status", :boolean => true, :checked => false
         Cleared?
