@@ -113,7 +113,8 @@ class Securitizations < Application
 
         csv_folder = File.join("#{Merb.root}/public/uploads", "loan_assignments", "converted_csv")
         FileUtils.mkdir_p(csv_folder)
-        csv_filepath = File.join(csv_folder, "loan_assignment")
+        FileUtils.rm_rf("#{csv_folder}/.")
+        csv_filepath = File.join(csv_folder, filename)
 
         User.convert_xls_to_csv(xls_filepath, csv_filepath)
         converted_csv_file = Dir.entries(csv_folder).select{|d| d.split('.').include?('csv')}.to_s
