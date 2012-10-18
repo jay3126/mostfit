@@ -162,8 +162,8 @@ class Securitizations < Application
             assignment_type_id = data[:assignment_type_id]
 
             # VALIDATIONS
-            is_loan_eligible = loan_facade.is_loan_eligible_for_loan_assignments?(id)
-            if is_loan_eligible
+            is_loan_eligible, reason = loan_facade.is_loan_eligible_for_loan_assignments?(id)
+            if reason.blank?
               msg << "Effective on date must not be blank" if effective_on_date.blank?
 
               funder = NewFunder.get funder_id
@@ -208,7 +208,7 @@ class Securitizations < Application
                 end
               end
             else
-              msg << "Loan is not eligible for assignment"
+              msg << "Loan is not eligible for assignment( #{reason} )"
             end
             
             begin

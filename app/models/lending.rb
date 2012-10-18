@@ -889,13 +889,23 @@ class Lending
   def self.is_loan_eligible_for_loan_assignments?(loan_id)
     loan_assignment_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
     loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan_id, Date.today)
-    eligible_to_assign = true
     loan = Lending.get loan_id
     client = Client.get(loan.loan_borrower.counterparty_id)
-    is_active = !Client.is_claim_processing_or_inactive?(client)
-    has_3_minimum_repayments = loan.loan_receipts.size >= 3 ? true : false
-    eligible_to_assign = loan_assignment.is_additional_encumbered ? true : false unless loan_assignment.blank?
-    return eligible_to_assign && loan.is_outstanding? && is_active && has_3_minimum_repayments ? true : false
+    if Client.is_claim_processing_or_inactive?(client)
+      return [false, "Client is under claim processing "]
+    end
+    unless (loan.loan_receipts.size >= 3)
+      return [false, "Loan does not have minimum 3 repayments "]
+    end
+    unless loan_assignment.blank? 
+      if !(loan_assignment.is_additional_encumbered)
+        return [false, "Loan is already assigned "]
+      end
+    end
+    unless loan.is_outstanding?
+      return [false, "Loan does not have outstanding "]
+    end
+    true
   end
 
   def update_loan_shechdule_according_calendar_holiday(on_date, move_date, after_date = Date.today)
