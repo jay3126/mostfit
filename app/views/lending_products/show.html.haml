@@ -107,8 +107,8 @@
           Date
         %th
           User
-      - id = @third_party.id
-      - model = "ThirdParty"
+      - id = @lending_product.id
+      - model = "LendingProduct"
       - @obj = Kernel.const_get(model).get(id)
       - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
       - @trails.each do |trail|
@@ -120,7 +120,13 @@
               = trail.action
           %td.text
             %table{:width => '100%'}
-              /= diff_display(trail.changes, @obj, trail.action)
+              - change = []
+              - count = 0
+              - trail.changes.each do |x|
+                - count += 1
+                - next if count == 8
+                - change << x
+              = diff_display(change, @obj, trail.action)
           %td
             = trail.created_at.strftime("%d-%m-%Y %H:%M")
           %td
