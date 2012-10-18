@@ -87,8 +87,6 @@ class LoanAssignmentFacade < StandardFacade
     return loan_assigned_to.nil? ? "Not Assigned" : loan_assignment_status(loan_assigned_to)
   end
 
-  private
-
   def loan_assignment_status(loan_assigned_to)
     loan_assigned_to.loan_assignment_status
   end

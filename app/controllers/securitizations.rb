@@ -97,7 +97,6 @@ class Securitizations < Application
     @sucessfully_uploaded_records = 0
     @failed_records = 0
     applied_by_staff = recorded_by_user = get_session_user_id
-    applied_on_date = get_effective_date
 
     # VALIDATIONS
     @errors << "Please select file" if params[:file].blank?
@@ -186,13 +185,21 @@ class Securitizations < Application
                 if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
                   msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
                 else
-                  if (loan_assignment && loan_assignment.is_additional_encumbered) || (assignment_type == "e" && tranch.assignment_type == "encumbrance") || (assignment_type == "ae")
-                    assignment_type_object = Encumberance.get assignment_type_id
-                    msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                  if (loan_assignment && loan_assignment.is_additional_encumbered)
+                    if assignment_type == "s"
+                      assignment_type_object = Securitization.get assignment_type_id
+                      msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    else
+                      assignment_type_object = Encumberance.get assignment_type_id
+                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    end
                   else
                     if (assignment_type == "s" && tranch.assignment_type == "securitization")
                       assignment_type_object = Securitization.get assignment_type_id
                       msg << "No Securitization found with Id #{assignment_type_id}" if assignment_type_object.blank?
+                    elsif (assignment_type == "e" && tranch.assignment_type == "encumbrance") || (assignment_type == "ae")
+                      assignment_type_object = Encumberance.get assignment_type_id
+                      msg << "No Encumbrance found with Id #{assignment_type_id}" if assignment_type_object.blank?
                     else
                       msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
                     end

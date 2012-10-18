@@ -11,8 +11,8 @@ class Securitization
 
   def created_on; self.effective_on; end
 
-  def to_s
-    "<b>Securitized:</b> #{name} <b>Effective On:</b> #{effective_on}"
+  def to_s(assignment_effective_on)
+    "<b>Securitized:</b> #{name} <b>Effective On:</b> #{assignment_effective_on}"
   end
 
 end

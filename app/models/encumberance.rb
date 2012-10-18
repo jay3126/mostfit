@@ -18,12 +18,12 @@ class Encumberance
   def assigned_value_money_amount; to_money_amount(:assigned_value); end
   def created_on; self.effective_on; end
 
-  def to_s
-    "<b>Encumbered:</b> #{name} <b>Effective On:</b> #{effective_on}"
+  def to_s(assignment_effective_on)
+    "<b>Encumbered:</b> #{name} <b>Effective On:</b> #{assignment_effective_on}"
   end
 
-  def additional_encumbered_to_s
-    "<b>Additional Encumbered:</b> #{name} <b>Effective On:</b> #{effective_on}"
+  def additional_encumbered_to_s(assignment_effective_on)
+    "<b>Additional Encumbered:</b> #{name} <b>Effective On:</b> #{assignment_effective_on}"
   end
 
   def self.create_encumberance(name, effective_on, assigned_value_money_amount)

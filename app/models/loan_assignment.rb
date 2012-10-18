@@ -23,8 +23,8 @@ class LoanAssignment
   def cannot_both_sell_and_encumber
     validate_value = true
     if self.new?
-      any_loan_assignment = LoanAssignment.first(:loan_id => self.loan_id)
-      validate_value = (any_loan_assignment.nil?) ? true :
+      any_loan_assignment = LoanAssignment.last(:loan_id => self.loan_id)
+      validate_value = (any_loan_assignment.blank? || any_loan_assignment.is_additional_encumbered) ? true :
         [false, "There is already an assignment for the loan with ID #{self.loan_id} in effect"]
     end
     validate_value
@@ -93,9 +93,9 @@ class LoanAssignment
     for_loan_on_date = {}
     for_loan_on_date[:loan_id]           = for_loan_id
     for_loan_on_date[:assignment_status] = ASSIGNED
-    for_loan_on_date[:effective_on.lte]  = on_date
-    for_loan_on_date[:order]             = [:effective_on.desc] 
-    first(for_loan_on_date)
+    #    for_loan_on_date[:effective_on.lte]  = on_date
+    #    for_loan_on_date[:order]             = [:effective_on.desc]
+    last(for_loan_on_date)
   end
 
   # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance, on a specific date
@@ -137,7 +137,7 @@ class LoanAssignment
   end
 
   def loan_assignment_status
-    is_additional_encumbered ? loan_assignment_instance.additional_encumbered_to_s : loan_assignment_instance.to_s
+    is_additional_encumbered ? loan_assignment_instance.additional_encumbered_to_s(effective_on) : loan_assignment_instance.to_s(effective_on)
   end
 
 end
