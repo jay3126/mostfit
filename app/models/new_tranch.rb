@@ -13,10 +13,12 @@ class NewTranch
   property :assignment_type,     Enum.send('[]', *TRANCH_ASSIGNMENT_TYPES), :default => Constants::TranchAssignment::NOT_ASSIGNED
   property :created_by,          Integer
   property :created_at,          *CREATED_AT
+  property :reference,           Integer, :unique => true  #property added for upload functionality.
 
   belongs_to :new_funding_line
+  belongs_to :upload, :nullable => true
 
-  validates_with_method  :disbursal_date,       :method => :disbursal_not_in_past?
+  #validates_with_method  :disbursal_date,       :method => :disbursal_not_in_past?
   validates_with_method  :disbursal_date,       :method => :disbursal_not_before_sanction?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_equalto_disbursal?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_before_disbursal?
@@ -30,6 +32,20 @@ class NewTranch
 
   def name
     "#{tranch_money_amount} @ #{interest_rate}"
+  end
+
+  #this function is for upload functionality.
+  def self.from_csv(row, headers)
+    funder = NewFunder.first(:name => row[headers[:funder_name]])
+    funding_line = NewFundingLine.first(:amount => MoneyManager.get_money_instance(row[headers[:funding_line]]).amount, :new_funder_id => funder.id)
+    money_amount = MoneyManager.get_money_instance(row[headers[:amount]])
+    obj = new(:new_funding_line_id => funding_line.id, :amount => money_amount.amount,
+              :currency => money_amount.currency, :interest_rate => row[headers[:interest_rate]], 
+              :reference => row[headers[:reference]], :disbursal_date => Date.parse(row[headers[:disbursal_date]]),
+              :first_payment_date => Date.parse(row[headers[:first_payment_date]]),
+              :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :assignment_type => row[headers[:assignment_type]],
+              :created_by => User.first.id, :upload_id => row[headers[:upload_id]])
+    [obj.save, obj]
   end
 
   private
