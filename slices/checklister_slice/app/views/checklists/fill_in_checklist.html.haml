@@ -1,12 +1,29 @@
+:javascript
+  $(document).ready(function() {
+    var inner_div = "<div style='margin-top: 0pt; float: right;', onclick="+"jQuery('div.flash').remove();"+"><a class='closeNotice' href='#'>[X]</a></div>"
+    $('#update_p_no').click(function() {
+      var p_number = jQuery('#nil_class_telephone_number').val();
+      if(p_number!=''){
+        $(this).after("<img id='spinner' src='/images/spinner.gif' />");
+         $.ajax({
+           type: "GET",
+           dataType: "json",
+           url: jQuery(this).attr('url')+'?phone_number='+p_number,
+           success: function(data){
+               $Query("div#flash-messages").append("<div class='flash notice'>"+inner_div+data+"</div>");
+           }
+        });
+        jQuery("div#flash-messages").append("<div class='flash notice'>"+inner_div+'<p>Client Phone Number Updated</p>'+"</div>");
+        $("#spinner").remove();
+        }
+        else{
+         jQuery("div#flash-messages").append("<div class='flash error'>"+inner_div+'<p>Client Phone Number cannot be blank</p>'+"</div>");
+        }
+     });
+  });
 - if params[:target_entity_type] == "Client"
   - client_object = Client.get params[:target_entity_id]
   - client_phone_number = client_object.telephone_number
-%p
-  -if message
-    #flash-messages.span-17.prefix-5.suffix-5.last
-    -  message.each do |key, value|
-      .flash{ :class => key.to_s }
-        %p= value.gsub("\n", "<br/>")
 %script
   $(function(){
   $("select").datepicker();
@@ -28,7 +45,7 @@
           %td
             = text_field :name => :staff_name ,:value=>params[:staff_name] ,:disabled=>true
             = hidden_field :staff_name ,:value=>params[:staff_name]
-        %tr
+        %tr{:style =>"display:#{['Branch','Center'].include?(params[:target_entity_type].to_s) ? 'none' : ''}"}
           %th
             = label params[:target_entity_type]
           %td
@@ -51,6 +68,17 @@
             =label "Value Date"
           %td
             = date_select :effective_date, Date.parse(params[:effective_date]), :max_date => Date.today
+        - if @checklist.checklist_type.name == "Customer Calling"
+          %tr
+            %th
+              = label "Client telephone number"
+            %td
+              - if client_phone_number.blank?
+                = text_field :telephone_number
+              - else
+                = text_field :phone_number, :value => client_phone_number, :class => 'text_phone_no'
+            %td
+              = link_to "Update Telephone Number", '#', :id => 'update_p_no', :url => url(:controller=> :new_clients, :action => :update_client_telephone_number, :id => params[:target_entity_id]), :class => "add grey_button"
       %p
         - count = 1
         -@sections.each do |section|
@@ -62,62 +90,54 @@
                   = link_to section.name, "#", :onclick => "jQuery('.table_#{count}').toggle(); return false;"
               %br
             =section.instructions
-
           =hidden_field :checklist_id, :value=>@checklist.id
-
           =hidden_field :filler_type, :value=>"User"
           =hidden_field :staff_id, :value=>@staff_id
           =hidden_field :target_entity_type, :value=>params[:target_entity_type]
           =hidden_field :target_entity_id, :value=>params[:target_entity_id]
-
           =hidden_field :loc1_id, :value=>params[:loc1_id]
           =hidden_field :loc2_id, :value=>params[:loc2_id]
           =hidden_field :loc1_type, :value=>params[:loc1_type]
           =hidden_field :loc2_type, :value=>params[:loc2_type]
           =hidden_field :no_of_applications, :value=>params[:no_of_applications]
-
           =hidden_field :referral_url, :value=>params[:referral_url]
-
-          -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
-            -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-            -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
-            -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
-            %table{:cellspacing=>"3px", :cellpadding=>"3px", :class => "table_#{count}", :style => "display:none"}
-              %tr.question_cell
-
-              -if !checkpoint.nil?
-                %td{:width=>"800px"}
-                  ="#{i+1} . #{checkpoint.name}"
+          %table{:style => "display:none;width:98%", :class => "tall report nojs table_#{count}"}
+            -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count).times do |i|
+              -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+              -dropdownpoint=Dropdownpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
+              -free_text=FreeText.first(:section_id=>section.id,:sequence_number=>(i+1))
+              %tr{:style => "text-align:left;"}
                 %td
-                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                  Yes
-                %td
-                  =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
-                  No
-              -elsif !free_text.nil?
-                %td{:width=>"800px"}
-                  ="#{i+1} .  #{free_text.name}"
-
-                  -if free_text.name.downcase=="date"
-                    %td
-                      =date_select "free_text_#{free_text.id}".to_sym, Date.today, :max_date => Date.today
-                  -else
-                    %td
-                      =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
-              -elsif !dropdownpoint.nil?
-                %td{:width=>"800px"}
-                  ="#{i+1} . #{dropdownpoint.name}"
-                %td
-                  -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym], :style => "width:210px"
-                  -else
-                    =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value", :style => "width:210px"
+                  = i+1
+                -if !checkpoint.nil?
+                  %td{:width=>'700px'}
+                    ="#{checkpoint.name}"
+                  %td
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>1,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==1 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                    Yes
+                    =radio_button :name=>"checkpoint_#{checkpoint.id}",:value=>0,:checked=>(params["checkpoint_#{checkpoint.id}".to_sym].to_i==0 and !params["checkpoint_#{checkpoint.id}".to_sym].blank? )
+                    No
+                -elsif !free_text.nil?
+                  %td{:width=>"700px"}
+                    ="#{free_text.name}"
+                    -if free_text.name.downcase=="date"
+                      %td
+                        =date_select "free_text_#{free_text.id}".to_sym, Date.today, :max_date => Date.today
+                    -else
+                      %td
+                        =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
+                -elsif !dropdownpoint.nil?
+                  %td{:width=>"700px"}
+                    ="#{dropdownpoint.name}"
+                  %td
+                    %b
+                      - default_value = dropdownpoint.name == 'Approved By' ? session.user.staff_member.id : ''
+                      -if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
+                        =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|[x.id,x.name]},:selected=>params["drop_down_point_#{dropdownpoint.id}".to_sym], :style => "width:250px;height:25px;"
+                      -else
+                        =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value", :style => "width:250px;height:25px;", :selected => default_value.to_s
           - count += 1
       %p
         = submit "Create"
         =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
-%br
-%br
-%br
-
 %br

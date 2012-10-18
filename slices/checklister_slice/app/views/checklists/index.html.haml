@@ -1,82 +1,67 @@
-%p
-  -if message
-    #flash-messages.span-17.prefix-5.suffix-5.last
-    -  message.each do |key, value|
-      .flash{ :class => key.to_s }
-        %p= value.gsub("\n", "<br/>")
 %h1.h1c
   ="See All CheckLists for #{@checklist_type.name}"
 %h4
   =#"To Be filled by #{params[:filler_record_id]}"
+- unless @checklist_type.is_hc_checklist?
+  -parameter_hash=Hash.new
+  -parameter_hash[:loc1_type]=@loc1_type
+  -parameter_hash[:loc2_type]=@loc2_type
+  -parameter_hash[:loc2_name]=@loc2_name
+  -parameter_hash[:loc1_name]=@loc1_name
 
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        <b>Checklist Name</b>
-      %th
-        %b
-          -if @checklist_type.is_pa_checklist?
-            =params[:loc1_type].capitalize
-          -else
-            =params[:target_entity_type]
-      %th
-        <b>Filled By</b>
-      %th
-        <b>For-Date</b>
-      %th
-        <b>Status</b>
-      %th
-        <b>Links</b>
+  -parameter_hash[:loc1_id]=@loc1_id
+  -parameter_hash[:loc2_id]=@loc2_id
 
+  -parameter_hash[:target_entity_id]=@target_entity_id
+  -parameter_hash[:target_entity_type]=@target_entity_type
+  -parameter_hash[:target_entity_name]=@target_entity_name
+  -parameter_hash[:staff_id]=@staff_id
+  -parameter_hash[:staff_name]=@staff_name
+  -parameter_hash[:no_of_applications]=@no_of_applications
+  -parameter_hash[:effective_date]=@effective_date
+  -parameter_hash[:referral_url]=@referral_url
+  = perform_link(session.user.role,@checklists.first,parameter_hash)
+- unless @responses.blank?
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th
+          <b>Checklist Name</b>
+        %th
+          %b
+            -if @checklist_type.is_pa_checklist?
+              =params[:loc1_type].capitalize
+            -else
+              =params[:target_entity_type]
+        %th
+          <b>Filled By</b>
+        %th
+          <b>For-Date</b>
+        -if @checklist_type.is_hc_checklist?
+          %th
+            <b>Status</b>
+        %th
+          <b>Links</b>
 
-  - for checklist in @checklists
-    - response = checklist.responses.blank? ? nil : checklist.responses.last
-    %tr
-      %td
-        =checklist.name
-      %td
-        =params[:target_entity_name]
-        -#=params[:loc2_name]
-      - if response.blank?
+    - for response in @responses
+      - checklist = response.checklist
+      %tr
         %td
-          =params[:staff_name]
+          =checklist.name
         %td
-          =params[:effective_date]
-        %td
-          = 'Pending'
-        %td
-          -parameter_hash=Hash.new
-          -parameter_hash[:loc1_type]=@loc1_type
-          -parameter_hash[:loc2_type]=@loc2_type
-          -parameter_hash[:loc2_name]=@loc2_name
-          -parameter_hash[:loc1_name]=@loc1_name
-
-          -parameter_hash[:loc1_id]=@loc1_id
-          -parameter_hash[:loc2_id]=@loc2_id
-
-          -parameter_hash[:target_entity_id]=@target_entity_id
-          -parameter_hash[:target_entity_type]=@target_entity_type
-          -parameter_hash[:target_entity_name]=@target_entity_name
-
-          -parameter_hash[:staff_id]=@staff_id
-          -parameter_hash[:staff_name]=@staff_name
-          -parameter_hash[:no_of_applications]=@no_of_applications
-          -parameter_hash[:effective_date]=@effective_date
-          -parameter_hash[:referral_url]=@referral_url
-          = perform_link(session.user.role,checklist,parameter_hash)
-      - else
+          =params[:target_entity_name]
         %td
           = response.filler.name
         %td
           = response.value_date.strftime("%b %e %Y")
-        %td
-          = response.completion_status
+        - if @checklist_type.is_hc_checklist?
+          %td
+            = response.completion_status
         %td
           - if response.result_status == "cleared"
             = link_to "View completed #{checklist.checklist_type.name} checklist",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
           - else
-            = link_to "Edit #{checklist.checklist_type.name} checklist", url(:checklister_slice_edit_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"        
+            = link_to "Edit #{checklist.checklist_type.name} checklist", url(:checklister_slice_edit_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"
 %br
 %br
 %br

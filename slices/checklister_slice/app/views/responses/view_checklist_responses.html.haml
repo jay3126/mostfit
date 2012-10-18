@@ -4,9 +4,7 @@
 -else
   %h1.h1c
     ="List of responses for #{@checklist.name}"
-
   -if !@responses.nil?
-
     %table.dataTable.report.weeksheet.nojs
       %thead
         %tr
@@ -25,7 +23,6 @@
           -if @checklist.checklist_type.is_hc_checklist?
             %td
               Result Status
-
           %td
             links
           -if @checklist.checklist_type.is_ba_checklist?
@@ -56,15 +53,6 @@
           -if @checklist.checklist_type.is_ba_checklist?
             %td
               =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>@checklist.id),:class=>"greenButton"
-
-%h4
-
+  %h4
   =link_to "Back",params[:referral_url],:class=>'greenButton'
 
-
-%p
-  -if message
-    #flash-messages.span-17.prefix-5.suffix-5.last
-    -  message.each do |key, value|
-      .flash{ :class => key.to_s }
-        %p= value.gsub("\n", "<br/>")

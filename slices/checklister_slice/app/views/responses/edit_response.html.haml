@@ -1,7 +1,4 @@
 %h2= "Checklist Filled  by #{@filler.name}"
--#- unless message[:error].blank?
--#  .error
--#    = message[:error]
 -if @checklist.checklist_type.is_pa_checklist?
   %table.tall
     %tr
@@ -10,24 +7,12 @@
       %td
         %b
           =@response.value_date.strftime("%b %e")
-    -#%tr
-    -#  %td
-    -#    =@response.checklist_locations.first.type.capitalize+":"
-    -#  %td
-    -#    %b
-    -#      =@response.checklist_locations.first.name
     %tr
       %td
         =@response.checklist_locations.first.type.capitalize+":"
       %td
         %b
           =@response.checklist_locations.last.name
-    -#%tr
-    -#  %td
-    -#    =@response.target_entity.type
-    -#  %td
-    -#    %b
-    -#      =@response.target_entity.name
     %tr
       %td
         Filled On

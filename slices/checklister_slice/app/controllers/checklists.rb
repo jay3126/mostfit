@@ -30,10 +30,14 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       @referral_url=params[:referral_url]
 
       @checklists = @checklist_type.checklists
-
+      @responses = @checklists.blank? ? [] : @checklists.first.get_responses(@target_entity_type, @target_entity_id)
       #@checklists=Checklist.all
-
-      display @checklists
+      if @responses.blank?
+        redirect url(:checklister_slice_fill_in_checklist, @checklists.first, params)
+      else
+        display @checklists
+      end
+      
     rescue TargetEntityNotFoundException => e
       message={:error => e.message}
       redirect params[:referral_url], :message => message
@@ -333,7 +337,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     end
 
     Response.get(params[:result_status]).update(:result_status => 'cleared') unless params[:result_status].blank?
-    #debugger
     if message[:error].blank?
       redirect params[:request_url], :message => {:notice => 'Checklist updated'}
     else

@@ -55,8 +55,8 @@ class Checklist
 
   end
 
-  def get_response(target_entity_type, target_entity_id)
-    self.responses.last('target_entity.type' => target_entity_type, 'target_entity.model_record_id' => target_entity_id)
+  def get_responses(target_entity_type, target_entity_id)
+    self.responses.all('target_entity.type' => target_entity_type, 'target_entity.model_record_id' => target_entity_id)
   end
 
 end

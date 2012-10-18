@@ -1,11 +1,6 @@
 - loan_file_id = @response.target_entity.model_record_id
 - loan_file = LoanFile.get(loan_file_id)
 - no_of_loan_applications = loan_file.loan_applications.size
-
-- unless message[:error].blank?
-  .error
-    = message[:error]
-
 %br
 .shaded
   #form_section
@@ -112,7 +107,7 @@
               - i +=1
 
           - else
-            %table.tall
+            %table{:style =>"width:99%", :class => "tall"}
               %tr
                 -(section.checkpoints.count+section.dropdownpoints.count+section.free_texts.count+section.checkboxpoints.count).times do |i|
                   -checkpoint=Checkpoint.first(:section_id=>section.id,:sequence_number=>(i+1))
@@ -174,6 +169,7 @@
           = check_box :name => "result_status", :value => @response.id, :checked => false
           Cleared?
           %br
+          = hidden_field :name => 'request_url', :value => request.referer
           = submit "Update", :class=>"greenButton"
         -#%br
         -#= link_to_with_rights "Update", url(:controller => :checklists, :action => :capture_checklist_data, :checklist_id => @checklist.id), :class => 'greenButton'

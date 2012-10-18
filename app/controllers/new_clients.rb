@@ -267,7 +267,13 @@ class NewClients < Application
   end
 
   def update_client_telephone_number
-    debugger
+    client = Client.get(params[:id])
+    client.telephone_number = params[:phone_number]
+    if client.save
+      return "Client Phone Number Updated"
+    else
+      redirect request.referer, :message => {:error => client.errors.first.join('<br>')}
+    end
   end
 
   def client_movement

@@ -4,6 +4,8 @@ class DeviationType
   property :id, Serial
   property :name, String ,:nullable=>false
 
+  validates_is_unique :name
+
 
   def self.generate_seed_data
     DeviationType.create!(:name => "Center Leader as Guarantor")
