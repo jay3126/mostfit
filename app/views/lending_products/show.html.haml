@@ -114,17 +114,15 @@
       - @trails.each do |trail|
         %tr
           %td
-            = link_to_with_rights "#{trail.auditable_type} #{trail.auditable_id}", url(:controller => trail.auditable_type.pluralize.downcase, :action => "show", :id => trail.auditable_id)
+            = link_to_with_rights "#{@lending_product.name} (Id: #{@lending_product.id})", url(:controller => :lending_products, :action => "show", :id => trail.auditable_id)
           %td.text
             %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
               = trail.action
           %td.text
             %table{:width => '100%'}
               - change = []
-              - count = 0
               - trail.changes.each do |x|
-                - count += 1
-                - next if count == 8
+                - next if x.keys.include?(:amount)
                 - change << x
               = diff_display(change, @obj, trail.action)
           %td
