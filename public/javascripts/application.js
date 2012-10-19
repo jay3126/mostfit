@@ -115,7 +115,7 @@ function update_phone_number(obj){
     $.ajax({
       type: "GET",
       dataType: "json",
-      url: jQuery(obj).attr('url')+'?phone_number='+p_number+".json",
+      url: jQuery(obj).attr('url')+'?phone_number='+p_number,
       success: function(data){
         jQuery("div#flash-messages").append("<div class='flash notice'>"+inner_div+data+"</div>");
         jQuery("#spinner").remove();
