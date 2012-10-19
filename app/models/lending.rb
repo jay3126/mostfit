@@ -877,10 +877,16 @@ class Lending
     eligible_loans = []
     loans = LoanAdministration.get_loans_administered(center_id)
     loans.each do |loan|
+      loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan.id, Date.today)
+      unless loan_assignment.blank?
+        no_assignments = !(loan_assignment.is_additional_encumbered) ? false : true
+      else
+        no_assignments = true
+      end
       client = Client.get(loan.loan_borrower.counterparty_id)
-      is_inactive = !Client.is_claim_processing_or_inactive?(client)
+      is_active = !Client.is_claim_processing_or_inactive?(client)
       has_3_minimum_repayments = loan.loan_receipts.size >= 3 ? true : false
-      eligible = loan_assignment_facade.get_loan_assigned_to(loan.id, Date.today).nil? && loan.is_outstanding? && is_inactive && has_3_minimum_repayments ? true : false
+      eligible = no_assignments && loan.is_outstanding? && is_active && has_3_minimum_repayments ? true : false
       eligible_loans << loan if eligible == true
     end
     eligible_loans
