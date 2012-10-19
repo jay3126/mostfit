@@ -44,6 +44,8 @@
           Fundling Line
         %th
           Tranch
+        %th
+          Assignment Status
     - s_no = 1
     - lendings.each do |lending|
       - funder = loan_facade.get_funder_assigned_to_loan(lending.id)
@@ -66,4 +68,6 @@
           = "#{funding_line.name} (Id: #{funding_line.id})"
         %td
           = "#{tranch.name} (Id: #{tranch.id})"
+        %td
+          = loan_assignment_facade.loan_assignment_status_message(lending.id)
         - s_no += 1

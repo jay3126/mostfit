@@ -68,4 +68,5 @@ class NewTranch
   def tranch_assignment_not_blank?
     return (assignment_type == Constants::TranchAssignment::NOT_ASSIGNED) ? [false, "Tranch must be either Securitized or Encumbered"] : true
   end
+  
 end
