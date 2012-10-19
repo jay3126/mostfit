@@ -189,7 +189,7 @@
                         = text_field :name => "free_text_#{free_text.id}".to_sym, :value => params["free_text_#{free_text.id}"]
                   - if !dropdownpoint.nil?
                     %th
-                      = "#{dropdownpoint.name}"
+                      = "<span style='color:red'>*</span>#{dropdownpoint.name}"
                     %td
                       - if !params["drop_down_point_#{dropdownpoint.id}".to_sym].blank?
                         = select :name => "drop_down_point_#{dropdownpoint.id}".to_sym, :collection => Kernel.const_get(dropdownpoint.model_name).all, :value_method => :id, :text_method => :name, :selected => params["drop_down_point_#{dropdownpoint.id}".to_sym]

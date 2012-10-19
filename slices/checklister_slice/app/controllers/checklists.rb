@@ -195,10 +195,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
         #    raise Exception
         #  end
         #end
-
+        if @checklist.checklist_type.is_cc_checklist? && params[:target_entity_type] == 'Client'
+          raise Exception, "Client Phone Number cannot be blank" if Client.get(params[:target_entity_id]).telephone_number.blank?
+        end
         section.dropdownpoints.each do |drop_down|
           if params["drop_down_point_#{drop_down.id}".to_sym].to_i==0
-            raise Exception
+            raise Exception, "Please select value for #{drop_down.name}"
           end
         end
 
@@ -282,10 +284,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       end
 
     rescue Exception => e
-      # message={:error => e.message}
-      # message={:error => params[:result_status]}
-      message[:error]="Fields cannot be blank"
-      #  render :fill_in_checklist, :message => message
+      message={:error => e.message}
       redirect url(:checklister_slice_fill_in_checklist, @checklist, params), :message => message
 
     else

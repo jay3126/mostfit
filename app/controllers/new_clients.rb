@@ -267,13 +267,19 @@ class NewClients < Application
   end
 
   def update_client_telephone_number
+    error = ''
     client = Client.get(params[:id])
     client.telephone_number = params[:phone_number]
     default_text = "<div style='margin-top: 0pt; float: right;', onclick="+"jQuery('div.flash').remove();"+"><a class='closeNotice' href='#'>[X]</a></div>"
+    error = "Client Phone Number is not valid format" if params[:phone_number].to_i <= 0 || params[:phone_number].size > 14
+    if error.blank?
     if client.save
       message = "<div class='flash notice'>#{default_text}Client Phone Number Updated</div>"
     else
       message = "<div class='flash error'>#{default_text}#{client.errors.first.join('<br>')}</div>"
+    end
+    else
+      message = "<div class='flash error'>#{error}</div>"
     end
     message
   end

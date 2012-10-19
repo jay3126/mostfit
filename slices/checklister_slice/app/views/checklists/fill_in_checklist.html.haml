@@ -105,7 +105,7 @@
                         =text_area  params["free_text_#{free_text.id}".to_sym], :name=>"free_text_#{free_text.id}".to_sym,:class=>"full_width"
                 -elsif !dropdownpoint.nil?
                   %td{:width=>"700px"}
-                    ="#{dropdownpoint.name}"
+                    ="<span style='color:red'>*</span>#{dropdownpoint.name}"
                   %td
                     %b
                       - default_value = dropdownpoint.name == 'Approved By' ? session.user.staff_member.id : ''

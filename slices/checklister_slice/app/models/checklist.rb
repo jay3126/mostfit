@@ -43,13 +43,13 @@ class Checklist
     @responses=@scv_checklist.checklists.first.responses.all(:target_entity_id => @target_entity.id,:value_date=>on_date)
 
     required_information_array=Array.new
-     if @responses.all(:completed_status => "completed").count>0
-       response=@responses.first
-       filler=Filler.get(response.filler_id)
-       required_information_array=[true,filler.model_record_id]
-       return required_information_array
+    if @responses.all(:completed_status => "completed").count>0
+      response=@responses.first
+      filler=Filler.get(response.filler_id)
+      required_information_array=[true,filler.model_record_id]
+      return required_information_array
 
-     end
+    end
 
     return false
 
@@ -59,4 +59,21 @@ class Checklist
     self.responses.all('target_entity.type' => target_entity_type, 'target_entity.model_record_id' => target_entity_id)
   end
 
+  def get_mandatory_fields
+    case self.checklist_type.name
+    when "Surprise Center Visit"
+      fields = []
+    when "Business Audit"
+      fields = []
+    when "Process Audit"
+      fields = []
+    when "HealthCheck on Loan Files"
+      fields = []
+    when "Customer Calling"
+      fields = []
+    else
+      fields = []
+    end
+    fields
+  end
 end

@@ -120,7 +120,7 @@
                   =text_field :name=>"free_text_#{free_text.id}".to_sym,:value=>@comment,:disabled=>true
             -if !dropdownpoint.nil?
               %th
-                =" #{dropdownpoint.name}"
+                ="<span style='color:red'>*</span> #{dropdownpoint.name}"
               %td
                 =dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
           -count=count+1

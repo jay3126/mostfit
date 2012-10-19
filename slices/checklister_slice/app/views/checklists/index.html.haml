@@ -40,10 +40,10 @@
         -if @checklist_type.is_hc_checklist?
           %th
             <b>Status</b>
-        %th
+        %th{:style => "width:30%"}
           <b>Links</b>
         -if @checklist_type.is_ba_checklist?
-          %th
+          %th{:style => "width:30%"}
             <b>Report</b>
 
     - for response in @responses
@@ -68,7 +68,5 @@
         - if @checklist_type.is_ba_checklist?
           %td
             =link_to "View Report",url(:checklister_slice_view_report,response.filler.id,:response_id=>response.id,:checklist_id=>checklist.id),:class=>"greenButton"
-%br
-%br
 %br
 =link_to "Back",params[:referral_url],:class=>"greenButton"
