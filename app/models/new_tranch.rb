@@ -18,7 +18,10 @@ class NewTranch
   belongs_to :new_funding_line
   belongs_to :upload, :nullable => true
 
-  #validates_with_method  :disbursal_date,       :method => :disbursal_not_in_past?
+  if Mfi.first.system_state != :migration
+    validates_with_method  :disbursal_date,       :method => :disbursal_not_in_past?
+  end
+
   validates_with_method  :disbursal_date,       :method => :disbursal_not_before_sanction?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_equalto_disbursal?
   validates_with_method  :first_payment_date,   :method => :first_payment_not_before_disbursal?
