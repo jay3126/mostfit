@@ -4,7 +4,7 @@
   Upload information for your past operations here, and you are ready to begin using Mostfit 
 %p
   Download 
-  %a{:href => "/upload_data.xls"}
+  %a{:href => "/new_upload_data.xls"}
     sample spreadsheet
 = form_for(@upload, :action => "/uploads/#{@upload.id}/", :multipart => true, :class => "bold") do
   = partial :fields
