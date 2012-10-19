@@ -39,7 +39,7 @@ class LendingProduct
     interest_rate       = row[headers[:interest_rate]]
     repayment_frequency = row[headers[:repayment_frequency]]
     allocation_strategy = row[headers[:repayment_allocation_strategy]]
-    
+
     loan_money_amount   = MoneyManager.get_money_instance(row[headers[:amount]])
     interest_amount     = MoneyManager.get_money_instance(row[headers[:interest_amount]])
     principal_schedules = MoneyManager.get_money_instance(*row[headers[:principal_schedules]].split(','))
@@ -49,6 +49,13 @@ class LendingProduct
     insurance_proudcts  = SimpleFeeProduct.all(:name => row[headers[:insurance_products]], :fee_charged_on_type => 'premium_collected_on_insurance').map(&:id)
     preclousre_proudcts = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]], :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
     obj = create_lending_product(name, loan_money_amount, interest_amount, interest_rate, repayment_frequency, tenure, allocation_strategy, principal_schedules, interest_schedules, staff_id, user_id, fee_products+preclousre_proudcts, insurance_proudcts, upload_id)
+
+    locations           = row[headers[:branches]].split(', ')
+    locations.each do |l|
+      location_id = BizLocation.first(:name => l).id
+      obj.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => Date.today,
+                                                    :performed_by => User.first.id, :recorded_by => StaffMember.first.id)
+    end
 
     if obj.save
       [true, obj]
@@ -100,7 +107,6 @@ class LendingProduct
     LoanScheduleTemplate.create_schedule_template(name, standard_loan_money_amount, total_interest_applicable_money_amount, tenure, repayment_frequency, new_product, principal_and_interest_amounts)
     unless fee_products.blank?
       fee_products.each do |fee_id|
-        #FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, by_staff, by_user)
         FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, staff_id, user_id)
       end
     end
