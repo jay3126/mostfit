@@ -111,6 +111,13 @@ class LoanBaseSchedule
     self.base_schedule_line_items.all(:on_date.gte => on_date)
   end
 
+  # Only fetches the schedule line item for the specified date,
+  #if there is a schedule line item
+  # @param [Date] on_date
+  def get_schedule_line_item(on_date)
+    self.base_schedule_line_items.first(:on_date => on_date)
+  end
+
   ###########################
   # LOAN AMORTIZATION queries # ends
   ###########################
@@ -132,12 +139,7 @@ class LoanBaseSchedule
     get_schedule_line_items_until(on_or_before_date).collect {|line_item| line_item.to_amortization}
   end
 
-  # Only fetches the schedule line item for the specified date,
-  #if there is a schedule line item
-  # @param [Date] on_date
-  def get_schedule_line_item(on_date)
-    self.base_schedule_line_items.first(:on_date => on_date)
-  end
+
 
   def get_schedule_line_items_until(date)
     self.base_schedule_line_items.all(:on_date.lte => date)

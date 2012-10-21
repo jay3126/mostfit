@@ -48,18 +48,31 @@
             %th
               Last Repayment Amount
             %th
+              Advance
+            %th
               Principal Due
             %th
               Interest Due
             %th
               Preclosure Penalty
             %th
+              Receipt No.
+            %th
               Total Due
         - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
         - @default_currency ||= MoneyManager.get_default_currency
         - @lendings.each do |lending|
-          - last_repayment = lending.loan_receipts.last
-          - last_repayment_date = last_repayment.blank? ? '-' : last_repayment.effective_on
+          - advance_amount        = lending.current_advance_available
+          - loan_principal        = lending.actual_principal_outstanding
+          - advance_principal     = loan_principal >= advance_amount ? advance_amount : loan_principal
+          - advance_interest      = loan_principal < advance_amount ? advance_amount-loan_principal : MoneyManager.default_zero_money
+          - actual_principal      = loan_principal < advance_amount ? MoneyManager.default_zero_money : loan_principal-advance_amount
+          - from_date             = lending.most_recent_payment_transaction_on_date
+          - to_date               = @date.class == Date ? @date : Date.parse(@date)
+          - loan_interest         = lending.interest_for_preclose(to_date)
+          - acutal_interest       = loan_interest < advance_interest ? advance_interest : loan_interest-advance_interest
+          - last_repayment        = lending.loan_receipts.last
+          - last_repayment_date   = last_repayment.blank? ? '-' : last_repayment.effective_on
           - last_repayment_amount = last_repayment.blank? ? '-' : last_repayment.to_money[:principal_received] + last_repayment.to_money[:interest_received]
           %tr
             %td{:style => "text-align:center"}
@@ -85,21 +98,22 @@
               = last_repayment_amount
               - accumulate_row_values[:last_repayment_amount] += last_repayment_amount unless last_repayment.blank?
             %td
-              - loan_principal = lending.actual_principal_outstanding
-              = loan_principal
-              = hidden_field :name => "preclose[#{lending.id}][principal_amount]", :value => loan_principal.to_regular_amount, :class => "weeksheet_total_#{lending.id}"
-              - accumulate_row_values[:loan_principal] += loan_principal
+              = advance_amount
             %td
-              - from_date     = last_repayment.blank? ? lending.scheduled_first_repayment_date : last_repayment_date
-              - loan_interest = lending.interest_for_preclose(@date)
-              = text_field :name => "preclose[#{lending.id}][interest_amount]", :value => loan_interest.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{lending.id} weeksheet_total weeksheet_total_lending", :onkeyup => "update_total_amount('INR'); update_total_on_div_amount('INR', '#{lending.id}'); update_total_on_div_amount('INR', 'lending');", :style => "width:100px"
-              - accumulate_row_values[:loan_interest] += loan_interest
+              = actual_principal
+              = hidden_field :name => "preclose[#{lending.id}][principal_amount]", :value => actual_principal.to_regular_amount, :class => "weeksheet_total_#{lending.id}"
+              - accumulate_row_values[:loan_principal] += actual_principal
+            %td
+              = text_field :name => "preclose[#{lending.id}][interest_amount]", :value => acutal_interest.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{lending.id} weeksheet_total weeksheet_total_lending", :onkeyup => "update_total_amount('INR'); update_total_on_div_amount('INR', '#{lending.id}'); update_total_on_div_amount('INR', 'lending');", :style => "width:100px"
+              - accumulate_row_values[:loan_interest] += acutal_interest
             %td
               - preclosure_penalty = lending.get_preclosure_penalty_product.effective_total_amount(@date) rescue MoneyManager.default_zero_money
               = preclosure_penalty
               - accumulate_row_values[:preclosure_penalty] += preclosure_penalty
             %td
-              - total_due = loan_principal + loan_interest
+              = text_field :name => "preclose[#{lending.id}][receipt_no]", :style => "width:80px"
+            %td
+              - total_due = advance_amount + actual_principal + acutal_interest
               %div{:id => "weeksheet_total_amount_#{lending.id}"}
                 = total_due
               = hidden_field :name => "preclose[#{lending.id}][total_amount]", :value => total_due.to_regular_amount, :class => 'weeksheet_total_lending'
@@ -120,12 +134,14 @@
             %td
               = total_rows[:last_repayment_amount]
             %td
+            %td
               = total_rows[:loan_principal]
             %td
               %div{:id => "weeksheet_total_amount"}
                 = total_rows[:loan_interest]
             %td
               = total_rows[:preclosure_penalty]
+            %td
             %td
               %div{:id => "weeksheet_total_amount_lending"}
                 = total_rows[:total_due]

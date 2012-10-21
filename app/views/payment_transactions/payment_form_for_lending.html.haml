@@ -9,6 +9,11 @@
           = hidden_field :name => "payment_type", :value => Constants::Transaction::RECEIPT
       %tr
         %th
+          Receipt Number
+        %td
+          = text_field :name => "receipt_no"
+      %tr
+        %th
           Maximum Amount
         %td
           = @lending.maximum_to_be_collected

@@ -121,7 +121,7 @@ module Pdf
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
       all_branches.each do |branch|
         weeksheets = []
-        filename = File.join(folder, "due_collection_#{branch.name}_#{Time.now}.pdf")
+        filename = File.join(folder, "due_collection_#{branch.name}_#{branch.id}_#{Time.now}.pdf")
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
         pdf.info.title = "due_generation_#{branch.name}_#{Time.now}"
@@ -131,7 +131,7 @@ module Pdf
 
         create_new_page = false
         branch_centers = LocationLink.get_children(branch)
-        branch_centers.each{|center| weeksheets << CollectionsFacade.new(user_id).get_collection_sheet(center.id, date)}
+        branch_centers.each{|center| weeksheets << CollectionsFacade.new(user_id).get_collection_sheet(center.id, date, true)}
         weeksheets.each do |weeksheet|
           unless weeksheet.blank?
             location            = BizLocation.get weeksheet.at_biz_location_id
@@ -171,24 +171,26 @@ module Pdf
                 installment_due = ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
                 overdue_amt = lending.overdue_amount(date)
                 table.data.push({
-                    "S. No."        => loan_row_count,
-                    "Group"         => ws.borrower_group_name,
-                    "Customer Name" => ws.borrower_name,
-                    "Loan LAN No."  => lending.lan,
-                    "POS"           => ws.loan_schedule_principal_outstanding,
-                    "Inst. Date"    => ws.loan_schedule_date,
-                    "Inst. No."     => ws.loan_installment_number,
-                    "OD"     => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
-                    "Inst. Due"     => installment_due.to_s,
-                    "Inst. Paid"    => '',
-                    "Attendance"    => ''
+                    "S. No."          => loan_row_count,
+                    "Group"           => ws.borrower_group_name,
+                    "Customer Name"   => ws.borrower_name,
+                    "Loan LAN No."    => lending.lan,
+                    "POS"             => ws.loan_schedule_principal_outstanding,
+                    "Advance"         => ws.loan_advance_receipts,
+                    "Collection Date" => ws.loan_origin_schedule_date,
+                    "Inst. Date"      => ws.loan_schedule_date,
+                    "Inst. No."       => ws.loan_installment_number,
+                    "OD"              => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
+                    "Inst. Due"       => installment_due.to_s,
+                    "Inst. Paid"      => '',
+                    "Attendance"      => ''
                   })
                 loan_row_count += 1
                 tot_amount += ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
               end
             end
             table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
-            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
+            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Collection Date", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
             table.show_lines        = :all
             table.show_headings     = true
             table.shade_rows        = :none

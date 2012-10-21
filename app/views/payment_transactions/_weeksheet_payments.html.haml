@@ -44,6 +44,8 @@
           %th
             Advance
           %th
+            Receipt
+          %th
             Total
         %tr
           %th
@@ -78,6 +80,8 @@
             Actual Interest Outstanding
           %th
             Advance Amount Balance
+          %th
+            Receipt No.
           %th
             Total Due
       - loan_row_count  = 1
@@ -130,6 +134,8 @@
               = ws.loan_advance_amount.to_s
               - total_advance_amount = total_advance_amount + ws.loan_advance_amount.amount unless ws.loan_advance_amount.blank?
             %td
+              = text_field :name => "payment_transactions[payments][#{loan_row_count}][receipt_no]", :style => "width:100px"
+            %td
               = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.loan_actual_total_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
               - total_amount = total_amount + ws.loan_actual_total_due.amount unless ws.loan_actual_total_due.blank?
               - loan_row_count = loan_row_count + 1
@@ -157,6 +163,7 @@
             = Money.new(total_actual_interest_outstanding,:INR).to_s
           %td{:style => "text-align:right"}
             = Money.new(total_advance_amount,:INR).to_s
+          %td
           %td{:style => "text-align:right"}
             %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
               = Money.new(total_amount,:INR).to_s

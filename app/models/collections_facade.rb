@@ -4,9 +4,10 @@ class CollectionsFacade < StandardFacade
   # This returns instances of CollectionSheet which represent
   # the collection sheet at a center location on a given date
   #following function will generte the weeksheet for center.
-  def get_collection_sheet(at_biz_location, on_date)
+  def get_collection_sheet(at_biz_location, on_date, only_installment_date = false)
     collection_sheet_line = []
     client_non_loan       = []
+    on_date = on_date.class == Date ? on_date : Date.parse(on_date)
     biz_location    = BizLocation.get(at_biz_location)
     location_manage = LocationManagement.staff_managing_location(biz_location.id, on_date ) # Use this center_manager for staff ID, staff name
     center_manager  = location_manage.manager_staff_member unless location_manage.blank?
@@ -17,11 +18,11 @@ class CollectionsFacade < StandardFacade
     return [] if loans.blank?
 
     loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
+    loans           = loans.select{|loan| loan.schedule_dates.include?(on_date)} if only_installment_date
     meeting_date    = meeting_facade.get_meeting(biz_location, on_date)
     meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
     meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
     clients         = ClientAdministration.get_clients_administered(biz_location.id, on_date)
-
     return [] if clients.blank?
     
     clients.each do |client|
@@ -55,7 +56,8 @@ class CollectionsFacade < StandardFacade
             loan_schedule_item = loan_schedule_items.class == Array ? loan_schedule_items.first.first : loan_schedule_items.first
           end
           loan_schedule_date                  = loan_schedule_item.first.last
-         
+          loan_schedule_on_date               = client_loan.loan_base_schedule.get_schedule_line_item(loan_schedule_date)
+          loan_origin_schedule_date           = loan_schedule_on_date.blank? ? '' : loan_schedule_on_date.actual_date
           loan_schedule_installment_no        = loan_schedule_item.first.first
           loan_schedule_principal_due         = loan_schedule_item.last[:scheduled_principal_due]
           loan_actual_principal_outstanding   = client_loan.actual_principal_outstanding
@@ -77,7 +79,7 @@ class CollectionsFacade < StandardFacade
           
           collection_sheet_line << CollectionSheetLineItem.new(at_biz_location, biz_location.name, on_date, client_id, client_name, client_group_id,
             client_group_name, loan_id, loan_amount,
-            loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no, loan_schedule_date, loan_days_past_due, loan_principal_due,
+            loan_status, loan_disbursal_date, loan_due_status, loan_schedule_installment_no, loan_schedule_date, loan_origin_schedule_date, loan_days_past_due, loan_principal_due,
             loan_schedule_principal_due, loan_schedule_principal_outstanding, loan_schedule_interest_due, loan_schedule_interest_outstanding,
             loan_advance_amount, loan_principal_receipts, loan_interest_receipts, loan_advance_receipts,
             loan_total_principal_due, loan_total_interest_due, 
@@ -96,8 +98,8 @@ class CollectionsFacade < StandardFacade
 
     #Find all centers by loan history on particular date
     location_manage = LocationManagement.locations_managed_by_staff(staff.id, on_date)
-    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| lm.managed_location}
-    biz_locations.each do |biz_location|
+    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| LocationLink.all_children(lm.managed_location, on_date)}
+    biz_locations.flatten.uniq.each do |biz_location|
       collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
     end
 

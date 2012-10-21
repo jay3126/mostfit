@@ -19,6 +19,8 @@
         %th
           Amount
         %th
+          Receipt No.
+        %th
           Payment Type
         %th
           Payment Towards
@@ -45,6 +47,8 @@
           = lt.id
         %td
           = lt.to_money[:amount].to_s
+        %td
+          = lt.receipt_no
         %td
           = lt.receipt_type
         %td

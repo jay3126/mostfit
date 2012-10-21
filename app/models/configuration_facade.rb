@@ -19,7 +19,7 @@ class ConfigurationFacade
 
   # The days of the week that are not business days
   def non_working_days
-    [SATURDAY, SUNDAY]
+    [SUNDAY]
   end
 
   # Returns the days of the week that are business days

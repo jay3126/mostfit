@@ -248,7 +248,7 @@ module Pdf
       raise ArgumentError,"No loans exists for generate pdf" if lendings.blank?
       folder   = File.join(Merb.root, "doc", "pdfs", "company","centers","#{self.name}")
       FileUtils.mkdir_p(folder)
-      filename = File.join(folder, "approve_loans_#{self.name}_#{Time.now}.pdf")
+      filename = File.join(folder, "approve_loans_#{self.name}_#{self.id}_#{Time.now}.pdf")
       pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
       pdf.select_font "Times-Roman"
       pdf.info.title = "approve_loans_#{self.name}_#{Time.now}"

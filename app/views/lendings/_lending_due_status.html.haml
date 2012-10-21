@@ -1,7 +1,12 @@
 :javascript
   $('table.loan_due_status').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
-      "bJQueryUI": true
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
     });
 %br
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }

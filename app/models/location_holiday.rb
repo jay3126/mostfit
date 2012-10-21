@@ -125,8 +125,7 @@ class LocationHoliday
 
   def self.working_holiday?(at_location, on_date)
     on_date = Date.parse on_date if on_date.class == String
-    valid_dates = get_configuration_facade(User.first).permitted_business_days_in_month(on_date)
-    !(valid_dates.include?(on_date) && get_any_holiday(at_location, on_date).blank?)
+    !(get_configuration_facade(User.first).is_business_day?(on_date) && get_any_holiday(at_location, on_date).blank?)
   end
 
   private

@@ -467,7 +467,7 @@ class Lending
     scheduled_amount_till_date  = get_sum_scheduled_amounts_info_till_date(to_date)
     scheduled_received_interest = scheduled_amount_till_date[:sum_of_scheduled_interest_due]
     received_interest_till_date = interest_received_till_date(to_date)
-    interest                    = scheduled_received_interest - received_interest_till_date
+    interest                    = scheduled_received_interest > received_interest_till_date ? scheduled_received_interest-received_interest_till_date : MoneyManager.default_zero_money
     interest                    += broken_period_interest_due(to_date) unless schedule_dates.include?(to_date)
     interest
   end

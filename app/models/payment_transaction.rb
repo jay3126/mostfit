@@ -40,6 +40,7 @@ class PaymentTransaction
   property :id,                   Serial
   property :amount,               *MONEY_AMOUNT_NON_ZERO
   property :currency,             *CURRENCY
+  property :receipt_no,           Integer
   property :receipt_type,         Enum.send('[]', *Constants::Transaction::RECEIVED_OR_PAID), :nullable => false
   property :payment_towards,      Enum.send('[]', *Constants::Transaction::PAYMENT_TOWARDS_TYPES), :nullable => false
   property :on_product_type,      Enum.send('[]', *Constants::Transaction::TRANSACTED_PRODUCTS), :nullable => false
@@ -54,10 +55,28 @@ class PaymentTransaction
   property :created_at,           *CREATED_AT
 
   validates_with_method :disallow_future_dated_transactions
+  validates_with_method :check_receipt_no
 
   def disallow_future_dated_transactions
-    (self.effective_on and (self.effective_on > Date.today)) ? [false, "Future dated transactions are not permitted"] :
-        true
+    if self.effective_on and (self.effective_on > Date.today)
+      [false, "Future dated transactions are not permitted"]
+    elsif(LocationHoliday.working_holiday?(self.performed_at_location, self.effective_on))
+      [false, "Holiday dated transactions are not permitted"]
+    else
+      true
+    end
+  end
+
+  def check_receipt_no
+    message = ''
+    if self.receipt_type == RECEIPT
+      if self.receipt_no.blank?
+        message = [false, "Receipt Number cannot be blank"]
+      elsif !PaymentTransaction.first(:receipt_no => self.receipt_no).blank?
+        message =  [false, "Receipt Number is not valid"]
+      end
+    end
+    message.blank? ? true : message
   end
 
   def money_amounts; [ :amount ]; end
@@ -76,11 +95,11 @@ class PaymentTransaction
 
   # UPDATES
 
-  def self.record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
+  def self.record_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     Validators::Arguments.not_nil?(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     # TO BE INTRODUCED
     # Validators::Arguments.is_id?(on_product_id, by_counterparty_id, performed_at, accounted_at, performed_by, recorded_by)
-    payment = to_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
+    payment = to_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     recorded_payment = create(payment)
     raise Errors::DataError, recorded_payment.errors.first.first unless recorded_payment.saved?
     recorded_payment
@@ -89,10 +108,11 @@ class PaymentTransaction
   private
 
   # Constructs the hash required to create a payment
-  def self.to_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
+  def self.to_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, recorded_by)
     payment = {}
     payment[:amount] = money_amount.amount; payment[:currency] = money_amount.currency
     payment[:receipt_type] = receipt_type; payment[:payment_towards] = payment_towards
+    payment[:receipt_no] = receipt_no unless receipt_no.blank?
     payment[:on_product_type] = on_product_type; payment[:on_product_id] = on_product_id
     payment[:by_counterparty_type] = by_counterparty_type; payment[:by_counterparty_id] = by_counterparty_id
     payment[:performed_at] = performed_at; payment[:accounted_at] = accounted_at

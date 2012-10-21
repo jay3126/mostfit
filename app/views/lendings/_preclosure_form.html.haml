@@ -33,6 +33,11 @@
         = advance_amount
     %tr
       %th
+        Receipt Number
+      %td
+        = text_field :name => "receipt_no"
+    %tr
+      %th
         Principal due
       %td
         = text_field :name => "specific_principal_amount", :value => actual_principal.to_s, :readonly => true, :class => 'weeksheet_total'

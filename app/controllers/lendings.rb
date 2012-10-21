@@ -199,9 +199,9 @@ class Lendings < Application
               fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
               fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
               fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
-              payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+              payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
               fee_instances.each do |fee_instance|
-                payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
+                payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
               end
               @message[:error].push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
             end
@@ -262,6 +262,7 @@ class Lendings < Application
     # GET-KEEPING
     @lending         = Lending.get params[:id]
     payment_amount   = params[:payment_amount]
+    receipt_no       = params[:receipt_no]
     payment_type     = params[:payment_type]
     payment_date     = params[:payment_date]
     payment_by_staff = params[:payment_by_staff]
@@ -286,7 +287,7 @@ class Lendings < Application
         money_amount    = MoneyManager.get_money_instance(payment_amount)
         valid = @lending.is_payment_transaction_permitted?(money_amount, payment_date, payment_by_staff, session.user.id)
         if valid == true
-          payment_facade.record_payment(money_amount, payment_type, payment_towards, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, product_action)
+          payment_facade.record_payment(money_amount, payment_type, payment_towards, receipt_no, 'lending', @lending.id, 'client', @lending.borrower.id, @lending.administered_at_origin, @lending.accounted_at_origin, payment_by_staff, payment_date, product_action)
           @message = {:notice => "Loan payment saved successfully."}
         else
           @message = {:error => valid.last}
@@ -367,6 +368,7 @@ class Lendings < Application
     currency                 = 'INR'
     product_action           = Constants::Transaction::LOAN_PRECLOSURE
     make_specific_allocation = true
+    parent_location = BizLocation.get parent_location_id
 
     @message[:error] << "Please select checkbox for Preclose loan" if lending_params.values.select{|l| l[:preclose]}.blank?
     @message[:error] << "Preclose date cannot be blank" if effective_on.blank?
@@ -375,6 +377,7 @@ class Lendings < Application
     @message[:error] << "Please Enter Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:total_amount].to_f <= 0}.blank?
     @message[:error] << "Please select Reason" if reason_id.blank?
     @message[:error] << 'Remarks cannot be blank' if remarks.blank?
+    @message[:error] << "Preclose Date cannot be holiday" if LocationHoliday.working_holiday?(parent_location, effective_on)
 
     begin
       if @message[:error].blank?
@@ -388,21 +391,20 @@ class Lendings < Application
             money_principal_amount        = MoneyManager.get_money_instance(value[:principal_amount].to_f)
             money_interest_amount         = MoneyManager.get_money_instance(value[:interest_amount].to_f)
             money_amount                  = money_principal_amount + money_interest_amount
+            receipt_no                    = value[:receipt_no]
             preclose_lendings[lending.id][:principal_amount] = money_principal_amount
             preclose_lendings[lending.id][:interest_amount] = money_interest_amount
-            if(money_amount.amount > 0)
-              payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
-                :on_product_type      => on_product_type, :on_product_id  => lending.id,
-                :performed_at         => performed_at, :accounted_at   => accounted_at,
-                :performed_by         => performed_by, :recorded_by    => recorded_by,
-                :by_counterparty_type => by_counterparty_type, :by_counterparty_id  => by_counterparty_id,
-                :receipt_type         => receipt_type, :payment_towards     => payment_towards)
-              if payment_transaction.valid?
-                if payment_facade.is_loan_payment_permitted?(payment_transaction)
-                  preclose_lendings[lending.id][:payment_transaction] = payment_transaction
-                else
-                  @message[:error] << "#{on_product_type}(#{lending.id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
-                end
+            payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
+              :on_product_type      => on_product_type, :on_product_id  => lending.id, :receipt_no => receipt_no,
+              :performed_at         => performed_at, :accounted_at   => accounted_at,
+              :performed_by         => performed_by, :recorded_by    => recorded_by,
+              :by_counterparty_type => by_counterparty_type, :by_counterparty_id  => by_counterparty_id,
+              :receipt_type         => receipt_type, :payment_towards     => payment_towards)
+            if payment_transaction.valid?
+              if payment_facade.is_loan_payment_permitted?(payment_transaction)
+                preclose_lendings[lending.id][:payment_transaction] = payment_transaction
+              else
+                @message[:error] << "#{on_product_type}(#{lending.id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
               end
             end
           end
@@ -411,14 +413,18 @@ class Lendings < Application
       if @message[:error].blank?
         begin
           preclose_lendings.each do |lending_id, preclose_lending|
+            lending            = Lending.get lending_id
             pt                 = preclose_lending[:payment_transaction]
             principal_amount   = preclose_lending[:principal_amount]
             interest_amount    = preclose_lending[:interest_amount]
             fee_instances      = FeeInstance.unpaid_loan_preclosure_fee_instance(pt.on_product_id)
             total_money_amount = pt.to_money[:amount]
-            payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, principal_amount, interest_amount)
+            loan_facade.adjust_advance_for_perclose(effective_on, lending.id) if lending.current_advance_available > MoneyManager.default_zero_money
+            if total_money_amount > MoneyManager.default_zero_money
+              payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, pt.receipt_no, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, principal_amount, interest_amount)
+            end
             fee_instances.each do |fee_instance|
-              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', pt.on_product_id, 'client', pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
+              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, '','lending', pt.on_product_id, 'client', pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
             end
             Comment.save_comment(remarks, reason_id, 'Lending', lending_id, recorded_by)
             @message[:notice] = "Succesfully preclosed"
@@ -439,6 +445,7 @@ class Lendings < Application
 
     # GATE-KEEPING
     receipt_type                    = params[:receipt_type]
+    receipt_no                      = params[:receipt_no]
     payment_towards                 = params[:payment_towards]
     on_product_type                 = params[:on_product_type]
     on_product_id                   = params[:on_product_id]
@@ -472,10 +479,10 @@ class Lendings < Application
         fee_instances = FeeInstance.unpaid_loan_preclosure_fee_instance(@lending.id)
         loan_facade.adjust_advance_for_perclose(effective_on, @lending.id) if @lending.current_advance_available > MoneyManager.default_zero_money
         if total_money_amount > MoneyManager.default_zero_money
-          payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
+          payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)
         end
         fee_instances.each do |fee_instance|
-          payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, 'lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
+          payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, '','lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
         end
         Comment.save_comment(remarks, reason_id, 'Lending', @lending.id, recorded_by)
         message = {:notice => "Succesfully preclosed"}

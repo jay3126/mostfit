@@ -106,6 +106,7 @@ class PaymentTransactions < Application
             product_id      = payment_value[:product_id]
             performed_at    = payment_value[:performed_at]
             accounted_at    = payment_value[:accounted_at]
+            receipt_no      = payment_value[:receipt_no]
             if ['client_attendance','payment_and_client_attendance'].include?(operation)
               @client_attendance[cp_id]                     = {}
               @client_attendance[cp_id][:counterparty_type] = 'client'
@@ -118,7 +119,7 @@ class PaymentTransactions < Application
             end
             if(money_amount.amount > 0 && ['payment','payment_and_client_attendance'].include?(operation))
               payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
-                :on_product_type      => product_type, :on_product_id  => product_id,
+                :on_product_type      => product_type, :on_product_id  => product_id, :receipt_no => receipt_no,
                 :performed_at         => performed_at, :accounted_at   => accounted_at,
                 :performed_by         => performed_by, :recorded_by    => recorded_by,
                 :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
@@ -137,7 +138,7 @@ class PaymentTransactions < Application
           @payment_transactions.each do |pt|
             begin
               money_amount = pt.to_money[:amount]
-              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
+              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.receipt_no, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
               @message[:notice] << "#{operation.humanize} successfully created"
             rescue => ex
               @message[:error] << "An error has occured: #{ex.message}"

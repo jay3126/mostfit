@@ -139,6 +139,6 @@ class LoanManager
     effective_on = on_date
     product_action = Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT
 
-    using_payment_facade.record_adjust_advance_payment(advance_balance, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, true)
+    using_payment_facade.record_adjust_advance_payment(advance_balance, receipt_type, payment_towards, '',on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, true)
   end
 end
