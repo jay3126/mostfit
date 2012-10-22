@@ -7,7 +7,7 @@ class LendingProductLocation
   property :performed_by,      *INTEGER_NOT_NULL
   property :recorded_by,       *INTEGER_NOT_NULL
   property :created_at,        *CREATED_AT
-  property :updateed_at,       *UPDATED_AT
+  property :updated_at,        *UPDATED_AT
   property :deleted_at,        *DELETED_AT
 
   belongs_to :biz_location
