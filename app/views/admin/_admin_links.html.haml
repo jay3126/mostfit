@@ -48,7 +48,7 @@
       %li
         = link_to_with_rights 'Cheque Book and Cheque Leaves', resource(:cheque_books), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Funders and funding lines', resource(:funders), :class => 'funder icon'
+        = link_to_with_rights 'Funders and funding lines', resource(:new_funders), :class => 'funder icon'
       %li
         = link_to_with_rights 'Third parties', resource(:third_parties), :class => 'funder icon'
       %li
@@ -70,7 +70,7 @@
       %li
         = link_to_with_rights 'Bulk Preclose of Loans', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
       %li
-        = link_to_with_rights 'under_development', resource(:new_funders), :class => 'funder icon'
+        =# link_to_with_rights 'under_development', resource(:new_funders), :class => 'funder icon'
       %li
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
       %li
