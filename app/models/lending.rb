@@ -897,19 +897,20 @@ class Lending
     loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan_id, Date.today)
     loan = Lending.get loan_id
     client = Client.get(loan.loan_borrower.counterparty_id)
+    msg = "Ineligible Loan for assignment"
     if Client.is_claim_processing_or_inactive?(client)
-      return [false, "Client is under claim processing "]
+      return [false, msg+" (Client is under claim processing)"]
     end
     unless (loan.loan_receipts.size >= 3)
-      return [false, "Loan does not have minimum 3 repayments "]
+      return [false, msg+" (Loan does not have minimum 3 repayments)"]
     end
     unless loan_assignment.blank? 
       if !(loan_assignment.is_additional_encumbered)
-        return [false, "Loan is already assigned "]
+        return [false, msg+" (Loan is already assigned)"]
       end
     end
     unless loan.is_outstanding?
-      return [false, "Loan does not have outstanding "]
+      return [false, msg+" (Loan does not have outstanding)"]
     end
     true
   end
