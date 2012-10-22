@@ -207,14 +207,7 @@ class Lending
       funding_line_id,
       tranch_id,
       lan = nil,
-      loan_purpose = nil,
-      approved_on_date = nil,
-      disbursal_date = nil,
-      approved_by_staff = nil,
-      disbursed_by_staff = nil,
-      upload_id = nil,
-      approved_amount = nil,
-      disbursed_amount = nil
+      loan_purpose = nil
     )
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
 
@@ -232,14 +225,7 @@ class Lending
       applied_by_staff,
       recorded_by_user,
       lan,
-      loan_purpose,
-      approved_on_date,
-      disbursal_date,
-      approved_by_staff,
-      disbursed_by_staff,
-      approved_amount,
-      disbursed_amount,
-      upload_id
+      loan_purpose
     )
 
     total_interest_applicable = from_lending_product.total_interest_money_amount
