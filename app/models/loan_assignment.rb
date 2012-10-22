@@ -140,4 +140,8 @@ class LoanAssignment
     is_additional_encumbered ? loan_assignment_instance.additional_encumbered_to_s(effective_on) : loan_assignment_instance.to_s(effective_on)
   end
 
+  def self.get_loans_assigned_to_tranch(to_tranch)
+    LoanAssignment.all(:tranch_id => to_tranch.id).aggregate(:loan_id)
+  end
+
 end

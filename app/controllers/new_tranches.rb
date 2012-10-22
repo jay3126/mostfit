@@ -3,6 +3,7 @@ class NewTranches < Application
   def show(id)
     @tranch = NewTranch.get(params[:id])
     raise NotFound unless @tranch
+    @lendings = loan_assignment_facade.get_loans_assigned_to_tranch(@tranch)
     display @tranch
   end
 

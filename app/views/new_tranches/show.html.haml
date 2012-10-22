@@ -64,7 +64,7 @@
           %tr
             %th
             %th
-              id
+              Loan id
             %th
               Applied Amount
             %th
@@ -84,7 +84,9 @@
             %th
               Accounted At
             %th
-              Status
+              Loan Status
+            %th
+              Loan Assignment Status
         - loan_row_count = 1
         - @lendings.each do |lending|
           - lending = lending.class == Lending ? lending : Lending.get(lending)
@@ -113,6 +115,8 @@
               = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
             %td
               = lending.status.humanize
+            %td
+              = loan_assignment_facade.loan_assignment_status_message(lending.id)
             - loan_row_count = loan_row_count + 1
         %tfoot
           %tr.org_total
