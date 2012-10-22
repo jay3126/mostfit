@@ -1296,6 +1296,7 @@ function update_total_on_div_amount(currency, id){
     total = parseFloat(total) + f_value;
   });
   jQuery('div#weeksheet_total_amount_'+id).html(total.toFixed(2) + ' ' + currency);
+  jQuery(".lending_total_"+id).attr('value', total.toFixed(2));
 }
 
 function date_validation(){

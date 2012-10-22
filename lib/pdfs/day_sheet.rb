@@ -114,6 +114,8 @@ module Pdf
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
       meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       file_names = {}
+      date = date.class == Date ? date : Date.parse(date.to_s)
+      time = Time.now
       folder   = File.join(Merb.root, "doc", "pdfs", "company","due_sheets",date.to_s)
       FileUtils.mkdir_p(folder)
       idx = 0
@@ -121,7 +123,7 @@ module Pdf
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
       all_branches.each do |branch|
         weeksheets = []
-        filename = File.join(folder, "due_collection_#{branch.name}_#{branch.id}_#{Time.now}.pdf")
+        filename = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.pdf")
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
         pdf.info.title = "due_generation_#{branch.name}_#{Time.now}"
@@ -214,7 +216,7 @@ module Pdf
         pdf.save_as(filename)
         file_names[filename] = pdf
       end
-      bundle_filename = "#{Merb.root}/doc/pdfs/company/due_sheets/#{date.to_s}/due_sheet_location_#{Time.now}.zip"
+      bundle_filename = "#{Merb.root}/doc/pdfs/company/due_sheets/#{date.to_s}/due_sheet_location_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.zip"
       Zip::ZipFile.open(bundle_filename, Zip::ZipFile::CREATE) {
         |zipfile|
         file_names.each do |file_name, file|

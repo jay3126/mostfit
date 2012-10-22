@@ -94,33 +94,32 @@ fee product, and when
 
   def self.record_fee_receipt(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
     Validators::Arguments.not_nil?(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
-    fee_receipt_values = {}
+    fee_receipt_values                          = {}
     
-    fee_receipt_values[:fee_instance] = fee_instance
-    fee_receipt_values[:simple_fee_product]  = fee_instance.simple_fee_product
+    fee_receipt_values[:fee_instance]           = fee_instance
+    fee_receipt_values[:simple_fee_product]     = fee_instance.simple_fee_product
     
-    performed_at = fee_instance.administered_at
-    accounted_at = fee_instance.accounted_at
-    fee_receipt_values[:performed_at] = performed_at
-    fee_receipt_values[:accounted_at] = accounted_at
+    performed_at                                = fee_instance.administered_at
+    accounted_at                                = fee_instance.accounted_at
+    fee_receipt_values[:performed_at]           = performed_at
+    fee_receipt_values[:accounted_at]           = accounted_at
 
-    fee_applied_on_type    = fee_instance.fee_applied_on_type
-    fee_applied_on_type_id = fee_instance.fee_applied_on_type_id
-
+    fee_applied_on_type                         = fee_instance.fee_applied_on_type
+    fee_applied_on_type_id                      = fee_instance.fee_applied_on_type_id
     fee_receipt_values[:fee_applied_on_type]    = fee_applied_on_type
     fee_receipt_values[:fee_applied_on_type_id] = fee_applied_on_type_id
 
-    by_counterparty_type = fee_instance.by_counterparty_type
-    by_counterparty_id   = fee_instance.by_counterparty_id
-    fee_receipt_values[:by_counterparty_type] = by_counterparty_type
-    fee_receipt_values[:by_counterparty_id]   = by_counterparty_id
+    by_counterparty_type                        = fee_instance.by_counterparty_type
+    by_counterparty_id                          = fee_instance.by_counterparty_id
+    fee_receipt_values[:by_counterparty_type]   = by_counterparty_type
+    fee_receipt_values[:by_counterparty_id]     = by_counterparty_id
 
-    fee_receipt_values[:fee_amount]   = fee_instance.total_money_amount.amount
-    fee_receipt_values[:currency]     = fee_instance.currency
-    fee_receipt_values[:effective_on] = effective_on
-    fee_receipt_values[:performed_by] = performed_by_id
-    fee_receipt_values[:recorded_by]  = recorded_by_id
-    fee_receipt = create(fee_receipt_values)
+    fee_receipt_values[:fee_amount]             = fee_money_amount.amount
+    fee_receipt_values[:currency]               = fee_money_amount.currency
+    fee_receipt_values[:effective_on]           = effective_on
+    fee_receipt_values[:performed_by]           = performed_by_id
+    fee_receipt_values[:recorded_by]            = recorded_by_id
+    fee_receipt                                 = create(fee_receipt_values)
     raise Errors::DataError, fee_receipt.errors.first.first unless fee_receipt.saved?
     fee_receipt
   end

@@ -242,13 +242,14 @@ module Pdf
 
     def generate_approve_loans_sheet_pdf(user_id, date = Date.today)
       date = Date.parse(date.to_s) if date.class != Date
+      time = Time.now
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
       meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
       lendings        = location_facade.get_loans_administered(self.id, date).compact
       raise ArgumentError,"No loans exists for generate pdf" if lendings.blank?
       folder   = File.join(Merb.root, "doc", "pdfs", "company","centers","#{self.name}")
       FileUtils.mkdir_p(folder)
-      filename = File.join(folder, "approve_loans_#{self.name}_#{self.id}_#{Time.now}.pdf")
+      filename = File.join(folder, "approve_loans_#{self.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.pdf")
       pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
       pdf.select_font "Times-Roman"
       pdf.info.title = "approve_loans_#{self.name}_#{Time.now}"

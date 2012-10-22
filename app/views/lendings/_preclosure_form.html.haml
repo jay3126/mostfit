@@ -57,7 +57,7 @@
       %th
         Preclosure penalty
       %td
-        = text_field :name => "penalty_amount", :class => 'weeksheet_total', :value => @preclosure_penalty_amount, :readonly => true, :onkeyup => "update_total_amount('INR');"
+        = text_field :name => "penalty_amount", :class => 'weeksheet_total', :value => @preclosure_penalty_amount, :onkeyup => "update_total_amount('INR');"
     %tr
       %th
         Payment by Staff
@@ -78,7 +78,7 @@
         %b= "Total:"
       %td
         #weeksheet_total_amount
-          %b= advance_amount+actual_principal+acutal_interest
+          %b= advance_amount+actual_principal+acutal_interest+@preclosure_penalty_amount
     %tr
       %td
         = submit 'Preclose', :class => "greenButton"
