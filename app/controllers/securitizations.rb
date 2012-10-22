@@ -125,7 +125,9 @@ class Securitizations < Application
         file_options = {:headers => true}
 
         loans_data = {}
+        row_no = 1
         FasterCSV.foreach(fq_file_path, file_options) do |row|
+          row_no             += 1
           loan_id_str        = row["Loan ID"]
           effective_on_str   = row["Effective on"]
           funder_id          = row["Funder ID"]
@@ -135,7 +137,8 @@ class Securitizations < Application
           assignment_type_id = row["Assignment type ID"]
           loan_id = loan_id_str.to_i
           effective_on_date = effective_on_str.blank? ? '' : Date.parse(effective_on_str)
-          loans_data[loan_id] = {
+          loans_data[row_no] = {
+            :loan_id            => loan_id,
             :effective_on_date  => effective_on_date,
             :funder_id          => funder_id,
             :funding_line_id    => funding_line_id,
@@ -145,24 +148,26 @@ class Securitizations < Application
           }
         end
 
-        @total_records = loans_data.keys.size
+        @total_records = CSV.readlines(fq_file_path).size - 1
         FasterCSV.open(file_to_write, "w") do |fastercsv|
           fastercsv << [ 'Loan ID', 'Effective On', 'Funder ID', 'Funding line ID', 'Tranch ID', 'Assignment type', 'Assignment type ID', 'Status', 'Error' ]
           record_no = 0
           if CSV.readlines(fq_file_path).size <= 1
             raise "File must not be blank"
           else
-            loans_data.each do |id, data|
+            loans_data.each do |row_id, data|
               msg = []
               record_no += 1
-              loan_assignment = loan_assignment_facade.get_loan_assigned_to(id, Date.today)
               loan_status, loan_error = "Not known", "Not known"
+              id                 = data[:loan_id]
               effective_on_date  = data[:effective_on_date]
               funder_id          = data[:funder_id]
               funding_line_id    = data[:funding_line_id]
               tranch_id          = data[:tranch_id]
               assignment_type    = data[:assignment_type]
               assignment_type_id = data[:assignment_type_id]
+              loan_assignment = loan_assignment_facade.get_loan_assigned_to(id, Date.today)
+
               # VALIDATIONS
               is_loan_eligible, reason = (id == 0) ? [false, "Loan ID must not be blank"] : loan_facade.is_loan_eligible_for_loan_assignments?(id)
               if reason.blank?
@@ -223,11 +228,11 @@ class Securitizations < Application
                 end
                 unless msg.blank?
                   @failed_records += 1
-                  @errors << "Loan ID #{id}: #{msg.flatten.join(', ')}"
+                  @errors << "Row No. #{row_id}, Loan ID #{id}: #{msg.flatten.join(', ')}"
                 end
               rescue => ex
                 @failed_records += 1
-                @errors << "Loan ID #{id}: #{ex.message}, #{msg.flatten.join(', ')}"
+                @errors << "Row No. #{row_id}, Loan ID #{id}: #{ex.message}, #{msg.flatten.join(', ')}"
                 loan_status, loan_error = 'Failure', "#{ex.message}, #{msg.flatten.join(', ')}"
               end
               fastercsv << [id, effective_on_date, funder_id, funding_line_id, tranch_id, assignment_type, assignment_type_id, loan_status, loan_error]
