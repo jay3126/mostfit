@@ -63,11 +63,11 @@
         %td
           = lending.loan_borrower.counterparty.name
         %td
-          = "#{funder.name} (Id: #{funder.id})"
+          = "#{funder.name} (Id: #{funder.id})" rescue nil
         %td
-          = "#{funding_line.name} (Id: #{funding_line.id})"
+          = "#{funding_line.name} (Id: #{funding_line.id})" rescue nil
         %td
-          = "#{tranch.name} (Id: #{tranch.id})"
+          = "#{tranch.name} (Id: #{tranch.id})" rescue nil
         %td
           = loan_assignment_facade.loan_assignment_status_message(lending.id)
         - s_no += 1
