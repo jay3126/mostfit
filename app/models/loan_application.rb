@@ -470,8 +470,7 @@ class LoanApplication
 
   # returns all loan applications which has status suspected_duplicate
   def self.suspected_duplicate(search_options = {})
-    search_options.merge!(:status => SUSPECTED_DUPLICATE_STATUS)
-    all(search_options)
+    all(search_options.merge(:status => SUSPECTED_DUPLICATE_STATUS))
   end
 
   # set loan application status as cleared_not_duplicate
@@ -490,6 +489,25 @@ class LoanApplication
     is_saved = loan_application.set_status(CONFIRMED_DUPLICATE_STATUS)
     raise ArgumentError, "Client ID #{loan_application.client_id} : #{loan_application.errors.to_a}" unless is_saved
     return true if is_saved
+  end
+
+  def resubmit_loan_application(params)
+    self.status = 'new'
+    save
+    raise Errors::DataError, self.errors.first unless self.saved?
+    dependency_destroy_for_loan_application
+  end
+
+  def dependency_destroy_for_loan_application
+    adapter = DataMapper.repository(:default).adapter
+    adapter.execute("delete from loan_authorizations where loan_application_id = #{self.id}") if self.to_info && self.to_info.authorization_info
+    adapter.execute("delete from client_verifications where loan_application_id = #{self.id}") unless self.client_verifications.blank?
+    #    unless self.loan_file_additions.blank?
+    #      loan_file_addition = LoanFileAddition.first(:loan_application_id => self.id)
+    #      loan_file_id = loan_file_addition.loan_file_id
+    #      adapter.execute("delete from loan_file_additions where loan_file_id = #{loan_file_id}")
+    #      adapter.execute("delete from loan_files where id = #{loan_file_id}")
+    #    end
   end
 
   #returns an object containing all information about a Loan Application

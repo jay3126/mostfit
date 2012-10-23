@@ -48,7 +48,7 @@ class LoanFileAddition
   # @param [Date]     on_date
   # @param [Integer]  by_user
   def self.add_to_loan_file(loan_application_id, loan_file, at_branch, at_center, for_cycle_number, by_staff, on_date, by_user)
-    raise ArgumentError, "New loan applications cannot be added to a loan file because its status is '#{loan_file.health_check_status.humanize}' " unless loan_file.health_check_status == Constants::Status::NEW_STATUS
+    #    raise ArgumentError, "New loan applications cannot be added to a loan file because its status is '#{loan_file.health_check_status.humanize}' " unless loan_file.health_check_status == Constants::Status::NEW_STATUS
     query_params = {}
     query_params[:loan_application_id] = loan_application_id
     query_params[:loan_file] = loan_file

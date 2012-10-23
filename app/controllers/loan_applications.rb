@@ -274,7 +274,23 @@ class LoanApplications < Application
   end
 
   def update
+    # INITIALIZATIONS
+    @errors = []
+    message = {}
+    is_crucial_info_updated = false
     @loan_application = LoanApplication.get(params[:id])
+
+    # GATE-KEEPING
+    client_name             = params[:loan_application][:client_name]
+    client_dob              = params[:loan_application][:client_dob]
+    client_reference1       = params[:loan_application][:client_reference1]
+    client_reference2       = params[:loan_application][:client_reference2]
+    client_reference2_type  = params[:loan_application][:client_reference2_type]
+    client_dob              = Date.parse(client_dob) unless client_dob.blank?
+    client_reference2_type  = client_reference2_type.to_sym unless client_reference2_type.blank?
+
+    # Credit Bureau File Creation for enquiry Resubmission of data when crucial fields are changed, like name, dob and ID details
+    crucial_info_changed = (client_name != @loan_application.client_name || client_dob != @loan_application.client_dob || client_reference1 != @loan_application.client_reference1 || client_reference2 != @loan_application.client_reference2 || client_reference2_type != @loan_application.client_reference2_type)
 
     # remove leading and trailing spaces from reference-1 and reference-2
     params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
@@ -286,9 +302,21 @@ class LoanApplications < Application
     params[:loan_application][:amount] = loan_amount
     params[:loan_application][:currency] = loan_amount_currency
 
-    loan_application = @loan_application.update(params[:loan_application])
+    begin
+      loan_application = @loan_application.update(params[:loan_application])
+      message = {:notice => "Loan application updated succesfully"}
+      if crucial_info_changed
+        @loan_application.resubmit_loan_application(params[:loan_application])
+        is_crucial_info_updated = true
+      end
+    rescue => ex
+      @errors << "An error has occured: #{ex.message}"
+      message = {:error => @errors.flatten.join(', ')}
+    end
+
     if loan_application
-      redirect resource(@loan_application), :message => {:notice => "Loan application updated succesfully"}
+      message = {:notice => "As some crucial information has been updated so the loan application will be considered as new loan application and will again go for dedupe and highmark process."} if is_crucial_info_updated
+      redirect resource(@loan_application), :message => message
     else
       display @loan_application, :edit
     end
@@ -342,7 +370,6 @@ class LoanApplications < Application
     @center = location_facade.get_location(center_id) if center_id
     search_options.merge!(:at_branch_id => @branch.id) unless branch_id.blank?
     search_options.merge!(:at_center_id => @center.id) unless center_id.blank?
-
     @suspected_duplicates = loan_applications_facade.suspected_duplicate(search_options) unless branch_id.blank?
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center(search_options) unless branch_id.blank?
   end
