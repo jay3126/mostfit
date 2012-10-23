@@ -53,19 +53,30 @@
     %thead
       %tr
         %th
-          S.No.
         %th
           Loan ID
         %th
-          Loan Amount
+          Applied Amount
         %th
           Borrower
         %th
-          Disbursed On
+          Applied Date
         %th
-          Scheduled Total Outstanding
+          First Repayment Date
         %th
-          Actual Total Outstanding
+          Scheduled Disbursal Date
+        %th
+          Repayment Frequency
+        %th
+          Tenure
+        %th
+          Administered At
+        %th
+          Accounted At
+        %th
+          Loan Status
+        %th
+          Loan Assignment Status
     - loan_row_count = 1
     - @lendings.each do |lending|
       - lending = lending.class == Lending ? lending : Lending.get(lending)
@@ -79,11 +90,23 @@
         %td
           = link_to lending.borrower.name, url(:controller => :new_clients, :action => :show, :id => lending.borrower.id)
         %td
+          = lending.applied_on_date
+        %td
+          = lending.scheduled_first_repayment_date
+        %td
           = lending.scheduled_disbursal_date
         %td
-          = lending.scheduled_total_outstanding(@date)
+          = lending.repayment_frequency
         %td
-          = lending.actual_total_outstanding
+          = lending.tenure
+        %td
+          = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+        %td
+          = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+        %td
+          = lending.status.humanize
+        %td
+          = loan_assignment_facade.loan_assignment_status_message(lending.id)
         - loan_row_count = loan_row_count + 1
     %tfoot
       %tr.org_total
