@@ -1,3 +1,11 @@
+- has_default_tranch = Mfi.first.set_default_funding_line
+- if has_default_tranch
+  - tranch_id = Mfi.first.funding_line_id
+  - default_tranch = NewTranch.get(tranch_id)
+  - default_tranch_name = default_tranch.name
+  - default_funding_line = default_tranch.new_funding_line
+  - default_funding_line_name = default_funding_line.name
+  - default_funder = default_funding_line.new_funder.name
 %h3
   = "This loan will be dispensed by loan product: #{@lending_product.name}"
 = hidden_field :name => 'lending_product_id', :value => @lending_product.id
@@ -32,37 +40,28 @@
       = text_field :lan
   %tr
     %th
-      Funder
-    %td
-      = NewFunder.first.name rescue "<b> Not created </b>"
-  - if NewFunder.count == 0 and session.user.role == :operator
-    %tr
-      %td{:colspan => 2}
-        You do not have any funder created yet. Create them
-        = link_to("here", resource(:new_funders, :new))
-  %tr
-    %th
-      Funding Line
-    %td
-      = NewFunder.first.new_funding_lines.first.name rescue "<b> Not created </b>"
-      = hidden_field :name=>'funding_line_id', :value => NewFunder.first.new_funding_lines.first.id rescue nil
-  - if NewFundingLine.count == 0 and session.user.role == :operator
-    %tr
-      %td{:colspan => 2}
-        You do not have any funding line created yet. Create them
-        = link_to("here", resource(:new_funders))
+      Funder & Funding Line
+    %td{:colspan => 2}
+      - if (NewFunder.count == 0 || NewFundingLine.count == 0) && session.user.role == :operator
+        %i No Funder or Funding Line created.
+        = link_to("Create", resource(:new_funders))
+      - elsif has_default_tranch
+        = default_funding_line_name
+        = hidden_field :name => 'funding_line_id', :value => default_funding_line.id
+      - else
+        = select :name => "funding_line_id", :collection => select_fundling_lines, :id => "funder_selector", :onchange => "fillFundingLines", :prompt => "Select funding line"
   %tr
     %th
       Tranch
-    %td
-      = NewFunder.first.new_funding_lines.first.new_tranches.first.name rescue "<b> Not created </b>"
-      = hidden_field :name=>'tranch_id', :value => NewFunder.first.new_funding_lines.first.new_tranches.first.id rescue nil
-  - if NewTranch.count == 0 and session.user.role == :operator
-    %tr
-      %td{:colspan => 2}
-        You do not have any tranch created yet. Create them
-        = link_to("here", resource(:new_funders))
-
+    %td{:colspan => 2}
+      - if NewTranch.count == 0 && session.user.role == :operator
+        %i No Tranch created.
+        = link_to("Create", resource(:new_funders))
+      - elsif has_default_tranch
+        = default_tranch_name
+        = hidden_field :name => 'tranch_id', :value => default_tranch.id
+      - else
+        = select :name => "tranch_id", :id => "tranch_selector"
   %tr
     %th
       Loan Purpose

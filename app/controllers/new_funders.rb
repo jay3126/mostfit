@@ -48,4 +48,12 @@ class NewFunders < Application
     end
   end
 
+  def funding_lines
+    if params[:id]
+      funding_line = NewFundingLine.get(params[:id])
+      raise NotFound if funding_line.blank?
+      return("<option value=''>Select tranch</option>"+funding_line.new_tranches.map{|t| "<option value=#{t.id}>#{t.name}</option>"}.join)
+    end
+  end
+
 end

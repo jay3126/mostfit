@@ -887,12 +887,15 @@ $(document).ready(function(){
   getAllNominalCenters();
   getClientAge();
   getDateDifference();
+  fillFundingLines();
   get_all_location_on_level();
   get_all_staff_member_on_location()
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
-  $("select.multiple").multiSelect({selectAllText:jQuery(this).attr('prompt')});
+  $("select.multiple").multiSelect({
+    selectAllText:jQuery(this).attr('prompt')
+  });
   $("#update_p_no").click(function(){
     update_phone_number(this);
   });
@@ -1426,6 +1429,18 @@ function getDateDifference() {
         else {
           jQuery("#days_between_dates").val(data);
         }
+      }
+    });
+  });
+}
+
+function fillFundingLines(){
+  $("#funder_selector").change(function(){
+    $.ajax({
+      type: "GET",
+      url: "/new_funders/funding_lines/"+$("#funder_selector").val(),
+      success: function(data){
+        $("#tranch_selector").html(data);
       }
     });
   });

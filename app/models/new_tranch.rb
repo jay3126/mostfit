@@ -30,7 +30,7 @@ class NewTranch
   def tranch_money_amount; to_money_amount(:amount); end
 
   def name
-    "#{tranch_money_amount} @ #{interest_rate}"
+    "#{tranch_money_amount}@#{interest_rate}"
   end
 
   #this function is for upload functionality.

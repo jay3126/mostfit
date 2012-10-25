@@ -115,14 +115,14 @@
             = select :default_repayment_style, :collection => [[NORMAL_REPAYMENT_STYLE,"fees=>int=>prin"], [PRORATA_REPAYMENT_STYLE,"pro rata"], [:sequential, "sequential"]]
         %tr
           %td
-            Set a default funding line in bulk loan creation?
+            Set a default tranch?
           %td
             = check_box :set_default_funding_line
         %tr#default_funding_line_selection
           %td
-            Default Funding line
+            Default Tranch
           %td
-            = select :funding_line_id, :collection => FundingLine.all.map{|x| [x.id, x.name]}, :prompt => 'select funding line'
+            = select :funding_line_id, :collection => NewTranch.all.map{|x| [x.id, x.name]}
         %tr
           %td
             Allow choice of repayment style in weeksheets?

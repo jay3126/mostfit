@@ -735,7 +735,7 @@ module Merb
     end
 
     def select_fundling_lines
-      catalog = Funder.catalog
+      catalog = NewFunder.catalog
       collection = []
       catalog.keys.sort.each do |funder_name|
         collection << ['', "FUNDER: #{funder_name}"]
@@ -745,7 +745,7 @@ module Merb
     end
 
     def select_tranches
-      [Funder.first.funding_lines.first.tranches.first] rescue []
+      [NewFunder.first.new_funding_lines.first.new_tranches.first] rescue []
     end
 
     private
