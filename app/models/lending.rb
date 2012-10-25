@@ -970,9 +970,6 @@ class Lending
     if Client.is_claim_processing_or_inactive?(client)
       return [false, msg+" (Client is under claim processing)"]
     end
-    unless (loan.loan_receipts.size >= 3)
-      return [false, msg+" (Loan does not have minimum 3 repayments)"]
-    end
     unless loan_assignment.blank? 
       if !(loan_assignment.is_additional_encumbered)
         return [false, msg+" (Loan is already assigned)"]
