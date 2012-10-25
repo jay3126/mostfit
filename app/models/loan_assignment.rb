@@ -7,7 +7,6 @@ class LoanAssignment
   property :id,                       Serial
   property :loan_id,                  *INTEGER_NOT_NULL
   property :assignment_nature,        Enum.send('[]', *LOAN_ASSIGNMENT_NATURE), :nullable => false
-  property :assignment_id,            *INTEGER_NOT_NULL
   property :assignment_status,        Enum.send('[]', *LOAN_ASSIGNMENT_STATUSES), :nullable => false
   property :effective_on,             *DATE_NOT_NULL
   property :funder_id,                *INTEGER_NOT_NULL
@@ -18,7 +17,7 @@ class LoanAssignment
   property :created_at,               *CREATED_AT
   property :deleted_at,               *DELETED_AT
 
-  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?, :effective_after_assignment_date?
+  validates_with_method :cannot_both_sell_and_encumber, :loan_exists?, :is_loan_outstanding_on_date?
 
   def cannot_both_sell_and_encumber
     validate_value = true
@@ -69,12 +68,10 @@ class LoanAssignment
     assignment
   end
 
-  def self.assign_on_date(loan_id, to_assignment, on_date, funder_id, funding_line_id, tranch_id, recorded_by, additional_encumbered = false)
+  def self.assign_on_date(loan_id, assignment_nature, on_date, funder_id, funding_line_id, tranch_id, recorded_by, additional_encumbered = false)
     new_assignment                     = {}
     new_assignment[:loan_id]           = loan_id
-    assignment_nature, assignment_id   = Resolver.resolve_loan_assignment(to_assignment)
     new_assignment[:assignment_nature] = assignment_nature
-    new_assignment[:assignment_id]     = assignment_id
     new_assignment[:assignment_status] = ASSIGNED
     new_assignment[:funder_id]         = funder_id
     new_assignment[:funding_line_id]   = funding_line_id
@@ -82,7 +79,6 @@ class LoanAssignment
     new_assignment[:effective_on]      = on_date
     new_assignment[:recorded_by]       = recorded_by
     new_assignment[:is_additional_encumbered] = additional_encumbered
-
     assignment = create(new_assignment)
     raise Errors::DataError, assignment.errors.first.first unless assignment.saved?
     assignment
@@ -136,8 +132,14 @@ class LoanAssignment
     assignment ? assignment.assignment_nature : NOT_ASSIGNED
   end
 
+  def self.loan_assignment_status_message(loan_id, on_date = Date.today)
+    loan_assigned_to = get_loan_assigned_to(loan_id, on_date)
+    return loan_assigned_to.nil? ? "Not Assigned" : loan_assigned_to.loan_assignment_status
+  end
+
   def loan_assignment_status
-    is_additional_encumbered ? loan_assignment_instance.additional_encumbered_to_s(effective_on) : loan_assignment_instance.to_s(effective_on)
+    assignment_nature_str = is_additional_encumbered ? "Additional Encumbered" : assignment_nature.humanize rescue nil
+    "<b>#{assignment_nature_str}</b> (Effective On: #{effective_on})"
   end
 
   def self.get_loans_assigned_to_tranch(to_tranch)
