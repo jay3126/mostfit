@@ -205,7 +205,7 @@ class Securitizations < Application
                         msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
                       end
                       if assignment_nature == :securitised
-                        msg << "Ineligible Loan for assignment: (Loan does not have minimum 3 repayments)" unless (Lending.get(id).loan_receipts.size >= 3)
+                        msg << "Ineligible Loan for assignment: (Loan does not have minimum #{get_no_of_minimum_repayments} repayments)" unless (Lending.get(id).loan_receipts.size >= get_no_of_minimum_repayments)
                       end
                     end
                   end

@@ -756,6 +756,9 @@ module Merb
       Mfi.first.funding_line_id
     end
 
+    def get_no_of_minimum_repayments
+      Mfi.first.minimum_no_of_repayments
+    end
     private
     
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)
