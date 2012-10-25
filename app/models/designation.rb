@@ -11,6 +11,18 @@ class Designation
   belongs_to :location_level
   has n, :staff_members
 
+  belongs_to :upload, :nullable => true
+
+  #this function is for upload functionality.
+  def self.from_csv(row, headers)
+    location_level = LocationLevel.first(:name => row[headers[:location_level]])
+    raise ArgumentError, "Location Level(#{row[headers[:location_level_name]]}) does not exist" if location_level.blank?
+
+    obj = new(:name => row[headers[:name]], :role_class => row[headers[:role]].downcase.to_sym, :location_level => location_level,
+              :upload_id => row[headers[:upload_id]])
+    [obj.save, obj]
+  end
+
   def is_supervisor?
     self.role_class == SUPERVISOR
   end
