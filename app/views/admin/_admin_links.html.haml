@@ -1,3 +1,17 @@
+:javascript
+  jQuery('.admin-box').each(function(){
+    if($(this).find('li a').length ==0){
+      $(this).remove();
+    }
+    else{
+      jQuery(this).find('li').each(function(){
+        if(jQuery(this).find('a').length==0){
+          jQuery(this).remove();
+        }
+      });
+    }
+  });
+
 - if session.user.can_access?({:controller => "admin", :action => "index"})
   %h1 Administration
   %div.clearfix
@@ -66,14 +80,10 @@
       %li
         = link_to_with_rights 'Write Off Loans', resource(:lendings, :write_off_lendings), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Bulk Edit of Funding Lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
-      %li
         = link_to_with_rights 'Bulk Preclose of Loans', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
-      %li
+        =# link_to_with_rights 'Bulk Edit of Funding Lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
         =# link_to_with_rights 'under_development', resource(:new_funders), :class => 'funder icon'
-      %li
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
-      %li
         =# link_to_with_rights 'Insurance companies & products', url(:action => :insurance), :class => 'insurance icon'
 
   .admin-box
@@ -110,13 +120,10 @@
       %h2 Securitisation
       %ul.icon_links
         %li
-          = link_to_with_rights 'Securitization', resource(:securitizations), :class => 'icon accept'
-          %li
-            = link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
-          %li
-            = link_to_with_rights 'Loans Eligible For Loan Assignment', url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments, :flag => 'true'), :class => 'icon accept'
-          %li
-            = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
+          =# link_to_with_rights 'Securitization', resource(:securitizations), :class => 'icon accept'
+          =# link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
+          =# link_to_with_rights 'Loans Eligible For Loan Assignment', url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments, :flag => 'true'), :class => 'icon accept'
+          = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
 
   - if Mfi.first.system_state == :migration
     %div.clearfix
@@ -130,16 +137,3 @@
     -# %ul
     -#   %li
     -#     =# link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
-:javascript
-  jQuery('.admin-box').each(function(){
-    if($(this).find('li a').length ==0){
-      $(this).remove();
-    }
-    else{
-      jQuery(this).find('li').each(function(){
-        if(jQuery(this).find('a').length==0){
-          jQuery(this).remove();
-        }
-      });
-    }
-  });
