@@ -25,6 +25,6 @@
         %td
           = designation.location_level.name
         %td
-          = designation.role_class.to_s.capitalize
+          = designation.role_class.to_s.capitalize.humanize
         %td
           = designation.created_at

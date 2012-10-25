@@ -99,31 +99,31 @@ module Merb
     end
 
     def url_for_process_audit_checklist(name,target_entity_type, target_entity, location1, location2, staff_member, date, local_params, no_of_applications = nil)
-          checklist_type = ChecklistType.first(:name => name)
+      checklist_type = ChecklistType.first(:name => name)
 
-          unless checklist_type.blank?
-            url(:checklister_slice_checklists,
-                :checklist_area => checklist_type.name,
-                :checklist_type_id => checklist_type.id,
-                :checklist_master_version => '1.0',
-                :target_entity_type => target_entity_type ,
-                :target_entity_name => target_entity.name ,
-                :target_entity_id => target_entity.id,
-                :loc1_type => "branch",
-                :loc1_name => location1.name,
-                :loc1_id => location1.id,
-                :loc2_type => "center",
-                :loc2_name => location2.name,
-                :loc2_id => location2.id,
-                :staff_id => staff_member.id,
-                :staff_name => staff_member.name,
-                :staff_role => staff_member.user.role,
-                :no_of_applications => no_of_applications,
-                :effective_date => date.strftime("%Y-%m-%d"),
-                :referral_url => url(local_params)
-            )
-          end
-        end
+      unless checklist_type.blank?
+        url(:checklister_slice_checklists,
+          :checklist_area => checklist_type.name,
+          :checklist_type_id => checklist_type.id,
+          :checklist_master_version => '1.0',
+          :target_entity_type => target_entity_type ,
+          :target_entity_name => target_entity.name ,
+          :target_entity_id => target_entity.id,
+          :loc1_type => "branch",
+          :loc1_name => location1.name,
+          :loc1_id => location1.id,
+          :loc2_type => "center",
+          :loc2_name => location2.name,
+          :loc2_id => location2.id,
+          :staff_id => staff_member.id,
+          :staff_name => staff_member.name,
+          :staff_role => staff_member.user.role,
+          :no_of_applications => no_of_applications,
+          :effective_date => date.strftime("%Y-%m-%d"),
+          :referral_url => url(local_params)
+        )
+      end
+    end
 
 
 
@@ -748,6 +748,17 @@ module Merb
       [NewFunder.first.new_funding_lines.first.new_tranches.first] rescue []
     end
 
+    def is_default_tranch_set?
+      Mfi.first.set_default_funding_line
+    end
+
+    def get_default_tranch_id
+      Mfi.first.funding_line_id
+    end
+
+    def get_no_of_minimum_repayments
+      Mfi.first.minimum_no_of_repayments
+    end
     private
     
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)

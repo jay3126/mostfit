@@ -57,7 +57,7 @@ class Mfi
 
   property :set_default_funding_line, Boolean, :default => false, :index => true
   property :funding_line_id, Integer, :nullable => true
-  
+  property :minimum_no_of_repayments, Integer, :default => 3
   validates_length :name, :min => 0, :max => 20
   before :valid?, :save_image
   
@@ -68,10 +68,10 @@ class Mfi
       $globals[:mfi_details]
     else
       mfi = if File.exists?(File.join(Merb.root, "config", "mfi.yml"))
-              Mfi.new(YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml"))).only(*Mfi.properties.map(&:name)))
-            else
-              Mfi.new(:name => "Mostfit", :fetched => Date.today)  
-            end
+        Mfi.new(YAML.load(File.read(File.join(Merb.root, "config", "mfi.yml"))).only(*Mfi.properties.map(&:name)))
+      else
+        Mfi.new(:name => "Mostfit", :fetched => Date.today)
+      end
       mfi.fetched = Date.today
       $globals ||= {}
       $globals[:mfi_details] = mfi

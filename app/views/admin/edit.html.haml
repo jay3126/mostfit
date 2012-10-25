@@ -125,6 +125,11 @@
             = select :funding_line_id, :collection => NewTranch.all.map{|x| [x.id, x.name]}
         %tr
           %td
+            Set No. of minimum repayments
+          %td
+            = text_field :minimum_no_of_repayments, :size => 3
+        %tr
+          %td
             Allow choice of repayment style in weeksheets?
           %td
             = check_box :allow_choice_of_repayment_style
