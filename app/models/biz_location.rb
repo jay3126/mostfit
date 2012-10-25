@@ -27,6 +27,7 @@ class BizLocation
   has n, :client_groups
   has n, :bank_branches
   has n, :eod_processes
+  has n, :bod_processes
   has n, :lending_product_locations
   has n, :lending_products, :through => :lending_product_locations
 
@@ -37,7 +38,6 @@ class BizLocation
   def self.from_csv(row, headers)
     location_level = LocationLevel.first(:name => row[headers[:location_level_name]])
     raise ArgumentError, "Location Level(#{row[headers[:location_level_name]]}) does not exist" if location_level.blank?
-
     if location_level.level == 0
       center_disbursal_date = Date.parse(row[headers[:center_disbursal_date]])
     else
@@ -46,7 +46,7 @@ class BizLocation
 
     creation_date = Date.parse(row[headers[:creation_date]])
     obj = new(:name => row[headers[:name]], :center_disbursal_date => center_disbursal_date,
-              :location_level => location_level, :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
+      :location_level => location_level, :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
     if obj.save
       parent_location_level = LocationLevel.first(:level => obj.location_level.level+1)
       unless parent_location_level.blank?
@@ -65,7 +65,7 @@ class BizLocation
         meeting_frequency = row[headers[:meeting_frequency]].downcase
         meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
         msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
-                                      meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
+          meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
         meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
         meeting_facade.setup_meeting_schedule(obj, msi, meeting_number)
 
@@ -135,6 +135,7 @@ class BizLocation
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
     new_location = create(location)
     raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
+    Ledger.setup_location_ledgers(new_location.creation_date, new_location.id) if new_location.location_level.level == 1
     new_location
   end
 
@@ -264,8 +265,8 @@ class BizLocation
     t_money_deposits_pending_verification = reporting_facade.total_money_deposited_pending_verification_until_date_at_locations(on_date, *location_ids)
 
     EodSummary.new(total_new_loan_application, loans_pending_approval, loans_approved_today, loans_scheduled_for_disbursement, loans_disbursed_today,
-                   t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
-                   t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
+      t_repayment_due, t_repayment_received, t_outstanding, t_money_deposits_recorded_today, t_money_deposits_verified_confirmed,
+      t_money_deposits_verified_rejected,t_money_deposits_pending_verification).summary
   end
 
   #################

@@ -57,4 +57,10 @@ module Resolver
     klass.get(for_id)
   end
 
+  # Given a model type and id, fetches the model
+  def self.fetch_model_instance(by_type, for_id)
+    Validators::Arguments.not_nil?(by_type, for_id)
+    klass = Kernel.const_get(by_type)
+    klass.get(for_id)
+  end
 end

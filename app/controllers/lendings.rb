@@ -201,7 +201,7 @@ class Lendings < Application
               fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
               payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
               fee_instances.each do |fee_instance|
-                payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
+                payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,'','lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
               end
               @message[:error].push("An error occurred disbursing loan ID: #{lending.id}") unless lending.reload.is_outstanding?
             end

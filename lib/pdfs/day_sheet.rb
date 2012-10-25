@@ -126,7 +126,7 @@ module Pdf
         filename = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.pdf")
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
-        pdf.info.title = "due_generation_#{branch.name}_#{Time.now}"
+        pdf.info.title = "due_generation_#{branch.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}"
         pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
         pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
         pdf.text("\n")

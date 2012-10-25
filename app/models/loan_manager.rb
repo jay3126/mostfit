@@ -120,7 +120,7 @@ class LoanManager
     effective_on = on_date
     product_action = Constants::Transaction::LOAN_ADVANCE_ADJUSTMENT
 
-    using_payment_facade.record_payment(money_amount, receipt_type, payment_towards, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
+    using_payment_facade.record_payment(money_amount, receipt_type, payment_towards, '', on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action)
   end
 
   def adjust_advance_for_perclose(on_date, on_loan_id, performed_by_id, using_payment_facade)

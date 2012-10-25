@@ -5,14 +5,16 @@ chart:
   chart_type: financial_accounting
   assets:
     - Cash
-    - Bank account
-    - Loans made
+    - Bank Account
+    - Loans Made
     - Debtors
+    - Loans Write Off
   liabilities:
-    - Loans taken
+    - Loans Advance
   incomes:
-    - Interest income
-    - Fee income
+    - Interest Income
+    - Charges Income
+    - Other Income
   expenses:
     - Salaries
     - Rent

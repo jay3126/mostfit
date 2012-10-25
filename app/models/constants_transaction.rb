@@ -23,6 +23,7 @@ module Constants
     LOAN_PRECLOSURE   = :loan_preclosure
     LOAN_RECOVERY     = :loan_recovery
     LOAN_FEE_RECEIPT  = :loan_fee_receipt
+    MONEY_DEPOSIT     = :money_deposit
     PRODUCT_ACTIONS   = [LOAN_DISBURSEMENT, LOAN_REPAYMENT, LOAN_ADVANCE_ADJUSTMENT, LOAN_ACCRUAL, LOAN_PRECLOSURE, LOAN_RECOVERY, LOAN_FEE_RECEIPT]
 
     FEE_CHARGED_ON_CLIENT = :fee_charged_on_client; FEE_CHARGED_ON_LOAN = :fee_charged_on_loan

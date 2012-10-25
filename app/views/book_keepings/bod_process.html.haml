@@ -1,0 +1,37 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_all').change(function() {
+    $('.eod_div').attr('checked',$(this).attr('checked'))});
+  });
+%h1== BOD Process on #{get_effective_date}
+
+.menu-strip{:style => "width:8%;"}
+  = link_to_with_rights "Back", url(:book_keepings), :class => "grey_button"
+
+= form_for(:book_keepings, :action => resource(:book_keepings, :perform_bod_process), :method => :get) do
+  %table.dataTable.weeksheet.report.nojs
+    %thead
+      %th
+        Branch Name
+      %th
+        Process Status
+      %th{:style => "display:none"}
+        Select All
+        %br
+        = check_box :name => 'select_all', :id => 'toggle_select_all'
+    - @locations.each do |location|
+      - bod = location.bod_processes.first(:on_date => get_effective_date)
+      - unless bod.blank?
+        %tr
+          %td
+            = location.name
+          %td
+            = bod.status.humanize rescue '-'
+          %td{:style => "display:none; text-align:center"}
+            - if bod.status == Constants::EODProcessVerificationStatus::PENDING
+              = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount, :class => 'eod_div'
+            - else
+              = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true
+  %br
+  =# submit 'Start'
+%br

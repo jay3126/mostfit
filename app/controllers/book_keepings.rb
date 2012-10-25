@@ -14,6 +14,15 @@ class BookKeepings < Application
     display @locations
   end
 
+  def bod_process
+    @locations = BizLocation.all('location_level.level' => 1)
+    location_ids = @locations.map(&:id)
+    on_date = get_effective_date
+    created_on = get_effective_date
+    EodProcess.create_default_eod_for_location(location_ids, on_date, created_on)
+    display @locations
+  end
+
   def perform_eod_process
     message           = {:error => [], :notice => []}
     @locations        = BizLocation.all('location_level.level' => 1)

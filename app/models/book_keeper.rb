@@ -30,12 +30,42 @@ module BookKeeper
     raise Errors::InvalidConfigurationError, "Unable to determine the product action for the payment transaction" unless product_action
 
     total_amount, currency, effective_on = payment_transaction.amount, payment_transaction.currency, payment_transaction.effective_on
-    notation = nil
+    notation = "Voucher created for #{product_action.to_s.humanize}"
 
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
     receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT
     Voucher.create_generated_voucher(total_amount, receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation)
+  end
+
+  def account_for_due_generation(loan, payment_allocation, on_date = Date.today)
+    # determine the product action
+    product_action = :loan_due
+    loan_id = loan.id
+    client_id = loan.borrower.id
+    total_amount = payment_allocation[:total_received]
+    performed_at = LoanAdministration.get_administered_at(loan_id, Date.today)
+    accounted_at = LoanAdministration.get_accounted_at(loan_id, Date.today)
+    product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+    postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at.id, accounted_at.id, loan_id, client_id)
+    receipt_type = Constants::Transaction::RECEIPT
+    narration = "Voucher created for Due Generation"
+    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
+  end
+
+  def account_for_write_off(loan, payment_allocation, on_date = Date.today)
+    # determine the product action
+    product_action = :write_off
+    loan_id = loan.id
+    client_id = loan.borrower.id
+    total_amount = payment_allocation[:total_received]
+    performed_at = LoanAdministration.get_administered_at(loan_id, Date.today)
+    accounted_at = LoanAdministration.get_accounted_at(loan_id, Date.today)
+    product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+    postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at.id, accounted_at.id, loan_id, client_id)
+    receipt_type = Constants::Transaction::RECEIPT
+    narration = "Voucher created for Due Generation"
+    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
   end
 
   def self.can_accrue_on_loan_on_date?(loan, on_date)

@@ -18,32 +18,13 @@ USAGE_TEXT
         on_date = Date.parse(on_date_str)
         raise ArgumentError, "#{on_date} is a future date" if on_date > Date.today
 
-        user_facade = FacadeFactory.instance.get_instance(FacadeFactory::USER_FACADE, nil)
-        operator = user_facade.get_operator
-
-        reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, operator)
-        all_outstanding_loans_on_date = reporting_facade.all_outstanding_loans_on_date(on_date)
-
-        errors = []
-        bk = MyBookKeeper.new
-        all_outstanding_loans_on_date.each {|loan|
-          begin
-            bk.accrue_all_receipts_on_loan(loan, on_date)
-          rescue => ex
-            errors << [loan.id, ex.message]
-          end
-        }
-        
-        unless errors.empty?
-          error_file_name = Constants::Tasks::error_file_name(MY_TASK_NAME, on_date, DateTime.now)
-          error_file_path = File.join(Merb.root, 'log', error_file_name)
-          FasterCSV.open(error_file_path, "w") do |csv|
-            errors.each do |err|
-              csv << err
-            end
-          end
+        branches_ids = BizLocation.all('location_level.level' => 1).map(&:id)
+        unless branches_ids.blank?
+          created_by = User.first
+          performed_by = User.first.staff_member
+          BodProcess.create_default_bod_for_location(branches_ids, on_date, on_date)
+          BodProcess.bod_process_for_location(branches_ids, performed_by.id, created_by.id, on_date)
         end
-        
       rescue => ex
         p "Error message: #{ex.message}"
         p USAGE_TEXT

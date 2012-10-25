@@ -9,11 +9,16 @@ class CostCenter
 
   belongs_to :biz_location, 'BizLocation', :nullable => true
   has n, :vouchers
+  has n, :accounting_locations
 
   validates_present :name
 
   def self.resolve_cost_center_by_branch(branch_id)
   	first_or_create(:biz_location_id => branch_id)
+  end
+
+  def get_ledgers(on_date = Date.today)
+    self.accounting_locations(:effective_on.glt => on_date, :product_type => 'Ledger').map(&:ledger)
   end
 
   def self.setup_cost_centers(nominal_branches = [])

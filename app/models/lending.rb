@@ -839,6 +839,11 @@ class Lending
     self.write_off_on_date    = write_off_on_date
     self.written_off_by_staff = written_off_by_staff
     set_status(WRITTEN_OFF_LOAN_STATUS, write_off_on_date)
+    bk = MyBookKeeper.new
+    total_loan_disbursed = self.to_money[:disbursed_amount]
+    total_principal_received = self.principal_received_till_date(write_off_on_date)
+    write_off_on_amount = total_loan_disbursed - total_principal_received
+    bk.account_for_write_off(self, {:total_received => write_off_on_amount}, write_off_on_date)
   end
 
   def setup_on_approval

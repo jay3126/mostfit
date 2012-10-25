@@ -69,7 +69,7 @@ class PaymentTransaction
 
   def check_receipt_no
     message = ''
-    if self.receipt_type == RECEIPT
+    if self.receipt_type == RECEIPT && self.payment_towards == PAYMENT_TOWARDS_LOAN_REPAYMENT
       if self.receipt_no.blank?
         message = [false, "Receipt Number cannot be blank"]
       elsif !PaymentTransaction.first(:receipt_no => self.receipt_no).blank?

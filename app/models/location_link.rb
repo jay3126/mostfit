@@ -1,16 +1,18 @@
 class LocationLink
   include DataMapper::Resource
+  include Constants::Locations
 
   property :id,           Serial
   property :effective_on, Date, :nullable => false
+  property :model_type, Enum.send('[]', *LINK_MODEL_NAME), :nullable => false
   property :created_at,   DateTime, :nullable => false, :default => DateTime.now
   property :creation_date, Date, :nullable => false, :default => Date.today
   property :parent_id,    Integer, :nullable => false
   property :child_id,     Integer, :nullable => false
   property :deleted_at, ParanoidDateTime
 
-  def parent_location; BizLocation.get(self.parent_id); end
-  def child_location; BizLocation.get(self.child_id); end
+  def parent_location; Resolver.fetch_model_instance(self.model_type, self.parent_id); end
+  def child_location; Resolver.fetch_model_instance(self.model_type, self.child_id); end
 
   validates_with_method :linked_locations_are_at_adjacent_levels?
   validates_with_method :linked_and_creation_dates_are_valid?
@@ -18,8 +20,11 @@ class LocationLink
 
   # Two locations are related to one another on different location levels and not on the same location level
   def linked_locations_are_at_adjacent_levels?
-    (self.parent.level_number - self.child.level_number == 1) ? true :
-      [false, "The linked locations are not on valid adjacent levels"]
+    if self.model_type == 'BizLocation'
+      (self.parent.level_number - self.child.level_number == 1) ? true : [false, "The linked locations are not on valid adjacent levels"]
+    else
+      true
+    end
   end
 
   def linked_and_creation_dates_are_valid?
@@ -27,28 +32,25 @@ class LocationLink
   end
   
   def linked_to_one_location_only_on_one_date?
-    linked_on_same_date = LocationLink.first(:child_id => self.child_id, :effective_on => self.effective_on)
-    linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] :
-      true
+    linked_on_same_date = LocationLink.first(:model_type => self.model_type, :child_id => self.child_id, :effective_on => self.effective_on)
+    linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] : true
   end
 
   # Get the 'ancestor' or parent for this location link
   def parent
-    BizLocation.get(self.parent_id)
+    Resolver.fetch_model_instance(self.model_type, self.parent_id)
   end
 
   # Get the 'child' or descendant for this location link
   def child
-    BizLocation.get(self.child_id)
+    Resolver.fetch_model_instance(self.model_type, self.child_id)
   end
 
   # Assign one BizLocation as the child of another as of the specified date
   def self.assign(child, to_parent, on_date = Date.today)
-    raise ArgumentError,
-      "Locations to be assigned must be instances of BizLocation" unless 
-    (child.is_a?(BizLocation) and to_parent.is_a?(BizLocation))
 
     construction = {}
+    construction[:model_type] = child.class.name
     construction[:child_id] = child.id
     construction[:parent_id] = to_parent.id
     construction[:effective_on] = on_date
@@ -62,6 +64,7 @@ class LocationLink
     parents = {}
     parents[:child_id] = for_location.id
     parents[:effective_on.lte] = on_date
+    parents[:model_type] = for_location.class.name
     parents[:order] = [:effective_on.desc]
 
     parent_links = all(parents)
@@ -74,6 +77,7 @@ class LocationLink
     children_on_date = []
     children = {}
     children[:parent_id] = for_location.id
+    children[:model_type] = for_location.class.name
     children[:effective_on.lte] = on_date
     children_links = all(children)
     children_links_grouped = children_links.group_by {|child| child.child_id}
@@ -112,10 +116,10 @@ class LocationLink
   end
 
   def self.all_children_with_self(for_location, on_date = Date.today)
-    all_children(for_location, on_date)<<for_location
+    all_children(for_location, on_date) << for_location
   end
 
   def self.all_parents_with_self(for_location, on_date = Date.today)
-    all_parents(for_location, on_date)<<for_location
+    all_parents(for_location, on_date) << for_location
   end
 end

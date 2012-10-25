@@ -12,6 +12,14 @@ class ProductAccountingRule
     self.product_posting_rules.collect {|rule| rule.to_posting_info(payment_transaction, payment_allocation)}
   end
 
+  def get_location_posting_info(payment_allocation, location_id, on_date = Date.today)
+    self.product_posting_rules.collect {|rule| rule.to_location_posting_info(payment_allocation, location_id, on_date)}
+  end
+
+  def get_due_generation_posting_info(payment_allocation, accounted_id, performed_id, loan_id, client_id, on_date = Date.today)
+    self.product_posting_rules.collect {|rule| rule.to_due_generation_posting_info(payment_allocation, accounted_id, performed_id, loan_id, client_id, on_date)}
+  end
+
   def self.load_product_accounting_rules(rules_hash)
     rules_hash.each { |product_action, accounting|
       product_accounting_rule = first_or_create(:product_action => product_action.to_sym)
@@ -20,10 +28,10 @@ class ProductAccountingRule
         ledger_classification = LedgerClassification.resolve(ledger_classification_text)
         raise Errors::InvalidConfigurationError, "No ledger classification was found for #{ledger_classification_text}" unless ledger_classification
         debit_posting_rule = ProductPostingRule.first_or_create(
-            :effect => DEBIT_EFFECT,
-            :product_amount => product_amount.to_sym,
-            :ledger_classification => ledger_classification,
-            :product_accounting_rule => product_accounting_rule
+          :effect => DEBIT_EFFECT,
+          :product_amount => product_amount.to_sym,
+          :ledger_classification => ledger_classification,
+          :product_accounting_rule => product_accounting_rule
         )
         raise Errors::InvalidConfigurationError, debit_posting_rule.errors.first.first unless (debit_posting_rule and (not (debit_posting_rule.id.nil?)))
       }
@@ -33,10 +41,10 @@ class ProductAccountingRule
         ledger_classification = LedgerClassification.resolve(ledger_classification_text)
         raise Errors::InvalidConfigurationError, "No ledger classification was found for #{ledger_classification_text}" unless ledger_classification
         credit_posting_rule = ProductPostingRule.first_or_create(
-            :effect => CREDIT_EFFECT,
-            :product_amount => product_amount.to_sym,
-            :ledger_classification => ledger_classification,
-            :product_accounting_rule => product_accounting_rule
+          :effect => CREDIT_EFFECT,
+          :product_amount => product_amount.to_sym,
+          :ledger_classification => ledger_classification,
+          :product_accounting_rule => product_accounting_rule
         )
         raise Errors::InvalidConfigurationError, credit_posting_rule.errors.first.first unless (credit_posting_rule and (not (credit_posting_rule.id.nil?)))
       }
