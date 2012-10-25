@@ -37,14 +37,43 @@ class BizLocation
   def self.from_csv(row, headers)
     location_level = LocationLevel.first(:name => row[headers[:location_level_name]])
     raise ArgumentError, "Location Level(#{row[headers[:location_level_name]]}) does not exist" if location_level.blank?
-    obj = new(:name => row[headers[:name]],
-              :location_level => location_level, :creation_date => row[headers[:creation_date]], :upload_id => row[headers[:upload_id]])
+
+    if location_level.level == 0
+      center_disbursal_date = Date.parse(row[headers[:center_disbursal_date]])
+    else
+      center_disbursal_date = Date.today
+    end
+
+    creation_date = Date.parse(row[headers[:creation_date]])
+    obj = new(:name => row[headers[:name]], :center_disbursal_date => center_disbursal_date,
+              :location_level => location_level, :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
     if obj.save
       parent_location_level = LocationLevel.first(:level => obj.location_level.level+1)
       unless parent_location_level.blank?
         parent_location = parent_location_level.biz_locations.first(:name => row[headers[:parent_location]])
         LocationLink.assign(obj, parent_location, row[headers[:effective_date]]) unless parent_location.blank?
       end
+
+      #assigning staff to locations.
+      staff = StaffMember.first(:name => row[headers[:manager]])
+      raise ArgumentError, "Staff Member(#{row[headers[:manager]]}) does not exist" if staff.blank?
+      LocationManagement.assign_manager_to_location(staff, obj, creation_date, User.first.staff_member.id, User.first.id)
+
+      if obj.location_level.level == 0
+        #creating meeting schedules and calendar for centers.
+        meeting_number = (Date.today - creation_date).to_i + Constants::Time::DEFAULT_FUTURE_MAX_DURATION_IN_DAYS
+        meeting_frequency = row[headers[:meeting_frequency]].downcase
+        meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
+        msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
+                                      meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
+        meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
+        meeting_facade.setup_meeting_schedule(obj, msi, meeting_number)
+
+        #creating center cycle for center.
+        location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
+        location_facade.create_center_cycle(creation_date, obj.id)
+      end
+
       [true, obj]
     else
       [false, obj]

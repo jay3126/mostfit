@@ -104,14 +104,10 @@ class Client
   end
 
   def self.from_csv(row, headers)
-    if center_attr = row[headers[:center]].strip
-      if center   = BizLocation.first(:name => center_attr)
-      elsif /\d+/.match(center_attr)
-        center   = BizLocation.get(center_attr)
-      end
-    end
-    raise ArgumentError.new("No center with id #{center_attr}") unless center
-    branch = LocationLink.get_parent(center, Date.parse(row[headers[:date_joined]]))
+    center = BizLocation.first(:name => row[headers[:center]])
+    raise ArgumentError, "Center(#{row[headers[:center]]}) does not exist" if center.blank?
+
+    branch = LocationLink.get_parent(center, Date.parse(row[headers[:date_joined]])) if center
     #creating group either on group code(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
       client_group  =  ClientGroup.first(:code => row[headers[:group_code]].strip)
@@ -125,7 +121,7 @@ class Client
     hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]],
       :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]],
       :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
-      :date_joined => Date.parse(row[headers[:date_joined]]), :client_group => client_group,
+      :date_joined => Date.parse(row[headers[:date_joined]]), :client_group => client_group, :telephone_number => row[headers[:telephone_number]],
       :center_id => BizLocation.first(:name => row[headers[:center]]).id, :guarantor_name => row[headers[:guarantor_name]],
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],

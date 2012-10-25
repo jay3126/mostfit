@@ -129,14 +129,18 @@ class Lending
 
   #this method is for upload functionality.
   def self.from_csv(row, headers)
+    administered_at_origin = BizLocation.first(:name => row[headers[:center]]).id
+    raise ArgumentError, "Center(#{row[headers[:center]]}) does not exist" if administered_at_origin.blank?
+
+    accounted_at_origin = BizLocation.first(:name => row[headers[:branch]]).id
+    raise ArgumentError, "Branch(#{row[headers[:branch]]}) does not exist" if accounted_at_origin.blank?
+
     loan_product = LendingProduct.first(:name => row[headers[:loan_product]])
     lending_product_id = loan_product
     client = Client.first(:name => row[headers[:client]])
     loan_borrower_id = client
     funding_line_id = NewFundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id
     tranch_id = NewTranch.first(:reference => row[headers[:tranch_serial_number]]).id
-    administered_at_origin = BizLocation.first(:name => row[headers[:center]]).id
-    accounted_at_origin = BizLocation.first(:name => row[headers[:branch]]).id
     applied_money_amount = MoneyManager.get_money_instance(row[headers[:applied_amount]])
     applied_amount = approved_amount = disbursed_amount = applied_money_amount
     repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
