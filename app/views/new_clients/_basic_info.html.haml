@@ -12,7 +12,8 @@
         = ''
     %tr
       %th
-        Name*
+        <span style="color:red">*</span> 
+        Name
       %td
         = @client.name
     %tr
@@ -21,28 +22,32 @@
       %td
         = @client.gender
     %tr
-      %th
+      %th<span style="color:red">*</span>
         Marital Status
       %td
         = @client.marital_status
     %tr
       %th
-        Ration Card*
+        <span style="color:red">*</span>  
+        Ration Card
       %td
         = "#{@client.reference_type}-#{@client.reference}"
     %tr
       %th
-        ID Proof*
+        <span style="color:red">*</span>
+        ID Proof
       %td
         = "#{@client.reference2_type}-#{@client.reference2}"
     %tr
       %th
-        Date of birth*
+        <span style="color:red">*</span>
+        Date of birth
       %td
         = @client.date_of_birth
     %tr
       %th
-        Date joined*
+        <span style="color:red">*</span> 
+        Date joined
       %td
         = @client.date_joined
     %tr
@@ -57,12 +62,14 @@
         = @client.spouse_date_of_birth
     %tr
       %th
-        Guarantor name*
+        <span style="color:red">*</span>
+        Guarantor name
       %td
         = @client.guarantor_name
     %tr
       %th
-        Guarantor Date of Birth*
+        <span style="color:red">*</span>  
+        Guarantor Date of Birth
       %td
         = @client.guarantor_dob
     %tr
@@ -72,17 +79,20 @@
         = @client.guarantor_relationship
     %tr
       %th
-        Address*
+        <span style="color:red">*</span>
+        Address
       %td
         = @client.address
     %tr
       %th
-        State*
+        <span style="color:red">*</span>
+        State
       %td
         = @client.state
     %tr
       %th
-        Pincode*
+        <span style="color:red">*</span>
+        Pincode
       %td
         = @client.pincode
     %tr
