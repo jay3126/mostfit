@@ -190,7 +190,7 @@ class Securitizations < Application
                   if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
                     msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
                   else
-                    if (loan_assignment && loan_assignment.is_additional_encumbered)
+                    if (loan_assignment && loan_assignment.is_additional_encumbered) || (is_default_tranch_set? && get_default_tranch_id == tranch_id.to_i)
                       if assignment_type == "s"
                         assignment_nature = securitization
                       else

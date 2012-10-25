@@ -1,6 +1,6 @@
-- has_default_tranch = Mfi.first.set_default_funding_line
+- has_default_tranch = is_default_tranch_set?
 - if has_default_tranch
-  - tranch_id = Mfi.first.funding_line_id
+  - tranch_id = get_default_tranch_id
   - default_tranch = NewTranch.get(tranch_id)
   - default_tranch_name = default_tranch.name
   - default_funding_line = default_tranch.new_funding_line
