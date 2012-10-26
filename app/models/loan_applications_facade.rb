@@ -249,7 +249,10 @@ class LoanApplicationsFacade < StandardFacade
   def generate_credit_bureau_request_file(search_option = {})
     OverlapReportRequest.generate_credit_bureau_request_file(search_option)
   end
-  
+
+  def is_center_eligible_for_cgt_grt?(branch, center)
+    LoanApplication.is_center_eligible_for_cgt_grt?(branch, center)
+  end
 end
 
 

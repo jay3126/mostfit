@@ -22,17 +22,20 @@
     %h3 No Center cycle currently exists for this center
   - else
     %h2= "Center Cycle Number: #{center_cycle_number}"
-- if @center_cycle
-  %div.tab_container.shaded
-    %ul.tabs
-      %li#CGT_GRT
-        CGT, GRT
-      %li#History
-        History
-    %div.tab
-      - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil
-        = partial :fields_cgt
-      - else
-        = partial :fields_grt
-    %div.tab
-      %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+    - result, msg = loan_applications_facade.is_center_eligible_for_cgt_grt?(params[:parent_location_id], params[:child_location_id])
+    - if result
+      %div.tab_container.shaded
+        %ul.tabs
+          %li#CGT_GRT
+            CGT, GRT
+          %li#History
+            History
+        %div.tab
+          - if @center_cycle.cgt_date_one == nil && @center_cycle.cgt_date_two == nil
+            = partial :fields_cgt
+          - else
+            = partial :fields_grt
+        %div.tab
+          %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
+    - else
+      %h3= msg
