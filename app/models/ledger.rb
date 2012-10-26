@@ -100,6 +100,10 @@ class Ledger
 
   def self.setup_product_ledgers(with_accounts_chart, currency, open_on_date, for_product_type = nil, for_product_id = nil)
     all_product_ledgers = {}
+    recorded_by = User.first.id
+    performed_by = User.first.staff_member.id
+    client = Client.get(with_accounts_chart.counterparty_id)
+    biz_location = get_client_facade(User.first).get_administration_on_date(client)
     PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
       ledger_classification = LedgerClassification.resolve(product_ledger_type)
 
@@ -108,8 +112,7 @@ class Ledger
         next if ledger_is_product_specific
       end
 
-      ledger_product_type, ledger_product_id = ledger_is_product_specific ? [for_product_type, for_product_id] :
-        [nil, nil]
+      ledger_product_type, ledger_product_id = ledger_is_product_specific ? [for_product_type, for_product_id] : [nil, nil]
 
       ledger_assignment = LedgerAssignment.record_ledger_assignment(with_accounts_chart, ledger_classification, ledger_product_type, ledger_product_id)
       ledger_name = name_for_product_ledger(with_accounts_chart.counterparty_type, with_accounts_chart.counterparty_id, ledger_classification, ledger_product_type, ledger_product_id)
@@ -128,6 +131,7 @@ class Ledger
       product_ledger = first_or_create(ledger)
       raise Errors::DataError, product_ledger.errors.first.first if product_ledger.id.nil?
       all_product_ledgers[ledger_classification.account_purpose] = product_ledger
+      AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location => biz_location, :effective_on => Date.today, :performed_by => performed_by, :recorded_by => recorded_by)
     }
     all_product_ledgers
   end
@@ -336,6 +340,10 @@ class Ledger
 
   def self.get_location_facade(user)
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
+  end
+
+  def self.get_client_facade(user)
+    @client_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, user)
   end
 
 end
