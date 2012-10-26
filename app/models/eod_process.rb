@@ -26,6 +26,7 @@ class EodProcess
       eod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
       eod.run_eod_process_in_thread
     end
+    head_office_eod(on_date) unless location_ids.blank?
   end
 
   def self.create_default_eod_for_location(location_ids, created_on = Date.today, on_date = Date.today)
@@ -55,6 +56,11 @@ class EodProcess
       end
       Ledger.run_branch_eod_accounting(self.biz_location, self.on_date)
       self.update(:completed_at => Time.now, :status => COMPLETED)
+    }
+  end
+  def self.head_office_eod(on_date = Date.today)
+    Thread.new {
+      Ledger.head_office_eod(on_date)
     }
   end
 

@@ -89,8 +89,10 @@ class Ledger
       type_sym = type.to_sym
       opening_balance_effect = DEFAULT_EFFECTS_BY_TYPE[type_sym]
       ledgers.each { |account_name|
+        classification = DEFAULT_LEDGER.index(account_name)
+        ledger_classification = LedgerClassification.resolve(classification)
         ledger = Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, :manual_voucher_permitted => true,
-          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart)
+          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart, :ledger_classification => ledger_classification)
         AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :cost_center => cost_center, :effective_on => Date.today, :performed_by => performed_by, :recorded_by => recorded_by)
       }
     }
@@ -275,7 +277,7 @@ class Ledger
         product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
         postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
         receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
-        Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, location.id, '', "EOD Voucher Entry For #{on_date}")
+        Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
       end
     end
   end
@@ -299,7 +301,36 @@ class Ledger
       product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
       postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
       receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
-      Voucher.create_generated_voucher(total_due.amount, receipt_type, total_due.currency, on_date, postings, location.id, '', "EOD Voucher Entry For #{on_date}")
+      Voucher.create_generated_voucher(total_due.amount, receipt_type, total_due.currency, on_date, postings, location.id, '', "Voucher created for Loan Due Generation on #{on_date}")
+    end
+  end
+
+  def self.head_office_eod(on_date)
+    h_cost_center = CostCenter.first(:name => 'Head Office')
+    h_ledgers = h_cost_center.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
+    h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
+    all_vouchers = Voucher.all(:effective_on => on_date)
+    h_ledgers.each do |h_ledger|
+      ledger_balances = {}
+      postings_collection = []
+      c_ledgers = LocationLink.get_children(h_ledger, on_date)
+      c_vouchers = []
+      c_ledgers.each do |c_ledger|
+        c_vouchers = c_ledger.vouchers(:effective_on => on_date)
+        c_vouchers = all_vouchers & c_vouchers
+        all_vouchers = all_vouchers - c_vouchers
+      end
+      ledger_postings = c_vouchers.map(&:ledger_postings).flatten
+      ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
+        ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *postings)
+        parent_ledger = LocationLink.get_parent(ledger, on_date)
+        postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, '', '')
+      end
+      total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
+      if total_amount > MoneyManager.default_zero_money
+        receipt_type = Constants::Transaction::RECEIPT
+        Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, on_date, postings_collection, '', '', "Voucher created for EOD on #{on_date}")
+      end
     end
   end
 

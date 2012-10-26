@@ -30,7 +30,7 @@ module BookKeeper
     raise Errors::InvalidConfigurationError, "Unable to determine the product action for the payment transaction" unless product_action
 
     total_amount, currency, effective_on = payment_transaction.amount, payment_transaction.currency, payment_transaction.effective_on
-    notation = "Voucher created for #{product_action.to_s.humanize}"
+    notation = "Voucher created for #{product_action.to_s.humanize} on #{effective_on}"
 
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
@@ -49,8 +49,8 @@ module BookKeeper
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at.id, accounted_at.id, loan_id, client_id)
     receipt_type = Constants::Transaction::RECEIPT
-    narration = "Voucher created for Due Generation"
-    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
+    notation = "Voucher created for Loan Due Generation on #{on_date}"
+    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, notation)
   end
 
   def account_for_write_off(loan, payment_allocation, on_date = Date.today)
@@ -64,7 +64,7 @@ module BookKeeper
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at.id, accounted_at.id, loan_id, client_id)
     receipt_type = Constants::Transaction::RECEIPT
-    narration = "Voucher created for Due Generation"
+    narration = "Voucher created for Loan Write Off on #{on_date}"
     Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
   end
 

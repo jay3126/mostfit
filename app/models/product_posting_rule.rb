@@ -24,7 +24,7 @@ class ProductPostingRule
 
   def to_location_posting_info(payment_allocation, location_id, on_date = Date.today)
     posting_money_amount = payment_allocation[self.product_amount]
-    location_ledgers = AccountingLocation.all(:effective_on.gte => on_date, :product_type => 'ledger', :biz_location_id => location_id).map(&:product).compact
+    location_ledgers = AccountingLocation.all(:effective_on.lte => on_date, :product_type => 'ledger', :biz_location_id => location_id).map(&:product).compact
     ledgers = location_ledgers.select{|l| l.ledger_classification == self.ledger_classification}
     raise Errors::InvalidConfigurationError, "Unable to locate the product accounting ledger" if ledgers.blank?
     PostingInfo.new(posting_money_amount.amount, posting_money_amount.currency, self.effect, ledgers.first, location_id, nil)
