@@ -12,6 +12,9 @@ class StaffPosting
   property :performed_by,   *INTEGER_NOT_NULL
   property :recorded_by,    *INTEGER_NOT_NULL
   property :created_at,     *CREATED_AT
+  property :reference,      Integer, :unique => true    #property added for upload functionality.
+
+  belongs_to :upload, :nullable => true
 
   def staff_assigned; StaffMember.get(self.staff_id); end
   def assigned_to_location; BizLocation.get(self.at_location_id); end
@@ -51,7 +54,28 @@ class StaffPosting
     all_active_staff - all_active_staff_posted
   end
 
-  def self.assign(staff_member, to_location, effective_on, performed_by, recorded_by)
+  #this function is for upload functionality.
+  def self.from_csv(row, headers)
+    staff_member = StaffMember.first(:name => row[headers[:staff_name]])
+    raise ArgumentError, "Staff Member (#{row[headers[:staff_name]]}) does not exist" if staff_member.blank?
+
+    location = BizLocation.first(:name => row[headers[:location_name]])
+    raise ArgumentError, "Location (#{row[headers[:location_name]]}) does not exist" if location.blank?
+
+    effective_on = Date.parse(row[headers[:effective_on]])
+    performed_by = User.first.id
+    recorded_by = User.first.id
+    upload_id = row[headers[:upload_id]]
+    reference = row[headers[:reference]]
+    obj = assign(staff_member, location, effective_on, performed_by, recorded_by, upload_id, reference)
+    if obj.saved?
+      [true, obj]
+    else
+      [false, obj]
+    end
+  end
+
+  def self.assign(staff_member, to_location, effective_on, performed_by, recorded_by, upload_id = nil, reference = nil)
     Validators::Arguments.not_nil?(staff_member, to_location, effective_on, performed_by, recorded_by)
     raise ArgumentError, "Staff member to be assigned is not an instance of StaffMember" unless staff_member.is_a?(StaffMember)
     raise ArgumentError, "Location to be assigned to is not an instance of BizLocation" unless to_location.is_a?(BizLocation)
@@ -62,6 +86,8 @@ class StaffPosting
     assignment[:effective_on]   = effective_on
     assignment[:performed_by]   = performed_by
     assignment[:recorded_by]    = recorded_by
+    assignment[:upload_id]      = upload_id if upload_id
+    assignment[:reference]      = reference if reference
     staff_posting = create(assignment)
     raise Errors::DataError, staff_posting.errors.first.first unless staff_posting.saved?
     staff_posting
