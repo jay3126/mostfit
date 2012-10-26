@@ -56,23 +56,15 @@ class StaffMember
   end
 
   def self.from_csv(row, headers)
-    user = nil
-    if headers[:name] and row[headers[:name]] and headers[:password] and row[headers[:password]]
-      user = User.new(:login => row[headers[:name]], :role => :staff_member,
-                      :password => row[headers[:password]], :password_confirmation => row[headers[:password]])
-      user.save
-    end
-
-    keys = [:name, :gender]
-    missing_keys = keys - headers.keys
-    raise ArgumentError.new("missing keys #{missing_keys.join(',')}") unless missing_keys.blank?
+    designation = Designation.first(:name => row[headers[:designation]])
+    raise ArgumentError, "Designation(#{row[headers[:designation]]}) does not exist" if designation.blank?
 
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
-    designation = Designation.first 
-    obj = new(:name => row[headers[:name]], :user => user, :creation_date => row[headers[:joining_date]],
-              :gender => row[headers[:gender]], :employee_id => row[headers[:employee_id]],
-              :mobile_number => mobile, :active => true, :designation => designation, :upload_id => row[headers[:upload_id]])
+
+    obj = new(:name => row[headers[:name]], :creation_date => row[headers[:joining_date]], :gender => row[headers[:gender]],
+              :employee_id => row[headers[:employee_id]], :mobile_number => mobile, :active => true, :designation => designation,
+              :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
   end
 
