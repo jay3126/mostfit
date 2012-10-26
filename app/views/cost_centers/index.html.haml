@@ -27,7 +27,11 @@
             = select :name => "cost_center_id", :collection => CostCenter.all, :selected => @cost_center.id.to_s, :text_method => :name, :value_method => :id, :id => 'cost_center_selector'
           %td
             = submit "Go"
-%h1== Cost Center : #{@cost_center.name}
+
+- if @cost_center
+  %h1== Cost Center : #{@cost_center.name}
+- else
+  %h1== Cost Center
 
 .menu-strip{:style => "width:30%;"}
   = link_to_with_rights 'Add new Cost Center', resource(:cost_centers, :new), :class => 'add grey_button'

@@ -1,9 +1,12 @@
 %table{:width => '100%'}
   %tr
-    - ledgers, account_balances = @cost_center.get_sum_of_balances_cost_center(Date.today, @course_product)
-    - ledgers_by_type = ledgers.group_by {|l| l.account_type}
+    - if @cost_center
+      - ledgers, account_balances = @cost_center.get_sum_of_balances_cost_center(Date.today, @course_product)
+      - ledgers_by_type = ledgers.group_by {|l| l.account_type}
+    - else
+      - ledgers, account_balances = []
     - for account_type in Constants::Accounting::ACCOUNT_TYPES
-      - ledgers = ledgers_by_type[account_type]
+      - ledgers = ledgers_by_type[account_type] if ledgers_by_type
       %td
         %table.tall
           %tr

@@ -9,7 +9,10 @@
             = select :name => "accounts_chart_id", :collection => AccountsChart.all, :selected => params[:accounts_chart_id], :text_method => :name, :value_method => :id
           %td
             = submit "Go"
-%h1== Accounts Chart : #{@accounts_chart.name}
+- if @accounts_chart
+  %h1== Accounts Chart : #{@accounts_chart.name}
+- else
+  %h1== Accounts Chart
 
 .menu-strip{:style => "width:25%;"}
   = link_to_with_rights 'Add new ledger', resource(:ledgers, :new), :class => 'add grey_button'
