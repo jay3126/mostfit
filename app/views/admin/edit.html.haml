@@ -122,7 +122,7 @@
           %td
             Default Tranch
           %td
-            = select :funding_line_id, :collection => NewTranch.all.map{|x| [x.id, x.name]}
+            = select :funding_line_id, :collection => NewTranch.all.map{|x| [x.id, "#{x.name} (Funding Line: #{x.new_funding_line.name})"]}
         %tr
           %td
             Set No. of minimum repayments
