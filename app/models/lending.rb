@@ -23,6 +23,8 @@ class Lending
   property :repaid_on_date,                 *DATE
   property :rejected_on_date,               *DATE
   property :write_off_on_date,              *DATE
+  property :write_off_approve,              Boolean
+  property :write_off_approve_on_date,      *DATE
   property :preclosed_on_date,              *DATE
   property :repayment_frequency,            *FREQUENCY
   property :tenure,                         *TENURE

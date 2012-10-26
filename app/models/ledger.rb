@@ -89,7 +89,7 @@ class Ledger
       type_sym = type.to_sym
       opening_balance_effect = DEFAULT_EFFECTS_BY_TYPE[type_sym]
       ledgers.each { |account_name|
-        classification = DEFAULT_LEDGER.index(account_name)
+        classification = DEFAULT_LEDGERS.index(account_name)
         ledger_classification = LedgerClassification.resolve(classification)
         ledger = Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, :manual_voucher_permitted => true,
           :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart, :ledger_classification => ledger_classification)

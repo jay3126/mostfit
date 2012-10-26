@@ -546,6 +546,34 @@ class Lendings < Application
     display @lendings
   end
 
+  def approve_write_off_lendings
+    @message           = {}
+    lendings           = []
+    @staff_id          = session.user.staff_member.id
+    lending_params     = params[:write_off_lendings].blank? ? [] : params[:write_off_lendings]
+    parent_location_id = params[:parent_location_id]
+    child_location_id  = params[:child_location_id]
+    begin
+      lending_params.each do |key, value|
+        if value.size == 2
+          lending  = Lending.get key.to_i
+          on_date  = Date.parse(value.last[:on_date])
+          lendings << {:lending => lending, :on_date => on_date}
+        end
+      end
+      @message = {:error => "Please select Loan for write off approve"} if lendings.blank?
+      if @message[:error].blank?
+        lendings.each do |lending_obj|
+          lending_obj[:lending].update(:write_off_approve_on_date => lending_obj[:on_date], :write_off_approve => true)
+        end
+        @message = {:notice => "Loan Write Off approved successfully."}
+      end
+    rescue => ex
+      @message = {:error => "An error has occured: #{ex.message}"}
+    end
+    redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
+  end
+
   def update_write_off_lendings
     @message           = {}
     lendings           = []

@@ -1,0 +1,84 @@
+- if params[:parent_location_id].blank?
+  %h3 Please Select Branch
+- else
+  - if lendings.blank?
+    %h3
+      No loan exists
+  - else
+    = form_for(:lendings, :action => url(:controller => :lendings, :action => :approve_write_off_lendings)) do
+      = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
+      = hidden_field :name => 'child_location_id', :value => params[:child_location_id]
+      = hidden_field :name => 'on_days', :value => params[:on_days]
+      %table.report.weeksheet.nojs
+        %thead
+          %tr
+            %th
+              Loan Id
+            %th
+              = LocationLevel.first(:level => 0).name
+            %th
+              = LocationLevel.first(:level => 1).name
+            %th
+              Borrower Name
+            %th
+              Loan Amount
+            %th
+              Loan Disbursed On
+            %th
+              Scheduled outstanding principal
+            %th
+              Scheduled outstanding interest
+            %th
+              Scheduled total outstating
+            %th
+              Actual outstanding principal
+            %th
+              Actual outstanding interest
+            %th
+              Actual total outstanding
+            %th
+              Days past due
+            %th
+              Select All
+              %br
+                = check_box :name => 'select_all'
+            %th
+              On Date
+        - lendings.each do |lending|
+          %tr
+            %td
+              = link_to_with_rights lending.id, resource(lending)
+            %td
+              = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+            %td
+              = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+            %td
+              = link_to_with_rights lending.loan_borrower.counterparty.name, url(:controller => :new_clients, :action => :show, :id => lending.loan_borrower.counterparty.id)
+            %td
+              = lending.total_loan_disbursed.to_s
+            %td
+              = lending.disbursal_date
+            %td
+              = lending.scheduled_principal_outstanding(get_effective_date)
+            %td
+              = lending.scheduled_interest_outstanding(get_effective_date)
+            %td
+              = lending.scheduled_total_outstanding(get_effective_date)
+            %td
+              = lending.actual_principal_outstanding
+            %td
+              = lending.actual_interest_outstanding
+            %td
+              = lending.actual_total_outstanding
+            %td
+              = lending.days_past_due_on_date(get_effective_date)
+            %td
+              = check_box :name => "write_off_lendings[#{lending.id}][]" ,:value => lending.id
+            %td
+              - min_date = lending.most_recent_payment_transaction_on_date
+              = date_select "write_off_lendings[#{lending.id}][][on_date]", get_effective_date, {:id => "lending_#{lending.id}", :size=> "10" , :min_date => min_date, :text => 'date_select'}
+        %tfoot
+          %tr.org_total
+            %td{:colspan => 15}
+      %br
+        = submit "Write Off Approve"
