@@ -49,16 +49,15 @@ class LoanAssignment
   end
 
   def loan_assignment_instance
-    Resolver.fetch_assignment(self.assignment_nature, self.assignment_id)
+    Resolver.fetch_assignment(self.assignment_nature)
   end
   
   # Marks a loan as assigned to a securitization or encumberance instance effective_on the specified date, performed_by the staff member and recorded_by user
   def self.assign(loan_id, to_assignment, recorded_by)
     new_assignment                     = {}
     new_assignment[:loan_id]           = loan_id
-    assignment_nature, assignment_id   = Resolver.resolve_loan_assignment(to_assignment)
+    assignment_nature                  = Resolver.resolve_loan_assignment(to_assignment)
     new_assignment[:assignment_nature] = assignment_nature
-    new_assignment[:assignment_id]     = assignment_id
     new_assignment[:assignment_status] = ASSIGNED
     new_assignment[:effective_on]      = to_assignment.effective_on
     new_assignment[:recorded_by]       = recorded_by
@@ -97,14 +96,13 @@ class LoanAssignment
   # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance, on a specific date
   # 
   def self.get_loans_assigned(to_assignment, on_date=nil)
-    assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)
+    assignment_nature = Resolver.resolve_loan_assignment(to_assignment)
     if ((assignment_nature == Constants::LoanAssignment::ENCUMBERED) and (on_date.nil?))
       raise ArgumentError, "Effective date must be supplied for encumberance"
     end
     loan_assignments = []
     query = {}
     query[:assignment_nature] = assignment_nature
-    query[:assignment_id]     = assignment_id
     query[:effective_on.lte]  = on_date if on_date
     query[:assignment_status] = ASSIGNED
     loan_assignments = all(query)
@@ -116,9 +114,8 @@ class LoanAssignment
     earlier_date, later_date = on_date <= till_date ? [on_date, till_date] : [till_date, on_date]
     loan_assignments = []
     query = {}
-    assignment_nature, assignment_id = Resolver.resolve_loan_assignment(to_assignment)
+    assignment_nature = Resolver.resolve_loan_assignment(to_assignment)
     query[:assignment_nature] = assignment_nature
-    query[:assignment_id]     = assignment_id
     query[:effective_on.gte]  = earlier_date if earlier_date
     query[:effective_on.lte]  = later_date if later_date
     query[:assignment_status] = ASSIGNED

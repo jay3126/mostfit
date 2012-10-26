@@ -24,15 +24,14 @@ module Resolver
     klass_name = for_assignment.class.name
     loan_assignment_type = Constants::LoanAssignment::MODELS_AND_ASSIGNMENTS[klass_name]
     raise ArgumentError, "Unable to recognize a loan assignment that corresponds to the instance #{for_assignment}" unless loan_assignment_type
-    [loan_assignment_type, for_assignment.id]
+    [loan_assignment_type]
   end
 
-  def self.fetch_assignment(by_assignment_type, for_assignment_id)
-    Validators::Arguments.not_nil?(by_assignment_type, for_assignment_id)
+  def self.fetch_assignment(by_assignment_type)
+    Validators::Arguments.not_nil?(by_assignment_type)
     klass_name = Constants::LoanAssignment::ASSIGNMENT_AND_MODELS[by_assignment_type]
     raise ArgumentError, "Unable to recognize a model that corresponds to the loan assignment: #{by_assignment_type}" unless klass_name
     klass = Kernel.const_get(klass_name)
-    klass.get(for_assignment_id)
   end
 
   # Verifies that the object is an instance of known counterparties
