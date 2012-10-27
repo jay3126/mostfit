@@ -60,7 +60,7 @@
       - if funding_line_id
         |
         Funding Line:
-        = FundingLine.get(funding_line_id).name
+        = NewFundingLine.get(funding_line_id).name
       - if securitization_id
         |
         Securitization:
@@ -228,7 +228,7 @@
           - if @report.respond_to?(:funding_line_id)
             %td
               Funding Line:
-              = select(:funding_line_id, :collection => FundingLine.all.map{|fl| [fl.id, fl.name]}, :include_blank => true, :selected => funding_line_id)
+              = select(:funding_line_id, :collection => NewFundingLine.all.map{|fl| [fl.id, fl.name]}, :include_blank => true, :selected => funding_line_id)
           - if @report.respond_to?(:securitization_id)
             %td
               Securitization:
