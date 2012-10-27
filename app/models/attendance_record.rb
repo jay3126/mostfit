@@ -60,6 +60,10 @@ class AttendanceRecord
     all(:at_location => at_location_id, :on_date => on_date)
   end
 
+  def self.get_client_attendance_at_location(at_location_id, on_date)
+    all(:at_location => at_location_id, :on_date => on_date, :counterparty_type => Constants::Transaction::CLIENT)
+  end
+
   def self.get_attendance(at_location_id, counterparty, on_date)
     first(:at_location => at_location_id, :counterparty_type => counterparty.class.name, :counterparty_id => counterparty.id, :on_date => on_date)
   end

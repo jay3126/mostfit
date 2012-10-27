@@ -1,5 +1,5 @@
 - biz_locations = CostCenter.all.map(&:biz_location).compact || []
-- all_locations = BizLocation.all.select{|l| l.location_level.level != 0 && !biz_locations.include?(l)}
+- all_locations = BizLocation.all.select{|l| l.location_level.level == 1 && !biz_locations.include?(l)}
 %table.tall.shaded
   %tr
     %th

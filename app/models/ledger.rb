@@ -159,6 +159,7 @@ class Ledger
         ledger[:opening_balance_effect] = parent_ledger.opening_balance_effect
         ledger[:accounts_chart] = parent_ledger.accounts_chart
         ledger[:ledger_classification] = ledger_classification
+        ledger[:manual_voucher_permitted] = true
         ledger_obj = first_or_create(ledger)
         LocationLink.assign(ledger_obj, parent_ledger)
         AccountingLocation.first_or_create(:product_type => 'ledger', :biz_location_id => location.id, :product_id => ledger_obj.id, :cost_center_id => cost_center_id, :effective_on => open_on_date, :performed_by => performed_by, :recorded_by => recorded_by)

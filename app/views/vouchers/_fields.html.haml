@@ -1,19 +1,24 @@
-%table
+%table.tall
   %tr
-    %td
+    %th
       Date
     %td
       = date_select_for @voucher, :effective_on
   %tr
-    %td
+    %th
       Narration
     %td
       = text_area :narration
   %tr
-    %td
+    %th
       Voucher Type
     %td
       = select :name => 'voucher_type', :collection => Constants::Accounting::VOUCHER_TYPE.map{|t| [t, t.to_s.humanize]}
+  %tr
+    %th
+      Cost Center
+    %td
+      = select :name => "cost_center_id", :collection => choice_facade.get_premitted_cost_centers(session.user.staff_member.id, get_effective_date), :text_method => 'name', :value_method => 'id', :class => 'cost_center'
   - if params[:debit_accounts]
     - params[:debit_accounts].each_with_index do |da, idx|
       = partial "vouchers/account_amount", :account => da, :account_type => :debit_accounts, :last_account => (params[:debit_accounts].length == idx + 1 ? true : false)

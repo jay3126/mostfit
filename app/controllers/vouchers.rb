@@ -45,9 +45,7 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(credit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      credit_biz_location = CostCenter.get(credit_posting["cost_center_id"].to_i).biz_location
-      credit_accounted_at = credit_biz_location.blank? ? nil : credit_biz_location.id
-      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger, credit_accounted_at)
+      postings << PostingInfo.new(money.amount, money.currency, :credit, ledger, nil)
     end
     debit_accounts = params['debit_accounts']
     debit_accounts.each do |debit_posting|
@@ -55,9 +53,7 @@ class Vouchers < Application
       money = MoneyManager.get_money_instance(debit_posting["amount"])
       sum = sum + money
       ledger = Ledger.get(ledger_id)
-      debit_biz_location = CostCenter.get(debit_posting["cost_center_id"].to_i).biz_location
-      debit_accounted_at = debit_biz_location.blank? ? nil : debit_biz_location.id
-      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger, debit_accounted_at)
+      postings << PostingInfo.new(money.amount, money.currency, :debit, ledger, nil)
     end
     accounting_facade = AccountingFacade.new(session.user)
 

@@ -18,7 +18,12 @@ class CostCenter
   end
 
   def get_ledgers(on_date = Date.today)
-    self.accounting_locations(:effective_on.lte => on_date, :product_type => 'ledger').map(&:product)
+    biz_location = self.biz_location
+    if biz_location.blank?
+      self.accounting_locations(:effective_on.lte => on_date, :product_type => 'ledger').map(&:product)
+    else
+      biz_location.accounting_locations(:effective_on.lte => on_date, :product_type => 'ledger').map(&:product)
+    end
   end
 
   def self.setup_cost_centers(nominal_branches = [])

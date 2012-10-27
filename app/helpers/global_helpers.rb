@@ -694,7 +694,8 @@ module Merb
     def select_accounts(name, branch=nil, journal_type=nil, attrs = {})
       branch ||= 0
       collection = []
-      @acc = Ledger.all(:manual_voucher_permitted => true)
+
+      @acc = branch.blank? ? branch.get_ledgers(get_effective_date) : Ledger.all(:manual_voucher_permitted => true)
       @acc.group_by { |a| a.account_type }.sort_by { |at| at.length }.each do |account_type, accounts|
         collection << ['', "#{account_type.to_s}"]
         accounts.sort_by { |a| a.name }.each { |a| collection << [a.id.to_s, "!!!!!!!!!#{a.name}"] }
@@ -704,7 +705,8 @@ module Merb
         :name => name,
         :id => attrs[:id],
         :selected => attrs[:selected],
-        :prompt => (attrs[:prompt] or "&lt;select a account&gt;"))
+        :prompt => (attrs[:prompt] or "Select Account"),
+        :class => attrs[:class])
       html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
     end
 

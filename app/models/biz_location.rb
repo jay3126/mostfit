@@ -28,6 +28,7 @@ class BizLocation
   has n, :bank_branches
   has n, :eod_processes
   has n, :bod_processes
+  has n, :accounting_locations
   has n, :lending_product_locations
   has n, :lending_products, :through => :lending_product_locations
 
@@ -223,17 +224,16 @@ class BizLocation
         grt_centers << center if center_cycle.grt_completed_on == on_date
       end
       total_clients << ClientAdministration.get_clients_administered(center.id, on_date)
-      attendance_record << AttendanceRecord.get_all_recorded_attendance_status_at_location(center.id, on_date)
-      absent_clients << total_clients.select{|client| AttendanceRecord.was_present?(center.id, client, on_date)==false}
+      attendance_record << AttendanceRecord.get_client_attendance_at_location(center.id, on_date)
       payment_collection = get_reporting_facade(user).total_dues_collected_and_collectable_per_location_on_date(self.id, on_date)
       collectable_amt += payment_collection[:schedule_total_due]
       collected_amt += payment_collection[:total_collected]
       overdue_amt += payment_collection[:overdue_amount]
     end
     total_clients = total_clients.flatten.uniq.count
-    attendance_record = attendance_record.flatten.uniq.count
-    absent_clients = total_clients > 0 && attendance_record > 0 ? absent_clients.flatten.uniq.count : 0
-    abs_in_presentage = (absent_clients/total_clients)*100 if total_clients > 0 && attendance_record > 0
+    attendance_record = attendance_record.flatten.uniq
+    absent_clients = attendance_record.select{|s| s.attendance != Constants::User::PRESENT_ATTENDANCE_STATUS }.count
+    abs_in_presentage = (absent_clients/total_clients)*100 if total_clients > 0 && attendance_record.count > 0
     collected_in_persentage = (collected_amt.amount.to_i/collectable_amt.amount.to_i)*100 if collectable_amt > MoneyManager.default_zero_money
     eod[:collection_eod] = {:total_centers => center_locations.flatten.uniq.count, :total_clients => total_clients, :client_absent => absent_clients,
       :client_absent_in_presentage => "#{abs_in_presentage}%", :collectable_amt => collectable_amt, :collected_amt => collected_amt,

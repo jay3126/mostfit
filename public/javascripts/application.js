@@ -834,6 +834,17 @@ function get_all_staff_member_on_location() {
     });
   });
 }
+function get_all_ledgers_on_cost_center() {
+  jQuery('.cost_center').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/cost_centers/ledger_for_selector/"+jQuery(this).val(),
+      success: function(data) {
+        jQuery(".c_ledgers").html(data);
+      }
+    });
+  });
+}
 
 function getAllNominalCenters() {
   jQuery('#parent_selector').change(function() {
@@ -889,7 +900,8 @@ $(document).ready(function(){
   getDateDifference();
   fillFundingLines();
   get_all_location_on_level();
-  get_all_staff_member_on_location()
+  get_all_staff_member_on_location();
+  get_all_ledgers_on_cost_center();
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
