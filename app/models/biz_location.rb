@@ -223,7 +223,7 @@ class BizLocation
         grt_centers << center if center_cycle.grt_completed_on == on_date
       end
       total_clients << ClientAdministration.get_clients_administered(center.id, on_date)
-      attendance_record << ClientAdministration.get_all_recorded_attendance_status_at_location(center.id, on_date)
+      attendance_record << AttendanceRecord.get_all_recorded_attendance_status_at_location(center.id, on_date)
       absent_clients << total_clients.select{|client| AttendanceRecord.was_present?(center.id, client, on_date)==false}
       payment_collection = get_reporting_facade(user).total_dues_collected_and_collectable_per_location_on_date(self.id, on_date)
       collectable_amt += payment_collection[:schedule_total_due]
