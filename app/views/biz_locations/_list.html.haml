@@ -11,6 +11,8 @@
         %th
           Name
         %th
+          Managed By
+        %th
           Location Level
         - unless @biz_location.new?
           %th
@@ -33,6 +35,13 @@
             %td
               = link_to_location biz_location
             %td
+              - manager = LocationManagement.staff_managing_location(biz_location.id, Date.today)
+              - if manager.blank?
+                Not Managed
+              - else
+                - managed_by = StaffMember.get(manager.manager_staff_id)
+                = link_to_with_rights managed_by.name, resource(managed_by)
+            %td
               = biz_location.level_name
             - unless biz_location_link.class == BizLocation
               %td
@@ -45,5 +54,12 @@
                 = link_to_with_rights "Add Client", resource(:new_clients,:new,:biz_location_id => biz_location.id)
                 |
                 = link_to_with_rights "Show Clients", resource(biz_location, :biz_location_clients)
+                - clients_count = ClientAdministration.get_clients_administered(biz_location.id, Date.today)
+                - if clients_count.count > 0
+                  (
+                  = clients_count.count
+                  clients)
+                - else
+                  (0 clients)
               - else
                 = link_to_with_rights "Assign Location", resource(biz_location)

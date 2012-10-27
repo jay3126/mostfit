@@ -2,6 +2,17 @@
 %i
 %b Note: Feilds marked * are compulsory
 %table.tall.shaded
+  - if !@biz_location.nil?
+    %tr
+      %th
+        = LocationLevel.first(:level => 1).name
+      %td
+        = LocationLink.get_parent(@biz_location, Date.today).name
+    %tr
+      %th
+        = LocationLevel.first(:level => 0).name
+      %td
+        = BizLocation.get(@biz_location.id).name
   %tr
     %th
       Group name
