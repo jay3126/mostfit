@@ -230,9 +230,9 @@ class BizLocation
       collected_amt += payment_collection[:total_collected]
       overdue_amt += payment_collection[:overdue_amount]
     end
-    attendance_record = attendance_record.flatten.uniq.count
-    absent_clients = absent_clients.flatten.uniq.count if total_clients > 0 && attendance_record > 0
     total_clients = total_clients.flatten.uniq.count
+    attendance_record = attendance_record.flatten.uniq.count
+    absent_clients = total_clients > 0 && attendance_record > 0 ? absent_clients.flatten.uniq.count : 0
     abs_in_presentage = (absent_clients/total_clients)*100 if total_clients > 0 && attendance_record > 0
     collected_in_persentage = (collected_amt.amount.to_i/collectable_amt.amount.to_i)*100 if collectable_amt > MoneyManager.default_zero_money
     eod[:collection_eod] = {:total_centers => center_locations.flatten.uniq.count, :total_clients => total_clients, :client_absent => absent_clients,
