@@ -649,8 +649,8 @@ function attachCustomTableEvents(){
 
 function confirm_for(things) {
   /* given a hash of ids and values, this function asks a confirmation to proceed if the values of the elements
-     * are not the same as the provided values
-     */
+   * are not the same as the provided values
+   */
   errors = [];
   for (thing in things) {
     if (($('#'+thing).val() != (things[thing] + "")) && $('#' + thing).val() != null) {
@@ -1443,5 +1443,15 @@ function fillFundingLines(){
         $("#tranch_selector").html(data);
       }
     });
+  });
+}
+
+function fillFundingLinesForBulkLoan(obj_id){
+  $.ajax({
+    type: "GET",
+    url: "/new_funders/funding_lines/"+$("#funder_selector_"+obj_id).val(),
+    success: function(data) {
+      $("#tranch_selector_"+obj_id).html(data);
+    }
   });
 }

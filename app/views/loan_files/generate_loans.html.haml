@@ -23,6 +23,15 @@
         %br
 
 - staffmember = [session.user.staff_member]
+- has_default_tranch = is_default_tranch_set?
+- if has_default_tranch
+  - tranch_id = get_default_tranch_id
+  - default_tranch = NewTranch.get(tranch_id)
+  - default_tranch_name = default_tranch.name
+  - default_funding_line = default_tranch.new_funding_line
+  - default_funding_line_name = default_funding_line.name
+  - default_funder = default_funding_line.new_funder.name
+
 %h1
   Loan entry for
   = @center.name
@@ -55,13 +64,13 @@
           = select :name => "loan[applied_by_staff_id]", :collection => staffmember, :value_method => :id, :text_method => :name, :class => 'chosen'
 
   %h2 Choose clients
-  - if Funder.count == 0 and session.user.role == :operator
+  - if NewFunder.count == 0 and session.user.role == :operator
     = "You do not have any <b>Funder</b> created yet. Create them"
-    = link_to("here", resource(:funders, :new))
+    = link_to("here", resource(:new_funders, :new))
   %br
-  - if FundingLine.count == 0 and session.user.role == :operator
+  - if NewFundingLine.count == 0 and session.user.role == :operator
     = "You do not have any <b>Funding Line</b> created yet. Create them"
-    = link_to("here", resource(:funders))
+    = link_to("here", resource(:new_funders))
   %table.report.nojs
     %tr
       %th
@@ -112,11 +121,23 @@
               - la = @loan_file.loan_applications(:client_id => client.id).first
               = la.loan_money_amount
             %td
-              = Funder.first.funding_lines.first.name rescue "<b> Not created </b>"
-              = hidden_field :name => "funding_line_id[#{client.id}]", :value => Funder.first.funding_lines.first.id rescue nil
+              - if (NewFunder.count == 0 || NewFundingLine.count == 0) && session.user.role == :operator
+                %i No Funder or Funding Line created.
+                = link_to("Create", resource(:new_funders))
+              - elsif has_default_tranch
+                = default_funding_line_name
+                = hidden_field :name => "funding_line_id[#{client.id}]", :value => default_funding_line.id
+              - else
+                = select :name => "funding_line_id[#{client.id}]", :collection => select_fundling_lines, :id => "funder_selector_#{client.id}", :onchange => "fillFundingLinesForBulkLoan('#{client.id}')", :prompt => "Select funding line"
             %td
-              = Funder.first.funding_lines.first.tranches.first.name rescue "<b> Not created </b>"
-              = hidden_field :name => "tranch_id[#{client.id}]", :value => Funder.first.funding_lines.first.tranches.first.id rescue nil
+              - if NewTranch.count == 0 && session.user.role == :operator
+                %i No Tranch created.
+                = link_to("Create", resource(:new_funders))
+              - elsif has_default_tranch
+                = default_tranch_name
+                = hidden_field :name => "tranch_id[#{client.id}]", :value => default_tranch.id
+              - else
+                = select :name => "tranch_id[#{client.id}]", :id => "tranch_selector_#{client.id}"
             %td
               - selected_loan_product = params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:loan_product_id] ? params[:clients]["#{client.id}"][:loan_product_id] : nil
               = select :name => "clients[#{client.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(la.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
