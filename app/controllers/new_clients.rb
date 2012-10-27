@@ -88,9 +88,9 @@ class NewClients < Application
         @client_new = Client.create_client(fields, biz_location_id, parent_biz_location.id)
 
         if @client_new.new?
-          @message = {:error => "Client creation fail"}
+          @message = {:error => "Client creation failed"}
         else
-          @message = {:notice => "Client created successfully"}
+          @message = {:notice => "Client: '#{@client_new.name} (Id: #{@client_new.id})' created successfully"}
         
         end
       rescue => ex
@@ -169,7 +169,7 @@ class NewClients < Application
     if @message[:error].blank?
       begin
         if @client.save
-          @message = {:notice => "Client updated successfully"}
+          @message = {:notice => "Client: '#{@client.name} (#{@client.id})' updated successfully"}
         else
           @message = { :error => @client.errors.collect{|error| error}.flatten.join(', ')}
         end

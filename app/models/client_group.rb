@@ -20,12 +20,15 @@ class ClientGroup
 
   validates_is_unique :name, :scope => :biz_location_id
   validates_is_unique :code, :scope => :biz_location_id
+  belongs_to :upload, :nullable => true
 
-  # def self.from_csv(row, headers)
-  #   center = Center.first(:code => row[headers[:center_code]])
-  #   obj    = new(:name => row[headers[:name]], :center_id => center.id, :code => row[headers[:code]], :upload_id => row[headers[:upload_id]])
-  #   [obj.save, obj]
-  # end
+  def self.from_csv(row, headers)
+    biz_location = BizLocation.first(:name => row[headers[:center]])
+    obj    = new(:name => row[headers[:name]], :biz_location_id => biz_location.id, :code => row[headers[:code]],
+                 :number_of_members => row[headers[:number_of_members]], :created_by_staff_member_id => User.first.staff_member.id,
+                 :creation_date => row[headers[:creation_date]], :upload_id => row[headers[:upload_id]])
+    [obj.save, obj]
+  end
 
   def self.search(q, per_page=10)
     if /^\d+$/.match(q)

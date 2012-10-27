@@ -39,24 +39,32 @@
     %td= @client.spouse_name
   %tr.even
     %th.even Manager
-    %td= @client_admin.performed_by_staff
+    %td= link_to_with_rights @client_admin.performed_by_staff.name, url(:controller => :staff_members, :action => :show, :id => @client_admin.performed_by_staff.id)
   %tr.odd
-    %th.odd At Location
-    %td=link_to @biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @biz_location.id)
+    %th.odd= LocationLevel.first(:level => 1).name
+    %td= link_to_with_rights at_branch.name, url(:controller => :user_locations, :action => :show, :id => at_branch.id)
   %tr.even
-    %th.even Group
-    %td= @client.client_group.name unless @client.client_group.blank?
+    %th.even
+      = LocationLevel.first(:level => 0).name
+    %td= link_to_with_rights at_center.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => at_center.id)
   %tr.odd
-    %th.odd Occupation
+    %th.odd Group
+    %td
+      - if @client.client_group.blank?
+        Not Attached to any group
+      - else
+        = link_to_with_rights @client.client_group.name, url(:controller => :client_groups, :action => :show, :id => @client.client_group.id)
+  %tr.even
+    %th.even Occupation
     %td= @client.occupation.name unless @client.occupation.blank?
-  %tr.even
-    %th.even Priority Sector List
-    %td= @client.priority_sector_list.name if @client.priority_sector_list
   %tr.odd
-    %th.odd PSL Sub-category
+    %th.odd Priority Sector List
+    %td= @client.priority_sector_list.name if @client.priority_sector_list
+  %tr.even
+    %th.even PSL Sub-category
     %td= @client.psl_sub_category.name if @client.psl_sub_category
   - if client_active
-    %tr.even
+    %tr.odd
       %td
         = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
 %div.tab_container.shaded
