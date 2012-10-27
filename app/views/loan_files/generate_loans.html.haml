@@ -40,7 +40,6 @@
 
 = form :action => url(:controller => :loan_files, :action => :generate_loans, :class => "_disable_button_", :id => @loan_file.id) do
   = hidden_field :name => :center_id, :value => @center.id
-  -# params[:loan] ||= Nothing
   .menu-strip{:style => "width:100%; text-align: left;"}
     %table
       %tr
@@ -64,13 +63,6 @@
           = select :name => "loan[applied_by_staff_id]", :collection => staffmember, :value_method => :id, :text_method => :name, :class => 'chosen'
 
   %h2 Choose clients
-  - if NewFunder.count == 0 and session.user.role == :operator
-    = "You do not have any <b>Funder</b> created yet. Create them"
-    = link_to("here", resource(:new_funders, :new))
-  %br
-  - if NewFundingLine.count == 0 and session.user.role == :operator
-    = "You do not have any <b>Funding Line</b> created yet. Create them"
-    = link_to("here", resource(:new_funders))
   %table.report.nojs
     %tr
       %th
