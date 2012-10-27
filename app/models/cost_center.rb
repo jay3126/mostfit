@@ -26,6 +26,11 @@ class CostCenter
     end
   end
 
+  def get_vouchers(on_date = Date.today)
+    ledgers = self.get_ledgers(on_date)
+    ledgers.blank? ? [] : ledgers.map{|l| l.ledger_postings.voucher}
+  end
+
   def self.setup_cost_centers(nominal_branches = [])
     first_or_create(:name => DEFAULT_HEAD_OFFICE_COST_CENTER_NAME)
     nominal_branches.each { |branch_id|

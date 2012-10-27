@@ -44,7 +44,8 @@
       - if managed_by.blank?
         Not Managed
       - else
-        = link_to_with_rights managed_by.name, url(:controller => :staff_members, :action => :show, :id => managed_by.id)
+        - staff_member = managed_by.manager_staff_member
+        = link_to_with_rights staff_member.name, url(:controller => :staff_members, :action => :show, :id => staff_member.id)
   %tr.odd
     %th.odd= LocationLevel.first(:level => 1).name
     %td= link_to_with_rights at_branch.name, url(:controller => :user_locations, :action => :show, :id => at_branch.id)
