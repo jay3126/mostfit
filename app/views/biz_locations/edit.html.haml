@@ -74,7 +74,7 @@
           Assign New Loan Product
         %td
           = select :name => 'new_lending_product_ids', :collection => unassign_lending_products, :text_method => :name, :value_method => :id, :prompt => "Select Loan Product ", :class => 'multiple'
-    - if @biz_location.location_level.level == 0
+    - if @biz_location.location_level.level == 0 and @biz_location.new?
       %tr{:class => 'center_meeting_div'}
         %td
           Create Meeting Schedule
