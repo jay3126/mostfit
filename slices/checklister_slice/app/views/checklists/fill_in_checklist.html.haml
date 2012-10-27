@@ -51,7 +51,7 @@
               = label "Client telephone number"
             %td
               - if client_phone_number.blank?
-                = text_field :telephone_number
+                = text_field :telephone_number, :class => 'text_phone_no'
               - else
                 = text_field :phone_number, :value => client_phone_number, :class => 'text_phone_no'
             %td
