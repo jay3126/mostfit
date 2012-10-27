@@ -1,10 +1,10 @@
 %table{:width => '100%'}
   %tr
     - if @cost_center
-      - ledgers, account_balances = @cost_center.get_sum_of_balances_cost_center(Date.today, @course_product)
+      - ledgers = @cost_center.get_ledgers(get_effective_date)
       - ledgers_by_type = ledgers.group_by {|l| l.account_type}
     - else
-      - ledgers, account_balances = []
+      - ledgers
     - for account_type in Constants::Accounting::ACCOUNT_TYPES
       - ledgers = ledgers_by_type[account_type] if ledgers_by_type
       %td
@@ -13,12 +13,11 @@
             %th{:style => "text-align: left;"}
               %h1
                 = account_type.to_s.humanize
-              = account_balances.blank? ? '' : account_balances[account_type]
           - if ledgers
             - ledgers.each do |ledger|
               %tr
                 %td
-                  = link_to_with_rights "#{ledger.name}(#{ledger.balance(Date.today, @cost_center.id)})", resource(ledger, :cost_center_id => @cost_center.id)
+                  = link_to_with_rights "#{ledger.name}", resource(ledger, :cost_center_id => @cost_center.id)
           - else
             %tr
               %td

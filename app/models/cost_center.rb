@@ -18,7 +18,7 @@ class CostCenter
   end
 
   def get_ledgers(on_date = Date.today)
-    self.accounting_locations(:effective_on.glt => on_date, :product_type => 'Ledger').map(&:ledger)
+    self.accounting_locations(:effective_on.lte => on_date, :product_type => 'ledger').map(&:product)
   end
 
   def self.setup_cost_centers(nominal_branches = [])

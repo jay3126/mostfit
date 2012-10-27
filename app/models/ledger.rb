@@ -90,9 +90,10 @@ class Ledger
       opening_balance_effect = DEFAULT_EFFECTS_BY_TYPE[type_sym]
       ledgers.each { |account_name|
         classification = DEFAULT_LEDGERS.index(account_name)
-        ledger_classification = LedgerClassification.resolve(classification)
+        ledger_classification = classification.blank? ? '' : LedgerClassification.resolve(classification)
+        ledger_classification_id = ledger_classification.blank? ? nil : ledger_classification.id
         ledger = Ledger.first_or_create(:name => account_name, :account_type => type_sym, :open_on => open_on, :manual_voucher_permitted => true,
-          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart, :ledger_classification => ledger_classification)
+          :opening_balance_amount => opening_balance_amount, :opening_balance_currency => opening_balance_currency, :opening_balance_effect => opening_balance_effect, :accounts_chart => chart, :ledger_classification_id => ledger_classification_id)
         AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :cost_center => cost_center, :effective_on => Date.today, :performed_by => performed_by, :recorded_by => recorded_by)
       }
     }
