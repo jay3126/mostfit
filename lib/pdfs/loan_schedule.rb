@@ -221,9 +221,6 @@ module Pdf
       pdf = PDF::Writer.new(:orientation => :portrait, :paper => "A4")
       pdf.select_font "Times-Roman"
       return nil if lendings.blank?
-      pdf.text "Suryoday Microfinance (P) Ltd.", :font_size => 18, :justification => :center
-      pdf.text "Disbursed Loan Receipt", :font_size => 16, :justification => :center
-      pdf.text("\n")
       lendings            = location_facade.get_loans_administered(self.id, on_date).compact
       lendings.each do |la|
         pdf.text('Receipt', :font_size => 14, :justification => :center)
@@ -397,7 +394,7 @@ module Pdf
           members  += lendings.count unless lendings.blank?
         end
 
-        table.data.push({"S. No."=>"Total", "  " => 'X', "No. of Members" => members, "Total" =>  tot_amount.to_s})
+        table.data.push({"S. No."=>"Total", "  " => '', "No. of Members" => '', "Total" =>  tot_amount.to_s})
         table.column_order  = ["S. No.", "Loan Type", "Charges", '  ', "No. of Members", "Total"]
         table.show_lines    = :all
         table.shade_rows    = :none
