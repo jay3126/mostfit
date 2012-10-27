@@ -501,11 +501,11 @@ class NewClients < Application
           client_hash[:family_income] = params[:family_income][client_id]
           client_hash[:telephone_type] = params[:telephone_type][client_id]
           client_hash[:religion] = params[:religion][client_id]
-          client_hash[:occupation_id] = params[:occupation_id][client_id]
-          client_hash[:psl_sub_category_id] = params[:psl_sub_category_id][client_id]
+          client_hash[:occupation_id] = params[:occupation_id][client_id] rescue ""
+          client_hash[:psl_sub_category_id] = params[:psl_sub_category_id][client_id] rescue ""
           client_hash[:spouse_name] = params[:spouse_name][client_id]
           client_hash[:guarantor_dob] = params[:guarantor_dob][client_id]
-          client_hash[:priority_sector_list_id] = params[:priority_sector_list_id][client_id]
+          client_hash[:priority_sector_list_id] = params[:priority_sector_list_id][client_id] rescue ""
           client_hash[:telephone_number] = params[:telephone_number][client_id]
           client = Client.get client_id
           client.update_client_details_in_bulk(client_hash)
