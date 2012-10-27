@@ -165,6 +165,8 @@ class Lendings < Application
     reason_id          = params[:reason]
     remarks            = params[:remarks]
     recorded_by        = session.user.id
+    cheque_number      = params[:cheque_number]
+    disbursement_mode  = params[:disbursement_mode]
     
 
     @message[:error] << "Please select Staff Member" if disbursed_by_staff.blank?
@@ -172,6 +174,7 @@ class Lendings < Application
     @message[:error] << "Please select Reason" if params[:submit] == 'Reject' && reason_id.blank?
     @message[:error] << "Remarks cannot be blank" if params[:submit] == 'Reject' && remarks.blank?
     @message[:error] << "Please select loans for Disburse or Reject" if lending_params.values.select{|l| l[:disburse]}.count <= 0
+    @message[:error] << "Please select cheque number as Disbursement mode choosen is Cheque" if (disbursement_mode == "Cheque" and cheque_number == "Not Specified")
     
     if @message[:error].blank?
       begin
@@ -182,6 +185,8 @@ class Lendings < Application
             lending.disbursed_amount   = disbursed_amount.amount
             lending.disbursed_by_staff = disbursed_by_staff
             lending.disbursal_date     = disbursal_date
+            lending.cheque_number      = cheque_number
+            lending.disbursement_mode  = disbursement_mode
             if lending.valid?
               lendings << lending
             else
@@ -199,6 +204,12 @@ class Lendings < Application
               fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
               fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
               fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
+
+              #this method will update the cheque leaf as used if disbursement mode is Cheque.
+              if ((disbursement_mode == "Cheque") and (not cheque_number == "Not Specified"))
+                ChequeLeaf.mark_cheque_leaf_as_used(cheque_number.to_i)
+              end
+
               payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
               fee_instances.each do |fee_instance|
                 payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,'','lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)

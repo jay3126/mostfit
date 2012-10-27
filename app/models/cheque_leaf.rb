@@ -15,4 +15,10 @@ class ChequeLeaf
 
   belongs_to :cheque_book
 
+  def self.mark_cheque_leaf_as_used(cheque_number)
+    cl = ChequeLeaf.first(:serial_number => cheque_number)
+    cl.used = true
+    cl.save!
+  end
+
 end

@@ -70,7 +70,7 @@
           %td
             = select :name => :disbursement_mode, :collection => Constants::Loan::DISBURSEMENT_MODES
           %td
-            = select :name => :cheque_number, :collection => ["Not Specified"] + ChequeLeaf.all(:biz_location_id => params[:parent_location_id]).map{|cl| [cl.id, cl.serial_number]}
+            = select :name => :cheque_number, :collection => ["Not Specified"] + ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false).map{|cl| [cl.serial_number]}
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
