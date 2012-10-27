@@ -510,6 +510,20 @@ class LoanApplication
     #    end
   end
 
+  def self.is_center_eligible_for_cgt_grt?(branch, center)
+    center_wise_loan_applications = LoanApplication.all(:at_branch_id => branch, :at_center_id => center)
+    status_array = center_wise_loan_applications.aggregate(:status)
+    must_not = ["1", "2", "3", "6", "7", "8", "9", "12", "14"]
+    result = status_array & must_not
+    if status_array.blank?
+      return [false, "There are no loan applications created under this center"]
+    elsif !result.compact.blank?
+      return [false, "CGT, GRT can only be performed if all loan applications for this center cycle is done with CPV2 Process"]
+    else
+      return true
+    end
+  end
+
   #returns an object containing all information about a Loan Application
   def to_info
     authorization_info = self.loan_authorization ? self.loan_authorization.to_info : nil
@@ -676,20 +690,6 @@ class LoanApplication
 
   def self.search(search_options = {})
     all(search_options).collect{|lap| lap.to_info}
-  end
-
-  def self.is_center_eligible_for_cgt_grt?(branch, center)
-    center_wise_loan_applications = LoanApplication.all(:at_branch_id => branch, :at_center_id => center)
-    status_array = center_wise_loan_applications.aggregate(:status)
-    must_not = ["1", "2", "3", "6", "7", "8", "9", "12", "14"]
-    result = status_array & must_not
-    if status_array.blank?
-      return [false, "There are no loan applications created under this center"]
-    elsif result.compact.blank?
-      return [false, "CGT, GRT can only be performed if all loan applications for this center cycle is done with CPV2 Process"]
-    else
-      return true
-    end
   end
 
 end
