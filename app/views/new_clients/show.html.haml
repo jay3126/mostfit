@@ -1,5 +1,6 @@
 - at_branch = BizLocation.get(@client_admin.registered_at) rescue nil
 - at_center = BizLocation.get(@client_admin.administered_at) rescue nil
+- managed_by = LocationManagement.staff_managing_location(at_center.id, get_effective_date)
 - client_active = client_facade.is_client_active?(@client)
 
 %br
@@ -39,7 +40,11 @@
     %td= @client.spouse_name
   %tr.even
     %th.even Manager
-    %td= link_to_with_rights @client_admin.performed_by_staff.name, url(:controller => :staff_members, :action => :show, :id => @client_admin.performed_by_staff.id)
+    %td
+      - if managed_by.blank?
+        Not Managed
+      - else
+        = link_to_with_rights managed_by.name, url(:controller => :staff_members, :action => :show, :id => managed_by.id)
   %tr.odd
     %th.odd= LocationLevel.first(:level => 1).name
     %td= link_to_with_rights at_branch.name, url(:controller => :user_locations, :action => :show, :id => at_branch.id)
