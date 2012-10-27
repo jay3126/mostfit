@@ -271,13 +271,13 @@ class NewClients < Application
     client = Client.get(params[:id])
     client.telephone_number = params[:phone_number]
     default_text = "<div style='margin-top: 0pt; float: right;', onclick="+"jQuery('div.flash').remove();"+"><a class='closeNotice' href='#'>[X]</a></div>"
-    error = "Client Phone Number is not valid format" if params[:phone_number].to_i <= 0 || params[:phone_number].size > 14
+    error = "Client Phone Number is not valid format" if params[:phone_number].to_i <= 0 || params[:phone_number].size > 14 || params[:phone_number] != params[:phone_number].to_i.to_s
     if error.blank?
-    if client.save
-      message = "<div class='flash notice'>#{default_text}Client Phone Number Updated</div>"
-    else
-      message = "<div class='flash error'>#{default_text}#{client.errors.first.join('<br>')}</div>"
-    end
+      if client.save
+        message = "<div class='flash notice'><b>#{default_text}Client Phone Number Updated<b></div>"
+      else
+        message = "<div class='flash error'>#{default_text}#{client.errors.first.join('<br>')}</div>"
+      end
     else
       message = "<div class='flash error'>#{error}</div>"
     end
@@ -475,7 +475,7 @@ class NewClients < Application
         rescue => ex
           @errors << "An error has occured #{ex.message}"
         end
-      end 
+      end
     end
     redirect resource(:new_clients, :all_deceased_clients)
   end
@@ -517,15 +517,16 @@ class NewClients < Application
         end
       end
     end
+  end
     
-    # REDIRECT
-    redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{params[:loan_file_id]}"), :message => message
-  end
+  # REDIRECT
+  redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{params[:loan_file_id]}"), :message => message
+end
 
-  def client_attendance
-    @client = Client.get params[:id]
-    @attendances = @client.attendance_records
-    partial 'new_clients/client_attendances'
-  end
+def client_attendance
+  @client = Client.get params[:id]
+  @attendances = @client.attendance_records
+  partial 'new_clients/client_attendances'
+end
 
 end
