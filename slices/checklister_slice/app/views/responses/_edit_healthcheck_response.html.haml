@@ -67,9 +67,7 @@
                     -if checkpoint_filling.nil?
                       Not Attempted
                     -else
-                      -#- debugger
                       =check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>checkpoint_filling.status?,:disabled=>false
-                      -#=check_box :name=>checkpoint_filling.id,:boolean=>true,:checked=>(params["#{checkpoint_filling.status?}".to_sym.to_i == 1]) ? ':checked' : nil,:disabled=>true
                 -if !checkboxpoint.nil?
                   %tr
                     %td
@@ -85,7 +83,7 @@
 
                           =" #{free_text.name}"
 
-                      -free_text_filling=FreeTextFilling.all(:free_text_id=>free_text.id,:response_id=>@response.id).first
+                      -free_text_filling=FreeTextFilling.first(:free_text_id=>free_text.id,:response_id=>@response.id)
                       -if free_text_filling.nil?
                         -@comment="----NA----"
                       -else

@@ -240,15 +240,12 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
         #save all the free texts
         section.free_texts.each do |free_text|
-          if !params["free_text_#{free_text.id}".to_sym].blank?
-            if @checklist_type.is_hc_checklist?
-              @free_text_filling=free_text.free_text_fillings.first(:response_id => @response.id)
-              if @free_text_filling.blank?
-                @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
-              end
-            else
-              @free_text_filling=free_text.free_text_fillings.create!(:comment => params["free_text_#{free_text.id}".to_sym], :response_id => @response.id)
-            end
+          @free_text_filling=free_text.free_text_fillings.first(:response_id => @response.id)
+          comment_value = params["free_text_#{free_text.id}".to_sym].blank? ? '' : params["free_text_#{free_text.id}".to_sym]
+          if @free_text_filling.blank?
+            @free_text_filling=free_text.free_text_fillings.create!(:comment => comment_value, :response_id => @response.id)
+          else
+            @free_text_filling=free_text.free_text_fillings.update(:comment => comment_value)
           end
         end
 
