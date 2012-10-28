@@ -110,5 +110,11 @@
               = text_area :name => 'remarks', :rows => 6, :cols => 20
     = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
     = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
+    %br
     = submit "Approve"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
     = submit "Reject"
+    %br

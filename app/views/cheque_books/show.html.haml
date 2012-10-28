@@ -43,7 +43,9 @@
           %td
             - if cheque_leaf.valid == true && cheque_leaf.used == false
               = link_to_with_rights '(Mark Invalid)', url(:controller => :cheque_leaves, :action => :mark_invalid, :id => cheque_leaf.id)
-            - else
+            - elsif cheque_leaf.valid == true && cheque_leaf.used == true
+              = "-"
+            - elsif cheque_leaf.valid == false && cheque_leaf.used == false
               = link_to_with_rights '(Mark Valid)', url(:controller => :cheque_leaves, :action => :mark_valid, :id => cheque_leaf.id)
           %td
             - if cheque_leaf.used == false

@@ -78,7 +78,7 @@ class Lendings < Application
         if @lending.new?
           @message[:error] << @lending.error.first.join("<br>")
         else
-          @message[:notice] = "Lending created successfully"
+          @message[:notice] = "Loan (Id: @lending.id) created successfully"
         end
       rescue => ex
         @message[:error] << "An error has occured: #{ex.message}"
@@ -167,14 +167,16 @@ class Lendings < Application
     recorded_by        = session.user.id
     cheque_number      = params[:cheque_number]
     disbursement_mode  = params[:disbursement_mode]
-    
 
     @message[:error] << "Please select Staff Member" if disbursed_by_staff.blank?
     @message[:error] << "Disbursal Date cannot blank" if disbursal_date.blank?
     @message[:error] << "Please select Reason" if params[:submit] == 'Reject' && reason_id.blank?
     @message[:error] << "Remarks cannot be blank" if params[:submit] == 'Reject' && remarks.blank?
     @message[:error] << "Please select loans for Disburse or Reject" if lending_params.values.select{|l| l[:disburse]}.count <= 0
+    @message[:error] << "Please select Disbursement Mode" if (disbursement_mode == "Not Specified")
+    @message[:error] << "Cheque Number can only be choosen if Disbursement Mode selected is Cheque" if ((disbursement_mode == "Not Specified" or disbursement_mode == "Cash") and cheque_number != "Not Specified")
     @message[:error] << "Please select cheque number as Disbursement mode choosen is Cheque" if (disbursement_mode == "Cheque" and cheque_number == "Not Specified")
+    
     
     if @message[:error].blank?
       begin
@@ -185,8 +187,8 @@ class Lendings < Application
             lending.disbursed_amount   = disbursed_amount.amount
             lending.disbursed_by_staff = disbursed_by_staff
             lending.disbursal_date     = disbursal_date
-            lending.cheque_number      = cheque_number
-            lending.disbursement_mode  = disbursement_mode
+            lending.cheque_number      = cheque_number if (cheque_number != "Not Specified" and disbursement_mode == "Cheque")
+            lending.disbursement_mode  = disbursement_mode if (disbursement_mode != "Not Specified")
             if lending.valid?
               lendings << lending
             else
@@ -222,7 +224,7 @@ class Lendings < Application
         @message[:error] << "An error has occured: #{ex.message}"
       end
     end
-    @message = {:notice => "Loan #{params[:submit].downcase}ed successfully."} if @message[:error].blank?
+    @message = {:notice => "Loan #{params[:submit].downcase}d successfully."} if @message[:error].blank?
     @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
     redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]) , :message => @message
   end
