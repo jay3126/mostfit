@@ -28,7 +28,8 @@ class CostCenter
 
   def get_vouchers(on_date = Date.today)
     ledgers = self.get_ledgers(on_date)
-    ledgers.blank? ? [] : ledgers.map{|l| l.ledger_postings.voucher}
+    vouchers = ledgers.blank? ? [] : ledgers.map{|l| l.ledger_postings(:effective_on => on_date).voucher}
+    vouchers.blank? ? [] : vouchers.flatten.uniq.compact
   end
 
   def self.setup_cost_centers(nominal_branches = [])

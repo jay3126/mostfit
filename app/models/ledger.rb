@@ -104,7 +104,8 @@ class Ledger
     recorded_by = User.first.id
     performed_by = User.first.staff_member.id
     client = Client.get(with_accounts_chart.counterparty_id)
-    biz_location = get_client_facade(User.first).get_administration_on_date(client)
+    client_admin = get_client_facade(User.first).get_administration_on_date(client, open_on_date)
+    biz_location = client_admin.blank? ? nil : client_admin.administered_at_location
     PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
       ledger_classification = LedgerClassification.resolve(product_ledger_type)
 

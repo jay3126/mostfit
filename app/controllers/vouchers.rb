@@ -7,8 +7,8 @@ class Vouchers < Application
 
     cost_center_id_str = params[:cost_center_id]
     @cost_center_id = (cost_center_id_str and !cost_center_id_str.empty?) ? cost_center_id_str.to_i : nil
-
-    @vouchers = @on_date ? Voucher.find_by_date_and_cost_center(@on_date, @cost_center_id) : []
+    @cost_center = CostCenter.get(@cost_center_id) unless @cost_center_id.blank?
+    @vouchers = @cost_center.blank? ? Voucher.find_by_date_and_cost_center(@on_date, @cost_center_id) : @cost_center.get_vouchers(@on_date)
     display @vouchers, :layout => layout?
   end
 
