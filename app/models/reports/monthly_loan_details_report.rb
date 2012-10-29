@@ -126,7 +126,7 @@ class MonthlyLoanDetailsReport < Report
       ro_name                    = managed_by_staff(center.id, Date.today)
       status_date                = loan.loan_status_changes(:to_status => LoanLifeCycle::REPAID_LOAN_STATUS).first
       loan_closure_date          = status_date.blank? ? 'Not Forclosure' : status_date.effective_on
-      source_of_fund_id          = FundingLine.get(FundingLineAddition.first(:lending_id => loan.id).funding_line_id).name
+      source_of_fund_id          = NewFundingLine.get(FundingLineAddition.first(:lending_id => loan.id).funding_line_id).name
       meeting_address            = center.biz_location_address
 
       data[loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
