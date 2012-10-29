@@ -376,8 +376,7 @@ class NewClients < Application
     if @errors.blank?
       begin
         is_saved = DeathEvent.save_death_event(deceased_name, relationship_to_client, date_of_death_str, reported_on_str, reported_on, recorded_by, reported_by, client_id)
-        client_facade.mark_client_as_inactive(@client)
-        message = {:notice => "Death event successfully registered and Client is also marked as Inactive"} if is_saved
+        message = {:notice => "Death event successfully registered"} if is_saved
       rescue => ex
         @errors << "An error has occured: #{ex.message}"
       end
@@ -436,7 +435,7 @@ class NewClients < Application
     if @errors.blank?
       begin
         InsuranceClaim.file_insurance_claim_for_death_event(death_event, claim_status, on_insurance_policy, filed_on_date_str, accounted_at_id, performed_by_id, recorded_by_id)
-        message = {:notice => "Successfully saved insurance"}
+        message = {:notice => "Successfully saved insuranc claim"}
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
       end
@@ -471,6 +470,8 @@ class NewClients < Application
         begin
           client = Client.get client_id
           claim_document_recieved_on = params[:document_recieved_on]["#{client_id}"]
+          is_client_died = client_facade.death_event_filed_for(client) == "Client"
+          client_facade.mark_client_as_inactive(client) if is_client_died
           client_facade.mark_client_documents_recieved(client, recieved_by, claim_document_recieved_on)
         rescue => ex
           @errors << "An error has occured #{ex.message}"
