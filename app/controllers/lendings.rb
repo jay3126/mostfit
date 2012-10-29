@@ -78,7 +78,7 @@ class Lendings < Application
         if @lending.new?
           @message[:error] << @lending.error.first.join("<br>")
         else
-          @message[:notice] = "Loan (Id: @lending.id) created successfully"
+          @message[:notice] = "Loan (Id: #{@lending.id}) created successfully"
         end
       rescue => ex
         @message[:error] << "An error has occured: #{ex.message}"
