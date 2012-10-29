@@ -56,7 +56,7 @@ class LoanExtractForSourceOfFundDetails < Report
       center = BizLocation.get(loan.administered_at_origin)
       center_name = center ? center.name : "Not Specified"
       funding_line = FundingLineAddition.all(:lending_id => loan.id).aggregate(:funding_line_id)
-      source_of_fund = (funding_line and (not funding_line.nil?)) ? FundingLine.get(funding_line).name : "Not SPecified"
+      source_of_fund = (funding_line and (not funding_line.nil?)) ? NewFundingLine.get(funding_line).name : "Not SPecified"
       pos = loan.scheduled_principal_outstanding(@to_date)
       overdue = reporting_facade.overdue_amounts(loan.id, @to_date)
       principal_overdue = overdue[:principal_overdue_amount]
