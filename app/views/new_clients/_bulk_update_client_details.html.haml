@@ -108,7 +108,8 @@
                 = select :name => "priority_sector_list_id[#{client_id}]", :collection => PrioritySectorList.all.collect{|ps| [ps.id, ps.name]}, :id => "psl_selector_#{client_id}", :prompt => "select", :selected => client.priority_sector_list_id.to_s, :onchange => "fillPslSubCategoriesBulkClient(#{client_id})"
               %td
                 - psl_sub_category_collection, psl_sub_category_selected = client.client_psl_sub_category_list
-                = select :name => "psl_sub_category_id[#{client_id}]", :collection => psl_sub_category_collection.each {|sub_psl| [sub_psl.id, sub_psl.name]}, :value_method => :id, :text_method => :name, :id => "psl_sub_category_selector_#{client_id}", :selected => client.psl_sub_category_id.to_s
+                - psl_sub_category_collection_mapped = psl_sub_category_collection.blank? ? psl_sub_category_collection : psl_sub_category_collection.each {|sub_psl| [sub_psl.id, sub_psl.name]}
+                = select :name => "psl_sub_category_id[#{client_id}]", :collection => psl_sub_category_collection_mapped, :value_method => :id, :text_method => :name, :id => "psl_sub_category_selector_#{client_id}", :selected => client.psl_sub_category_id.to_s
               %td
                 = select :name => "caste[#{client_id}]", :collection => Constants::Masters::CASTE_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}, :selected => client.caste.to_s
               %td
