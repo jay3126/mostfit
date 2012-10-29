@@ -14,7 +14,12 @@ class LedgerClassification
 
   # The account type followed by the account purpose
   def to_s
-    "#{self.account_type}: #{self.account_purpose}"
+    "#{self.account_type.humanize}: #{self.account_purpose.humanize}"
+  end
+
+    # The account type followed by the account purpose
+  def to_name
+    "#{self.account_type.humanize}: #{self.account_purpose.to_s.split('customer_').last.humanize}"
   end
 
   # Setup the default ledger classifications

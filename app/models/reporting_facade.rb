@@ -621,8 +621,15 @@ class ReportingFacade < StandardFacade
     outstanding_loans_exceeding_days_past_due(by_number_of_days, accounted_at, administered_at)
   end
 
-  def all_accrual_transactions_recorded_on_date(on_date)
-    AccrualTransaction.all(:created_at.gt => on_date, :created_at.lt => (on_date + 1))
+  def all_accrual_transactions_recorded_on_date(on_date, loan_id = nil)
+    search = {}
+    search[:created_at.gt] = on_date
+    search[:created_at.lt] = (on_date + 1)
+    unless loan_id.blank?
+      search[:on_product_type] = :lending
+      search[:on_product_id] = loan_id
+    end
+    AccrualTransaction.all(search)
   end
 
   #this function gives back the total amount paid towards written-off status for loan.

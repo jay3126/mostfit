@@ -106,7 +106,10 @@ class Ledger
     client = Client.get(with_accounts_chart.counterparty_id)
     client_admin = get_client_facade(User.first).get_administration_on_date(client, open_on_date)
     biz_location = client_admin.blank? ? nil : client_admin.administered_at_location
+    parent_location = LocationLink.get_parent(biz_location, open_on_date)
+    parent_ledgers = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product).flatten.compact
     PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
+      ledgers_size = Ledger.all.count
       ledger_classification = LedgerClassification.resolve(product_ledger_type)
 
       ledger_is_product_specific = ledger_classification.is_product_specific?
@@ -132,8 +135,13 @@ class Ledger
       ledger[:ledger_assignment] = ledger_assignment
       product_ledger = first_or_create(ledger)
       raise Errors::DataError, product_ledger.errors.first.first if product_ledger.id.nil?
+      parent_ledgers = parent_ledgers.uniq unless parent_ledgers.blank?
+      parent_ledger = parent_ledgers.select{|l| l.ledger_classification == ledger_classification}.first
       all_product_ledgers[ledger_classification.account_purpose] = product_ledger
-      AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location => biz_location, :effective_on => Date.today, :performed_by => performed_by, :recorded_by => recorded_by)
+      if Ledger.all.count != ledgers_size
+        LocationLink.assign(product_ledger, parent_ledger, open_on_date) unless parent_ledger.blank?
+        AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => product_ledger.id, :biz_location => biz_location, :effective_on => open_on_date, :performed_by => performed_by, :recorded_by => recorded_by)
+      end
     }
     all_product_ledgers
   end
@@ -206,7 +214,9 @@ class Ledger
       biz_location    = CostCenter.get(cost_center_id).biz_location
       biz_location_id = biz_location.blank? ? nil : biz_location.id
       self.ledger_postings.group_by{|posting| posting.voucher}.each do |voucher, postings|
-        ledger_vouchers << voucher if voucher.effective_on <= till_date && !postings.blank? && postings.map(&:accounted_at).include?(biz_location_id)
+        unless voucher.blank?
+          ledger_vouchers << voucher if voucher.effective_on <= till_date && !postings.blank? && postings.map(&:accounted_at).include?(biz_location_id)
+        end
       end
     end
     ledger_vouchers.flatten.blank? ? ledger_vouchers.flatten : ledger_vouchers.flatten.compact
@@ -337,6 +347,46 @@ class Ledger
       if total_amount > MoneyManager.default_zero_money
         receipt_type = Constants::Transaction::RECEIPT
         Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, on_date, postings_collection, '', '', "Voucher created for EOD on #{on_date}")
+      end
+    end
+  end
+
+  def self.location_accounting_eod(location, on_date)
+    on_date = Date.parse(on_date.to_s) if on_date.class != Date
+    h_ledgers = location.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
+    h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
+    ledger_classification = LedgerClassification.resolve(:loan_disbursement)
+    all_vouchers = Voucher.all(:created_at.gt => Date.today, :created_at.lt => Date.today+1)
+    h_ledgers.each do |h_ledger|
+      ledger_balances = {}
+      postings_collection = []
+      c_ledgers = LocationLink.get_children(h_ledger, on_date)
+      c_vouchers = []
+      c_ledgers.each do |c_ledger|
+        t_vouchers = c_ledger.vouchers.all(:created_at.gte => Date.today, :created_at.lt => Date.today+1)
+        unless t_vouchers.blank?
+          c_vouchers += all_vouchers & t_vouchers
+          all_vouchers = all_vouchers - t_vouchers
+        end
+      end
+      c_vouchers = c_vouchers.flatten.compact.uniq unless c_vouchers.blank?
+      c_vouchers.uniq.group_by{|v| v.effective_on}.each do |effective_date, vouchers|
+        narration = ''
+        postings_collection = []
+        ledger_postings = vouchers.map(&:ledger_postings).flatten
+        ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
+          classification = ledger.ledger_classification||''
+          narration = "Voucher created for EOD(#{classification.blank? ? '' : classification.to_name}) on #{effective_date}"
+          ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *postings)
+          parent_ledger = LocationLink.get_parent(ledger, on_date)
+          postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, location.id, '')
+        end
+        total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
+        if total_amount > MoneyManager.default_zero_money
+          posting = postings_collection.select{|p| p.ledger.ledger_classification == ledger_classification && p.effect==:credit}
+          receipt_type = posting.blank? ? Constants::Transaction::RECEIPT : Constants::Transaction::PAYMENT
+          Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, postings_collection, '', location.id, narration)
+        end
       end
     end
   end

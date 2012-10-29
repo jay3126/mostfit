@@ -147,8 +147,15 @@ class Application < Merb::Controller
 
   def get_effective_date
     if session[:effective_date].blank?
-      set_effective_date(Date.today)
-      return Date.today  #redirect url(:controller => :home, :action => :effective_date), :message => {:error => "Please select effective date"}
+      last_eod = EodProcess.last
+      if last_eod.blank?
+        date = Date.today
+      else
+        eods = EodPocess.all(:on_date => last_eod.on_date, :status.not => Constants::EODProcessVerificationStatus::COMPLETED)
+        date = eods.blank? ? last_eod.on_date+1 : last_eod.on_date
+      end
+      set_effective_date(date)
+      return date  #redirect url(:controller => :home, :action => :effective_date), :message => {:error => "Please select effective date"}
     else
       session[:effective_date]
     end

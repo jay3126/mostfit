@@ -31,7 +31,6 @@ module BookKeeper
 
     total_amount, currency, effective_on = payment_transaction.amount, payment_transaction.currency, payment_transaction.effective_on
     notation = "Voucher created for #{product_action.to_s.humanize} on #{effective_on}"
-
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
     receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT

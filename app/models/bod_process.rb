@@ -37,24 +37,13 @@ class BodProcess
   def run_bod_process_in_thread
     bk = MyBookKeeper.new
     user = self.user
-    all_accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date)
     loans = LoanAdministration.get_loans_accounted(self.biz_location.id, self.on_date)
     loans = loans.compact.uniq unless loans.blank?
     loans.each do |loan|
       LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)
       bk.accrue_all_receipts_on_loan_till_date(loan, self.on_date) if loan.is_outstanding?
-      accrual_transactions = all_accrual_transactions.select{|a| a.on_product_type == :lending && a.on_product_id == loan.id}
+      accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
       accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
-      if loan.is_disbursed?
-        installment = loan.loan_base_schedule.get_schedule_line_item(self.on_date)
-        unless installment.blank?
-          due_principal = installment.to_money[:scheduled_principal_due]
-          due_interest = installment.to_money[:scheduled_interest_due]
-          due_total = due_principal+due_interest
-          allocation = {:total_received => due_total, :principal_received => due_principal, :interest_received => due_interest}
-          bk.account_for_due_generation(loan, allocation, self.on_date)
-        end
-      end
     end
     Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
     self.update(:completed_at => Time.now, :status => COMPLETED)
