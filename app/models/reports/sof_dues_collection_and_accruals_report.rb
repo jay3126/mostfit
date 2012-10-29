@@ -34,52 +34,56 @@ class SOFDuesCollectionAndAccrualsReport < Report
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
+    preclosure_loans = LoanStatusChange.status_between_dates(LoanLifeCycle::PRECLOSED_LOAN_STATUS, @from_date, @to_date).lending
     loan_ids.each do |l|
       loan = Lending.get(l)
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_name = branch ? branch.name : "Not Specified"
       branch_id = branch ? branch.id : "Not Specified"
-      
-      if loan.scheduled_principal_due(@to_date) > loan.scheduled_principal_due(@from_date)
-        ewi_principal_due = loan.scheduled_principal_due(@to_date) - loan.scheduled_principal_due(@from_date)
-      else
-        ewi_principal_due = loan.scheduled_principal_due(@from_date) - loan.scheduled_principal_due(@to_date)
+      branch_preclosure_loans = preclosure_loans.select{|lending| lending.accounted_at_origin == branch_id}
+
+      data[branch_id] = {}
+
+      preclosure_collect = interest_accured = disbursed_amount = outstanding_principal = emi_collect_interest = MoneyManager.default_zero_money
+      dues_emi_interest = dues_emi_total = dues_emi_principal = emi_collect_principal = emi_collect_total = MoneyManager.default_zero_money
+      fee_collect = total_fee_collection = preclosure_fee_collect = MoneyManager.default_zero_money
+
+      branch_loans = LoanAdministration.get_loans_accounted_for_date_range(branch_id, @from_date, @to_date).compact
+      branch_loans.each do |lending|
+        if lending.is_outstanding?
+          dues_emi_principal    += lending.actual_principal_outstanding(@to_date) || MoneyManager.default_zero_money
+          dues_emi_interest     += lending.actual_interest_outstanding(@to_date)  || MoneyManager.default_zero_money
+          dues_emi_total        = dues_emi_principal + dues_emi_interest
+          emi_collect_principal += lending.principal_received_in_date_range(@from_date, @to_date)
+          emi_collect_interest  += lending.interest_received_in_date_range(@from_date, @to_date)
+          emi_collect_total     = emi_collect_principal + emi_collect_interest
+          interest_accured      = interest_accured      + lending.accrued_interim_interest(@from_date, @to_date)
+          disbursed_amount      = disbursed_amount      + lending.to_money[:disbursed_amount] if (lending.disbursal_date >= @from_date and lending.disbursal_date <= @from_date) 
+          outstanding_principal = outstanding_principal + lending.actual_principal_outstanding(@to_date)
+        end
+      end
+        
+      fee_collection = FeeReceipt.all_paid_loan_fee_receipts_on_accounted_at_for_date_range(branch_id, @from_date, @to_date)
+      fee_collect = fee_collection[:loan_fee_receipts].blank? ? MoneyManager.default_zero_money : Money.new(fee_collection[:loan_fee_receipts].map(&:fee_amount).sum.to_i, default_currency)
+      preclosure_fee_collect = fee_collection[:loan_preclousure_fee_receipts].blank? ? MoneyManager.default_zero_money : Money.new(fee_collection[:loan_preclousure_fee_receipts].map(&:fee_amount).sum.to_i, default_currency)
+
+      branch_preclosure_loans.each do |lending|
+        status_change  = lending.loan_status_changes(:to_status => LoanLifeCycle::PRECLOSED_LOAN_STATUS, :effective_on.gte => @from_date, :effective_on.lte => @to_date)
+        preclosure_collect += lending.loan_receipts.last.to_money[:principal_received] unless status_change.blank?
       end
 
-      if loan.scheduled_interest_due(@from_date) > loan.scheduled_interest_due(@to_date)
-        ewi_interest_due = loan.scheduled_interest_due(@from_date) - loan.scheduled_interest_due(@to_date)
-      else
-        ewi_interest_due = loan.scheduled_interest_due(@to_date) - loan.scheduled_interest_due(@from_date)
-      end
-      ewi_total_due = ewi_principal_due + ewi_interest_due
+      total_fee_collection = fee_collect + preclosure_fee_collect + preclosure_collect
 
-      if loan.principal_received_till_date(@from_date) > loan.principal_received_till_date(@to_date)
-        ewi_principal_paid = loan.principal_received_till_date(@from_date) - loan.principal_received_till_date(@to_date)
-      else
-        ewi_principal_paid = loan.principal_received_till_date(@to_date) - loan.principal_received_till_date(@from_date)
-      end
-
-      if loan.interest_received_till_date(@from_date) > loan.interest_received_till_date(@to_date)
-        ewi_interest_paid = loan.interest_received_till_date(@from_date) - loan.interest_received_till_date(@to_date)
-      else
-        ewi_interest_paid = loan.interest_received_till_date(@to_date) - loan.interest_received_till_date(@from_date)
-      end
-
-      ewi_total_paid = ewi_principal_paid + ewi_interest_paid
-      outstanding_principal = loan.actual_principal_outstanding(@to_date)
-      disbursed_amount = (loan and loan.disbursed_amount) ? MoneyManager.get_money_instance(Money.new(loan.disbursed_amount.to_i, :INR).to_s) : Money.default_money_amount(:INR)
-      interest_accrued = loan.accrued_interim_interest(@from_date, @to_date)
-
-      data[loan] = {:branch_id => branch_id, :branch_name => branch_name, :ewi_principal_due => ewi_principal_due, :ewi_interest_due => ewi_interest_due, :ewi_total_due => ewi_total_due, :ewi_principal_paid => ewi_principal_paid, :ewi_interest_paid => ewi_interest_paid, :ewi_total_paid => ewi_total_paid, :outstanding_principal => outstanding_principal, :disbursed_amount => disbursed_amount, :interest_accrued => interest_accrued}
+      data[branch_id] = {
+        :branch_name => branch_name, :branch_id => branch_id,
+        :dues_emi_principal => dues_emi_principal , :dues_emi_interest => dues_emi_interest, :dues_emi_total => dues_emi_total,
+        :emi_collect_principal => emi_collect_principal, :emi_collect_interest => emi_collect_interest, :emi_collect_total => emi_collect_total,
+        :loan_fee_collect => fee_collect, :preclosure_collect_fee => preclosure_fee_collect, :preclosure_collect => preclosure_collect,
+        :total_fee_collect => total_fee_collection, :interest_accrued => interest_accured, :disbursed_amount => disbursed_amount,
+        :outstanding_principal => outstanding_principal
+      }
     end
     data
-=begin
-Columns required in this report are as follows:
-   d. Processiing Fees
-   e. Foreclosure Fees
-   f. Foreclosure POS
-   g. Total Collected
-=end
   end
 
   def funding_line_not_selected

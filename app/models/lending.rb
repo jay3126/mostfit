@@ -661,6 +661,28 @@ class Lending
     principal_received_till_date + interest_received_till_date + advance_balance + loan_recovery_till_date
   end
 
+  def principal_received_in_date_range(from_date = Date.today, to_date = from_date)
+    principal_received_on_from_date = amounts_received_till_date(from_date)[PRINCIPAL_RECEIVED]
+    principal_received_on_to_date = amounts_received_till_date(to_date)[PRINCIPAL_RECEIVED] 
+    if principal_received_on_from_date > principal_received_on_to_date 
+      principal_received_during_date_range = principal_received_on_from_date - principal_received_on_to_date
+    else
+      principal_received_during_date_range = principal_received_on_to_date - principal_received_on_from_date
+    end
+    principal_received_during_date_range
+  end
+
+  def interest_received_in_date_range(from_date = Date.today, to_date = from_date)
+    interest_received_on_from_date = amounts_received_till_date(from_date)[INTEREST_RECEIVED]
+    interest_received_on_to_date = amounts_received_till_date(to_date)[INTEREST_RECEIVED] 
+    if interest_received_on_from_date > interest_received_on_to_date 
+      interest_received_during_date_range = interest_received_on_from_date - interest_received_on_to_date
+    else
+      interest_received_during_date_range = interest_received_on_to_date - interest_received_on_from_date
+    end
+    interest_received_during_date_range
+  end
+
   def advance_balance(on_date = Date.today); advance_received_till_date(on_date) - advance_adjusted_till_date(on_date); end
 
   def overdue_amount(on_date)

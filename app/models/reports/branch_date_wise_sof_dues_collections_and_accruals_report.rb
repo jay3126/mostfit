@@ -37,8 +37,7 @@ class BranchDateWiseSofDuesCollectionsAndAccrualsReport < Report
     location_facade  = get_location_facade(@user)
     data = {}
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    preclosure_loans = LoanStatusChange.status_between_dates(LoanLifeCycle::REPAID_LOAN_STATUS, @from_date, @to_date).lending
-    # branches.each do |branch_id|
+    preclosure_loans = LoanStatusChange.status_between_dates(LoanLifeCycle::PRECLOSED_LOAN_STATUS, @from_date, @to_date).lending
     loan_ids.each do |loan_id|
       loan = Lending.get(loan_id)
       branch = BizLocation.get(loan.accounted_at_origin)
@@ -73,7 +72,7 @@ class BranchDateWiseSofDuesCollectionsAndAccrualsReport < Report
           preclosure_fee_collect = fee_collection[:loan_preclousure_fee_receipts].blank? ? MoneyManager.default_zero_money  : Money.new(fee_collection[:loan_preclousure_fee_receipts].map(&:fee_amount).sum.to_i, default_currency)
 
           branch_preclosure_loans.each do |lending|
-            status_change      = lending.loan_status_changes(:to_status => LoanLifeCycle::REPAID_LOAN_STATUS, :effective_on => on_date)
+            status_change      = lending.loan_status_changes(:to_status => LoanLifeCycle::PRECLOSED_LOAN_STATUS, :effective_on => on_date)
             preclosure_collect += lending.loan_receipts.last.to_money[:principal_received] unless status_change.blank?
           end
 
