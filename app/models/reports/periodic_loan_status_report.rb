@@ -82,7 +82,7 @@ class PeriodicLoanStatusReport < Report
         end
 
         number_of_days_principal_overdue = loan.days_past_dues_on_date(@from_date)
-        current_principal_outstanding = loan.actual_principal_outstanding
+        current_principal_outstanding = loan.actual_principal_outstanding(@to_date)
         interest_outstanding_beginning_of_week = loan.scheduled_interest_outstanding(@from_date)
 
         if loan.scheduled_interest_due(@from_date) > loan.scheduled_interest_due(@to_date)
@@ -104,7 +104,7 @@ class PeriodicLoanStatusReport < Report
         end
 
         number_of_days_interest_overdue = loan.days_past_dues_on_date(@from_date)
-        current_interest_outstanding = loan.actual_interest_outstanding
+        current_interest_outstanding = loan.actual_interest_outstanding(@to_date)
 
         data[loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_name => district_name,
           :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining,

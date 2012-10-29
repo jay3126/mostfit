@@ -1,99 +1,150 @@
 = partial :form
-%table.report.nojs
-  %thead
-    %tr
-      %th
-        Client ID
-      %th
-        Loan ID
-      %th
-        District
-      %th
-        Branch
-      %th
-        Client Name
-      %th
-        Loan Amount
-      %th
-        Disbursement Date
-      %th
-        Loan Status
-      %th
-        Loan Closure Date
-      %th
-        No of Installments Remaining
-      %th
-        Principal Outstanding Beginning of Period
-      %th
-        Principal Due During Period
-      %th
-        Principal Paid During Period
-      %th
-        Principal Overdue
-      %th
-        No. of Days Principal Overdue
-      %th
-        Current Principal Outstanding
-      %th
-        Interest Outstanding Beginning of Period
-      %th
-        Interest due during Period
-      %th
-        Interest paid during Period
-      %th
-        Interest Overdue
-      %th
-        No. of days Interest Outstanding
-      %th
-        Current Interest Outstanding
-  %tbody
-    - from_date = @data[:from_date]
-    - to_date = @data[:to_date]
-    - loan_ids = @data[:loan_ids]
-    - loan_ids.each do |loan_id|
-      - loan = Lending.get(loan_id)
+- if @data.blank?
+  %h2 No data to display
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
       %tr
+        %th
+          Loan Id
+        %th
+          Client Id
+        %th
+          Client Name
+        %th
+          District
+        %th
+          Branch
+        %th
+          Loan Amount
+        %th
+          Disbursal Date
+        %th
+          Loan Status
+        %th
+          Loan Closure Date
+        %th
+          No. Of Installments Remaining
+        %th
+          Principal Outstanding Beginning of Period
+        %th
+          Principal Due During Period
+        %th
+          Principal Paid During Period
+        %th
+          Principal Overdue
+        %th
+          No. Of Days Principal Overdue
+        %th
+          Current Principal Outstanding
+        %th
+          Interest Outstanding Beginning of Period
+        %th
+          Interest Due During Period
+        %th
+          Interest Paid During Period
+        %th
+          Interest Overdue
+        %th
+          No. Of Days Interest Overdue
+        %th
+          Current Interest Outstanding
+
+    %tbody
+      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+      - @default_currency ||= MoneyManager.get_default_currency
+      - @data.sort_by{|loan| loan}.each do |loan, values|
+        %tr
+          %td
+            = values[:loan_id]
+          %td
+            = values[:client_id]
+          %td
+            = values[:client_name]
+          %td
+            = values[:district_name]
+          %td
+            = values[:branch_name]
+          %td
+            = values[:loan_amount]
+            - accumulate_row_values[:loan_amount] += values[:loan_amount]
+          %td
+            = values[:loan_disbursal_date]
+          %td
+            = values[:loan_status]
+          %td
+            = values[:loan_closure_date]
+          %td
+            = values[:no_of_installments_remaining]
+          %td
+            = values[:principal_outstanding_beginning_of_week]
+            - accumulate_row_values[:principal_outstanding_beginning_of_week] += values[:principal_outstanding_beginning_of_week]
+          %td
+            = values[:principal_due_during_week]
+            - accumulate_row_values[:principal_due_during_week] += values[:principal_due_during_week]
+          %td
+            = values[:principal_paid_during_week]
+            - accumulate_row_values[:principal_paid_during_week] += values[:principal_paid_during_week]
+          %td
+            = values[:principal_overdue]
+            - accumulate_row_values[:principal_overdue] += values[:principal_overdue]
+          %td
+            = values[:number_of_days_principal_overdue]
+          %td
+            = values[:current_principal_outstanding]
+            - accumulate_row_values[:current_principal_outstanding] += values[:current_principal_outstanding]
+          %td
+            = values[:interest_outstanding_beginning_of_week]
+            - accumulate_row_values[:interest_outstanding_beginning_of_week] += values[:interest_outstanding_beginning_of_week]
+          %td
+            = values[:interest_due_during_week]
+            - accumulate_row_values[:interest_due_during_week] += values[:interest_due_during_week]
+          %td
+            = values[:interest_paid_during_week]
+            - accumulate_row_values[:interest_paid_during_week] += values[:interest_paid_during_week]
+          %td
+            = values[:interest_overdue]
+            - accumulate_row_values[:interest_overdue] += values[:interest_overdue]
+          %td
+            = values[:number_of_days_interest_overdue]
+          %td
+            = values[:current_interest_outstanding]
+            - accumulate_row_values[:current_interest_outstanding] += values[:current_interest_outstanding]
+
+    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+    %tfoot
+      %tr
+        %th
+          Total
         %td
-          = loan.borrower.id
         %td
-          = loan.id
         %td
-          = nil
         %td
-          = nil
         %td
-          = loan.borrower.name
+          = total_rows[:loan_amount]
         %td
-          = loan.total_loan_disbursed
         %td
-          = loan.disbursal_date
         %td
-          = loan.status
         %td
-          = nil # loan closure date
         %td
-          = nil # no of installments remaining
+          = total_rows[:principal_outstanding_beginning_of_week]
         %td
-          = loan.actual_principal_outstanding
+          = total_rows[:principal_due_during_week]
         %td
-          = loan.scheduled_principal_due(to_date) - loan.scheduled_principal_due(from_date)
+          = total_rows[:principal_paid_during_week]
         %td
-          = nil #principal paid during period
+          = total_rows[:principal_overdue]
         %td
-          = #loan.actual_principal_due(Date.today)
         %td
-          = nil #no of days principal overdue
+          = total_rows[:current_principal_outstanding]
         %td
-          = loan.actual_principal_outstanding
+          = total_rows[:interest_outstanding_beginning_of_week]
         %td
-          = loan.actual_interest_outstanding
+          = total_rows[:interest_due_during_week]
         %td
-          = loan.scheduled_interest_due(to_date) - loan.scheduled_interest_due(from_date)
+          = total_rows[:interest_paid_during_week]
         %td
-          = nil # interest paid during period
+          = total_rows[:interest_overdue]
         %td
-          = #loan.actual_interest_due(Date.today)
         %td
-          = nil #no of days interest outstanding
-        %td
-          = loan.actual_interest_outstanding
+          = total_rows[:current_interest_outstanding]

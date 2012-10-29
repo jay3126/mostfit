@@ -110,11 +110,10 @@ class LoanAssignment
   end
 
   # Returns a list of loan IDs that are assigned to an instance of securitization or encumberance, for a date range.
-  def self.get_loans_assigned_in_date_range(to_assignment, on_date, till_date)
+  def self.get_loans_assigned_in_date_range(assignment_nature, on_date, till_date)
     earlier_date, later_date = on_date <= till_date ? [on_date, till_date] : [till_date, on_date]
     loan_assignments = []
     query = {}
-    assignment_nature = Resolver.resolve_loan_assignment(to_assignment)
     query[:assignment_nature] = assignment_nature
     query[:effective_on.gte]  = earlier_date if earlier_date
     query[:effective_on.lte]  = later_date if later_date

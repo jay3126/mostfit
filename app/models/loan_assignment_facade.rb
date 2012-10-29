@@ -17,8 +17,8 @@ class LoanAssignmentFacade < StandardFacade
     LoanAssignment.get_loans_assigned(to_loan_assignment, on_date)
   end
 
-  def get_loans_assigned_in_date_range(to_loan_assignment, on_date, till_date)
-    LoanAssignment.get_loans_assigned_in_date_range(to_loan_assignment, on_date, till_date)
+  def get_loans_assigned_in_date_range(assignment_nature, on_date, till_date)
+    LoanAssignment.get_loans_assigned_in_date_range(assignment_nature, on_date, till_date)
   end
 
   def get_loans_assigned_to_tranch(to_tranch)
