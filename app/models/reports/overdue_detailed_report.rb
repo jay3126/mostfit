@@ -71,7 +71,7 @@ class OverdueDetailedReport < Report
         end
         loan_product_name      = (loan and loan.lending_product and (not loan.nil?)) ? loan.lending_product.name : "Loan Product Not Available"
         funding_line           = FundingLineAddition.all(:lending_id => loan.id)
-        source_of_fund             = (funding_line and (not funding_line.blank?)) ? FundingLine.get(funding_line.first.funding_line_id).name : "Source of Fund not Available"
+        source_of_fund             = (funding_line and (not funding_line.blank?)) ? NewFundingLine.get(funding_line.first.funding_line_id).name : "Source of Fund not Available"
         loan_account_number        = (loan and (not loan.nil?)) ? loan.lan : "Not Specified"
         loan_disbursed_date        = (loan and loan.disbursal_date and (not loan.nil?)) ? loan.disbursal_date : "Disbursal Date Not Available"
         loan_end_date              = (loan and loan.last_scheduled_date and (not loan.nil?)) ? loan.last_scheduled_date : "End Date Not Available"
