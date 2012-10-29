@@ -10,8 +10,9 @@
 - if client_facade.client_has_death_event?(@client)
   - if client_facade.client_death_documents_recieved?(@client)
     .menu-strip
-      %h4{:style => "color: red"} 
-        = "Client is Inactive (#{client_facade.death_event_filed_for(@client)} Death)"
+      %h4{:style => "color: red"}
+        - msg = client_facade.death_event_filed_for(@client) == "Client" ? "Client is Inactive (#{client_facade.death_event_filed_for(@client)} Death)" : "Client's loan Inactive(#{client_facade.death_event_filed_for(@client)} Death)"
+        = msg
   - else
     .menu-strip
       %h4{:style => "color: red"}
@@ -69,7 +70,7 @@
   %tr.even
     %th.even PSL Sub-category
     %td= @client.psl_sub_category.name if @client.psl_sub_category
-  - if client_active
+  - unless client_facade.client_has_death_event?(@client)
     %tr.odd
       %td
         = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
