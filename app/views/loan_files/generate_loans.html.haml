@@ -120,7 +120,8 @@
                 = default_funding_line_name
                 = hidden_field :name => "funding_line_id[#{client.id}]", :value => default_funding_line.id
               - else
-                = select :name => "funding_line_id[#{client.id}]", :collection => select_fundling_lines, :id => "funder_selector_#{client.id}", :onchange => "fillFundingLinesForBulkLoan('#{client.id}')", :prompt => "Select funding line"
+                - selected_funding_line = params[:funding_line_id] && params[:funding_line_id]["#{client.id}"] ? params[:funding_line_id]["#{client.id}"] : nil
+                = select :name => "funding_line_id[#{client.id}]", :collection => select_fundling_lines, :id => "funder_selector_#{client.id}", :onchange => "fillFundingLinesForBulkLoan('#{client.id}')", :prompt => "Select funding line", :selected => selected_funding_line
             %td
               - if NewTranch.count == 0 && session.user.role == :operator
                 %i No Tranch created.
@@ -129,7 +130,9 @@
                 = default_tranch_name
                 = hidden_field :name => "tranch_id[#{client.id}]", :value => default_tranch.id
               - else
-                = select :name => "tranch_id[#{client.id}]", :id => "tranch_selector_#{client.id}"
+                - funding_lines_tranch = params[:funding_line_id] && !params[:funding_line_id]["#{client.id}"].blank? ? NewFundingLine.get(params[:funding_line_id] && params[:funding_line_id]["#{client.id}"]).new_tranches.map{|t| [t.id, t.name] } : nil
+                - selected_tranch = params[:tranch_id] && params[:tranch_id]["#{client.id}"] ? params[:tranch_id]["#{client.id}"] : nil
+                = select :name => "tranch_id[#{client.id}]", :collection => funding_lines_tranch, :id => "tranch_selector_#{client.id}", :selected => selected_tranch
             %td
               - selected_loan_product = params[:clients] && params[:clients]["#{client.id}"] && params[:clients]["#{client.id}"][:loan_product_id] ? params[:clients]["#{client.id}"][:loan_product_id] : nil
               = select :name => "clients[#{client.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(la.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
