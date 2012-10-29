@@ -64,7 +64,7 @@
             = "Status"
       %tbody
         - @loan_file.loan_applications.each do |lap|
-          - if lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS
+          - if (lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS || lap.status == Constants::Status::CLIENT_CREATED)
             %tr
               %td
                 = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
