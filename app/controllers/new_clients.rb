@@ -471,6 +471,10 @@ class NewClients < Application
           client = Client.get client_id
           claim_document_recieved_on = params[:document_recieved_on]["#{client_id}"]
           is_client_died = client_facade.death_event_filed_for(client) == "Client"
+          all_loans = client_facade.get_all_loans_for_counterparty(client).compact
+          all_loans.each do |loan|
+            loan.set_status(LoanLifeCycle::REJECTED_LOAN_STATUS, Date.today)
+          end
           client_facade.mark_client_as_inactive(client) if is_client_died
           client_facade.mark_client_documents_recieved(client, recieved_by, claim_document_recieved_on)
         rescue => ex
