@@ -761,6 +761,16 @@ class Lending
     LoanDueStatus.unbroken_days_past_due(self.id, on_date)
   end
 
+  #this method is same as days_past_due_on_date with a small modification.
+  def days_past_dues_on_date(on_date)
+    if self.disbursal_date < on_date
+      return 0 unless is_outstanding_on_date?(on_date)
+      LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+    else
+      return 0
+    end
+  end
+
   ###########################
   # LOAN LIFE-CYCLE ACTIONS # begins
   ###########################

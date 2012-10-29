@@ -76,7 +76,7 @@ class OngoingLoanInformationReport < Report
         principal_overdue = loan.actual_principal_outstanding(@to_date) - loan.scheduled_principal_outstanding(@to_date)
       end
 
-      number_of_days_principal_overdue = loan.days_past_due_on_date(@from_date)
+      number_of_days_principal_overdue = loan.days_past_dues_on_date(@from_date)
       current_principal_outstanding = loan.actual_principal_outstanding
       interest_outstanding_beginning_of_week = loan.scheduled_interest_outstanding(@from_date)
 
@@ -98,7 +98,7 @@ class OngoingLoanInformationReport < Report
         interest_overdue = loan.actual_interest_outstanding(@to_date) - loan.scheduled_interest_outstanding(@to_date)
       end
 
-      number_of_days_interest_overdue = loan.days_past_due_on_date(@from_date)
+      number_of_days_interest_overdue = loan.days_past_dues_on_date(@from_date)
       current_interest_outstanding = loan.actual_interest_outstanding
 
       data[loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_id => district_id, :district_name => district_name, :branch_id => branch_id, :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining, :principal_outstanding_beginning_of_week => principal_outstanding_beginning_of_week, :principal_due_during_week => principal_due_during_week, :principal_paid_during_week => principal_paid_during_week, :principal_overdue => principal_overdue, :number_of_days_principal_overdue => number_of_days_principal_overdue, :current_principal_outstanding => current_principal_outstanding, :interest_outstanding_beginning_of_week => interest_outstanding_beginning_of_week, :interest_due_during_week => interest_due_during_week, :interest_paid_during_week => interest_paid_during_week, :interest_overdue => interest_overdue, :number_of_days_interest_overdue => number_of_days_interest_overdue, :current_interest_outstanding => current_interest_outstanding, :loan_lan => loan_lan}
