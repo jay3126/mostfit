@@ -16,7 +16,7 @@
     .menu-strip
       %h4{:style => "color: red"}
         = "Client is under Death Claim Process (#{client_facade.death_event_filed_for(@client)} Death)"
-- else
+- unless client_facade.client_has_death_event?(@client) && client_facade.death_event_filed_for(@client) == "Client"
   .menu-strip
     = link_to_with_rights 'Edit Client', url(:controller => :new_clients, :action => :edit, :id => @client.id), :class => 'add grey_button'
     - @checklist_type=ChecklistType.first(:name=>"Customer Calling")
