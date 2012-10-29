@@ -458,7 +458,7 @@ class NewClients < Application
 
     # INITIALIZATIONS
     @errors = []
-    
+    message = {}
     # VALIDATIONS
     @errors << "Select atleast one client" if selected_clients.blank?
     @errors << "Select date document submission" if recieved_on.blank?
@@ -477,12 +477,16 @@ class NewClients < Application
           end
           client_facade.mark_client_as_inactive(client) if is_client_died
           client_facade.mark_client_documents_recieved(client, recieved_by, claim_document_recieved_on)
+          message = {:notice => "Documents successfully submitted for Client: #{client} and Due generation as been stopped for all loans."}
         rescue => ex
           @errors << "An error has occured #{ex.message}"
+          message = {:error => @errors.flatten.join(', ')}
         end
       end
+    else
+      message = {:error => @errors.flatten.join(', ')}
     end
-    redirect resource(:new_clients, :all_deceased_clients)
+    redirect resource(:new_clients, :all_deceased_clients), :message => message
   end
 
   def bulk_update_client_details
