@@ -15,9 +15,9 @@
   %div.tab_container.shaded
     %ul.tabs
       %li#write_off_loans
-        Write Off Loans
+        Select for Write off
       %li#write_off_approve_loans
-        Write Off Approve Loans
+        Write Off Approved Loans
     %div.tab
       = partial "lendings/write_off_loans", :lendings => @lendings.select{|s| s.write_off_approve.blank? || s.write_off_approve == false}
     %div.tab
