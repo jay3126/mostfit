@@ -44,7 +44,7 @@
             = text_field :client_reference2
           %td
             - selected_amount = params[:loan_application] ? params[:loan_application][:amount] : nil
-            - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.to_regular_amount}).uniq
+            - loan_product_amount = @branch.branch_loan_product_amount_list
             = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => selected_amount, :prompt => 'Select'
           %td
             = text_field :client_address

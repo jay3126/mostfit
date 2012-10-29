@@ -291,5 +291,17 @@ class BizLocation
   def get_reporting_facade(user)
     @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
   end
-  
+
+  # list loan amount of all loan product associated with branch
+  def branch_loan_product_amount_list
+    loan_product_amount = []
+    loan_product_list = self.lending_product_locations
+    loan_product_list.each do |lpc|
+      loan_product_id = lpc.lending_product_id
+      loan_product = LendingProduct.get loan_product_id
+      loan_product_amount << loan_product.loan_money_amount.to_regular_amount
+    end
+    loan_product_amount.compact.uniq
+  end
+
 end
