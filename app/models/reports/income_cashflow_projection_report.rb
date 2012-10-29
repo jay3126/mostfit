@@ -59,7 +59,7 @@ class IncomeCashflowProjectionReport < Report
       if loan.interest_received_till_date(@from_date) > loan.interest_received_till_date(@to_date)
         schedule_interest_realisations = loan.interest_received_till_date(@from_date) - loan.interest_received_till_date(@to_date)
       else
-        schedule_interest_realisations = loan.interest_received_till_date(@from_date) - loan.interest_received_till_date(@to_date)
+        schedule_interest_realisations = loan.interest_received_till_date(@to_date) - loan.interest_received_till_date(@from_date)
       end
 
       schedule_total_realisations = schedule_principal_realisations + schedule_interest_realisations
