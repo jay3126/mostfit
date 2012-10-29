@@ -51,8 +51,8 @@
                   = client.address
                 %td
                   - if eligibility
-                    - loan_product_amount = (choice_facade.available_loan_products.collect {|lp| lp.loan_money_amount.to_regular_amount}).uniq
-                    = select :name => "clients[#{client.id}][amount]", :collection => loan_product_amount.map{|x| [x.to_s]}
+                    - loan_product_amount = @branch.branch_loan_product_amount_list
+                    = select :name => "clients[#{client.id}][amount]", :collection => loan_product_amount
         %table.narrow.form{:style => "width:100%;"}
           %tfoot
             %tr
