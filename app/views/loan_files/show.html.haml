@@ -87,6 +87,6 @@
               %td
                 = lap.client_pincode
               %td
-                = lap.status.humanize rescue nil
+                = (lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS && !lap.client_id.blank?) ? "Client created (Existing client)" : lap.status.humanize rescue nil
   - else
     %h3 No loan applications
