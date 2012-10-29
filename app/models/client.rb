@@ -273,6 +273,20 @@ class Client
     loans.blank?
   end
 
+  def client_psl_sub_category_list
+    psl_id = self.priority_sector_list_id
+    sub_psl_id = self.psl_sub_category_id
+    collection_sub_psl = []
+    if psl_id.blank?
+      return [nil, nil]
+    else
+      psl = PrioritySectorList.get(psl_id)
+      collection_sub_psl = psl.psl_sub_categories
+      selected_sub_psl = sub_psl_id.blank? ? nil : PslSubCategory.get(sub_psl_id)
+      return [collection_sub_psl, selected_sub_psl]
+    end
+  end
+
   private
   
   def convert_blank_to_nil

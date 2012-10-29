@@ -676,19 +676,6 @@ function fillCenters(){
   });
 }
 
-function fillPslSubCategories(){
-  $("#psl_selector").change(function(){
-    $.ajax({
-      type: "GET",
-      url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
-      success: function(data){
-        $("#psl_sub_category_selector").html(data);
-        $("#psl_sub_category_selector").trigger("liszt:updated");
-      }
-    });
-  });
-}
-
 function fillComboBranches(){
   $("#area_selector").change(function(){
     $.ajax({
@@ -1464,6 +1451,29 @@ function fillFundingLinesForBulkLoan(obj_id){
     url: "/new_funders/funding_lines/"+$("#funder_selector_"+obj_id).val(),
     success: function(data) {
       $("#tranch_selector_"+obj_id).html(data);
+    }
+  });
+}
+
+function fillPslSubCategories(){
+  $("#psl_selector").change(function(){
+    $.ajax({
+      type: "GET",
+      url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector").val(),
+      success: function(data){
+        $("#psl_sub_category_selector").html(data);
+        $("#psl_sub_category_selector").trigger("liszt:updated");
+      }
+    });
+  });
+}
+
+function fillPslSubCategoriesBulkClient(obj_id){
+  $.ajax({
+    type: "GET",
+    url: "/priority_sector_lists/psl_sub_categories/"+$("#psl_selector_"+obj_id).val(),
+    success: function(data){
+      $("#psl_sub_category_selector_"+obj_id).html(data)
     }
   });
 }
