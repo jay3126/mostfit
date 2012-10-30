@@ -9,6 +9,7 @@ class PeriodicLoanStatusReport < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Periodic Loan Status Report from #{@from_date} to #{@to_date}"
     @user = user
+    all_funding_line_ids = NewFundingLine.all.map{|fl| fl.id}
     @funding_line_id = (params and params[:funding_line_id] and (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
     get_parameters(params, user)
   end
