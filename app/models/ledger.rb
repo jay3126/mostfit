@@ -323,30 +323,55 @@ class Ledger
   end
 
   def self.head_office_eod(on_date)
-    h_cost_center = CostCenter.first(:name => 'Head Office')
-    h_ledgers = h_cost_center.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
+    head_office = CostCenter.first(:name => 'Head Office')
+    on_date = Date.parse(on_date.to_s) if on_date.class != Date
+    h_ledgers = head_office.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
     h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
-    all_vouchers = Voucher.all(:effective_on => on_date)
+    ledger_classification = LedgerClassification.resolve(:loan_disbursement)
+    all_vouchers = Voucher.all(:created_at.gt => Date.today, :created_at.lt => Date.today+1)
     h_ledgers.each do |h_ledger|
       ledger_balances = {}
       postings_collection = []
       c_ledgers = LocationLink.get_children(h_ledger, on_date)
       c_vouchers = []
       c_ledgers.each do |c_ledger|
-        c_vouchers = c_ledger.vouchers(:effective_on => on_date)
-        c_vouchers = all_vouchers & c_vouchers
-        all_vouchers = all_vouchers - c_vouchers
+        t_vouchers = c_ledger.vouchers.all(:created_at.gte => Date.today, :created_at.lt => Date.today+1)
+        unless t_vouchers.blank?
+          c_vouchers += all_vouchers & t_vouchers
+          all_vouchers = all_vouchers - t_vouchers
+        end
       end
-      ledger_postings = c_vouchers.map(&:ledger_postings).flatten
-      ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
-        ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *postings)
-        parent_ledger = LocationLink.get_parent(ledger, on_date)
-        postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, '', '')
-      end
-      total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
-      if total_amount > MoneyManager.default_zero_money
-        receipt_type = Constants::Transaction::RECEIPT
-        Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, on_date, postings_collection, '', '', "Voucher created for EOD on #{on_date}")
+      c_vouchers = c_vouchers.flatten.compact.uniq unless c_vouchers.blank?
+      c_vouchers.uniq.group_by{|v| v.effective_on}.each do |effective_date, vouchers|
+        vouchers.group_by{|v| v.narration}.each do |narration, vouchers|
+          postings_collection = []
+          ledger_postings = vouchers.map(&:ledger_postings).flatten
+          ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
+            postings.group_by{|p| p.ledger.ledger_classification}.each do |classification, c_postings|
+              ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *c_postings)
+              parent_ledger = LocationLink.get_parent(ledger, on_date)
+              postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, '', '')
+            end
+          end
+          total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
+          if total_amount > MoneyManager.default_zero_money
+            voucher_postings = []
+            posting = postings_collection.select{|p| p.ledger.ledger_classification == ledger_classification && p.effect==:credit}
+            receipt_type = posting.blank? ? Constants::Transaction::RECEIPT : Constants::Transaction::PAYMENT
+            postings_collection.group_by{|g| g.ledger}.each do |ledger, posting_info|
+              if posting_info.size > 1
+                amt = posting_info.map(&:amount).sum
+                parent_ledger = ledger
+                currency = posting_info.first.currency
+                effect = posting_info.first.effect
+                voucher_postings << PostingInfo.new(amt, currency, effect, parent_ledger, '', '')
+              else
+                voucher_postings << posting_info
+              end
+            end
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', '', narration)
+          end
+        end
       end
     end
   end

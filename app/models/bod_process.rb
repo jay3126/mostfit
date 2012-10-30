@@ -45,7 +45,7 @@ class BodProcess
       accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
       accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
     end
-    Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
+    #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
     self.update(:completed_at => Time.now, :status => COMPLETED)
   end
 
