@@ -1,15 +1,17 @@
 :javascript
-  jQuery('.admin-box').each(function(){
-    if($(this).find('li a').length ==0){
-      $(this).remove();
-    }
-    else{
-      jQuery(this).find('li').each(function(){
-        if(jQuery(this).find('a').length==0){
-          jQuery(this).remove();
-        }
-      });
-    }
+  $(document).ready(function() {
+    jQuery('.admin-box').each(function(){
+      if($(this).find('li a').length ==0){
+        $(this).remove();
+      }
+      else{
+        jQuery(this).find('li').each(function(){
+          if(jQuery(this).find('a').length==0){
+            jQuery(this).remove();
+          }
+        });
+      }
+    });
   });
 
 - if session.user.can_access?({:controller => "admin", :action => "index"})

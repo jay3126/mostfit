@@ -371,21 +371,20 @@ class Ledger
       end
       c_vouchers = c_vouchers.flatten.compact.uniq unless c_vouchers.blank?
       c_vouchers.uniq.group_by{|v| v.effective_on}.each do |effective_date, vouchers|
-        narration = ''
-        postings_collection = []
-        ledger_postings = vouchers.map(&:ledger_postings).flatten
-        ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
-          classification = ledger.ledger_classification||''
-          narration = "Voucher created for EOD(#{classification.blank? ? '' : classification.to_name}) on #{effective_date}"
-          ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *postings)
-          parent_ledger = LocationLink.get_parent(ledger, on_date)
-          postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, location.id, '')
-        end
-        total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
-        if total_amount > MoneyManager.default_zero_money
-          posting = postings_collection.select{|p| p.ledger.ledger_classification == ledger_classification && p.effect==:credit}
-          receipt_type = posting.blank? ? Constants::Transaction::RECEIPT : Constants::Transaction::PAYMENT
-          Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, postings_collection, '', location.id, narration)
+        vouchers.group_by{|v| v.narration}.each do |narration, vouchers|
+          postings_collection = []
+          ledger_postings = vouchers.map(&:ledger_postings).flatten
+          ledger_postings.group_by{ |lp| lp.ledger }.each do |ledger, postings|
+            ledger_balances[ledger] = LedgerBalance.add_balances(LedgerBalance.zero_debit_balance(:INR), *postings)
+            parent_ledger = LocationLink.get_parent(ledger, on_date)
+            postings_collection << PostingInfo.new(ledger_balances[ledger].amount, ledger_balances[ledger].currency, ledger_balances[ledger].effect, parent_ledger, location.id, '')
+          end
+          total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
+          if total_amount > MoneyManager.default_zero_money
+            posting = postings_collection.select{|p| p.ledger.ledger_classification == ledger_classification && p.effect==:credit}
+            receipt_type = posting.blank? ? Constants::Transaction::RECEIPT : Constants::Transaction::PAYMENT
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, postings_collection, '', location.id, "EOD :- "+narration)
+          end
         end
       end
     end
