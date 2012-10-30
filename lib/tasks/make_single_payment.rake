@@ -14,12 +14,12 @@ Merb.start_environment(:environment => ENV['MERB_ENV'] || 'development')
 namespace :mostfit do
   namespace :suryoday do
 
-    desc "records a single principal repaid payment for each loan to match the POS data in uploads"
+    desc "records a single payment for each loan to match the POS data in uploads"
     task :make_single_payment, :directory do |t, args|
       require 'fastercsv'
       USAGE = <<USAGE_TEXT
 [bin/]rake mostfit:suryoday:make_single_payment[<'directory'>]
-Convert loans tab in the upload file to a .csv and put them into <directory>
+Convert lendings tab in the upload file to a .csv and put them into <directory>
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'lan'
@@ -56,7 +56,7 @@ USAGE_TEXT
             default_currency = MoneyManager.get_default_currency
             pos = nil
             begin
-              pos = Money.new(pos_str.to_i, default_currency)
+              pos = MoneyManager.get_money_instance(pos_str.to_i)
             rescue => ex
               errors << [lan, pos_str, "pos not parsed"]
               next
@@ -64,7 +64,7 @@ USAGE_TEXT
 
             int_os = nil
             begin 
-              int_os = Money.new(int_os_str.to_i, default_currency)
+              int_os = MoneyManager.get_money_instance(int_os_str.to_i)
             rescue => ex
               errors << [lan, int_os_str, "int os not parsed"]
               next
@@ -72,7 +72,7 @@ USAGE_TEXT
             
             total_os = nil
             begin 
-              total_os = Money.new(total_os_str.to_i, default_currency)
+              total_os = MoneyManager.get_money_instance(total_os_str.to_i)
             rescue => ex
               errors << [lan, total_os_str, "total os not parsed"]
               next
@@ -113,7 +113,7 @@ USAGE_TEXT
             amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
             money_amount_to_be_paid = amount_to_be_paid
 
-            receipt_type = Constants::Transaction::PAYMENT
+            receipt_type = Constants::Transaction::RECEIPT
             effective_on = as_on_date
             payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
             product_action   = Constants::Transaction::LOAN_REPAYMENT
@@ -136,7 +136,7 @@ USAGE_TEXT
                                                        performed_by, effective_on, product_action)
               loan_ids_updated << [loan.id, loan.lan, client.id, "Payment successfully made"]
             else
-              errors << [loan.id, loan.lan, "Payment cannot be saved"]
+              errors << [loan.id, loan.lan, "Payment cannot be saved because: #{valid.last}"]
             end
           end
 

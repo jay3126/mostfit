@@ -276,7 +276,7 @@ class Lending
         return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
 
         maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding : actual_total_outstanding_net_advance_balance
-        if (maximum_receipt_to_accept < transaction_money_amount)
+        if ((maximum_receipt_to_accept < transaction_money_amount) and Mfi.first.system_state != :migration)
           return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
         end
       end
