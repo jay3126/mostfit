@@ -65,4 +65,4 @@
               %td{:style => "text-align:center;"}
                 = claim.nil? ? "-" : StaffMember.get(claim.performed_by).name rescue nil
   - else
-    No clients found
+    %h3 No clients found

@@ -114,7 +114,7 @@
                   = claim.nil? ? "-" : StaffMember.get(claim.performed_by).name rescue nil
       = submit 'Submit'
   - else
-    No clients found
+    %h3 No clients found
 
 %br
 = partial :all_settled_claims
