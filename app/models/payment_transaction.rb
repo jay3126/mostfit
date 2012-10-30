@@ -58,10 +58,7 @@ class PaymentTransaction
   validates_with_method :check_receipt_no
 
   def disallow_future_dated_transactions
-    eod = accounted_at_location.eod_processes(:on_date => self.effective_on, :status.not => Constants::EODProcessVerificationStatus::PENDING)
-    if !eod.blank?
-      [false, "Transaction cannot be preformed after EOD Process"]
-    elsif self.effective_on and (self.effective_on > Date.today)
+    if self.effective_on and (self.effective_on > Date.today)
       [false, "Future dated transactions are not permitted"]
     elsif(LocationHoliday.working_holiday?(self.performed_at_location, self.effective_on))
       [false, "Holiday dated transactions are not permitted"]
