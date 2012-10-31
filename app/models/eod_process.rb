@@ -20,13 +20,13 @@ class EodProcess
   belongs_to :staff_member, :child_key => [:performed_by], :model => 'StaffMember'
 
   def self.eod_process_for_location(location_ids, performed_by_id, created_by_id, on_date = Date.today)
-    biz_locations = BizLocation.all(:id => location_ids)
-    biz_locations.each do |location|
+    @biz_locations = BizLocation.all(:id => location_ids)
+    @biz_locations.each do |location|
       eod = first(:on_date => on_date, :biz_location_id => location.id)
       eod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
       eod.run_eod_process_in_thread
+      
     end
-    self.head_office_eod(on_date) unless biz_locations.blank?
   end
 
   def self.create_default_eod_for_location(location_ids, created_on = Date.today, on_date = Date.today)
@@ -52,8 +52,10 @@ class EodProcess
       end
       Ledger.location_accounting_eod(self.biz_location, self.on_date)
       self.update(:completed_at => Time.now, :status => COMPLETED)
+      Ledger.head_office_eod(self.on_date) if EodProcess.first(:on_date => self.on_date, :status.not => COMPLETED).blank?
     }
   end
+  
   def self.head_office_eod(on_date = Date.today)
     Thread.new {
       Ledger.head_office_eod(on_date)
