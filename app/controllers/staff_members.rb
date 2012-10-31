@@ -133,11 +133,40 @@ class StaffMembers < Application
   end
 
   def create(staff_member)
+    @message = {:notice => [], :error => []}
+    recorded_by = session.user.id
+    performed_by = session.user.staff_member
+    biz_location_id = params[:biz_location_id]
+    manage_location_ids = params[:manage_location_ids]||[]
+    manage_locations = manage_location_ids.blank? ? [] : BizLocation.all(:id => manage_location_ids)
     @staff_member = StaffMember.new(staff_member)
-    if @staff_member.save
-      redirect resource(:staff_members), :message => {:notice => "StaffMember '#{@staff_member.name}' (Id:#{@staff_member.id}) was successfully created"}
+    
+    begin
+      manage_locations.each do |location|
+        assigned = LocationManagement.first(:managed_location_id => location.id, :effective_on => @staff_member.creation_date)
+        @message[:error] << "There is already a staff member(#{assigned.manager_staff_member.name.humanize}) assigned to manage the location on the date: #{assigned.effective_on}" unless assigned.blank?
+      end
+      if @message[:error].blank?
+        if @staff_member.save
+          StaffPosting.assign(@staff_member, BizLocation.get(biz_location_id), @staff_member.creation_date, performed_by.id, recorded_by.id) unless biz_location_id.blank?
+          manage_locations = manage_location_ids.blank? ? [] : BizLocation.all(:id => manage_location_ids)
+          manage_locations.each do |location|
+            LocationManagement.assign_manager_to_location(@staff_member, location, @staff_member.creation_date, performed_by.id, recorded_by.id)
+          end
+          @message[:notice] = "StaffMember '#{@staff_member.name}' (Id:#{@staff_member.id}) was successfully created"
+        else
+          @message[:error] = @staff_member.errors.first.join('<br>')
+        end
+      end
+    rescue => ex
+      @message[:error] << "An error has occured: #{ex.message}"
+    end
+
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+
+    if @message[:error].blank?
+      redirect resource(:staff_members), :message => @message
     else
-      message[:error] = "StaffMember failed to be created"
       render :new
     end
   end

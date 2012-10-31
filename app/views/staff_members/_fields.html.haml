@@ -8,16 +8,26 @@
       %span.greytext the screen name of the staff member
   %tr
     %th
-      Employee Id
+      Employee Id:
     %td
       = text_field :employee_id, :size => 20
       %br/
       %span.greytext employee id of staff as given by MFI
   %tr
     %th
-      Designation
+      Designation:
     %td
       = select :designation_id, :collection => Designation.all.map{|d| [d.id.to_s, d.name]}
+  %tr
+    %th
+      Location:
+    %td
+      = select :name => 'biz_location_id', :collection => BizLocation.all('location_level.level'.to_sym.not => 0).map{|d| [d.id.to_s, d.name]}, :prompt => 'Select Location'
+  %tr
+    %th
+      Manage Locations:
+    %td
+      = select :name => 'manage_location_ids', :collection => BizLocation.all.map{|d| [d.id.to_s, d.name]}, :class => 'multiple', :prompt => 'Select Location'
   %tr
     %th
       Mobile number:

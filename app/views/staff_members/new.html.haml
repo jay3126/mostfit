@@ -1,6 +1,8 @@
 %h1 Create a new staff member
-
-= error_messages_for @staff_member
+- unless @message.blank?
+  - if !@message[:error].blank?
+    .flash.error
+      = @message[:error].class == Array ? @message[:error].join('<br>') : @message[:error]
 
 = form_for(@staff_member, :action => url(:staff_members)) do
   = partial :fields
