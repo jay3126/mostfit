@@ -124,8 +124,7 @@
         %li
           =# link_to_with_rights 'Securitization', resource(:securitizations), :class => 'icon accept'
           =# link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
-          =# link_to_with_rights 'Loans Eligible For Loan Assignment', url(:controller => :securitizations, :action => :eligible_loans_for_loan_assignments, :flag => 'true'), :class => 'icon accept'
-          = link_to_with_rights 'Loan Assignments', url(:controller => :securitizations, :action => :loan_assignments, :flag => 'true'), :class => 'icon accept'
+          = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
 
   - if Mfi.first.system_state == :migration
     %div.clearfix
@@ -134,8 +133,3 @@
         %ul.icon_links
           %li
             = link_to_with_rights 'Upload data', url(:controller => 'uploads'), :class => 'upload icon'
-
-    -# %h2 API Use
-    -# %ul
-    -#   %li
-    -#     =# link_to_with_rights "API Access", resource(:api_accesses), :class => 'edit'
