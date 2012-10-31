@@ -129,9 +129,9 @@ module Constants
     DEFAULT_CLASSIFICATION = NOT_SPECIFIED
     TOWN_CLASSIFICATION = [NOT_SPECIFIED, RURAL, URBAN, SEMI_URBAN]
 
-    SINGLE = 'Single'; MARRIED = 'Married'; DIVORCE = 'Divorce'; WIDOWED = 'Widowed'
+    SINGLE = 'Single'; MARRIED = 'Married'; DIVORCE = 'Divorce'; SINGLE_WOMEN = 'Single_women'
     DEFAULT_MARRITAL_STATUS = SINGLE
-    MARITAL_STATUS= [SINGLE, MARRIED, DIVORCE , WIDOWED]
+    MARITAL_STATUS= [SINGLE, MARRIED, DIVORCE , SINGLE_WOMEN]
 
     TELEPHONE_TYPES = ["Residence", "Company", "Mobile", "Permanent", "Foreign", "Other", "Untagged"]
     UNTAGGED_TELEPHONE_TYPE = 'Untagged'
