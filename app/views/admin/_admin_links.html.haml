@@ -83,8 +83,6 @@
         = link_to_with_rights 'Write Off Loans', resource(:lendings, :write_off_lendings), :class => 'loan icon'
       %li
         = link_to_with_rights 'Bulk Preclose of Loans', resource(:lendings, :bulk_lending_preclose), :class => 'loan icon'
-        =# link_to_with_rights 'Bulk Edit of Funding Lines', url(:controller => :lendings, :action => :bulk_edit_funding_lines, :flag => 'true'), :class => 'loan icon'
-        =# link_to_with_rights 'under_development', resource(:new_funders), :class => 'funder icon'
         =# link_to_with_rights 'Repayment Styles', resource(:repayment_styles), :class => 'loan icon'
         =# link_to_with_rights 'Insurance companies & products', url(:action => :insurance), :class => 'insurance icon'
 
@@ -122,8 +120,6 @@
       %h2 Securitisation
       %ul.icon_links
         %li
-          =# link_to_with_rights 'Securitization', resource(:securitizations), :class => 'icon accept'
-          =# link_to_with_rights 'Encumberances', resource(:encumberances), :class => 'icon accept'
           = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
 
   - if Mfi.first.system_state == :migration

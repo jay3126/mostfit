@@ -615,52 +615,6 @@ class Lendings < Application
     redirect resource(:lendings, :write_off_lendings, :on_days => params[:on_days], :parent_location_id => parent_location_id, :child_location_id => child_location_id), :message => @message
   end
 
-  def bulk_edit_funding_lines
-    @errors = []
-    branch_id = params[:parent_location_id]
-    center_id = params[:child_location_id]
-    unless params[:flag] == 'true'
-      @errors << "No branch selected " if branch_id.blank?
-      @errors << "No center selected " if center_id.blank?
-    end
-    get_all_loans_eligible_for_sec_or_encum(params) if @errors.blank?
-    render :bulk_edit_funding_lines
-  end
-
-  def update_loans_funding_lines
-    # GATE-KEEPING
-    branch_id = params[:parent_location_id]
-    center_id = params[:child_location_id]
-    created_on = params[:created_on]
-    lending = params[:lending]
-
-    # INITIATIZATION
-    @errors = []
-    message = {}
-    # VALIDATIONS
-    @errors << "Select atleast one loan" if lending.blank?
-
-    # OPERATIONS-PERFORMED
-    if @errors.blank?
-      lending.keys.each do |l|
-        begin
-          lending_id = lending["#{l}"]
-          funding_line_id = params[:funding_line_id]["#{l}"]
-          tranch_id = params[:tranch_id]["#{l}"]
-          FundingLineAddition.assign_tranch_to_loan(lending_id, funding_line_id, tranch_id, session.user.id, created_on, session.user.id)
-          message = {:notice => "Successfully updated funding lines"}
-        rescue => ex
-          @errors << "An error has occured for Loan ID #{lending_id}: #{ex.message}"
-        end
-      end
-    end
-    unless @errors.blank?
-      message = {:error => @errors.flatten.join(', ')}
-    end
-    # RE-DIRECT/RENDER
-    redirect resource(:lendings, :bulk_edit_funding_lines, :parent_location_id => branch_id, :child_location_id => center_id), :message => message
-  end
-
   def reschedule_loan_installment
     @lending = Lending.get(params[:id])
     display @lending, :layout => layout?

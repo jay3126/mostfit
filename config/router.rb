@@ -99,7 +99,7 @@ Merb::Router.prepare do
   resources :occupations
   resources :loan_purposes
   resources :lending_products
-  resources :lendings, :id => %r(\d+), :member => {:reschedule_loan_installment => [:get], :save_reschedule_loan_installment => [:get,:put], :record_lending_preclose => [:put]}, :collection => {:approve_write_off_lendings => [:put,:get], :bulk_lending_preclose => [:get], :record_bulk_lending_preclose => [:put], :write_off_lendings => [:get], :bulk_edit_funding_lines => [:get]}
+  resources :lendings, :id => %r(\d+), :member => {:reschedule_loan_installment => [:get], :save_reschedule_loan_installment => [:get,:put], :record_lending_preclose => [:put]}, :collection => {:approve_write_off_lendings => [:put,:get], :bulk_lending_preclose => [:get], :record_bulk_lending_preclose => [:put], :write_off_lendings => [:get]}
   resources :staff_attendances
   resources :holidays
   resources :verifications
