@@ -22,7 +22,7 @@ class Client
   property :family_income,            Integer
   property :reference,                String, CommonClient::Validations.get_validation(:reference, Client)
   property :name,                     String, CommonClient::Validations.get_validation(:name, Client)
-  property :gender,                   Enum.send('[]', *GENDER_CHOICE), :nullable => true, :default => DEFAULT_GENDER
+  property :gender,                   Enum.send('[]', *GENDER_CHOICE), :nullable => true, :default => FEMALE_GENDER
   property :marital_status,           Enum.send('[]', *MARITAL_STATUS), :default => DEFAULT_MARRITAL_STATUS
   property :reference_type,           Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:reference_type, Client)
   property :reference2,               String, CommonClient::Validations.get_validation(:client_reference2, LoanApplication)
