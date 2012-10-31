@@ -1,0 +1,55 @@
+- unless @errors.blank?
+  - @errors.each do |error|
+    .error
+      = error
+      %br
+
+%h1 Loan Assignments
+.menu-strip{:style => "width: 32%;"}
+  = link_to_with_rights "Click to Download xls file format", url(:controller => :loan_assignments, :action => :download_xls_file_format), :class => "grey_button"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+%br
+.shaded
+  %h2 Upload xls to mark loan as assigned (securitized or encumbered)
+  %form{:action => url(:controller => :loan_assignments, :action => :upload_loan_assignment_file), :enctype => "multipart/form-data", :method => "post"}
+    %input{:name => "file", :size => "80", :type => "file"}
+    %input{:type => "submit", :value => "Upload"}
+  %table
+    %tr{:style => "text-align:left;"}
+      %th Total number of records in file
+      %td= @total_records.blank? ? "N/A" : @total_records
+    %tr{:style => "text-align:left;"}
+      %th Number of records successfully uploaded
+      %td= @sucessfully_uploaded_records.blank? ? "N/A" : @sucessfully_uploaded_records
+    %tr{:style => "text-align:left;"}
+      %th Number of records failed to upload
+      %td= @failed_records.blank? ? "N/A" : @failed_records
+%br
+.shaded
+  %h2 Assigned Loans
+  - unless @loan_assignments.blank?
+    %table.dataTable.report.weeksheet.nojs
+      %thead
+        %tr
+          %td Loan ID
+          %td LAN ID
+          %td Loan Assignment Status
+          %td Funder
+          %td Funding Line
+          %td Tranch
+      %tbody
+        - @loan_assignments.each do |la|
+          - loan = Lending.get(la.loan_id)
+          - funder = NewFunder.get la.funder_id rescue nil
+          - funding_line = NewFundingLine.get la.funding_line_id rescue nil
+          - tranch = NewTranch.get la.tranch_id rescue nil
+          %tr{:style => "text-align:left;"}
+            %td= link_to_with_rights la.loan_id, resource(loan)
+            %td= loan.lan
+            %td= loan_assignment_facade.loan_assignment_status_message(la.loan_id)
+            %td= "#{funder.name} (Id: #{funder.id})" rescue nil
+            %td= "#{funding_line.name} (Id: #{funding_line.id})" rescue nil
+            %td= "#{tranch.name} (Id: #{tranch.id})" rescue nil
+  - else
+    = "No loans has been assigned to either securitization or encumbrance"

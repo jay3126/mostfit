@@ -12,7 +12,8 @@ Merb::Router.prepare do
       resources :new_tranches
     end
   end
-
+  
+  resources :loan_assignments, :id => %r(\d+)
   resources :psl_sub_categories
   resources :priority_sector_lists
 
