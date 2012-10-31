@@ -3,7 +3,11 @@ class LoanFacade < StandardFacade
   # QUERIES
 
   def get_loans_at_location(location, on_date = Date.today)
-    LoanAdministration.get_loans_accounted(location, on_date)
+    if location.location_level.level == 0
+      LoanAdministration.get_loans_administered(location.id, on_date)
+    else
+      LoanAdministration.get_loans_accounted(location.id, on_date)
+    end
   end
 
   def get_loan_frequencies_at_location(at_location, on_date = Date.today)

@@ -91,7 +91,7 @@ class PaymentTransactions < Application
     @message[:error] << "Date cannot be blank" if effective_on.blank?
     @message[:error] << "Please Select Operation Type(Payment/Attendance/Both)" if operation.blank?
     @message[:error] << "Performed by must not be blank" if performed_by.blank?
-    @message[:error] << "Please Select Check box For Payment/Attendance" if payments.values.select{|f| f[:payment]}.blank?
+    @message[:error] << "Please Select Check box For #{operation.humanize}" if payments.values.select{|f| f[:payment]}.blank?
     @message[:error] << "Please Enter Amount Greater Than ZERO" if ['payment','payment_and_client_attendance'].include?(operation) && !payments.values.select{|f| f[:payment] && f[:amount].to_f <= 0}.blank?
     
     # OPERATIONS PERFORMED
@@ -99,8 +99,12 @@ class PaymentTransactions < Application
       begin
         payments.each do |key, payment_value|
           unless payment_value[:payment].blank?
-
-            payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+            lending = Lending.get(payment_value[:product_id])
+            if lending.is_written_off?
+              payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY
+            else
+              payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+            end
             money_amount    = MoneyManager.get_money_instance(payment_value[:amount].to_f)
             cp_id           = payment_value[:counterparty_id]
             product_id      = payment_value[:product_id]
@@ -138,7 +142,8 @@ class PaymentTransactions < Application
           @payment_transactions.each do |pt|
             begin
               money_amount = pt.to_money[:amount]
-              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.receipt_no, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, Constants::Transaction::LOAN_REPAYMENT)
+              product_action = pt.payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY ? Constants::Transaction::LOAN_RECOVERY : Constants::Transaction::LOAN_REPAYMENT
+              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.receipt_no, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, product_action)
               @message[:notice] << "#{operation.humanize} successfully created"
             rescue => ex
               @message[:error] << "An error has occured: #{ex.message}"

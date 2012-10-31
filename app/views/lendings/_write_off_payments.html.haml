@@ -1,0 +1,104 @@
+- if params[:parent_location_id].blank?
+  %h3 Please Select Branch
+- else
+  - if lendings.blank?
+    %h3
+      No loan exists
+  - else
+    - p_id, c_id, s_id = params[:parent_location_id], params[:child_location_id], params[:staff_member_id]
+    - url = resource(:payment_transactions, :create_group_payments, :parent_location_id => p_id, :child_location_id => c_id, :date => get_effective_date)
+    = form_for(:payment_transactions ,:action => url) do
+      = hidden_field :name => 'parent_location_id', :value => p_id
+      = hidden_field :name => 'child_location_id', :value => c_id
+      = hidden_field :name => 'on_days', :value => params[:on_days]
+      %table.report.weeksheet.nojs
+        %thead
+          %tr
+            %th
+              Loan Id
+            %th
+              = LocationLevel.first(:level => 0).name
+            %th
+              = LocationLevel.first(:level => 1).name
+            %th
+              Borrower Name
+            %th
+              Loan Amount
+            %th
+              Loan Disbursed On
+            %th
+              Actual outstanding principal
+            %th
+              Actual outstanding interest
+            %th
+              Actual total outstanding
+            %th
+              Days past due
+            %th
+              Write Off On Date
+            %th
+              Select All
+              %br
+                = check_box :name => 'select_all'
+            %th
+              Receipt No.
+            %th
+              Amount
+        - lendings.each do |lending|
+          %tr
+            %td
+              = link_to_with_rights lending.id, resource(lending)
+            %td
+              - center = lending.administered_at_origin_location
+              = link_to_with_rights center.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => center.id)
+            %td
+              - branch = lending.accounted_at_origin_location
+              = link_to_with_rights branch.name, url(:controller => :user_locations, :action => :show, :id => branch.id)
+            %td
+              - client = lending.loan_borrower.counterparty
+              = link_to_with_rights client.name, url(:controller => :new_clients, :action => :show, :id => client.id)
+            %td
+              = lending.total_loan_disbursed.to_s
+            %td
+              = lending.disbursal_date
+            %td
+              - principal = lending.actual_principal_outstanding(lending.write_off_on_date-1)
+              = principal
+            %td
+              - interest = lending.actual_interest_outstanding(lending.write_off_on_date-1)
+              = interest
+            %td
+              = principal+interest
+            %td
+              = lending.days_past_due_on_date(lending.write_off_on_date-1)
+            %td
+              = lending.write_off_on_date
+            %td
+              = check_box :name => "payment_transactions[payments][#{lending.id}][payment]" ,:value => lending.id
+            %td
+              = text_field :name => "payment_transactions[payments][#{lending.id}][receipt_no]", :style => "width:80px"
+            %td
+              = text_field :name => "payment_transactions[payments][#{lending.id}][amount]", :style => "width:80px"
+              = hidden_field :name => "payment_transactions[payments][#{lending.id}][performed_at]", :value => center.id
+              = hidden_field :name => "payment_transactions[payments][#{lending.id}][accounted_at]", :value => branch.id
+              = hidden_field :name => "payment_transactions[payments][#{lending.id}][counterparty_id]", :value => client.id
+              = hidden_field :name => "payment_transactions[payments][#{lending.id}][product_id]", :value => lending.id
+              = hidden_field :name => 'operation', :value => 'payment'
+        %tfoot
+          %tr.org_total
+            %td{:colspan => 16}
+      %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
+        %table.form{:style => "text-align:right;width:100%;"}
+          %thead
+            %tr
+              %th
+                Date:
+              %td
+                = date_select "payment_transactions[on_date]", get_effective_date, :max_date => Date.today, :size => 8, :location_id => params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
+              %th
+                Performed by:
+              %th
+                - staff_member  = session.user.staff_member
+                = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+              %th
+                = submit "Save Payments"

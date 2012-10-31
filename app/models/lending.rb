@@ -484,7 +484,7 @@ class Lending
   end
 
   def actual_principal_outstanding(on_date = Date.today)
-    return zero_money_amount unless is_outstanding?
+    return zero_money_amount unless is_outstanding_on_date?(on_date)
 
     if (total_loan_disbursed > principal_received_till_date(on_date))
       return (total_loan_disbursed - principal_received_till_date(on_date))
@@ -493,7 +493,7 @@ class Lending
   end
 
   def actual_interest_outstanding(on_date = Date.today)
-    return zero_money_amount unless is_outstanding?
+    return zero_money_amount unless is_outstanding_on_date?(on_date)
 
     if (total_interest_applicable > interest_received_till_date(on_date))
       return (total_interest_applicable - interest_received_till_date(on_date))

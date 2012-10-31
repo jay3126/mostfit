@@ -555,6 +555,8 @@ class Lendings < Application
       @write_off = reporting_facade.loans_eligible_for_write_off(on_days.to_i, accounted_at, administered_at)
       @lendings  = @write_off.last
       @due_days  = @write_off.first
+      @location  = administered_at.blank? ? BizLocation.get(accounted_at) : BizLocation.get(administered_at)
+      @write_off_lendings = loan_facade.get_loans_at_location(@location, get_effective_date).select{|l| l.is_written_off?}
     end
     display @lendings
   end

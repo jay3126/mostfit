@@ -18,7 +18,11 @@
         Select for Write off
       %li#write_off_approve_loans
         Write Off Approved Loans
+      %li#write_off_payments
+        Make Recovery
     %div.tab
       = partial "lendings/write_off_loans", :lendings => @lendings.select{|s| s.write_off_approve.blank? || s.write_off_approve == false}
     %div.tab
       = partial "lendings/write_off_approve_loans", :lendings => @lendings.select{|s| s.write_off_approve == true}
+    %div.tab
+      = partial "lendings/write_off_payments", :lendings => @write_off_lendings
