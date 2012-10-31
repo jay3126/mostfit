@@ -2,7 +2,23 @@
 .menu-strip{:style => "width: 8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 = form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member)) do
-  = partial 'lib/biz_location_selector_for_write_off', :date => get_effective_date, :staff_member => true
+  .shaded
+    %table.form
+      %thead
+        %tr
+          %th Branch:
+          %th
+            = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location'
+          %th Staff Member:
+          %th
+            - staff_members = (params[:parent_location_id].blank? && params[:staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(params[:parent_location_id].to_i, get_effective_date).map(&:staff_assigned)
+            = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id]
+          %th Select Date:
+          %th
+            - date = params[:date].blank? ? get_effective_date : params[:date]
+            = date_select 'date', date, :max_date => Date.today, :size => 15
+          %td
+            = submit "Go"
 - if @staff_member.blank?
   Please Select Staff Member
 - else

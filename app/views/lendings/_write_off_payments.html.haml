@@ -93,8 +93,8 @@
             %tr
               %th
                 Date:
-              %td
-                = date_select "payment_transactions[on_date]", get_effective_date, :max_date => Date.today, :size => 8, :location_id => params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
+              %th
+                = date_select "payment_transactions[on_date]", get_effective_date,{:id => 'payment_transactions_on_date', :max_date => Date.today}
               %th
                 Performed by:
               %th
