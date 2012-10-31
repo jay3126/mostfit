@@ -7,7 +7,6 @@
   - center_id = (params[report] and params[report][:center_id] and not params[report][:center_id].blank?) ? params[report][:center_id] : nil
   - loan_product_id = (params[report] and params[report][:loan_product_id] and not params[report][:loan_product_id].blank?) ? params[report][:loan_product_id] : nil
   - staff_member_id = (params[report] and params[report][:staff_member_id] and not params[report][:staff_member_id].blank?) ? params[report][:staff_member_id] : nil
-  - funder_id = (params[report] and params[report][:funder_id] and not params[report][:funder_id].blank?) ? params[report][:funder_id] : nil
   - funding_line_id = (params[report] and params[report][:funding_line_id] and not params[report][:funding_line_id].blank?) ? params[report][:funding_line_id] : nil
   - securitization_id = (params[report] and params[report][:securitization_id] and not params[report][:securitization_id].blank?) ? params[report][:securitization_id] : nil
   - account_id = (params[report] and params[report][:account_id] and not params[report][:account_id].blank?) ? params[report][:account_id] : nil
@@ -53,10 +52,6 @@
         |
         Staff: 
         = StaffMember.get(staff_member_id).name
-      - if funder_id
-        |
-        Funder:
-        = Funder.get(funder_id).name
       - if funding_line_id
         |
         Funding Line:
@@ -221,10 +216,6 @@
             %td
               Staff member:
               = select(:staff_member_id , :collection => get_accessible_staff_members(@staff), :include_blank => true, :selected => staff_member_id)
-          - if @report.respond_to?(:funder_id)
-            %td
-              Funder:
-              = select(:funder_id , :collection => get_accessible_funders(@user), :include_blank => true, :selected => funder_id, :id => "funder_selector")
           - if @report.respond_to?(:funding_line_id)
             %td
               Funding Line:

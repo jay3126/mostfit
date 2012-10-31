@@ -16,8 +16,6 @@ module Merb
     def current_user_info
       staff_or_funder = ""
       staff_or_funder = session.user.staff_member.blank? ? "#{session.user.name}" : "#{session.user.staff_member.name}"
-      f = Funder.first(:user_id => session.user.id)
-      staff_or_funder += " #{f.name}" if f
       effective_date = session[:effective_date].blank? ? Date.today : session[:effective_date]
       "#{staff_or_funder} Logged in as <b>#{link_to session.user.login, resource(session.user)}</b> (#{session.user.role.to_s.humanize}) #{link_to effective_date, url(:controller => :home, :action => :effective_date)} | #{link_to 'log out', url(:logout)}"
     end
@@ -201,23 +199,6 @@ module Merb
         :id => "#{obj.class.to_s.snake_case}_#{id_col}",
         :selected => selected_id,
         :prompt => (attrs[:prompt] or "&lt;select a center&gt;")
-      html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
-    end
-
-    def select_funding_line_for(obj, col, attrs = {}) # Fix me: Refactor this with all select_*_for
-      id_col = "#{col.to_s}_id".to_sym
-      catalog = Funder.catalog
-      collection = []
-      catalog.keys.sort.each do |funder_name|
-        collection << ['', "FUNDER: #{funder_name}"]
-        catalog[funder_name].each_pair { |k, v| collection << [k.to_s, "!!!!!!#{v}"] }
-      end
-      html = select col,
-        :collection => collection,
-        :name => attrs[:name] || "#{obj.class.to_s.snake_case}[#{id_col}]",
-        :id => attrs[:id] || "#{obj.class.to_s.snake_case}_#{id_col}",
-        :selected => (obj.send(id_col) ? obj.send(id_col).to_s : nil),
-        :prompt => (attrs[:prompt] or "&lt;select a funding line&gt;")
       html.gsub('!!!', '&nbsp;') # otherwise the &nbsp; entities get escaped
     end
 
@@ -605,26 +586,6 @@ module Merb
         StaffMember.all(:order => [:name])
       end
       staff_members.map { |x| [x.id, x.name] }
-    end
-
-    def get_accessible_funders(user=nil)
-      (
-        if session.user.role == :funder
-          Funder.all(:user => user)
-        else
-          Funder.all
-        end).map { |x| [x.id, "#{x.name}"] }
-    end
-
-    def get_accessible_funding_lines(funder_id, user = nil)
-      fl = if user or session.user.role == :funder
-        FundingLine.all(:funder => get_accessible_funders)
-      elsif funder_id and not funder_id.blank?
-        FundingLine.all(:funder_id => funder_id)
-      else
-        []
-      end
-      fl.map { |x| [x.id, "#{x.name}"] }
     end
 
     #this function is used to get the branches which belong to a particular area if area is selected.

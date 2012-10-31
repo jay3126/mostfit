@@ -8,7 +8,6 @@ class FundsSource
   property :created_at,   *CREATED_AT
 
   belongs_to :lending
-  belongs_to :tranch
 
   validates_with_method :loan_and_tranch_dates_are_valid?
 

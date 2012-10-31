@@ -40,7 +40,6 @@ Merb::Router.prepare do
   resources :securitizations, :id => %r(\d+)
   resources :encumberances
   resources :third_parties
-  resources :tranches
   resources :staff_member_attendances
   resources :report_formats
   resources :checkers
@@ -118,12 +117,6 @@ Merb::Router.prepare do
     resources :cgts
   end
   resources :payments
-  resources :funders, :collection => {:funding_lines_tranches => [:get]}
-  resources :funding_lines
-  resources :funders do    
-    resources :portfolios
-    resources :funding_lines
-  end
   resources :repayment_styles
 
   resources :uploads, :member => {:continue => [:get], :reset => [:get], :show_csv => [:get], :reload => [:get], :extract => [:get], :stop => [:get]} do
@@ -173,8 +166,6 @@ Merb::Router.prepare do
   match('/third_parties/:action').to(:controller => 'third_parties').name(:third_party_actions)
   match('/third_parties/new').to(:controller => 'third_parties', :action => 'new')
   match('/third_parties/:id').to(:controller => 'third_parties', :action => 'show')
-  match('/tranches/:action').to(:controller => 'tranches').name(:tranch_actions)
-  match('/tranches/new').to(:controller => 'tranch', :action => 'new')
   match('/auth_override_reasons/:action').to(:controller => 'auth_override_reasons').name(:auth_override_reason_actions)
   match('/auth_override_reasons/new').to(:controller => 'auth_override_reasons', :action => 'new')
 
@@ -198,7 +189,6 @@ Merb::Router.prepare do
     match('/errors.:format', :method => "get").to(:controller => 'exceptions', :action =>'index')
     match('/securitizations.:format', :method => "post").to(:controller => 'securitizations', :action => 'create')
     match('/third_parties.:format', :method => "post").to(:controller => 'third_parties', :action => 'create')
-    match('/tranches.:format', :method => "post").to(:controller => 'tranches', :action => 'create')
   end
   match('/accounts/:account_id/accounting_periods/:accounting_period_id/account_balances/:id/verify').to(:controller => 'account_balances', :action => 'verify').name(:verify_account_balance)
   match('/accounting_periods/:id/close').to(:controller => 'accounting_periods', :action => 'close').name(:close_accounting_period)

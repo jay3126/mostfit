@@ -120,7 +120,6 @@ class Lending
   has n, :simple_insurance_policies
   has n, :loan_claims, 'LoanClaimProcessing'
   has n, :funds_sources
-  has n, :tranches, :through => :funds_sources
 
   def register_loan_claim(for_death_event, on_date)
     Validators::Arguments.not_nil?(for_death_event, on_date)

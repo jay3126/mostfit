@@ -19,9 +19,7 @@ class Report
 
   def get_parameters(params, user=nil)
     staff     = user.staff_member if user
-    @funder = Funder.first(:user_id => user.id) if user and user.role == :funder
     @account = Account.all(:order => [:name])
-    @funder = Funder.get(params[:funder_id]) if not @funder and params and params[:funder_id] and not params[:funder_id].blank?
 
     [:loan_product_id, :late_by_more_than_days, :more_than, :late_by_less_than_days, :attendance_status, :include_past_data, :include_unapproved_loans].each{|key|
       if params and params[key] and params[key].to_i>0

@@ -25,7 +25,6 @@ class Portfolio
   property :created_at, DateTime, :default => Time.now
   property :updated_at, DateTime, :default => Time.now
 
-  belongs_to :funder
   has n, :portfolio_loans
   belongs_to :created_by,  :child_key => [:created_by_user_id],   :model => 'User'
 
