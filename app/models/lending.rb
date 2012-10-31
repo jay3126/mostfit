@@ -143,7 +143,11 @@ class Lending
     funding_line_id = NewFundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id
     tranch_id = NewTranch.first(:reference => row[headers[:tranch_serial_number]]).id
     applied_money_amount = MoneyManager.get_money_instance(row[headers[:applied_amount]])
-    applied_amount = approved_amount = disbursed_amount = applied_money_amount
+    approved_money_amount = MoneyManager.get_money_instance(row[headers[:approved_amount]])
+    disbursed_money_amount = MoneyManager.get_money_instance(row[headers[:disbursed_amount]])
+    applied_amount = applied_money_amount
+    approved_amount = approved_money_amount
+    disbursed_amount = disbursed_money_amount
     repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
     tenure = row[headers[:tenure]]
     applied_on_date = Date.parse(row[headers[:applied_on]])
@@ -171,8 +175,9 @@ class Lending
                                     recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff, 
                                     upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
 
-    new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
-
+    new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin,
+                                                          applied_by_staff, recorded_by_user)
+    
     new_loan  = to_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
                                  accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
                                  recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
@@ -181,9 +186,11 @@ class Lending
     total_interest_applicable = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
     principal_and_interest_amounts = from_lending_product.amortization
-    # TODO create a LoanAdministration instance for the loan administered_at_origin and accounted_at_origin
+
+    #setting the initial status of loan.
     new_loan.set_status(NEW_LOAN_STATUS, applied_on_date)
-    new_loan.set_status(DISBURSED_LOAN_STATUS, disbursal_date)
+
+    #making enteries in intermediatory models.
     LoanBaseSchedule.create_base_schedule(applied_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
                                           repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
@@ -192,6 +199,15 @@ class Lending
 
     FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date,
                                               recorded_by_user)
+
+    #approving the loan.
+    new_loan.approve(approved_amount, approved_on_date, approved_by_staff)
+
+    #making the disbursement entry.
+    payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
+    payment_facade.record_payment(new_loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', new_loan.id, 'client', new_loan.loan_borrower.counterparty_id, new_loan.administered_at_origin, new_loan.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+
+   
     new_loan
   end
 

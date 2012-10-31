@@ -37,17 +37,21 @@ class BizLocation
   validates_present :name
 
   def self.from_csv(row, headers)
-    location_level = LocationLevel.first(:name => row[headers[:location_level_name]])
+    location_level = LocationLevel.first(:name => row[headers[:location_level_name]])    
     raise ArgumentError, "Location Level(#{row[headers[:location_level_name]]}) does not exist" if location_level.blank?
+    location_level_number = location_level.level
     if location_level.level == 0
       center_disbursal_date = Date.parse(row[headers[:center_disbursal_date]])
     else
       center_disbursal_date = Date.today
     end
 
+    originator_by = StaffMember.first(:name => row[headers[:originated_by]]).id
     creation_date = Date.parse(row[headers[:creation_date]])
-    obj = new(:name => row[headers[:name]], :center_disbursal_date => center_disbursal_date,
-      :location_level => location_level, :creation_date => creation_date, :upload_id => row[headers[:upload_id]])
+    name = row[headers[:name]]
+    upload_id = row[headers[:upload_id]]
+    address = row[headers[:address]]
+    obj = create_new_location(name, creation_date, location_level_number, originator_by, address, center_disbursal_date)
     if obj.save
       parent_location_level = LocationLevel.first(:level => obj.location_level.level+1)
       unless parent_location_level.blank?
