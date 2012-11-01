@@ -42,8 +42,6 @@ Merb::Router.prepare do
   resources :encumberances
   resources :third_parties
   resources :staff_member_attendances
-  resources :report_formats
-  resources :checkers
   resources :staff_postings
   resources :simple_fee_products
   resources :simple_insurance_products
@@ -120,9 +118,7 @@ Merb::Router.prepare do
   resources :payments
   resources :repayment_styles
 
-  resources :uploads, :member => {:continue => [:get], :reset => [:get], :show_csv => [:get], :reload => [:get], :extract => [:get], :stop => [:get]} do
-    resources :checkers, :collection => {:recheck => [:get]}
-  end
+  resources :uploads, :member => {:continue => [:get], :reset => [:get], :show_csv => [:get], :reload => [:get], :extract => [:get], :stop => [:get]}
 
   # maintainer slice
   slice(:maintainer, :path_prefix => "maintain")
