@@ -56,6 +56,14 @@ class LoanReceipt
     add_up(all_receipts)
   end
 
+  # Sum of all receipts upto and including the specified between dates
+  def self.sum_between_dates(from_date = Date.today, to_date = Date.today)
+    matching_date                    = { }
+    matching_date[:effective_on.gte] = from_date
+    matching_date[:effective_on.lte] = to_date
+    all_receipts                     = all(matching_date)
+    add_up(all_receipts)
+  end
   private
 
   # Add up the money amounts on receipt and return a hash with the correct keys

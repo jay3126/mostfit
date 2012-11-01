@@ -163,25 +163,25 @@ class Lending
     upload_id = row[headers[:upload_id]]
 
     obj = create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, lending_product_id, loan_borrower_id, administered_at_origin,
-                                   accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-                                   recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
-                                   disbursed_by_staff, upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
+      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
+      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
+      disbursed_by_staff, upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
     [obj.save, obj]
   end
 
   # Creates a new loan from csv.
   def self.create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, for_borrower, administered_at_origin,
-                                    accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-                                    recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff, 
-                                    upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
+      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
+      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
+      upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
 
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin,
-                                                          applied_by_staff, recorded_by_user)
+      applied_by_staff, recorded_by_user)
     
     new_loan  = to_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-                                 accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-                                 recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
-                                 disbursed_by_staff, upload_id, approved_amount, disbursed_amount)
+      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
+      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
+      disbursed_by_staff, upload_id, approved_amount, disbursed_amount)
     
     total_interest_applicable = from_lending_product.total_interest_money_amount
     num_of_installments = tenure
@@ -192,13 +192,13 @@ class Lending
 
     #making enteries in intermediatory models.
     LoanBaseSchedule.create_base_schedule(applied_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
-                                          repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
+      repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
     LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff,
-                              recorded_by_user, applied_on_date)
+      recorded_by_user, applied_on_date)
 
     FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date,
-                                              recorded_by_user)
+      recorded_by_user)
 
     #approving the loan.
     new_loan.approve(approved_amount, approved_on_date, approved_by_staff)
@@ -662,8 +662,16 @@ class Lending
     historical_amounts_received_till_date(on_date)
   end
 
+  def amounts_received_between_dates(from_date = Date.today, to_date = Date.today)
+    historical_amounts_received_between_dates(from_date, to_date)
+  end
+
   def historical_amounts_received_till_date(on_or_before_date)
     self.loan_receipts.sum_till_date(on_or_before_date)
+  end
+
+  def historical_amounts_received_between_dates(from_date = Date.today, to_date = Date.today)
+    self.loan_receipts.sum_between_dates(from_date, to_date)
   end
 
   def principal_received_till_date(on_date = Date.today); amounts_received_till_date(on_date)[PRINCIPAL_RECEIVED]; end
@@ -1064,8 +1072,8 @@ class Lending
   end
 
   def self.to_loan(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
-                   administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-                   applied_by_staff, recorded_by_user, lan = nil, loan_purpose = nil)
+      administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
+      applied_by_staff, recorded_by_user, lan = nil, loan_purpose = nil)
     Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower,
       administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date,
       scheduled_first_repayment_date, applied_by_staff, recorded_by_user)
@@ -1091,14 +1099,14 @@ class Lending
   end
 
   def self.to_loan_from_csv(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-                            accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-                            applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-                            upload_id, approved_amount, disbursed_amount)
+      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
+      applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
+      upload_id, approved_amount, disbursed_amount)
 
     Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-                                   accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-                                   applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-                                   approved_amount, disbursed_amount)
+      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
+      applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
+      approved_amount, disbursed_amount)
 
     loan_hash                                  = { }
     loan_hash[:applied_amount]                 = for_amount.amount

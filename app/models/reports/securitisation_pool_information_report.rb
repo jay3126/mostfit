@@ -77,11 +77,8 @@ class SecuritisationPoolInformationReport < Report
         loan_disbursed_amount      = loan.to_money[:disbursed_amount]
         loan_outstanding_principal = loan.actual_principal_outstanding
         loan_outstanding_interest  = loan.actual_interest_outstanding
-        total_interest_due_at_org  = MoneyManager.default_zero_money
-        demand_completed_weeks     = MoneyManager.default_zero_money
-        date_week                  = ''
-        principal_week             = MoneyManager.default_zero_money
-        interest_week              = MoneyManager.default_zero_money
+        total_interest_due_at_org  = loan.lending_product.total_interest_money_amount
+        demand_completed_weeks     = get_reporting_facade(User.first).number_of_installments_per_loan(loan.id)[:installments_paid_till_date]
         center                     = loan.administered_at_origin_location
         center_id                  = center ? center.id : "Not Specified"
         center_name                = center ? center.name : "Not Specified"
@@ -101,8 +98,7 @@ class SecuritisationPoolInformationReport < Report
           :installment_frequency => installment_frequency, :installment_number => installment_number,
           :loan_disbursed_date => loan_disbursed_date, :loan_disbursed_amount => loan_disbursed_amount,
           :loan_outstanding_principal => loan_outstanding_principal, :loan_outstanding_interest => loan_outstanding_interest,
-          :total_interest_due_at_org => total_interest_due_at_org, :demand_completed_weeks => demand_completed_weeks,
-          :date_week => date_week, :principal_week => principal_week, :interest_week => interest_week }
+          :total_interest_due_at_org => total_interest_due_at_org, :demand_completed_weeks => demand_completed_weeks}
       end
       data
     end

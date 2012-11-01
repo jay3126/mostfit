@@ -64,17 +64,18 @@
           Total Interest due at Origination
         %th
           Demand completed weeks
-        %th
-          Date week
-        %th
-          Principal week
-        %th
-          Interest week
-
+        - (1..50).each do |week|
+          %th
+            = "Date week #{week}"
+          %th
+            = "Principal week #{week}"
+          %th
+            = "Interest week #{week}"
     %tbody
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
       - @default_currency ||= MoneyManager.get_default_currency
-      - @data.each do |branch, values|
+      - @data.each do |loan_id, values|
+        - loan = Lending.get loan_id
         %tr
           %td
             %b
@@ -142,56 +143,15 @@
             - accumulate_row_values[:total_interest_due_at_org] += values[:total_interest_due_at_org]
           %td
             = values[:demand_completed_weeks]
-          %td
-            = values[:date_week]
-          %td
-            = values[:principal_week]
-            - accumulate_row_values[:principal_week] += values[:principal_week]
-          %td
-            = values[:interest_week]
-            - accumulate_row_values[:interest_week] += values[:interest_week]
-    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-    %tfoot
-      %tr
-        %th
-          Total
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-        %td
-          = total_rows[:loan_insurance]
-        %td
-        %td
-        %td
-          = total_rows[:fee_collected]
-        %td
-          = total_rows[:installment_amount]
-        %td
-        %td
-        %td
-        %td
-          = total_rows[:loan_disbursed_amount]
-        %td
-          = total_rows[:loan_outstanding_principal]
-        %td
-          = total_rows[:loan_outstanding_interest]
-        %td
-          = total_rows[:total_interest_due_at_org]
-        %td
-        %td
-        %td
-          = total_rows[:principal_week]
-        %td
-          = total_rows[:interest_week]
+          - loan_payments = loan.loan_base_schedule.base_schedule_line_items(:payment_type => :repayment)
+          - loan_payments.each do |payment|
+            %td
+              = payment.on_date
+            %td
+              = payment.to_money[:scheduled_principal_due]
+            %td
+              = payment.to_money[:scheduled_interest_due]
+          - (1..50-loan_payments.size).each do |np|
+            %td
+            %td
+            %td

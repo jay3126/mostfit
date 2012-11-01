@@ -120,13 +120,15 @@ module Pdf
       FileUtils.mkdir_p(folder)
       idx = 0
       all_branches = location_ids.blank? ? BizLocation.all('location_level.level' => 1) : BizLocation.all(:id => location_ids)
+      custom_date = CustomCalendar.first(:on_date => date)
+      collection_date = custom_date.blank? ? date : custom_date.collection_date
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
       all_branches.each do |branch|
         weeksheets = []
-        filename = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.pdf")
+        filename = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}.pdf")
         pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
         pdf.select_font "Times-Roman"
-        pdf.info.title = "due_generation_#{branch.id}_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}"
+        pdf.info.title = "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}"
         pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
         pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
         pdf.text("\n")
@@ -146,7 +148,8 @@ module Pdf
             table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{branch.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{location.name}"},
               {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
               {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{location.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"},
-              {"col1"=>"<b>Meeting Start Time</b>", "col_s1"=>":", "col2"=>"", "col3"=>"<b>Meeting End Time</b>","col_s2"=>":", "col4"=>""}
+              {"col1"=>"<b>Meeting Start Time</b>", "col_s1"=>":", "col2"=>"", "col3"=>"<b>Meeting End Time</b>","col_s2"=>":", "col4"=>""},
+              {"col1"=>"<b>Unique Id</b>", "col_s1"=>":", "col2"=>pdf.info.title, "col3"=>"<b>Collection Date</b>","col_s2"=>":", "col4"=>collection_date}
             ]
 
             table1.column_order  = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
@@ -179,7 +182,6 @@ module Pdf
                     "Loan LAN No."    => lending.lan,
                     "POS"             => ws.loan_schedule_principal_outstanding,
                     "Advance"         => ws.loan_advance_receipts,
-                    "Collection Date" => ws.loan_origin_schedule_date,
                     "Inst. Date"      => ws.loan_schedule_date,
                     "Inst. No."       => ws.loan_installment_number,
                     "OD"              => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
@@ -192,7 +194,7 @@ module Pdf
               end
             end
             table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
-            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Collection Date", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
+            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
             table.show_lines        = :all
             table.show_headings     = true
             table.shade_rows        = :none
