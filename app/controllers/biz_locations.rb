@@ -122,6 +122,7 @@ class BizLocations < Application
     recorded_by        = session.user
     performed_by       = recorded_by.staff_member
     staff              = StaffMember.get b_managed_by unless b_managed_by.blank?
+    parent_location    = BizLocation.get(parent_location_id) unless parent_location_id.blank?
 
 
     # VALIDATIONS
@@ -135,7 +136,7 @@ class BizLocations < Application
     message[:error] << "Please fill right value of time" if b_level == '0' && !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
     message[:error] << "Default Disbursal Date cannot be holiday" if b_level == '0' && !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
-    parent_location = BizLocation.get(parent_location_id) unless parent_location_id.blank?
+    message[:error] << "Creation Date cannot be before Parent Location of Creation Date" if !parent_location_id.blank? && parent_location.creation_date > b_creation_date
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
@@ -311,7 +312,7 @@ class BizLocations < Application
     message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
     message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
-    
+    message[:error] << "Creation Date cannot be before Parent Location of Creation Date" if !@parent_location.blank? && @parent_location.creation_date > b_creation_date
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
