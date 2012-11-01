@@ -5,18 +5,28 @@
         %th
           Name
         %td
-          = text_field :name
-      %tr
+          = text_field :name, :style => "width:70%"
+        %td{:colspan=>3}
+          = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;', :class => "grey_button"
+      %tr{:id => 'tr_0'}
         %th
           Branch
         %td
-          = text_field :name => 'bank_branch[0][bank_branch]'
+          = text_field :name => 'bank_branch[0][bank_branch]', :style => "width:70%"
         %th
           Location
         %td
           = select :name => "bank_branch[0][location]", :collection => get_all_nominal_branches, :text_method => 'name', :value_method => 'id', :class => 'biz_location'
-          &nbsp; &nbsp;
-          = link_to "add another branch", '#', :onclick => 'add_text_field(); return false;', :class => "grey_button"
+        %th
+          Account Name
+        %td
+          = text_field :name => "bank_branch[0][account][0][account_name]", :style => "width:70%", :class => 'biz_account'
+        %th
+          Account No.
+        %td
+          = text_field :name => "bank_branch[0][account][0][account_no]", :style => "width:70%"
+        %td
+          = link_to "Account", '#', :onclick => 'add_account_text_field(0); return false;', :class => "grey_button"
     = submit "Save"
     &nbsp;&nbsp;
     %b

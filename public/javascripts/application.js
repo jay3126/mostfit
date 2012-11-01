@@ -865,9 +865,21 @@ function get_all_location_on_level() {
 function add_text_field(){
   locations = jQuery('.biz_location').html();
   count = jQuery('.biz_location').size();
-  jQuery("#TextBoxesGroup").append('<tr><th>Branch </th><td>' +
-    "<input type='text' name='bank_branch["+count+"][bank_branch]' id='bank_branch_"+count+"__bank_branch_' value='' ></td>"+
+  a_count = jQuery('.biz_account').size();
+  jQuery("#TextBoxesGroup").append("<tr id='tr_"+count+"'><th>Branch </th><td>" +
+    "<input type='text' name='bank_branch["+count+"][bank_branch]' id='bank_branch_"+count+"__bank_branch_' value='' style='width:70%'></td>"+
     "<th> Location</th> <td><select id='bank_branch_0"+count+"__location_' name='bank_branch["+count+"][location]' class='biz_location'>"+locations+
+    "<th>Account Name </th><td><input type='text' name='bank_branch["+count+"][account]["+a_count+"][account_name]' id='bank_branch_"+count+"_account_"+a_count+"_account_name_' value='' style='width:70%' class='biz_account'></td>"+
+    "<th>Account No. </th><td><input type='text' name='bank_branch["+count+"][account]["+a_count+"][account_no]' id='bank_branch_"+count+"_account_"+a_count+"_account_no_' value='' style='width:70%'></td>"+
+    "<td><a onclick='add_account_text_field("+count+"); return false;' href='#' class='grey_button'>Account</a>"+
+    "</td></tr>");
+}
+
+function add_account_text_field(count){
+  a_count = jQuery('.biz_account').size();
+  jQuery('#tr_'+count).after('<tr><td></td><td></td><td></td><td></td>' +
+    "<th>Account Name </th><td><input type='text' name='bank_branch["+count+"][account]["+a_count+"][account_name]' id='bank_branch_"+count+"_account_"+a_count+"_account_name_' value='' style='width:70%' class='biz_account'></td>"+
+    "<th>Account No. </th><td><input type='text' name='bank_branch["+count+"][account]["+a_count+"][account_no]' id='bank_branch_"+count+"_account_"+a_count+"_account_no_' value='' style='width:70%'></td>"+
     "</td></tr>");
 }
 
