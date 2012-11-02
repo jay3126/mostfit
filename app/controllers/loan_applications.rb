@@ -301,7 +301,7 @@ class LoanApplications < Application
     begin
       loan_application = @loan_application.update(params[:loan_application])
       message = {:notice => "Loan application updated succesfully"}
-      if crucial_info_changed
+      if crucial_info_changed && @loan_application.status != Constants::Status::LOAN_FILE_GENERATED_STATUS
         @loan_application.resubmit_loan_application(params[:loan_application])
         is_crucial_info_updated = true
       end

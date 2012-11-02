@@ -1,6 +1,4 @@
 class CenterCycles < Application
-
-  provides :xml, :yaml, :js, :html
   
   def create
     center_id = params[:center_id]

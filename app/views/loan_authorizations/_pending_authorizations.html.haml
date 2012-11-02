@@ -5,13 +5,11 @@
   }
 
   $(document).ready(function() {
-  $('#toggle_select_approve_all').change(function() {
-    $('.approve_all').attr('checked',$(this).attr('checked'))});
-  });
+    $('#toggle_select_approve_all').change(function() {
+      $('.approve_all').attr('checked',$(this).attr('checked'))});
 
-  $(document).ready(function() {
-  $('#toggle_select_reject_all').change(function() {
-    $('.reject_all').attr('checked',$(this).attr('checked'))});
+    $('#toggle_select_reject_all').change(function() {
+      $('.reject_all').attr('checked',$(this).attr('checked'))});
   });
 
 #pending_list
@@ -41,9 +39,11 @@
                 = "Credit Bureau Rejection Reason"
               %td
                 = "Approve all"
+                %br
                 = radio_button :name => 'bulk_select', :id => "toggle_select_approve_all"
               %td
                 = "Reject all"
+                %br
                 = radio_button :name => 'bulk_select', :id => "toggle_select_reject_all"
               %td{:colspan => 2}
                 = "Override reason"
