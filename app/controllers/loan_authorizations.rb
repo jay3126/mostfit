@@ -91,7 +91,6 @@ class LoanAuthorizations < Application
   def get_pending_and_completed_auth(params)
     @pending_authorizations = loan_applications_facade.pending_authorization(search_options(@branch_id, @center_id))
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => @branch_id, :at_center_id => @center_id})
-    @completed_authorizations = loan_applications_facade.completed_authorization(search_options(@branch_id, @center_id))
   end
 
   def search_options(branch_id = nil, center_id = nil)

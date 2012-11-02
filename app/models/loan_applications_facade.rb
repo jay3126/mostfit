@@ -8,13 +8,15 @@ class LoanApplicationsFacade < StandardFacade
   def get_all_loan_applications_for_branch_and_center(search_options = {})
     LoanApplication.get_all_loan_applications_for_branch_and_center(search_options)
   end
-  # General information
+
+  # either use or remove
   def get_loan_application_status(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
     loan_application.get_status
   end
 
+  # either use or remove
   def get_loan_application_info(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
@@ -22,7 +24,6 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # Rate suspect on de-dupe
-
   def rate_suspected_duplicate(loan_application_id)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
@@ -36,15 +37,13 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # Rate on credit bureau response
-
   def rate_by_credit_bureau_response(loan_application_id, rating)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
     loan_application.record_credit_bureau_response(rating)
   end
 
-  # Loan authorization
-
+  # Loan authorizations
   def check_loan_authorization_status(credit_bureau_status, authorization_status)
     LoanApplication.check_loan_authorization_status(credit_bureau_status, authorization_status)
   end
@@ -66,7 +65,6 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # CPVs
-
   def record_CPV1_approved(loan_application_id, by_staff, on_date)
     loan_application = LoanApplication.get(loan_application_id)
     raise NotFound if loan_application.nil?
@@ -106,8 +104,8 @@ class LoanApplicationsFacade < StandardFacade
   def find_cpv1_for_loan_application(loan_application_id)
     ClientVerification.find_cpv1_for_loan_application(loan_application_id)
   end
-  # Locate center cycle information
 
+  # Locate center cycle information
   def get_current_center_cycle_number(at_center_id)
     CenterCycle.get_current_center_cycle(at_center_id)
   end
@@ -116,21 +114,17 @@ class LoanApplicationsFacade < StandardFacade
     CenterCycle.get_cycle(at_center_id, for_cycle_number)
   end
 
-  # Locate loan applications in progress
-
   # Returns a list of all client IDs for existing clients that have a loan application
   # submitted at a center for a given center cycle
   def all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
     LoanApplication.all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
   end
 
-  # Locate loan files
-
   def locate_loan_file(by_loan_file_identifier)
     LoanFile.locate_loan_file(by_loan_file_identifier)
   end
 
-  #get a single loan file at a center, at a branch for a cycle number
+  # get a single loan file at a center, at a branch for a cycle number
   def locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
     LoanFile.locate_loan_file_at_center(at_branch, at_center, for_cycle_number)
   end
@@ -139,13 +133,12 @@ class LoanApplicationsFacade < StandardFacade
     LoanFile.get_loan_file_info(loan_file_identifier)
   end
 
-  #return all loan files at a center in a branch for cycle number
+  # return all loan files at a center in a branch for cycle number
   def locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
     LoanFile.locate_loan_files_at_center_at_branch_for_cycle(at_branch, at_center, for_cycle_number)
   end
 
   # Create loan file
-
   def create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, *loan_application_id)
     LoanApplication.create_loan_file(at_branch, at_center, for_cycle_number, scheduled_disbursal_date, scheduled_first_payment_date, by_staff, on_date, user_id, *loan_application_id)
   end
@@ -155,7 +148,6 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # De-dupe
-
   # returns all loan applications which are pending for de-dupe process
   def self.pending_dedupe
     LoanApplication.pending_dedupe
@@ -193,46 +185,14 @@ class LoanApplicationsFacade < StandardFacade
     LoanApplication.pending_CPV(search_options)
   end
 
-  def recently_recorded_CPV(search_options = {})
-    LoanApplication.recently_recorded_client_verifications(search_options)
-  end
-
   def pending_loan_file_generation(search_options = {})
     LoanApplication.pending_loan_file_generation(search_options)
   end
 
-  # Update action completed (background tasks)
-
-  def dedupe_screened(*loan_application_ids)
-  end
-
-  def credit_bureau_request_generated(*loan_application_ids)
-  end
-
   # Lists by status
-
   # General purpose search
   def search(search_options = {})
     LoanApplication.search(search_options)
-  end
-
-  def newly_created(search_options = {})
-  end
-
-  def completed_dedupe(search_options = {})
-  end
-
-  def completed_dedupe_review(search_options = {})
-  end
-
-  def completed_credit_bureau_rating(search_options = {})
-  end
-
-  def completed_CPV(search_options={})
-  end
-
-  def completed_authorization(search_options = {})
-    LoanApplication.completed_authorization(search_options)
   end
 
   # generates credit bureau request file for particular branch and center
@@ -252,11 +212,11 @@ end
 # The loan applications are rated on the response from the credit bureau
 # The loan applications may then be approved or rejected for fresh loans
 # Approved loan applications progress to center creation
-## CPV must be completed
-## CGT is conducted for the center
-## GRT is conducted at the center
+# CPV must be completed
+# CGT is conducted for the center
+# GRT is conducted at the center
 # For loan applications that clear CGT at a center, a loan file is created
-## For loan file creation, a scheduled disbursal date, a first payment date must be assigned
+# For loan file creation, a scheduled disbursal date, a first payment date must be assigned
 # The loan file travels to FINOPS
 # FINOPS subjects the loan file to health check
 # When health check is cleared, loans may be made

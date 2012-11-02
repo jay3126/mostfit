@@ -169,20 +169,6 @@ class LoanApplication
     self.client
   end
 
-  
-  def create_loan(loan_params = {})
-    raise ArgumentError if loan_params.blank? and !(loan_params.is_a?(Hash))
-    loan_params.merge!(:client_id => self.client_id)
-    loan = nil
-    return loan if (self.client_id.nil? || !(self.loan.nil?))
-    Loan.transaction do |t|
-      loan = Loan.create(loan_params)
-      self.loan = loan
-      t.rollback unless loan.saved? and self.save
-    end
-    loan
-  end
-
   def is_unique_for_center_cycle?
     unless client_id.nil? or self.saved?
       client_ids = LoanApplication.all(:center_cycle_id => center_cycle_id).aggregate(:client_id)
@@ -423,12 +409,6 @@ class LoanApplication
     pending.collect {|lap| lap.to_info}
   end
 
-  def self.completed_authorization(search_options = {})
-    search_options.merge!(:status => AUTHORIZATION_STATUSES, :order => [:updated_at.desc])
-    all(search_options)
-    #    loan_applications.collect {|lap| lap.to_info}
-  end
-
   # Is pending loan file generation
   def is_pending_loan_file_generation?
     not (self.loan_files and not (self.loan_files.empty?))
@@ -439,37 +419,6 @@ class LoanApplication
     search_options[:status] = CPV2_APPROVED_STATUS
     loan_applications = all(search_options)
     loan_applications.collect {|lap| lap.to_info}
-  end
-
-  #returns all loan applications for which CPV was recently recorded
-  def self.recently_recorded_client_verifications(search_options = {})
-    cpv_completed_statuses = [CPV1_APPROVED_STATUS, CPV1_REJECTED_STATUS, CPV2_APPROVED_STATUS, CPV2_REJECTED_STATUS]
-    search_options.merge!({:status => cpv_completed_statuses})
-    recent = all(search_options)
-    recent.collect{|lap| lap.to_info}
-  end
-
-  #returns all loan applications for which CPV was recently recorded
-  def self.recently_recorded_by_user(by_user_id)
-    raise ArgumentError, "User id not supplied" unless by_user_id
-
-    #get all client_verifications which were done by this user
-    verifications_by_this_user = ClientVerification.all(:created_by_user_id => by_user_id)
-
-    #get corresponding loan applications
-    loan_applications_which_have_CPVs_by_this_user = []
-    verifications_by_this_user.each do |v|
-      loan_applications_which_have_CPVs_by_this_user.push(LoanApplication.get(v.loan_application_id))
-    end
-    loan_applications_which_have_CPVs_by_this_user.uniq!
-
-    #get all loan application info objects
-    linfos = []
-    loan_applications_which_have_CPVs_by_this_user.each do |l|
-      puts "Processing #{l}"
-      linfos.push(l.to_info)
-    end
-    linfos
   end
 
   # returns all loan applications which are pending for de-dupe process
@@ -516,12 +465,6 @@ class LoanApplication
     adapter = DataMapper.repository(:default).adapter
     adapter.execute("delete from loan_authorizations where loan_application_id = #{self.id}") if self.to_info && self.to_info.authorization_info
     adapter.execute("delete from client_verifications where loan_application_id = #{self.id}") unless self.client_verifications.blank?
-    #    unless self.loan_file_additions.blank?
-    #      loan_file_addition = LoanFileAddition.first(:loan_application_id => self.id)
-    #      loan_file_id = loan_file_addition.loan_file_id
-    #      adapter.execute("delete from loan_file_additions where loan_file_id = #{loan_file_id}")
-    #      adapter.execute("delete from loan_files where id = #{loan_file_id}")
-    #    end
   end
 
   def self.is_center_eligible_for_cgt_grt?(branch, center)
