@@ -3,6 +3,14 @@
     jQuery("form input[type='radio']").attr('checked',false);
   }
 
+  $(document).ready(function() {
+    $('#select_all_as_approved').change(function() {
+      $('.approve_duplicates').attr('checked',$(this).attr('checked'))});
+
+    $('#select_all_as_rejected').change(function() {
+      $('.reject_duplicates').attr('checked',$(this).attr('checked'))});
+  });
+
 #pending_list
   .shaded
     %h2 Pending Suspected duplicate loan applications
@@ -11,15 +19,22 @@
         %table.narrow.form{:width => "100%"}
           %thead
             %tr
-              %th S.No.
-              %th ID
-              %th Name
-              %th Guarantor Name
-              %th Relationship
-              %th DOB
-              %th Address
-              %th{:colspan => 2, :style=>"text-align : center"} Actions
-              %th Potential Matches
+              %td S.No.
+              %td ID
+              %td Name
+              %td Guarantor Name
+              %td Relationship
+              %td DOB
+              %td Address
+              %td
+                Approve all
+                %br
+                = radio_button :name => "bulk_select", :id => "select_all_as_approved"
+              %td
+                Reject all
+                %br
+                = radio_button :name => "bulk_select", :id => "select_all_as_rejected"
+              %td Potential Matches
           %tbody
             - s_no = 0
             - @suspected_duplicates.each do |loan_application|
@@ -40,12 +55,10 @@
                   = loan_application.client_address
                 %td
                   - selected_clear =   !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "clear" ? "checked" : nil
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'clear', :checked => selected_clear }
-                  Clear
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'clear', :checked => selected_clear, :class => "approve_duplicates" }
                 %td
                   - selected_confirm = !params[:clear_or_confirm_duplicate].nil? && params[:clear_or_confirm_duplicate]["#{loan_application.id}"] == "confirm" ? "checked" : nil
-                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm }
-                  Confirm
+                  %input{:name => "[clear_or_confirm_duplicate][#{loan_application.id}]", :type => "radio", :value => 'confirm', :checked => selected_confirm, :class => "reject_duplicates" }
                   = hidden_field :name => 'parent_location_id', :value => @branch.id
                   = hidden_field :name => 'child_location_id', :value => @center.id unless @center.blank?
                 %td
