@@ -19,8 +19,16 @@ class LocationHoliday
 
   validates_is_unique :name
   validates_is_unique :on_date, :scope => :move_work_to_date
-
+  validates_with_method :check_same_date?
   # validates_with_method :check_working_business_holiday?
+
+  def check_same_date?
+    if self.on_date == self.move_work_to_date
+      [false, "Move Date cannot be same as Holiday Date"]
+    else
+      true
+    end
+  end
 
   def check_working_business_holiday?
     valid_dates = LocationHoliday.get_configuration_facade(User.first).permitted_business_days_in_month(self.move_work_to_date)
@@ -28,8 +36,6 @@ class LocationHoliday
       [false, "There is already Working/Business Holiday defined on Move Date(#{self.move_work_to_date})"]
     elsif !valid_dates.include?(self.on_date)
       [false, "There is already Working/Business Holiday defined On Date(#{self.on_date})"]
-    elsif self.on_date == self.move_work_to_date
-      [false, "Move Date cannot be same as Holiday Date"]
     else
       true
     end
