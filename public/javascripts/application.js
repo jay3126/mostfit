@@ -45,6 +45,16 @@ function dataTables(){
       }
     });
   }
+  else if ($('table').hasClass('location')){
+    $('table.weeksheet').dataTable({
+      "bProcessing": true,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
+    });
+  }
   else if ($('table').hasClass('location_weeksheet')){
     $('table.weeksheet').dataTable({
       "bPaginate": false,

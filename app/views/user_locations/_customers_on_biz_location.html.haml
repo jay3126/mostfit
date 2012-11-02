@@ -1,11 +1,16 @@
 :javascript
   $('table.client_tab').dataTable({
-    "bPaginate": false,
-    "bJQueryUI": true
+    "sScrollX": "100%",
+    "bPaginate": true,
+    "bJQueryUI": true,
+    "sDom": '<"H"Tfr>t<"F"ip>',
+    "oTableTools": {
+      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+    }
   });
-
+%br
 = link_to_with_rights 'Add Client', url(:controller => :new_clients, :action => :new, :biz_location_id => @biz_location.id), :class => "add grey_button", :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
-
+%br
 %br
 - if @customers.blank?
   %p

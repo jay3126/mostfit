@@ -1,8 +1,13 @@
 :javascript
   $('table.unsortable').dataTable({
-    "sPaginationType": "full_numbers",
+    "sScrollX": "100%",
+    "bPaginate": true,
     "bSort": false,
-    "bJQueryUI": true
+    "bJQueryUI": true,
+    "sDom": '<"H"Tfr>t<"F"ip>',
+    "oTableTools": {
+      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+    }
    });
 
 .shaded

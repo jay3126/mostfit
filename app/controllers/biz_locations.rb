@@ -180,7 +180,7 @@ class BizLocations < Application
 
   def show
     @biz_location     = BizLocation.get params[:id]
-    @biz_locations    = LocationLink.all(:parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
+    @biz_locations    = LocationLink.all(:model_type => 'BizLocation', :parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
     location_level    = LocationLevel.first(:level => (@biz_location.location_level.level - 1))
     @parent_locations = BizLocation.all_locations_at_level(@biz_location.location_level.level)
     @child_locations  = location_level.blank? ? [] : BizLocation.all_locations_at_level(location_level.level)
