@@ -1,0 +1,12 @@
+{
+"sEcho": <%=h @sEcho %>,
+"iTotalRecords": <%= @iTotalRecords %>,
+"iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+"aaData" : [
+<% @locations.each do |location| %>
+  [
+  "<%=h location.id %>", "<%=h location.name %>","<%=h location.biz_location_address %>","<%=h location.creation_date %>"
+  <%= location == @locations.last ? ']' : '],'%>
+<% end %>
+]
+}
