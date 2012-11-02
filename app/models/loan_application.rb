@@ -116,7 +116,21 @@ class LoanApplication
     all(:at_center_id => for_center_id, :center_cycle_id => for_center_cycle.id).aggregate(:client_id).compact
   end
 
-  #mapping of loan application to client 
+  def self.create_for_client(loan_money_amount, client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date, user_id)
+    hash = client.to_loan_application + {
+      :amount              => loan_money_amount.amount.to_i,
+      :currency            => loan_money_amount.currency,
+      :created_by_staff_id => by_staff,
+      :at_branch_id        => at_branch,
+      :at_center_id        => at_center,
+      :created_by_user_id  => user_id,
+      :center_cycle_id     => for_cycle,
+      :created_on          => on_date
+    }
+    new(hash)
+  end
+
+  #mapping of loan application to client
   def to_client
     _to_client = {
       :name                       => client_name,

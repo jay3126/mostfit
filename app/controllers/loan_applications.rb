@@ -1,10 +1,7 @@
 class LoanApplications < Application
-  # provides :xml, :yaml, :js
 
   def index
-    @errors = {}
-    @loan_applications = LoanApplicationsFacade.new(session.user).search
-    display @loan_applications
+    render
   end
 
   def show(id)
@@ -54,7 +51,6 @@ class LoanApplications < Application
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     render
   end
-
 
   # this lists the clients in the center that has been selected
   def list
@@ -374,4 +370,4 @@ class LoanApplications < Application
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center(search_options) unless branch_id.blank?
   end
 
-end # LoanApplications
+end

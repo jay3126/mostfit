@@ -2,17 +2,7 @@
 class LoanApplicationsFacade < StandardFacade
 
   def create_for_client(loan_money_amount, client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date)
-    hash = client.to_loan_application + {
-      :amount              => loan_money_amount.amount.to_i,
-      :currency            => loan_money_amount.currency,
-      :created_by_staff_id => by_staff,
-      :at_branch_id        => at_branch,
-      :at_center_id        => at_center,
-      :created_by_user_id  => user_id,
-      :center_cycle_id     => for_cycle,
-      :created_on          => on_date
-    }
-    loan_application = LoanApplication.new(hash)
+    LoanApplication.create_for_client(loan_money_amount, client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date, user_id)
   end
 
   def get_all_loan_applications_for_branch_and_center(search_options = {})
