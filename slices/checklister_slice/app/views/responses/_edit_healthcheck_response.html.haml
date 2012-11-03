@@ -159,13 +159,22 @@
                     %td
                       = select :name => "dropdownpoint_fillings[dropdownpoint_filling_#{dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.id}]".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all.map{|x|x.name}, :selected => dropdownpoint.dropdownpoint_fillings.all(:response_id=>@response.id).first.model_record_name
             -count=count+1
-        %p
-          = check_box :name => "result_status", :value => @response.id, :checked => false
-          Cleared?
-          %br
-          = hidden_field :name => 'request_url', :value => request.referer
-          = submit "Update", :class=>"greenButton"
-          = link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
+        %table{:style =>"width:99%", :class => "tall"}
+          %tr
+            %th
+              Status
+            %td
+              = radio_button :name => "result_status", :value => 'pending', :checked => @response.result_status == 'pending'
+              Pending
+              = radio_button :name => "result_status", :value => 'override', :checked => @response.result_status == 'override'
+              Override
+              = radio_button :name => "result_status", :value => 'cleared', :checked => @response.result_status == 'cleared'
+              Clear
+        %br
+        = hidden_field :name => 'request_url', :value => request.referer
+        = hidden_field :name => "response_id", :value => @response.id
+        = submit "Update", :class=>"greenButton"
+        = link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 
 
 

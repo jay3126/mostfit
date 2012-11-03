@@ -105,6 +105,21 @@ class LocationLevels < Application
     display @location, :layout => layout?
   end
 
+    def fetch_child_locations
+    @colName = ["id" , "name", 'biz_location_address', 'creation_date']
+    @colCount = params[:iColumns]
+    order = [@colName[params[:iSortCol_0].to_i]]
+    location_level = LocationLevel.get(params[:id])
+    @locations = location_level.biz_locations(:order => order,
+      :limit => params[:iDisplayLength].to_i,
+      :offset => params[:iDisplayStart].to_i,
+      :conditions => [ 'id LIKE ? OR name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @iTotalRecords = location_level.biz_locations.count
+    @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
+    @sEcho = params[:sEcho].to_i
+    display @location, :layout => layout?
+  end
+
   def destroy
   end
 

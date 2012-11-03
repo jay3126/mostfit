@@ -29,9 +29,19 @@ class Checklist
 
     @responses=@healthcheck_checklist.checklists.first.responses.all(:target_entity_id => @target_entity.id)
 
-    return true if @responses.all(:result_status => "cleared").count>0
+    return true if @responses.all(:result_status.not => "pending").count>0
 
     return false
+  end
+
+  def self.get_hc_result_status(target_entity_type, target_entity_id)
+    @target_entity=TargetEntity.all(:type => target_entity_type.to_s, :name => target_entity_id).first
+    @healthcheck_checklist=ChecklistType.all(:name => "HealthCheck on Loan Files").first
+    return 'Pending' if @target_entity.nil? or @healthcheck_checklist.nil?
+
+    @response=@healthcheck_checklist.checklists.first.responses.first(:target_entity_id => @target_entity.id)
+
+    @response.blank? ? 'Pending' : @response.result_status.humanize
   end
 
 

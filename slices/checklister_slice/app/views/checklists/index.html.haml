@@ -59,7 +59,7 @@
           = response.value_date.strftime("%b %e %Y")
         - if @checklist_type.is_hc_checklist?
           %td
-            = response.completion_status
+            = response.result_status.humanize
         %td
           - if response.result_status == "cleared"
             = link_to "View completed #{checklist.checklist_type.name} checklist",url(:checklister_slice_view_response,response.filler.id,:response_id=>response.id,:referral_url=>params[:referral_url]),:class=>"greenButton"

@@ -172,14 +172,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     @target_entity=TargetEntity.first_or_create(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
 
     if !params[:result_status].blank?
-      if params[:result_status].to_i==1
-        @result_status="cleared"
-      else
-        @result_status="pending"
-      end
-    else
-      @result_status="cleared"
-
+      @result_status = params[:result_status]
     end
 
 
@@ -331,8 +324,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       id = dropdownpoint_filling_id.split("_").last
       DropdownpointFilling.get(id).update(:model_record_name => value)
     end
-
-    Response.get(params[:result_status]).update(:result_status => 'cleared') unless params[:result_status].blank?
+    Response.get(params[:response_id]).update(:result_status => params[:result_status]) unless params[:result_status].blank?
     if message[:error].blank?
       redirect params[:request_url], :message => {:notice => 'Checklist updated'}
     else
