@@ -48,7 +48,7 @@ function dataTables(){
   else if ($('table').hasClass('remote_data')){
     $('table.weeksheet').dataTable({
       "bServerSide": true,
-      "sAjaxSource": '/location_levels/fetch_locations/1',
+      "sAjaxSource": $('table.remote_data').attr('source'),
       "bProcessing": true,
       "bJQueryUI": true,
       "sDom": '<"H"Tfr>t<"F"ip>',

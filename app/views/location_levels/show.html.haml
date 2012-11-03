@@ -34,7 +34,7 @@
     - if @biz_locations.count == 0
       = "No Biz-Location associated with #{@location_level.name} location level"
     - else
-      %table{:source=> url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
+      %table{:source => url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
         %thead
           %tr
             %th

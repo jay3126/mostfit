@@ -1,12 +1,47 @@
-{
-"sEcho": <%=h @sEcho %>,
-"iTotalRecords": <%= @iTotalRecords %>,
-"iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
-"aaData" : [
-<% @locations.each do |location| %>
-  [
-  "<%=h location.id %>", "<%=h location.name %>","<%=h location.biz_location_address %>","<%=h location.creation_date %>"
-  <%= location == @locations.last ? ']' : '],'%>
+<% if @colCount.to_i == 4 %>
+  {
+  "sEcho": <%=h @sEcho %>,
+  "iTotalRecords": <%= @iTotalRecords %>,
+  "iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+  "aaData" : [
+  <% @locations.each do |location| %>
+    [
+    "<%=h location.id %>", "<%="<a href='#{link_to_location_url(location)}'>#{location.name}</a>"%>", "<%=h location.biz_location_address %>","<%=h location.creation_date %>"
+    <%= location == @locations.last ? ']' : '],'%>
+  <% end %>
+  ]
+  }
+<% else %>
+  {
+  "sEcho": <%=h @sEcho %>,
+  "iTotalRecords": <%= @iTotalRecords %>,
+  "iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+  "aaData" : [
+  <% @locations.each do |location| %>
+    <% manager = LocationManagement.staff_managing_location(location.id, get_effective_date)%>
+    <% managed_by = manager.blank? ? '' : StaffMember.get(manager.manager_staff_id) %>
+    [
+    "<%=h location.id %>",
+    "<%="<a href='#{link_to_location_url(location)}'>#{location.name}</a>"%>",
+    "<%=h location.biz_location_address %>",
+    "<%= managed_by.blank? ? 'Not Defined' : "<a href='#{resource(managed_by)}'>#{managed_by.name} </a>" %>",
+    <% if @parent_location.blank? %>
+      "<%=h location.creation_date %>",
+    <% else %>
+      <% location_link = LocationLink.first(:parent_id => @parent_location.id, :child_id => location.id, :model_type => 'BizLocation') %>
+      "<%=h location_link.blank? ? '-' : location_link.effective_on %>",
+    <% end %>
+    <% if location.location_level.level == 0 %>
+      <% clients_count = ClientAdministration.get_clients_administered(location.id, Date.today) %>
+      <% a_link = "<a href='#{resource(:new_clients,:new,:biz_location_id => location.id)}'> Add Client</a>" %>
+      <% b_link = "<a href='#{resource(location, :biz_location_clients)}'> Show Clients(#{clients_count.count}) | </a>" %>
+      "<%= a_link+b_link%>"
+    <% else %>
+      "<%= "<a href='#{resource(location)}'>Assign Location</a>" %>"
+    <%end%>
+    <%= location == @locations.last ? ']' : '],'%>
+  <% end %>
+  ]
+  }
+
 <% end %>
-]
-}

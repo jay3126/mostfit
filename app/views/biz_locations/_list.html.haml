@@ -1,9 +1,9 @@
 - if @biz_locations.count == 0
   %p
-    %i No Location Mapping have been created yet.
+    %i No Location have been created yet.
 - else
   %br
-  %table.narrow{:style => 'width:100%'}
+  %table{:source => url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
     %thead
       %tr
         %th
@@ -11,55 +11,10 @@
         %th
           Name
         %th
-          Managed By
+          Address
         %th
-          Location Level
-        - unless @biz_location.new?
-          %th
-            Effective On
-        - else
-          %th
-            Location Created On
+          Managed By
+        %th{:style => "width:10%"}
+          Location Created On
         %th
           Action
-    %tr
-      - for biz_location_level in @biz_locations.sort_by{|x| x.first}.reverse
-        %tr
-          %td{:style => "background-color:gray; text-align:center", :colspan => 6}
-            %b= "#{biz_location_level.first}-Level"
-        - for biz_location_link in biz_location_level.last
-          - biz_location = biz_location_link.class == BizLocation ? biz_location_link : biz_location_link.child
-          %tr
-            %td
-              = biz_location.id
-            %td
-              = link_to_location biz_location
-            %td
-              - manager = LocationManagement.staff_managing_location(biz_location.id, Date.today)
-              - if manager.blank?
-                Not Managed
-              - else
-                - managed_by = StaffMember.get(manager.manager_staff_id)
-                = link_to_with_rights managed_by.name, resource(managed_by)
-            %td
-              = biz_location.level_name
-            - unless biz_location_link.class == BizLocation
-              %td
-                = biz_location_link.effective_on.strftime("%Y-%m-%d")
-            - else
-              %td
-                = biz_location_link.creation_date.strftime("%Y-%m-%d")
-            %td
-              - if biz_location_level.first == 0
-                = link_to_with_rights "Add Client", resource(:new_clients,:new,:biz_location_id => biz_location.id)
-                |
-                = link_to_with_rights "Show Clients", resource(biz_location, :biz_location_clients)
-                - clients_count = ClientAdministration.get_clients_administered(biz_location.id, Date.today)
-                - if clients_count.count > 0
-                  (
-                  = clients_count.count
-                  clients)
-                - else
-                  (0 clients)
-              - else
-                = link_to_with_rights "Assign Location", resource(biz_location)

@@ -1,11 +1,22 @@
 %h1 List of Biz-Locations
-
+%div{:style => "width:auto; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:user_locations, :action => url(:controller => :biz_locations, :action => :index), :method => :get) do
+    %table
+      %thead
+        %tr
+          %th
+            Location Level
+          %th
+            = select :name => "location_level_id", :collection => LocationLevel.all, :text_method => :name, :value_method => :id, :prompt => 'Select Location Level', :selected => params[:location_level_id]
+          %td
+            = submit "Go"
 .menu-strip{:style => "width: 35%;"}
   = link_to "Create a New Biz Location", '#', :class => 'add grey_button', :onclick => "jQuery('#location').toggle(); return false;"
   &nbsp;&nbsp;
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 #location(style = "display : none")
-  = form_for(@biz_location, :action => url(:biz_locations) ) do
+  - @biz_location = BizLocation.new
+  = form_for(@biz_location, :action => resource(:biz_locations) ) do
     = partial :fields
     = submit 'Create Biz Location'
     &nbsp;&nbsp;

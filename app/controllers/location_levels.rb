@@ -91,8 +91,9 @@ class LocationLevels < Application
   end
 
   def fetch_locations
-    colName = ["id" , "name", 'biz_location_address', 'creation_date']
-    order = [colName[params[:iSortCol_0].to_i]]
+    @colName = ["id" , "name", 'biz_location_address', 'creation_date']
+    @colCount = params[:iColumns]
+    order = [@colName[params[:iSortCol_0].to_i]]
     location_level = LocationLevel.get(params[:id])
     @locations = location_level.biz_locations(:order => order,
       :limit => params[:iDisplayLength].to_i,
@@ -101,7 +102,7 @@ class LocationLevels < Application
     @iTotalRecords = location_level.biz_locations.count
     @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
     @sEcho = params[:sEcho].to_i
-    render :partial => 'location_levels/locations_data', :layout => layout?
+    display @location, :layout => layout?
   end
 
   def destroy

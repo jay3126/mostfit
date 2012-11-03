@@ -50,13 +50,17 @@ module Merb
       location_levels = choice_facade.visible_locations(session.user.staff_member.id, get_effective_date)
       locations = location_levels.values.flatten
       if locations.include?(location)
-        if location.location_level.level == 0
-          link_to(location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => location.id))
-        else
-          link_to(location.name, url(:controller => :user_locations, :action => :show, :id => location.id))
-        end
+        link_to(location.name, link_to_location_url(location))
       else
         location.name
+      end
+    end
+
+    def link_to_location_url(location)
+      if location.location_level.level == 0
+        url(:controller => :user_locations, :action => :weeksheet_collection, :id => location.id)
+      else
+        url(:controller => :user_locations, :action => :show, :id => location.id)
       end
     end
 

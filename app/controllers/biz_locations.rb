@@ -1,10 +1,14 @@
 class BizLocations < Application
 
   def index
-    @location_levels = LocationLevel.all
-    @biz_locations   = BizLocation.all.group_by{|c| c.location_level.level}
-    @biz_location    = BizLocation.new()
-    display @location_levels
+    if params[:location_level_id].blank?
+      @location_level = ''
+      @biz_locations = []
+    else
+      @location_level = LocationLevel.get(params[:location_level_id])
+      @biz_locations = @location_level.biz_locations
+    end
+    display @biz_locations
   end
 
   def edit
@@ -355,6 +359,19 @@ class BizLocations < Application
     @client = Client.get(params[:client_id]) unless params[:client_id].blank?
     @lending_products = @parent_location.lending_products
     display @lending_products
+  end
+
+  def fetch_child_locations
+    @colName = ["id" , "name", 'biz_location_address', 'creation_date']
+    @colCount = params[:iColumns]
+    order = [@colName[params[:iSortCol_0].to_i]]
+    @parent_location = BizLocation.get(params[:id])
+    @child_locations = LocationLink.get_children(@parent_location, get_effective_date)
+    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @iTotalRecords = @child_locations.count
+    @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
+    @sEcho = params[:sEcho].to_i
+    render :template => 'location_levels/fetch_locations', :layout => layout?
   end
 
 end

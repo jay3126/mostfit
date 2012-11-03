@@ -35,4 +35,19 @@
             = submit 'Save'
           %td
             = link_to_with_rights 'Cancel', url(params[:return]), :class => "grey_button"
-= partial :list
+%br
+%table{:source => url(:controller => 'biz_locations', :id => @biz_location.id, :action => 'fetch_child_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
+  %thead
+    %tr
+      %th
+        Id
+      %th
+        Name
+      %th
+        Address
+      %th
+        Managed By
+      %th{:style => "width:10%"}
+        Effective Date
+      %th
+        Action
