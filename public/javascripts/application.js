@@ -47,6 +47,7 @@ function dataTables(){
   }
   else if ($('table').hasClass('remote_data')){
     $('table.weeksheet').dataTable({
+      "sPaginationType": "full_numbers",
       "bServerSide": true,
       "sAjaxSource": $('table.remote_data').attr('source'),
       "bProcessing": true,

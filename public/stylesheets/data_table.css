@@ -1,5 +1,5 @@
 /*
- *  File:         demo_table.css
+ *  File:         demo_table_jui.css
  *  CVS:          $Id$
  *  Description:  CSS descriptions for DataTables demo pages
  *  Author:       Allan Jardine
@@ -26,6 +26,84 @@
  *     ../images/ - relative to this CSS file.
  */
 
+
+/*
+ * jQuery UI specific styling
+ */
+
+.paging_two_button .ui-button {
+	float: left;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.paging_full_numbers .ui-button {
+	padding: 2px 6px;
+	margin: 0;
+	cursor: pointer;
+	* cursor: hand;
+	color: #333 !important;
+}
+
+.dataTables_paginate .ui-button {
+	margin-right: -0.1em !important;
+}
+
+.paging_full_numbers {
+	width: 350px !important;
+}
+
+.dataTables_wrapper .ui-toolbar {
+	padding: 5px;
+}
+
+.dataTables_paginate {
+	width: auto;
+}
+
+.dataTables_info {
+	padding-top: 3px;
+}
+
+table.display thead th {
+	padding: 3px 0px 3px 10px;
+	cursor: pointer;
+	* cursor: hand;
+}
+
+div.dataTables_wrapper .ui-widget-header {
+	font-weight: normal;
+}
+
+
+/*
+ * Sort arrow icon positioning
+ */
+table.display thead th div.DataTables_sort_wrapper {
+	position: relative;
+	padding-right: 20px;
+	padding-right: 20px;
+}
+
+table.display thead th div.DataTables_sort_wrapper span {
+	position: absolute;
+	top: 50%;
+	margin-top: -8px;
+	right: 0;
+}
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Everything below this line is the same as demo_table.css. This file is
+ * required for 'cleanliness' of the markup
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables features
  */
@@ -33,23 +111,19 @@
 .dataTables_wrapper {
 	position: relative;
 	clear: both;
-	zoom: 1; /* Feeling sorry for IE */
 }
 
 .dataTables_processing {
 	position: absolute;
-	top: 50%;
+	top: 0px;
 	left: 50%;
 	width: 250px;
-	height: 30px;
 	margin-left: -125px;
-	margin-top: -15px;
-	padding: 14px 0 2px 0;
 	border: 1px solid #ddd;
 	text-align: center;
 	color: #999;
-	font-size: 14px;
-	background-color: white;
+	font-size: 11px;
+	padding: 2px 0;
 }
 
 .dataTables_length {
@@ -64,7 +138,7 @@
 }
 
 .dataTables_info {
-	width: 60%;
+	width: 50%;
 	float: left;
 }
 
@@ -74,55 +148,27 @@
 }
 
 /* Pagination nested */
-.paginate_disabled_previous, .paginate_enabled_previous,
-.paginate_disabled_next, .paginate_enabled_next {
+.paginate_disabled_previous, .paginate_enabled_previous, .paginate_disabled_next, .paginate_enabled_next {
 	height: 19px;
+	width: 19px;
+	margin-left: 3px;
 	float: left;
-	cursor: pointer;
-	*cursor: hand;
-	color: #111 !important;
-}
-.paginate_disabled_previous:hover, .paginate_enabled_previous:hover,
-.paginate_disabled_next:hover, .paginate_enabled_next:hover {
-	text-decoration: none !important;
-}
-.paginate_disabled_previous:active, .paginate_enabled_previous:active,
-.paginate_disabled_next:active, .paginate_enabled_next:active {
-	outline: none;
-}
-
-.paginate_disabled_previous,
-.paginate_disabled_next {
-	color: #666 !important;
-}
-.paginate_disabled_previous, .paginate_enabled_previous {
-	padding-left: 23px;
-}
-.paginate_disabled_next, .paginate_enabled_next {
-	padding-right: 23px;
-	margin-left: 10px;
 }
 
 .paginate_disabled_previous {
-	background: url('../images/back_disabled.png') no-repeat top left;
+	background-image: url('../images/back_disabled.jpg');
 }
 
 .paginate_enabled_previous {
-	background: url('../images/back_enabled.png') no-repeat top left;
-}
-.paginate_enabled_previous:hover {
-	background: url('../images/back_enabled_hover.png') no-repeat top left;
+	background-image: url('../images/back_enabled.jpg');
 }
 
 .paginate_disabled_next {
-	background: url('../images/forward_disabled.png') no-repeat top right;
+	background-image: url('../images/forward_disabled.jpg');
 }
 
 .paginate_enabled_next {
-	background: url('../images/forward_enabled.png') no-repeat top right;
-}
-.paginate_enabled_next:hover {
-	background: url('../images/forward_enabled_hover.png') no-repeat top right;
+	background-image: url('../images/forward_enabled.jpg');
 }
 
 
@@ -130,50 +176,30 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables display
  */
-/* table.display { */
-/* 	margin: 0 auto; */
-/* 	clear: both; */
-/* 	width: 100%; */
-	
-/* 	/\* Note Firefox 3.5 and before have a bug with border-collapse */
-/* 	 * ( https://bugzilla.mozilla.org/show%5Fbug.cgi?id=155955 )  */
-/* 	 * border-spacing: 0; is one possible option. Conditional-css.com is */
-/* 	 * useful for this kind of thing */
-/* 	 * */
-/* 	 * Further note IE 6/7 has problems when calculating widths with border width. */
-/* 	 * It subtracts one px relative to the other browsers from the first column, and */
-/* 	 * adds one to the end... */
-/* 	 * */
-/* 	 * If you want that effect I'd suggest setting a border-top/left on th/td's and  */
-/* 	 * then filling in the gaps with other borders. */
-/* 	 *\/ */
-/* } */
+table.display {
+	margin: 0 auto;
+	width: 100%;
+	clear: both;
+	border-collapse: collapse;
+}
 
-/* table.display thead th { */
-/* 	padding: 3px 18px 3px 10px; */
-/* 	border-bottom: 1px solid black; */
-/* 	font-weight: bold; */
-/* 	cursor: pointer; */
-/* 	* cursor: hand; */
-/* } */
+table.display tfoot th {
+	padding: 3px 0px 3px 10px;
+	font-weight: bold;
+	font-weight: normal;
+}
 
-/* table.display tfoot th { */
-/* 	padding: 3px 18px 3px 10px; */
-/* 	border-top: 1px solid black; */
-/* 	font-weight: bold; */
-/* } */
+table.display tr.heading2 td {
+	border-bottom: 1px solid #aaa;
+}
 
-/* table.display tr.heading2 td { */
-/* 	border-bottom: 1px solid #aaa; */
-/* } */
+table.display td {
+	padding: 3px 10px;
+}
 
-/* table.display td { */
-/* 	padding: 3px 10px; */
-/* } */
-
-/* table.display td.center { */
-/* 	text-align: center; */
-/* } */
+table.display td.center {
+	text-align: center;
+}
 
 
 
@@ -200,10 +226,6 @@
 .sorting_desc_disabled {
 	background: url('../images/sort_desc_disabled.png') no-repeat center right;
 }
- 
-th:active {
-	outline: none;
-}
 
 
 
@@ -211,46 +233,57 @@ th:active {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * DataTables row classes
  */
-/* table.display tr.odd.gradeA { */
-/* 	background-color: #ddffdd; */
-/* } */
+table.display tr.odd.gradeA {
+	background-color: #ddffdd;
+}
 
-/* table.display tr.even.gradeA { */
-/* 	background-color: #eeffee; */
-/* } */
-
-/* table.display tr.odd.gradeC { */
-/* 	background-color: #ddddff; */
-/* } */
-
-/* table.display tr.even.gradeC { */
-/* 	background-color: #eeeeff; */
-/* } */
-
-/* table.display tr.odd.gradeX { */
-/* 	background-color: #ffdddd; */
-/* } */
-
-/* table.display tr.even.gradeX { */
-/* 	background-color: #ffeeee; */
-/* } */
-
-/* table.display tr.odd.gradeU { */
-/* 	background-color: #ddd; */
-/* } */
-
-/* table.display tr.even.gradeU { */
-/* 	background-color: #eee; */
-/* } */
+table.display tr.even.gradeA {
+	background-color: #eeffee;
+}
 
 
-/* tr.odd { */
-/* 	background-color: #E2E4FF; */
-/* } */
 
-/* tr.even { */
-/* 	background-color: white; */
-/* } */
+
+table.display tr.odd.gradeA {
+	background-color: #ddffdd;
+}
+
+table.display tr.even.gradeA {
+	background-color: #eeffee;
+}
+
+table.display tr.odd.gradeC {
+	background-color: #ddddff;
+}
+
+table.display tr.even.gradeC {
+	background-color: #eeeeff;
+}
+
+table.display tr.odd.gradeX {
+	background-color: #ffdddd;
+}
+
+table.display tr.even.gradeX {
+	background-color: #ffeeee;
+}
+
+table.display tr.odd.gradeU {
+	background-color: #ddd;
+}
+
+table.display tr.even.gradeU {
+	background-color: #eee;
+}
+
+
+tr.odd {
+	background-color: #E2E4FF;
+}
+
+tr.even {
+	background-color: white;
+}
 
 
 
@@ -264,7 +297,6 @@ th:active {
 }
 
 .dataTables_scrollBody {
-	*margin-top: -1px;
 	-webkit-overflow-scrolling: touch;
 }
 
@@ -286,44 +318,30 @@ th:active {
 	text-align: center;
 }
 
-/* tfoot input { */
-/* 	margin: 0.5em 0; */
-/* 	width: 100%; */
-/* 	color: #444; */
-/* } */
+tfoot input {
+	margin: 0.5em 0;
+	width: 100%;
+	color: #444;
+}
 
-/* tfoot input.search_init { */
-/* 	color: #999; */
-/* } */
+tfoot input.search_init {
+	color: #999;
+}
 
-/* td.group { */
-/* 	background-color: #d1cfd0; */
-/* 	border-bottom: 2px solid #A19B9E; */
-/* 	border-top: 2px solid #A19B9E; */
-/* } */
+td.group {
+	background-color: #d1cfd0;
+	border-bottom: 2px solid #A19B9E;
+	border-top: 2px solid #A19B9E;
+}
 
-/* td.details { */
-/* 	background-color: #d1cfd0; */
-/* 	border: 2px solid #A19B9E; */
-/* } */
+td.details {
+	background-color: #d1cfd0;
+	border: 2px solid #A19B9E;
+}
 
 
 .example_alt_pagination div.dataTables_info {
 	width: 40%;
-}
-
-.paging_full_numbers {
-	width: 400px;
-	height: 22px;
-	line-height: 22px;
-}
-
-.paging_full_numbers a:active {
-	outline: none
-}
-
-.paging_full_numbers a:hover {
-	text-decoration: none;
 }
 
 .paging_full_numbers a.paginate_button,
@@ -351,42 +369,42 @@ th:active {
 	background-color: #99B3FF;
 }
 
-/* table.display tr.even.row_selected td { */
-/* 	background-color: #B0BED9; */
-/* } */
+table.display tr.even.row_selected td {
+	background-color: #B0BED9;
+}
 
-/* table.display tr.odd.row_selected td { */
-/* 	background-color: #9FAFD1; */
-/* } */
+table.display tr.odd.row_selected td {
+	background-color: #9FAFD1;
+}
 
 
 /*
  * Sorting classes for columns
  */
 /* For the standard odd/even */
-/* tr.odd td.sorting_1 { */
-/* 	background-color: #D3D6FF; */
-/* } */
+tr.odd td.sorting_1 {
+	background-color: #D3D6FF;
+}
 
-/* tr.odd td.sorting_2 { */
-/* 	background-color: #DADCFF; */
-/* } */
+tr.odd td.sorting_2 {
+	background-color: #DADCFF;
+}
 
-/* tr.odd td.sorting_3 { */
-/* 	background-color: #E0E2FF; */
-/* } */
+tr.odd td.sorting_3 {
+	background-color: #E0E2FF;
+}
 
-/* tr.even td.sorting_1 { */
-/* 	background-color: #EAEBFF; */
-/* } */
+tr.even td.sorting_1 {
+	background-color: #EAEBFF;
+}
 
-/* tr.even td.sorting_2 { */
-/* 	background-color: #F2F3FF; */
-/* } */
+tr.even td.sorting_2 {
+	background-color: #F2F3FF;
+}
 
-/* tr.even td.sorting_3 { */
-/* 	background-color: #F9F9FF; */
-/* } */
+tr.even td.sorting_3 {
+	background-color: #F9F9FF;
+}
 
 
 /* For the Conditional-CSS grading rows */
@@ -399,101 +417,101 @@ th:active {
 	  dd > d1
 	  ee > e2
  */
-/* tr.odd.gradeA td.sorting_1 { */
-/* 	background-color: #c4ffc4; */
-/* } */
+tr.odd.gradeA td.sorting_1 {
+	background-color: #c4ffc4;
+}
 
-/* tr.odd.gradeA td.sorting_2 { */
-/* 	background-color: #d1ffd1; */
-/* } */
+tr.odd.gradeA td.sorting_2 {
+	background-color: #d1ffd1;
+}
 
-/* tr.odd.gradeA td.sorting_3 { */
-/* 	background-color: #d1ffd1; */
-/* } */
+tr.odd.gradeA td.sorting_3 {
+	background-color: #d1ffd1;
+}
 
-/* tr.even.gradeA td.sorting_1 { */
-/* 	background-color: #d5ffd5; */
-/* } */
+tr.even.gradeA td.sorting_1 {
+	background-color: #d5ffd5;
+}
 
-/* tr.even.gradeA td.sorting_2 { */
-/* 	background-color: #e2ffe2; */
-/* } */
+tr.even.gradeA td.sorting_2 {
+	background-color: #e2ffe2;
+}
 
-/* tr.even.gradeA td.sorting_3 { */
-/* 	background-color: #e2ffe2; */
-/* } */
+tr.even.gradeA td.sorting_3 {
+	background-color: #e2ffe2;
+}
 
-/* tr.odd.gradeC td.sorting_1 { */
-/* 	background-color: #c4c4ff; */
-/* } */
+tr.odd.gradeC td.sorting_1 {
+	background-color: #c4c4ff;
+}
 
-/* tr.odd.gradeC td.sorting_2 { */
-/* 	background-color: #d1d1ff; */
-/* } */
+tr.odd.gradeC td.sorting_2 {
+	background-color: #d1d1ff;
+}
 
-/* tr.odd.gradeC td.sorting_3 { */
-/* 	background-color: #d1d1ff; */
-/* } */
+tr.odd.gradeC td.sorting_3 {
+	background-color: #d1d1ff;
+}
 
-/* tr.even.gradeC td.sorting_1 { */
-/* 	background-color: #d5d5ff; */
-/* } */
+tr.even.gradeC td.sorting_1 {
+	background-color: #d5d5ff;
+}
 
-/* tr.even.gradeC td.sorting_2 { */
-/* 	background-color: #e2e2ff; */
-/* } */
+tr.even.gradeC td.sorting_2 {
+	background-color: #e2e2ff;
+}
 
-/* tr.even.gradeC td.sorting_3 { */
-/* 	background-color: #e2e2ff; */
-/* } */
+tr.even.gradeC td.sorting_3 {
+	background-color: #e2e2ff;
+}
 
-/* tr.odd.gradeX td.sorting_1 { */
-/* 	background-color: #ffc4c4; */
-/* } */
+tr.odd.gradeX td.sorting_1 {
+	background-color: #ffc4c4;
+}
 
-/* tr.odd.gradeX td.sorting_2 { */
-/* 	background-color: #ffd1d1; */
-/* } */
+tr.odd.gradeX td.sorting_2 {
+	background-color: #ffd1d1;
+}
 
-/* tr.odd.gradeX td.sorting_3 { */
-/* 	background-color: #ffd1d1; */
-/* } */
+tr.odd.gradeX td.sorting_3 {
+	background-color: #ffd1d1;
+}
 
-/* tr.even.gradeX td.sorting_1 { */
-/* 	background-color: #ffd5d5; */
-/* } */
+tr.even.gradeX td.sorting_1 {
+	background-color: #ffd5d5;
+}
 
-/* tr.even.gradeX td.sorting_2 { */
-/* 	background-color: #ffe2e2; */
-/* } */
+tr.even.gradeX td.sorting_2 {
+	background-color: #ffe2e2;
+}
 
-/* tr.even.gradeX td.sorting_3 { */
-/* 	background-color: #ffe2e2; */
-/* } */
+tr.even.gradeX td.sorting_3 {
+	background-color: #ffe2e2;
+}
 
-/* tr.odd.gradeU td.sorting_1 { */
-/* 	background-color: #c4c4c4; */
-/* } */
+tr.odd.gradeU td.sorting_1 {
+	background-color: #c4c4c4;
+}
 
-/* tr.odd.gradeU td.sorting_2 { */
-/* 	background-color: #d1d1d1; */
-/* } */
+tr.odd.gradeU td.sorting_2 {
+	background-color: #d1d1d1;
+}
 
-/* tr.odd.gradeU td.sorting_3 { */
-/* 	background-color: #d1d1d1; */
-/* } */
+tr.odd.gradeU td.sorting_3 {
+	background-color: #d1d1d1;
+}
 
-/* tr.even.gradeU td.sorting_1 { */
-/* 	background-color: #d5d5d5; */
-/* } */
+tr.even.gradeU td.sorting_1 {
+	background-color: #d5d5d5;
+}
 
-/* tr.even.gradeU td.sorting_2 { */
-/* 	background-color: #e2e2e2; */
-/* } */
+tr.even.gradeU td.sorting_2 {
+	background-color: #e2e2e2;
+}
 
-/* tr.even.gradeU td.sorting_3 { */
-/* 	background-color: #e2e2e2; */
-/* } */
+tr.even.gradeU td.sorting_3 {
+	background-color: #e2e2e2;
+}
 
 
 /*
@@ -505,81 +523,4 @@ th:active {
 
 .ex_highlight #example tbody tr.odd:hover, #example tbody tr.odd td.highlighted {
 	background-color: #E6FF99;
-}
-
-.ex_highlight_row #example tr.even:hover {
-	background-color: #ECFFB3;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_1 {
-	background-color: #DDFF75;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_2 {
-	background-color: #E7FF9E;
-}
-
-.ex_highlight_row #example tr.even:hover td.sorting_3 {
-	background-color: #E2FF89;
-}
-
-.ex_highlight_row #example tr.odd:hover {
-	background-color: #E6FF99;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_1 {
-	background-color: #D6FF5C;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_2 {
-	background-color: #E0FF84;
-}
-
-.ex_highlight_row #example tr.odd:hover td.sorting_3 {
-	background-color: #DBFF70;
-}
-
-
-/*
- * KeyTable
- */
-/* table.KeyTable td { */
-/* 	border: 3px solid transparent; */
-/* } */
-
-/* table.KeyTable td.focus { */
-/* 	border: 3px solid #3366FF; */
-/* } */
-
-/* table.display tr.gradeA { */
-/* 	background-color: #eeffee; */
-/* } */
-
-/* table.display tr.gradeC { */
-/* 	background-color: #ddddff; */
-/* } */
-
-/* table.display tr.gradeX { */
-/* 	background-color: #ffdddd; */
-/* } */
-
-/* table.display tr.gradeU { */
-/* 	background-color: #ddd; */
-/* } */
-
-/* div.box { */
-/* 	height: 100px; */
-/* 	padding: 10px; */
-/* 	overflow: auto; */
-/* 	border: 1px solid #8080FF; */
-/* 	background-color: #E5E5FF; */
-/* } */
-
-table.weeksheet th{
-    border: 1px solid black;
-    text-align: center;
-    font-size: 0.95em;
-    padding-left: 2px;
-    padding-right: 2px;
-    color:gray;
 }
