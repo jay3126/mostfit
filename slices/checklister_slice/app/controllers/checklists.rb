@@ -295,6 +295,17 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     message = {}
     @checklist = Checklist.get params[:checklist_id]
+    @response = Response.get params[:response_id]
+    @checkpoints = params[:checkpoint]||[]
+    @checkpoints.each do |checkpoint_id, value|
+      id = checkpoint_id.split("_").last
+      checkpoint = Checkpoint.get(id)
+      @checkpoint_filling = checkpoint.checkpoint_fillings.first(:response_id => @response.id)
+      if @checkpoint_filling.blank?
+        @checkpoint_filling = checkpoint.checkpoint_fillings.create!(:status => @checkpoints["checkpoint_#{checkpoint.id}".to_sym], :response_id => @response.id)
+      end
+    end
+    
     @checkpoint_fillings = params[:checkpoint_fillings]||[]
     @checkpoint_fillings.each do |checkpoint_filling_id, value|
       id = checkpoint_filling_id.split("_").last

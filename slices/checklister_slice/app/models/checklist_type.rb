@@ -315,7 +315,7 @@ class ChecklistType
     @free_text3=FreeText.create!(:section_id => @section1.id, :name => "Distance", :sequence_number => 6, :created_at => Date.today)
     @checkpoint6=Checkpoint.create!(:section_id => @section1.id, :name => "MFtrack", :sequence_number => 7, :created_at => Date.today)
     @checkpoint7=Checkpoint.create!(:section_id => @section1.id, :name => "Rented", :sequence_number => 8, :created_at => Date.today)
-    @checkpoint8=Checkpoint.create!(:section_id => @section1.id, :name => " Widow/Divorced", :sequence_number => 9, :created_at => Date.today)
+    @checkpoint8=Checkpoint.create!(:section_id => @section1.id, :name => "Single Women", :sequence_number => 9, :created_at => Date.today)
 
 
     #section 2(repeated 15 times)
