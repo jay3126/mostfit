@@ -2,10 +2,13 @@
 - if has_default_tranch 
   - tranch_id = get_default_tranch_id
   - default_tranch = NewTranch.get(tranch_id)
-  - default_tranch_name = default_tranch.name
-  - default_funding_line = default_tranch.new_funding_line
-  - default_funding_line_name = default_funding_line.name
-  - default_funder = default_funding_line.new_funder.name
+  - if default_tranch.blank?
+    - has_default_tranch = false
+  - else
+    - default_tranch_name = default_tranch.name
+    - default_funding_line = default_tranch.new_funding_line
+    - default_funding_line_name = default_funding_line.name
+    - default_funder = default_funding_line.new_funder.name
 %h3
   = "This loan will be dispensed by loan product: #{@lending_product.name}"
 = hidden_field :name => 'lending_product_id', :value => @lending_product.id
