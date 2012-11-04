@@ -3,7 +3,7 @@
     %i No Location Mapping have been created yet.
 - else
   %br
-  %table.narrow{:style => 'width:100%'}
+  %table{:source => url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
     %thead
       %tr
         %th
