@@ -24,4 +24,4 @@
           = link_to_with_rights 'Edit', resource(@funder,funding_line,:edit)
           &nbsp;&nbsp;
           %br
-            = link_to_with_rights "New Tranch", url("new_funders/#{@funder.id}/new_funding_lines/#{funding_line.id}/new_tranches/new")
+            = link_to_with_rights "New Tranch", resource(@funder, funding_line, :new_tranches, :new)

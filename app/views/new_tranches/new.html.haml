@@ -1,5 +1,3 @@
-- form_url   =  resource(:tranches, {:return => params[:return]})
-- cancel_url =  url(params[:return])
 %h1 Create a new Tranch
 = error_messages_for @tranch
 = form_for (:new_tranches, :action => resource(@funder, @funding_line, :new_tranches)) do
