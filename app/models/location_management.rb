@@ -15,6 +15,9 @@ class LocationManagement
   validates_with_method :assignment_and_creation_dates_are_valid?
   validates_with_method :staff_member_is_active?
 
+  belongs_to :biz_location, :child_key => [:managed_location_id]
+  belongs_to :staff_member, :child_key => [:performed_by], :model_name => 'StaffMember'
+
   def only_one_assignment_on_date?
     assigned = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)
     assigned && assigned.manager_staff_id != self.manager_staff_id ? [false, "There is already a staff member(#{assigned.manager_staff_member.name.humanize}) assigned to manage the location on the date: #{self.effective_on}"] : true

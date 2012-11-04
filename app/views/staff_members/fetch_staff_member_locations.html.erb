@@ -1,0 +1,17 @@
+{
+"sEcho": <%=h @sEcho %>,
+"iTotalRecords": <%= @iTotalRecords %>,
+"iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+"aaData" : [
+<% @location_manages.each do |location_manage| %>
+  <% location = location_manage.managed_location %>
+  [
+  "<%=h location.id %>", 
+  "<%="<a href='#{link_to_location_url(location)}'>#{location.name}</a>"%>",
+  "<%=h location.location_level.name.humanize %>",
+  "<%=h location_manage.manager_staff_member.name %>",
+  "<%=h location_manage.effective_on %>"
+  <%= location_manage.id == @location_manages.last.id ? ']' : '],'%>
+<% end %>
+]
+}

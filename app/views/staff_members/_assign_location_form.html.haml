@@ -24,7 +24,7 @@
   %p
     %i No Location Mapping has been created yet.
 - else
-  %table.dataTable.report.weeksheet.nojs
+  %table{:source => url(:controller => 'staff_members', :id => @staff_member.id, :action => 'fetch_staff_member_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
     %thead
       %tr
         %th
@@ -37,16 +37,3 @@
           Perfomed By
         %th
           Effective Date for manage
-    - @manage_locations.each do |management|
-      - location = management.managed_location
-      %tr
-        %td
-          = location.id
-        %td
-          = link_to_location location
-        %td
-          = location.location_level.name
-        %td
-          = management.manager_staff_member.name
-        %td
-          = management.effective_on
