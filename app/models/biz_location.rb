@@ -65,15 +65,6 @@ class BizLocation
       LocationManagement.assign_manager_to_location(staff, obj, creation_date, User.first.staff_member.id, User.first.id)
 
       if obj.location_level.level == 0
-        #creating meeting schedules and calendar for centers.
-        meeting_number = (Date.today - creation_date).to_i + Constants::Time::DEFAULT_FUTURE_MAX_DURATION_IN_DAYS
-        meeting_frequency = row[headers[:meeting_frequency]].downcase
-        meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
-        msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
-          meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
-        meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
-        meeting_facade.setup_meeting_schedule(obj, msi, meeting_number)
-
         #creating center cycle for center.
         location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
         location_facade.create_center_cycle(creation_date, obj.id)
