@@ -16,7 +16,7 @@ class LocationManagement
   validates_with_method :staff_member_is_active?
 
   belongs_to :biz_location, :child_key => [:managed_location_id]
-  belongs_to :staff_member, :child_key => [:performed_by], :model_name => 'StaffMember'
+  belongs_to :staff_member, :child_key => [:performed_by], :model => 'StaffMember'
 
   def only_one_assignment_on_date?
     assigned = LocationManagement.first(:managed_location_id => self.managed_location_id, :effective_on => self.effective_on)

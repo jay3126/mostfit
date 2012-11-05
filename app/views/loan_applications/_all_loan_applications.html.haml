@@ -1,15 +1,3 @@
-:javascript
-  $('table.unsortable').dataTable({
-    "sScrollX": "100%",
-    "bPaginate": true,
-    "bSort": false,
-    "bJQueryUI": true,
-    "sDom": '<"H"Tfr>t<"F"ip>',
-    "oTableTools": {
-      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
-    }
-   });
-
 .shaded
   %h2 All loan applications
   - if @all_loan_applications and not @all_loan_applications.empty?

@@ -215,6 +215,7 @@ module Merb
       attrs.merge!(:id => opts[:id]||name)
       attrs.merge!(:date => date)
       attrs.merge!(:size => opts[:size]||20)
+      attrs.merge!(:style => opts[:style]||'')
       attrs.merge!(:min_date => opts[:min_date]||Date.min_date)
       attrs.merge!(:max_date => opts[:max_date]||Date.max_date)
       attrs.merge!(:nullable => (opts.key?(:nullable) ? opts[:nullable] : Mfi.first.date_box_editable))
@@ -266,7 +267,7 @@ module Merb
         @working_holiday = configuration_facade.non_working_days.to_s
       end
       str = %Q{
-        <input type='text' name="#{attrs[:name]}" id="#{attrs[:id]}" value="#{attrs[:date]}" size="#{attrs[:size]}" #{attrs[:nullable] ? "" : "readonly='true'"}>
+        <input type='text' name="#{attrs[:name]}" id="#{attrs[:id]}" style="#{attrs[:style]}" value="#{attrs[:date]}" size="#{attrs[:size]}" #{attrs[:nullable] ? "" : "readonly='true'"}>
         <script type="text/javascript">
           $(function(){
       function nonWorkingDays(date) {
