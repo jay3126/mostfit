@@ -263,13 +263,13 @@ class StaffMembers < Application
       @iTotalDisplayRecords = @iTotalRecords
     else
       @iTotalDisplayRecords = (LocationManagement.all(:order => order, :id => @all_location_manages.map(&:id))&(
-          LocationManagement.all(:managed_location_id.like => '%'+params[:sSearch]+'%')|
+          LocationManagement.all(:managed_location_id.like => params[:sSearch])|
           LocationManagement.all('staff_member.name'.to_sym.like => '%'+params[:sSearch]+'%')|
           LocationManagement.all('biz_location.location_level.name'.to_sym.like => '%'+params[:sSearch]+'%')|
           LocationManagement.all('biz_location.name'.to_sym.like => '%'+params[:sSearch]+'%')|
           LocationManagement.all(:effective_on => '%'+params[:sSearch]+'%'))).count
       @location_manages = LocationManagement.all(:order => order, :id => @all_location_manages.map(&:id))&(
-        LocationManagement.all(:managed_location_id.like => '%'+params[:sSearch]+'%', :limit => params[:iDisplayLength].to_i, :offset => params[:iDisplayStart].to_i)|
+        LocationManagement.all(:managed_location_id.like => params[:sSearch], :limit => params[:iDisplayLength].to_i, :offset => params[:iDisplayStart].to_i)|
         LocationManagement.all('staff_member.name'.to_sym.like => '%'+params[:sSearch]+'%', :limit => params[:iDisplayLength].to_i, :offset => params[:iDisplayStart].to_i)|
         LocationManagement.all('biz_location.location_level.name'.to_sym.like => '%'+params[:sSearch]+'%', :limit => params[:iDisplayLength].to_i, :offset => params[:iDisplayStart].to_i)|
         LocationManagement.all('biz_location.name'.to_sym.like => '%'+params[:sSearch]+'%', :limit => params[:iDisplayLength].to_i, :offset => params[:iDisplayStart].to_i)|
