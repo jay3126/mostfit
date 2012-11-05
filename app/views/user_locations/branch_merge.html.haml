@@ -1,0 +1,78 @@
+%h1 Branch Merge
+
+= form_for(:user_locations, :action => resource(:user_locations, :branch_merge), :method => :get) do
+  .shaded
+    %table.form
+      %thead
+        %tr
+          %th Branch For Merge:
+          %th
+            = select :name => "first_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :selected => params[:first_location_id]
+          %th Branch To Merge:
+          %th
+            = select :name => "second_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :selected => params[:second_location_id]
+          %td
+            Date
+          %th
+            = date_select 'on_date', get_effective_date, :max_date => get_effective_date, :size => 15
+          %td
+            = submit "Go"
+- if !@first_location.blank? && !@second_location.blank?
+  %div{:style => 'display:table; width:100%;'}
+    %table.loan.tall{ :style => "width:50%;" }
+      %tr
+        %th Branch For Merge
+        %td
+          = @first_location.name
+      %tr
+        %th Centers
+        %td
+          = LocationLink.all_children(@first_location, get_effective_date).count
+      %tr
+        %th Clients
+        %td
+      %tr
+        %th Applied Loans
+        %td
+      %tr
+        %th Approved Loans
+        %td
+      %tr
+        %th Disbursed Loans
+        %td
+      %tr
+        %th Precloused Loans
+        %td
+      %tr
+        %th Write Off Loans
+        %td
+    %div{:style => "display:table-cell;"}
+      %table.loan.tall{ :style => "width:50%;" }
+        %tr
+          %th Branch To Merge
+          %td
+            = @second_location.name
+        %tr
+          %th Centers
+          %td
+            = LocationLink.all_children(@second_location, get_effective_date).count
+        %tr
+          %th Clients
+          %td
+        %tr
+          %th Applied Loans
+          %td
+        %tr
+          %th Approved Loans
+          %td
+        %tr
+          %th Disbursed Loans
+          %td
+        %tr
+          %th Precloused Loans
+          %td
+        %tr
+          %th Write Off Loans
+          %td
+- else
+  %h2 Please Select Branch

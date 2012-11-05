@@ -310,6 +310,16 @@ class UserLocations < Application
     send_data(File.read(file_url), :filename => file_url.split('/').last, :type => "application/zip")
   end
 
+  def branch_merge
+    @first_location = @second_location = ''
+    if !params[:first_location_id].blank? && !params[:second_location_id].blank?
+      @first_location = BizLocation.get params[:first_location_id]
+      @second_location = BizLocation.get params[:second_location_id]
+      @on_date = Date.parse(params[:on_date])
+    end
+    display @first_location
+  end
+
 
   private
 
