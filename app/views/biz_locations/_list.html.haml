@@ -1,20 +1,23 @@
-- if @biz_locations.count == 0
+- if BizLocation.all.count == 0
   %p
     %i No Location Mapping have been created yet.
 - else
-  %br
-  %table{:source => url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
-    %thead
-      %tr
-        %th
-          Id
-        %th
-          Name
-        %th
-          Address
-        %th
-          Managed By
-        %th{:style => "width:10%"}
-          Location Created On
-        %th
-          Action
+  - if @biz_locations.count == 0
+    %h2 Please select Location Level to view the list of Biz-Locations.
+  - else
+    %br
+      %table{:source => url(:controller => 'location_levels', :id => @location_level.id, :action => 'fetch_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
+        %thead
+          %tr
+            %th
+              Id
+            %th
+              Name
+            %th
+              Address
+            %th
+              Managed By
+            %th{:style => "width:10%"}
+              Location Created On
+            %th
+              Action
