@@ -185,12 +185,12 @@ table.display {
 	clear: both;
 	border-collapse: collapse;
 }
-
+/*
 table.display tfoot th {
 	padding: 3px 0px 3px 10px;
 	font-weight: bold;
 	font-weight: normal;
-}
+}*/
 
 table.display tr.heading2 td {
 	border-bottom: 1px solid #aaa;
@@ -321,7 +321,7 @@ tr.even {
 	text-align: center;
 }
 
-tfoot input {
+/*tfoot input {
 	margin: 0.5em 0;
 	width: 100%;
 	color: #444;
@@ -329,7 +329,7 @@ tfoot input {
 
 tfoot input.search_init {
 	color: #999;
-}
+}*/
 
 td.group {
 	background-color: #d1cfd0;
