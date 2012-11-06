@@ -14,11 +14,11 @@ class VisitSchedule
   MAX_SCHEDULED_PER_DAY_AT_BRANCH = 7
 
   SYMBOLIC_DESIGNATION_TO_ROLE_CLASSES_MAP = {
-    :branch_manager => Constants::User::SUPERVISOR, :audit_officer => Constants::User::SUPPORT
+    :branch_manager => Constants::User::SUPERVISOR, :audit_officer => Constants::User::SUPPORT, :area_manager => Constants::User::SUPERVISOR, :district_manager => Constants::User::SUPERVISOR
   }
 
   COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION = {
-    :branch_manager => 3, :audit_officer => 2
+    :branch_manager => 3, :audit_officer => 2, :area_manager => 1, :district_manager => 1
   }
 
   def self.schedule_visits(under_branch_id, on_date)    
@@ -30,7 +30,6 @@ class VisitSchedule
     scheduler = MyVisitScheduler.new
     visits_to_schedule = scheduler.schedule_visit(on_date, COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION, history_of_visits)
     staff_members = get_staff_member_ids(COUNT_VISITS_TO_ASSIGN_BY_DESIGNATION.keys, under_branch_id, on_date)
-
     visits_to_schedule.each { |staff_member_designation, center_ids_to_visit|
       staff_member = staff_members[staff_member_designation]
       next unless staff_member
