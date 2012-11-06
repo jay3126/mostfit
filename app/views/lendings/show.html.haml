@@ -64,11 +64,12 @@
       %td
         = loan_assignment_facade.loan_assignment_status_message(@lending.id)
     %tr.even
+      - locations = LoanAdministration.get_locations(@lending.id, get_effective_date)
       %th.even= LocationLevel.first(:level => 0).name
-      %td= link_to_with_rights @lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => @lending.administered_at_origin)
+      %td= link_to_with_rights locations[:administered_at].name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => locations[:administered_at].id)
     %tr.odd
       %th.odd= LocationLevel.first(:level => 1).name
-      %td= link_to_with_rights @lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => @lending.accounted_at_origin)
+      %td= link_to_with_rights locations[:accounted_at].name, url(:controller => :user_locations, :action => :show, :id => locations[:accounted_at].id)
     - unless @fee_instance.blank?
       %tr.even
         %th.even Fee Status

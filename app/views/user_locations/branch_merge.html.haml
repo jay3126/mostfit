@@ -14,65 +14,133 @@
           %td
             Date
           %th
-            = date_select 'on_date', get_effective_date, :max_date => get_effective_date, :size => 15
+            - date = @on_date.blank? ? get_effective_date : @on_date
+            = date_select 'on_date', date, :max_date => get_effective_date, :size => 15
           %td
             = submit "Go"
 - if !@first_location.blank? && !@second_location.blank?
-  %div{:style => 'display:table; width:100%;'}
-    %table.loan.tall{ :style => "width:50%;" }
-      %tr
-        %th Branch For Merge
-        %td
-          = @first_location.name
-      %tr
-        %th Centers
-        %td
-          = LocationLink.all_children(@first_location, get_effective_date).count
-      %tr
-        %th Clients
-        %td
-      %tr
-        %th Applied Loans
-        %td
-      %tr
-        %th Approved Loans
-        %td
-      %tr
-        %th Disbursed Loans
-        %td
-      %tr
-        %th Precloused Loans
-        %td
-      %tr
-        %th Write Off Loans
-        %td
-    %div{:style => "display:table-cell;"}
-      %table.loan.tall{ :style => "width:50%;" }
+  = form_for(:user_locations, :action => resource(:user_locations, :save_branch_merge), :method => :get) do
+    = hidden_field :name => 'merged_location_id', :value => @first_location.id
+    = hidden_field :name => 'merge_into_location_id', :value => @second_location.id
+    - f_loans = location_facade.get_loans_accounted(@first_location.id, @on_date)
+    - s_loans = location_facade.get_loans_accounted(@second_location.id, @on_date)
+    - f_payments = PaymentTransaction.all(:on_product_type => :lending, :on_product_id => f_loans.map(&:id))
+    - s_payments = PaymentTransaction.all(:on_product_type => :lending, :on_product_id => s_loans.map(&:id))
+    - f_group_payments = f_payments.group_by{|p| p.payment_towards}
+    - s_group_payments = s_payments.group_by{|p| p.payment_towards}
+    - f_group_loans = f_loans.group_by{|l| l.status}
+    - s_group_loans = s_loans.group_by{|l| l.status}
+    - zero_amt = MoneyManager.default_zero_money
+    %div{:style => 'display:table; width:100%;'}
+      %table.loan.tall
         %tr
-          %th Branch To Merge
-          %td
-            = @second_location.name
+          %th Branch For Merge
+          %td= @first_location.name
+        %tr
+          %th Staff Members
+          %td= StaffPosting.get_staff_assigned(@first_location.id, @on_date).count
         %tr
           %th Centers
-          %td
-            = LocationLink.all_children(@second_location, get_effective_date).count
+          %td= LocationLink.all_children(@first_location, @on_date).count
         %tr
-          %th Clients
-          %td
+          - clients = ClientAdministration.get_clients_registered(@first_location.id, @on_date).group_by{|c| c.active}
+          %th Active Clients
+          %td= clients[true].blank? ? 0 : clients[true].count
+          %th Inactive Clients
+          %td= clients[false].blank? ? 0 : clients[false].count
         %tr
           %th Applied Loans
-          %td
+          %td= f_group_loans[:new_loan_status].blank? ? 0 : f_group_loans[:new_loan_status].count
         %tr
           %th Approved Loans
-          %td
+          %td= f_group_loans[:approved_loan_status].blank? ? 0 : f_group_loans[:approved_loan_status].count
         %tr
           %th Disbursed Loans
-          %td
+          %td= f_group_loans[:disbursed_loan_status].blank? ? 0 : f_group_loans[:disbursed_loan_status].count
+          %th Amt
+          %td= f_group_payments[:payment_towards_loan_disbursement].blank? ? zero_amt : f_group_payments[:payment_towards_loan_disbursement].map(&:payment_money_amount).sum
         %tr
           %th Precloused Loans
-          %td
+          %td= f_group_loans[:preclosed_loan_status].blank? ? 0 : f_group_loans[:preclosed_loan_status].count
+          %th Amt
+          %td= f_group_payments[:payment_towards_loan_preclosure].blank? ? zero_amt : f_group_payments[:payment_towards_loan_preclosure].map(&:payment_money_amount).sum
         %tr
           %th Write Off Loans
-          %td
+          %td= f_group_loans[:written_off_loan_status].blank? ? 0 : f_group_loans[:written_off_loan_status].count
+          %th Amt
+          %td= f_group_payments[:payment_towards_loan_recovery].blank? ? zero_amt : f_group_payments[:payment_towards_loan_recovery].map(&:payment_money_amount).sum
+        %tr
+          %th Repayments
+          %td= f_group_payments[:payment_towards_loan_repayment].blank? ? 0 : f_group_payments[:payment_towards_loan_repayment].count
+          %th Amt
+          %td= f_group_payments[:payment_towards_loan_repayment].blank? ? zero_amt : f_group_payments[:payment_towards_loan_repayment].map(&:payment_money_amount).sum
+        %tr
+          %th Fee Collection
+          %td= f_group_payments[:payment_towards_fee_receipt].blank? ? 0 : f_group_payments[:payment_towards_fee_receipt].count
+          %th Amt
+          %td= f_group_payments[:payment_towards_fee_receipt].blank? ? zero_amt : f_group_payments[:payment_towards_fee_receipt].map(&:payment_money_amount).sum
+      %div{:style => "display:table-cell;"}
+        %table.loan.tall
+          %tr
+            %th Branch To Merge
+            %td= @second_location.name
+          %tr
+            %th Staff Members
+            %td= StaffPosting.get_staff_assigned(@second_location.id, @on_date).count
+          %tr
+            %th Centers
+            %td= LocationLink.all_children(@second_location, @on_date).count
+          %tr
+            - clients = ClientAdministration.get_clients_registered(@second_location.id, @on_date).group_by{|c| c.active}
+            %th Active Clients
+            %td= clients[true].blank? ? 0 : clients[true].count
+            %th Inactive Clients
+            %td= clients[false].blank? ? 0 : clients[false].count
+          %tr
+            %th Applied Loans
+            %td= s_group_loans[:new_loan_status].blank? ? 0 : s_group_loans[:new_loan_status].count
+          %tr
+            %th Approved Loans
+            %td= s_group_loans[:approved_loan_status].blank? ? 0 : s_group_loans[:approved_loan_status].count
+          %tr
+            %th Disbursed Loans
+            %td= s_group_loans[:disbursed_loan_status].blank? ? 0 : s_group_loans[:disbursed_loan_status].count
+            %th Amt
+            %td= s_group_payments[:payment_towards_loan_disbursement].blank? ? zero_amt : s_group_payments[:payment_towards_loan_disbursement].map(&:payment_money_amount).sum
+          %tr
+            %th Precloused Loans
+            %td= s_group_loans[:preclosed_loan_status].blank? ? 0 : s_group_loans[:preclosed_loan_status].count
+            %th Amt
+            %td= s_group_payments[:payment_towards_loan_preclosure].blank? ? zero_amt : s_group_payments[:payment_towards_loan_preclosure].map(&:payment_money_amount).sum
+          %tr
+            %th Write Off Loans
+            %td= s_group_loans[:written_off_loan_status].blank? ? 0 : s_group_loans[:written_off_loan_status].count
+            %th Amt
+            %td= s_group_payments[:payment_towards_loan_recovery].blank? ? zero_amt : s_group_payments[:payment_towards_loan_recovery].map(&:payment_money_amount).sum
+          %tr
+            %th Repayments
+            %td= s_group_payments[:payment_towards_loan_repayment].blank? ? 0 : s_group_payments[:payment_towards_loan_repayment].count
+            %th Amt
+            %td= s_group_payments[:payment_towards_loan_repayment].blank? ? zero_amt : s_group_payments[:payment_towards_loan_repayment].map(&:payment_money_amount).sum
+          %tr
+            %th Fee Collection
+            %td= s_group_payments[:payment_towards_fee_receipt].blank? ? 0 : s_group_payments[:payment_towards_fee_receipt].count
+            %th Amt
+            %td= s_group_payments[:payment_towards_fee_receipt].blank? ? zero_amt : s_group_payments[:payment_towards_fee_receipt].map(&:payment_money_amount).sum
+    .shaded
+      %table.form
+        %thead
+          %tr{:style => "text-align:left;"}
+            %th
+              Merge Date
+            %th
+              - date = @on_date.blank? ? get_effective_date : @on_date
+              = date_select 'merge_date', date, :max_date => get_effective_date
+            %th
+              Performed By
+            %th
+              = select :name => "performed_by_id", :text_method => :name, :value_method => :id, :collection => [session.user.staff_member], :prompt => "Select Staff Member", :selected => session.user.staff_member.id.to_s
+            %th
+              = submit "Save"
 - else
   %h2 Please Select Branch

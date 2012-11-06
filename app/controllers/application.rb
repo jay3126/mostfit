@@ -151,7 +151,7 @@ class Application < Merb::Controller
       if last_eod.blank?
         date = Date.today
       else
-        eods = EodPocess.all(:on_date => last_eod.on_date, :status.not => Constants::EODProcessVerificationStatus::COMPLETED)
+        eods = EodProcess.all(:on_date => last_eod.on_date, :status.not => Constants::ProcessVerificationStatus::COMPLETED)
         date = eods.blank? ? last_eod.on_date+1 : last_eod.on_date
       end
       set_effective_date(date)

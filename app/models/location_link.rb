@@ -1,22 +1,23 @@
 class LocationLink
   include DataMapper::Resource
   include Constants::Locations
+  include Constants::Properties
 
-  property :id,           Serial
-  property :effective_on, Date, :nullable => false
-  property :model_type, Enum.send('[]', *LINK_MODEL_NAME), :nullable => false
-  property :created_at,   DateTime, :nullable => false, :default => DateTime.now
+  property :id,            Serial
+  property :effective_on,  *DATE_NOT_NULL
+  property :model_type,    Enum.send('[]', *LINK_MODEL_NAME), :nullable => false
+  property :created_at,    *CREATED_AT
   property :creation_date, Date, :nullable => false, :default => Date.today
-  property :parent_id,    Integer, :nullable => false
-  property :child_id,     Integer, :nullable => false
-  property :deleted_at, ParanoidDateTime
+  property :parent_id,     *INTEGER_NOT_NULL
+  property :child_id,      *INTEGER_NOT_NULL
+  property :deleted_at,    *DELETED_AT
 
   def parent_location; Resolver.fetch_model_instance(self.model_type, self.parent_id); end
   def child_location; Resolver.fetch_model_instance(self.model_type, self.child_id); end
 
   validates_with_method :linked_locations_are_at_adjacent_levels?
   validates_with_method :linked_and_creation_dates_are_valid?
-  validates_with_method :linked_to_one_location_only_on_one_date?
+  validates_with_method :linked_to_one_location_only_on_one_date?, :if => lambda { |t| t.deleted_at == nil }
 
   # Two locations are related to one another on different location levels and not on the same location level
   def linked_locations_are_at_adjacent_levels?
@@ -65,6 +66,7 @@ class LocationLink
     parents[:child_id] = for_location.id
     parents[:effective_on.lte] = on_date
     parents[:model_type] = for_location.class.name
+    parents[:deleted_at] = nil
     parents[:order] = [:effective_on.desc]
 
     parent_links = all(parents)
@@ -79,12 +81,13 @@ class LocationLink
     children[:parent_id] = for_location.id
     children[:model_type] = for_location.class.name
     children[:effective_on.lte] = on_date
+    children[:deleted_at] = nil
     children_links = all(children)
     children_links_grouped = children_links.group_by {|child| child.child_id}
     children_links_grouped.each { |child_id, links|
       sorted_links = links.sort_by {|lnk| lnk.effective_on}
       latest_link = sorted_links.first
-      children_on_date << latest_link.child if (latest_link and latest_link.child)
+      children_on_date << latest_link.child if (latest_link and latest_link.child and get_parent(latest_link.child, on_date) == for_location)
     }
     children_on_date
   end

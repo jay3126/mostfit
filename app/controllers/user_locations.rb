@@ -320,6 +320,50 @@ class UserLocations < Application
     display @first_location
   end
 
+  def save_branch_merge
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+
+    message = {:error => [], :notice => []}
+
+    # GATE-KEEPING
+
+    merged_location_id     = params[:merged_location_id]
+    merge_into_location_id = params[:merge_into_location_id]
+    effective_on           = params[:merge_date]
+    performed_by_id        = params[:performed_by_id]
+    recorded_by_id         = session.user.id
+
+    # VALIDATIONS
+
+    message[:error] << "Branch For Merge Location cannot be blank" if merged_location_id.blank?
+    message[:error] << "Branch To Merge Location cannot be blank" if merge_into_location_id.blank?
+    message[:error] << "Merge Date cannot blank" if effective_on.blank?
+    message[:error] << "Please Select Performed By" if performed_by_id.blank?
+    message[:error] << "Same Location cannot be merge" if merged_location_id == merge_into_location_id
+
+    # OPERATIONS PERFORMEDmessage[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
+    if message[:error].blank?
+      begin
+        merge_date          = Date.parse(effective_on)
+        merged_location     = BizLocation.get merged_location_id
+        merge_into_location = BizLocation.get merge_into_location_id
+        if LocationMerge.merge_to_location(merged_location, merge_into_location, merge_date, performed_by_id, recorded_by_id).status == :completed
+          message[:notice] << "Location Merged successfully"
+        else
+          LocationMerge.merge_roll_back_to_location(merged_location, merge_into_location, merge_date)
+          message[:error] << "Location Merged Fail"
+        end
+      rescue => ex
+        LocationMerge.merge_roll_back_to_location(merged_location, merge_into_location, merge_date)
+        message[:error] << "An error has occured: #{ex.message}"
+      end
+    end
+
+    #REDIRECT/RENDER
+    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
+    redirect resource(:user_locations, :branch_merge, :first_location_id => merged_location_id, :second_location_id => merge_into_location_id, :on_date => effective_on), :message => message
+  end
+
 
   private
 

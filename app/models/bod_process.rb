@@ -1,11 +1,11 @@
 class BodProcess
   include DataMapper::Resource
   include Constants::Properties
-  include Constants::EODProcessVerificationStatus
+  include Constants::ProcessVerificationStatus
 
   property :id,           Serial
   property :on_date,      *DATE_NOT_NULL
-  property :status,       Enum.send('[]', *EOD_VERIFICATION_STATUSES), :nullable => false, :default => PENDING
+  property :status,       Enum.send('[]', *VERIFICATION_STATUSES), :nullable => false, :default => PENDING
   property :created_on,   *DATE_NOT_NULL
   property :started_at,   DateTime
   property :completed_at, DateTime

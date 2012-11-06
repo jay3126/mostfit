@@ -1451,6 +1451,10 @@ table.tall th {
   vertical-align: middle;
 }
 
+table.tall td {
+  vertical-align: middle;
+}
+
 table.tall .greytext {
   font-weight: normal;
   font-size: 0.9em;

@@ -204,12 +204,12 @@ module Constants
     
   end
 
-  module EODProcessVerificationStatus
+  module ProcessVerificationStatus
 
     PENDING = :pending
     IN_PROCESS = :in_process
     COMPLETED = :completed
-    EOD_VERIFICATION_STATUSES = [ PENDING, IN_PROCESS, COMPLETED ]
+    VERIFICATION_STATUSES = [ PENDING, IN_PROCESS, COMPLETED ]
 
   end
 
