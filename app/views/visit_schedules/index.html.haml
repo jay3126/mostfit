@@ -1,0 +1,26 @@
+%h1 Surprise Center Visit
+
+%div.tab_container.shaded
+  %ul.tabs{:style => "background-color: #3D3D3D;"}
+    %li#scv_form
+      SCV Form
+    %li#scv_suggestions
+      SCV Suggestions
+    %li#age_of_centers
+      Age Of centers
+    %li#center_not_visited
+      Center Not Visited
+    %li#scv_done_by_users
+      SCV Done By Users
+    %li#scv_exception
+      SCV Exception
+    %li#centers_suggested_and_not_visited
+      Centers Suggested and Not Visited
+  %div.tab
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :visit_schedules, :action => :scv_suggestions)}
+  %div.tab
+  %div.tab
+  %div.tab
+  %div.tab
+  %div.tab

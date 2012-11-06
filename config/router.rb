@@ -16,6 +16,7 @@ Merb::Router.prepare do
   resources :loan_assignments, :id => %r(\d+)
   resources :psl_sub_categories
   resources :priority_sector_lists
+  resources :visit_schedules, :id => %r(\d+)
 
   #book-keeping from bk begins
   resources :home, :collection => {:effective_date => [:get]}
