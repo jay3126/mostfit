@@ -98,7 +98,7 @@ class CollectionsFacade < StandardFacade
 
     #Find all centers by loan history on particular date
     location_manage = LocationManagement.locations_managed_by_staff(staff.id, on_date)
-    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| LocationLink.all_children(lm.managed_location, on_date)}
+    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| LocationLink.all_children_with_self(lm.managed_location, on_date)}
     biz_locations.flatten.uniq.each do |biz_location|
       collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
     end

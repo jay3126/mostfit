@@ -103,7 +103,7 @@ class LoanAdministration
       loan = each_admin.loan
 
       if administered_or_accounted_choice == ADMINISTERED_AT
-        loans.push(loan) if (given_location == each_admin.administered_at_location and each_admin.administered_at == get_administered_at(each_admin.loan_id, on_date))
+        loans.push(loan) if (given_location == each_admin.administered_at_location and each_admin.administered_at_location == get_administered_at(each_admin.loan_id, on_date))
       end
 
       if administered_or_accounted_choice == ACCOUNTED_AT
@@ -126,7 +126,7 @@ class LoanAdministration
       loan = each_admin.loan
 
       if administered_or_accounted_choice == ADMINISTERED_AT
-        loans.push(loan) if (given_location == each_admin.administered_at_location and each_admin.administered_at == get_administered_at(each_admin.loan_id, on_date))
+        loans.push(loan) if (given_location == each_admin.administered_at_location and each_admin.administered_at_location == get_administered_at(each_admin.loan_id, on_date))
       end
 
       if administered_or_accounted_choice == ACCOUNTED_AT
