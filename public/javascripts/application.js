@@ -700,18 +700,6 @@ function fillCenters(){
   });
 }
 
-function fillComboBranches(){
-  $("#area_selector").change(function(){
-    $.ajax({
-      type: "GET",
-      url: "/areas/branches/"+$("#area_selector").val(),
-      success: function(data){
-        $("#combo_branch_selector").html(data);
-      }
-    });
-  });
-}
-
 function fillAccounts(){
   if($("#account_selector").length > 0){
     $("#branch_selector").change(function(){
@@ -872,6 +860,21 @@ function getAllNominalCenters() {
   });
 }
 
+function getAllBranchesInArea() {
+  jQuery('#area_selector').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/branches_for_area/"+jQuery("#area_selector").val(),
+      data: {
+        "effective_date" : jQuery("#effective_date_id").val()
+      },
+      success: function(data) {
+        jQuery("#branches_in_area").html(data);
+      }
+    });
+  });
+}
+
 function get_all_location_on_level() {
   jQuery('#location_level_selector').change(function() {
     jQuery.ajax({
@@ -913,12 +916,12 @@ $(document).ready(function(){
   create_remotes();
   attachFormRemote();
   fillCenters();
-  fillComboBranches();
   fillAccounts();
   fillCashAccounts();
   fillBankAccounts();
   fillPslSubCategories();
   getAllNominalCenters();
+  getAllBranchesInArea();
   getClientAge();
   getDateDifference();
   fillFundingLines();

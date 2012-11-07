@@ -1,9 +1,0 @@
-%table
-  %tr
-    %th Branch
-    %th
-      = select :name => :biz_location_id, :collection => get_all_nominal_branches.map{|branch| [branch.id, branch.name]}, :prompt => "Select branch", :selected => params[:parent_location_id]
-    %th Visit Scheduled Date
-    %th
-      = date_select :visit_scheduled_date, Date.today
-      = submit "Go"

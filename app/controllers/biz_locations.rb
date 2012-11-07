@@ -251,6 +251,18 @@ class BizLocations < Application
     end
   end
 
+  def branches_for_area
+    if params[:id]
+      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
+      area = location_facade.get_location(params[:id])
+      effective_date = params[:effective_date]
+      branches = location_facade.get_children(area, effective_date)
+      return("<option value=''> Select branch </option>"+branches.map{|branch| "<option value=#{branch.id}>#{branch.name}"}.join)
+    else
+      return("<option value=''> Select branch </option>")
+    end
+  end
+
   def staffs_for_selector
     if params[:parent_location_id].blank?
       return("<option value=''>Select Staff Member</option>")
