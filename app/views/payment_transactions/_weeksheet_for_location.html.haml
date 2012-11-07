@@ -3,8 +3,8 @@
     $('#toggle_select_all').change(function() {
       $('input.checkbox').attr('checked',$(this).attr('checked'))
     });
-    $('tfoot td').click(function() {
-      location_id = jQuery(this).parents('tfoot').attr('location_id');
+    $('tr.location_footer th').click(function() {
+      location_id = jQuery(this).parents('tr').attr('location_id');
       jQuery('.biz_location_'+location_id).toggle();
     });
   });
@@ -28,7 +28,7 @@
       = radio_button :name => 'operation', :value => 'client_attendance'
       Both
       = radio_button :name => 'operation', :value => 'payment_and_client_attendance'
-    %table.dataTable.report.weeksheet.nojs
+    %table.unsortable.dataTable.report.weeksheet.nojs
       %thead
         %tr
           %th{:style=>"width: 35px;"}
@@ -154,37 +154,36 @@
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => ws.loan_actual_total_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
                 - total_amount = total_amount + ws.loan_actual_total_due.amount unless ws.loan_actual_total_due.blank?
                 - loan_row_count = loan_row_count + 1
-        %tfoot{:style => 'cursor:pointer;', :location_id => location_id}
-          %tr.org_total
-            %th{:style => "text-align:center; background:#888888;"}
-              = check_box :id => "toggle_select_to_disburse", :class => "payment_#{location_id}", :onclick => "toggle_check_box(this, 'payment_#{location_id}')"
-            %td
-              = biz_location.name.humanize
-            %td
-            %td
-            %td
-            %td
-            %td{:style => "text-align:right"}
-              = Money.new(total_disbursed_amount,:INR).to_s
-            %td
-            %td
-            %td
-            %td
-            %td
-            %td{:style => "text-align:right"}
-              = Money.new(total_schedule_principal_due,:INR).to_s
-            %td{:style => "text-align:right"}
-              = Money.new(total_actual_principal_outstanding,:INR).to_s
-            %td{:style => "text-align:right"}
-              = Money.new(total_schedule_interest_due,:INR).to_s
-            %td{:style => "text-align:right"}
-              = Money.new(total_actual_interest_outstanding,:INR).to_s
-            %td{:style => "text-align:right"}
-              = Money.new(total_advance_amount,:INR).to_s
-            %td
-            %td{:style => "text-align:right"}
-              %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
-                = Money.new(total_amount,:INR).to_s
+        %tr{:location_id => location_id, :class => 'location_footer', :style => 'cursor:pointer;'}
+          %td{:style => "text-align:center; background:#888888;"}
+            = check_box :id => "toggle_select_to_disburse", :class => "payment_#{location_id}", :onclick => "toggle_check_box(this, 'payment_#{location_id}')"
+          %th
+            = biz_location.name.humanize
+          %th
+          %th
+          %th
+          %th
+          %th{:style => "text-align:right"}
+            = Money.new(total_disbursed_amount,:INR).to_s
+          %th
+          %th
+          %th
+          %th
+          %th
+          %th{:style => "text-align:right"}
+            = Money.new(total_schedule_principal_due,:INR).to_s
+          %th{:style => "text-align:right"}
+            = Money.new(total_actual_principal_outstanding,:INR).to_s
+          %th{:style => "text-align:right"}
+            = Money.new(total_schedule_interest_due,:INR).to_s
+          %th{:style => "text-align:right"}
+            = Money.new(total_actual_interest_outstanding,:INR).to_s
+          %th{:style => "text-align:right"}
+            = Money.new(total_advance_amount,:INR).to_s
+          %th
+          %th{:style => "text-align:right"}
+            %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
+              = Money.new(total_amount,:INR).to_s
     %table.narrow.form{:style => "text-align:right;width:100%;"}
       %tfoot
         %tr
