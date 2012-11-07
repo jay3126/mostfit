@@ -108,7 +108,6 @@ class LocationMerge
     first_accounts = merge_location.accounting_locations.map(&:product)
     second_accounts = merge_into_location.accounting_locations.map(&:product)
     first_accounts.each do |p_account|
-      debugger
       child_accounts = LocationLink.get_children(p_account, effective_on)
       if p_account.class == Ledger
         s_account = second_accounts.select{|s| s.class == Ledger && s.ledger_classification == p_account.ledger_classification}
