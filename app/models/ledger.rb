@@ -328,14 +328,14 @@ class Ledger
     h_ledgers = head_office.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
     h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
     ledger_classification = LedgerClassification.resolve(:loan_disbursement)
-    all_vouchers = Voucher.all(:created_at.gt => Date.today, :created_at.lt => Date.today+1)
+    all_vouchers = Voucher.all(:eod => false)
     h_ledgers.each do |h_ledger|
       ledger_balances = {}
       postings_collection = []
       c_ledgers = LocationLink.get_children(h_ledger, on_date)
       c_vouchers = []
       c_ledgers.each do |c_ledger|
-        t_vouchers = c_ledger.vouchers.all(:created_at.gte => Date.today, :created_at.lt => Date.today+1)
+        t_vouchers = c_ledger.vouchers.all(:eod => false)
         unless t_vouchers.blank?
           c_vouchers += all_vouchers & t_vouchers
           all_vouchers = all_vouchers - t_vouchers
@@ -369,7 +369,8 @@ class Ledger
                 voucher_postings << posting_info
               end
             end
-            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', '', narration)
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', '', narration, true)
+            vouchers.each{|d| d.update(:eod=>true)}
           end
         end
       end
@@ -381,14 +382,14 @@ class Ledger
     h_ledgers = location.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
     h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
     ledger_classification = LedgerClassification.resolve(:loan_disbursement)
-    all_vouchers = Voucher.all(:created_at.gt => Date.today, :created_at.lt => Date.today+1)
+    all_vouchers = Voucher.all(:eod => false)
     h_ledgers.each do |h_ledger|
       ledger_balances = {}
       postings_collection = []
       c_ledgers = LocationLink.get_children(h_ledger, on_date)
       c_vouchers = []
       c_ledgers.each do |c_ledger|
-        t_vouchers = c_ledger.vouchers.all(:created_at.gte => Date.today, :created_at.lt => Date.today+1)
+        t_vouchers = c_ledger.vouchers.all(:eod => false)
         unless t_vouchers.blank?
           c_vouchers += all_vouchers & t_vouchers
           all_vouchers = all_vouchers - t_vouchers
@@ -423,6 +424,7 @@ class Ledger
               end
             end
             Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', location.id, "EOD :- "+narration)
+            vouchers.each{|d| d.update(:eod=>true)}
           end
         end
       end

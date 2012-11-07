@@ -28,7 +28,7 @@
           %td
             = bod.status.humanize rescue '-'
           %td{:style => "display:none; text-align:center"}
-            - if bod.status == Constants::EODProcessVerificationStatus::PENDING
+            - if bod.status == Constants::ProcessVerificationStatus::PENDING
               = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount, :class => 'eod_div'
             - else
               = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true

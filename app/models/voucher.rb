@@ -14,6 +14,7 @@ class Voucher
   property :mode_of_accounting, Enum.send('[]', *ACCOUNTING_MODES), :nullable => false, :default => PRODUCT_ACCOUNTING
   property :accounted_at,   Integer
   property :performed_at,   Integer
+  property :eod,            Boolean, :default => false
   property :created_at,     *CREATED_AT
 
   has n, :ledger_postings
@@ -45,8 +46,8 @@ class Voucher
 
   def voucher_type; "RECEIPT"; end
 
-  def self.create_generated_voucher(total_amount, voucher_type, currency, effective_on, postings, performed_at =nil, accounted_at=nil, notation = nil)
-    create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, GENERATED_VOUCHER)
+  def self.create_generated_voucher(total_amount, voucher_type, currency, effective_on, postings, performed_at =nil, accounted_at=nil, notation = nil, eod = false)
+    create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, GENERATED_VOUCHER, eod)
   end
 
   def self.create_manual_voucher(total_money_amount, voucher_type, effective_on, postings, performed_at = nil, accounted_at= nil, notation = nil)
@@ -173,7 +174,7 @@ class Voucher
 
   private
 
-  def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode)
+  def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode, eod = false)
     values = {}
     values[:total_amount] = total_amount
     values[:currency] = currency
@@ -181,6 +182,7 @@ class Voucher
     values[:type] = voucher_type
     values[:narration] = notation if notation
     values[:generated_mode] = generated_mode
+    values[:eod] = eod
     values[:performed_at] = performed_at unless performed_at.blank?
     values[:accounted_at] = accounted_at unless accounted_at.blank?
     ledger_postings = []
