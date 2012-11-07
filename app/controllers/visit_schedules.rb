@@ -7,17 +7,21 @@ class VisitSchedules < Application
 
   def suggest_scv_for_branch
     message = {}
-    biz_location = params[:biz_location_id]
+    area_id = params[:area_id]
+    branch_id = params[:branch_id]
     visit_scheduled_date = params[:visit_scheduled_date]
 
-    # OPERATIONS
     begin
-      @suggested_scv = VisitSchedule.schedule_visits(biz_location, visit_scheduled_date)
-      message[:notice] = "Random suggestions generated"
+      @suggested_scv = VisitSchedule.schedule_visits(branch_id, visit_scheduled_date)
+      if @suggested_scv.blank?
+        message[:error] = "Suggestions cannot be generated"
+      else
+        message[:notice] = "Random suggestions generated"
+      end
     rescue => ex
       message[:error] = ex.message
     end
-    redirect "/visit_schedules", :messgae => message
+    redirect resource(:visit_schedules, :area_id => area_id, :branch_id => branch_id, :visit_scheduled_date => visit_scheduled_date), :message => message
   end
 
 end
