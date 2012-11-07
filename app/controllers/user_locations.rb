@@ -347,11 +347,12 @@ class UserLocations < Application
         merge_date          = Date.parse(effective_on)
         merged_location     = BizLocation.get merged_location_id
         merge_into_location = BizLocation.get merge_into_location_id
-        if LocationMerge.merge_to_location(merged_location, merge_into_location, merge_date, performed_by_id, recorded_by_id).status == :completed
+        loc_merge = LocationMerge.merge_to_location(merged_location, merge_into_location, merge_date, performed_by_id, recorded_by_id)
+        if loc_merge.saved? && loc_merge.status == :completed
           message[:notice] << "Location Merged successfully"
         else
           LocationMerge.merge_roll_back_to_location(merged_location, merge_into_location, merge_date)
-          message[:error] << "Location Merged Fail"
+          message[:error] << loc_merge.errors.first
         end
       rescue => ex
         LocationMerge.merge_roll_back_to_location(merged_location, merge_into_location, merge_date)

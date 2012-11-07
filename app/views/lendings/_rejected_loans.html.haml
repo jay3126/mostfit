@@ -69,7 +69,7 @@
         %td
           = link_to_location lending.accounted_at_origin_location
         %td
-          = link_to StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff)
+          = lending.rejected_by_staff.blank? ? '-' : link_to(StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff))
         %td
           = lending.rejected_on_date
         - loan_row_count = loan_row_count + 1

@@ -51,7 +51,6 @@ class LocationMerge
     LocationLink.all(:created_at.gte => self.started_time, :created_at.lte => end_time).destroy
     LendingProductLocation.all(:created_at.gte => self.started_time, :created_at.lte => end_time).destroy
     StaffPosting.all(:created_at.gte => self.started_time, :created_at.lte => end_time).destroy
-    AccountingLocation.all(:created_at.gte => self.started_time, :created_at.lte => end_time).destroy
   end
 
   def perform_merge_to_location
@@ -65,7 +64,7 @@ class LocationMerge
     all_center_merge(merge_location, merge_into_location, effective_on)
     all_loan_product_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
     all_staff_member_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
-    all_accouting_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
+    all_accouting_ledger_merge(merge_location, merge_into_location, effective_on)
   end
 
   def all_loan_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
@@ -85,7 +84,7 @@ class LocationMerge
   end
 
   def all_center_merge(merge_location, merge_into_location, effective_on)
-    centers = LocationLink.all_children(merge_location, effective_on)
+    centers = LocationLink.get_children(merge_location, effective_on)
     centers.each do |center|
       LocationLink.assign(center, merge_into_location, effective_on)
     end
@@ -105,10 +104,20 @@ class LocationMerge
     end
   end
 
-  def all_accouting_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
-    account_locations = merge_location.accounting_locations
-    account_locations.each do |account_location|
-      AccountingLocation.first_or_create(:biz_location_id => merge_into_location.id, :product_type => account_location.product_type, :product_id => account_location.product_id, :cost_center => merge_into_location.cost_center, :effective_on => effective_on, :performed_by => performed_by, :recorded_by => recorded_by)
+  def all_accouting_ledger_merge(merge_location, merge_into_location, effective_on)
+    first_accounts = merge_location.accounting_locations.map(&:product)
+    second_accounts = merge_into_location.accounting_locations.map(&:product)
+    first_accounts.each do |p_account|
+      debugger
+      child_accounts = LocationLink.get_children(p_account, effective_on)
+      if p_account.class == Ledger
+        s_account = second_accounts.select{|s| s.class == Ledger && s.ledger_classification == p_account.ledger_classification}
+        unless s_account.blank?
+          child_accounts.each do |c_account|
+            LocationLink.assign(c_account, s_account.first, effective_on)
+          end
+        end
+      end
     end
     self.update(:status => COMPLETED, :completed_time => DateTime.now)
   end
