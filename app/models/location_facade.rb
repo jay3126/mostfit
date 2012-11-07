@@ -48,6 +48,11 @@ class LocationFacade < StandardFacade
     location_manager.all_nominal_centers
   end
 
+  # returns list of area
+  def all_nominal_areas
+    location_manager.all_nominal_areas
+  end
+
   # Get the 'parent' BizLocation for the specified 'child' BizLocation on the given date, if one exists
   def get_parent(for_location, on_date = Date.today)
     LocationLink.get_parent(for_location, on_date)

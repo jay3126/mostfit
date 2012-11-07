@@ -49,6 +49,10 @@ class LocationManager
     all_locations_at_level(LocationLevel::NOMINAL_CENTER_LEVEL)
   end
 
+  def all_nominal_areas
+    all_locations_at_level(LocationLevel::NOMINAL_AREA_LEVEL)
+  end
+
   def all_locations_on_date(on_date = Date.today)
     BizLocation.all(:creation_date.lte => on_date)
   end
