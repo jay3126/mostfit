@@ -56,7 +56,7 @@
           %td= f_group_loans[:approved_loan_status].blank? ? 0 : f_group_loans[:approved_loan_status].count
         %tr
           %th Disbursed Loans
-          %td= f_group_loans[:disbursed_loan_status].blank? ? 0 : f_group_loans[:disbursed_loan_status].count
+          %td= f_loans.blank? ? 0 : f_loans.count
           %th Amt
           %td= f_group_payments[:payment_towards_loan_disbursement].blank? ? zero_amt : f_group_payments[:payment_towards_loan_disbursement].map(&:payment_money_amount).sum
         %tr
@@ -104,7 +104,7 @@
             %td= s_group_loans[:approved_loan_status].blank? ? 0 : s_group_loans[:approved_loan_status].count
           %tr
             %th Disbursed Loans
-            %td= s_group_loans[:disbursed_loan_status].blank? ? 0 : s_group_loans[:disbursed_loan_status].count
+            %td= s_loans.blank? ? 0 : s_loans.count
             %th Amt
             %td= s_group_payments[:payment_towards_loan_disbursement].blank? ? zero_amt : s_group_payments[:payment_towards_loan_disbursement].map(&:payment_money_amount).sum
           %tr

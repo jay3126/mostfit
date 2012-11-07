@@ -21,7 +21,7 @@ class LocationMerge
   validates_with_method :check_merge_location?
 
   def check_merge_location?
-    obj = first(:status => COMPLETED, :merged_location_id => [self.merged_location_id, self.merge_into_location_id])
+    obj = LocationMerge.first(:status => COMPLETED, :merged_location_id => [self.merged_location_id, self.merge_into_location_id])
     obj.blank? ? true : [false, "Location merged already"]
   end
 
@@ -33,7 +33,6 @@ class LocationMerge
     obj_values[:performed_by]           = performed_by
     obj_values[:recorded_by]            = recorded_by
     obj_values[:status]                 = IN_PROCESS
-
     obj = first_or_create(obj_values)
     raise Errors::DataError, obj.errors.first.first unless obj.saved?
     obj.perform_merge_to_location
