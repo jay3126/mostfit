@@ -5,10 +5,6 @@ class VisitSchedules < Application
     render
   end
 
-  def scv_suggestions
-    partial :scv_suggestions
-  end
-
   def suggest_scv_for_branch
     message = {}
     biz_location = params[:biz_location_id]
