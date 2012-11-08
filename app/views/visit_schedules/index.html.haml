@@ -12,10 +12,10 @@
           %th Meeting Date
           %th Meeting Time
           %th Center Name
-          %th Staff Member
-          %th Staff Member Designation
+          %th RO Name
           %th Branch Name
           %th Area Name
+          %th Actions
       %tbody
         - s_no = 0
         - @scv_suggestions.each do |s|
@@ -23,15 +23,15 @@
           - center = BizLocation.get(s.biz_location_id)
           - branch = location_facade.get_parent(center, Date.today)
           - area = location_facade.get_parent(branch, Date.today)
-          - staff_member = StaffMember.get(s.staff_member_id)
-          - staff_member_designation = staff_member.designation
+          - center_managed_by = LocationManagement.staff_managing_location(s.biz_location_id, Date.today)
+          - staff_member = StaffMember.get(center_managed_by.manager_staff_id)
           - meeting = meeting_facade.get_meeting_schedules(center).first.meeting_begins_at rescue nil
           %tr
             %td= s_no
             %td= s.visit_scheduled_date
             %td= meeting
-            %td= center.name rescue nil
+            %td= link_to center.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => center.id)
             %td= staff_member.name rescue nil
-            %td= staff_member_designation.name rescue nil
-            %td= branch.name rescue nil
-            %td= area.name rescue nil
+            %td= link_to branch.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => branch.id)
+            %td= link_to area.name, url(:controller => :user_locations, :action => :show, :id => area.id)
+            %td
