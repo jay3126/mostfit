@@ -23,15 +23,13 @@
           - center = BizLocation.get(s.biz_location_id)
           - branch = location_facade.get_parent(center, Date.today)
           - area = location_facade.get_parent(branch, Date.today)
-          - center_managed_by = LocationManagement.staff_managing_location(s.biz_location_id, Date.today)
-          - staff_member = StaffMember.get(center_managed_by.manager_staff_id)
           - meeting = meeting_facade.get_meeting_schedules(center).first.meeting_begins_at rescue nil
           %tr
             %td= s_no
             %td= s.visit_scheduled_date
             %td= meeting
-            %td= link_to center.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => center.id)
-            %td= staff_member.name rescue nil
-            %td= link_to branch.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => branch.id)
-            %td= link_to area.name, url(:controller => :user_locations, :action => :show, :id => area.id)
+            %td= link_to_location(center)
+            %td= managed_by_staff_member(center.id, get_effective_date)
+            %td= link_to_location(branch)
+            %td= link_to_location(area)
             %td
