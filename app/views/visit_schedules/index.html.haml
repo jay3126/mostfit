@@ -25,10 +25,11 @@
           - area = location_facade.get_parent(branch, Date.today)
           - staff_member = StaffMember.get(s.staff_member_id)
           - staff_member_designation = staff_member.designation
+          - meeting = meeting_facade.get_meeting_schedules(center).first.meeting_begins_at rescue nil
           %tr
             %td= s_no
             %td= s.visit_scheduled_date
-            %td= "Meeting Time"
+            %td= meeting
             %td= center.name rescue nil
             %td= staff_member.name rescue nil
             %td= staff_member_designation.name rescue nil
