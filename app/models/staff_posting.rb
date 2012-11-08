@@ -106,7 +106,7 @@ class StaffPosting
     staff_ids  = (staff_postings.collect {|posting| posting.staff_id}).uniq
     staff_ids.each { |staff_id|
       current_assigned_location = get_assigned_location(staff_id, on_date)
-      staff_assigned_to_location.push(current_assigned_location) if current_assigned_location.at_location_id == to_location_id
+      staff_assigned_to_location.push(current_assigned_location) if current_assigned_location.at_location_id == to_location_id.to_i
     }
     staff_assigned_to_location
   end

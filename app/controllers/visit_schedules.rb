@@ -1,7 +1,7 @@
 class VisitSchedules < Application
 
   def index
-    @scv = VisitSchedule.all
+    @scv_suggestions = VisitSchedule.all
     render
   end
 

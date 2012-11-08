@@ -74,7 +74,7 @@ class VisitSchedule
     centers = location_facade.get_children(branch, on_date)
     return [] unless (centers and (not (centers.empty?)))
 
-    date_lower_limit = on_date - past_number_of_days
+    date_lower_limit = Date.parse(on_date) - past_number_of_days
     center_visit_history = {}
     centers.each { |center|
       visit_count = (center.visit_schedules.all(:was_visited => true, :visited_on.gte => date_lower_limit)).count

@@ -3,3 +3,34 @@
   %h2 SCV Suggestions
   = form(:action => url(:controller => :visit_schedules, :action => :suggest_scv_for_branch), :method => :post) do
     = partial "lib/scv_area_branch_selector"
+
+  - unless @scv_suggestions.blank?
+    %table.dataTable
+      %thead
+        %tr
+          %th S.No.
+          %th Meeting Date
+          %th Meeting Time
+          %th Center Name
+          %th Staff Member
+          %th Staff Member Designation
+          %th Branch Name
+          %th Area Name
+      %tbody
+        - s_no = 0
+        - @scv_suggestions.each do |s|
+          - s_no += 1
+          - center = BizLocation.get(s.biz_location_id)
+          - branch = location_facade.get_parent(center, Date.today)
+          - area = location_facade.get_parent(branch, Date.today)
+          - staff_member = StaffMember.get(s.staff_member_id)
+          - staff_member_designation = staff_member.designation
+          %tr
+            %td= s_no
+            %td= s.visit_scheduled_date
+            %td= "Meeting Time"
+            %td= center.name rescue nil
+            %td= staff_member.name rescue nil
+            %td= staff_member_designation.name rescue nil
+            %td= branch.name rescue nil
+            %td= area.name rescue nil
