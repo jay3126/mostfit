@@ -1,3 +1,14 @@
+:javascript
+  $('table.scv').dataTable({
+    "sScrollX": "100%",
+    "bPaginate": false,
+    "bJQueryUI": true,
+    "sDom": '<"H"Tfr>t<"F"ip>',
+    "oTableTools": {
+      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+    }
+  });
+
 %h1 Surprise Center Visit
 .shaded
   %h2 SCV Suggestions
@@ -5,7 +16,7 @@
     = partial "lib/scv_area_branch_selector"
 
   - unless @scv_suggestions.blank?
-    %table.dataTable
+    %table.report.weeksheet.nojs.scv
       %thead
         %tr
           %th S.No.
