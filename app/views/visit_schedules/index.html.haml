@@ -43,4 +43,4 @@
             %td= managed_by_staff_member(center.id, get_effective_date)
             %td= link_to_location(branch)
             %td= link_to_location(area)
-            %td
+            %td= link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', "Center",center, branch, center, session.user.staff_member, Date.today, params, nil), :class => 'grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
