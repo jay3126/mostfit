@@ -1,4 +1,4 @@
-= form(:biz_locations, resource(:biz_locations,:location_checklists)) do 
+= form_for(:biz_locations, :action => resource(:biz_locations,:location_checklists)) do 
   .shaded
     %table.form
       %thead
@@ -10,12 +10,11 @@
           %th
             - all_centers = params[:parent_location_id].blank? ? [] : get_all_nominal_centers(params[:parent_location_id])
             = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id], :class => 'location'
-          %td
-            Staff Member:
-          %th
-            - location_id   = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
-            - staff_members = (location_id.blank? && params[:staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
-            = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id]
+          %td{:style => 'display:none'}
+            Client:
+          %th{:style => 'display:none'}
+            - clients = params[:child_location_id].blank? ? [] : ClientAdministration.get_clients_administered(params[:child_location_id].to_i, get_effective_date)
+            = select :name => "client_id", :collection => clients, :text_method => :name, :value_method => :id, :prompt => 'Select Client', :id => 'client_selector', :selected => params[:client_id]
           %td
             = submit "Go"
     - unless params[:parent_location_id].blank?
@@ -27,8 +26,9 @@
             %br
             Center:
             = BizLocation.get(params[:child_location_id]).name
+%br
 - unless @parent_location.blank?
-  = link_to 'Process Audit', url_for_process_audit_checklist('Process Audit',"Center", @parent_location, @praent_location, @parent_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+  = link_to 'Process Audit', url_for_process_audit_checklist('Process Audit',"Center", @parent_location, @parent_location, @parent_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
 - unless @child_location.blank?
   - if check_checklist_parameters(@child_location.location_level, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil)
     = link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', "Center", @child_location, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
@@ -38,18 +38,25 @@
     = link_to 'Business Audit', url_for_checklist('Business Audit', "Center", @child_location, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
   - else
     = link_to 'Business Audit Not Available', "#", :class => 'add grey_button', :disabled=>true
+%br
 - unless @clients.blank?
-  %table
+  - checklist_type = ChecklistType.first(:name=>"Customer Calling")
+  - checklist = checklist_type.checklists.first
+  %table{:style => "width:38%", :class => 'reports'}
     %thead
       %tr
-        %th Staff Member
+        %th Client
         %th Action
     - @clients.each do |client|
       %tr
         %td
-          = client.name
+          - if checklist.get_responses('Client', client.id).blank?
+            %b{:style => 'color:red'}*
+          -else
+            %b{:style => 'color:green'}*
+          %b= client.name
         %td
           - if check_checklist_parameters(client, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil)
-            = link_to 'Customer Calling', url_for_checklist('Customer Calling', client.class.to_s, client, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :target => 'blank'
+            = link_to 'Customer Calling', url_for_checklist('Customer Calling', client.class.to_s, client, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button'
           - else
             = '-'

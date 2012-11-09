@@ -59,6 +59,8 @@
         %li
           = link_to_with_rights 'Claim Processing', url(:controller => :new_clients, :action => :all_deceased_clients), :class => 'user icon'
         %li
+          = link_to_with_rights 'CheckLists', resource(:biz_locations,:location_checklists), :class => 'user icon'
+        %li
           = link_to_with_rights 'Surprise Center Visit', resource(:visit_schedules), :class => 'icon'
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting

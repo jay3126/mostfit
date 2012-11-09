@@ -243,7 +243,7 @@ class BizLocations < Application
     if params[:id]
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
       branch = location_facade.get_location(params[:id])
-      effective_date = params[:effective_date]
+      effective_date = params[:effective_date]||get_effective_date
       centers = location_facade.get_children(branch, effective_date)
       return("<option value=''>Select center</option>"+centers.map{|center| "<option value=#{center.id}>#{center.name}"}.join)
     else
@@ -270,6 +270,15 @@ class BizLocations < Application
       location_id = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
       staff_members = StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
       return("<option value=''>Select Staff Member</option>"+staff_members.map{|staff| "<option value=#{staff.id}>#{staff.name}"}.join)
+    end
+  end
+
+  def clients_for_selector
+    if params[:id].blank?
+      return("<option value=''>Select Client</option>")
+    else
+      clients = ClientAdministration.get_clients_administered(params[:id].to_i, get_effective_date)
+      return("<option value=''>Select Client</option>"+clients.map{|client| "<option value=#{client.id}>#{client.name}"}.join)
     end
   end
 
@@ -384,6 +393,13 @@ class BizLocations < Application
     @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
     @sEcho = params[:sEcho].to_i
     render :template => 'location_levels/fetch_locations', :layout => layout?
+  end
+
+  def location_checklists
+    @parent_location = params[:parent_location_id].blank? ? '' : BizLocation.get(params[:parent_location_id])
+    @child_location  = params[:child_location_id].blank? ? '' : BizLocation.get(params[:child_location_id])
+    @clients         = @child_location.blank? ? [] : ClientAdministration.get_clients_administered(@child_location.id, get_effective_date)
+    display @clients
   end
 
 end

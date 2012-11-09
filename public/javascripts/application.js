@@ -845,6 +845,18 @@ function get_all_ledgers_on_cost_center() {
   });
 }
 
+function get_all_clients_on_center() {
+  jQuery('#child_selector').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/clients_for_selector/"+jQuery(this).val(),
+      success: function(data) {
+        jQuery("#client_selector").html(data);
+      }
+    });
+  });
+}
+
 function getAllNominalCenters() {
   jQuery('#parent_selector').change(function() {
     jQuery.ajax({
@@ -928,6 +940,7 @@ $(document).ready(function(){
   get_all_location_on_level();
   get_all_staff_member_on_location();
   get_all_ledgers_on_cost_center();
+  get_all_clients_on_center();
   $('.chosen').chosen();
   $('input#submit').addClass("greenButton");
   $('button.add').addClass("greenButton");
