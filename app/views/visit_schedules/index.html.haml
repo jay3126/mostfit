@@ -16,31 +16,40 @@
     = partial "lib/scv_area_branch_selector"
 
   - unless @scv_suggestions.blank?
+    - visit_schedule_infos = @scv_suggestions.map{|d| VisitSchedulerInfo.new(d)}
     %table.report.weeksheet.nojs.scv
       %thead
         %tr
           %th S.No.
           %th Meeting Date
-          %th Meeting Time
-          %th Center Name
           %th RO Name
-          %th Branch Name
-          %th Area Name
-          %th Actions
+          %th Timeslot - Before 8AM
+          %th Timeslot - 8AM TO 9AM
+          %th Timeslot - 9AM TO 10AM
+          %th Timeslot - 10AM TO 11AM
+          %th Timeslot - 11AM TO 12AM
+          %th Timeslot - 12AM TO 01PM
+          %th Timeslot - 01AM TO 02PM
+          %th Timeslot - 02AM TO 03PM
+          %th Timeslot - 03AM TO 04PM
+          %th Timeslot - After 04PM
+          %th Not Defined
       %tbody
         - s_no = 0
-        - @scv_suggestions.each do |s|
+        - visit_schedule_infos.group_by{|g| [g.meeting_date, g.staff_member]}.each do |keys, values|
           - s_no += 1
-          - center = BizLocation.get(s.biz_location_id)
-          - branch = location_facade.get_parent(center, Date.today)
-          - area = location_facade.get_parent(branch, Date.today)
-          - meeting = meeting_facade.get_meeting_schedules(center).first.meeting_begins_at rescue nil
           %tr
             %td= s_no
-            %td= s.visit_scheduled_date
-            %td= meeting
-            %td= link_to_location(center)
-            %td= managed_by_staff_member(center.id, get_effective_date)
-            %td= link_to_location(branch)
-            %td= link_to_location(area)
-            %td= link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', "Center",center, branch, center, session.user.staff_member, Date.today, params, nil), :class => 'grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+            %td= keys.first
+            %td= keys.last.name
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('08:00AM') < s.meeting_time }.map(&:location).map(&:name).to_s}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('08:00AM') < s.meeting_time && Time.parse('09:00AM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('09:00AM') < s.meeting_time && Time.parse('10:00AM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('10:00AM') < s.meeting_time && Time.parse('11:00AM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('11:00AM') < s.meeting_time && Time.parse('12:00AM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('12:00AM') < s.meeting_time && Time.parse('01:00PM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('01:00PM') < s.meeting_time && Time.parse('02:00AM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('02:00PM') < s.meeting_time && Time.parse('03:00PM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('03:00PM') < s.meeting_time && Time.parse('04:00PM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| !s.meeting_time.blank? && Time.parse('04:00PM') > s.meeting_time}.map(&:location).map(&:name)}"
+            %td= "#{values.select{|s| s.meeting_time.blank?}.map(&:location).map(&:name)}"

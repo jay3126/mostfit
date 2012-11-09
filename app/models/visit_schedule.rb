@@ -21,7 +21,7 @@ class VisitSchedule
     :branch_manager => 3, :audit_officer => 2, :area_manager => 1, :district_manager => 1
   }
 
-  def self.schedule_visits(under_branch_id, on_date)    
+  def self.schedule_visits(under_branch_id, on_date)
     existing_visit_count_on_date = (all(:biz_location_id => under_branch_id, :visit_scheduled_date => on_date)).count
     return unless existing_visit_count_on_date == 0
 
@@ -171,4 +171,20 @@ class MyVisitScheduler
 
   attr_reader :created_at
   def initialize; @created_at = DateTime.now; end
+end
+
+class VisitSchedulerInfo
+
+  attr_reader :meeting_date, :meeting_time, :location, :staff_member
+  def initialize(visit_schedule)
+    @location = visit_schedule.biz_location
+    @meeting_date = visit_schedule.visit_scheduled_date
+    meeting = get_meeting_facade(User.first).get_meeting_schedules(@location).first.meeting_begins_at rescue nil
+    @meeting_time = Time.parse(meeting)
+    @staff_member = visit_schedule.staff_member
+  end
+
+  def get_meeting_facade(user)
+    @meeting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user)
+  end
 end
