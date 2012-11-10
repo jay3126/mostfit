@@ -1,8 +1,12 @@
 class ChequeLeaf
   include DataMapper::Resource
+  include Constants::Properties
+  include Constants::Transaction
 
   property :id, Serial
   property :cheque_issue_date, Date, :nullable => false, :default => Date.today
+  property :amount,   *MONEY_AMOUNT_NULL
+  property :type, Enum.send('[]', *CHEQUE_LEAF_TYPE), :nullable => false, :default => NOT_DEFINED
   property :valid, Boolean, :default => true
   property :used, Boolean, :default => false
   property :created_at, DateTime

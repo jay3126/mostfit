@@ -4,11 +4,14 @@ module Constants
     CLIENT = :client
     STAFFMEMBER = :staff_member
     FIX_AMOUNT = :fix_amount
+    LOCATION = :location
+    NOT_DEFINED = :not_defined
     PERCENTAGE_AMOUNT = :percentage_amount
     FEE_AMOUNT_TYPE = [FIX_AMOUNT, PERCENTAGE_AMOUNT]
     COUNTERPARTIES = [CLIENT, STAFFMEMBER]
     COUNTERPARTIES_AND_MODELS = { CLIENT => 'Client' ,STAFFMEMBER => 'StaffMember' }
     MODELS_AND_COUNTERPARTIES = { 'Client' => CLIENT, 'StaffMember' => STAFFMEMBER }
+    CHEQUE_LEAF_TYPE = [NOT_DEFINED, LOCATION, CLIENT]
 
     COUNTERPARTY_ADMINISTERED_AT = :administered_at
     COUNTERPARTY_REGISTERED_AT   = :registered_at

@@ -11,6 +11,8 @@
       %th
         Cheaque Leaf No.
       %th
+        Type
+      %th
         Cheque Leaf Issue Date
       %th
         Issued By
@@ -31,6 +33,8 @@
             = cheque_leaf.id
           %td
             = cheque_leaf.serial_number
+          %td
+            = select :name => "cheque_leaf[#{cheque_leaf.id}][][type]", :collection => Constants::Transaction::CHEQUE_LEAF_TYPE.map{|c| [c, c.to_s.humanize]}, :selected => cheque_leaf.type.to_s
           %td
             = date_select "cheque_leaf[#{cheque_leaf.id}][][cheque_issue_date]", cheque_leaf.cheque_issue_date, {:id => "cheque_leaf_#{cheque_leaf.id}", :size => "10", :max_date => Date.today}
           %td
