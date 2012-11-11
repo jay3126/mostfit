@@ -5,8 +5,21 @@
     });
 
   $(document).ready(function() {
-  $('#toggle_select_to_pre_disburse').change(function() {
-    $('.select_to_disburse').attr('checked',$(this).attr('checked'))});
+    $('#toggle_select_to_pre_disburse').change(function() {
+      $('.select_to_disburse').attr('checked',$(this).attr('checked'))
+    });
+
+    $('.d_mode').change(function() {
+      v = jQuery(this).attr('value');
+      if(v=='Cash'){
+        jQuery(this).parents('tr').find('.cheque_no, .cheque_amt').attr('disabled',true);
+        jQuery(this).parents('tr').find('.cheque_no').val('');
+        jQuery(this).parents('tr').find('.cheque_amt').val('0.00');
+      }else{
+        jQuery(this).parents('tr').find('.cheque_no, .cheque_amt').attr('disabled',false);
+        jQuery(this).parents('tr').find('.cheque_no, .cheque_amt').attr('disabled',false);
+     }
+    });
   });
 
 - if lendings.blank?
@@ -68,11 +81,11 @@
             - elsif lending.applied_by_staff == session.user.staff_member.id
               %i No privilege
           %td
-            = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES
+            = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES, :class => 'd_mode'
           %td
-            = select :name => "lending[#{lending.id}][cheque_number]", :collection => ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false, :type => :client).map{|cl| [cl.serial_number]}, :prompt => 'Select Cheque'
+            = select :name => "lending[#{lending.id}][cheque_number]", :collection => ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false, :type => :client).map{|cl| [cl.serial_number]}, :prompt => 'Select Cheque', :class => 'cheque_no'
           %td
-            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;"
+            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt'
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
