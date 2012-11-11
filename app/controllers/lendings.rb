@@ -6,13 +6,14 @@ class Lendings < Application
       search             = {:status => [:new_loan_status, :approved_loan_status, :disbursed_loan_status, :rejected_loan_status]}
       search.merge!(:accounted_at_origin => params[:parent_location_id]) unless params[:parent_location_id].blank?
       search.merge!(:administered_at_origin => params[:child_location_id]) unless params[:child_location_id].blank?
-      @lendings          = Lending.all(search)
-      @new_lendings      = @lendings.select{|l| l.status == :new_loan_status}
-      @approve_lendings  = @lendings.select{|l| l.status == :approved_loan_status}
-      @disburse_lendings = @lendings.select{|l| l.status == :disbursed_loan_status}
-      @rejected_lendings = @lendings.select{|l| l.status == :rejected_loan_status}
-      @fee_lendings      = @disburse_lendings.collect{|al| al.unpaid_loan_fees}.flatten
-      @insurance_fees    = @disburse_lendings.collect{|al| al.unpaid_loan_insurance_fees}.flatten
+      @lendings               = Lending.all(search)
+      @new_lendings           = @lendings.select{|l| l.status == :new_loan_status}
+      @pre_disbursal_lendings = @lendings.select{|l| l.status == :approved_loan_status && l.disbursement_mode == 'Not Specified'}
+      @approved_lendings      = @lendings.select{|l| l.status == :approved_loan_status && l.disbursement_mode != 'Not Specified'}
+      @disburse_lendings      = @lendings.select{|l| l.status == :disbursed_loan_status}
+      @rejected_lendings      = @lendings.select{|l| l.status == :rejected_loan_status}
+      @fee_lendings           = @disburse_lendings.collect{|al| al.unpaid_loan_fees}.flatten
+      @insurance_fees         = @disburse_lendings.collect{|al| al.unpaid_loan_insurance_fees}.flatten
     end
     display @new_lendings
   end
@@ -156,6 +157,59 @@ class Lendings < Application
     redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]) , :message => @message
   end
 
+
+  def setup_lending_disbursement_mode
+    @message           = {:error => [], :notice => []}
+    lendings           = {}
+    lending_params     = params[:lending]
+    performed_by_staff = params[:performed_by_staff]
+    recorded_by        = session.user.id
+    cheque_numbers = lending_params.values.map{|l| l[:cheque_number] if ['Cheque', 'Cheque With Cash'].include?(l[:disbursement_mode]) && !l[:disbursement].blank?}
+    @message[:error] << "Please select Staff Member" if performed_by_staff.blank?
+    @message[:error] << "Please select loans for Setup Disbursement Mode" if lending_params.values.select{|l| l[:disbursement]}.count <= 0
+    @message[:error] << "A Cheque No. cannot be use multiple times" if !cheque_numbers.blank? && cheque_numbers.compact.count != cheque_numbers.compact.uniq.count
+    if @message[:error].blank?
+      begin
+        lending_params.each do |key, value|
+          unless value[:disbursement].blank?
+            lending                    = Lending.get key
+            cheque_number              = value[:cheque_number]
+            disbursement_mode          = value[:disbursement_mode]
+            cheque_amount              = value[:cheque_amount].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance(value[:cheque_amount])
+            lending.cheque_number      = cheque_number if (cheque_number != "Not Specified" and ['Cheque', 'Cheque With Cash'].include?(disbursement_mode))
+            lending.disbursement_mode  = disbursement_mode
+            @message[:error] << "Loan(#{lending.id})= Please Select Disbursement Mode" if disbursement_mode.blank? || disbursement_mode == "Not Specified"
+            @message[:error] << "Loan(#{lending.id})= Please Select Cheque No." if ['Cheque', 'Cheque With Cash'].include?(disbursement_mode) && cheque_number.blank?
+            @message[:error] << "Loan(#{lending.id})= Cheque Amount cannot be blank" if ['Cheque', 'Cheque With Cash'].include?(disbursement_mode) && value[:cheque_amount].blank?
+            @message[:error] << "Loan(#{lending.id})= Cheque Amount cannot be greater Approved Amount" if ['Cheque', 'Cheque With Cash'].include?(disbursement_mode) && cheque_amount > lending.to_money[:approved_amount]
+            if lending.valid?
+              lendings[lending] = {:cheque_number => cheque_number, :cheque_amount => cheque_amount}
+            else
+              @message[:error] << "#{lending.id}= #{lending.errors.first.join(', ')}"
+            end
+          end
+        end
+        if @message[:error].blank?
+          lendings.each do |lending, cheque|
+            if lending.save
+              #this method will update the cheque leaf as used if disbursement mode is Cheque.
+              if ['Cheque', 'Cheque With Cash'].include?(lending.disbursement_mode)
+                ChequeLeaf.get(cheque[:cheque_number]).update!(:amount => cheque[:cheque_amount].amount, :currency => cheque[:cheque_amount].currency, :used => true)
+              end
+            else
+              @message[:error] << "Loan(#{lending.id})= #{lending.errors.first.join(',')}"
+            end
+          end
+        end
+      rescue => ex
+        @message[:error] << "An error has occured: #{ex.message}"
+      end
+    end
+    @message = {:notice => "Loan saved successfully."} if @message[:error].blank?
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+    redirect resource(:lendings, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]) , :message => @message
+  end
+
   def update_lending_approve_to_disburse
     @message           = {:error => [], :notice => []}
     lendings           = []
@@ -165,18 +219,12 @@ class Lendings < Application
     reason_id          = params[:reason]
     remarks            = params[:remarks]
     recorded_by        = session.user.id
-    cheque_number      = params[:cheque_number]
-    disbursement_mode  = params[:disbursement_mode]
 
     @message[:error] << "Please select Staff Member" if disbursed_by_staff.blank?
     @message[:error] << "Disbursal Date cannot blank" if disbursal_date.blank?
     @message[:error] << "Please select Reason" if params[:submit] == 'Reject' && reason_id.blank?
     @message[:error] << "Remarks cannot be blank" if params[:submit] == 'Reject' && remarks.blank?
     @message[:error] << "Please select loans for Disburse or Reject" if lending_params.values.select{|l| l[:disburse]}.count <= 0
-    @message[:error] << "Please select Disbursement Mode" if (disbursement_mode == "Not Specified")
-    @message[:error] << "Cheque Number can only be choosen if Disbursement Mode selected is Cheque" if ((disbursement_mode == "Not Specified" or disbursement_mode == "Cash") and cheque_number != "Not Specified")
-    @message[:error] << "Please select cheque number as Disbursement mode choosen is Cheque" if (disbursement_mode == "Cheque" and cheque_number == "Not Specified")
-    
     
     if @message[:error].blank?
       begin
@@ -187,8 +235,6 @@ class Lendings < Application
             lending.disbursed_amount   = disbursed_amount.amount
             lending.disbursed_by_staff = disbursed_by_staff
             lending.disbursal_date     = disbursal_date
-            lending.cheque_number      = cheque_number if (cheque_number != "Not Specified" and disbursement_mode == "Cheque")
-            lending.disbursement_mode  = disbursement_mode if (disbursement_mode != "Not Specified")
             if lending.valid?
               lendings << lending
             else
@@ -206,11 +252,6 @@ class Lendings < Application
               fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
               fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(lending.id)
               fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
-
-              #this method will update the cheque leaf as used if disbursement mode is Cheque.
-              if ((disbursement_mode == "Cheque") and (not cheque_number == "Not Specified"))
-                ChequeLeaf.mark_cheque_leaf_as_used(cheque_number.to_i)
-              end
 
               payment_facade.record_payment(lending.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', lending.id, 'client', lending.loan_borrower.counterparty_id, lending.administered_at_origin, lending.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
               fee_instances.each do |fee_instance|

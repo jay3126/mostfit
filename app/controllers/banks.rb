@@ -30,7 +30,6 @@ class Banks < Application
           accounts = []
           branch_obj = @bank.bank_branches.new(:name => branch[:bank_branch], :created_by_user_id => session.user.id, :biz_location_id => branch[:location])
           branch_accounts.each do |a_key, account|
-            debugger
             branch_obj.bank_accounts.new(:name=> account[:account_name], :account_no => account[:account_no], :created_by_user_id => session.user.id) if !account[:account_name].blank? && !account[:account_no].blank?
           end
           branch_obj.save unless branch[:bank_branch].blank?

@@ -32,5 +32,6 @@ module Constants
 
     FREQUENCY         = [ DataMapper::Types::Enum.send('[]', *MarkerInterfaces::Recurrence::FREQUENCIES), NOT_NULL ]
     CURRENCY          = [ DataMapper::Types::Enum.send('[]', *Constants::Money::CURRENCIES), NOT_NULL ]
+    CURRENCY_NULL     = [ DataMapper::Types::Enum.send('[]', *Constants::Money::CURRENCIES)]
   end
 end

@@ -1,11 +1,11 @@
 :javascript
-  $('table.approve_loan').dataTable({
+  $('table.pre_disbursed').dataTable({
       "bPaginate": false,
       "bJQueryUI": true
     });
 
   $(document).ready(function() {
-  $('#toggle_select_to_disburse').change(function() {
+  $('#toggle_select_to_pre_disburse').change(function() {
     $('.select_to_disburse').attr('checked',$(this).attr('checked'))});
   });
 
@@ -13,16 +13,16 @@
   %h3
     No loans exist
 - else
-  = form_for(:lendings, :action => url(:controller => :lendings, :action => :update_lending_approve_to_disburse)) do
-    %table.report.weeksheet.nojs.approve_loan
+  = form_for(:lendings, :action => url(:controller => :lendings, :action => :setup_lending_disbursement_mode)) do
+    %table.report.weeksheet.nojs.pre_disbursed
       %thead
         %tr
           %th
             S.No.
           %th
-            Check to Disburse
+            Select All
             %br
-            = check_box :id => "toggle_select_to_disburse"
+            = check_box :id => "toggle_select_to_pre_disburse"
           %th
             Disbursement Mode
           %th
@@ -51,8 +51,6 @@
             Approved by
           %th
             Approval Date
-          %th
-            Disburse Amount
       - loan_row_count = 1
       - lendings.each do |lending|
         %tr
@@ -61,20 +59,20 @@
           %td
             - client = Client.get(lending.loan_borrower.counterparty_id)
             - if (lending.applied_by_staff == session.user.staff_member.id) || client_facade.is_claim_processing_or_inactive?(client)
-              = check_box :name => "lending[#{lending.id}][disburse]" ,:value => true, :disabled => true
+              = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :disabled => true
             - else
-              = check_box :name => "lending[#{lending.id}][disburse]" ,:value => true, :class => 'select_to_disburse'
+              = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :class => 'select_to_pre_disburse'
             %br
             - if client_facade.is_claim_processing_or_inactive?(client)
               %i Client Inactive
             - elsif lending.applied_by_staff == session.user.staff_member.id
               %i No privilege
           %td
-            = lending.disbursement_mode.to_s.humanize
+            = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES
           %td
-            = lending.cheque_number
+            = select :name => "lending[#{lending.id}][cheque_number]", :collection => ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false, :type => :client).map{|cl| [cl.serial_number]}, :prompt => 'Select Cheque'
           %td
-            = lending.cheque_number.blank? ? '-' : ChequeLeaf.get(lending.cheque_number).money_amount
+            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;"
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
@@ -97,8 +95,6 @@
             = link_to_with_rights StaffMember.get(lending.approved_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.approved_by_staff)
           %td
             = lending.approved_on_date
-          %td
-            = text_field :name => "lending[#{lending.id}][disbursed_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;"
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
@@ -108,33 +104,19 @@
             %i Client Inactive: The Client is going throuh death claim processing.
 
     %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix'}
-      %table.form{:style => "text-align:right;width:100%;"}
+      %table.form{:style => "width:100%;"}
         %thead
           %tr
             %th
               Date:
             %td
-              = date_select "disbursal_date", get_effective_date, :max_date => Date.today, :size => 8, :location_id => params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
+              = date_select "pre_disbursal_date", get_effective_date, :max_date => Date.today, :location_id => params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
             %th
               Performed by:
             %th
               - staff_member  = session.user.staff_member
-              = select :name => "disbursed_by_staff", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
-            %th
-              Reason:
-            %th
-              = select :name => 'reason', :collection => Reason.all, :text_method => :name, :value_method => :id, :prompt => 'Select Reason'
-            %th
-              Remarks:
-            %th
-              = text_area :name => 'remarks', :rows => 6, :cols => 20
+              = select :name => "performed_by_staff", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
     = hidden_field :name => 'parent_location_id', :value => params[:parent_location_id]
-    = hidden_field :name => 'childe_location_id', :value => params[:child_location_id]
+    = hidden_field :name => 'child_location_id', :value => params[:child_location_id]
     %br
-    = submit "Disburse"
-    &nbsp;&nbsp;
-    %b
-      Or
-    &nbsp;&nbsp;
-    = submit "Reject"
-    %br
+    = submit "Save"

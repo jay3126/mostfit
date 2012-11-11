@@ -6,6 +6,7 @@ class ChequeLeaf
   property :id, Serial
   property :cheque_issue_date, Date, :nullable => false, :default => Date.today
   property :amount,   *MONEY_AMOUNT_NULL
+  property :currency, *CURRENCY_NULL
   property :type, Enum.send('[]', *CHEQUE_LEAF_TYPE), :nullable => false, :default => NOT_DEFINED
   property :valid, Boolean, :default => true
   property :used, Boolean, :default => false
@@ -18,6 +19,8 @@ class ChequeLeaf
   property :biz_location_id, Integer, :nullable => false
 
   belongs_to :cheque_book
+
+  def money_amount; to_money_amount(:amount); end
 
   def self.mark_cheque_leaf_as_used(cheque_number)
     cl = ChequeLeaf.first(:serial_number => cheque_number)

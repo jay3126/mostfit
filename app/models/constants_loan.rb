@@ -11,8 +11,8 @@ module Constants
     ACCOUNTED_AT    = :accounted_at
 
     DISBURSE_LOAN_ACTION = :disburse_loan_action; REPAY_LOAN_ACTION = :repay_loan_action
-    NOT_SPECIFIED = 'Not Specified'; CASH = 'Cash'; CHEQUE = 'Cheque'
-    DISBURSEMENT_MODES = [NOT_SPECIFIED, CASH, CHEQUE]
+    NOT_SPECIFIED = 'Not Specified'; CASH = 'Cash'; CHEQUE = 'Cheque'; CHEQUE_WITH_CASE = 'Cheque With Cash'
+    DISBURSEMENT_MODES = [NOT_SPECIFIED, CASH, CHEQUE, CHEQUE_WITH_CASE]
     LOAN_ACTIONS = [ DISBURSE_LOAN_ACTION, REPAY_LOAN_ACTION ]
 
     INTEREST_RATE_PRECISION = 65

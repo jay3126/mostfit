@@ -9,6 +9,8 @@
     %ul.tabs
       %li#apply_loans
         Loans for Approval
+      %li#pre_disburse_loans
+        Loans for Pre-Disbursal
       %li#approved_Loans
         Loans for Disbursal
       %li#rejected_Loans
@@ -22,7 +24,9 @@
     %div.tab
       = partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
     %div.tab
-      = partial "lendings/approve_loans", :lendings => @approve_lendings, :type => 'disburse'
+      = partial "lendings/pre_disbursal_loans", :lendings => @pre_disbursal_lendings, :type => 'pre_disbursal'
+    %div.tab
+      = partial "lendings/approve_loans", :lendings => @approved_lendings, :type => 'disburse'
     %div.tab
       = partial "lendings/rejected_loans", :lendings => @rejected_lendings, :type => 'reject'
     %div.tab
