@@ -11,6 +11,8 @@
       %th
         Cheaque Leaf No.
       %th
+        Cheque Amount
+      %th
         Type
       %th
         Cheque Leaf Issue Date
@@ -34,12 +36,14 @@
           %td
             = cheque_leaf.serial_number
           %td
+            = cheque_leaf.amount.blank? ? MoneyManager.default_zero_money : cheque_leaf.money_amount
+          %td{:style => 'width:10%'}
             = select :name => "cheque_leaf[#{cheque_leaf.id}][][type]", :collection => Constants::Transaction::CHEQUE_LEAF_TYPE.map{|c| [c, c.to_s.humanize]}, :selected => cheque_leaf.type.to_s
-          %td
+          %td{:style => 'width:15%'}
             = date_select "cheque_leaf[#{cheque_leaf.id}][][cheque_issue_date]", cheque_leaf.cheque_issue_date, {:id => "cheque_leaf_#{cheque_leaf.id}", :size => "10", :max_date => Date.today}
-          %td
+          %td{:style => 'width:10%'}
             = select :name => "cheque_leaf[#{cheque_leaf.id}][][issued_by_staff]", :collection => [session.user.staff_member], :text_method => :name, :value_method => :id, :style => "width:110px;"
-          %td
+          %td{:style => 'width:10%'}
             - if cheque_leaf.valid == true
               Valid
             - else

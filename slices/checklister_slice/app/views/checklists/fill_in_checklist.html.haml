@@ -115,6 +115,7 @@
                         =select :name=>"drop_down_point_#{dropdownpoint.id}".to_sym ,:collection => Kernel.const_get(dropdownpoint.model_name).all,:value_method=>:id,:text_method=>:name,:prompt=>"Select A Value", :style => "width:250px;height:25px;", :selected => default_value.to_s
           - count += 1
       %p
+        = hidden_field :name => 'result_status', :value => 'cleared'
         = submit "Create"
         =link_to "Back",request.referer,:class=>"greenButton",:onclick=>"history.go(-1)"
 %br
