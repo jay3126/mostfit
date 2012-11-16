@@ -15,7 +15,7 @@
       = (second_location_level and second_location_level.biz_locations) ? second_location_level.biz_locations.count : 0
       %span.label
         = (second_location_level and second_location_level.name) ? second_location_level.name.pluralize : "N/A"
-    .number  
+    .number
       = Client.count || 0
       %span.label
         clients

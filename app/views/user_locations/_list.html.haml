@@ -27,6 +27,6 @@
             %td
               = location_level.name
             %td
-              = location_facade.get_children(biz_location, get_effective_date).count
+              = LocationLink.get_children_by_sql(biz_location, get_effective_date, true)
             %td
               = location_level.creation_date

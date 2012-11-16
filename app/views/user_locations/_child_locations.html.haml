@@ -28,6 +28,6 @@
         %td
           = biz_location.location_level.name
         %td
-          = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE,session.user).get_children(biz_location, session[:effective_date]).count
+          = LocationLink.get_children_by_sql(biz_location, get_effective_date, true)
         %td
           = biz_location.creation_date.strftime("%Y-%m-%d")

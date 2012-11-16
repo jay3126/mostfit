@@ -35,7 +35,7 @@
         %th Manager
         %th Meeting
         %th No. Of Clients
-    - @meeting_dates.sort_by{|c| c.location_id}.each do |meeting_date|
+    - @meeting_dates.each do |meeting_date|
       - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
       %tr{:class => cycle('odd','')}
         %td
@@ -50,7 +50,7 @@
         %td
           = meeting_date.meeting_begins_at
         %td
-          = ClientAdministration.get_clients_administered(biz_location.id, @date).count
+          = ClientAdministration.get_clients_administered_by_sql(biz_location.id, @date, true)
     %tfoot
       %tr
         %td{ :colspan => 6 }

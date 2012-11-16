@@ -15,7 +15,7 @@ class UserLocations < Application
       @biz_locations = @location_level.biz_locations
     else
       @location_level = LocationLevel.first(:level => level-1)
-      @biz_locations = LocationLink.get_children(@biz_location, @date)
+      @biz_locations = LocationLink.get_children_by_sql(@biz_location, @date)
       @meeting_dates = meeting_facade.get_meetings_for_loncations_on_date(@biz_locations, @date) if @location_level.has_meeting
     end
     display @biz_locations

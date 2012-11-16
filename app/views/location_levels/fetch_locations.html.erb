@@ -32,9 +32,9 @@
       "<%=h location_link.blank? ? '-' : location_link.effective_on %>",
     <% end %>
     <% if location.location_level.level == 0 %>
-      <% clients_count = ClientAdministration.get_clients_administered(location.id, Date.today) %>
+      <% clients_count = ClientAdministration.get_clients_administered_by_sql(location.id, Date.today) %>
       <% a_link = "<a href='#{resource(:new_clients,:new,:biz_location_id => location.id)}'> Add Client</a>" %>
-      <% b_link = "<a href='#{resource(location, :biz_location_clients)}'> Show Clients(#{clients_count.count}) | </a>" %>
+      <% b_link = "<a href='#{resource(location, :biz_location_clients)}'> Show Clients(#{clients_count.size}) | </a>" %>
       "<%= a_link+b_link%>"
     <% else %>
       "<%= "<a href='#{resource(location)}'>Assign Location</a>" %>"

@@ -125,4 +125,41 @@ class LocationLink
   def self.all_parents_with_self(for_location, on_date = Date.today)
     all_parents(for_location, on_date) << for_location
   end
+
+  def self.get_children_by_sql(for_location, on_date = Date.today, count = false)
+    if LINK_MODEL_NAME.include?(for_location.class.name)
+      model_type = for_location.class == BizLocation ? 1 : 2
+      child_ids = repository(:default).adapter.query("SELECT child_id FROM location_links WHERE deleted_at IS NULL AND parent_id = #{for_location.id} AND model_type = #{model_type} AND effective_on >= #{on_date}")
+      if child_ids.blank?
+        count == true ? 0 : []
+      else
+        if count
+          l_links = repository(:default).adapter.query("select count(*) from (select * from location_links where model_type = 1 and child_id IN (#{child_ids.join(',')})) l where parent_id = (select parent_id from (select * from location_links where model_type = 1 and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and model_type =1 and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          l_links.blank? ? 0 : l_links
+        else
+          l_links = repository(:default).adapter.query("select * from (select * from location_links where model_type = 1 and child_id IN (#{child_ids.join(',')})) l where parent_id = (select parent_id from (select * from location_links where model_type = 1 and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and model_type =1 and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          l_links.map(&:child_id).blank? ? [] : BizLocation.all(:id => l_links.map(&:child_id))
+        end
+      end
+    else
+      count == true ? 0 : []
+    end
+  end
+
+  def self.all_children_by_sql(for_location, on_date = Date.today)
+    if for_location.location_level.level == 0
+      []
+    else
+      @all_children = []
+      location = []
+      children = get_children_by_sql(for_location, on_date)
+      children.each do |child|
+        location << all_children_by_sql(child, on_date)
+      end
+      @all_children = location + children
+      @all_children.flatten.compact.uniq
+    end
+  end
 end
+
+

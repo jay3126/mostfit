@@ -184,10 +184,9 @@ class BizLocations < Application
 
   def show
     @biz_location     = BizLocation.get params[:id]
-    @biz_locations    = LocationLink.all(:model_type => 'BizLocation', :parent_id => @biz_location.id).group_by{|c| c.child.location_level.level}
     location_level    = LocationLevel.first(:level => (@biz_location.location_level.level - 1))
-    @parent_locations = BizLocation.all_locations_at_level(@biz_location.location_level.level)
-    @child_locations  = location_level.blank? ? [] : BizLocation.all_locations_at_level(location_level.level)
+    @parent_locations = BizLocation.all('location_level.level' => @biz_location.location_level.level)
+    @child_locations  = location_level.blank? ? [] : location_level.biz_locations
     display @biz_location
   end
 
@@ -387,7 +386,7 @@ class BizLocations < Application
     @colCount = params[:iColumns]
     order = [@colName[params[:iSortCol_0].to_i]]
     @parent_location = BizLocation.get(params[:id])
-    @child_locations = LocationLink.get_children(@parent_location, get_effective_date)
+    @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
     @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
     @iTotalRecords = @child_locations.count
     @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size

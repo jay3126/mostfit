@@ -130,14 +130,7 @@ class ReportingFacade < StandardFacade
 
   #this function will give the total amount outstanding for loans disbursed till date.
   def sum_all_outstanding_loans
-    loan_ids = Lending.all(:disbursal_date.lte => Date.today).aggregate(:id)
-    outstanding_amount = MoneyManager.default_zero_money
-    loan_ids.each do |l|
-      loan = Lending.get(l)
-      next unless loan.is_outstanding?
-      outstanding_amount += loan.actual_total_outstanding
-    end
-    outstanding_amount
+    MoneyManager.get_money_instance_least_terms((PaymentTransaction.all(:payment_towards => :payment_towards_loan_disbursement, :effective_on.lte => Date.today).sum(:amount).to_i - PaymentTransaction.all(:payment_towards => :payment_towards_loan_repayment, :effective_on.lte => Date.today).sum(:amount).to_i))
   end
 
   #this function will give the total loan amount per branch for a date range.
