@@ -1,7 +1,9 @@
 :javascript
   $('table.center_list').dataTable({
-      "sScrollX": "100%",
-      "bPaginate": false,
+      "sPaginationType": "full_numbers",
+      "bServerSide": true,
+      "sAjaxSource": $('table.center_list').attr('source'),
+      "bProcessing": true,
       "bJQueryUI": true,
       "sDom": '<"H"Tfr>t<"F"ip>',
       "oTableTools": {
@@ -27,7 +29,7 @@
     %p
       %i No centers meet on this day.
 - else
-  %table.dataTable.weeksheet.report.nojs.center_list
+  %table{:source => url(:controller => 'user_locations', :id => @biz_location.id, :action => 'child_location_meetings_on_date', :date => @date), :class => 'remote_data center_list dataTable report weeksheet nojs'}
     %thead
       %tr
         %th ID
@@ -35,22 +37,3 @@
         %th Manager
         %th Meeting
         %th No. Of Clients
-    - @meeting_dates.each do |meeting_date|
-      - biz_location = @biz_locations.find{|x| x.id == meeting_date.location_id}
-      %tr{:class => cycle('odd','')}
-        %td
-          = biz_location.id
-        %td
-          - if @location_level.level == 0
-            = link_to biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id, :date => meeting_date.on_date )
-          - else
-            = link_to biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
-        %td
-          = managed_by_staff_member(biz_location.id, @date)
-        %td
-          = meeting_date.meeting_begins_at
-        %td
-          = ClientAdministration.get_clients_administered_by_sql(biz_location.id, @date, true)
-    %tfoot
-      %tr
-        %td{ :colspan => 6 }

@@ -59,9 +59,25 @@
     %div.tab
       %div#container_centers_list
         = partial "user_locations/location_list"
-  %div.tab
-    = link_to "Create #{@location_level.name}", resource(@biz_location, :biz_location_form), :class => "add grey_button _remote_"
-    = partial "user_locations/child_locations"
+    %div.tab
+      %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :child_locations, :id => @biz_location.id)}
+  - else
+    %div.tab
+      = link_to "Create #{@location_level.name}", resource(@biz_location, :biz_location_form), :class => "add grey_button _remote_"
+      %br
+      %table{:source => url(:controller => 'biz_locations', :id => @biz_location.id, :action => 'fetch_child_locations'), :class => 'remote_data dataTable report weeksheet nojs'}
+        %thead
+          %tr
+            %th
+              id
+            %th
+              Name
+            %th
+              Location Address
+            %th
+              Location No. Count
+            %th
+              Created On
   %div.tab
     %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :user_locations, :action => :staffs_on_biz_location, :id => @biz_location.id)}
   - if @biz_location.is_nominal_branch?

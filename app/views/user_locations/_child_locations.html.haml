@@ -1,33 +1,27 @@
+:javascript
+  $('table.child_location').dataTable({
+      "sPaginationType": "full_numbers",
+      "bServerSide": true,
+      "sAjaxSource": $('table.child_location').attr('source'),
+      "bProcessing": true,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
+    });
+= link_to "Create #{@location_level.name}", resource(@biz_location, :biz_location_form), :class => "add grey_button _remote_"
 %br
-- if @biz_locations.count == 0
-  %p
-    %i No Location Mapping has been created yet.
-- else
-  %table.location.dataTable.report.weeksheet.nojs
-    %thead
-      %tr
-        %th
-          id
-        %th
-          Name
-        %th
-          Location Level
-        %th
-          Location No. Count
-        %th
-          Created On
-    - for biz_location in @biz_locations
-      %tr
-        %td
-          = biz_location.id
-        %td
-          - if biz_location.location_level.level == 0
-            = link_to_with_rights biz_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => biz_location.id)
-          - else
-            = link_to_with_rights biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id)
-        %td
-          = biz_location.location_level.name
-        %td
-          = LocationLink.get_children_by_sql(biz_location, get_effective_date, true)
-        %td
-          = biz_location.creation_date.strftime("%Y-%m-%d")
+%table{:source => url(:controller => 'biz_locations', :id => @biz_location.id, :action => 'fetch_child_locations'), :class => 'child_location dataTable report weeksheet nojs'}
+  %thead
+    %tr
+      %th
+        id
+      %th
+        Name
+      %th
+        Location Address
+      %th
+        Location No. Count
+      %th
+        Created On

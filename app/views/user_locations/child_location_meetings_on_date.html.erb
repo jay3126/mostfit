@@ -1,0 +1,15 @@
+{
+"sEcho": <%=h @sEcho %>,
+"iTotalRecords": <%= @iTotalRecords %>,
+"iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+"aaData" : [
+<% @meetings.each do |meeting| %>
+  <% location = @child_locations.find{|x| x.id == meeting.location_id} %>
+    <% manager = LocationManagement.staff_managing_location(location.id, get_effective_date)%>
+    <% managed_by = manager.blank? ? '' : StaffMember.get(manager.manager_staff_id) %>
+  [
+  "<%=h location.id %>", "<%="<a href='#{link_to_location_url(location)}'>#{location.name}</a>"%>", "<%= managed_by.blank? ? 'Not Defined' : "<a href='#{resource(managed_by)}'>#{managed_by.name} </a>" %>","<%=h meeting.meeting_begins_at %>","<%=h ClientAdministration.get_clients_administered_by_sql(location.id, @date, true) %>"
+  <%= meeting.id == @meetings.last.id ? ']' : '],'%>
+<% end %>
+]
+}

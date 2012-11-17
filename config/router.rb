@@ -32,7 +32,7 @@ Merb::Router.prepare do
   resources :overlap_report_responses, :id => %r(\d+)
   resources :overlap_report_requests, :id => %r(\d+)
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}
-  resources :user_locations, :id => %r(\d+), :member => {:weeksheet_collection => [:get]}, :collection => {:save_branch_merge => [:get, :post], :branch_merge => [:get], :get_due_generation_sheet_for_location => [:get], :due_generation_for_location => [:get], :zip_file_download=>[:get]}
+  resources :user_locations, :id => %r(\d+), :member => {:child_location_meetings_on_date => [:get], :weeksheet_collection => [:get]}, :collection => {:save_branch_merge => [:get, :post], :branch_merge => [:get], :get_due_generation_sheet_for_location => [:get], :due_generation_for_location => [:get], :zip_file_download=>[:get]}
 
   #book-keeping from bk ends
 

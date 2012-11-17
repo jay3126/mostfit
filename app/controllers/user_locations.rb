@@ -16,7 +16,7 @@ class UserLocations < Application
     else
       @location_level = LocationLevel.first(:level => level-1)
       @biz_locations = LocationLink.get_children_by_sql(@biz_location, @date)
-      @meeting_dates = meeting_facade.get_meetings_for_loncations_on_date(@biz_locations, @date) if @location_level.has_meeting
+      @meeting_dates = MeetingCalendar.all(:location_id => @biz_locations.map(&:id), :on_date => @date) if @location_level.has_meeting
     end
     display @biz_locations
   end
@@ -33,6 +33,22 @@ class UserLocations < Application
     raise NotFound unless @biz_location
     @meeting_dates = meeting_facade.get_meeting_calendar(@biz_location, session[:effective_date] - Constants::Time::DEFAULT_PAST_MAX_DURATION_IN_DAYS )
     partial "user_locations/meeting_calendar"
+  end
+
+  def child_location_meetings_on_date
+    @colName = ["location_id", '','',"meeting_time_begins_hours",'']
+    @colCount = params[:iColumns]
+    order = @colName[params[:iSortCol_0].to_i].blank? ? ["location_id"] : [@colName[params[:iSortCol_0].to_i]]
+    @date = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
+    @parent_location = BizLocation.get(params[:id])
+    @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
+    @total_meetings = MeetingCalendar.all(:on_date => @date, :location_id => @child_locations.map(&:id)).count
+    limit = params[:iDisplayLength].to_i <= 0 ? 10 : params[:iDisplayLength].to_i
+    @meetings = MeetingCalendar.all(:order => order, :on_date => @date, :location_id => @child_locations.map(&:id), :limit => limit,:offset => params[:iDisplayStart].to_i, :conditions => [ ' location_id LIKE ? OR meeting_time_begins_hours LIKE ? OR meeting_time_begins_minutes LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @iTotalRecords = @total_meetings
+    @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @meetings.size
+    @sEcho = params[:sEcho].to_i
+    display @meetings, :layout => layout?
   end
 
   def weeksheet_collection
@@ -148,10 +164,29 @@ class UserLocations < Application
       @biz_locations = @location_level.biz_locations
     else
       @location_level = LocationLevel.first(:level => level-1)
-      @biz_locations = LocationLink.get_children(@biz_location, session[:effective_date])
-      @meeting_dates = meeting_facade.get_meetings_for_loncations_on_date(@biz_locations, @date)
+      @biz_locations = LocationLink.get_children_by_sql(@biz_location, session[:effective_date])
+      @meeting_dates = MeetingCalendar.all(:location_id => @biz_locations.map(&:id), :on_date => @date)
     end
     partial 'location_list', :layout => layout?
+  end
+
+  def child_location_list
+    @colName = ["id" , "name", 'biz_location_address', 'creation_date']
+    @colCount = params[:iColumns]
+    order = [@colName[params[:iSortCol_0].to_i]]
+    @parent_location = BizLocation.get(params[:id])
+    @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
+    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @iTotalRecords = @child_locations.count
+    @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
+    @sEcho = params[:sEcho].to_i
+    render :template => 'location_levels/fetch_locations', :layout => layout?
+  end
+
+  def child_locations
+    @biz_location = BizLocation.get(params[:id])
+    @location_level = @biz_location.location_level
+    partial 'child_locations'
   end
 
   def staffs_on_biz_location

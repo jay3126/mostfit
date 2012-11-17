@@ -387,7 +387,7 @@ class BizLocations < Application
     order = [@colName[params[:iSortCol_0].to_i]]
     @parent_location = BizLocation.get(params[:id])
     @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
-    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ ' id LIKE ? OR name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
     @iTotalRecords = @child_locations.count
     @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
     @sEcho = params[:sEcho].to_i

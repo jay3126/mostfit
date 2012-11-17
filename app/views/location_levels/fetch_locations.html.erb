@@ -11,6 +11,19 @@
   <% end %>
   ]
   }
+<% elsif @colCount.to_i == 5 %>
+  {
+  "sEcho": <%=h @sEcho %>,
+  "iTotalRecords": <%= @iTotalRecords %>,
+  "iTotalDisplayRecords": <%= @iTotalDisplayRecords %>,
+  "aaData" : [
+  <% @locations.each do |location| %>
+    [
+    "<%=h location.id %>", "<%="<a href='#{link_to_location_url(location)}'>#{location.name}</a>"%>", "<%=h location.biz_location_address %>","<%=h LocationLink.get_children_by_sql(location, get_effective_date, true) %>", "<%=h location.creation_date %>"
+    <%= location == @locations.last ? ']' : '],'%>
+  <% end %>
+  ]
+  }
 <% else %>
   {
   "sEcho": <%=h @sEcho %>,
