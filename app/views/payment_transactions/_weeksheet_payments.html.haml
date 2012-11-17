@@ -1,5 +1,6 @@
 :javascript
   $('table.payment').dataTable({
+      "sScrollX": "100%",
       "bPaginate": false,
       "bJQueryUI": true
     });
@@ -167,15 +168,15 @@
           %td{:style => "text-align:right"}
             %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
               = Money.new(total_amount,:INR).to_s
-  %table.narrow.form{:style => "text-align:right;width:100%;"}
-    %tfoot
-      %tr
-        %td
-          %b Chosen date
-          = @date
-          = hidden_field :name => "payment_transactions[on_date]", :value => @date
-        %td
-          %b Performed by
-          = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [@staff_member], :prompt => "Select staff member", :selected => @staff_member.id.to_s
-        %td
-          = submit 'Save Payment'
+    %table.narrow.form{:style => "text-align:right;width:100%;"}
+      %tfoot
+        %tr
+          %td
+            %b Chosen date
+            = @date
+            = hidden_field :name => "payment_transactions[on_date]", :value => @date
+          %td
+            %b Performed by
+            = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [@staff_member], :prompt => "Select staff member", :selected => @staff_member.id.to_s
+          %td
+            = submit 'Save Payment'

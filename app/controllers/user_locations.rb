@@ -38,7 +38,7 @@ class UserLocations < Application
   def child_location_meetings_on_date
     @colName = ["location_id", '','',"meeting_time_begins_hours",'']
     @colCount = params[:iColumns]
-    order = @colName[params[:iSortCol_0].to_i].blank? ? ["location_id"] : [@colName[params[:iSortCol_0].to_i]]
+    order = @colName[params[:iSortCol_0].to_i].blank? ? @colName.first : [@colName[params[:iSortCol_0].to_i]]
     @date = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
     @parent_location = BizLocation.get(params[:id])
     @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
@@ -173,10 +173,11 @@ class UserLocations < Application
   def child_location_list
     @colName = ["id" , "name", 'biz_location_address', 'creation_date']
     @colCount = params[:iColumns]
-    order = [@colName[params[:iSortCol_0].to_i]]
+    order = @colName[params[:iSortCol_0].to_i].blank? ? @colName.first : [@colName[params[:iSortCol_0].to_i]]
+    limit = params[:iDisplayLength].to_i <= 0 ? 10 : params[:iDisplayLength].to_i
     @parent_location = BizLocation.get(params[:id])
     @child_locations = LocationLink.get_children_by_sql(@parent_location, get_effective_date)
-    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => params[:iDisplayLength].to_i,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
+    @locations = BizLocation.all(:order => order, :id => @child_locations.map(&:id), :limit => limit,:offset => params[:iDisplayStart].to_i, :conditions => [ 'name LIKE ? OR biz_location_address LIKE ? OR creation_date LIKE ?', '%'+params[:sSearch]+'%','%'+params[:sSearch]+'%','%'+params[:sSearch]+'%'])
     @iTotalRecords = @child_locations.count
     @iTotalDisplayRecords = params[:sSearch].blank? ? @iTotalRecords : @locations.size
     @sEcho = params[:sEcho].to_i
