@@ -140,7 +140,12 @@ class StaffMembers < Application
     manage_location_ids = params[:manage_location_ids]||[]
     manage_locations = manage_location_ids.blank? ? [] : BizLocation.all(:id => manage_location_ids)
     @staff_member = StaffMember.new(staff_member)
-    
+    unless params[:login_info].blank?
+      @user = User.new(params[:user])
+      @user.staff_member = @staff_membe
+      @message[:error] << @user.errors.first unless @user.valid?
+      @message[:error].flatten!.delete('Staff member must not be blank')
+    end
     begin
       manage_locations.each do |location|
         assigned = LocationManagement.first(:managed_location_id => location.id, :effective_on => @staff_member.creation_date)
@@ -153,7 +158,11 @@ class StaffMembers < Application
           manage_locations.each do |location|
             LocationManagement.assign_manager_to_location(@staff_member, location, @staff_member.creation_date, performed_by.id, recorded_by.id)
           end
-          @message[:notice] = "StaffMember '#{@staff_member.name}' (Id:#{@staff_member.id}) was successfully created"
+          unless params[:login_info].blank?
+            @user.staff_member = @staff_member
+            @user.save
+          end
+          @message[:notice] = "Staff Member '#{@staff_member.name}' (Id:#{@staff_member.id}) was successfully created"
         else
           @message[:error] = @staff_member.errors.first.join('<br>')
         end

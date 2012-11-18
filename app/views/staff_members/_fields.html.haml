@@ -1,3 +1,17 @@
+:javascript
+  $(document).ready(function() {
+    if(jQuery('#login_info').attr('checked') == true){
+      $('.user_tab').show();
+    }
+
+    $('#login_info').change(function() {
+      if(jQuery(this).attr('checked') == true){
+        $('.user_tab').show();
+      }else{
+        $('.user_tab').hide();
+      }
+    })
+  });
 %table.tall.shaded
   %tr
     %th
@@ -49,3 +63,24 @@
       = check_box :active
       &nbsp;&nbsp;
       %span.greytext only active staff members can be marked as managers, approve loans, or receive payments
+  %tr
+    %th
+      Login Info:
+    %td
+      = check_box :name => 'login_info', :id => 'login_info', :checked => !params[:login_info].blank?
+%table{:class => 'user_tab tall shaded', :style => 'display:none'}
+  %tr
+    %th
+      Login Name:
+    %td
+      = text_field :name => 'user[login]', :size => 40, :value => "#{params[:user].blank? ? '' : params[:user][:login]}"
+  %tr
+    %th
+      Password:
+    %td
+      = password_field :name => 'user[password]'
+  %tr
+    %th
+      Password confirmation:
+    %td
+      = password_field :name => 'user[password_confirmation]'
