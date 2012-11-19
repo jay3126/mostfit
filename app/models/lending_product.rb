@@ -37,7 +37,7 @@ class LendingProduct
     tenure              = row[headers[:tenure]].to_i
     upload_id           = row[headers[:upload_id]]
     interest_rate       = row[headers[:interest_rate]]
-    repayment_frequency = row[headers[:repayment_frequency]]
+    repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
     allocation_strategy = row[headers[:repayment_allocation_strategy]]
 
     loan_money_amount   = MoneyManager.get_money_instance(row[headers[:amount]])

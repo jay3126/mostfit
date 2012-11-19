@@ -61,8 +61,9 @@ class StaffMember
 
     mobile = nil
     mobile = row[headers[:mobile_number]] if headers[:mobile_number] and row[headers[:mobile_number]]
+    gender = row[headers[:gender]].downcase.to_sym
 
-    obj = new(:name => row[headers[:name]], :creation_date => row[headers[:joining_date]], :gender => row[headers[:gender]],
+    obj = new(:name => row[headers[:name]], :creation_date => row[headers[:joining_date]], :gender => gender,
               :employee_id => row[headers[:employee_id]], :mobile_number => mobile, :active => true, :designation => designation,
               :upload_id => row[headers[:upload_id]])
     [obj.save, obj]
