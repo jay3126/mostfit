@@ -23,7 +23,7 @@ class Client
   property         :spouse_name,     String, :length => 100, :lazy => true, :nullable => false
   property         :fathers_name,     String, :length => 100, :lazy => true, :nullable => false
   property         :father_is_alive, Enum.send('[]', *['', 'yes', 'no']), :default => '', :nullable => true, :lazy => true
-  property         :spouse_date_of_birth, Date, :index => true, :lazy => true 
+  property         :spouse_date_of_birth, Date, :index => true, :lazy => true, :nullable => false, :default => Date.new(1975, 01, 01)
   property         :date_of_birth,   Date, :nullable => false, :index => true, :lazy => true
   property         :address,         Text, :nullable => false, :lazy => true
   property         :address_pin,     String, :nullable => false, :length => 6, :lazy => true
