@@ -12,9 +12,29 @@ class SimpleInsuranceProduct
   belongs_to :lending_product, :nullable => true
   has 1, :premium, 'SimpleFeeProduct'
   has n, :simple_insurance_policies
+  belongs_to :upload, :nullable => true
 
   def total_premium_money_amount(on_date)
     self.premium ? self.premium.effective_total_amount(on_date) : nil
+  end
+
+  #this function is for upload functionality.
+  def self.from_csv(row, headers)
+    fee_product = SimpleFeeProduct.first(:name => row[headers[:fee_product]])
+    raise ArgumentError, "Fee Product (#{row[headers[:fee_product]]}) does not exist" if fee_product.blank?
+    name = row[headers[:name]]
+    insurance_type = row[headers[:insurance_type]].downcase.to_sym
+    insurance_for = row[headers[:insurance_for]].downcase.to_sym
+    created_on = Date.parse(row[headers[:created_on]])
+
+    obj = SimpleInsuranceProduct.new(:name => name, :insured_type => insurance_type, :insurance_for => insurance_for, :created_on => created_on)
+
+    if obj.save
+      fee_product.update(:simple_insurance_product_id => obj.id) unless fee_product.blank?
+      [true, obj]
+    else
+      [false, obj]
+    end
   end
 
   def get_premium_fee_amount(lending, on_date)
