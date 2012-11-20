@@ -3,14 +3,11 @@ class PaymentTransactions < Application
   @@biz_location_ids = []
 
   def index
-    if params[:lending_ids]
-      @payment_transactions = PaymentTransaction.all(:on_product_id => params[:lending_ids], :on_product_type => :lending)
-    elsif params[:payment_ids]
-      @payment_transactions = PaymentTransaction.all(:id => params[:payment_ids])
+    if params[:staff_member_id].blank?
+      redirect request.referer
     else
-      @payment_transactions = PaymentTransaction.all
+      redirect resource(:payment_transactions, :payment_by_staff_member, params.except(:action, :controller))
     end
-    display @payment_transactions
   end
 
   def new
@@ -56,16 +53,21 @@ class PaymentTransactions < Application
   def payment_by_staff_member
     @weeksheets      = []
     @message         = {}
+    page             = params[:page].blank? ? 1 : params[:page]
+    limit            = 3
     @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
     if @message[:error].blank?
-      @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
+      @date                = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
       @child_biz_location  = BizLocation.get(params[:child_location_id])
       @parent_biz_location = BizLocation.get(params[:parent_location_id])
       @staff_member        = StaffMember.get(params[:staff_member_id])
       @user                = session.user
-      @weeksheets          = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date)
+      @biz_locations, @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date, page, limit)
     end
-    display @weeksheets.flatten!
+    @weeksheets = @weeksheets.class == Array ? @weeksheets : [@weeksheets]
+    params.delete('_message') if params[:save_payment].blank?
+    params.delete('save_payment')
+    display @weeksheets
   end
 
   def create_group_payments
@@ -163,10 +165,11 @@ class PaymentTransactions < Application
     @staff_member_id     = params[:staff_member_id]
     @parent_location_id  = params[:parent_location_id]
     @child_location_id   = params[:child_location_id]
+    page                 = @message[:error].blank? ? params[:page].to_i+1 : params[:page]
     @@biz_location_ids = payments.values.collect{|s| s[:performed_at]}.compact.uniq
-    add_url = "?staff_member_id=#{params[:staff_member_id]}&parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}"
+    add_url = "?staff_member_id=#{params[:staff_member_id]}&parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}&page=#{page}&save_payment=true"
     # REDIRECT/RENDER
     redirect request.referer+add_url, :message => @message
   end
-  
+
 end

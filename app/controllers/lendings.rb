@@ -446,7 +446,7 @@ class Lendings < Application
             money_interest_amount         = MoneyManager.get_money_instance(value[:interest_amount].to_f)
             money_amount                  = money_principal_amount + money_interest_amount
             receipt_no                    = value[:receipt_no]
-            fee_amount                    = value[:penalty_amount]
+            fee_amount                    = value[:preclosure_penalty]
             fee_money_amount              = MoneyManager.get_money_instance(fee_amount)
             fee_product                   = lending.get_preclosure_penalty_product
             fee_amount                    = fee_product.blank? ? MoneyManager.default_zero_money : fee_product.effective_total_amount

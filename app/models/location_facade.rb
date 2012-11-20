@@ -63,6 +63,10 @@ class LocationFacade < StandardFacade
     LocationLink.get_children(for_location, on_date)
   end
 
+  def get_children_by_sql(for_location, on_date = Date.today)
+    LocationLink.get_children_by_sql(for_location, on_date)
+  end
+
   ###########
   # QUERIES # on loans at location begins
   ###########
@@ -71,8 +75,16 @@ class LocationFacade < StandardFacade
     LoanAdministration.get_loans_administered(at_location_id, on_date)
   end
 
+  def get_loans_administered_by_sql(at_location_id, on_date = Date.today, count = false, status = nil)
+    LoanAdministration.get_loans_administered_by_sql(at_location_id, on_date, count, status)
+  end
+
   def get_loans_accounted(at_location_id, on_date = Date.today)
     LoanAdministration.get_loans_accounted(at_location_id, on_date)
+  end
+
+  def get_loans_accounted_by_sql(at_location_id, on_date = Date.today)
+    LoanAdministration.get_loans_accounted_by_sql(at_location_id, on_date)
   end
 
   ###########

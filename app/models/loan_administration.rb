@@ -74,6 +74,10 @@ class LoanAdministration
     get_loans_at_location(ADMINISTERED_AT, at_location_id, on_date)
   end
 
+  def self.get_loans_administered_by_sql(at_location_id, on_date = Date.today, count = false, status = nil)
+    get_loans_at_location_by_sql(ADMINISTERED_AT, at_location_id, on_date, count, status)
+  end
+
   # Returns an (empty) list of loans administered at a location for a date range.
   def self.get_loans_administered_for_date_range(at_location_id, on_date = Date.today, till_date = on_date)
     get_loans_at_location_for_date_range(ADMINISTERED_AT, at_location_id, on_date, till_date)
@@ -82,6 +86,10 @@ class LoanAdministration
   # Returns an (empty) list of loans accounted at a location
   def self.get_loans_accounted(at_location_id, on_date = Date.today)
     get_loans_at_location(ACCOUNTED_AT, at_location_id, on_date)
+  end
+
+  def self.get_loans_accounted_by_sql(at_location_id, on_date = Date.today, count = false, status = nil)
+    get_loans_at_location_by_sql(ACCOUNTED_AT, at_location_id, on_date, count, status)
   end
 
   # Returns an (empty) list of loans accounted at a location for a date range.
@@ -111,6 +119,27 @@ class LoanAdministration
       end
     }
     loans.uniq
+  end
+
+  def self.get_loans_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, count = false, status = nil)
+    locations                                   = {}
+    loan_search                                 = {}
+    locations[administered_or_accounted_choice] = given_location_id
+    locations[:effective_on.lte]                = on_date
+    administration                              = all(locations)
+    if administration.blank?
+      count == true ? 0 : []
+    else
+      if count
+        l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = #{given_location_id} order by la1.effective_on desc limit 1 );")
+        l_links.blank? ? 0 : l_links
+      else
+        l_links = repository(:default).adapter.query("select * from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = #{given_location_id} order by la1.effective_on desc limit 1 );")
+        loan_search[:id] = l_links.map(&:loan_id)
+        loan_search[:status] = status unless status.blank?
+        l_links.map(&:loan_id).blank? ? [] : Lending.all(loan_search)
+      end
+    end
   end
 
   # Returns the locations (per administered/accounted choice) at the given location (by id) for a date range.

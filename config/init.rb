@@ -27,11 +27,11 @@ Merb::BootLoader.before_app_loads do
   Extlib::Inflection.word('attendancy')    # i dont like a table named 'attendancies'
   Numeric::Transformer.add_format(
     :mostfit_default => { :number =>   { :precision => 3, :delimiter => ' ',  :separator => '.'},
-                          :currency => { :unit => '',     :format => '%n',    :precision => 0 } },
+      :currency => { :unit => '',     :format => '%n',    :precision => 0 } },
     :in              => { :number =>   {:precision => 3, :delimiter => ',',  :separator => '.', :regex => /(\d+?)(?=(\d\d)+(\d)(?!\d))(\.\d+)?/},
-                          :currency => { :format => '%u %n', :precision => 0, :delimiter => ',' } },
+      :currency => { :format => '%u %n', :precision => 0, :delimiter => ',' } },
     :in_with_paise   => { :number =>   {:precision => 3, :delimiter => ',',  :separator => '.', :regex => /(\d+?)(?=(\d\d)+(\d)(?!\d))(\.\d+)?/},
-                          :currency => { :format => '%u %n', :precision => 2, :delimiter => ',' } })
+      :currency => { :format => '%u %n', :precision => 2, :delimiter => ',' } })
   Numeric::Transformer.change_default_format(:mostfit_default)
   require 'config/constants.rb'
   require 'slices/checklister_slice/config/checklist_constants.rb'
@@ -51,6 +51,8 @@ Merb::BootLoader.before_app_loads do
   require 'lib/datevector.rb'
   require 'gettext'
   require 'haml_gettext'
+  require 'will_paginate'
+  require 'will_paginate/array'
 
   #initialize i18n
   require 'i18n'
@@ -111,7 +113,7 @@ Merb::BootLoader.after_app_loads do
   begin; $holidays = Holiday.all.map{|h| [h.date, h]}.to_hash; rescue; end
 
   # Starting the logger takes time, so turn it off during development
-#  Misfit::Logger.start(['Loans', 'Clients','Centers','Branches','Payments', 'DataEntry::Payments']) #unless Merb.environment == "development" or Merb.environment == "test"
+  #  Misfit::Logger.start(['Loans', 'Clients','Centers','Branches','Payments', 'DataEntry::Payments']) #unless Merb.environment == "development" or Merb.environment == "test"
   # Load the validation hooks
   # ruby is too beautiful. 3 lines of code and all payments can get their appropriate validations which are decided by the
   # loan product.

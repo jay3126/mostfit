@@ -13,7 +13,7 @@
     = css_include_tag "jquery-ui", :media => "screen, projection"
     = css_include_tag :chosen
     = css_include_tag :data_table, 'TableTools.css','TableTools_JUI.css'
-    = css_include_tag 'jquery.multiSelect.css'
+    = css_include_tag 'jquery.multiSelect.css','pagination.css'
     =# css_include_tag 'jquery.dataTable'
     = js_include_tag :jquery, :application, :swfobject, "jquery.highlight.js", "jquery.floatheader.min.js", "jquery-ui.min.js", "chosen/chosen/chosen.jquery.js", "less.js", "jquery.dataTables.js", "FixedHeader.js",'TableTools.js', 'ZeroClipboard.js'
     = js_include_tag 'jquery.multiSelect.js', 'jquery.bgiframe.min.js'
@@ -63,7 +63,7 @@
           #flash-messages.span-17.prefix-5.suffix-5.last
             - message.each do |key, value|
               .flash{ :class => key.to_s }
-                - value = value.join('<br/>') if value.class == Array
+                - value = value.uniq.join('<br/>') if value.class == Array
                 %p= value.gsub("\n", "<br/>")
         - if request.exceptions
           - @exceptions = request.exceptions.dup

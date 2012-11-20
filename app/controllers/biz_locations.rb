@@ -234,7 +234,7 @@ class BizLocations < Application
 
   def biz_location_clients
     @biz_location = BizLocation.get params[:id]
-    @clients      = client_facade.get_clients_administered(@biz_location.id, get_effective_date)
+    @clients      = client_facade.get_clients_administered_by_sql(@biz_location.id, get_effective_date)
     display @clients
   end
 
@@ -243,7 +243,7 @@ class BizLocations < Application
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
       branch = location_facade.get_location(params[:id])
       effective_date = params[:effective_date]||get_effective_date
-      centers = location_facade.get_children(branch, effective_date)
+      centers = location_facade.get_children_by_sql(branch, effective_date)
       return("<option value=''>Select center</option>"+centers.map{|center| "<option value=#{center.id}>#{center.name}"}.join)
     else
       return("<option value=''>Select center</option>")
@@ -255,7 +255,7 @@ class BizLocations < Application
       location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
       area = location_facade.get_location(params[:id])
       effective_date = params[:effective_date]
-      branches = location_facade.get_children(area, effective_date)
+      branches = location_facade.get_children_by_sql(area, effective_date)
       return("<option value=''> Select branch </option>"+branches.map{|branch| "<option value=#{branch.id}>#{branch.name}"}.join)
     else
       return("<option value=''> Select branch </option>")
@@ -276,7 +276,7 @@ class BizLocations < Application
     if params[:id].blank?
       return("<option value=''>Select Client</option>")
     else
-      clients = ClientAdministration.get_clients_administered(params[:id].to_i, get_effective_date)
+      clients = ClientAdministration.get_clients_administered_by_sql(params[:id].to_i, get_effective_date)
       return("<option value=''>Select Client</option>"+clients.map{|client| "<option value=#{client.id}>#{client.name}"}.join)
     end
   end

@@ -22,8 +22,8 @@
   = form_for(:user_locations, :action => resource(:user_locations, :save_branch_merge), :method => :get) do
     = hidden_field :name => 'merged_location_id', :value => @first_location.id
     = hidden_field :name => 'merge_into_location_id', :value => @second_location.id
-    - f_loans = location_facade.get_loans_accounted(@first_location.id, @on_date)
-    - s_loans = location_facade.get_loans_accounted(@second_location.id, @on_date)
+    - f_loans = location_facade.get_loans_accounted_by_sql(@first_location.id, @on_date)
+    - s_loans = location_facade.get_loans_accounted_by_sql(@second_location.id, @on_date)
     - f_payments = PaymentTransaction.all(:on_product_type => :lending, :on_product_id => f_loans.map(&:id))
     - s_payments = PaymentTransaction.all(:on_product_type => :lending, :on_product_id => s_loans.map(&:id))
     - f_group_payments = f_payments.group_by{|p| p.payment_towards}
@@ -41,9 +41,9 @@
           %td= StaffPosting.get_staff_assigned(@first_location.id, @on_date).count
         %tr
           %th Centers
-          %td= LocationLink.all_children(@first_location, @on_date).count
+          %td= LocationLink.get_children_by_sql(@first_location, @on_date, true)
         %tr
-          - clients = ClientAdministration.get_clients_registered(@first_location.id, @on_date).group_by{|c| c.active}
+          - clients = ClientAdministration.get_clients_registered_by_sql(@first_location.id, @on_date).group_by{|c| c.active}
           %th Active Clients
           %td= clients[true].blank? ? 0 : clients[true].count
           %th Inactive Clients
@@ -89,9 +89,9 @@
             %td= StaffPosting.get_staff_assigned(@second_location.id, @on_date).count
           %tr
             %th Centers
-            %td= LocationLink.all_children(@second_location, @on_date).count
+            %td= LocationLink.get_children_by_sql(@second_location, @on_date, true)
           %tr
-            - clients = ClientAdministration.get_clients_registered(@second_location.id, @on_date).group_by{|c| c.active}
+            - clients = ClientAdministration.get_clients_registered_by_sql(@second_location.id, @on_date).group_by{|c| c.active}
             %th Active Clients
             %td= clients[true].blank? ? 0 : clients[true].count
             %th Inactive Clients

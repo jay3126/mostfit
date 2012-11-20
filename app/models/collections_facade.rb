@@ -14,19 +14,20 @@ class CollectionsFacade < StandardFacade
     manager_name    = center_manager.blank? ? 'No Manage' : center_manager.name
     manager_id      = center_manager.blank? ? '' : center_manager.id
 
-    loans = location_facade.get_loans_administered(biz_location.id, on_date).compact
+    loans = location_facade.get_loans_administered_by_sql(biz_location.id, on_date, false, LoanLifeCycle::DISBURSED_LOAN_STATUS).compact
     return [] if loans.blank?
 
-    loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
-    loans           = loans.select{|loan| loan.schedule_dates.include?(on_date)} if only_installment_date
+    #    loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
+    loans           = BaseScheduleLineItem.all('loan_base_schedule.lending' => loans.map(&:id), :on_date => on_date).loan_base_schedule.lending if only_installment_date
     meeting_date    = meeting_facade.get_meeting(biz_location, on_date)
     meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
     meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
-    clients         = ClientAdministration.get_clients_administered(biz_location.id, on_date)
+    clients         = ClientAdministration.get_clients_administered_by_sql(biz_location.id, on_date)
     return [] if clients.blank?
     
     clients.each do |client|
-      client_loans = loans.select{|l| l.loan_borrower.counterparty == client}
+      client_loans = LoanBorrower.all(:counterparty_id => client.id, :counterparty_type => 'client', 'lending.id' => loans.map(&:id)).lending
+      #      client_loans = loans.select{|l| l.loan_borrower.counterparty == client}
       if client_loans.blank?
         client_non_loan << client.id
       else
@@ -92,18 +93,24 @@ class CollectionsFacade < StandardFacade
   end
 
   #following function will generate the daily collection sheet for staff_member.
-  def get_collection_sheet_for_staff(staff_id, on_date)
+  def get_collection_sheet_for_staff(staff_id, on_date, page = nil, limit = nil)
     collection_sheet = []
     staff = StaffMember.get staff_id
 
     #Find all centers by loan history on particular date
     location_manage = LocationManagement.locations_managed_by_staff(staff.id, on_date)
-    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| LocationLink.all_children_with_self(lm.managed_location, on_date)}
-    biz_locations.flatten.uniq.each do |biz_location|
-      collection_sheet << self.get_collection_sheet(biz_location.id, on_date )
+    biz_locations = location_manage.blank? ? [] : location_manage.collect{|lm| LocationLink.get_children_by_sql(lm.managed_location, on_date)<<lm.managed_location}
+    locations = page.blank? ? biz_locations.flatten.uniq : BizLocation.all(:id => biz_locations.flatten.uniq.map(&:id)).paginate(:page => page, :per_page => limit)
+    count = 0
+    locations.each do |biz_location|
+      cs = self.get_collection_sheet(biz_location.id, on_date )
+      unless cs.blank?
+        collection_sheet << cs
+        count = count + 1
+      end
+      break if count > 3
     end
-
-    collection_sheet
+    page.blank? ? collection_sheet : [biz_locations.flatten.uniq.paginate(:page => page, :per_page => limit), collection_sheet]
   end
 
   private

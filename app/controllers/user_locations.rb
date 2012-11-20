@@ -86,9 +86,9 @@ class UserLocations < Application
     @errors = []
     begin
       if @biz_location.location_level.level == 0
-        @customers = ClientAdministration.get_clients_administered(@biz_location.id, session[:effective_date])
+        @customers = ClientAdministration.get_clients_administered_by_sql(@biz_location.id, session[:effective_date])
       else
-        @customers = ClientAdministration.get_clients_registered(@biz_location.id, session[:effective_date])
+        @customers = ClientAdministration.get_clients_registered_by_sql(@biz_location.id, session[:effective_date])
       end
     rescue => ex
       @errors << ex.message
