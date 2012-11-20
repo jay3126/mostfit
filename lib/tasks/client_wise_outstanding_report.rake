@@ -72,7 +72,7 @@ namespace :mostfit do
     date1 = Date.new(2012, 03, 31)
 
     f = File.open("tmp/client_wise_outstanding_report_as_of_march_2012_#{DateTime.now.to_s}.csv", "w")
-    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Gender\", \"Loan Id\", \"Loan Amount\", \"Loan Status\", \"Cycle No.\", \"Interest Rate\", \"Disbursal Date\", \"First Payment Date\", \"Loan Tenure\", \"Installment Frequency\", \"Loan Product\", \"Principal Outstanding as on 31st March 2012\", \"Interest Outstanding as on 31st March 2012\"")
+    f.puts("\"Sl. No.\", \"Branch Id\", \"Branch Name\", \"Center Id\", \"Center Name\", \"Client Id\", \"Client Name\", \"Gender\", \"Loan Id\", \"Loan Amount\", \"Cycle No.\", \"Interest Rate\", \"Disbursal Date\", \"First Payment Date\", \"Loan Tenure\", \"Installment Frequency\", \"Loan Product\", \"Principal Outstanding as on 31st March 2012\", \"Interest Outstanding as on 31st March 2012\"")
 
     # loan_ids.each do |l|
     #   loan = Loan.get(l)
@@ -136,7 +136,7 @@ namespace :mostfit do
       branch_id = branch.id
       branch_name = branch.name
 
-      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", \"#{client_gender}\", #{loan_id}, #{loan_amount}, \"#{loan_status}\", #{loan_cycle_number}, #{loan_interest_rate}, #{loan_disbursal_date}, #{loan_first_repayment_date}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_product}\", #{principal_outstanding_as_on_date1}, #{interest_outstanding_as_on_date1}")
+      f.puts("#{sl_no}, #{branch_id}, \"#{branch_name}\", #{center_id}, \"#{center_name}\", #{client_id}, \"#{client_name}\", \"#{client_gender}\", #{loan_id}, #{loan_amount}, #{loan_cycle_number}, #{loan_interest_rate}, #{loan_disbursal_date}, #{loan_first_repayment_date}, #{loan_number_of_installments}, \"#{loan_installment_frequency}\", \"#{loan_product}\", #{principal_outstanding_as_on_date1}, #{interest_outstanding_as_on_date1}")
     end
     f.close
   end
