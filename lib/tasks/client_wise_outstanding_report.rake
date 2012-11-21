@@ -68,7 +68,7 @@ namespace :mostfit do
   task :client_wise_outstanding_report_as_of_march_2012 do
     sl_no = 0
     #loan_ids = Loan.all('client.date_joined.lte' => Date.new(2012, 03, 31)).aggregate(:id)
-    loan_ids = Client.all(:date_joined.lte => Date.new(2012, 03, 31)).loans.aggregate(:id)
+    loan_ids = Client.all(:date_joined.lte => Date.new(2012, 03, 31)).loans(:disbursal_date.lte => Date.new(2012, 03, 31)).aggregate(:id)
     date1 = Date.new(2012, 03, 31)
 
     f = File.open("tmp/client_wise_outstanding_report_as_of_march_2012_#{DateTime.now.to_s}.csv", "w")
