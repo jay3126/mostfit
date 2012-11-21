@@ -86,12 +86,15 @@ class Client
 
   validates_length    :name, :min => 3
   validates_present   :date_joined
-  validates_is_unique :reference
-  validates_is_unique :reference2
   validates_attachment_thumbnails :picture
   validates_with_method :date_joined, :method => :dates_make_sense
-  validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
 
+  #do not check these validations when the system is in :migration state.
+  if Mfi.first.system_state != :migration
+    validates_is_unique :reference 
+    validates_is_unique :reference2
+    validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
+  end
 
   def created_on; self.date_joined; end
   def counterparty; self; end
