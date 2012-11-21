@@ -1065,7 +1065,7 @@ class Lending
     insurance_products_on_loan.each { |insurance_product|
       premium_map = SimpleFeeProduct.get_applicable_premium_on_insurance_product(insurance_product.id)
       premium_fee_product = premium_map[Constants::Transaction::PREMIUM_COLLECTED_ON_INSURANCE]
-      raise Errors::InvalidConfigurationError, "An insurance premium has not been configured for the insurance product: #{insurance_product.to_s}" unless premium_fee_product
+      raise Errors::InvalidConfigurationError, "An insurance premium has not been configured for the insurance product: #{insurance_product.name}" unless premium_fee_product
       insurance_products_and_premia[insurance_product] = premium_fee_product
     }
     insurance_products_and_premia

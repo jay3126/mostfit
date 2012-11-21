@@ -31,6 +31,9 @@ class LendingProduct
 
   #method for upload functionality.
   def self.from_csv(row, headers)
+    insurance_products = SimpleInsuranceProduct.first(:name => row[headers[:insurance_products]])
+    raise ArgumentError, "Insurance Product (#{row[headers[:insurance_products]]}) does not exist" if insurance_products.blank?    
+
     user_id             = User.first.id
     staff_id            = StaffMember.first.id
     name                = row[headers[:name]]
@@ -45,9 +48,8 @@ class LendingProduct
     principal_schedules = MoneyManager.get_money_instance(*row[headers[:principal_schedules]].split(','))
     interest_schedules  = MoneyManager.get_money_instance(*row[headers[:interest_schedules]].split(','))
 
-    fee_products        = SimpleFeeProduct.all(:name => row[headers[:fee_products]], :fee_charged_on_type => 'fee_charged_on_loan').map(&:id)
-    #insurance_proudcts  = SimpleFeeProduct.all(:name => row[headers[:insurance_products]], :fee_charged_on_type => 'premium_collected_on_insurance').map(&:id)
-    insurance_products = SimpleInsuranceProduct.first(:name => row[headers[:insurance_products]]).id
+    fee_product_names = row[headers[:fee_products]].split(',')
+    fee_products        = SimpleFeeProduct.all(:name => fee_product_names, :fee_charged_on_type => 'fee_charged_on_loan').map(&:id)
     preclosure_products = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]], :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
     obj = create_lending_product(name, loan_money_amount, interest_amount, interest_rate, repayment_frequency, tenure, allocation_strategy, principal_schedules, interest_schedules, staff_id, user_id, fee_products+preclosure_products, insurance_products, upload_id)
 

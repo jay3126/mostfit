@@ -22,14 +22,18 @@ class SimpleInsuranceProduct
   def self.from_csv(row, headers)
     fee_product = SimpleFeeProduct.first(:name => row[headers[:fee_product]])
     raise ArgumentError, "Fee Product (#{row[headers[:fee_product]]}) does not exist" if fee_product.blank?
+
     name = row[headers[:name]]
     insurance_type = row[headers[:insurance_type]].downcase.to_sym
     insurance_for = row[headers[:insurance_for]].downcase.to_sym
     created_on = Date.parse(row[headers[:created_on]])
+    upload_id = row[headers[:upload_id]]
 
-    obj = SimpleInsuranceProduct.new(:name => name, :insured_type => insurance_type, :insurance_for => insurance_for, :created_on => created_on)
+    obj = SimpleInsuranceProduct.new(:name => name, :insured_type => insurance_type, :insurance_for => insurance_for, :created_on => created_on,
+                                     :upload_id => upload_id)
 
     if obj.save
+      fee_product = SimpleFeeProduct.first(:name => row[headers[:fee_product]])
       fee_product.update(:simple_insurance_product_id => obj.id) unless fee_product.blank?
       [true, obj]
     else
