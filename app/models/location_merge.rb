@@ -68,7 +68,7 @@ class LocationMerge
   end
 
   def all_loan_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
-    loans = get_location_facade(User.first).get_loans_accounted(merge_location.id, effective_on)
+    loans = get_location_facade(User.first).get_loans_accounted_by_sql(merge_location.id, effective_on)
     loans.each do |loan|
       center = LoanAdministration.get_administered_at(loan.id, effective_on)
       LoanAdministration.assign(center, merge_into_location, loan, performed_by, recorded_by, effective_on)
@@ -76,7 +76,7 @@ class LocationMerge
   end
 
   def all_client_merge(merge_location, merge_into_location, effective_on, performed_by, recorded_by)
-    clients = ClientAdministration.get_clients_registered(merge_location.id, effective_on)
+    clients = ClientAdministration.get_clients_registered_by_sql(merge_location.id, effective_on)
     clients.each do |client|
       center = ClientAdministration.get_current_administration(client)
       ClientAdministration.assign(center.administered_at_location, merge_into_location, client, performed_by, recorded_by, effective_on) if Client.is_client_active?(client)
@@ -84,7 +84,7 @@ class LocationMerge
   end
 
   def all_center_merge(merge_location, merge_into_location, effective_on)
-    centers = LocationLink.get_children(merge_location, effective_on)
+    centers = LocationLink.get_children_by_sql(merge_location, effective_on)
     centers.each do |center|
       LocationLink.assign(center, merge_into_location, effective_on)
     end
@@ -108,12 +108,13 @@ class LocationMerge
     first_accounts = merge_location.accounting_locations.map(&:product)
     second_accounts = merge_into_location.accounting_locations.map(&:product)
     first_accounts.each do |p_account|
-      child_accounts = LocationLink.get_children(p_account, effective_on)
+      child_accounts = LocationLink.get_children_by_sql(p_account, effective_on)
       if p_account.class == Ledger
-        s_account = second_accounts.select{|s| s.class == Ledger && s.ledger_classification == p_account.ledger_classification}
+        s_account = Ledger.first( :id => second_accounts.map(&:id), 'ledger_classification.id' => p_account.ledger_classification.id)
+#        s_account = second_accounts.select{|s| s.class == Ledger && s.ledger_classification == p_account.ledger_classification}
         unless s_account.blank?
           child_accounts.each do |c_account|
-            LocationLink.assign(c_account, s_account.first, effective_on)
+            LocationLink.assign(c_account, s_account, effective_on)
           end
         end
       end
