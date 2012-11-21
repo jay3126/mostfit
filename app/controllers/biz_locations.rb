@@ -234,7 +234,7 @@ class BizLocations < Application
 
   def biz_location_clients
     @biz_location = BizLocation.get params[:id]
-    @clients      = client_facade.get_clients_administered_by_sql(@biz_location.id, get_effective_date)
+    @clients      = ClientAdministration.get_clients_administered_by_sql(@biz_location.id, get_effective_date)
     display @clients
   end
 
