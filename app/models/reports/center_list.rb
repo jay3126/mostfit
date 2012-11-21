@@ -6,9 +6,7 @@ class CenterList < Report
     @date = dates[:date] || Date.today
     @name = "Center List on #{@date}"
     @user = user
-    location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @biz_location_branch = params[:biz_location_branch_id] rescue nil
     get_parameters(params, user)
   end
 
@@ -35,24 +33,14 @@ class CenterList < Report
   def managed_by_staff(location_id, on_date)
     location_facade = get_location_facade(@user)
     location_manage = location_facade.location_managed_by_staff(location_id, on_date)
-    if location_manage.blank?
-      'Not Managed'
-    else
-      staff_member = location_manage.manager_staff_member.name
-    end
+    location_manage.blank? ? 'Not Managed' : location_manage.manager_staff_member.name
   end
 
   def generate
-
     data = {}
     location_facade = get_location_facade(@user)
     meeting_facade = get_meeting_facade(@user)
-
-    if @biz_location_branch.class == Fixnum
-      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @date)
-    else
-      all_centers = location_facade.all_nominal_centers
-    end
+    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers : location_facade.get_children(BizLocation.get(@biz_location_branch), @date)
 
     all_centers.each do |center|
       branch = location_facade.get_parent(BizLocation.get(center.id), @date)
