@@ -73,54 +73,43 @@
           = values[:loans_disbursed][:total_amount]
           - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
         %td
-          - payments = values[:loan_allocations].values[0]
-          = payments[:principal_received]
-          - accumulate_row_values[:principal_received] += payments[:principal_received]
+          = values[:loans_repayment_principal]
+          - accumulate_row_values[:principal_received] += values[:loans_repayment_principal]
         %td
-          = payments[:interest_received]
-          - accumulate_row_values[:interest_received] += payments[:interest_received]
+          = values[:loans_repayment_interest]
+          - accumulate_row_values[:interest_received] += values[:loans_repayment_interest]
         %td
-          = values[:fee_receipts][:total_amount]
-          - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
+          = values[:fee_receipts]
+          - accumulate_row_values[:fee_receipts] += values[:fee_receipts]
         %td
-          = payments[:total_received]
-          - accumulate_row_values[:total_received] += payments[:total_received]
+          = p_total = values[:loans_repayment_principal] + values[:loans_repayment_interest] + values[:fee_receipts]
+          - accumulate_row_values[:total_received] += p_total
         %td
-          - outstandings = values[:loan_balances].values[0]
-          = outstandings[:actual_principal_outstanding]
-          - accumulate_row_values[:actual_principal_outstanding] += outstandings[:actual_principal_outstanding]
+          = values[:loan_outstanding_principal]
+          - accumulate_row_values[:actual_principal_outstanding] += values[:loan_outstanding_principal]
         %td
-          = outstandings[:actual_interest_outstanding]
-          - accumulate_row_values[:actual_interest_outstanding] += outstandings[:actual_interest_outstanding]
+          = values[:loan_outstanding_interest]
+          - accumulate_row_values[:actual_interest_outstanding] += values[:loan_outstanding_interest]
         %td
-          = outstandings[:actual_total_outstanding]
-          - accumulate_row_values[:actual_total_outstanding] += outstandings[:actual_total_outstanding]
+          = o_total = values[:loan_outstanding_principal] + values[:loan_outstanding_interest]
+          - accumulate_row_values[:actual_total_outstanding] += o_total
         %td
-          = outstandings[:advance_received_on_date]
-          - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
+          = values[:loan_advance_collect]
+          - accumulate_row_values[:advance_received_on_date] += values[:loan_advance_collect]
         %td
-          = outstandings[:advance_adjusted_on_date]
-          - accumulate_row_values[:advance_adjusted_on_date] += outstandings[:advance_adjusted_on_date]
+          = values[:loan_advance_adjust]
+          - accumulate_row_values[:advance_adjusted_on_date] += values[:loan_advance_adjust]
         %td
-          = outstandings[:advance_balance]
-          - accumulate_row_values[:advance_balance] += outstandings[:advance_balance]
+          = values[:loan_advance_balance]
+          - accumulate_row_values[:advance_balance] += values[:loan_advance_balance]
         %td
-          - if (outstandings[:actual_principal_outstanding] > outstandings[:scheduled_principal_outstanding])
-            = principal_overdue = (outstandings[:actual_principal_outstanding] - outstandings[:scheduled_principal_outstanding])
-          - else
-            = principal_overdue = (outstandings[:scheduled_principal_outstanding] - outstandings[:actual_principal_outstanding])
-          - accumulate_row_values[:principal_overdue] += principal_overdue
+          = values[:loan_overdue_principal]
+          - accumulate_row_values[:principal_overdue] += values[:loan_overdue_principal]
         %td
-          - if (outstandings[:actual_interest_outstanding] > outstandings[:scheduled_interest_outstanding])
-            = interest_overdue = (outstandings[:actual_interest_outstanding] - outstandings[:scheduled_interest_outstanding])
-          - else
-            = interest_overdue = (outstandings[:scheduled_interest_outstanding] - outstandings[:actual_interest_outstanding])
-          - accumulate_row_values[:interest_overdue] += interest_overdue
+          = values[:loan_overdue_interest]
+          - accumulate_row_values[:interest_overdue] += values[:loan_overdue_interest]
         %td
-          - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
-            = total_overdue = (outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding])
-          - else
-            = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
+          = total_overdue = values[:loan_overdue_principal] + values[:loan_overdue_interest]
           - accumulate_row_values[:total_overdue] += total_overdue
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)

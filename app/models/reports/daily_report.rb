@@ -6,7 +6,7 @@ class DailyReport < Report
     @name = "Daily Report for #{@date}"
     @user = user
     location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
+    all_branch_ids = location_facade.all_nominal_branches.map(&:id)
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
   end
@@ -34,36 +34,46 @@ class DailyReport < Report
   def generate
 
     reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
     
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
-
       loans_applied = reporting_facade.loans_applied_by_branches_on_date(@date, *branch_id)
       loans_approved = reporting_facade.loans_approved_by_branches_on_date(@date, *branch_id)
       loans_scheduled_for_disbursement = reporting_facade.loans_scheduled_for_disbursement_by_branches_on_date(@date, *branch_id)
       loans_disbursed = reporting_facade.loans_disbursed_by_branches_on_date(@date, *branch_id)
 
-      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *branch_id)
-      loan_receipts = reporting_facade.all_receipts_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
-      loan_payments = reporting_facade.all_payments_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
-      loan_net_payments = reporting_facade.net_payments_on_loans_accounted_at_locations_on_value_date(@date, *branch_id)
-      loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *branch_id)
-      fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
+      all_payments = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date(@date, *branch_id)
+      amounts = all_payments.values.first
+      loan_disbursed_principal_amt = amounts['disbursed_principal_amt']
+      loan_disbursed_interest_amt = amounts['disbursed_interest_amt']
+      loan_repayment_principal_amt = amounts['principal_amt']
+      loan_repayment_interest_amt = amounts['interest_amt']
+      loan_fee_amt = amounts['fee_amt']
+      loan_outstanding_principal = loan_disbursed_principal_amt - loan_repayment_principal_amt
+      loan_outstanding_interest = loan_disbursed_interest_amt - loan_repayment_interest_amt
+      loan_advance_collect = amounts['advance_amt']
+      loan_advance_adjust = amounts['advance_adjustment_amt']
+      loan_advance_balance = amounts['total_advance_amt'] - loan_advance_adjust
+      loan_overdue_principal = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
+      loan_overdue_interest = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
 
       branch_data_map = {}
       branch_data_map[:loans_applied] = loans_applied
       branch_data_map[:loans_approved] = loans_approved
       branch_data_map[:loans_scheduled_for_disbursement] = loans_scheduled_for_disbursement
       branch_data_map[:loans_disbursed] = loans_disbursed
-      branch_data_map[:loan_balances] = loan_balances
-      branch_data_map[:loan_receipts] = loan_receipts
-      branch_data_map[:loan_payments] = loan_payments
-      branch_data_map[:loan_net_payments] = loan_net_payments
-      branch_data_map[:loan_allocations] = loan_allocations
-      branch_data_map[:fee_receipts] = fee_receipts
-
+      branch_data_map[:loans_repayment_principal] = loan_repayment_principal_amt
+      branch_data_map[:loans_repayment_interest] = loan_repayment_interest_amt
+      branch_data_map[:fee_receipts] = loan_fee_amt
+      branch_data_map[:loan_outstanding_principal] = loan_outstanding_principal
+      branch_data_map[:loan_outstanding_interest] = loan_outstanding_interest
+      branch_data_map[:loan_advance_collect] = loan_advance_collect
+      branch_data_map[:loan_advance_adjust] = loan_advance_adjust
+      branch_data_map[:loan_advance_balance] = loan_advance_balance
+      branch_data_map[:loan_overdue_principal] = loan_overdue_principal
+      branch_data_map[:loan_overdue_interest] = loan_overdue_interest
+      
       data[branch_id] = branch_data_map
     }    
     data    

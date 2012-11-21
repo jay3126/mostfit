@@ -117,6 +117,34 @@ class ReportingFacade < StandardFacade
     get_ids(all_outstanding_loans_on_date(on_date))
   end
 
+  def sum_all_loans_balances_at_accounted_locations_on_date(on_date, *at_location_ids_ary)
+    loan_amounts = {}
+    at_location_ids_ary.each do |location_id|
+      loans = LoanAdministration.get_loans_accounted_by_sql(location_id, on_date)
+      loans_ids = loans.blank? ? [0] : loans.map(&:id)
+      disbursed_principal_amt = LoanPayment.all(:lending_id => loans_ids, :effective_on => on_date)
+      disbursed_interest_amt = disbursed_principal_amt.blank? ? 0 : LoanBaseSchedule.all('lending.id' => disbursed_principal_amt.map(&:lending_id)).aggregate(:total_interest_applicable.sum)
+      till_on_loan_receipts = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on <= #{on_date}").first
+      loan_receipts = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on = #{on_date}").first
+      fee_amt = FeeReceipt.all(:accounted_at => location_id, :effective_on => on_date).aggregate(:fee_amount.sum)
+      scheduled_amounts = BaseScheduleLineItem.all('loan_base_schedule.lending.id' => loans_ids, :on_date.lte => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum)
+      loan_amounts[location_id] = {}
+      loan_amounts[location_id]['disbursed_principal_amt'] = disbursed_principal_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_principal_amt.map(&:loan_disbursed).sum.to_i)
+      loan_amounts[location_id]['disbursed_interest_amt'] = disbursed_interest_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_interest_amt.to_i)
+      loan_amounts[location_id]['principal_amt'] = loan_receipts.principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.principal.to_i)
+      loan_amounts[location_id]['interest_amt'] = loan_receipts.interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.interest)
+      loan_amounts[location_id]['advance_amt'] = loan_receipts.advance.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.advance)
+      loan_amounts[location_id]['advance_adjustment_amt'] = loan_receipts.advance_adjustment.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.advance_adjustment)
+      loan_amounts[location_id]['recovery_amt'] = loan_receipts.recovery.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.recovery)
+      loan_amounts[location_id]['fee_amt'] = fee_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(fee_amt.to_i)
+      loan_amounts[location_id]['total_advance_amt'] = till_on_loan_receipts.advance.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.advance.to_i)
+      loan_amounts[location_id]['scheduled_principal_amt'] = scheduled_amounts[0].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[0].to_i)
+      loan_amounts[location_id]['scheduled_interest_amt'] = scheduled_amounts[1].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[1].to_i)
+    end
+    loan_amounts
+  end
+
+
   # Outstanding loan balances
 
   def sum_all_outstanding_loans_balances_accounted_at_locations_on_date(on_date, *at_location_ids_ary)
