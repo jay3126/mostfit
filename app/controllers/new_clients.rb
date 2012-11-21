@@ -230,7 +230,7 @@ class NewClients < Application
     by_staff        = client_params[:move_by_staff]
     recorded_by     = session.user.id
     move_on_location = client_params[:biz_location_id]
-    @message[:error] << "Please select client for assignment" if client_ids.blank?
+    @message[:error] << "Please select client for movement" if client_ids.blank?
     @message[:error] << "Please select Performed By" if by_staff.blank?
     @message[:error] << "Date cannot be blank" if move_date.blank?
     @message[:error] << "Please select Center" if move_on_location.blank?
@@ -255,7 +255,7 @@ class NewClients < Application
         end
         if @message[:error].blank?
           assign_clients.each{|assign_client| assign_client.save}
-          @message[:notice] = "Client assignment successfully"
+          @message[:notice] = "Client movement performed successfully"
         end
       end
     rescue => ex
