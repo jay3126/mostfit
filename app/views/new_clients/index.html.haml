@@ -3,6 +3,21 @@
   $('#select_all').change(function() {
     $('input.checkbox').attr('checked',$(this).attr('checked'))});
   });
+
+- unless @errors.blank?
+  - if @errors.is_a?(Hash)
+    - @errors.keys.each do |client_id|
+      - if @errors[client_id]
+        .error
+          - @errors[client_id].keys.each do |key|
+            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
+            %br
+  - else
+    - @errors.each do |error|
+      .error
+        = error
+        %br
+
 %h1 Client Movement
 .menu-strip{:style => "width:8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
