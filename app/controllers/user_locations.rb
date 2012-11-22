@@ -271,7 +271,7 @@ class UserLocations < Application
   def location_scv
     @date            = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
     @biz_location    = BizLocation.get params[:id]
-    @child_locations = LocationLink.get_children(@biz_location, @date)
+    @child_locations = LocationLink.get_children_by_sql(@biz_location, @date)
     @scv             = VisitSchedule.all(:biz_location_id => @child_locations.map(&:id), :visit_scheduled_date => @date)
     render :template => 'user_locations/location_scv', :layout => layout?
   end
