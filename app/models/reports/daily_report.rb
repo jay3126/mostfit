@@ -54,7 +54,7 @@ class DailyReport < Report
       loan_outstanding_interest = loan_disbursed_interest_amt - loan_repayment_interest_amt
       loan_advance_collect = amounts['advance_amt']
       loan_advance_adjust = amounts['advance_adjustment_amt']
-      loan_advance_balance = amounts['total_advance_amt'] - loan_advance_adjust
+      loan_advance_balance = amounts['total_advance_balance_amt']
       loan_overdue_principal = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
       loan_overdue_interest = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
 
