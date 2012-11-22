@@ -3,17 +3,17 @@ class Lendings < Application
   def index
     @lending, @new_lendings, @approve_lendings, @disburse_lendings = []
     unless params[:parent_location_id].nil?
-      search             = {}
-      search.merge!(:accounted_at_origin => params[:parent_location_id]) unless params[:parent_location_id].blank?
-      search.merge!(:administered_at_origin => params[:child_location_id]) unless params[:child_location_id].blank?
-      @new_lendings           = Lending.all(search.merge(:status => :new_loan_status))
-      @pre_disbursal_lendings = Lending.all(search.merge(:status => :approved_loan_status, :disbursement_mode => 'Not Specified'))
-      @approved_lendings      = Lending.all(search.merge(:status => :approved_loan_status, :disbursement_mode.not => 'Not Specified'))
-      @rejected_lendings      = Lending.all(search.merge(:status => :rejected_loan_status))
-      #      @disburse_lendings      = @lendings.select{|l| l.status == :disbursed_loan_status}
-      #      @rejected_lendings      = @lendings.select{|l| l.status == :rejected_loan_status}
-      #      @fee_lendings           = @disburse_lendings.collect{|al| al.unpaid_loan_fees}.flatten
-      #      @insurance_fees         = @disburse_lendings.collect{|al| al.unpaid_loan_insurance_fees}.flatten
+      if !params[:child_location_id].blank?
+        @loans = LoanAdministration.get_loans_administered_by_sql(params[:child_location_id], get_effective_date)
+      else
+        @loans = LoanAdministration.get_loans_accounted_by_sql(params[:parent_location_id], get_effective_date)
+      end
+      @parent_location        = BizLocation.get(params[:parent_location_id])
+      @loan_ids               = @loans.blank? ? [0] : @loans.map(&:id)
+      @new_lendings           = Lending.all(:id => @loan_ids, :status => :new_loan_status)
+      @pre_disbursal_lendings = Lending.all(:id => @loan_ids, :status => :approved_loan_status, :disbursement_mode => 'Not Specified')
+      @approved_lendings      = Lending.all(:id => @loan_ids, :status => :approved_loan_status, :disbursement_mode.not => 'Not Specified')
+      @rejected_lendings      = Lending.all(:id => @loan_ids, :status => :rejected_loan_status)
     end
     display @new_lendings
   end

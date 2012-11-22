@@ -74,9 +74,10 @@
           %td
             = lending.scheduled_disbursal_date
           %td
-            = link_to_with_rights lending.administered_at_origin_location.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => lending.administered_at_origin)
+            - locations = LoanAdministration.get_locations(lending.id, get_effective_date)
+            = locations.blank? ? '-' : link_to_location(locations[:administered_at])
           %td
-            = link_to_with_rights lending.accounted_at_origin_location.name, url(:controller => :user_locations, :action => :show, :id => lending.accounted_at_origin)
+            = locations.blank? ? '-' : link_to_location(locations[:accounted_at])
           %td
             = text_field :name => "lending[#{lending.id}][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
           - loan_row_count = loan_row_count + 1

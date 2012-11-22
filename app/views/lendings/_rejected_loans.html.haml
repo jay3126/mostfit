@@ -65,9 +65,10 @@
         %td
           = lending.tenure
         %td
-          = link_to_location lending.administered_at_origin_location
+          - locations = LoanAdministration.get_locations(lending.id, get_effective_date)
+          = locations.blank? ? '-' : link_to_location(locations[:administered_at])
         %td
-          = link_to_location lending.accounted_at_origin_location
+          = locations.blank? ? '-' : link_to_location(locations[:accounted_at])
         %td
           = lending.rejected_by_staff.blank? ? '-' : link_to(StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff))
         %td
