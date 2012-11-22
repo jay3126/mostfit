@@ -7,7 +7,7 @@ class NewClients < Application
       @errors << "please select branch" if params[:parent_location_id].blank?
       @errors << "please select center" if params[:child_location_id].blank?
     end
-    unless @errors.blank?
+    if @errors.blank?
       @biz_location    = BizLocation.get params[:child_location_id]
       @parent_location = BizLocation.get params[:parent_location_id]
       @child_locations = location_facade.get_children(@parent_location, effective_date) - [@biz_location]
@@ -224,6 +224,7 @@ class NewClients < Application
   end
 
   def update_client_location
+    debugger
     @message        = {:error => [], :notice => []}
     assign_clients  = []
     client_params   = params[:client]
@@ -239,8 +240,8 @@ class NewClients < Application
     @message[:error] << "Please select Performed By" if by_staff.blank?
     @message[:error] << "Date cannot be blank" if move_date.blank?
     @message[:error] << "Please select Center" if move_on_location.blank?
-    @message[:error] << "Please select Center" if child_biz_location.blank?
-    @message[:error] << "Please select Branch" if parent_biz_location.blank?
+    #@message[:error] << "Please select Center" if child_location.blank?
+    #@message[:error] << "Please select Branch" if parent_location.blank?
     begin
       if @message[:error].blank?
         client_ids.each do |client_id|
