@@ -52,6 +52,8 @@ class Client
   property :cliam_document_recieved_on,  Date
   property :town_classification,           Enum.send('[]', *TOWN_CLASSIFICATION), :nullable => true, :default => DEFAULT_CLASSIFICATION
 
+  property :upload_reference,      Integer, :unique => true    #property added for upload functionality.
+
   has n, :simple_insurance_policies
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
   has n, :attendance_records, :parent_key => [:id], :child_key => [:counterparty_id]
@@ -129,7 +131,7 @@ class Client
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]]}
+      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :upload_reference => row[headers[:upload_reference]]}
 
     obj = create_client(hash, center.id, branch.id)
     [obj.save!, obj]

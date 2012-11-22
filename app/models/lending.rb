@@ -138,7 +138,7 @@ class Lending
 
     loan_product = LendingProduct.first(:name => row[headers[:loan_product]])
     lending_product_id = loan_product
-    client = Client.first(:name => row[headers[:client]])
+    client = Client.first(:name => row[headers[:client]], :upload_reference => row[headers[:upload_reference]])
     loan_borrower_id = client
     funding_line_id = NewFundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id
     tranch_id = NewTranch.first(:reference => row[headers[:tranch_serial_number]]).id
