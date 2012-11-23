@@ -26,7 +26,7 @@
 %br
 - customers = @customers.blank? ? nil : @customers.collect{|c| c if client_facade.is_client_active?(c)}.compact
 - if customers.blank?
-  %p
+  .shaded
     %i No Client Mapping has been created yet.
 - else
   %i
@@ -60,4 +60,5 @@
                   = customer.date_joined
 
     = submit "Save order"
+%br
 = link_to_with_rights "Back", url("user_locations/weeksheet_collection/#{@biz_location.id}"), :class => "greenButton"
