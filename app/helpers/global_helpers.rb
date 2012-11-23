@@ -727,6 +727,12 @@ module Merb
     def get_no_of_minimum_repayments
       Mfi.first.minimum_no_of_repayments
     end
+
+    # Returns true if string is number(Integer or float)
+    def is_number?(object)
+      true if Float(object) rescue false
+    end
+
     private
     
     def staff_members_collection(allow_unassigned=false, allow_inactive=false)
