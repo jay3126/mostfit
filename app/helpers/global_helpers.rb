@@ -834,7 +834,7 @@ module Merb
       if branch_id
         biz_location = BizLocation.get branch_id
         location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, session.user)
-        location_facade.get_children biz_location
+        location_facade.get_children_by_sql biz_location
       else
         []
       end

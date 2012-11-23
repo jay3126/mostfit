@@ -1,19 +1,19 @@
 class Lendings < Application
 
   def index
-    @lending, @new_lendings, @approve_lendings, @disburse_lendings = []
+    @new_lendings, @approve_lendings, @disburse_lendings = []
     unless params[:parent_location_id].nil?
       if !params[:child_location_id].blank?
-        @loans = LoanAdministration.get_loans_administered_by_sql(params[:child_location_id], get_effective_date)
+        @loans = LoanAdministration.get_loans_administered_by_sql(params[:child_location_id], get_effective_date).group_by{|g| [g.status, g.disbursement_mode]}
       else
-        @loans = LoanAdministration.get_loans_accounted_by_sql(params[:parent_location_id], get_effective_date)
+        @loans = LoanAdministration.get_loans_accounted_by_sql(params[:parent_location_id], get_effective_date).group_by{|g| [g.status, g.disbursement_mode]}
       end
       @parent_location        = BizLocation.get(params[:parent_location_id])
       @loan_ids               = @loans.blank? ? [0] : @loans.map(&:id)
-      @new_lendings           = Lending.all(:id => @loan_ids, :status => :new_loan_status)
-      @pre_disbursal_lendings = Lending.all(:id => @loan_ids, :status => :approved_loan_status, :disbursement_mode => 'Not Specified')
-      @approved_lendings      = Lending.all(:id => @loan_ids, :status => :approved_loan_status, :disbursement_mode.not => 'Not Specified')
-      @rejected_lendings      = Lending.all(:id => @loan_ids, :status => :rejected_loan_status)
+      @new_lendings           = @loans[[:new_loan_status, 'Not Specified' ]]||[]
+      @pre_disbursal_lendings = @loans[[:approved_loan_status, 'Not Specified']]||[]
+      @approved_lendings      = [@loans[[:approved_loan_status, 'Cheque']]||[], @loans[[:approved_loan_status, 'Cheque With Cash']]||[], @loans[[:approved_loan_status, 'Cash']]||[]].flatten
+      @rejected_lendings      = [@loans[[:rejected_loan_status, 'Not Specified']]||[], @loans[[:rejected_loan_status, 'Cheque']]||[], @loans[[:approved_loan_status, 'Cheque With Cash']]||[], @loans[[:approved_loan_status, 'Cash']]||[]].flatten
     end
     display @new_lendings
   end
