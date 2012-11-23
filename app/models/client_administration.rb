@@ -178,7 +178,7 @@ class ClientAdministration
         l_links.blank? ? 0 : l_links
       else
         l_links = repository(:default).adapter.query("select * from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} = #{given_location_id} order by ca1.effective_on desc limit 1 );")
-        l_links.map(&:counterparty_id).blank? ? [] : Client.all(:id => l_links.map(&:counterparty_id)).paginate(:page => 1, :per_page => 5)
+        l_links.map(&:counterparty_id).blank? ? [] : Client.all(:id => l_links.map(&:counterparty_id)).paginate(:page => 1)
       end
     end
   end
