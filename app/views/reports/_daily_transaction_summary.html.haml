@@ -53,40 +53,38 @@
           = values[:loans_disbursed][:total_amount]
           - accumulate_row_values[:loans_disbursed] += values[:loans_disbursed][:total_amount]
         %td
-          - payments = values[:loan_allocations].values[0]
-          = payments[:principal_received]
-          - accumulate_row_values[:principal_received] += payments[:principal_received]
+          = values[:loans_repayment_principal]
+          - accumulate_row_values[:principal_received] += values[:loans_repayment_principal]
         %td
-          = payments[:interest_received]
-          - accumulate_row_values[:interest_received] += payments[:interest_received]
+          = values[:loans_repayment_interest]
+          - accumulate_row_values[:interest_received] += values[:loans_repayment_interest]
         %td
-          = values[:fee_receipts][:total_amount]
-          - accumulate_row_values[:fee_receipts] += values[:fee_receipts][:total_amount]
+          = values[:fee_receipts]
+          - accumulate_row_values[:fee_receipts] += values[:fee_receipts]
         %td
-          = payments[:total_received]
-          - accumulate_row_values[:total_received] += payments[:total_received]
+          = total_p = values[:loans_repayment_principal] + values[:loans_repayment_interest] + values[:fee_receipts]
+          - accumulate_row_values[:total_received] += total_p
         %td
-          = values[:loan_preclosures][:principal_received]
-          - accumulate_row_values[:preclosure_principal_received] += values[:loan_preclosures][:principal_received]
+          = values[:loans_preclose_principal]
+          - accumulate_row_values[:preclosure_principal_received] += values[:loans_preclose_principal]
         %td
-          = values[:loan_preclosures][:interest_received]
-          - accumulate_row_values[:preclosure_interest_received] += values[:loan_preclosures][:interest_received]
+          = values[:loans_preclose_interest]
+          - accumulate_row_values[:preclosure_interest_received] += values[:loans_preclose_interest]
         %td
-          = values[:loan_preclosures][:total_received]
-          - accumulate_row_values[:preclosure_total_received] += values[:loan_preclosures][:total_received]
+          = total_pre = values[:loans_preclose_principal] + values[:loans_preclose_interest]
+          - accumulate_row_values[:preclosure_total_received] += total_pre
         %td
-          - outstandings = values[:loan_balances].values[0]
-          = outstandings[:advance_received_on_date]
-          - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
+          = values[:loan_advance_collect]
+          - accumulate_row_values[:advance_received_on_date] += values[:loan_advance_collect]
         %td
-          = outstandings[:advance_adjusted_on_date]
-          - accumulate_row_values[:advance_adjusted_on_date] += outstandings[:advance_adjusted_on_date]
+          = values[:loan_advance_adjust]
+          - accumulate_row_values[:advance_adjusted_on_date] += values[:loan_advance_adjust]
         %td
-          = outstandings[:advance_balance]
-          - accumulate_row_values[:advance_balance] += outstandings[:advance_balance]
+          = values[:loan_advance_balance]
+          - accumulate_row_values[:advance_balance] += values[:loan_advance_balance]
         %td
-          = values[:loan_written_off_values][:total_amount]
-          - accumulate_row_values[:loan_written_off_values] += values[:loan_written_off_values][:total_amount]
+          = values[:loans_recovery]
+          - accumulate_row_values[:loan_written_off_values] += values[:loans_recovery]
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
