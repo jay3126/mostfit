@@ -4,6 +4,7 @@ class MoneyManager
   # The application uses this factory to create instances of money that are all the same currency
   # defaulted from configuration
   def self.get_money_instance(*regular_amount_str)
+    raise "Amount must be number" unless is_number?(regular_amount_str)
     money_instances = regular_amount_str.collect { |amount_str|
       Money.parse(get_default_currency, get_default_locale, amount_str)
     }
@@ -28,6 +29,10 @@ class MoneyManager
   # Get the default locale
   def self.get_default_locale
     ConfigurationFacade.instance.default_locale
+  end
+
+  def self.is_number?(object)
+    true if Float(object) rescue false
   end
 
 end
