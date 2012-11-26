@@ -20,22 +20,24 @@
         %th
           Amount
     %tbody
-      - @data.each do |key, value|
+      - @data.each do |value|
         %tr
+          - loan = value.loan_base_schedule.lending
+          - l_locations = LoanAdministration.get_locations(loan.id, value.on_date)
           %td
-            = value[:accounted_at]
+            = l_locations.blank? ? '-' : l_locations[:accounted_at].name
           %td
-            = value[:administered_at]
+            = l_locations.blank? ? '-' : l_locations[:administered_at].name
           %td
-            = value[:lan]
+            = loan.lan
           %td
-            = value[:schedule_date]
+            = value.on_date
           %td
-            = value[:schedule_principal_due].to_s
+            = value.to_money[:scheduled_principal_due].to_s
           %td
-            = value[:schedule_interest_due].to_s
+            = value.to_money[:scheduled_interest_due].to_s
           %td
-            = value[:total_due].to_s
+            = (value.to_money[:scheduled_principal_due] + value.to_money[:scheduled_interest_due]).to_s
 - else
   .shaded
     %h3 No records found
