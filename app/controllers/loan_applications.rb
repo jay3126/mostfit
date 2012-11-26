@@ -12,12 +12,14 @@ class LoanApplications < Application
   
   # this controller is responsible for the bulk addition of clients to loan applications
   def bulk_new
-    @errors = {}
+    @errors = []
+    selected = 0
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
     @branch = location_facade.get_location(branch_id) if branch_id
     @center = location_facade.get_location(center_id) if center_id
     by_staff = params[:staff_member_id]
+    created_on = params[:created_on]
     center_cycle_number = params[:center_cycle_number].to_i
 
     if request.method == :post
@@ -26,13 +28,13 @@ class LoanApplications < Application
 
       if params[:clients]
         client_ids = params[:clients].keys
-        if by_staff.empty? or params[:created_on].empty?
-          @errors = []
-          @errors << "Please select a Staff Member" if by_staff.empty?
-          @errors << "Please select a created on date" if params[:created_on].empty?
+        if by_staff.blank? || created_on.blank?
+          @errors << "Please select a Staff Member" if by_staff.blank?
+          @errors << "Please select a created on date" if params[:created_on].blank?
           @errors << "Created on date must not be future date" if Date.parse(params[:created_on]) > Date.today
         else
           client_ids.each do |client_id|
+            selected += 1 unless params[:clients][client_id][:selected].blank?
             loan_amount_str = params[:clients][client_id][:amount]
             loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
             client = Client.get(client_id)
@@ -47,6 +49,7 @@ class LoanApplications < Application
       client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
       final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
       @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
+      @errors << "Please select atleast one client " if selected.eql?(0)
     end
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
     render
