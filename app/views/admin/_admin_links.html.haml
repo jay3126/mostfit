@@ -66,8 +66,6 @@
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links
       %li
-        = link_to_with_rights 'Loan authorize override reasons', resource(:auth_override_reasons), :class => 'loan icon'
-      %li
         = link_to_with_rights 'Cheque Book and Cheque Leaves', resource(:cheque_books), :class => 'loan icon'
       %li
         = link_to_with_rights 'Funders and funding lines', resource(:new_funders), :class => 'funder icon'
@@ -97,6 +95,8 @@
     %ul.icon_links
       %li
         = link_to_with_rights 'Loan Purposes', resource(:loan_purposes), :class => 'edit'
+      %li
+        = link_to_with_rights 'Loan authorize override reasons', resource(:auth_override_reasons), :class => 'loan icon'
       %li
         = link_to_with_rights 'Occupations', resource(:occupations), :class => 'edit'
       %li

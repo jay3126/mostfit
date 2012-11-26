@@ -29,7 +29,7 @@ class LoanAuthorizations < Application
 
     by_staff = params[:by_staff_id]
     on_date = params[:performed_on]
-
+    lap_ids = []
     # VALIDATIONS
 
     @errors << "Staff member is not selected " if by_staff.blank?
@@ -61,6 +61,7 @@ class LoanAuthorizations < Application
             raise ArgumentError, "Please provide override reason" if override_reason.blank?
             loan_applications_facade.authorize_reject_override(lap, by_staff, on_date, override_reason)
           end
+          lap_ids << lap
         rescue => ex
           @errors << "An error has occured for Loan Application ID #{lap}: #{ex.message}"
         end
@@ -68,7 +69,9 @@ class LoanAuthorizations < Application
     end
 
     # POPULATING RESPONSE AND OTHER VARIABLES
-    
+    unless lap_ids.blank?
+      @success = "Loan Application ID: [#{lap_ids.flatten.join(', ')}] has successfully authorized"
+    end
     get_pending_and_completed_auth(params)
 
     # RENDER/RE-DIRECT
