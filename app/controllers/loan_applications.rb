@@ -20,10 +20,12 @@ class LoanApplications < Application
     center_id = get_param_value(:child_location_id)
     @branch = branch_id ? location_facade.get_location(branch_id) : nil
     @center = center_id ? location_facade.get_location(center_id) : nil
-
+    
     # VALIDATION
-    @errors << "No branch was selected" unless branch_id
-    @errors << "No center was selected" unless center_id
+    unless params[:flag] == 'true'
+      @errors << "No branch was selected" unless branch_id
+      @errors << "No center was selected" unless center_id
+    end
 
     # OPERATIONS PERFORMED
     if @errors.empty?
