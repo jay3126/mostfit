@@ -9,54 +9,9 @@ class LoanApplications < Application
     raise NotFound unless @loan_app
     display @loan_app
   end
-  
-  # this controller is responsible for the bulk addition of clients to loan applications
+
+  # Only List all clients under selected center
   def bulk_new
-    @errors = []
-    selected = 0
-    branch_id = params[:parent_location_id]
-    center_id = params[:child_location_id]
-    @branch = location_facade.get_location(branch_id) if branch_id
-    @center = location_facade.get_location(center_id) if center_id
-    by_staff = params[:staff_member_id]
-    created_on = params[:created_on]
-    center_cycle_number = params[:center_cycle_number].to_i
-
-    if request.method == :post
-      created_on = Date.parse(params[:created_on])
-      center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
-
-      if params[:clients]
-        client_ids = params[:clients].keys
-        if by_staff.blank? || created_on.blank?
-          @errors << "Please select a Staff Member" if by_staff.blank?
-          @errors << "Please select a created on date" if params[:created_on].blank?
-          @errors << "Created on date must not be future date" if Date.parse(params[:created_on]) > Date.today
-        else
-          client_ids.each do |client_id|
-            selected += 1 unless params[:clients][client_id][:selected].blank?
-            loan_amount_str = params[:clients][client_id][:amount]
-            loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
-            client = Client.get(client_id)
-            loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, params[:clients][client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if params[:clients][client_id][:selected] == "on"
-            save_status = loan_application.save if loan_application
-            @errors[loan_application.client_id] = loan_application.errors if (save_status == false)
-          end
-        end
-      end
-      client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today) if @center
-      client_ids_from_center = client_from_center.collect{|client| client.id}
-      client_ids_from_existing_loan_applications = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => center_cycle.id).aggregate(:client_id)
-      final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
-      @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
-      @errors << "Please select atleast one client " if selected.eql?(0)
-    end
-    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
-    render
-  end
-
-  # this lists the clients in the center that has been selected
-  def list
     # INITIALIZING VARIABLES USED THROUGHOUT
     @errors = []
 
@@ -75,12 +30,7 @@ class LoanApplications < Application
       begin
         center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
         if center_cycle_number > 0
-          center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
-          client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today)
-          client_ids_from_center = client_from_center.collect{|client| client.id}
-          client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
-          final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
-          @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
+          fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
         end
       rescue => ex
         @errors << "An error has occurred: #{ex.message}"
@@ -91,7 +41,58 @@ class LoanApplications < Application
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
 
     # RENDER/RE-DIRECT
-    render :bulk_new
+    render
+  end
+
+  # Bulk addition of clients to loan applications
+  def list
+    # INITIALIZATIONS & GATE-KEEPING
+    message = {}
+    @errors = []
+    selected = 0
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    by_staff = params[:staff_member_id]
+    created_on = params[:created_on]
+    center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
+    center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+    clients = params[:clients]
+
+    # VALIDATIONS
+    @errors << "No client is aligible to apply for New Loan Application" if clients.blank?
+    @errors << "Please select a Staff Member" if by_staff.blank?
+    @errors << "Please select a created on date" if created_on.blank?
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+
+    # OPERATIONS-PERFORMED
+    if @errors.blank?
+      client_ids = clients.keys
+      client_ids.each do |client_id|
+        begin
+          selected += 1 unless clients[client_id][:selected].blank?
+          loan_amount_str = clients[client_id][:amount]
+          loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
+          client = Client.get(client_id)
+          loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
+          loan_application.save if loan_application
+        rescue => ex
+          @errors << ex.message
+        end
+      end
+      center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
+      fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
+      @errors << "Please select atleast one client" if selected.eql?(0)
+    end
+
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
+    if @errors.blank?
+      message[:notice] = "Successfully added Existing Clients as New Loan Applicant"
+    else
+      message[:error] = @errors.flatten.join(', ')
+    end
+    redirect resource(:loan_applications, :bulk_new, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
   end
 
   # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
@@ -371,6 +372,15 @@ class LoanApplications < Application
     search_options.merge!(:at_center_id => @center.id) unless center_id.blank?
     @suspected_duplicates = loan_applications_facade.suspected_duplicate(search_options) unless branch_id.blank?
     @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center(search_options) unless branch_id.blank?
+  end
+
+  def fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
+    center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
+    client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today)
+    client_ids_from_center = client_from_center.collect{|client| client.id}
+    client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
+    final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
+    @clients = Client.all(:id => final_client_ids, :order => [:name.asc])
   end
 
 end

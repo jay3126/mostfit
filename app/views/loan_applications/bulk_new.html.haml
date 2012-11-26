@@ -14,7 +14,7 @@
         = error
         %br
           
-%form{:action => url(:controller => :loan_applications, :action => :list), :method => :get}
+%form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :get}
   = partial 'lib/biz_location_selector'
 
 %br

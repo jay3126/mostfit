@@ -13,7 +13,7 @@
       %h2
         = "Center Cycle Number #{center_cycle_number}"
       %h2 Add new loan applications
-      %form{:action => url(:controller => :loan_applications, :action => :bulk_new), :method => :post}
+      %form{:action => url(:controller => :loan_applications, :action => :list), :method => :post}
         %table.form{:style => "width:100%;"}
           %thead
             %tr
