@@ -36,7 +36,7 @@
             = link_to_with_class('Home', resource(:home))
             //= link_to_with_class('Loans', '#')
             = link_to_with_class('Configuration', url(:admin))
-            = link_to_with_class('Sourcing', url(:loan_applications))
+            = link_to_with_class('Sourcing', url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true' ))
             //= link_to_with_class('Collections', '#')
             = link_to_with_class('Accounting', resource(:book_keepings))
             //= link_to_with_class('Dashboard', url(:dashboard))
