@@ -174,12 +174,17 @@ class BizLocations < Application
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
       end
+      message.delete(:error)
+      redirect resource(:biz_locations), :message => message
+    else
+      valid_params = {}
+      params[:biz_location].keys.each do |k, v|
+        valid_params[k] = params[:biz_location][k] rescue nil unless params[:biz_location][k].blank?
+      end
+      message.delete(:notice)
+      redirect resource(:biz_locations, valid_params), :message => message
     end
 
-    #REDIRECT/RENDER
-    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
-    redirect resource(:biz_locations), :message => message
-  
   end
 
   def show

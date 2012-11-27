@@ -49,7 +49,7 @@
       %th
         Name
       %td
-        = text_field :name
+        = text_field :name, :value => params[:name]
     %tr
       %th.date{:style => 'display:none'}
         Default Disbursal Date
@@ -64,7 +64,7 @@
       %th
         Address
       %td
-        = text_area :biz_location_address, :rows => 6, :cols => 38
+        = text_area :biz_location_address, :rows => 6, :cols => 38, :value => params[:biz_location_address]
     %tr
       %th
         Originator By
@@ -100,6 +100,3 @@
           = text_field :name => "meeting[meeting_time_begins_minutes]", :size => 2, :maxlength => 2
           &nbsp;&nbsp;
           %span.greytext time is in a 24 hour format
-
-      
-
