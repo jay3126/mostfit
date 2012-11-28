@@ -108,7 +108,6 @@ class BizLocations < Application
     message = {:error => [], :notice => []}
 
     # GATE-KEEPING
-
     b_level            = params[:biz_location][:location_level]
     b_creation_date    = Date.parse(params[:biz_location][:creation_date])
     b_name             = params[:biz_location][:name]
@@ -174,7 +173,9 @@ class BizLocations < Application
       rescue => ex
         message = {:error => "An error has occured: #{ex.message}"}
       end
-      message.delete(:error)
+      if message[:error].blank?
+        message.delete(:error)
+      end
       redirect resource(:biz_locations), :message => message
     else
       valid_params = {}
