@@ -162,10 +162,16 @@ class Lending
     recorded_by_user = User.first.id
     upload_id = row[headers[:upload_id]]
 
+    #fields used for making single payment for loan.
+    pos = MoneyManager.get_money_instance(row[headers[:principal_outstanding]])
+    int_os = MoneyManager.get_money_instance(row[headers[:interest_outstanding]])
+    total_os = MoneyManager.get_money_instance(row[headers[:total_outstanding]])
+    as_on_date = Date.parse(row[headers[:as_on_date]])
+
     obj = create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, lending_product_id, loan_borrower_id, administered_at_origin,
       accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
       recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
-      disbursed_by_staff, upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
+      disbursed_by_staff, upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id, pos, int_os, total_os, as_on_date)
     [obj.save, obj]
   end
 
@@ -173,7 +179,7 @@ class Lending
   def self.create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, for_borrower, administered_at_origin,
       accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
       recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-      upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id)
+      upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id, pos, int_os, total_os, as_on_date)
 
     new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin,
       applied_by_staff, recorded_by_user)
@@ -207,6 +213,40 @@ class Lending
     payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
     payment_facade.record_payment(new_loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', new_loan.id, 'client', new_loan.loan_borrower.counterparty_id, new_loan.administered_at_origin, new_loan.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
 
+    #making the single payment to match the POS at the specified date.
+    default_currency = MoneyManager.get_default_currency
+    branch_id = new_loan.accounted_at_origin
+    center_id = new_loan.administered_at_origin
+    center = BizLocation.get(center_id)
+    performed_by_staff = User.first.staff_member
+    recorded_by_staff = User.first
+    client = new_loan.borrower
+    principal_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
+    interest_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
+    amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
+    money_amount_to_be_paid = amount_to_be_paid
+
+    receipt_type = Constants::Transaction::RECEIPT
+    effective_on = as_on_date
+    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+    product_action   = Constants::Transaction::LOAN_REPAYMENT
+    on_product_type = 'lending'
+    on_product_id = new_loan.id
+    by_counterparty_type = 'client'
+    by_counterparty_id = client.id
+    performed_at = center_id
+    accounted_at = branch_id
+    performed_by = performed_by_staff.id
+    recorded_by = recorded_by.id
+    receipt_no = new_loan.id
+
+    valid = new_loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
+    if valid == true
+      payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
+      payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
+                                               on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
+                                               performed_by, effective_on, product_action)
+    end
    
     new_loan
   end

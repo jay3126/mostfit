@@ -123,17 +123,23 @@ class Client
       client_group  = nil
     end
 
-    hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]],
-      :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]],
+    hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
+      :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]].tr('^A-Za-z0-9', ''),
       :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
       :date_joined => Date.parse(row[headers[:date_joined]]), :client_group => client_group,
       :center_id => BizLocation.first(:name => row[headers[:center]]).id, :guarantor_name => row[headers[:guarantor_name]],
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :upload_reference => row[headers[:upload_reference]]}
+      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]]}
 
     obj = create_client(hash, center.id, branch.id)
+
+    #if client obj is saved, then update the client with upload_reference.
+    if obj.saved?
+      obj.update(:upload_reference => obj.id)
+    end
+
     [obj.save!, obj]
   end
 
