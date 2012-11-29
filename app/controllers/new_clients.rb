@@ -62,7 +62,7 @@ class NewClients < Application
     occupation_id           = params[:client][:occupation_id]
     priority_sector_list_id = params[:client][:priority_sector_list_id]
     psl_sub_category_id     = params[:client][:psl_sub_category_id]
-    caste                   = params[:client][:caste]
+    caste                   = params[:client][:caste_id]
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
     classification          = params[:client][:town_classification]
@@ -80,8 +80,9 @@ class NewClients < Application
       :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
       :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
       :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
-      :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff, :town_classification => classification,
+      :psl_sub_category_id => psl_sub_category_id, :caste_id => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff, :town_classification => classification,
       :created_by_user_id => created_by}
+     
     @client = Client.new(fields)
 
     if @message[:error].blank?
@@ -117,7 +118,7 @@ class NewClients < Application
 
   def update
     # INITIALIZATION VARIABLES USED THROUGHTOUT
-
+ debugger
     @message = {}
     
     # GATE KEEPING
@@ -169,7 +170,7 @@ class NewClients < Application
       :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
       :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
       :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
-      :psl_sub_category_id => psl_sub_category_id, :caste => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff, :town_classification => classification,
+      :psl_sub_category_id => psl_sub_category_id, :caste_id => caste, :religion => religion, :picture => picture, :created_by_staff_member_id => created_by_staff, :town_classification => classification,
       :created_by_user_id => created_by}
     if @message[:error].blank?
       begin
