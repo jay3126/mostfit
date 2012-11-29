@@ -1,56 +1,55 @@
-- center = BizLocation.get(center_id)
-- center_created_at = center.creation_date
-- if (!(center_cycle.blank?) && center_cycle.is_open?)
-  %h2= "Center Cycle no: #{center_cycle.cycle_number}"
-- else
-  = form :action => url(:controller => :center_cycles, :action => :create) do
-    %p.menu-strip
-      = 'Start New Center Cycle'
-      = hidden_field :name => :center_id, :value => params[:id]
-      = date_select "initiated_date", Date.today, :max_date => Date.today, :id => "cycle_date", :min_date => center_created_at
-      = submit "Start"
-%hr
-- if center_cycle
-  %h1= "CGT"
-  - unless center_cycle.cgt_date_one == nil && center_cycle.cgt_date_two == nil && center_cycle.cgt_date_two == nil
-    %table.form
-      %tr
-        %th CGT Start Date:
-        %td
-          = center_cycle.cgt_date_one
-      %tr
-        %th CGT End Date:
-        %td
-          = center_cycle.cgt_date_two
-      %tr
-        %th CGT recorded by:
-        %td
-          = StaffMember.get(center_cycle.cgt_performed_by_staff).name
-      %tr
-        %th CGT recorded on:
-        %td
-          = center_cycle.cgt_recorded_at.display
+:javascript
+  $('table.center_cycle').dataTable({
+    "sScrollX": "100%",
+    "bPaginate": true,
+    "bJQueryUI": true,
+    "sDom": '<"H"Tfr>t<"F"ip>',
+    "oTableTools": {
+      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+    }
+  });
+- center_text = "text-align: center"
+- all_center_cycles = CenterCycle.all(:center_id => center_id)
+.shaded
+  %h2 Center Cycles
+  - unless all_center_cycles.blank?
+    %table.report.weeksheet.center_cycle
+      %thead
+        %tr
+          %th S.No.
+          %th Center Cycle No.
+          %th CGT Start Date
+          %th CGT End Date
+          %th CGT Recorded By
+          %th CGT Recorded On
+          %th GRT Status
+          %th GRT Completed On
+          %th GRT Completed By
+          %th GRT Recorded On
+      %tbody
+        - s_no = 1
+        - all_center_cycles.each do |center_cycle|
+          %tr
+            %td
+              = s_no
+              - s_no += 1
+            %td
+              = center_cycle.cycle_number
+            %td
+              = center_cycle.cgt_date_one.blank? ? "CGT Not Done" : center_cycle.cgt_date_one
+            %td
+              = center_cycle.cgt_date_two.blank? ? "CGT Not Done" : center_cycle.cgt_date_two
+            %td
+              = center_cycle.cgt_performed_by_staff.blank? ? "CGT Not Done" : StaffMember.get(center_cycle.cgt_performed_by_staff).name rescue nil
+            %td
+              = center_cycle.cgt_recorded_at.blank? ? "CGT Not Done" : center_cycle.cgt_recorded_at.display
+            %td
+              = center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE ? "CGT Not Done" : @center_cycle.grt_status.humanize
+            %td
+              = @center_cycle.grt_completed_on.blank? ? "GRT Not Done" : @center_cycle.grt_completed_on
+            %td
+              = @center_cycle.grt_completed_by_staff.blank? ? "GRT Not Done" : StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
+            %td
+              = @center_cycle.grt_recorded_at.blank? ? "GRT Not Done" : @center_cycle.grt_recorded_at.display
   - else
-    %h3= "CGT not done"
-
-  %h1= "GRT"
-  - unless center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE
-    %table.form
-      %tr
-        %th GRT status:
-        %td
-          = @center_cycle.grt_status.humanize
-      %tr
-        %th GRT completed on:
-        %td
-          = @center_cycle.grt_completed_on
-      %tr
-        %th GRT completed by:
-        %td
-          = StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
-      %tr
-        %th GRT recorded on:
-        %td
-          = @center_cycle.grt_recorded_at.display
-  - else
-    %h3= "GRT not done"
+    %h3 No center cycle
