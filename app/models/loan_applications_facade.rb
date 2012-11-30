@@ -107,7 +107,11 @@ class LoanApplicationsFacade < StandardFacade
 
   # Locate center cycle information
   def get_current_center_cycle_number(at_center_id)
-    CenterCycle.get_current_center_cycle(at_center_id)
+    CenterCycle.get_current_center_cycle_number(at_center_id)
+  end
+
+  def get_current_center_cycle(center_id)
+    CenterCycle.get_current_center_cycle(center_id)
   end
 
   def get_center_cycle(at_center_id, for_cycle_number)

@@ -84,9 +84,13 @@ class CenterCycle
   #  end
 
   # it returns current cycle number of center
-  def self.get_current_center_cycle(center_id)
+  def self.get_current_center_cycle_number(center_id)
     latest = last(:biz_location_id => center_id, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :closed_on => nil)
     latest.blank? ? 0 : latest.cycle_number
+  end
+
+  def self.get_current_center_cycle(center_id)
+    last(:biz_location_id => center_id, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :closed_on => nil)
   end
 
   def self.get_cycle(for_center, by_cycle_number)

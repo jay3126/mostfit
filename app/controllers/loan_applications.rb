@@ -31,9 +31,7 @@ class LoanApplications < Application
     if @errors.empty?
       begin
         center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
-        if center_cycle_number > 0
-          fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
-        end
+        fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number) if center_cycle_number > 0
       rescue => ex
         @errors << "An error has occurred: #{ex.message}"
       end
@@ -136,8 +134,7 @@ class LoanApplications < Application
     pincode = params[:loan_application][:client_pincode]
     created_by = params[:loan_application][:created_by_staff_id]
     created_on = params[:created_on]
-    center_cycle_number = params[:center_cycle_number].to_i
-    center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
+    center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
     loan_amount_str = params[:loan_application][:amount]
     
     # Match format of client reference1 and reference2, it should allow only alphanumeric value
