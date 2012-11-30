@@ -84,7 +84,7 @@ class BizLocation
 
         meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
         msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
-                                      meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
+          meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
         meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
         meeting_facade.setup_meeting_schedule(obj, msi, meeting_number)
       end
@@ -316,6 +316,18 @@ class BizLocation
       loan_product_amount << loan_product.loan_money_amount.to_regular_amount
     end
     loan_product_amount.compact.uniq
+  end
+
+  # While creating center, center cycle with cycle number 1 is automatically gets created but
+  # this association has been added at last, so this class method will create center cycle with cycle number 1 for existing centers
+  def self.update_center_cycle_for_existing_centers
+    all_centers = []
+    BizLocation.all.each do |biz_location|
+      all_centers << biz_location if biz_location.location_level.level == 0 && biz_location.center_cycles.blank?
+    end
+    all_centers.each do |center|
+      center.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => center.creation_date, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
+    end
   end
 
 end
