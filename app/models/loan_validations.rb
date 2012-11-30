@@ -32,10 +32,12 @@ module LoanValidations
   end
 
   def scheduled_disbursal_and_scheduled_first_repayment_dates_are_ordered?
-    if (scheduled_disbursal_date and scheduled_first_repayment_date)
-      return [false, "Scheduled disbursal date must precede scheduled first repayment date"] if (scheduled_disbursal_date >= scheduled_first_repayment_date)
+    if Mfi.first.system_state != :migration
+      if (scheduled_disbursal_date and scheduled_first_repayment_date)
+        return [false, "Scheduled disbursal date must precede scheduled first repayment date"] if (scheduled_disbursal_date >= scheduled_first_repayment_date)
+      end
+      true
     end
-    true
   end
     
 end
