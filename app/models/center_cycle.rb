@@ -41,6 +41,8 @@ class CenterCycle
   belongs_to :biz_location
   has n, :loan_applications
 
+  validates_with_method :cycle_number, :method => :check_previous_center_cycle_closed?
+
   #  validates_with_method :cycle_number, :method => :is_cycle_incremented?
   #  validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
 
@@ -131,6 +133,13 @@ class CenterCycle
     all_centers.each do |center|
       center.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => center.creation_date, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
     end
+  end
+
+  private
+
+  def check_previous_center_cycle_closed?
+    center_cycle_status = biz_location.center_cycles.all.aggregate(:status)
+    return center_cycle_status.include?("1") ? [false, "previous center cycle is not closed"] : true
   end
 
 end
