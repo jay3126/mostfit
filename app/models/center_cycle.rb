@@ -41,8 +41,8 @@ class CenterCycle
   belongs_to :biz_location
   has n, :loan_applications
 
-  validates_with_method :cycle_number, :method => :is_cycle_incremented?
-  validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
+  #  validates_with_method :cycle_number, :method => :is_cycle_incremented?
+  #  validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on
 
   def self.create_center_cycle(initiated_on, center_id, created_by)
     center_cycle_hash = {}
@@ -64,28 +64,27 @@ class CenterCycle
     save
   end
 
-  # The cycle number can only be incremented by one each time
-  def is_cycle_incremented?
-    latest_cycle_number = CenterCycle.get_current_center_cycle(self.biz_location_id)
-    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, latest_cycle_number)
-    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
-    return [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"] if ((self.cycle_number - latest_cycle_number) != 1)
-    return true
-  end
+  #  # The cycle number can only be incremented by one each time
+  #  def is_cycle_incremented?
+  #    latest_cycle_number = CenterCycle.get_current_center_cycle(self.biz_location_id)
+  #    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, latest_cycle_number)
+  #    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
+  #    return [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"] if ((self.cycle_number - latest_cycle_number) != 1)
+  #    return true
+  #  end
 
-  def initiated_on_should_be_later_than_the_last_closed_on
-    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, CenterCycle.get_current_center_cycle(self.biz_location_id))
-    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
-    return [false, "The previous center cycle has not been closed"] if (previous_center_cycle && previous_center_cycle.closed_on.nil?)
-    return [false, "The current center cycle cannot be initiated before the last center cycle was closed"] if (previous_center_cycle && (self.initiated_on < previous_center_cycle.closed_on))
-    return true
-  end
+  #  def initiated_on_should_be_later_than_the_last_closed_on
+  #    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, CenterCycle.get_current_center_cycle(self.biz_location_id))
+  #    return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
+  #    return [false, "The previous center cycle has not been closed"] if (previous_center_cycle && previous_center_cycle.closed_on.nil?)
+  #    return [false, "The current center cycle cannot be initiated before the last center cycle was closed"] if (previous_center_cycle && (self.initiated_on < previous_center_cycle.closed_on))
+  #    return true
+  #  end
 
-  # Returns the current center cycle number for a center
-  # Returns zero if there are no center cycles created for a center
+  # it returns current cycle number of center
   def self.get_current_center_cycle(center_id)
-    latest = first(:biz_location_id => center_id, :order => [:cycle_number.desc])
-    (latest and latest.cycle_number) ? latest.cycle_number : 0
+    latest = last(:biz_location_id => center_id, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :closed_on => nil)
+    latest.blank? ? 0 : latest.cycle_number
   end
 
   def self.get_cycle(for_center, by_cycle_number)
@@ -120,6 +119,18 @@ class CenterCycle
   def self.is_grt_marked?(center_id)
     center_cycle = CenterCycle.first(:biz_location_id => center_id, :cycle_number => 1)
     center_cycle.grt_status == Constants::CenterFormation::GRT_PASSED ? true : false
+  end
+
+  # While creating center, center cycle with cycle number 1 is automatically gets created but
+  # this association has been added at last, so this class method will create center cycle with cycle number 1 for existing centers
+  def self.update_center_cycle_for_existing_centers
+    all_centers = []
+    BizLocation.all.each do |biz_location|
+      all_centers << biz_location if biz_location.location_level.level == 0 && biz_location.center_cycles.blank?
+    end
+    all_centers.each do |center|
+      center.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => center.creation_date, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
+    end
   end
 
 end
