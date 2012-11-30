@@ -219,37 +219,40 @@ class Lending
 
     #making the single payment to match the POS at the specified date.
     default_currency = MoneyManager.get_default_currency
-    branch_id = new_loan.accounted_at_origin
-    center_id = new_loan.administered_at_origin
-    center = BizLocation.get(center_id)
-    performed_by_staff = User.first.staff_member
-    recorded_by_staff = User.first
-    client = new_loan.borrower
     principal_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
     interest_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-    amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
-    money_amount_to_be_paid = amount_to_be_paid
+    
+    #if POS is equal to applied amount, then no payments have to be made.
+    if (pos != principal_amount_from_loan_product) and (int_os != interest_amount_from_loan_product)
+      branch_id = new_loan.accounted_at_origin
+      center_id = new_loan.administered_at_origin
+      center = BizLocation.get(center_id)
+      performed_by_staff = User.first.staff_member
+      recorded_by_staff = User.first
+      client = new_loan.borrower
+      amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
+      money_amount_to_be_paid = amount_to_be_paid    
+      receipt_type = Constants::Transaction::RECEIPT
+      effective_on = as_on_date
+      payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+      product_action   = Constants::Transaction::LOAN_REPAYMENT
+      on_product_type = 'lending'
+      on_product_id = new_loan.id
+      by_counterparty_type = 'client'
+      by_counterparty_id = client.id
+      performed_at = center_id
+      accounted_at = branch_id
+      performed_by = performed_by_staff.id
+      recorded_by = recorded_by.id
+      receipt_no = new_loan.id
 
-    receipt_type = Constants::Transaction::RECEIPT
-    effective_on = as_on_date
-    payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
-    product_action   = Constants::Transaction::LOAN_REPAYMENT
-    on_product_type = 'lending'
-    on_product_id = new_loan.id
-    by_counterparty_type = 'client'
-    by_counterparty_id = client.id
-    performed_at = center_id
-    accounted_at = branch_id
-    performed_by = performed_by_staff.id
-    recorded_by = recorded_by.id
-    receipt_no = new_loan.id
-
-    valid = new_loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
-    if valid == true
-      payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
-      payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
-                                               on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
-                                               performed_by, effective_on, product_action)
+      valid = new_loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
+      if valid == true
+        payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
+        payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
+                                                on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
+                                                performed_by, effective_on, product_action)
+      end
     end
    
     new_loan
