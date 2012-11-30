@@ -8,8 +8,10 @@
       "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
     }
   });
+
 - center_text = "text-align: center"
-- all_center_cycles = CenterCycle.all(:center_id => center_id)
+- all_center_cycles = CenterCycle.all(:biz_location_id => center_id)
+
 .shaded
   %h2 Center Cycles
   - unless all_center_cycles.blank?
@@ -18,6 +20,7 @@
         %tr
           %th S.No.
           %th Center Cycle No.
+          %th Center Cycle Status
           %th CGT Start Date
           %th CGT End Date
           %th CGT Recorded By
@@ -35,6 +38,8 @@
               - s_no += 1
             %td
               = center_cycle.cycle_number
+            %td
+              = center_cycle.status.humanize rescue nil
             %td
               = center_cycle.cgt_date_one.blank? ? "CGT Not Done" : center_cycle.cgt_date_one
             %td

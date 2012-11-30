@@ -234,7 +234,7 @@ module Constants
 
     MEETINGS_SUPPORTED_AT = [ CENTER ]
 
-    OPEN_CENTER_CYCLE_STATUS = 'open_center_cycle_status'; CLOSED_CENTER_CYCLE_STATUS = 'closed_center_cycle_status'
+    OPEN_CENTER_CYCLE_STATUS = 'open'; CLOSED_CENTER_CYCLE_STATUS = 'closed'
     CENTER_CYCLE_STATUSES = [ OPEN_CENTER_CYCLE_STATUS, CLOSED_CENTER_CYCLE_STATUS ]
     
     def self.all_ancestors_for_type(location_type)
