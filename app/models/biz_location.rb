@@ -31,6 +31,7 @@ class BizLocation
   has n, :accounting_locations
   has n, :lending_product_locations
   has n, :lending_products, :through => :lending_product_locations
+  has n, :center_cycles
 
   validates_with_method :location_level_precedes_biz_location?
   validates_is_unique :name

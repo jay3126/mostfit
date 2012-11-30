@@ -150,7 +150,7 @@ class BizLocations < Application
           begin
             LocationLink.assign(biz_location, parent_location, b_creation_date) unless parent_location.blank?
             if b_level == "0"
-              location_facade.create_center_cycle(b_creation_date, biz_location.id)
+              biz_location.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => session.user.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => session.user.staff_member.id)
               unless b_meeting.blank?
                 msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
                 meeting_facade.setup_meeting_schedule(biz_location, msi, b_meeting_number)

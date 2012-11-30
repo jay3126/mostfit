@@ -11,8 +11,8 @@ class CenterCycle
   # and bumped up by one, each time a new cycle is begun at a center
   
   property :id,                    Serial
-  property :cycle_number,          Integer, :nullable => false, :min => 1, :default => lambda{ |obj, p| (CenterCycle.get_current_center_cycle(obj.center_id) + 1)}
-  property :center_id,             Integer, :nullable => false
+  property :cycle_number,          Integer, :nullable => false
+  property :biz_location_id,       Integer, :nullable => false
   property :initiated_by_staff_id, Integer, :nullable => false
   property :initiated_on,          Date, :nullable => false
   property :closed_by_staff_id,    Integer, :nullable => true
@@ -38,6 +38,7 @@ class CenterCycle
   property :created_at,            *CREATED_AT
   property :updated_at,            DateTime, :nullable => false, :default => DateTime.now
 
+  belongs_to :biz_location
   has n, :loan_applications
 
   validates_with_method :cycle_number, :method => :is_cycle_incremented?
@@ -49,7 +50,7 @@ class CenterCycle
     center_cycle_hash[:created_by] = created_by
     center_cycle_hash[:initiated_by_staff_id] = created_by
     center_cycle_hash[:created_at] = initiated_on
-    center_cycle_hash[:center_id] = center_id
+    center_cycle_hash[:biz_location_id] = center_id
     center_cycle = create(center_cycle_hash)
     raise Errors::DataError, center_cycle.errors.first.first unless center_cycle.saved?
   end
@@ -65,15 +66,15 @@ class CenterCycle
 
   # The cycle number can only be incremented by one each time
   def is_cycle_incremented?
-    latest_cycle_number = CenterCycle.get_current_center_cycle(self.center_id)
-    previous_center_cycle = CenterCycle.get_cycle(self.center_id, latest_cycle_number)
+    latest_cycle_number = CenterCycle.get_current_center_cycle(self.biz_location_id)
+    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, latest_cycle_number)
     return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
     return [false, "The center cycle can only be advanced to #{(latest_cycle_number + 1)}"] if ((self.cycle_number - latest_cycle_number) != 1)
     return true
   end
 
   def initiated_on_should_be_later_than_the_last_closed_on
-    previous_center_cycle = CenterCycle.get_cycle(self.center_id, CenterCycle.get_current_center_cycle(self.center_id))
+    previous_center_cycle = CenterCycle.get_cycle(self.biz_location_id, CenterCycle.get_current_center_cycle(self.biz_location_id))
     return true if (previous_center_cycle && (self.id == previous_center_cycle.id))
     return [false, "The previous center cycle has not been closed"] if (previous_center_cycle && previous_center_cycle.closed_on.nil?)
     return [false, "The current center cycle cannot be initiated before the last center cycle was closed"] if (previous_center_cycle && (self.initiated_on < previous_center_cycle.closed_on))
@@ -83,12 +84,12 @@ class CenterCycle
   # Returns the current center cycle number for a center
   # Returns zero if there are no center cycles created for a center
   def self.get_current_center_cycle(center_id)
-    latest = first(:center_id => center_id, :order => [:cycle_number.desc])
+    latest = first(:biz_location_id => center_id, :order => [:cycle_number.desc])
     (latest and latest.cycle_number) ? latest.cycle_number : 0
   end
 
   def self.get_cycle(for_center, by_cycle_number)
-    first(:center_id => for_center, :cycle_number => by_cycle_number, :order => [:cycle_number.desc])
+    first(:biz_location_id => for_center, :cycle_number => by_cycle_number, :order => [:cycle_number.desc])
   end
 
   # Encapsulates fetching the status of a center cycle
@@ -117,7 +118,7 @@ class CenterCycle
 
   # Return true if GRT passed fro particular center
   def self.is_grt_marked?(center_id)
-    center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
+    center_cycle = CenterCycle.first(:biz_location_id => center_id, :cycle_number => 1)
     center_cycle.grt_status == Constants::CenterFormation::GRT_PASSED ? true : false
   end
 
