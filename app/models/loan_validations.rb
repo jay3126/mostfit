@@ -6,6 +6,12 @@ module LoanValidations
     :dates_are_ordered?,
     :scheduled_disbursal_and_scheduled_first_repayment_dates_are_ordered?
   ]
+
+  DATE_VALIDATIONS_FOR_UPLOAD = [
+    :applied_date_scheduled_disbursal_date_and_scheduled_first_repayment_dates_are_all_supplied?,
+    :scheduled_disbursal_and_first_repayment_date_are_both_supplied?,
+    :dates_are_ordered?
+  ]
   
   def applied_date_scheduled_disbursal_date_and_scheduled_first_repayment_dates_are_all_supplied?
     return true if (applied_on_date and scheduled_disbursal_date and scheduled_first_repayment_date)
@@ -32,12 +38,10 @@ module LoanValidations
   end
 
   def scheduled_disbursal_and_scheduled_first_repayment_dates_are_ordered?
-    if Mfi.first.system_state != :migration
-      if (scheduled_disbursal_date and scheduled_first_repayment_date)
-        return [false, "Scheduled disbursal date must precede scheduled first repayment date"] if (scheduled_disbursal_date >= scheduled_first_repayment_date)
-      end
-      true
+    if (scheduled_disbursal_date and scheduled_first_repayment_date)
+       return [false, "Scheduled disbursal date must precede scheduled first repayment date"] if (scheduled_disbursal_date >= scheduled_first_repayment_date)
     end
+    true
   end
     
 end

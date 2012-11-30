@@ -96,8 +96,12 @@ class Lending
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
 
-  validates_with_method *DATE_VALIDATIONS #see app/models/loan_validations.rb
-
+  if Mfi.first.system_state == :migration
+    validates_with_method *DATE_VALIDATIONS_FOR_UPLOAD #see app/models/loan_validations.rb
+  else
+    validates_with_method *DATE_VALIDATIONS #see app/models/loan_validations.rb
+  end
+  
   def disbursal_date_value
     self.disbursal_date ? self.disbursal_date : self.scheduled_disbursal_date
   end
@@ -1024,6 +1028,7 @@ class Lending
   ###########################
 
   ###########
+  #
   # UPDATES # begins
   ###########
 
