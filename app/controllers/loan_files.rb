@@ -217,7 +217,7 @@ class LoanFiles < Application
   def fetch_loan_files_for_branch_and_center(params)
     @branch =location_facade.get_location(params[:parent_location_id].to_i)
     @center = location_facade.get_location(params[:child_location_id].to_i)
-    for_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
+    for_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center.id)
     @loan_files_at_center_at_branch_for_cycle = loan_applications_facade.locate_loan_files_at_center_at_branch_for_cycle(@branch.id, @center.id, for_cycle_number)
   end
 

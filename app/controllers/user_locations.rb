@@ -53,8 +53,7 @@ class UserLocations < Application
 
   def weeksheet_collection
     @biz_location        = BizLocation.get params[:id]
-    center_cycle_no      = CenterCycle.get_current_center_cycle params[:id]
-    @center_cycle        = CenterCycle.get_cycle(params[:id], center_cycle_no)
+    @center_cycle        = loan_applications_facade.get_current_center_cycle(params[:id])
     @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
     @date                = params[:date].blank? ? session[:effective_date] : Date.parse(params[:date])
     @meeting_schedule    = meeting_facade.get_meeting_schedules(@biz_location)

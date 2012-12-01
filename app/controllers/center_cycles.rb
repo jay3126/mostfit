@@ -26,8 +26,8 @@ class CenterCycles < Application
       @errors << "No center was selected" if @center.blank?
     end
     unless @center.blank?
-      @center_cycle_number = CenterCycle.get_current_center_cycle(@center.id)
-      @center_cycle = CenterCycle.first(:center_id => @center.id, :cycle_number => 1)
+      @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center.id)
+      @center_cycle = loan_applications_facade.get_current_center_cycle_number(@center.id)
     end
 
     render :mark_cgt_grt

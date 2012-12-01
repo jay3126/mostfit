@@ -311,7 +311,7 @@ class NewClients < Application
     @branch = BizLocation.get branch_id
     center_id = @loan_file.at_center_id
     @center = BizLocation.get center_id
-    @center_cycle_number = CenterCycle.get_current_center_cycle(center_id)
+    @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
 
     display @loan_file
   end
