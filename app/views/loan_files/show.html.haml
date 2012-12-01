@@ -1,4 +1,4 @@
-- center_cycle_number = CenterCycle.get_current_center_cycle(@loan_file.at_center_id)
+- center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@loan_file.at_center_id)
 - branch = BizLocation.get(@loan_file.at_branch_id)
 - center = BizLocation.get(@loan_file.at_center_id)
 %h1
