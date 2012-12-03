@@ -41,7 +41,7 @@ class CenterCycle
   belongs_to :biz_location
   has n, :loan_applications
 
-  validates_with_method :cycle_number, :method => :check_previous_center_cycle_closed?
+  #  validates_with_method :cycle_number, :method => :check_previous_center_cycle_closed?
 
   #  validates_with_method :cycle_number, :method => :is_cycle_incremented?
   #  validates_with_method :initiated_on, :method => :initiated_on_should_be_later_than_the_last_closed_on

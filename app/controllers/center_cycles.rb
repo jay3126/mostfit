@@ -27,7 +27,7 @@ class CenterCycles < Application
     end
     unless @center.blank?
       @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center.id)
-      @center_cycle = loan_applications_facade.get_current_center_cycle_number(@center.id)
+      @center_cycle = loan_applications_facade.get_current_center_cycle(@center.id)
     end
 
     render :mark_cgt_grt
@@ -48,10 +48,9 @@ class CenterCycles < Application
     cgt_performed_by_staff = params[:cgt_performed_by_staff]
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
-    @center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
+    @center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
 
     # VALIDATIONS
-
     unless @center_cycle.is_restarted
       # All three dates must be unique
       both_dates = [cgt_date_one_str, cgt_date_two_str]
@@ -94,7 +93,7 @@ class CenterCycles < Application
     grt_completed_on = Date.parse(grt_completed_on_str)
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
-    @center_cycle = CenterCycle.first(:center_id => center_id, :cycle_number => 1)
+    @center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
 
     # VALIDATIONS
     @errors << "GRT completed on date must not be future date" if grt_completed_on > Date.today
