@@ -186,7 +186,8 @@ class UserLocations < Application
 
   def child_locations
     @biz_location = BizLocation.get(params[:id])
-    @location_level = @biz_location.location_level
+    biz_location_level = @biz_location.location_level.level
+    @location_level = LocationLevel.first(:level => biz_location_level - 1)
     partial 'child_locations'
   end
 
