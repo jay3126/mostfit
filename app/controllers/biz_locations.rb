@@ -357,7 +357,7 @@ class BizLocations < Application
           end
           LocationManagement.assign_manager_to_location(staff, child_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
           if b_level == "0"
-            location_facade.create_center_cycle(b_creation_date, child_location.id)
+            child_location.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => session.user.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => session.user.staff_member.id)
             msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"
           else
             if b_level == '1'
