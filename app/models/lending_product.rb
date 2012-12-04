@@ -53,7 +53,7 @@ class LendingProduct
     preclosure_products = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]], :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
     obj = create_lending_product(name, loan_money_amount, interest_amount, interest_rate, repayment_frequency, tenure, allocation_strategy, principal_schedules, interest_schedules, staff_id, user_id, fee_products+preclosure_products, insurance_products, upload_id)
 
-    locations           = row[headers[:branches]].split(', ')
+    locations           = row[headers[:branches]].split(/,/)
     locations.each do |l|
       location_id = BizLocation.first(:name => l).id
       obj.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => Date.today,

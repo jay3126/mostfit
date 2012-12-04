@@ -8,6 +8,8 @@
     %thead
       %tr
         %td
+          Id
+        %td
           Name
         %td
           Branch
@@ -25,6 +27,8 @@
       - @lending_products.each do |lp|
         - locations = lp.get_assign_locations(get_effective_date)
         %tr
+          %td
+            = lp.id
           %td
             = link_to_with_rights lp.name, resource(lp)
           %td
