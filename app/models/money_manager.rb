@@ -5,7 +5,8 @@ class MoneyManager
   # defaulted from configuration
   def self.get_money_instance(*regular_amount_str)
     money_instances = regular_amount_str.collect { |amount_str|
-      raise "Amount is not a valid number" unless is_number?(amount_str)
+      # commented temp., need to refactor these methods bcs it is taking string also and converting it into 0 money amount 
+      #      raise "Amount is not a valid number" unless is_number?(amount_str)
       Money.parse(get_default_currency, get_default_locale, amount_str)
     }
     money_instances.length == 1 ? money_instances.first : money_instances
