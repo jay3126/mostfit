@@ -230,7 +230,7 @@ class BizLocation
       clients = repayments.map(&:by_counterparty_id).uniq.count
     end
     center_locations.each do |center|
-      center_cycle = CenterCycle.first(:center_id => center.id, :created_at.lte => on_date, :order => [:cycle_number.desc])
+      center_cycle = CenterCycle.first(:biz_location_id => center.id, :created_at.lte => on_date, :order => [:cycle_number.desc])
       unless center_cycle.blank?
         cgt1_members << center_cycle.loan_applications if center_cycle.cgt_date_one == on_date
         cgt2_members << center_cycle.loan_applications if center_cycle.cgt_date_two == on_date
