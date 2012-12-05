@@ -72,7 +72,16 @@ class NewTranches < Application
     if @errors.blank?
       @tranch = @funding_line.new_tranches.new({:amount => amount, :currency => currency, :interest_rate => interest_rate, :disbursal_date => disbursal_date,
           :first_payment_date => first_payment_date, :last_payment_date => last_payment_date, :assignment_type => assignment_type, :created_by => session.user.id})
-      if @tranch.save
+      if @tranch.save!
+        #used save! method to bypass an error which was disallowing it to save amounts in crores from front end but from backend it was working fine.
+        #added a custom code for making entry in audit_trail table for tracking history.
+        audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :create,
+            :changes => [{:created_by=>[nil, session.user.id]}, {:created_at=>[nil, @tranch.created_at]}, {:interest_rate=>[nil, interest_rate]},
+                        {:assignment_type=>[nil, assignment_type]}, {:disbursal_date=>[nil, disbursal_date]}, {:first_payment_date=>[nil, first_payment_date]},
+                        {:last_payment_date=>[nil, last_payment_date]}, {:currency=>[nil, currency]}, {:amount=>[nil, amount]}],
+            :created_at => DateTime.now, :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+        @audit_trail = AuditTrail.new(audit_params)
+        @audit_trail.save
         message[:notice] = "Tranch created successfully"
         redirect("/new_tranches/list/#{funding_line_id}", :message => {:notice => "Tranch successfully created"})
       else
@@ -121,11 +130,56 @@ class NewTranches < Application
       @errors << "Tranch amount must not be greater than funding line amount" if amount > @funding_line.amount
     end
     
+    #remembering the old values.
+    old_amount = @tranch.amount
+    old_interest_rate = @tranch.interest_rate
+    old_disbursal_date = @tranch.disbursal_date
+    old_first_payment_date = @tranch.first_payment_date
+    old_last_payment_date = @tranch.last_payment_date
+    old_assignment_type = @tranch.assignment_type
+    
     # OPERATIONS PERFORMED
     if @errors.blank?
       begin
-        @tranch.update_attributes({:amount => amount, :currency => currency, :interest_rate => interest_rate, :disbursal_date => disbursal_date,
-            :first_payment_date => first_payment_date, :last_payment_date => last_payment_date, :assignment_type => assignment_type, :created_by => session.user.id})
+        values = {:amount => amount, :currency => currency, :interest_rate => interest_rate, :disbursal_date => disbursal_date,
+            :first_payment_date => first_payment_date, :last_payment_date => last_payment_date, :assignment_type => assignment_type, :created_by => session.user.id}
+        @tranch.attributes = values
+        @tranch.save!
+        #a very dirty patch. needs to be refactored.
+        if (old_amount != amount)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:amount=>[old_amount, amount]}], :created_at => DateTime.now, :user_role => session.user.staff_member.designation.role_class, 
+              :user_id => session.user.id, :type => :log}
+          
+        elsif (old_interest_rate != interest_rate)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:interest_rate=>[old_interest_rate, interest_rate]}], :created_at => DateTime.now,
+              :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+          
+        elsif (old_disbursal_date != disbursal_date)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:disbursal_date=>[old_disbursal_date, disbursal_date]}], :created_at => DateTime.now,
+              :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+            
+        elsif (old_first_payment_date != first_payment_date)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:first_payment_date=>[old_first_payment_date, first_payment_date]}], :created_at => DateTime.now,
+              :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+            
+        elsif (old_last_payment_date != last_payment_date)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:last_payment_date=>[old_last_payment_date, last_payment_date]}], :created_at => DateTime.now,
+              :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+            
+        elsif (old_assignment_type != assignment_type)
+          audit_params = {:auditable_id => @tranch.id, :auditable_type => "NewTranch", :action => :update,
+              :changes => [{:assignment_type=>[old_assignment_type, assignment_type]}], :created_at => DateTime.now,
+              :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+            
+          
+        end
+        @audit_trail = AuditTrail.new(audit_params)
+        @audit_trail.save
       rescue => ex
         @errors << ex.message
       end
