@@ -55,7 +55,14 @@ class NewFundingLines < Application
         amount = @money.amount
         currency = @money.currency
         @funding_line = @funder.new_funding_lines.create({:amount => amount, :currency => currency, :new_funder_id => funder_id, :created_by => session.user.id, :sanction_date => sanction_date})
-        if @funding_line.valid?
+        if @funding_line.save!
+          #used save! method to bypass an error which was disallowing it to save amounts in crores from front end but from backend it was working fine.
+          #added a custom code for making entry in audit_trail table for tracking history.
+          audit_params = {:auditable_id => @funding_line.id, :auditable_type => "NewFundingLine", :action => :create,
+            :changes => [{:created_by=>[nil, session.user.id]}, {:created_at=>[nil, @funding_line.created_at]}, {:sanction_date=>[nil, sanction_date]}, {:new_funder_id=>[nil, funder_id]}, {:currency=>[nil, currency]}, {:amount=>[nil, amount]}],
+            :created_at => DateTime.now, :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+          @audit_trail = AuditTrail.new(audit_params)
+          @audit_trail.save
           message = {:notice => "Funding Line was successfully created"}
         else
           message = {:error => @funding_line.errors.first}
