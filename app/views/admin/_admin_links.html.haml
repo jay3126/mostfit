@@ -61,14 +61,14 @@
         %li
           = link_to_with_rights 'CheckLists', resource(:biz_locations,:location_checklists), :class => 'user icon'
         %li
-          = link_to_with_rights 'Surprise Center Visit', resource(:visit_schedules), :class => 'icon'
+          = link_to_with_rights 'Surprise Center Visit', resource(:visit_schedules), :class => 'icon holiday'
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links
       %li
         = link_to_with_rights 'Cheque Book and Cheque Leaves', resource(:cheque_books), :class => 'loan icon'
       %li
-        = link_to_with_rights 'Funders and funding lines', resource(:new_funders), :class => 'funder icon'
+        = link_to_with_rights 'Funders, Funding lines and Tranches', resource(:new_funders), :class => 'funder icon'
       %li
         = link_to_with_rights 'Third parties', resource(:third_parties), :class => 'funder icon'
       %li
@@ -128,9 +128,8 @@
         %li
           = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
 
-  - if Mfi.first.system_state == :migration
-    %div.clearfix
-      .admin-box
+      - if Mfi.first.system_state == :migration
+        %br
         %h2 Data Migration
         %ul.icon_links
           %li
