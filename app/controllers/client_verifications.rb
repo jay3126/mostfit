@@ -25,6 +25,11 @@ class ClientVerifications < Application
             verification_status = params['verification_status'][cpv_type][id]
             verified_on_date = params['verified_on_date'][cpv_type][id]
             client_verification = loan_applications_facade.find_cpv1_for_loan_application(id)
+            loan_application = LoanApplication.get id
+            authorized_on_date = loan_application.loan_authorization.performed_on
+            if client_verification.blank?
+              raise "Loan Application ID #{id} : Verified on date(#{verified_on_date}) must not before Loan application authorized date(#{authorized_on_date})" if Date.parse(verified_on_date) < authorized_on_date
+            end
             if verified_by_staff_id.empty?
               @errors[id] = "Loan Application ID #{id} : Staff ID must be provided for #{cpv_type}"
               next
