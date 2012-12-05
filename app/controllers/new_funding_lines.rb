@@ -87,13 +87,31 @@ class NewFundingLines < Application
   def update
     @funding_line = NewFundingLine.get(params[:id])
     raise NotFound unless @funding_line
+    old_amount = @funding_line.amount
+    old_sanction_date = @funding_line.sanction_date
     @funder = NewFunder.get(params[:new_funder_id])
     amount_str = params[:new_funding_line][:amount]
     @money = MoneyManager.get_money_instance(amount_str)
     amount = @money.amount
     currency = @money.currency
     sanction_date = params[:new_funding_line][:sanction_date]
-    if @funding_line.update_attributes({:amount => amount, :currency => currency, :new_funder_id => @funder.id, :created_by => session.user.id, :sanction_date => sanction_date})
+    values = {:amount => amount, :currency => currency, :new_funder_id => @funder.id, :created_by => session.user.id, :sanction_date => sanction_date}
+    @funding_line.attributes = values
+    if @funding_line.save!
+    #used save! method to bypass an error which was disallowing it to save amounts in crores from front end but from backend it was working fine.
+    #added a custom code for making entry in audit_trail table for tracking history.
+      if (old_amount != amount)
+        audit_params = {:auditable_id => @funding_line.id, :auditable_type => "NewFundingLine", :action => :update,
+            :changes => [{:amount=>[old_amount, amount]}],
+            :created_at => DateTime.now, :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+      elsif (old_sanction_date != sanction_date)
+        audit_params = {:auditable_id => @funding_line.id, :auditable_type => "NewFundingLine", :action => :update,
+            :changes => [{:sanction_date=>[old_sanction_date, sanction_date]}],
+            :created_at => DateTime.now, :user_role => session.user.staff_member.designation.role_class, :user_id => session.user.id, :type => :log}
+      end
+
+      @audit_trail = AuditTrail.new(audit_params)
+      @audit_trail.save
       redirect url("new_funders/#{@funder.id}"), :message => {:notice => "Funding Line details updated successfully"}
     else
       redirect url("new_funders/#{@funder.id}/new_funding_lines/#{@funding_line.id}/edit"), :message => {:error => "Details of Funding Line cannot be updated because: #{@funding_line.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
