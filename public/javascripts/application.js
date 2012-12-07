@@ -333,7 +333,8 @@ function attachFormRemote(){
       error: function(xhr, text, errorThrown){
         if(xhr.status=="302"){
           window.location.href = text;
-        }else{
+        }
+        else{
           $("div.error").remove();
           txt = "<div class='error'>"+xhr.responseText+"</div>";
           form.before(txt);
@@ -428,7 +429,8 @@ function attachReportingFormEvents(id){
       model=$("#reporting_form select#model_"+counter).val();
     }else if($("#reporting_form input#model_"+counter).length>0){
       model=$("#reporting_form input#model_"+counter).attr("value");
-    }else{
+    }
+    else{
       model=$("#reporting_form select#model_1").val();
     }
     $.ajax({
@@ -782,7 +784,8 @@ function portfolioCalculations(){
         var branch_val = parseInt($($(tr.nextAll("tr.branch_total")[0]).find("td b")[td_id]).html().replace(/\s|\,/g, '')) || 0;
         $($($(tr.nextAll("tr.branch_total")[0]).find("td")[td_id])).html("<b>" + (branch_val + td_val) + "</b>") || 0;
       });
-    }else{
+    }
+    else{
       //setting branch total
       [3, 4, 5, 6].forEach(function(td_id){
         if(td_id == 3){
@@ -923,7 +926,7 @@ function add_account_text_field(count){
 }
 
 $(document).ready(function(){
-  
+  b_popup();
   dataTables();
   create_remotes();
   attachFormRemote();
@@ -1527,5 +1530,16 @@ function fillPslSubCategoriesBulkClient(obj_id){
     success: function(data){
       $("#psl_sub_category_selector_"+obj_id).html(data)
     }
+  });
+}
+
+function b_popup() {
+  // Binding a click event
+  // From jQuery v.1.7.0 use .on() instead of .bind()
+  $('#my-button').bind('click', function(e) {
+    // Prevents the default action to be triggered.
+    e.preventDefault();
+    // Triggering bPopup when click event is fired
+    $('#element_to_pop_up').bPopup();
   });
 }

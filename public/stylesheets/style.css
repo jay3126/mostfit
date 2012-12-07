@@ -1658,3 +1658,13 @@ table.moreinfo thead th {
 table.form thead th {
   vertical-align: middle;
 }
+
+#element_to_pop_up {
+    background-color:#fff;
+    border-radius:15px;
+    color:#000;
+    display:none;
+    padding:20px;
+    min-width:400px;
+    min-height: 180px;
+}
