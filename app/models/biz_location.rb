@@ -67,8 +67,7 @@ class BizLocation
 
       if obj.location_level.level == 0
         #creating center cycle for center.
-        CenterCycle.create_center_cycle(creation_date, obj.id, User.first.id)
-
+        obj.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
         #creating meeting schedules and calendar for centers.
         meeting_frequency = row[headers[:meeting_frequency]].downcase
         if meeting_frequency == "daily"
