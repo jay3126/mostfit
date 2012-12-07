@@ -67,8 +67,7 @@ class BizLocation
 
       if obj.location_level.level == 0
         #creating center cycle for center.
-        location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
-        location_facade.create_center_cycle(creation_date, obj.id)
+        CenterCycle.create_center_cycle(creation_date, obj.id, User.first.id)
 
         #creating meeting schedules and calendar for centers.
         meeting_frequency = row[headers[:meeting_frequency]].downcase
@@ -85,8 +84,15 @@ class BizLocation
         meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
         msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
           meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
-        meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
-        meeting_facade.setup_meeting_schedule(obj, msi, meeting_number)
+
+        result = MeetingScheduleManager.create_meeting_schedule(obj, msi)
+        if result == true
+          meeting_schedule = obj.meeting_schedules.last
+          meeting_dates = meeting_schedule.get_no_of_meeting_dates_in_schedule(meeting_number)
+          meeting_dates.each do |date|
+            MeetingCalendar.setup_location_meeting_calendar(meeting_schedule, obj.id, date)
+          end
+        end
       end
 
       [true, obj]
