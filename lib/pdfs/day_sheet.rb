@@ -116,107 +116,108 @@ module Pdf
       file_names = {}
       date = date.class == Date ? date : Date.parse(date.to_s)
       time = Time.now
-      folder   = File.join(Merb.root, "doc", "pdfs", "company","due_sheets",date.to_s)
+      folder = File.join(Merb.root, "doc", "pdfs", "company","due_sheets",date.to_s)
       FileUtils.mkdir_p(folder)
-      idx = 0
-      all_branches = location_ids.blank? ? BizLocation.all('location_level.level' => 1) : BizLocation.all(:id => location_ids)
-      custom_date = CustomCalendar.first(:on_date => date)
+      all_branches    = location_ids.blank? ? BizLocation.all('location_level.level' => 1) : BizLocation.all(:id => location_ids)
+      custom_date     = CustomCalendar.first(:on_date => date)
       collection_date = custom_date.blank? ? date : custom_date.collection_date
       raise ArgumentError, "Branch cannot be blank" if all_branches.blank?
+      
       all_branches.each do |branch|
-        weeksheets = []
-        filename = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}.pdf")
-        pdf = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
-        pdf.select_font "Times-Roman"
-        pdf.info.title = "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}"
-        pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
-        pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
-        pdf.text("\n")
-
-        create_new_page = false
-        branch_centers = LocationLink.get_children(branch)
-        branch_centers.each{|center| weeksheets << CollectionsFacade.new(user_id).get_collection_sheet(center.id, date, true)}
-        weeksheets.each do |weeksheet|
-          unless weeksheet.blank?
-            location            = BizLocation.get weeksheet.at_biz_location_id
-            location_manage     = location_facade.location_managed_by_staff(location.id, date)
-            staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
-            meeting             = meeting_facade.get_meeting(location, date)
-            meeting_status      = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
-            table1              = PDF::SimpleTable.new
-            pdf.start_new_page if idx > 0
-            table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{branch.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{location.name}"},
-              {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
-              {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{location.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"},
-              {"col1"=>"<b>Meeting Start Time</b>", "col_s1"=>":", "col2"=>"", "col3"=>"<b>Meeting End Time</b>","col_s2"=>":", "col4"=>""},
-              {"col1"=>"<b>Unique Id</b>", "col_s1"=>":", "col2"=>pdf.info.title, "col3"=>"<b>Collection Date</b>","col_s2"=>":", "col4"=>collection_date}
-            ]
-
-            table1.column_order  = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
-            table1.show_lines    = :none
-            table1.shade_rows    = :none
-            table1.show_headings = false
-            table1.shade_headings = true
-            table1.orientation   = :center
-            table1.position      = :center
-            table1.heading_font_size = 16
-            table1.font_size         = 14
-            table1.header_gap = 20
-            table1.width = 830
-            table1.render_on(pdf)
+        idx = 0
+        center_locations = LocationLink.get_children_by_sql(branch, date)
+        unless center_locations.blank?
+          loan_schedules = LoanAdministration.get_loans_accounted_by_sql(branch.id, date, false, LoanLifeCycle::DISBURSED_LOAN_STATUS).loan_base_schedule.base_schedule_line_items(:on_date => date)
+          unless loan_schedules.blank?
+            filename       = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}.pdf")
+            pdf            = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
+            pdf.select_font "Times-Roman"
+            pdf.info.title = "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}"
+            pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
+            pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
             pdf.text("\n")
-            table      = PDF::SimpleTable.new
-            table.data = []
-            tot_amount = MoneyManager.default_zero_money
-            weeksheet.groups.each do |group|
-              collection_sheets = weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
-              loan_row_count=1
-              collection_sheets.each do |ws|
-                lending = Lending.get ws.loan_id
-                installment_due = ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
-                overdue_amt = lending.overdue_amount(date)
-                table.data.push({
-                    "S. No."          => loan_row_count,
-                    "Group"           => ws.borrower_group_name,
-                    "Customer Name"   => ws.borrower_name,
-                    "Loan LAN No."    => lending.lan,
-                    "POS"             => ws.loan_schedule_principal_outstanding,
-                    "Advance"         => ws.loan_advance_receipts,
-                    "Inst. Date"      => ws.loan_schedule_date,
-                    "Inst. No."       => ws.loan_installment_number,
-                    "OD"              => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
-                    "Inst. Due"       => installment_due.to_s,
-                    "Inst. Paid"      => '',
-                    "Attendance"      => ''
-                  })
-                loan_row_count += 1
-                tot_amount += ws.loan_schedule_principal_due+ws.loan_schedule_interest_due
+
+            center_locations.each do |center|
+              center_schedules = loan_schedules.select{|s| s.loan_base_schedule.lending.administered_at_origin == center.id}
+              unless center_schedules.blank?
+                location_manage     = location_facade.location_managed_by_staff(center.id, date)
+                staff_member_name   = location_manage.blank? ? 'No Managed' : location_manage.manager_staff_member.name
+                meeting             = meeting_facade.get_meeting(center, date)
+                meeting_status      = meeting.blank? ? 'No Meeting' : "#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+                table1              = PDF::SimpleTable.new
+                pdf.start_new_page if idx > 0
+                table1.data = [{"col1"=>"<b>Branch</b>", "col_s1"=>":", "col2"=>"#{branch.name}", "col3"=>"<b>Center</b>", "col_s2"=>":", "col4"=>"#{center.name}"},
+                  {"col1"=>"<b>R.O Name</b>", "col_s1"=>":", "col2"=>"#{staff_member_name}", "col3"=>"<b>Date</b>","col_s2"=>":", "col4"=>"#{date}"},
+                  {"col1"=>"<b>Meeting Address</b>", "col_s1"=>":", "col2"=>"#{center.biz_location_address}", "col3"=>"<b>Time</b>","col_s2"=>":", "col4"=>"#{meeting_status}"},
+                  {"col1"=>"<b>Meeting Start Time</b>", "col_s1"=>":", "col2"=>"", "col3"=>"<b>Meeting End Time</b>","col_s2"=>":", "col4"=>""},
+                  {"col1"=>"<b>Unique Id</b>", "col_s1"=>":", "col2"=>pdf.info.title, "col3"=>"<b>Collection Date</b>","col_s2"=>":", "col4"=>collection_date}
+                ]
+
+                table1.column_order      = ["col1", "col_s1","col2", "col3","col_s2", "col4"]
+                table1.show_lines        = :none
+                table1.shade_rows        = :none
+                table1.show_headings     = false
+                table1.shade_headings    = true
+                table1.orientation       = :center
+                table1.position          = :center
+                table1.heading_font_size = 16
+                table1.font_size         = 14
+                table1.header_gap        = 20
+                table1.width             = 830
+                table1.render_on(pdf)
+                pdf.text("\n")
+                table                    = PDF::SimpleTable.new
+                table.data               = []
+                loan_row_count           = 1
+                tot_amount               = MoneyManager.default_zero_money
+                center_schedules.each do |schedule|
+                  lending         = schedule.loan_base_schedule.lending
+                  installment_due = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
+                  overdue_amt     = lending.overdue_amount(date)
+                  client          = lending.borrower
+                  table.data.push({
+                      "S. No."          => loan_row_count,
+                      "Group"           => "#{client.client_group.blank? ? 'Not Specified' : client.client_group.name}",
+                      "Customer Name"   => client.name,
+                      "Loan LAN No."    => lending.lan,
+                      "POS"             => schedule.to_money[:scheduled_principal_outstanding],
+                      "Advance"         => lending.advance_balance(date),
+                      "Inst. Date"      => schedule.on_date,
+                      "Inst. No."       => schedule.installment,
+                      "OD"              => (overdue_amt.amount > 0 && !lending.schedule_date?(date)) && overdue_amt > installment_due ? (overdue_amt-installment_due).to_s : overdue_amt.to_s,
+                      "Inst. Due"       => installment_due.to_s,
+                      "Inst. Paid"      => '',
+                      "Attendance"      => ''
+                    })
+                  loan_row_count = loan_row_count + 1
+                  tot_amount     += installment_due
+                end
+                table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
+                table.column_order                     = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
+                table.show_lines                       = :all
+                table.show_headings                    = true
+                table.shade_rows                       = :none
+                table.shade_headings                   = true
+                table.orientation                      = :center
+                table.position                         = :center
+                table.heading_font_size                = 16
+                table.font_size                        = 12
+                table.header_gap                       = 10
+                table.maximum_width                    = 830
+                table.columns["Loan LAN No."]          = PDF::SimpleTable::Column.new("Loan LAN No.")
+                table.columns["Customer Name"]         = PDF::SimpleTable::Column.new("Customer Name")
+                table.columns["Installment No."]       = PDF::SimpleTable::Column.new("Installment No.")
+                table.columns["Loan LAN No."].width    = 210
+                table.columns["Installment No."].width = 50
+                table.columns["Customer Name"].width   = 120
+                table.render_on(pdf)
+                idx += 1
               end
             end
-            table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
-            table.column_order      = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
-            table.show_lines        = :all
-            table.show_headings     = true
-            table.shade_rows        = :none
-            table.shade_headings    = true
-            table.orientation       = :center
-            table.position          = :center
-            table.heading_font_size = 16
-            table.font_size         = 12
-            table.header_gap        = 10
-            table.maximum_width     = 830
-            table.columns["Loan LAN No."]        = PDF::SimpleTable::Column.new("Loan LAN No.")
-            table.columns["Customer Name"]        = PDF::SimpleTable::Column.new("Customer Name")
-            table.columns["Installment No."]     = PDF::SimpleTable::Column.new("Installment No.")
-            table.columns["Loan LAN No."].width  = 215
-            table.columns["Installment No."].width  = 50
-            table.columns["Customer Name"].width  = 120
-            table.render_on(pdf)
-            idx += 1
+            pdf.save_as(filename)
+            file_names[filename] = pdf
           end
         end
-        pdf.save_as(filename)
-        file_names[filename] = pdf
       end
       bundle_filename = "#{Merb.root}/doc/pdfs/company/due_sheets/#{date.to_s}/due_sheet_location_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.zip"
       Zip::ZipFile.open(bundle_filename, Zip::ZipFile::CREATE) {
