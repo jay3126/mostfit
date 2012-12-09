@@ -149,9 +149,9 @@ class Lending
     applied_money_amount = MoneyManager.get_money_instance(row[headers[:applied_amount]])
     approved_money_amount = MoneyManager.get_money_instance(row[headers[:approved_amount]])
     disbursed_money_amount = MoneyManager.get_money_instance(row[headers[:disbursed_amount]])
-    applied_amount = applied_money_amount
-    approved_amount = approved_money_amount
-    disbursed_amount = disbursed_money_amount
+    applied_amount = applied_money_amount.amount
+    approved_amount = approved_money_amount.amount
+    disbursed_amount = disbursed_money_amount.amount
     repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
     tenure = row[headers[:tenure]]
     applied_on_date = Date.parse(row[headers[:applied_on]])
@@ -171,31 +171,41 @@ class Lending
     int_os = MoneyManager.get_money_instance(row[headers[:interest_outstanding]])
     total_os = MoneyManager.get_money_instance(row[headers[:total_outstanding]])
     as_on_date = Date.parse(row[headers[:as_on_date]])
-
-    obj = create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, lending_product_id, loan_borrower_id, administered_at_origin,
-      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
-      disbursed_by_staff, upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id, pos, int_os, total_os, as_on_date)
-    [obj.save, obj]
-  end
-
-  # Creates a new loan from csv.
-  def self.create_new_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, for_borrower, administered_at_origin,
-      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-      upload_id, approved_amount, disbursed_amount, funding_line_id, tranch_id, pos, int_os, total_os, as_on_date)
-
-    new_loan_borrower = LoanBorrower.assign_loan_borrower(for_borrower, applied_on_date, administered_at_origin, accounted_at_origin,
-      applied_by_staff, recorded_by_user)
     
-    new_loan  = to_loan_from_csv(applied_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date, applied_by_staff,
-      recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff,
-      disbursed_by_staff, upload_id, approved_amount, disbursed_amount)
-    
-    total_interest_applicable = from_lending_product.total_interest_money_amount
+    #creating the loan_borrower entry.
+    new_loan_borrower = LoanBorrower.assign_loan_borrower(client, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
+
+    #creating new loan.
+    loan_hash                                  = { }
+    loan_hash[:applied_amount]                 = applied_money_amount.amount
+    loan_hash[:currency]                       = applied_money_amount.currency
+    loan_hash[:repayment_frequency]            = repayment_frequency
+    loan_hash[:tenure]                         = tenure
+    loan_hash[:lending_product]                = loan_product
+    loan_hash[:loan_borrower]                  = new_loan_borrower
+    loan_hash[:administered_at_origin]         = administered_at_origin
+    loan_hash[:accounted_at_origin]            = accounted_at_origin
+    loan_hash[:applied_on_date]                = applied_on_date
+    loan_hash[:scheduled_disbursal_date]       = scheduled_disbursal_date
+    loan_hash[:scheduled_first_repayment_date] = scheduled_first_repayment_date
+    loan_hash[:applied_by_staff]               = applied_by_staff
+    loan_hash[:recorded_by_user]               = recorded_by_user
+    loan_hash[:lan]                            = lan
+    loan_hash[:approved_on_date]               = approved_on_date
+    loan_hash[:disbursal_date]                 = disbursal_date
+    loan_hash[:approved_by_staff]              = approved_by_staff
+    loan_hash[:disbursed_by_staff]             = disbursed_by_staff
+    loan_hash[:upload_id]                      = upload_id
+    loan_hash[:approved_amount]                = approved_money_amount.amount
+    loan_hash[:disbursed_amount]               = disbursed_money_amount.amount
+    loan_hash[:repayment_allocation_strategy]  = loan_product.repayment_allocation_strategy
+    loan_hash[:status]                         = STATUS_NOT_SPECIFIED
+
+    new_loan = Lending.new(loan_hash)
+
+    total_interest_applicable = loan_product.total_interest_money_amount
     num_of_installments = tenure
-    principal_and_interest_amounts = from_lending_product.amortization
+    principal_and_interest_amounts = loan_product.amortization
 
     #setting the initial status of loan.
     new_loan.set_status(NEW_LOAN_STATUS, applied_on_date)
@@ -204,11 +214,9 @@ class Lending
     LoanBaseSchedule.create_base_schedule(applied_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
       repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
-    LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff,
-      recorded_by_user, applied_on_date)
+    LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
 
-    FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date,
-      recorded_by_user)
+    FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date, recorded_by_user)
 
     #approving the loan.
     new_loan.approve(approved_amount, approved_on_date, approved_by_staff)
@@ -221,7 +229,7 @@ class Lending
     default_currency = MoneyManager.get_default_currency
     principal_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
     interest_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-    
+
     #if POS is equal to applied amount, then no payments have to be made.
     if (pos != principal_amount_from_loan_product) and (int_os != interest_amount_from_loan_product)
       branch_id = new_loan.accounted_at_origin
@@ -231,7 +239,7 @@ class Lending
       recorded_by_staff = User.first
       client = new_loan.borrower
       amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
-      money_amount_to_be_paid = amount_to_be_paid    
+      money_amount_to_be_paid = amount_to_be_paid
       receipt_type = Constants::Transaction::RECEIPT
       effective_on = as_on_date
       payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
@@ -254,8 +262,6 @@ class Lending
                                                 performed_by, effective_on, product_action)
       end
     end
-   
-    new_loan
   end
 
   # Creates a new loan
@@ -1143,44 +1149,6 @@ class Lending
     loan_hash[:status]                         = STATUS_NOT_SPECIFIED
     loan_hash[:lan]                            = lan if lan
     loan_hash[:loan_purpose]                   = loan_purpose if loan_purpose
-    Lending.new(loan_hash)
-  end
-
-  def self.to_loan_from_csv(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-      applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-      upload_id, approved_amount, disbursed_amount)
-
-    Validators::Arguments.not_nil?(for_amount, repayment_frequency, tenure, from_lending_product, new_loan_borrower, administered_at_origin,
-      accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_repayment_date,
-      applied_by_staff, recorded_by_user, lan, approved_on_date, disbursal_date, approved_by_staff, disbursed_by_staff,
-      approved_amount, disbursed_amount)
-
-    loan_hash                                  = { }
-    loan_hash[:applied_amount]                 = for_amount.amount
-    loan_hash[:currency]                       = for_amount.currency
-    loan_hash[:repayment_frequency]            = repayment_frequency
-    loan_hash[:tenure]                         = tenure
-    loan_hash[:lending_product]                = from_lending_product
-    loan_hash[:loan_borrower]                  = new_loan_borrower
-    loan_hash[:administered_at_origin]         = administered_at_origin
-    loan_hash[:accounted_at_origin]            = accounted_at_origin
-    loan_hash[:applied_on_date]                = applied_on_date
-    loan_hash[:scheduled_disbursal_date]       = scheduled_disbursal_date
-    loan_hash[:scheduled_first_repayment_date] = scheduled_first_repayment_date
-    loan_hash[:applied_by_staff]               = applied_by_staff
-    loan_hash[:recorded_by_user]               = recorded_by_user
-    loan_hash[:lan]                            = lan
-    loan_hash[:approved_on_date]               = approved_on_date
-    loan_hash[:disbursal_date]                 = disbursal_date
-    loan_hash[:approved_by_staff]              = approved_by_staff
-    loan_hash[:disbursed_by_staff]             = disbursed_by_staff
-    loan_hash[:upload_id]                      = upload_id
-    loan_hash[:approved_amount]                = approved_amount.amount
-    loan_hash[:disbursed_amount]               = disbursed_amount.amount
-    loan_hash[:repayment_allocation_strategy]  = from_lending_product.repayment_allocation_strategy
-    loan_hash[:status]                         = STATUS_NOT_SPECIFIED
-
     Lending.new(loan_hash)
   end
 
