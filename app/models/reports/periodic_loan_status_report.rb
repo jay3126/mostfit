@@ -22,29 +22,15 @@ class PeriodicLoanStatusReport < Report
     "Periodic Loan Status Report"
   end
 
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
-  end
-
-  def get_location_facade(user)
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
-  end
-
-  def default_currency
-    @default_currency = MoneyManager.get_default_currency
-  end
-
   def generate
 
-    reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
+    reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, @user)
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    loans_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date)
+    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:id)
 
-    if !loans_with_disbursal_dates.blank?
-      loan_ids_with_disbursal_dates = loans_with_disbursal_dates.aggregate(:id)
+    if !loan_ids_with_disbursal_dates.blank?
       loan_ids_with_disbursal_dates.each do |l|
         loan = Lending.get(l)
         loan_id = loan ? loan.id : "Not Specified"
