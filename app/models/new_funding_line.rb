@@ -28,7 +28,7 @@ class NewFundingLine
     obj = new(:amount => money_amount.amount, :currency => money_amount.currency, :sanction_date => Date.parse(row[headers[:sanction_date]]),
               :new_funder_id => funder.id, :created_by => User.first.id, :reference => row[headers[:reference]],
               :upload_id => row[headers[:upload_id]])
-    [obj.save, obj]
+    [obj.save!, obj]
   end
 
 end

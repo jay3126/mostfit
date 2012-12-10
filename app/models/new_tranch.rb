@@ -44,7 +44,7 @@ class NewTranch
               :first_payment_date => Date.parse(row[headers[:first_payment_date]]),
               :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :assignment_type => row[headers[:assignment_type]],
               :created_by => User.first.id, :upload_id => row[headers[:upload_id]])
-    [obj.save, obj]
+    [obj.save!, obj]
   end
 
   private
