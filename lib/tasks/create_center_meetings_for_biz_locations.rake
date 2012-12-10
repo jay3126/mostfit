@@ -112,15 +112,31 @@ USAGE_TEXT
             biz_locations_ids_read << [biz_location.id]
               
             #creating meeting schedules and calendar for centers.
-            meeting_number = (Date.today - creation_date).to_i + Constants::Time::DEFAULT_FUTURE_MAX_DURATION_IN_DAYS
-            msi = MeetingScheduleInfo.new(meeting_frequency, center_disbursal_date, meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
-            meeting_facade = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, User.first)
-            center_meetings = meeting_facade.setup_meeting_schedule(biz_location, msi, meeting_number)
+            if meeting_frequency == "daily"
+              meeting_number = 900
+            elsif meeting_frequency == "weekly"
+              meeting_number = 180
+            elsif meeting_frequency == "biweekly"
+              meeting_number = 98
+            elsif meeting_frequency == "monthly"
+              meeting_number = 42
+            end
 
-            if center_meetings.count > 0
-              biz_locations_ids_updated << [biz_location.id, biz_location.name, "Meetings successsfully created."]
-            else
-              errors << [biz_location.id, biz_location.name, "Meetings cannot be created because: #{biz_location.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
+            msi = MeetingScheduleInfo.new(meeting_frequency, center_disbursal_date, meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
+            meetings = []
+            result = MeetingScheduleManager.create_meeting_schedule(biz_location, msi)
+            if result == true
+              meeting_schedule = biz_location.meeting_schedules.last
+              meeting_dates = meeting_schedule.get_no_of_meeting_dates_in_schedule(meeting_number)
+              meeting_dates.each do |date|
+                meetings << MeetingCalendar.setup_location_meeting_calendar(meeting_schedule, biz_location.id, date)
+              end
+
+              if meetings.count > 0
+                biz_locations_ids_updated << [biz_location.id, biz_location.name, "Meetings successsfully created."]
+              else
+                errors << [biz_location.id, biz_location.name, "Meetings cannot be created because: #{biz_location.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
+              end
             end
           end
 
