@@ -127,7 +127,8 @@ module Pdf
         idx = 0
         center_locations = LocationLink.get_children_by_sql(branch, date)
         unless center_locations.blank?
-          loan_schedules = LoanAdministration.get_loans_accounted_by_sql(branch.id, date, false, LoanLifeCycle::DISBURSED_LOAN_STATUS).loan_base_schedule.base_schedule_line_items(:on_date => date)
+          loans = LoanAdministration.get_loans_accounted_by_sql(branch.id, date, false, LoanLifeCycle::DISBURSED_LOAN_STATUS)
+          loan_schedules = loans.blank? ? [] : loans.loan_base_schedule.base_schedule_line_items(:on_date => date)
           unless loan_schedules.blank?
             filename       = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}.pdf")
             pdf            = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
@@ -219,6 +220,7 @@ module Pdf
           end
         end
       end
+      raise ArgumentError, "Loan schedule does not exist for this date" if file_names.blank?
       bundle_filename = "#{Merb.root}/doc/pdfs/company/due_sheets/#{date.to_s}/due_sheet_location_#{date.day}_#{date.month}_#{date.year}_#{time.strftime('%I:%M%p')}.zip"
       Zip::ZipFile.open(bundle_filename, Zip::ZipFile::CREATE) {
         |zipfile|
