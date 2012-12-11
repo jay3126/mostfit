@@ -576,7 +576,7 @@ class LoanApplication
       :sister_in_law   => "K11",
       :son_in_law      => "K12",
       :brother_in_law  => "K13",
-      :other           => "K14"
+      :other           => "K15"
     }
   end
 
