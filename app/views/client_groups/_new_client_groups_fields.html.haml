@@ -21,7 +21,7 @@
     %th
       Group Code:
     %td
-      = text_field :code, :size => 10
+      = text_field :code, :size => 2 , :maxlength => 2
       %br/
       %span.greytext a two letter unique code
   - if @client.new?
@@ -40,7 +40,7 @@
     %th
       Maximum clients:
     %td
-      = text_field :number_of_members, :size => 3
+      = text_field :number_of_members, :size => 2,  :maxlength => 2
       %br
         %span.greytext
           maximum clients allowed is 20

@@ -70,7 +70,6 @@ class Client
   belongs_to :upload, :nullable => true
 
   validates_with_method :is_there_space_in_the_client_group?
-
   has_attached_file :picture,
     :styles => {:medium => "300x300>", :thumb => "60x60#"},
     :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
@@ -86,6 +85,7 @@ class Client
     :url => "/uploads/:class/:id/:basename.:extension",
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
+  validates_length :pincode, :min => 6
   validates_length    :name, :min => 3
   validates_present   :date_joined
   validates_attachment_thumbnails :picture
@@ -96,10 +96,19 @@ class Client
     validates_is_unique :reference 
     validates_is_unique :reference2
     validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
+#    validates_with_method :pincode , :method => :pincode_length_check?
   end
 
   def created_on; self.date_joined; end
   def counterparty; self; end
+
+#  def pincode_length_check?
+#    if :pincode
+#      true
+#    else
+#      false
+#    end
+#  end
 
   def is_there_space_in_the_client_group?
     if (self.client_group and self.client_group.nil? and self.client_group.clients and self.new?)
