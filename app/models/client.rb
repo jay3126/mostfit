@@ -123,10 +123,19 @@ class Client
       client_group  = nil
     end
 
+    #if client's date joined is before center's creation date then client's creation date will be center's creation date.
+    client_date_joined = Date.parse(row[headers[:date_joined]])
+    if center.creation_date < client_date_joined
+      date_joined = client_date_joined
+    else
+      date_joined = center.creation_date
+    end
+    
+
     hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
       :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]].tr('^A-Za-z0-9', ''),
       :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
-      :date_joined => Date.parse(row[headers[:date_joined]]), :client_group => client_group,
+      :date_joined => date_joined, :client_group => client_group,
       :center_id => BizLocation.first(:name => row[headers[:center]]).id, :guarantor_name => row[headers[:guarantor_name]],
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
