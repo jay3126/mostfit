@@ -15,7 +15,7 @@ module OverlapReportInterpreter
       reason_for_rejection << "Member have second active MFI relation" if (reported_no_of_mfis > 1)
     end
 
-    # Member should not have Loan outstanding including our loan greater than 50,000
+    # Member should not have Loan outstanding including our loan greater than 50,000, including applied loan amount
     loan_amount_applied_for = self.applied_for_amount
     raise StandardError, "Unable to determine the loan amount applied for" unless loan_amount_applied_for
     total_outstanding_allowed = ConfigurationFacade.instance.regulation_total_oustanding_allowed
@@ -27,9 +27,19 @@ module OverlapReportInterpreter
 
     # Member should not have Overdue
     total_overdue_money = MoneyManager.get_money_instance(self.overdue_amount)
+    total_scheduled_amount = MoneyManager.get_money_instance(self.scheduled_amount)
+
     reported_total_overdue = self.respond_to?(:overdue_amount) ? total_overdue_money : nil
-    if reported_total_overdue
-      reason_for_rejection << "Member have Delinquent Accounts" if reported_total_overdue > MoneyManager.default_zero_money
+    reported_total_scheduled_amount = self.respond_to?(:scheduled_amount) ? total_scheduled_amount : nil
+    if reported_total_overdue || reported_total_scheduled_amount
+      unless reported_total_overdue == MoneyManager.default_zero_money
+        overdue_amount = (reported_total_overdue.amount)/100 
+        scheduled_amount = (total_scheduled_amount.amount)/100
+        five_percent_of_scheduled_amount = (scheduled_amount * 5)/100
+        if overdue_amount > 10 && overdue_amount > five_percent_of_scheduled_amount
+          reason_for_rejection << "Member have Overdues" 
+        end
+      end
     end
 
     reason_for_rejection.flatten.join(', ')

@@ -12,6 +12,7 @@ class OverlapReportResponse
   property :no_of_mfis,           Integer
   property :loan_application_id,  Integer
   property :not_matched,          Boolean, :nullable => false
+  property :scheduled_amount,     Integer, :default => 0
   property :response_text,        Text # Marshal.dump of response hash
 
   after :save, :update_loan_application_status
@@ -51,6 +52,10 @@ class OverlapReportResponse
       responses.each{|x| overdue_amount += x["LOAN_DETAILS"]["OVERDUE_AMT"].to_f.abs}
       self.overdue_amount = overdue_amount
 
+      # Check scheduled amount of member
+      scheduled_amount = 0
+      responses.each{|x| scheduled_amount += x["LOAN_DETAILS"]["INSTALLMENT_AMT"].to_f.abs}
+      self.scheduled_amount = scheduled_amount
     else
       self.not_matched = true
     end
