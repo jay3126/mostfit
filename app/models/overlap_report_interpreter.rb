@@ -33,9 +33,9 @@ module OverlapReportInterpreter
     reported_total_scheduled_amount = self.respond_to?(:scheduled_amount) ? total_scheduled_amount : nil
     if reported_total_overdue || reported_total_scheduled_amount
       unless reported_total_overdue == MoneyManager.default_zero_money
-        overdue_amount = (reported_total_overdue.amount)/100 
-        scheduled_amount = (total_scheduled_amount.amount)/100
-        five_percent_of_scheduled_amount = (scheduled_amount * 5)/100
+        overdue_amount = (reported_total_overdue.amount.to_f)/100
+        scheduled_amount = (total_scheduled_amount.amount.to_f)/100
+        five_percent_of_scheduled_amount = ((scheduled_amount * 5).to_f)/100
         if overdue_amount > 10 && overdue_amount > five_percent_of_scheduled_amount
           reason_for_rejection << "Member have Overdues" 
         end

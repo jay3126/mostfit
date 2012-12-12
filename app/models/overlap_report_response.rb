@@ -6,13 +6,13 @@ class OverlapReportResponse
   property :id,                   Serial
   property :created_at,           DateTime
   property :created_by_user_id,   Integer
-  property :total_outstanding,    Integer
-  property :overdue_amount,       Integer
+  property :total_outstanding,    Float
+  property :overdue_amount,       Float
   property :no_of_active_loans,   Integer
   property :no_of_mfis,           Integer
   property :loan_application_id,  Integer
   property :not_matched,          Boolean, :nullable => false
-  property :scheduled_amount,     Integer, :default => 0
+  property :scheduled_amount,     Float, :default => 0
   property :response_text,        Text # Marshal.dump of response hash
 
   after :save, :update_loan_application_status
