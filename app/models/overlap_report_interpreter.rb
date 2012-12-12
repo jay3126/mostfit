@@ -5,13 +5,14 @@ module OverlapReportInterpreter
 
     reason_for_rejection = []
 
-    # Member should not have more than 2 active loans
+    # Member should not have more than 2 active loans-removed this condition
+    # Now member can have any number of active loan but the total outstanding should not exceeds more than 50,000 Rs.
     # Member should not have relationship with other MFI
     total_loans_allowed = ConfigurationFacade.instance.regulation_total_loans_allowed
     reported_no_of_active_loans = self.respond_to?(:no_of_active_loans) ? self.no_of_active_loans : nil
     reported_no_of_mfis = self.respond_to?(:no_of_mfis) ? self.no_of_mfis : nil
     if reported_no_of_active_loans || reported_no_of_mfis
-      reason_for_rejection << "Member have second active MFI relation" if ((reported_no_of_active_loans + 1) > total_loans_allowed) || (reported_no_of_mfis > 1)
+      reason_for_rejection << "Member have second active MFI relation" if (reported_no_of_mfis > 1)
     end
 
     # Member should not have Loan outstanding including our loan greater than 50,000
