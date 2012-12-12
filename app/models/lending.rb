@@ -150,15 +150,27 @@ class Lending
     approved_money_amount = MoneyManager.get_money_instance(row[headers[:approved_amount]])
     disbursed_money_amount = MoneyManager.get_money_instance(row[headers[:disbursed_amount]])
     applied_amount = applied_money_amount.amount
+    currency = applied_money_amount.currency
     approved_amount = approved_money_amount.amount
     disbursed_amount = disbursed_money_amount.amount
     repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
     tenure = row[headers[:tenure]]
-    applied_on_date = Date.parse(row[headers[:applied_on]])
-    approved_on_date = Date.parse(row[headers[:approved_on]])
-    scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
-    scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
-    disbursal_date = Date.parse(row[headers[:disbursal_date]])
+
+    date_applied = Date.parse(row[headers[:applied_on]])
+    if client.date_joined < date_applied
+      applied_on_date = date_applied
+      approved_on_date = Date.parse(row[headers[:approved_on]])
+      scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
+      scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
+      disbursal_date = Date.parse(row[headers[:disbursal_date]])
+    else
+      applied_on_date = client.date_joined
+      approved_on_date = Date.parse(row[headers[:approved_on]])
+      scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
+      scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
+      disbursal_date = Date.parse(row[headers[:disbursal_date]])
+    end
+    
     applied_by_staff = StaffMember.first(:name => row[headers[:applied_by_staff]]).id
     approved_by_staff = StaffMember.first(:name => row[headers[:approved_by_staff]]).id
     disbursed_by_staff = StaffMember.first(:name => row[headers[:disbursed_by_staff]]).id
@@ -166,19 +178,13 @@ class Lending
     recorded_by_user = User.first.id
     upload_id = row[headers[:upload_id]]
 
-    #fields used for making single payment for loan.
-    pos = MoneyManager.get_money_instance(row[headers[:principal_outstanding]])
-    int_os = MoneyManager.get_money_instance(row[headers[:interest_outstanding]])
-    total_os = MoneyManager.get_money_instance(row[headers[:total_outstanding]])
-    as_on_date = Date.parse(row[headers[:as_on_date]])
-    
     #creating the loan_borrower entry.
     new_loan_borrower = LoanBorrower.assign_loan_borrower(client, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
 
     #creating new loan.
     loan_hash                                  = { }
-    loan_hash[:applied_amount]                 = applied_money_amount.amount
-    loan_hash[:currency]                       = applied_money_amount.currency
+    loan_hash[:applied_amount]                 = applied_amount
+    loan_hash[:currency]                       = currency
     loan_hash[:repayment_frequency]            = repayment_frequency
     loan_hash[:tenure]                         = tenure
     loan_hash[:lending_product]                = loan_product
@@ -206,62 +212,62 @@ class Lending
     total_interest_applicable = loan_product.total_interest_money_amount
     num_of_installments = tenure
     principal_and_interest_amounts = loan_product.amortization
-
+    
     #setting the initial status of loan.
     new_loan.set_status(NEW_LOAN_STATUS, applied_on_date)
 
     #making enteries in intermediatory models.
-    LoanBaseSchedule.create_base_schedule(applied_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
+    LoanBaseSchedule.create_base_schedule(applied_money_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
       repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
     LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
 
     FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date, recorded_by_user)
 
-    #approving the loan.
-    new_loan.approve(approved_amount, approved_on_date, approved_by_staff)
+#    #approving the loan.
+#    new_loan.approve(approved_amount, approved_on_date, approved_by_staff)
 
-    #making the disbursement entry.
-    payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
-    payment_facade.record_payment(new_loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', new_loan.id, 'client', new_loan.loan_borrower.counterparty_id, new_loan.administered_at_origin, new_loan.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
-
-    #making the single payment to match the POS at the specified date.
-    default_currency = MoneyManager.get_default_currency
-    principal_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
-    interest_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-
-    #if POS is equal to applied amount, then no payments have to be made.
-    if (pos != principal_amount_from_loan_product) and (int_os != interest_amount_from_loan_product)
-      branch_id = new_loan.accounted_at_origin
-      center_id = new_loan.administered_at_origin
-      center = BizLocation.get(center_id)
-      performed_by_staff = User.first.staff_member
-      recorded_by_staff = User.first
-      client = new_loan.borrower
-      amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
-      money_amount_to_be_paid = amount_to_be_paid
-      receipt_type = Constants::Transaction::RECEIPT
-      effective_on = as_on_date
-      payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
-      product_action   = Constants::Transaction::LOAN_REPAYMENT
-      on_product_type = 'lending'
-      on_product_id = new_loan.id
-      by_counterparty_type = 'client'
-      by_counterparty_id = client.id
-      performed_at = center_id
-      accounted_at = branch_id
-      performed_by = performed_by_staff.id
-      recorded_by = recorded_by.id
-      receipt_no = new_loan.id
-
-      valid = new_loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
-      if valid == true
-        payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
-        payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
-                                                on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
-                                                performed_by, effective_on, product_action)
-      end
-    end
+#    #making the disbursement entry.
+#    payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
+#    payment_facade.record_payment(new_loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending', new_loan.id, 'client', new_loan.loan_borrower.counterparty_id, new_loan.administered_at_origin, new_loan.accounted_at_origin, disbursed_by_staff, disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
+#
+#    #making the single payment to match the POS at the specified date.
+#    default_currency = MoneyManager.get_default_currency
+#    principal_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
+#    interest_amount_from_loan_product = Money.new(new_loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
+#
+#    #if POS is equal to applied amount, then no payments have to be made.
+#    if (pos != principal_amount_from_loan_product) and (int_os != interest_amount_from_loan_product)
+#      branch_id = new_loan.accounted_at_origin
+#      center_id = new_loan.administered_at_origin
+#      center = BizLocation.get(center_id)
+#      performed_by_staff = User.first.staff_member
+#      recorded_by_staff = User.first
+#      client = new_loan.borrower
+#      amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
+#      money_amount_to_be_paid = amount_to_be_paid
+#      receipt_type = Constants::Transaction::RECEIPT
+#      effective_on = as_on_date
+#      payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+#      product_action   = Constants::Transaction::LOAN_REPAYMENT
+#      on_product_type = 'lending'
+#      on_product_id = new_loan.id
+#      by_counterparty_type = 'client'
+#      by_counterparty_id = client.id
+#      performed_at = center_id
+#      accounted_at = branch_id
+#      performed_by = performed_by_staff.id
+#      recorded_by = recorded_by.id
+#      receipt_no = new_loan.id
+#
+#      valid = new_loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
+#      if valid == true
+#        payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
+#        payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
+#                                                on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
+#                                                performed_by, effective_on, product_action)
+#      end
+#    end
   end
 
   # Creates a new loan
