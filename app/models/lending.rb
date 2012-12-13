@@ -50,7 +50,9 @@ class Lending
 
   belongs_to :upload, :nullable => true
 
-  validates_with_method :check_working_business_holiday?
+  if Mfi.first.system_state != :migration
+    validates_with_method :check_working_business_holiday?
+  end
 
   def check_working_business_holiday?
     return_value = true
