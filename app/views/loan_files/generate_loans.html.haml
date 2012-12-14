@@ -22,7 +22,6 @@
         = error
         %br
 
-- staffmember = [session.user.staff_member]
 - has_default_tranch = is_default_tranch_set? && !get_default_tranch_id.blank?
 - if has_default_tranch
   - tranch_id = get_default_tranch_id
@@ -46,24 +45,24 @@
   .menu-strip{:style => "width:100%; text-align: left;"}
     %table
       %tr
-        %th Application date
+        %th Application Date
         %td
           = @loan_file.created_on
           = hidden_field :name => "loan[applied_on]", :value => @loan_file.created_on
       %tr
-        %th Scheduled disbursal date
+        %th Scheduled Disbursal Date
         %td
           - scheduled_disbursal_date_selected = params[:loan] && params[:loan][:scheduled_disbursal_date] ? params[:loan][:scheduled_disbursal_date] : @loan_file.scheduled_disbursal_date
           = date_select "loan[scheduled_disbursal_date]", scheduled_disbursal_date_selected, :id =>"scheduled_disbursal_date"
       %tr
-        %th Scheduled first payment date
+        %th Scheduled First Payment Date
         %td
           - scheduled_first_payment_date_selected = params[:loan] && params[:loan][:scheduled_first_payment_date] ? params[:loan][:scheduled_first_payment_date] : @loan_file.scheduled_first_payment_date
           = date_select "loan[scheduled_first_payment_date]", scheduled_first_payment_date_selected, :id =>"scheduled_first_payment_date"
-      %tr
-        %th Applied by
+        %th Applied By:
         %td
-          = select :name => "loan[applied_by_staff_id]", :collection => staffmember, :value_method => :id, :text_method => :name, :class => 'chosen'
+          = session.user.staff_member.name
+          = hidden_field :name => "loan[applied_by_staff_id]", :value => session.user.staff_member.id
 
   %h2 Choose clients
   %table.report.nojs
