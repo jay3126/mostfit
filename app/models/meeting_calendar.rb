@@ -203,7 +203,7 @@ class MeetingCalendar
 
   def self.predicates_for_location(location)
     location_type_string = location.location_level.name.downcase.to_sym
-    raise ArgumentError, "meetings are not supported at #{location_type_string}" unless Constants::Space::MEETINGS_SUPPORTED_AT.include?(location_type_string)
+    raise ArgumentError, "meetings are not supported at #{location_type_string}" unless location.location_level.level == 0
     {:location_id => location.id }
   end
 
