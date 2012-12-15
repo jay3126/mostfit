@@ -68,7 +68,9 @@ class SimpleInsurancePolicy
 
   def setup_insurance_premium_fee
     administered_at, accounted_at = self.administered_at_id, self.accounted_at_id
-    raise Errors::InvalidConfigurationError, "Locations that the client is registered at or administered at were not found" unless (administered_at and accounted_at)
+    if Mfi.first.system_state != :migration
+      raise Errors::InvalidConfigurationError, "Locations that the client is registered at or administered at were not found" unless (administered_at and accounted_at)
+    end
     proposed_on_date = self.proposed_on
     get_insurance_premium_fee_product.values.each { |premium|
       FeeInstance.register_fee_instance(premium, self, administered_at, accounted_at, proposed_on_date)
