@@ -25,7 +25,9 @@ class SimpleInsurancePolicy
   def created_on; self.proposed_on; end
   def counterparty; self.client; end
 
-  validates_with_method :policy_proposed_after_client_joined?
+  if Mfi.first.system_state != :migration
+    validates_with_method :policy_proposed_after_client_joined?
+  end
 
   def policy_proposed_after_client_joined?
     return true if (self.client and self.created_on and (self.created_on >= self.client.created_on))
