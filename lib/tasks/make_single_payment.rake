@@ -56,7 +56,7 @@ USAGE_TEXT
             default_currency = MoneyManager.get_default_currency
             pos = nil
             begin
-              pos = MoneyManager.get_money_instance(pos_str.to_i)
+              pos = MoneyManager.get_money_instance(pos_str)
             rescue => ex
               errors << [lan, pos_str, "pos not parsed"]
               next
@@ -64,7 +64,7 @@ USAGE_TEXT
 
             int_os = nil
             begin 
-              int_os = MoneyManager.get_money_instance(int_os_str.to_i)
+              int_os = MoneyManager.get_money_instance(int_os_str)
             rescue => ex
               errors << [lan, int_os_str, "int os not parsed"]
               next
@@ -72,7 +72,7 @@ USAGE_TEXT
             
             total_os = nil
             begin 
-              total_os = MoneyManager.get_money_instance(total_os_str.to_i)
+              total_os = MoneyManager.get_money_instance(total_os_str)
             rescue => ex
               errors << [lan, total_os_str, "total os not parsed"]
               next
