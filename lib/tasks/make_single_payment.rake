@@ -126,8 +126,8 @@ USAGE_TEXT
             performed_by = performed_by_staff.id
             recorded_by = recorded_by.id
             receipt_no = loan.id
-            approved_money_amount = MoneyManager.get_money_instance(loan.approved_amount)
-            approved_amount = approved_money_amount.amount
+            default_currency = MoneyManager.get_default_currency
+            approved_amount = Money.new(loan.approved_amount.to_i, default_currency)
 
             #approving the loan.
             loan.approve(approved_amount, loan.approved_on_date, loan.approved_by_staff)
@@ -139,7 +139,6 @@ USAGE_TEXT
               loan.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
 
             #making the single payment to match the POS at the specified date.
-            default_currency = MoneyManager.get_default_currency
             principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
             interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
 
