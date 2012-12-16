@@ -35,7 +35,9 @@ class SimpleInsurancePolicy
   end
 
   def self.setup_proposed_insurance(proposed_on_date, from_insurance_product, on_client, on_loan = nil)
-    Validators::Arguments.not_nil?(proposed_on_date, from_insurance_product, on_client)
+    if Mfi.first.system_state != :migration
+      Validators::Arguments.not_nil?(proposed_on_date, from_insurance_product, on_client)
+    end
     proposed_insurance = {}
     proposed_insurance[:insured_type]  = from_insurance_product.insured_type
     proposed_insurance[:insurance_for] = from_insurance_product.insurance_for
@@ -57,13 +59,23 @@ class SimpleInsurancePolicy
   end
 
   def administered_at_id
-    administered_at = ClientAdministration.get_administered_at(self.client, self.proposed_on)
-    administered_at ? administered_at.id : nil
+    if Mfi.first.system_state == :migration
+      administered_at = ClientAdministration.first(:counterparty_type => :client, :counterparty_id => self.client_id)
+      administered_at ? administered_at.administered_at : nil
+    else
+      administered_at = ClientAdministration.get_administered_at(self.client, self.proposed_on)
+      administered_at ? administered_at.id : nil
+    end
   end
 
   def accounted_at_id
-    accounted_at = ClientAdministration.get_registered_at(self.client, self.proposed_on)
-    accounted_at ? accounted_at.id : nil
+    if Mfi.first.system_state == :migration
+      accounted_at = ClientAdministration.first(:counterparty_type => :client, :counterparty_id => self.client_id)
+      accounted_at ? accounted_at.registered_at : nil
+    else
+      accounted_at = ClientAdministration.get_registered_at(self.client, self.proposed_on)
+      accounted_at ? accounted_at.id : nil
+    end
   end
 
   def setup_insurance_premium_fee

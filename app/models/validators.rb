@@ -4,10 +4,12 @@ module Validators
 
     # Validates that none of the arguments are nil
     def self.not_nil?(*args)
-      args.each_with_index { |argument, idx|
-        raise ArgumentError, "Argument at position #{idx + 1} is null" if argument.nil?
-      }
-      true
+      if Mfi.first.system_state != :migration
+        args.each_with_index { |argument, idx|
+          raise ArgumentError, "Argument at position #{idx + 1} is null" if argument.nil?
+        }
+        true
+      end
     end
 
     def self.is_id?(*args)
