@@ -83,8 +83,12 @@ class LoanDueStatus
     loan = Lending.get(for_loan_id)
     raise Errors::DataError, "Unable to locate the loan for ID: #{for_loan_id}" unless loan
 
-    location_map = LoanAdministration.get_locations(for_loan_id, on_date)
-    raise Errors::DataError, "Unable to determine loan locations" unless location_map
+    if Mfi.first.system_state == :migration
+      location_map = LoanAdministration.first(:loan_id => for_loan_id)
+    else
+      location_map = LoanAdministration.get_locations(for_loan_id, on_date)
+      raise Errors::DataError, "Unable to determine loan locations" unless location_map
+    end
 
     administered_at_id = location_map[ADMINISTERED_AT].id
     accounted_at_id    = location_map[ACCOUNTED_AT].id
