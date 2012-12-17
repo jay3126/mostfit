@@ -154,7 +154,10 @@ class LoanDueStatus
     scheduled_first_repayment_date = loan.scheduled_first_repayment_date
     return unless (loan.disbursal_date and (on_date >= scheduled_first_repayment_date))
 
-    (scheduled_first_repayment_date..on_date).each { |each_date|
+    status_dates = all(:lending_id => for_loan_id, :on_date => (scheduled_first_repayment_date..on_date)).aggregate(:on_date).uniq
+    remaining_dates = (scheduled_first_repayment_date..on_date).to_a - status_dates
+
+    remaining_dates.each { |each_date|
       most_recent_status_record_on_date(for_loan_id, each_date)
     }
   end

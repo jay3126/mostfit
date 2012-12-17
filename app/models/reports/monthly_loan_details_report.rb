@@ -47,10 +47,10 @@ class MonthlyLoanDetailsReport < Report
 
     data     = {}
     @loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id).to_a.paginate(:page => @page, :per_page => @limit)
+    loans = @loan_ids.blank? ? [] : Lending.all(:id => @loan_ids)
     data[:loan_ids] = @loan_ids
     data[:loans] = {}
-    @loan_ids.each do |l|
-      loan = Lending.get(l)
+    loans.each do |loan|
       member = loan.loan_borrower.counterparty
       if member.blank?
         member_id = member_state = member_address = reference1_type = reference2_type = reference1_id = reference2_id = caste = religion = 'Not Available'
@@ -120,7 +120,7 @@ class MonthlyLoanDetailsReport < Report
       installments_paid          = loan_tenure-installment_remaining
       overdue_installment        = ''
       overdue_amount             = overdue_principal + overdue_interest
-      days_overdue               = 0
+      days_overdue               = loan.days_past_due
       payment_scheme             = 'Not Specified'
       security_deposit           = 'Not Specified'
       land_holding               = 'Not Specified'
