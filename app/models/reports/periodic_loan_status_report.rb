@@ -1,6 +1,6 @@
 class PeriodicLoanStatusReport < Report
 
-  attr_accessor :from_date, :to_date, :funding_line_id
+  attr_accessor :from_date, :to_date, :funding_line_id, :page
 
   validates_with_method :funding_line_id, :funding_line_not_selected
 
@@ -11,6 +11,8 @@ class PeriodicLoanStatusReport < Report
     @user = user
     all_funding_line_ids = NewFundingLine.all.map{|fl| fl.id}
     @funding_line_id = (params and params[:funding_line_id] and (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
+    @page = params.blank? || params[:page].blank? ? 1 : params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -28,11 +30,12 @@ class PeriodicLoanStatusReport < Report
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:id)
+    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:loan_ids] = loan_ids_with_disbursal_dates
+    data[:loans] = {}
 
     if !loan_ids_with_disbursal_dates.blank?
-      loan_ids_with_disbursal_dates.each do |l|
-        loan = Lending.get(l)
+      loan_ids_with_disbursal_dates.each do |loan|
         loan_id = loan ? loan.id : "Not Specified"
         loan_amount = (loan and loan.applied_amount) ? MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s) : Money.default_money_amount(:INR)
         loan_status = loan.status.to_s.humanize
@@ -93,7 +96,7 @@ class PeriodicLoanStatusReport < Report
         number_of_days_interest_overdue = loan.days_past_dues_on_date(@from_date)
         current_interest_outstanding = loan.actual_interest_outstanding(@to_date)
 
-        data[loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_name => district_name,
+        data[:loans][loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_name => district_name,
           :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining,
           :principal_outstanding_beginning_of_week => principal_outstanding_beginning_of_week,
           :principal_due_during_week => principal_due_during_week, :principal_paid_during_week => principal_paid_during_week,

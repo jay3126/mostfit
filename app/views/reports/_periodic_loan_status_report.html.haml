@@ -1,5 +1,5 @@
 = partial :form
-- if @data.blank?
+- if @data[:loans].blank?
   %h2 No data to display
 - else
   %table.dataTable.report.weeksheet.nojs
@@ -53,7 +53,7 @@
     %tbody
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
       - @default_currency ||= MoneyManager.get_default_currency
-      - @data.sort_by{|loan| loan}.each do |loan, values|
+      - @data[:loans].sort_by{|loan| loan}.each do |loan, values|
         %tr
           %td
             = values[:loan_id]
@@ -148,3 +148,7 @@
         %td
         %td
           = total_rows[:current_interest_outstanding]
+%br
+.flickr_pagination
+  = will_paginate @data[:loan_ids], :container => false
+%br
