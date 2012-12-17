@@ -1,5 +1,5 @@
 class MonthlyLoanDetailsReport < Report
-  attr_accessor :from_date, :to_date, :funding_line_id
+  attr_accessor :from_date, :to_date, :funding_line_id, :page
 
   validates_with_method :funding_line_id, :funding_line_not_selected
 
@@ -8,6 +8,8 @@ class MonthlyLoanDetailsReport < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Monthly Loan Details Report from #{@from_date} to #{@to_date}"
     @user = user
+    @page = params.blank? || params[:page].blank? ? 1 : params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -44,8 +46,10 @@ class MonthlyLoanDetailsReport < Report
   def generate
 
     data     = {}
-    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    loan_ids.each do |l|
+    @loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:loan_ids] = @loan_ids
+    data[:loans] = {}
+    @loan_ids.each do |l|
       loan = Lending.get(l)
       member = loan.loan_borrower.counterparty
       if member.blank?
@@ -116,7 +120,7 @@ class MonthlyLoanDetailsReport < Report
       installments_paid          = loan_tenure-installment_remaining
       overdue_installment        = ''
       overdue_amount             = overdue_principal + overdue_interest
-      days_overdue               = loan.is_outstanding? ? loan.days_past_due : 0
+      days_overdue               = 0
       payment_scheme             = 'Not Specified'
       security_deposit           = 'Not Specified'
       land_holding               = 'Not Specified'
@@ -129,7 +133,7 @@ class MonthlyLoanDetailsReport < Report
       source_of_fund_id          = NewFundingLine.get(FundingLineAddition.first(:lending_id => loan.id).funding_line_id).name
       meeting_address            = center.biz_location_address
 
-      data[loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
+      data[:loans][loan.id] = {:member_name => member_name, :member_id => member_id,:member_address => member_address, :member_state => member_state,
         :guarantor_name => guarantor_name, :occupation => occupation, :gender => gender, :pincode => pincode, :psl_category => psl_category,
         :village_slum => village_slum, :city => city, :district => district, :loan_product_name => loan_product_name, :tenor_in_week => tenor_in_week,
         :center_name => center_name, :center_id => center_id, :loan_account_number => loan_account_number, :phone_number => phone_number,

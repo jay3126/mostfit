@@ -32,7 +32,7 @@ class Reports < Application
     @report = Report.get(id) if id
     class_key  =  klass.to_s.snake_case.to_sym
     dates = get_dates(class_key)
-
+    params[class_key].merge!(:page => params[:page]) unless params[:page].blank?
     if @report
       display @report
     elsif Reports::Types.values.flatten.include?(klass) and not klass==WeeklyReport and not klass==DuplicateClientsReport and not klass==IncentiveReport

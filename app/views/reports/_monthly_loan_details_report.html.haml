@@ -13,7 +13,7 @@
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
-    - @data.each do |branch, values|
+    - @data[:loans].each do |branch, values|
       %tr
         %td
           %b
@@ -117,10 +117,7 @@
         = total_rows[:overdue_interest]
       -(1..7).each do |k|
         %td
-#header_values
-  - count = 1
-  =# check_box :name => 'header_all', :checked => true, :onclick => "check_all_box(this,'advance');"
-  - header.each do |value|
-    = value
-    = check_box :name => 'header', :value => "#{value}", :class => 'report_check_box', :checked => true, :onclick => "toggle_table_row(this,'monthly_loan', '#{count}');"
-    - count += 1
+%br
+.flickr_pagination
+  = will_paginate @data[:loan_ids], :container => false
+%br
