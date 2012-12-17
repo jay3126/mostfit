@@ -101,43 +101,29 @@ USAGE_TEXT
               next
             end
             loan_ids_read << [loan.id]
-            
-            branch_id = loan.accounted_at_origin
-            center_id = loan.administered_at_origin
-            center = BizLocation.get(center_id)
-            performed_by_staff = User.first.staff_member
-            recorded_by_staff = User.first
-            client = loan.borrower
-            principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
-            interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-            amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
-            money_amount_to_be_paid = amount_to_be_paid
 
-            receipt_type = Constants::Transaction::RECEIPT
-            effective_on = as_on_date
-            payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
-            product_action   = Constants::Transaction::LOAN_REPAYMENT
-            on_product_type = 'lending'
-            on_product_id = loan.id
-            by_counterparty_type = 'client'
-            by_counterparty_id = client.id
-            performed_at = center_id
-            accounted_at = branch_id
-            performed_by = performed_by_staff.id
-            recorded_by = recorded_by.id
-            receipt_no = loan.id
             default_currency = MoneyManager.get_default_currency
-            approved_amount = Money.new(loan.approved_amount.to_i, default_currency)
 
             #approving the loan.
-            loan.approve(approved_amount, loan.approved_on_date, loan.approved_by_staff)
+            new_loan_status = LoanLifeCycle::APPROVED_LOAN_STATUS
+            current_status = loan.status
+            loan.status = new_loan_status
+            loan.save       #saving the loan with its new status.
+
+            #making the entry in loan_status_change model.
+            LoanStatusChange.record_status_change(loan, current_status, new_loan_status, loan.approved_on_date)
+            loan.setup_on_approval
 
             #making the disbursement entry.
-            payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
-            payment_facade.record_payment(loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
+            accounting_facade = FacadeFactory.instance.get_instance(FacadeFactory::ACCOUNTING_FACADE, User.first)
+
+            payment_transaction = PaymentTransaction.record_payment(loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
               loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
               loan.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
 
+            payment_allocation = loan.allocate_payment(payment_transaction, Constants::Transaction::LOAN_DISBURSEMENT, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
+            accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
+            
             #making the single payment to match the POS at the specified date.
             principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
             interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
@@ -150,6 +136,8 @@ USAGE_TEXT
               performed_by_staff = User.first.staff_member
               recorded_by_staff = User.first
               client = loan.borrower
+              principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
+              interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
               amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
               money_amount_to_be_paid = amount_to_be_paid
               receipt_type = Constants::Transaction::RECEIPT
@@ -168,10 +156,13 @@ USAGE_TEXT
 
               valid = loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
               if valid == true
-                payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
-                payments = payment_facade.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
+                payment_transaction = PaymentTransaction.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
                                                         on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
                                                         performed_by, effective_on, product_action)
+
+                payment_allocation = loan.allocate_payment(payment_transaction, product_action, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
+                accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
+                
                 loan_ids_updated << [loan.id, loan.lan, client.id, "Payment successfully made"]
               else
                 errors << [loan.id, loan.lan, "Payment cannot be saved because: #{valid.last}"]
