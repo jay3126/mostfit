@@ -1,5 +1,5 @@
 = partial :form
-- if @data[:loans].blank?
+- if @data.blank? || @data[:loans].blank?
   %h2 No data to display
 - else
   %table.dataTable.report.weeksheet.nojs
@@ -148,7 +148,7 @@
         %td
         %td
           = total_rows[:current_interest_outstanding]
-%br
-.flickr_pagination
-  = will_paginate @data[:loan_ids], :container => false
-%br
+  %br
+  .flickr_pagination
+    = will_paginate @data[:loan_ids], :container => false
+  %br
