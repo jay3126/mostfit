@@ -117,11 +117,13 @@ USAGE_TEXT
             #making the disbursement entry.
             accounting_facade = FacadeFactory.instance.get_instance(FacadeFactory::ACCOUNTING_FACADE, User.first)
 
-            payment_transaction = PaymentTransaction.record_payment(loan.to_money[:disbursed_amount], 'payment', Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
+            payment_transaction = PaymentTransaction.record_payment(loan.to_money[:disbursed_amount], 'payment',
+              Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
               loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
               loan.disbursal_date, Constants::Transaction::LOAN_DISBURSEMENT)
 
-            payment_allocation = loan.allocate_payment(payment_transaction, Constants::Transaction::LOAN_DISBURSEMENT, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
+            payment_allocation = loan.allocate_payment(payment_transaction, Constants::Transaction::LOAN_DISBURSEMENT, make_specific_allocation = nil,
+              specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
             accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
             
             #making the single payment to match the POS at the specified date.
@@ -154,18 +156,16 @@ USAGE_TEXT
               recorded_by = recorded_by.id
               receipt_no = loan.id
 
-              valid = loan.is_payment_transaction_permitted?(money_amount_to_be_paid, effective_on, performed_by, recorded_by)
-              if valid == true
-                payment_transaction = PaymentTransaction.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
+              payment_transaction = PaymentTransaction.record_payment(money_amount_to_be_paid, receipt_type, payment_towards, receipt_no, on_product_type,
                                                         on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at,
                                                         performed_by, effective_on, product_action)
-
+              if payment_transaction.saved?
                 payment_allocation = loan.allocate_payment(payment_transaction, product_action, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
                 accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
                 
                 loan_ids_updated << [loan.id, loan.lan, client.id, "Payment successfully made"]
               else
-                errors << [loan.id, loan.lan, "Payment cannot be saved because: #{valid.last}"]
+                errors << [loan.id, loan.lan, "Payment cannot be saved because: #{payment_transaction.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
               end
             end
           end
