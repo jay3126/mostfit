@@ -5,8 +5,8 @@ class LoanStatusReport < Report
   validates_with_method :funding_line_id, :funding_line_not_selected
 
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
+    @from_date = (dates && dates[:from_date]) ? dates[:from_date] : Date.today - 7
+    @to_date   = (dates && dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Loan Status Report from #{@from_date} to #{@to_date}"
     @user = user
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
@@ -45,14 +45,14 @@ class LoanStatusReport < Report
       client_id = client ? client.id : "Not Specified"
       client_name = client ? client.name : "Not Specified"
       loan_id = loan ? loan.id : "Not Specified"
-      loan_lan = (loan and loan.lan) ? loan.lan : "Not Specified"
+      loan_lan = (loan && loan.lan) ? loan.lan : "Not Specified"
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_name = branch ? branch.name : "Not Specified"
       branch_id = branch ? branch.id : "Not Specified"
       location = LocationLink.all_parents(branch, @to_date)
       district = location.select{|s| s.location_level.name.downcase == 'district'}.first
-      district_name = (district and (not district.blank?)) ? district.name : "Not Specified"
-      district_id = (district and (not district.blank?)) ? district.id : "Not Specified"
+      district_name = (district && (not district.blank?)) ? district.name : "Not Specified"
+      district_id = (district && (not district.blank?)) ? district.id : "Not Specified"
       no_of_installments_remaining = reporting_facade.number_of_installments_per_loan(loan.id)
       principal_outstanding_beginning_of_week = loan.scheduled_principal_outstanding(@from_date)
 
@@ -74,7 +74,6 @@ class LoanStatusReport < Report
         principal_overdue = loan.actual_principal_outstanding(@to_date) - loan.scheduled_principal_outstanding(@to_date)
       end
 
-      number_of_days_principal_overdue = loan.days_past_dues_on_date(@from_date)
       current_principal_outstanding = loan.actual_principal_outstanding
       interest_outstanding_beginning_of_week = loan.scheduled_interest_outstanding(@from_date)
 
@@ -96,16 +95,16 @@ class LoanStatusReport < Report
         interest_overdue = loan.actual_interest_outstanding(@to_date) - loan.scheduled_interest_outstanding(@to_date)
       end
 
-      number_of_days_interest_overdue = loan.days_past_dues_on_date(@from_date)
+      number_of_days_overdue = loan.days_past_dues_on_date(@from_date)
       current_interest_outstanding = loan.actual_interest_outstanding
 
-      data[:loans][loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_id => district_id, :district_name => district_name, :branch_id => branch_id, :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining, :principal_outstanding_beginning_of_week => principal_outstanding_beginning_of_week, :principal_due_during_week => principal_due_during_week, :principal_paid_during_week => principal_paid_during_week, :principal_overdue => principal_overdue, :number_of_days_principal_overdue => number_of_days_principal_overdue, :current_principal_outstanding => current_principal_outstanding, :interest_outstanding_beginning_of_week => interest_outstanding_beginning_of_week, :interest_due_during_week => interest_due_during_week, :interest_paid_during_week => interest_paid_during_week, :interest_overdue => interest_overdue, :number_of_days_interest_overdue => number_of_days_interest_overdue, :current_interest_outstanding => current_interest_outstanding, :loan_lan => loan_lan}
+      data[:loans][loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_id => district_id, :district_name => district_name, :branch_id => branch_id, :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining, :principal_outstanding_beginning_of_week => principal_outstanding_beginning_of_week, :principal_due_during_week => principal_due_during_week, :principal_paid_during_week => principal_paid_during_week, :principal_overdue => principal_overdue, :number_of_days_principal_overdue => number_of_days_overdue, :current_principal_outstanding => current_principal_outstanding, :interest_outstanding_beginning_of_week => interest_outstanding_beginning_of_week, :interest_due_during_week => interest_due_during_week, :interest_paid_during_week => interest_paid_during_week, :interest_overdue => interest_overdue, :number_of_days_interest_overdue => number_of_days_overdue, :current_interest_outstanding => current_interest_outstanding, :loan_lan => loan_lan}
     end
     data
   end
 
   def funding_line_not_selected
-    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
+    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) && !self.funding_line_id
     return true
   end
 end
