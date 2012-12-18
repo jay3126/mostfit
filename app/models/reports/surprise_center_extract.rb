@@ -53,10 +53,10 @@ class SurpriseCenterExtract < Report
     location_facade  = get_location_facade(@user)
     meeting_facade = get_meeting_facade(@user)
 
-    if @biz_location_branch.class == Fixnum
-      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @date)
-    else
+    if @biz_location_branch.class == Array
       all_centers = location_facade.all_nominal_centers
+    else
+      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @date)
     end
 
     all_centers.each do |center|
