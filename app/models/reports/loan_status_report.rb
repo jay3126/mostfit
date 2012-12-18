@@ -51,8 +51,8 @@ class LoanStatusReport < Report
       branch_id = branch ? branch.id : "Not Specified"
       location = LocationLink.all_parents(branch, @to_date)
       district = location.select{|s| s.location_level.name.downcase == 'district'}.first
-      district_name = (district && (not district.blank?)) ? district.name : "Not Specified"
-      district_id = (district && (not district.blank?)) ? district.id : "Not Specified"
+      district_name = (district && (!district.blank?)) ? district.name : "Not Specified"
+      district_id = (district && (!district.blank?)) ? district.id : "Not Specified"
       no_of_installments_remaining = reporting_facade.number_of_installments_per_loan(loan.id)
       principal_outstanding_beginning_of_week = loan.scheduled_principal_outstanding(@from_date)
 

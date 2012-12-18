@@ -1,6 +1,6 @@
 class SurpriseCenterExtract < Report
 
-  attr_accessor :date, :biz_location_branch_id
+  attr_accessor :date, :biz_location_branch_id, :page
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -9,6 +9,8 @@ class SurpriseCenterExtract < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -18,10 +20,6 @@ class SurpriseCenterExtract < Report
 
   def self.name
     "Surprise Center Extract"
-  end
-
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
   end
 
   def get_location_facade(user)
@@ -38,7 +36,7 @@ class SurpriseCenterExtract < Report
     if location_manage.blank?
       'Not Managed'
     else
-      staff_member = location_manage.manager_staff_member
+      location_manage.manager_staff_member
     end
   end
 
@@ -49,16 +47,17 @@ class SurpriseCenterExtract < Report
   def generate
 
     data = {}
-    reporting_facade = get_reporting_facade(@user)
     location_facade  = get_location_facade(@user)
     meeting_facade = get_meeting_facade(@user)
 
     if @biz_location_branch.class == Array
-      all_centers = location_facade.all_nominal_centers
+      all_centers = location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit)
     else
-      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @date)
+      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @date).to_a.paginate(:page => @page, :per_page => @limit)
     end
 
+    data[:center_ids] = all_centers
+    data[:centers] = {}
     all_centers.each do |center|
       branch = location_facade.get_parent(BizLocation.get(center.id), @date)
       branch_name = branch ? branch.name : "Not Specified"
@@ -81,7 +80,7 @@ class SurpriseCenterExtract < Report
       loan_start_date = "Not Specified"
       loan_cycle = "Not Specified"
 
-      data[center] = {:branch_name => branch_name, :branch_id => branch_id, :center_id => center_id, :center_name => center_name, :center_creation_month => center_creation_month, :center_creation_year => center_creation_year, :ro_name => ro_name, :ro_code => ro_code, :meeting_day => meeting_day, :meeting_time => meeting_time, :loan_start_date => loan_start_date, :loan_cycle => loan_cycle}
+      data[:centers][center] = {:branch_name => branch_name, :branch_id => branch_id, :center_id => center_id, :center_name => center_name, :center_creation_month => center_creation_month, :center_creation_year => center_creation_year, :ro_name => ro_name, :ro_code => ro_code, :meeting_day => meeting_day, :meeting_time => meeting_time, :loan_start_date => loan_start_date, :loan_cycle => loan_cycle}
     end
     data    
   end
