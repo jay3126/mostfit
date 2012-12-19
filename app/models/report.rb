@@ -11,7 +11,7 @@ class Report
   property :created_at, DateTime
   property :generation_time, Integer
 
-  validates_with_method :method => :from_date_should_be_less_than_to_date
+  validates_with_method :from_date, :method => :from_date_should_be_less_than_to_date
 
   def name
     "#{report_type}: #{start_date} - #{end_date}"
@@ -147,6 +147,12 @@ class Report
     return true
   end
 
+  def from_date_should_be_less_than_to_date
+    if @from_date and @to_date and @from_date > @to_date
+      return [false, "From date should be before to date"]
+    end
+    return true
+  end
 
   private
 
@@ -154,13 +160,6 @@ class Report
     params.each{|key, value|
       instance_variable_set("@#{key}", value.to_i) if not [:date, :from_date, :to_date].include?(key.to_sym) and value and value.to_i>0
     } if params
-  end
-
-  def from_date_should_be_less_than_to_date
-    if @from_date and @to_date and @from_date > @to_date
-      return [false, "From date should be before to date"]
-    end
-    return true
   end
 
 end
