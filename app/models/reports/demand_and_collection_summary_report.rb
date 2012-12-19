@@ -38,7 +38,7 @@ class DemandAndCollectionSummaryReport < Report
 
     reporting_facade = get_reporting_facade(@user)
     data = {}
-    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch.paginate(:page => @page, :per_page => @limit) : [@biz_location_branch]
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch.paginate(:page => @page, :per_page => @limit) : [@biz_location_branch].paginate(:page => @page, :per_page => @limit)
     data[:branch_ids] = at_branch_ids_ary
     data[:branches] = {}
 
