@@ -1,167 +1,174 @@
 = partial :form
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Branch Name
-      %th{:colspan => 4}
-        Installment (EWI)
-      %th{:colspan => 3}
-        OverDues
-      %th{:colspan => 3}
-        Fees
-      %th
-        Advance
-      %th{:colspan => 2}
-        Foreclosures
-      %th{:colspan => 3}
-        Collections
-
-    %tr
-      %th
-      %th
-        Scheduled
-      %th
-        Due
-      %th
-        Advance
-      %th
-        Collected
-      %th
-        Amount
-      %th
-        Overdue For the Day
-      %th
-        EWI Collected
-      %th
-        Collectable
-      %th
-        Collected
-      %th
-        Other Fees Collected
-      %th
-        Collected
-      %th
-        Principal Outstanding
-      %th
-        Overdue Interest
-      %th
-        Total
-      %th
-        Short
-      %th
-        Difference
-
-  %tbody
-    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
-    - @default_currency ||= MoneyManager.get_default_currency
-    - @data.sort_by{|branch| branch}.each do |branch, values|
+- if @data.blank? || @data[:branches].blank?
+  %h2 No data to display
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
       %tr
-        %td
-          %b
-            = BizLocation.get(branch).name
-        %td
-          - outstandings = values[:loan_balances].values[0]
-          = outstandings[:scheduled_total_due]
-          - accumulate_row_values[:scheduled_total_due] += outstandings[:scheduled_total_due]
-        %td
-          = outstandings[:actual_total_due]
-          - accumulate_row_values[:actual_total_due] += outstandings[:actual_total_due]
-        %td
-          = outstandings[:advance_balance]
-          - accumulate_row_values[:advance_balance] += outstandings[:advance_balance]
-        %td
-          = outstandings[:advance_received_on_date]
-          - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
-        %td
-          
-          - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
-            = total_overdue = (outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding])
-          - else
-            = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
-          - accumulate_row_values[:total_overdue] += total_overdue
-        %td
-          - outstandings = values[:loan_balances].values[0]
-          - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
-            = total_overdue = (outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding])
-          - else
-            = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
-          - accumulate_row_values[:total_overdue] += total_overdue
-        %td
-          = outstandings[:advance_received_on_date]
-          - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
-        %td
-          = values[:fee_dues][:total_amount]
-          - accumulate_row_values[:fee_dues] += values[:fee_dues][:total_amount]
-        %td
-          = values[:loan_fee_receipts][:total_amount]
-          - accumulate_row_values[:loan_fee_receipts] += values[:loan_fee_receipts][:total_amount]
-        %td
-          = values[:all_fee_receipts][:total_amount]
-          - accumulate_row_values[:all_fee_receipts] += values[:all_fee_receipts][:total_amount]
-        %td
-          = outstandings[:advance_received_on_date]
-          - accumulate_row_values[:advance_collected] += outstandings[:advance_received_on_date]
-        %td
-          = outstandings[:actual_principal_outstanding]
-          - accumulate_row_values[:actual_principal_outstanding] += outstandings[:actual_principal_outstanding]
-        %td
-          - if (outstandings[:actual_interest_outstanding] > outstandings[:scheduled_interest_outstanding])
-            = interest_overdue = (outstandings[:actual_interest_outstanding] - outstandings[:scheduled_interest_outstanding])
-          - else
-            = interest_overdue = (outstandings[:scheduled_interest_outstanding] - outstandings[:actual_interest_outstanding])
-          - accumulate_row_values[:interest_overdue] += interest_overdue
-        %td
-          - payments = values[:loan_allocations].values[0]
-          = payments[:total_received]
-          - accumulate_row_values[:total_received] += payments[:total_received]
-        %td
-          - if (outstandings[:scheduled_total_due] > payments[:total_received])
-            = short_collection = outstandings[:scheduled_total_due] - payments[:total_received]
-          - else
-            = short_collection = payments[:total_received] - outstandings[:scheduled_total_due]
-          - accumulate_row_values[:short_collection] += short_collection
-        %td
-          - if (payments[:total_received] > short_collection)
-            = difference = payments[:total_received] - short_collection
-          - else
-            = difference = short_collection - payments[:total_received]
-          - accumulate_row_values[:difference] += difference
+        %th
+          Branch Name
+        %th{:colspan => 4}
+          Installment (EWI)
+        %th{:colspan => 3}
+          OverDues
+        %th{:colspan => 3}
+          Fees
+        %th
+          Advance
+        %th{:colspan => 2}
+          Foreclosures
+        %th{:colspan => 3}
+          Collections
 
-  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-  %tfoot
-    %tr
-      %th
-        Total
-      %td
-        = total_rows[:scheduled_total_due]
-      %td
-        = total_rows[:actual_total_due]
-      %td
-        = total_rows[:advance_balance]
-      %td
-        = total_rows[:advance_received_on_date]
-      %td
-        = total_rows[:total_overdue]
-      %td
-        = total_rows[:total_overdue]
-      %td
-        = total_rows[:advance_received_on_date]
-      %td
-        = total_rows[:fee_dues]
-      %td
-        = total_rows[:loan_fee_receipts]
-      %td
-        = total_rows[:all_fee_receipts]
-      %td
-        = total_rows[:advance_collected]
-      %td
-        = total_rows[:actual_principal_outstanding]
-      %td
-        = total_rows[:interest_overdue]
-      %td
-        = total_rows[:total_received]
-      %td
-        = total_rows[:short_collection]
-      %td
-        = total_rows[:difference]
+      %tr
+        %th
+        %th
+          Scheduled
+        %th
+          Due
+        %th
+          Advance
+        %th
+          Collected
+        %th
+          Amount
+        %th
+          Overdue For the Day
+        %th
+          EWI Collected
+        %th
+          Collectable
+        %th
+          Collected
+        %th
+          Other Fees Collected
+        %th
+          Collected
+        %th
+          Principal Outstanding
+        %th
+          Overdue Interest
+        %th
+          Total
+        %th
+          Short
+        %th
+          Difference
+
+    %tbody
+      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+      - @default_currency ||= MoneyManager.get_default_currency
+      - @data[:branches].sort_by{|branch| branch}.each do |branch, values|
+        %tr
+          %td
+            %b
+              = BizLocation.get(branch).name
+          %td
+            - outstandings = values[:loan_balances].values[0]
+            = outstandings[:scheduled_total_due]
+            - accumulate_row_values[:scheduled_total_due] += outstandings[:scheduled_total_due]
+          %td
+            = outstandings[:actual_total_due]
+            - accumulate_row_values[:actual_total_due] += outstandings[:actual_total_due]
+          %td
+            = outstandings[:advance_balance]
+            - accumulate_row_values[:advance_balance] += outstandings[:advance_balance]
+          %td
+            = outstandings[:advance_received_on_date]
+            - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
+          %td
+
+            - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
+              = total_overdue = (outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding])
+            - else
+              = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
+            - accumulate_row_values[:total_overdue] += total_overdue
+          %td
+            - outstandings = values[:loan_balances].values[0]
+            - if (outstandings[:actual_total_outstanding] > outstandings[:scheduled_total_outstanding])
+              = total_overdue = (outstandings[:actual_total_outstanding] - outstandings[:scheduled_total_outstanding])
+            - else
+              = total_overdue = (outstandings[:scheduled_total_outstanding] - outstandings[:actual_total_outstanding])
+            - accumulate_row_values[:total_overdue] += total_overdue
+          %td
+            = outstandings[:advance_received_on_date]
+            - accumulate_row_values[:advance_received_on_date] += outstandings[:advance_received_on_date]
+          %td
+            = values[:fee_dues][:total_amount]
+            - accumulate_row_values[:fee_dues] += values[:fee_dues][:total_amount]
+          %td
+            = values[:loan_fee_receipts][:total_amount]
+            - accumulate_row_values[:loan_fee_receipts] += values[:loan_fee_receipts][:total_amount]
+          %td
+            = values[:all_fee_receipts][:total_amount]
+            - accumulate_row_values[:all_fee_receipts] += values[:all_fee_receipts][:total_amount]
+          %td
+            = outstandings[:advance_received_on_date]
+            - accumulate_row_values[:advance_collected] += outstandings[:advance_received_on_date]
+          %td
+            = outstandings[:actual_principal_outstanding]
+            - accumulate_row_values[:actual_principal_outstanding] += outstandings[:actual_principal_outstanding]
+          %td
+            - if (outstandings[:actual_interest_outstanding] > outstandings[:scheduled_interest_outstanding])
+              = interest_overdue = (outstandings[:actual_interest_outstanding] - outstandings[:scheduled_interest_outstanding])
+            - else
+              = interest_overdue = (outstandings[:scheduled_interest_outstanding] - outstandings[:actual_interest_outstanding])
+            - accumulate_row_values[:interest_overdue] += interest_overdue
+          %td
+            - payments = values[:loan_allocations].values[0]
+            = payments[:total_received]
+            - accumulate_row_values[:total_received] += payments[:total_received]
+          %td
+            - if (outstandings[:scheduled_total_due] > payments[:total_received])
+              = short_collection = outstandings[:scheduled_total_due] - payments[:total_received]
+            - else
+              = short_collection = payments[:total_received] - outstandings[:scheduled_total_due]
+            - accumulate_row_values[:short_collection] += short_collection
+          %td
+            - if (payments[:total_received] > short_collection)
+              = difference = payments[:total_received] - short_collection
+            - else
+              = difference = short_collection - payments[:total_received]
+            - accumulate_row_values[:difference] += difference
+
+    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+    %tfoot
+      %tr
+        %th
+          Total
+        %td
+          = total_rows[:scheduled_total_due]
+        %td
+          = total_rows[:actual_total_due]
+        %td
+          = total_rows[:advance_balance]
+        %td
+          = total_rows[:advance_received_on_date]
+        %td
+          = total_rows[:total_overdue]
+        %td
+          = total_rows[:total_overdue]
+        %td
+          = total_rows[:advance_received_on_date]
+        %td
+          = total_rows[:fee_dues]
+        %td
+          = total_rows[:loan_fee_receipts]
+        %td
+          = total_rows[:all_fee_receipts]
+        %td
+          = total_rows[:advance_collected]
+        %td
+          = total_rows[:actual_principal_outstanding]
+        %td
+          = total_rows[:interest_overdue]
+        %td
+          = total_rows[:total_received]
+        %td
+          = total_rows[:short_collection]
+        %td
+          = total_rows[:difference]
+  %br
+  .flickr_pagination
+    = will_paginate @data[:branch_ids], :container => false
+  %br

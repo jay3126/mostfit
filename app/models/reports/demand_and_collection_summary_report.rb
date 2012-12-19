@@ -1,6 +1,6 @@
 class DemandAndCollectionSummaryReport < Report
 
-  attr_accessor :date, :biz_location_branch_id
+  attr_accessor :date, :biz_location_branch_id, :page
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -9,6 +9,8 @@ class DemandAndCollectionSummaryReport < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -35,10 +37,11 @@ class DemandAndCollectionSummaryReport < Report
   def generate
 
     reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch.paginate(:page => @page, :per_page => @limit) : [@biz_location_branch]
+    data[:branch_ids] = at_branch_ids_ary
+    data[:branches] = {}
 
-    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
       loan_fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, @date, *branch_id)
       all_fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
@@ -53,7 +56,7 @@ class DemandAndCollectionSummaryReport < Report
       branch_data_map[:loan_balances] = loan_balances
       branch_data_map[:loan_allocations] = loan_allocations
 
-      data[branch_id] = branch_data_map
+      data[:branches][branch_id] = branch_data_map
     }
     data
   end
