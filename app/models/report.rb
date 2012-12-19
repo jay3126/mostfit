@@ -149,7 +149,7 @@ class Report
 
   def from_date_should_be_less_than_to_date
     if @from_date and @to_date and @from_date > @to_date
-      return [false, "From date should be before to date"]
+      return [false, " 'From Date' must not be greator than 'To Date' "]
     end
     return true
   end
