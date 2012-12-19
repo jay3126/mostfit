@@ -1,14 +1,17 @@
 class SOFDuesCollectionAndAccrualsReport < Report
 
-  attr_accessor :from_date, :to_date, :funding_line_id
+  attr_accessor :from_date, :to_date, :funding_line_id, :page
 
   validates_with_method :funding_line_id, :funding_line_not_selected
+  validates_with_method :method => :from_date_should_be_less_than_to_date
 
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 30
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
+    @from_date = (dates && dates[:from_date]) ? dates[:from_date] : Date.today - 30
+    @to_date   = (dates && dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "SOF Dues Collection and Accrual Report from #{@from_date} to #{@to_date}"
     @user = user
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 100
     get_parameters(params, user)
   end
 
@@ -20,21 +23,16 @@ class SOFDuesCollectionAndAccrualsReport < Report
     "SOF Dues Collection and Accrual Report"
   end
 
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
-  end
-
   def default_currency
     @default_currency = MoneyManager.get_default_currency
   end
 
   def generate
-
-    reporting_facade = get_reporting_facade(@user)
     data = {}
-
-    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
+    loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id).paginate(:page => @page, :per_page => @limit)
     preclosure_loans = LoanStatusChange.status_between_dates(LoanLifeCycle::PRECLOSED_LOAN_STATUS, @from_date, @to_date).lending
+    data[:loan_ids] = loan_ids
+    data[:loans] = {}
     loan_ids.each do |l|
       loan = Lending.get(l)
       branch = BizLocation.get(loan.accounted_at_origin)
@@ -58,7 +56,7 @@ class SOFDuesCollectionAndAccrualsReport < Report
           emi_collect_interest  += lending.interest_received_in_date_range(@from_date, @to_date)
           emi_collect_total     = emi_collect_principal + emi_collect_interest
           interest_accured      = interest_accured      + lending.accrued_interim_interest(@from_date, @to_date)
-          disbursed_amount      = disbursed_amount      + lending.to_money[:disbursed_amount] if (lending.disbursal_date >= @from_date and lending.disbursal_date <= @from_date) 
+          disbursed_amount      = disbursed_amount      + lending.to_money[:disbursed_amount] if (lending.disbursal_date >= @from_date && lending.disbursal_date <= @from_date)
           outstanding_principal = outstanding_principal + lending.actual_principal_outstanding(@to_date)
         end
       end
@@ -74,7 +72,7 @@ class SOFDuesCollectionAndAccrualsReport < Report
 
       total_fee_collection = fee_collect + preclosure_fee_collect + preclosure_collect
 
-      data[branch_id] = {
+      data[:loans][branch_id] = {
         :branch_name => branch_name, :branch_id => branch_id,
         :dues_emi_principal => dues_emi_principal , :dues_emi_interest => dues_emi_interest, :dues_emi_total => dues_emi_total,
         :emi_collect_principal => emi_collect_principal, :emi_collect_interest => emi_collect_interest, :emi_collect_total => emi_collect_total,
@@ -87,7 +85,7 @@ class SOFDuesCollectionAndAccrualsReport < Report
   end
 
   def funding_line_not_selected
-    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
+    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) && !self.funding_line_id
     return true
   end
 end
