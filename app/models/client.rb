@@ -121,7 +121,9 @@ class Client
     center = BizLocation.first(:name => row[headers[:center]])
     raise ArgumentError, "Center(#{row[headers[:center]]}) does not exist" if center.blank?
 
-    branch = LocationLink.get_parent(center, Date.parse(row[headers[:date_joined]])) if center
+    branch = BizLocation.first(:name => row[headers[:branch]])
+    raise ArgumentError, "Branch(#{row[headers[:branch]]}) does not exist" if branch.blank?
+
     #creating group either on group code(if a group sheet is present groups should be already in place) or based on group name
     if headers[:group_code] and row[headers[:group_code]]
       client_group  =  ClientGroup.first(:code => row[headers[:group_code]].strip)
@@ -145,7 +147,7 @@ class Client
       :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]].tr('^A-Za-z0-9', ''),
       :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
       :date_joined => date_joined, :client_group => client_group,
-      :center_id => BizLocation.first(:name => row[headers[:center]]).id, :guarantor_name => row[headers[:guarantor_name]],
+      :center_id => center.id, :guarantor_name => row[headers[:guarantor_name]],
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
@@ -213,13 +215,17 @@ class Client
   end
 
   def self.create_client(fields, admin_location_id, reg_location_id)
-    
     client = Client.new(fields)
     admin_location = BizLocation.get admin_location_id
     reg_location = BizLocation.get reg_location_id
-    raise Errors::DataError, client.errors.first.join(', ') unless client.valid?
-    valid = Validators::Assignments.is_valid_assignment_date?(client.date_joined, admin_location, reg_location)
-    raise Errors::DataError, valid.last unless valid == true
+
+    #disabling validations in migration mode.
+    if Mfi.first.system_state != :migration
+      raise Errors::DataError, client.errors.first.join(', ') unless client.valid?
+      valid = Validators::Assignments.is_valid_assignment_date?(client.date_joined, admin_location, reg_location)
+      raise Errors::DataError, valid.last unless valid == true
+    end
+    
     client.save
     ClientAdministration.assign(admin_location, reg_location , client, client.created_by_staff_member_id, client.created_by_user_id, client.date_joined)
     AccountsChart.setup_counterparty_accounts_chart(client)
