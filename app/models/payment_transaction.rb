@@ -54,8 +54,10 @@ class PaymentTransaction
   property :effective_on,         *DATE_NOT_NULL
   property :created_at,           *CREATED_AT
 
-  validates_with_method :disallow_future_dated_transactions
-  validates_with_method :check_receipt_no
+  if Mfi.first.system_state != :migration
+    validates_with_method :disallow_future_dated_transactions
+    validates_with_method :check_receipt_no
+  end
 
   def disallow_future_dated_transactions
     if self.effective_on and (self.effective_on > Date.today)

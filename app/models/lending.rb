@@ -860,18 +860,20 @@ class Lending
   ###########################
 
   def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil, fee_instance_id = nil, adjust_complete_advance = false)
-    is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
+    if Mfi.first.system_state != :migration
+      is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
 
-    is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
-      [true, nil]
-    raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
+      is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
+        [true, nil]
+      raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
 
-    if (make_specific_allocation)
-      raise ArgumentError, "A principal and interest amount to allocate must be specified" unless (specific_principal_amount and specific_interest_amount)
-      
-      total_principal_and_interest = specific_principal_amount + specific_interest_amount
-      if (total_principal_and_interest > actual_total_outstanding_net_advance_balance)
-        raise Errors::BusinessValidationError, "Total principal and interest amount to allocate cannot exceed loan amount outstanding"
+      if (make_specific_allocation)
+        raise ArgumentError, "A principal and interest amount to allocate must be specified" unless (specific_principal_amount and specific_interest_amount)
+
+        total_principal_and_interest = specific_principal_amount + specific_interest_amount
+        if (total_principal_and_interest > actual_total_outstanding_net_advance_balance)
+          raise Errors::BusinessValidationError, "Total principal and interest amount to allocate cannot exceed loan amount outstanding"
+        end
       end
     end
 
