@@ -1,6 +1,6 @@
 class LoanExtractForSourceOfFundDetails < Report
 
-  attr_accessor :from_date, :to_date, :funding_line_id
+  attr_accessor :from_date, :to_date, :funding_line_id, :page
 
   validates_with_method :funding_line_id, :funding_line_not_selected
 
@@ -9,6 +9,8 @@ class LoanExtractForSourceOfFundDetails < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Loan Extract Source of Fund Details Report from #{@from_date} to #{@to_date}"
     @user = user
+    @page = params.blank? || params[:page].blank? ? 1 : params[:page]
+    @limit = 1
     get_parameters(params, user)
   end
 
@@ -24,25 +26,20 @@ class LoanExtractForSourceOfFundDetails < Report
     @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
   end
 
-  def get_location_facade(user)
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
-  end
-
   def default_currency
     @default_currency = MoneyManager.get_default_currency
   end
 
   def generate
-
     reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:id)
+    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:loan_ids] = loan_ids_with_disbursal_dates
+    data[:loans] = {}
 
-    loan_ids_with_disbursal_dates.each do |l|
-      loan = Lending.get(l)
+    loan_ids_with_disbursal_dates.each do |loan|
       loan_id = loan ? loan.id : "Not Specified"
       loan_lan_number = (loan and loan.lan) ? loan.lan : "Not Specified"
       loan_amount = (loan and loan.applied_amount) ? MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s) : Money.default_money_amount(:INR)
@@ -68,7 +65,7 @@ class LoanExtractForSourceOfFundDetails < Report
       district = location.select{|s| s.location_level.name.downcase == 'district'}.first
       district_name = (district and (not district.blank?)) ? district.name : "Not Specified"
 
-      data[loan] = {:loan_id => loan_id, :loan_lan_number => loan_lan_number, :loan_amount => loan_amount, :loan_start_date => loan_start_date, :loan_disbursal_date => loan_disbursal_date, :client_id => client_id, :client_name => client_name, :caste => caste, :religion => religion, :center_name => center_name, :source_of_fund => source_of_fund, :pos => pos, :principal_overdue => principal_overdue, :branch_name => branch_name, :state_name => state_name, :district_name => district_name}
+      data[:loans][loan] = {:loan_id => loan_id, :loan_lan_number => loan_lan_number, :loan_amount => loan_amount, :loan_start_date => loan_start_date, :loan_disbursal_date => loan_disbursal_date, :client_id => client_id, :client_name => client_name, :caste => caste, :religion => religion, :center_name => center_name, :source_of_fund => source_of_fund, :pos => pos, :principal_overdue => principal_overdue, :branch_name => branch_name, :state_name => state_name, :district_name => district_name}
     end
     data
   end
