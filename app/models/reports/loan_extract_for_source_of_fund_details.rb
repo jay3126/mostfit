@@ -10,7 +10,7 @@ class LoanExtractForSourceOfFundDetails < Report
     @name = "Loan Extract Source of Fund Details Report from #{@from_date} to #{@to_date}"
     @user = user
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
-    @limit = 1
+    @limit = 10
     get_parameters(params, user)
   end
 
