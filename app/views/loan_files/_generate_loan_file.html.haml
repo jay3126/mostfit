@@ -51,13 +51,13 @@
           %tr
             %td
               = "Loan File Created on"
-              = date_select("created_on", center_disbursal_date, :id => "created_on", :max_date => center_disbursal_date, :size => 10)
+              = date_select("created_on", params[:created_on] || center_disbursal_date, :id => "created_on", :size => 10)
             %td
               = "Scheduled Disbursal"
-              = date_select("scheduled_disbursal_date", center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)
+              = date_select("scheduled_disbursal_date", params[:scheduled_disbursal_date] || center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)
             %td
               = "Scheduled First Payment"
-              = date_select("scheduled_first_payment_date", center_disbursal_date, :id => "scheduled_first_payment_date", :size => 10)
+              = date_select("scheduled_first_payment_date", params[:scheduled_first_payment_date] || center_disbursal_date, :id => "scheduled_first_payment_date", :size => 10)
             %td
               %b By:
               = get_session_user_name

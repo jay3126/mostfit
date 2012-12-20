@@ -91,7 +91,7 @@ class LoanFiles < Application
         message = {:error => @errors.flatten.join(', ')}
       end
       if @errors.blank? && message[:error].blank?
-      redirect url("loan_files/generate_loans/#{params['id']}"), :message => message
+        redirect url("loan_files/generate_loans/#{params['id']}"), :message => message
       else
         @errors << message[:error]
         render :generate_loans
@@ -127,6 +127,10 @@ class LoanFiles < Application
     @errors << "Please Select all loan applications" unless params.key?('select_all')
     @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
 
+    @errors << "Scheduled disbursal date must not before loan file creation date" if Date.parse(scheduled_disbursal_date) < Date.parse(created_on)
+    @errors << "Scheduled first payment date must not before loan file creation date" if Date.parse(scheduled_first_payment_date) < Date.parse(created_on)
+    @errors << "Scheduled first payment date must not before Scheduled disbursal date" if Date.parse(scheduled_first_payment_date) < Date.parse(scheduled_disbursal_date)
+
     if @errors.blank?
       begin
         @loan_applications = params['selected'].keys
@@ -147,8 +151,11 @@ class LoanFiles < Application
 
     end
     get_data(params)
-
-    render :loan_file_generation
+    if @errors.blank?
+      redirect url("loan_files/pending_loan_file_generation?parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}"), :message => {:notice => "Loan file created successfully"}
+    else
+      render :loan_file_generation
+    end
   end
 
   def generate_disbursement_labels
