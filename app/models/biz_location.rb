@@ -67,31 +67,8 @@ class BizLocation
 
       if obj.location_level.level == 0
         #creating center cycle for center.
-        obj.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
-        #creating meeting schedules and calendar for centers.
-#        meeting_frequency = row[headers[:meeting_frequency]].downcase
-#        if meeting_frequency == "daily"
-#          meeting_number = 1500
-#        elsif meeting_frequency == "weekly"
-#          meeting_number = 300
-#        elsif meeting_frequency == "biweekly"
-#          meeting_number = 150
-#        elsif meeting_frequency == "monthly"
-#          meeting_number = 60
-#        end
-#
-#        meeting_time_begins_hours, meeting_time_begins_minutes = row[headers[:meeting_time_in_24_hour_format]].split(":")[0..1]
-#        msi = MeetingScheduleInfo.new(meeting_frequency, Date.parse(row[headers[:center_disbursal_date]]),
-#          meeting_time_begins_hours.to_i, meeting_time_begins_minutes.to_i)
-#
-#        result = MeetingScheduleManager.create_meeting_schedule(obj, msi)
-#        if result == true
-#          meeting_schedule = obj.meeting_schedules.last
-#          meeting_dates = meeting_schedule.get_no_of_meeting_dates_in_schedule(meeting_number)
-#          meeting_dates.each do |date|
-#            MeetingCalendar.setup_location_meeting_calendar(meeting_schedule, obj.id, date)
-#          end
-#        end
+        obj.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => Date.today,
+                                 :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
       end
 
       [true, obj]
