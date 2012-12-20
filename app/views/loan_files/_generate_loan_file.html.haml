@@ -51,7 +51,7 @@
           %tr
             %td
               = "Loan File Created on"
-              = date_select("created_on", center_disbursal_date, :id => "created_on", :min_date => center_disbursal_date, :max_date => Date.today, :size => 10)
+              = date_select("created_on", center_disbursal_date, :id => "created_on", :max_date => center_disbursal_date, :size => 10)
             %td
               = "Scheduled Disbursal"
               = date_select("scheduled_disbursal_date", center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)

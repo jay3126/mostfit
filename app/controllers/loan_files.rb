@@ -125,7 +125,6 @@ class LoanFiles < Application
 
     @errors << "Staff member must not be blank" if created_by_staff_id.blank?
     @errors << "Please Select all loan applications" unless params.key?('select_all')
-    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
     @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
 
     if @errors.blank?
