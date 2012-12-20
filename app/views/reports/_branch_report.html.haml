@@ -1,74 +1,81 @@
 = partial :form
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Branch Id
-      %th
-        Branch Name
-      %th
-        Agent Id
-      %th
-        Agent Name
-      %th
-        Center Number
-      %th
-        Loan Clients
-      %th
-        Arrears
-      %th
-        Outstanding
-      %th
-        Number Of Loan Accounts In Arrear
-      %th
-        Overdue POS
-
-  %tbody
-    - total_locations_count = total_members_count = 0
-    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
-    - @default_currency ||= MoneyManager.get_default_currency
-    - @data.sort_by{|staff| staff}.each do |staff, values|
+- if @data.blank? || @data[:branches].blank?
+  %h2 No data to display
+- else
+  %table.dataTable.report.weeksheet.nojs
+    %thead
       %tr
-        %td
-          = values[:branch_id]
-        %td
-          = values[:branch_name]
-        %td
-          = values[:staff_id]
-        %td
-          = values[:staff_name]
-        %td
-          = values[:centers_members_total][:locations_count]
-          - total_locations_count += values[:centers_members_total][:locations_count]
-        %td
-          = values[:centers_members_total][:members_count]
-          - total_members_count += values[:centers_members_total][:members_count]
-        %td
-          = values[:arrears]
-        %td
-          = values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
-          - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
-        %td
-          = values[:number_of_loan_accounts_in_arrear]
-        %td
-          = values[:outstanding_and_overdue_amounts][:overdue_amounts]
-          - accumulate_row_values[:overdue_amounts] += values[:outstanding_and_overdue_amounts][:overdue_amounts]
+        %th
+          Branch Id
+        %th
+          Branch Name
+        %th
+          Agent Id
+        %th
+          Agent Name
+        %th
+          Center Number
+        %th
+          Loan Clients
+        %th
+          Arrears
+        %th
+          Outstanding
+        %th
+          Number Of Loan Accounts In Arrear
+        %th
+          Overdue POS
 
-  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-  %tfoot
-    %tr
-      %th
-        Total
-      %td
-      %td
-      %td
-      %td
-        = total_locations_count
-      %td
-        = total_members_count
-      %td
-      %td
-        = total_rows[:scheduled_outstanding_amount]
-      %td
-      %td
-        = total_rows[:overdue_amounts]
+    %tbody
+      - total_locations_count = total_members_count = 0
+      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+      - @default_currency ||= MoneyManager.get_default_currency
+      - @data[:branches].sort_by{|staff| staff}.each do |staff, values|
+        %tr
+          %td
+            = values[:branch_id]
+          %td
+            = values[:branch_name]
+          %td
+            = values[:staff_id]
+          %td
+            = values[:staff_name]
+          %td
+            = values[:centers_members_total][:locations_count]
+            - total_locations_count += values[:centers_members_total][:locations_count]
+          %td
+            = values[:centers_members_total][:members_count]
+            - total_members_count += values[:centers_members_total][:members_count]
+          %td
+            = values[:arrears]
+          %td
+            = values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
+            - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
+          %td
+            = values[:number_of_loan_accounts_in_arrear]
+          %td
+            = values[:outstanding_and_overdue_amounts][:overdue_amounts]
+            - accumulate_row_values[:overdue_amounts] += values[:outstanding_and_overdue_amounts][:overdue_amounts]
+
+    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+    %tfoot
+      %tr
+        %th
+          Total
+        %td
+        %td
+        %td
+        %td
+          = total_locations_count
+        %td
+          = total_members_count
+        %td
+        %td
+          = total_rows[:scheduled_outstanding_amount]
+        %td
+        %td
+          = total_rows[:overdue_amounts]
+  %br
+  .flickr_pagination
+    = will_paginate @data[:branch_ids], :container => false
+  %br

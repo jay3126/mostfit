@@ -1,6 +1,6 @@
 class BranchReport < Report
 
-  attr_accessor :biz_location_branch_id, :date
+  attr_accessor :biz_location_branch_id, :date, :page
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -9,6 +9,8 @@ class BranchReport < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @page = params.blank? || params[:page].blank? ? 1 : params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -28,10 +30,6 @@ class BranchReport < Report
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
   end
 
-  def get_client_facade(user)
-    @client_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, user)
-  end
-
   def default_currency
     @default_currency = MoneyManager.get_default_currency
   end
@@ -39,11 +37,12 @@ class BranchReport < Report
   def generate
 
     reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
-    client_facade = get_client_facade(@user)
     data = {}
 
-    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch.to_a.paginate(:page => @page, :per_page => @limit) : [@biz_location_branch].to_a.paginate(:page => @page, :per_page => @limit)
+    data[:branch_ids] = at_branch_ids_ary
+    data[:branches] = {}
+
     at_branch_ids_ary.each do |branch_id|
       branch = BizLocation.get(branch_id)
       branch_id = branch.id
@@ -57,7 +56,7 @@ class BranchReport < Report
         staff_id = staff.id
         staff_name = staff.name
         centers_members_total = reporting_facade.locations_managed_by_staffs_on_date(staff.id, @date)
-        data[staff] = {:branch_id => branch_id, :branch_name => branch_name, :staff_name => staff_name, :staff_id => staff_id, :centers_members_total => centers_members_total, :outstanding_and_overdue_amounts => outstanding_and_overdue_amounts, :arrears => arrears, :number_of_loan_accounts_in_arrear => number_of_loan_accounts_in_arrear}
+        data[:branches][staff] = {:branch_id => branch_id, :branch_name => branch_name, :staff_name => staff_name, :staff_id => staff_id, :centers_members_total => centers_members_total, :outstanding_and_overdue_amounts => outstanding_and_overdue_amounts, :arrears => arrears, :number_of_loan_accounts_in_arrear => number_of_loan_accounts_in_arrear}
       end
     end
     data
