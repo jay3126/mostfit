@@ -1,12 +1,14 @@
 class CenterList < Report
 
-  attr_accessor :biz_location_branch_id, :date
+  attr_accessor :biz_location_branch_id, :date, :page
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
     @name = "Center List on #{@date}"
     @user = user
     @biz_location_branch = params[:biz_location_branch_id] rescue nil
+    @page = params.blank? || params[:page].blank? ? 1 : params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -40,7 +42,9 @@ class CenterList < Report
     data = {}
     location_facade = get_location_facade(@user)
     meeting_facade = get_meeting_facade(@user)
-    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers : LocationLink.all_children_by_sql(BizLocation.get(@biz_location_branch), @date)
+    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit) : LocationLink.all_children_by_sql(BizLocation.get(@biz_location_branch), @date).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:center_ids] = all_centers
+    data[:centers] = {}
 
     all_centers.each do |center|
       branch = location_facade.get_parent(BizLocation.get(center.id), @date)
@@ -55,7 +59,7 @@ class CenterList < Report
       meeting_frequency = meetings ? meetings.meeting_frequency : "Not Specified"
       center_disbursal_date = (center and center.center_disbursal_date) ? center.center_disbursal_date : "Not Specified"
 
-      data[center.name] = {:branch_id => branch_id, :branch_name => branch_name, :agent_name => agent_name, :center_id => center_id, :center_name => center_name, :meeting_day => meeting_day, :meeting_time => meeting_time, :meeting_frequency => meeting_frequency, :center_disbursal_date => center_disbursal_date}
+      data[:centers][center.name] = {:branch_id => branch_id, :branch_name => branch_name, :agent_name => agent_name, :center_id => center_id, :center_name => center_name, :meeting_day => meeting_day, :meeting_time => meeting_time, :meeting_frequency => meeting_frequency, :center_disbursal_date => center_disbursal_date}
     end
     data
   end
