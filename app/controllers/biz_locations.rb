@@ -344,9 +344,13 @@ class BizLocations < Application
       message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
       message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
       message[:error] << "Creation Date cannot be before Parent Location of Center Creation Date" if !@parent_location.blank? && @parent_location.creation_date > b_creation_date
-      message[:error] << "Default Disbursal Date cannot be before Center Creation Date" unless b_disbursal_date.blank? && b_creation_date > b_disbursal_date
     end
-
+    unless b_meeting.blank?
+      message[:error] << "Default Disbursal Date cannot be before Center Creation Date" if !b_disbursal_date.blank? && b_creation_date > b_disbursal_date
+      message[:error] << "Disbursal date is compulsory for meeting schedule" if b_disbursal_date.blank?
+      message[:error] << "Number of meeting cannot be blank" if b_meeting_number.blank? || b_meeting_number == 0
+      message[:error] << "Enter Meeting time in HH:MM format of 24hours" if b_begins_hours == 0 && b_begins_minutes == 0
+    end
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
@@ -385,7 +389,7 @@ class BizLocations < Application
       redirect url("user_locations/show/#{@parent_location.id}?success_message=#{msg_str}#location")
     else
       message.delete(:notice)
-      msg_str = message[:error].flatten.join(', ')
+      msg_str = message[:error].to_a.flatten.join(', ')
       redirect url("user_locations/show/#{@parent_location.id}?error_message=#{msg_str}#location")
     end
   end
