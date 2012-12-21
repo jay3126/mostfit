@@ -228,7 +228,7 @@ class MeetingCalendar
     raise ArgumentError, "from date is not valid: #{from_date}" unless from_date
     raise ArgumentError, "to date is not valid: #{to_date}" unless to_date
     raise ArgumentError, "from date should precede to date" if to_date < from_date
-    {:on_date.gte => from_date, :on_date.lt => to_date, :order => [:on_date.asc]}
+    {:on_date.gte => from_date, :on_date.lte => to_date, :order => [:on_date.asc]}
   end
 
   def date_change_according_to_holiday

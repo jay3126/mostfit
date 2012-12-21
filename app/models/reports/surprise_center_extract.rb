@@ -9,7 +9,7 @@ class SurpriseCenterExtract < Report
     @user = user
     location_facade = get_location_facade(@user)
     @page = params.blank? || params[:page].blank? ? 1 :params[:page]
-    @limit = 50
+    @limit = 20
     get_parameters(params, user)
   end
 
@@ -65,14 +65,15 @@ class SurpriseCenterExtract < Report
         ro_code = (ro && ro.employee_id && !(ro.employee_id.blank?)) ? ro.employee_id : "Not Available"
       end
       meeting = MeetingScheduleManager.get_all_meeting_schedule_infos(center).first
-      meeting_day = (meeting && meeting.schedule_begins_on) ? meeting.schedule_begins_on.strftime("%A") : "Not Specified"
+      meeting_dates = MeetingCalendar.meeting_calendar(center, @from_date, @to_date)
+      meeting_date = (meeting_dates and !meeting_dates.blank?) ? meeting_dates.first : "Not Specified"
       meeting_time = meeting ? meeting.meeting_begins_at : "Not Specified"
       loan_start_date = Lending.all(:administered_at_origin => center.id).aggregate(:scheduled_first_repayment_date)
       loan_cycle = Lending.all(:administered_at_origin => center.id).aggregate(:cycle_number)
 
       data[:centers][center] = {:branch_name => branch_name, :branch_id => branch_id, :center_id => center_id, :center_name => center_name,
         :center_creation_month => center_creation_month, :center_creation_year => center_creation_year, :ro_name => ro_name, :ro_code => ro_code,
-        :meeting_day => meeting_day, :meeting_time => meeting_time, :loan_start_date => loan_start_date, :loan_cycle => loan_cycle}
+        :meeting_date => meeting_date, :meeting_time => meeting_time, :loan_start_date => loan_start_date, :loan_cycle => loan_cycle}
     end
     data
   end

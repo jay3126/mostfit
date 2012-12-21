@@ -22,7 +22,7 @@
         %th
           RO Employee Id
         %th
-          Meeting Day
+          Meeting Date
         %th
           Meeting Time
         %th
@@ -50,7 +50,18 @@
           %td
             = values[:ro_code]
           %td
-            = values[:meeting_day]
+            - if values[:meeting_date] == "Not Specified"
+              = values[:meeting_date]
+            - elsif values[:meeting_date].on_date == values[:meeting_date].actual_date
+              = values[:meeting_date].on_date
+              (
+              = values[:meeting_date].on_date.strftime("%A")
+              )
+            - else
+              = values[:meeting_date].actual_date
+              (
+              = values[:meeting_date].actual_date.strftime("%A")
+              )
           %td
             = values[:meeting_time]
           %td
