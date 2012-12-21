@@ -303,7 +303,7 @@ class BizLocations < Application
     @child_location_level = LocationLevel.first(:level => level-1)
     @new_biz_location     = @child_location_level.biz_locations.new
     @staff_members        = StaffPosting.get_staff_assigned(@biz_location.id, get_effective_date).map(&:staff_assigned)
-    render :partial => 'biz_locations/location_fields', :layout => layout?
+    render :biz_location_form, :layout => layout?
   end
 
   def create_and_assign_location
@@ -311,12 +311,11 @@ class BizLocations < Application
     message = {:error => [], :notice => []}
 
     # GATE-KEEPING
-
     b_level          = params[:biz_location][:location_level]
-    b_creation_date  = Date.parse(params[:creation_date])
+    b_creation_date  = params[:creation_date].blank? ? '' : Date.parse(params[:creation_date])
     b_name           = params[:biz_location][:name]
     b_id             = params[:id]
-    b_disbursal_date = params[:biz_location][:center_disbursal_date].blank? ? '' : Date.parse(params[:biz_location][:center_disbursal_date])
+    b_disbursal_date = params[:center_disbursal_date].blank? ? '' : Date.parse(params[:center_disbursal_date])
     b_managed_by     = params[:managed_by]
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
@@ -332,17 +331,22 @@ class BizLocations < Application
     staff            = StaffMember.get b_managed_by unless b_managed_by.blank?
 
     # VALIDATIONS
-
     message[:error] << "Name cannot be blank" if b_name.blank?
     message[:error] << "Please select Location Level" if b_level.blank?
-    message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
     message[:error] << "Parent location is invaild" if @parent_location.blank?
     message[:error] << "Meeting Number cannot be blank" if !b_meeting.blank? && b_meeting_number.blank?
-    message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
     message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
-    message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
-    message[:error] << "Creation Date cannot be before Parent Location of Creation Date" if !@parent_location.blank? && @parent_location.creation_date > b_creation_date
+
+    if b_creation_date.blank? || b_disbursal_date.blank?
+      message[:error] << "Creation Date cannot be blank" if b_creation_date.blank?
+    else
+      message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
+      message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
+      message[:error] << "Creation Date cannot be before Parent Location of Center Creation Date" if !@parent_location.blank? && @parent_location.creation_date > b_creation_date
+      message[:error] << "Default Disbursal Date cannot be before Center Creation Date" unless b_disbursal_date.blank? && b_creation_date > b_disbursal_date
+    end
+
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
@@ -375,8 +379,15 @@ class BizLocations < Application
     end
 
     #REDIRECT/RENDER
-    message[:error].blank? ? message.delete(:error) : message.delete(:notice)
-    redirect url(:controller => :user_locations, :action => :show, :id => @parent_location.id), :message => message
+    if message[:error].blank?
+      message.delete(:error)
+      msg_str = message[:notice].to_s
+      redirect url("user_locations/show/#{@parent_location.id}?success_message=#{msg_str}#location")
+    else
+      message.delete(:notice)
+      msg_str = message[:error].flatten.join(', ')
+      redirect url("user_locations/show/#{@parent_location.id}?error_message=#{msg_str}#location")
+    end
   end
 
   def loan_products

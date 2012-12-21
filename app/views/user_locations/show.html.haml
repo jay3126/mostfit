@@ -1,3 +1,11 @@
+- unless params[:error_message].blank? && params[:success_message].blank?
+  - if params[:error_message].blank?
+    .flash.notice
+      = params[:success_message]
+  - else
+    .error
+      = params[:error_message]
+
 - parent_location = LocationLink.get_parent(@biz_location)
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
 

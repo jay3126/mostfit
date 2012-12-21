@@ -19,7 +19,7 @@
         %th
           Creation Date
         %td
-          = date_select 'creation_date'
+          = date_select 'creation_date', ''
       %tr
         %th
           Address
@@ -40,7 +40,7 @@
           %th
             Default Disbursal Date
           %td
-            = date_select_for @biz_location, :center_disbursal_date
+            = date_select 'center_disbursal_date', ''
         %tr
           %td
             Create Meeting Schedule
