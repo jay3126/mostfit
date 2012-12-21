@@ -49,7 +49,8 @@ class CenterList < Report
       center_name = center.name
       center_id = center.id
       meetings = MeetingScheduleManager.get_all_meeting_schedule_infos(center).first
-      meeting_date = (meetings and meetings.schedule_begins_on) ? meetings.schedule_begins_on : "Not Specified"
+      meeting_dates = MeetingCalendar.next_meeting_for_location(center, @date)
+      meeting_date = (meeting_dates and !meeting_dates.blank?) ? meeting_dates : "Not Specified"
       meeting_time = meetings ? meetings.meeting_begins_at : "Not Specified"
       meeting_frequency = meetings ? meetings.meeting_frequency : "Not Specified"
       center_disbursal_date = (center and center.center_disbursal_date) ? center.center_disbursal_date : "Not Specified"

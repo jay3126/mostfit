@@ -40,10 +40,18 @@
           %td
             = values[:center_name]
           %td
-            = values[:meeting_date]
-            (
-            = values[:meeting_date].strftime("%A")
-            )
+            - if values[:meeting_date] == "Not Specified"
+              = values[:meeting_date]
+            - elsif values[:meeting_date].on_date == values[:meeting_date].actual_date
+              = values[:meeting_date].on_date
+              (
+              = values[:meeting_date].on_date.strftime("%A")
+              )
+            - else
+              = values[:meeting_date].actual_date
+              (
+              = values[:meeting_date].actual_date.strftime("%A")
+              )
           %td
             = values[:meeting_time]
           %td
