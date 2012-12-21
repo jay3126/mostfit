@@ -28,10 +28,6 @@ class CenterList < Report
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
   end
 
-  def get_meeting_facade(user)
-    @meeting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user)
-  end
-
   def managed_by_staff(location_id, on_date)
     location_facade = get_location_facade(@user)
     location_manage = location_facade.location_managed_by_staff(location_id, on_date)
@@ -41,7 +37,6 @@ class CenterList < Report
   def generate
     data = {}
     location_facade = get_location_facade(@user)
-    meeting_facade = get_meeting_facade(@user)
     all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit) : LocationLink.all_children_by_sql(BizLocation.get(@biz_location_branch), @date).to_a.paginate(:page => @page, :per_page => @limit)
     data[:center_ids] = all_centers
     data[:centers] = {}
@@ -53,13 +48,15 @@ class CenterList < Report
       agent_name = managed_by_staff(center.id, @date)
       center_name = center.name
       center_id = center.id
-      meetings = meeting_facade.get_meeting_schedules(center).first
-      meeting_day = (meetings and meetings.schedule_begins_on) ? meetings.schedule_begins_on.strftime("%A") : "Not Specified"
+      meetings = MeetingScheduleManager.get_all_meeting_schedule_infos(center).first
+      meeting_date = (meetings and meetings.schedule_begins_on) ? meetings.schedule_begins_on : "Not Specified"
       meeting_time = meetings ? meetings.meeting_begins_at : "Not Specified"
       meeting_frequency = meetings ? meetings.meeting_frequency : "Not Specified"
       center_disbursal_date = (center and center.center_disbursal_date) ? center.center_disbursal_date : "Not Specified"
 
-      data[:centers][center.name] = {:branch_id => branch_id, :branch_name => branch_name, :agent_name => agent_name, :center_id => center_id, :center_name => center_name, :meeting_day => meeting_day, :meeting_time => meeting_time, :meeting_frequency => meeting_frequency, :center_disbursal_date => center_disbursal_date}
+      data[:centers][center.name] = {:branch_id => branch_id, :branch_name => branch_name, :agent_name => agent_name, :center_id => center_id,
+        :center_name => center_name, :meeting_date => meeting_date, :meeting_time => meeting_time, :meeting_frequency => meeting_frequency,
+        :center_disbursal_date => center_disbursal_date}
     end
     data
   end
