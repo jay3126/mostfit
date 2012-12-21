@@ -63,10 +63,12 @@
           .section_block
             %h2
               %b{:style=>"color:black"}
+                %span.greytext
+                  = "(Click this link to open form)"
                 %u
                   = link_to section.name, "#", :onclick => "jQuery('.table_#{count}').toggle(); return false;"
               %br
-            =section.instructions
+            =#section.instructions
           =hidden_field :checklist_id, :value=>@checklist.id
           =hidden_field :filler_type, :value=>"User"
           =hidden_field :staff_id, :value=>@staff_id
