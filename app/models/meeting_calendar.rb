@@ -24,6 +24,7 @@ class MeetingCalendar
   include Constants::Space
   include IsMeeting
   include Comparable
+  include IsLocation
 
   # The meeting calendar consults meeting schedules for all locations that meet
   # It then periodically creates a 'proposed' meeting calendar based on such schedules
@@ -123,6 +124,21 @@ class MeetingCalendar
 
   def self.all_locations_meeting_on_date(on_date = Date.today, meeting_status = nil)
     query = {:on_date => on_date}
+    query.merge!(:meeting_status => meeting_status) if meeting_status
+    all_meetings = all(query)
+    locations_and_meetings = all_meetings.group_by {|meeting| meeting.location_type}
+    all_locations = {}
+    locations_and_meetings.each { |type, meetings|
+      all_locations[type] ||= []
+      meetings.each { |meeting_calendar|
+        all_locations[type].push(meeting_calendar.location_id)
+      }
+    }
+    all_locations
+  end
+
+  def self.all_locations_meeting_in_date_range(on_date, till_date, meeting_status = nil)
+    query = {:on_date.gte => on_date, :on_date.lte => till_date}
     query.merge!(:meeting_status => meeting_status) if meeting_status
     all_meetings = all(query)
     locations_and_meetings = all_meetings.group_by {|meeting| meeting.location_type}
