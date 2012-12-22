@@ -33,7 +33,11 @@ class BizLocation
   has n, :lending_products, :through => :lending_product_locations
   has n, :center_cycles
 
-  validates_with_method :location_level_precedes_biz_location?
+  #validation to be disabled in migration mode.
+  if Mfi.first.system_state != :migration
+    validates_with_method :location_level_precedes_biz_location?
+  end
+
   validates_is_unique :name
   validates_present :name
 
@@ -52,8 +56,18 @@ class BizLocation
     name = row[headers[:name]]
     upload_id = row[headers[:upload_id]]
     address = row[headers[:address]]
-    obj = create_new_location(name, creation_date, location_level_number, originator_by, address, center_disbursal_date)
+
+    location = {}
+    location[:name] = name
+    location[:creation_date] = creation_date
+    location[:location_level] = location_level_number
+    location[:originator_by] = originator_by
+    location[:biz_location_address] = address
+    location[:center_disbursal_date] = center_disbursal_date
+    obj = create(location)
     if obj.save
+      #setiing up the chart of accounts if location_level is 1, i.e., branch. and assigning the locations.
+      Ledger.setup_location_ledgers(obj.creation_date, obj.id) if obj.location_level.level == 1
       parent_location_level = LocationLevel.first(:level => obj.location_level.level+1)
       unless parent_location_level.blank?
         parent_location = parent_location_level.biz_locations.first(:name => row[headers[:parent_location]])
@@ -70,7 +84,6 @@ class BizLocation
         obj.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => Date.today,
                                  :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
       end
-
       [true, obj]
     else
       [false, obj]

@@ -181,7 +181,8 @@ class Lending
     upload_id = row[headers[:upload_id]]
 
     #creating the loan_borrower entry.
-    new_loan_borrower = LoanBorrower.assign_loan_borrower(client, applied_on_date, administered_at_origin, accounted_at_origin, applied_by_staff, recorded_by_user)
+    new_loan_borrower = LoanBorrower.assign_loan_borrower(client, applied_on_date, administered_at_origin, accounted_at_origin,
+                                                          applied_by_staff, recorded_by_user)
 
     #creating new loan.
     loan_hash                                  = { }
@@ -220,11 +221,13 @@ class Lending
 
     #making enteries in intermediatory models.
     LoanBaseSchedule.create_base_schedule(applied_money_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
-      repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
+                                          repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
-    LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff, recorded_by_user, applied_on_date)
+    LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff,
+                              recorded_by_user, applied_on_date)
 
-    FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date, recorded_by_user)
+    FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date,
+                                              recorded_by_user)
   end
 
   # Creates a new loan

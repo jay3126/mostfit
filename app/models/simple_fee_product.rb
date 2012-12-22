@@ -19,13 +19,15 @@ class SimpleFeeProduct
 
   #method for upload functionality.
   def self.from_csv(row, headers)
-    obj = new(:name => row[headers[:name]],
-              :fee_charged_on_type => row[headers[:fee_type]], :created_on => row[headers[:creation_date]], :upload_id => row[headers[:upload_id]])
+    obj = new(:name => row[headers[:name]], :fee_charged_on_type => row[headers[:fee_type]], :created_on => row[headers[:creation_date]],
+              :upload_id => row[headers[:upload_id]])
     if obj.save
       money_amount = MoneyManager.get_money_instance(row[headers[:fee_amount]])
       money_tax    = MoneyManager.get_money_instance(row[headers[:fee_tax]])
       amount_type  = Constants::Transaction::FIX_AMOUNT
-      timed_amount = TimedAmount.new(:simple_fee_product_id => obj.id, :fee_only_amount => money_amount.amount, :tax_only_amount => money_tax.amount, :effective_on => row[headers[:effective_date]], :currency => money_amount.currency, :amount_type => amount_type)
+      timed_amount = TimedAmount.new(:simple_fee_product_id => obj.id, :fee_only_amount => money_amount.amount,
+                                     :tax_only_amount => money_tax.amount, :effective_on => row[headers[:effective_date]],
+                                     :currency => money_amount.currency, :amount_type => amount_type)
       timed_amount.save
       [true, obj]
     else

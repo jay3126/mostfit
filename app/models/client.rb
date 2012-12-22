@@ -68,8 +68,7 @@ class Client
   belongs_to :created_by_staff,     :child_key => [:created_by_staff_member_id], :model => 'StaffMember'
   belongs_to :created_by,           :child_key => [:created_by_user_id],    :model => 'User'
   belongs_to :upload, :nullable => true
-
-  validates_with_method :is_there_space_in_the_client_group?
+ 
   has_attached_file :picture,
     :styles => {:medium => "300x300>", :thumb => "60x60#"},
     :url => "/uploads/:class/:id/:attachment/:style/:basename.:extension",
@@ -85,17 +84,17 @@ class Client
     :url => "/uploads/:class/:id/:basename.:extension",
     :path => "#{Merb.root}/public/uploads/:class/:id/:basename.:extension"
 
-  validates_length :pincode, :min => 6
-  validates_length    :name, :min => 3
-  validates_present   :date_joined
-  validates_attachment_thumbnails :picture
-  validates_with_method :date_joined, :method => :dates_make_sense
-
   #do not check these validations when the system is in :migration state.
   if Mfi.first.system_state != :migration
+    validates_length :pincode, :min => 6
+    validates_length    :name, :min => 3
+    validates_present   :date_joined
+    validates_attachment_thumbnails :picture
+    validates_with_method :date_joined, :method => :dates_make_sense
     validates_is_unique :reference 
     validates_is_unique :reference2
     validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
+    validates_with_method :is_there_space_in_the_client_group?
 #    validates_with_method :pincode , :method => :pincode_length_check?
   end
 
@@ -129,7 +128,10 @@ class Client
       client_group  =  ClientGroup.first(:code => row[headers[:group_code]].strip)
     elsif headers[:client_group] and row[headers[:client_group]]
       name          = row[headers[:client_group]].strip
-      client_group  = ClientGroup.first(:name => name)||ClientGroup.create(:name => name, :biz_location_id => center.id, :code => name.split(' ').join, :upload_id => row[headers[:upload_id]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id, :creation_date => Date.parse(row[headers[:date_joined]]))
+      client_group  = ClientGroup.first(:name => name) || ClientGroup.create(:name => name, :biz_location_id => center.id,
+                      :code => name.split(' ').join, :upload_id => row[headers[:upload_id]],
+                      :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
+                      :creation_date => Date.parse(row[headers[:date_joined]]))
     else
       client_group  = nil
     end
@@ -140,8 +142,7 @@ class Client
       date_joined = client_date_joined
     else
       date_joined = center.creation_date
-    end
-    
+    end    
 
     hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
       :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]].tr('^A-Za-z0-9', ''),
@@ -153,13 +154,19 @@ class Client
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
       :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]]}
 
-    obj = create_client(hash, center.id, branch.id)
+    obj = Client.new(hash)
+    admin_location = BizLocation.get center.id
+    reg_location = BizLocation.get branch.id
+    obj.save
 
     #if client obj is saved, then update the client with upload_reference.
     if obj.saved?
       obj.update(:upload_reference => obj.id)
     end
 
+    ClientAdministration.assign(admin_location, reg_location, obj, obj.created_by_staff_member_id, obj.created_by_user_id, obj.date_joined)
+    AccountsChart.setup_counterparty_accounts_chart(obj)
+    
     [obj.save!, obj]
   end
 

@@ -50,20 +50,44 @@ class LendingProduct
 
     fee_product_names = row[headers[:fee_products]].split(',')
     fee_products        = SimpleFeeProduct.all(:name => fee_product_names, :fee_charged_on_type => 'fee_charged_on_loan').map(&:id)
-    preclosure_products = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]], :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
-    obj = create_lending_product(name, loan_money_amount, interest_amount, interest_rate, repayment_frequency, tenure, allocation_strategy, principal_schedules, interest_schedules, staff_id, user_id, fee_products+preclosure_products, insurance_products, upload_id)
+    preclosure_products = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]],
+                                               :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
 
-    locations           = row[headers[:branches]].split(/,/)
-    locations.each do |l|
-      location_id = BizLocation.first(:name => l).id
-      obj.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => Date.today,
-                                                    :performed_by => User.first.id, :recorded_by => StaffMember.first.id)
-    end
+    #creating new lending_product.
+    product = {}
+    product[:name] = name
+    product[:amount] = loan_money_amount.amount
+    product[:currency] = loan_money_amount.currency
+    product[:interest_rate] = interest_rate
+    product[:repayment_frequency] = repayment_frequency
+    product[:tenure] = tenure
+    product[:repayment_allocation_strategy] = allocation_strategy
+    product[:simple_insurance_products] = [insurance_products]
+    product[:upload_id] = upload_id
+    new_product = first_or_create(product)
 
-    if obj.save
-      [true, obj]
+    if new_product.save
+      #creating the schedules.
+      principal_and_interest_amounts = assemble_amortization(tenure, principal_schedules, interest_schedules)
+      LoanScheduleTemplate.create_schedule_template(name, loan_money_amount, interest_amount, tenure, repayment_frequency, new_product,
+                                                    principal_and_interest_amounts)
+      #setting up the fees.
+      unless fee_products.blank?
+        fee_products.each do |fee_id|
+          FeeAdministration.fee_setup(fee_id, 'LendingProduct', new_product.id, Date.today, staff_id, user_id)
+        end
+      end
+
+      #assigning the lending_products to branches.
+      locations           = row[headers[:branches]].split(/,/)
+      locations.each do |l|
+        location_id = BizLocation.first(:name => l).id
+        new_product.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => Date.today,
+                                                              :performed_by => User.first.id, :recorded_by => StaffMember.first.id)
+      end
+      [true, new_product]
     else
-      [false, obj]
+      [false, new_product]
     end
   end
 

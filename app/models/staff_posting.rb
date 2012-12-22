@@ -19,9 +19,11 @@ class StaffPosting
   def staff_assigned; StaffMember.get(self.staff_id); end
   def assigned_to_location; BizLocation.get(self.at_location_id); end
 
-  validates_with_method :only_one_posting_on_date?
-  validates_with_method :assignment_and_creation_dates_are_valid?
-  validates_with_method :staff_member_is_active?
+  if Mfi.first.system_state != :migration
+    validates_with_method :only_one_posting_on_date?
+    validates_with_method :assignment_and_creation_dates_are_valid?
+    validates_with_method :staff_member_is_active?
+  end
 
   def only_one_posting_on_date?
     assigned_elsewhere_on_date = StaffPosting.first(:staff_id => self.staff_id, :effective_on => self.effective_on)
@@ -67,7 +69,15 @@ class StaffPosting
     recorded_by = User.first.id
     upload_id = row[headers[:upload_id]]
     reference = row[headers[:reference]]
-    obj = assign(staff_member, location, effective_on, performed_by, recorded_by, upload_id, reference)
+    assignment = {}
+    assignment[:staff_id]       = staff_member.id
+    assignment[:at_location_id] = location.id
+    assignment[:effective_on]   = effective_on
+    assignment[:performed_by]   = performed_by
+    assignment[:recorded_by]    = recorded_by
+    assignment[:upload_id]      = upload_id
+    assignment[:reference]      = reference
+    obj = create(assignment)
     if obj.saved?
       [true, obj]
     else
