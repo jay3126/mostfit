@@ -15,9 +15,11 @@ class LocationLink
   def parent_location; Resolver.fetch_model_instance(self.model_type, self.parent_id); end
   def child_location; Resolver.fetch_model_instance(self.model_type, self.child_id); end
 
-  validates_with_method :linked_locations_are_at_adjacent_levels?
-  validates_with_method :linked_and_creation_dates_are_valid?
-  validates_with_method :linked_to_one_location_only_on_one_date?, :if => lambda { |t| t.deleted_at == nil }
+  if Mfi.first.system_state != :migration
+    validates_with_method :linked_locations_are_at_adjacent_levels?
+    validates_with_method :linked_and_creation_dates_are_valid?
+    validates_with_method :linked_to_one_location_only_on_one_date?, :if => lambda { |t| t.deleted_at == nil }
+  end
 
   # Two locations are related to one another on different location levels and not on the same location level
   def linked_locations_are_at_adjacent_levels?
