@@ -1,5 +1,5 @@
 class OverdueDetailedReport < Report
-  attr_accessor :biz_location_branch_id, :date
+  attr_accessor :biz_location_branch_id, :date, :page
 
   validates_with_method :biz_location_branch_id, :branch_should_be_selected
 
@@ -10,6 +10,8 @@ class OverdueDetailedReport < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -51,12 +53,12 @@ class OverdueDetailedReport < Report
   end
 
   def generate
-
     data = {}
-    outstanding_loans = get_reporting_facade(@user).all_outstanding_loans_on_date(@date, @biz_location_branch)
+    outstanding_loans = get_reporting_facade(@user).all_outstanding_loans_on_date(@date, @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:outstanding_loans] = outstanding_loans
+    data[:loans] = {}
     lendings = outstanding_loans.select {|loan| (loan.days_past_due > 0)}
     lendings.each do |loan|
-      
       loan_due_status            = loan.loan_due_statuses(:due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc]).first
       loan_overdue_status        = loan.loan_due_statuses(:due_status => Constants::Loan::OVERDUE, :on_date.lte => @date, :order => [:on_date.desc, :created_at.desc]).last
 
@@ -89,7 +91,7 @@ class OverdueDetailedReport < Report
         branch_name                = branch ? branch.name : "Not Specified"
         branch_id                  = branch ? branch.id : "Not Specified"
 
-        data[loan.id] = {:member_name => member_name, :member_id => member_id,
+        data[:loans][loan.id] = {:member_name => member_name, :member_id => member_id,
           :center_name => center_name, :center_id => center_id, :loan_account_number => loan_account_number,
           :branch_name => branch_name, :branch_id => branch_id,
           :product_name => loan_product_name, :source_of_fund => source_of_fund,
