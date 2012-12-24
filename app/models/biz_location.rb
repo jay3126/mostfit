@@ -60,7 +60,7 @@ class BizLocation
     location = {}
     location[:name] = name
     location[:creation_date] = creation_date
-    location[:location_level] = location_level_number
+    location[:location_level] = location_level
     location[:originator_by] = originator_by
     location[:biz_location_address] = address
     location[:center_disbursal_date] = center_disbursal_date
