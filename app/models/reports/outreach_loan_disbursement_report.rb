@@ -32,7 +32,7 @@ class OutreachLoanDisbursementReport < Report
 
   def generate
     location_facade  = get_location_facade(@user)
-    data = {:loan_disbursement_by_caste => {}, :loan_disbursement_by_religion => {}, :loan_disbursement_by_loan_cycle => {}, :loan_disbursement_by_caste => {}, :loan_disbursement_by_loan_product => {}, :loan_disbursement_by_branch => {}, :loan_disbursement_by_classification => {}, :loan_disbursement_by_psl => {}}
+    data = {:loan_disbursement_by_caste => {}, :loan_disbursement_by_religion => {}, :loan_disbursement_by_loan_cycle => {}, :loan_disbursement_by_loan_product => {}, :loan_disbursement_by_branch => {}, :loan_disbursement_by_classification => {}, :loan_disbursement_by_psl => {}}
 
     #loan_disbursement_by_caste
     caste_master_list = Constants::Masters::CASTE_CHOICE
