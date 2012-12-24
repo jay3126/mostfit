@@ -166,7 +166,7 @@ class ClientAdministration
 
   def self.get_clients_at_location_by_sql(administered_or_registered_choice, given_location_id, on_date = Date.today, count = false)
     locations                                    = { }
-    locations[administered_or_registered_choice] = given_location_id
+    locations[administered_or_registered_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
     locations[:counterparty_type]                = Constants::Transaction::CLIENT
     locations[:effective_on.lte]                 = on_date
     administration                               = all(locations)
@@ -174,11 +174,11 @@ class ClientAdministration
       count == true ? 0 : []
     else
       if count
-        l_links = repository(:default).adapter.query("select count(*) from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} = #{given_location_id} order by ca1.effective_on desc limit 1 );")
+        l_links = repository(:default).adapter.query("select count(*) from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
         l_links.blank? ? 0 : l_links
       else
-        l_links = repository(:default).adapter.query("select * from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} = #{given_location_id} order by ca1.effective_on desc limit 1 );")
-        l_links.map(&:counterparty_id).blank? ? [] : Client.all(:id => l_links.map(&:counterparty_id)).paginate(:page => 1)
+        l_links = repository(:default).adapter.query("select * from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
+        l_links.map(&:counterparty_id).blank? ? [] : Client.all(:id => l_links.map(&:counterparty_id))
       end
     end
   end

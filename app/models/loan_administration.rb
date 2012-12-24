@@ -129,17 +129,17 @@ class LoanAdministration
   def self.get_loans_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, count = false, status = nil)
     locations                                   = {}
     loan_search                                 = {}
-    locations[administered_or_accounted_choice] = given_location_id
+    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
     locations[:effective_on.lte]                = on_date
     administration                              = all(locations)
     if administration.blank?
       count == true ? 0 : []
     else
       if count
-        l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = #{given_location_id} order by la1.effective_on desc limit 1 );")
+        l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
         l_links.blank? ? 0 : l_links
       else
-        l_links = repository(:default).adapter.query("select * from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = #{given_location_id} order by la1.effective_on desc limit 1 );")
+        l_links = repository(:default).adapter.query("select * from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
         if status.blank?
           loan_search[:id] = l_links.map(&:loan_id)
         else

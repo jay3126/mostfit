@@ -65,20 +65,23 @@ class ReportingFacade < StandardFacade
 
   #this function will give back the list of location which is managed by staff.
   def locations_managed_by_staffs_on_date(staff_id, on_date)
-    result = {}
     members = []
-    params = {:manager_staff_id => staff_id, :effective_on => on_date}
-    location_ids_array = LocationManagement.locations_managed_by_staff(staff_id, on_date).map{|lm| lm.managed_location_id}
-    location_ids_array.each do |location|
-      biz_location = BizLocation.get(location)
-      if biz_location.location_level.level == 0
-        members << ClientAdministration.get_clients_administered(biz_location.id, on_date)
-      else
-        members << ClientAdministration.get_clients_registered(biz_location.id, on_date)
+    centers = []
+    locations = LocationManagement.locations_managed_by_staff_by_sql(staff_id, on_date)
+    locations.group_by{|g| g.location_level_id}.each do |location_level_id, biz_locations|
+      l_level = LocationLevel.get(location_level_id)
+      if l_level.level == 0
+        centers << biz_locations
+      elsif l_level.level == 1
+        biz_locations.each do |l|
+          centers << LocationLink.get_children_by_sql(l, on_date)
+        end
       end
     end
-    members_count = members.flatten.count
-    result = {:locations_count => location_ids_array.count, :location_ids => location_ids_array, :members_count => members_count}
+    centers = centers.blank? ? [] : centers.flatten.uniq.compact
+    members = ClientAdministration.get_clients_administered_by_sql(centers.map(&:id), on_date)
+    
+    {:locations_count => centers.count, :location_ids => centers.map(&:id), :members_count => members.count}
   end
 
   # Allocations
@@ -224,21 +227,62 @@ class ReportingFacade < StandardFacade
 
   #this function will give the total amount outstanding for loans disbursed till date.
   def sum_all_outstanding_and_overdues_loans_per_branch_on_date(on_date, *at_location_ids_ary)
-    result = {}
-    loan_ids = Lending.all(:disbursal_date.lte => on_date, :accounted_at_origin => at_location_ids_ary).aggregate(:id)
+    loans = []
+    default_currency = MoneyManager.get_default_currency
+    loans = LoanAdministration.get_loans_accounted_by_sql(at_location_ids_ary.flatten, on_date, false,'disbursed_loan_status') unless at_location_ids_ary.flatten.blank?
+    loan_ids = loans.blank? ? [] : loans.map(&:id)
     actual_outstanding_amount = scheduled_outstanding_amount = overdue_amounts = MoneyManager.default_zero_money
-    loan_ids.each do |l|
-      loan = Lending.get(l)
-      next unless loan.is_outstanding?
-      actual_outstanding_amount += loan.actual_total_outstanding
-      scheduled_outstanding_amount += loan.scheduled_total_outstanding(on_date)
-      if loan.scheduled_principal_outstanding(on_date) > loan.actual_principal_outstanding(on_date)
-        overdue_amounts += (loan.scheduled_principal_outstanding(on_date) - loan.actual_principal_outstanding(on_date))
-      else
-        overdue_amounts += (loan.actual_principal_outstanding(on_date) - loan.scheduled_principal_outstanding(on_date))
-      end
-    end
-    result = {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
+    loan_schedules = BaseScheduleLineItem.all('loan_base_schedule.lending.id' => loan_ids, :on_date.lte => on_date)
+    scheduled_amounts = loan_schedules.blank? ? [0,0] : loan_schedules.aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum)
+    scheduled_principal = scheduled_amounts[0] <= 0 ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[0].to_i, default_currency)
+    scheduled_interest  = scheduled_amounts[1] <= 0 ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[1].to_i, default_currency)
+    scheduled_total  = scheduled_principal + scheduled_interest
+
+    received_till_date = LoanReceipt.all(:lending_id => loan_ids, :effective_on.lte => on_date)
+    received_amounts = received_till_date.blank? ? [0,0,0,0,0] : received_till_date.aggregate(:principal_received.sum,:interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum)
+    received_principal = received_amounts[0] <= 0 ? MoneyManager.default_zero_money : Money.new(received_amounts[0].to_i, default_currency)
+    received_interest = received_amounts[1] <= 0 ? MoneyManager.default_zero_money : Money.new(received_amounts[1].to_i, default_currency)
+    received_total = received_principal + received_interest
+
+    disbursed_till_date = loans.blank? ? [0,0] : LoanBaseSchedule.all(:lending_id => loans.map(&:id)).aggregate(:total_loan_disbursed.sum, :total_interest_applicable.sum)
+    principal_disbursed = disbursed_till_date[0] <= 0 ? MoneyManager.default_zero_money : Money.new(disbursed_till_date[0].to_i, default_currency)
+    interest_disbursed = disbursed_till_date[1] <= 0 ? MoneyManager.default_zero_money : Money.new(disbursed_till_date[1].to_i, default_currency)
+    total_disbursed = principal_disbursed + interest_disbursed
+    actual_outstanding_amount = total_disbursed - received_total
+    scheduled_outstanding_amount = total_disbursed - scheduled_total
+    overdue_amounts = received_principal < scheduled_principal ? scheduled_principal-received_principal : MoneyManager.default_zero_money
+
+    {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
+  end
+
+  #this function will give the total amount outstanding for loans disbursed till date.
+  def sum_all_outstanding_and_overdues_loans_location_centers_on_date(on_date, *at_location_ids_ary)
+    loans = []
+    default_currency = MoneyManager.get_default_currency
+    loans = LoanAdministration.get_loans_administered_by_sql(at_location_ids_ary.flatten, on_date, false,'disbursed_loan_status') unless at_location_ids_ary.flatten.blank?
+    loan_ids = loans.blank? ? [] : loans.map(&:id)
+    actual_outstanding_amount = scheduled_outstanding_amount = overdue_amounts = MoneyManager.default_zero_money
+    loan_schedules = BaseScheduleLineItem.all('loan_base_schedule.lending.id' => loan_ids, :on_date.lte => on_date)
+    scheduled_amounts = loan_schedules.blank? ? [0,0] : loan_schedules.aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum)
+    scheduled_principal = scheduled_amounts[0] <= 0 ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[0].to_i, default_currency)
+    scheduled_interest  = scheduled_amounts[1] <= 0 ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[1].to_i, default_currency)
+    scheduled_total  = scheduled_principal + scheduled_interest
+
+    received_till_date = LoanReceipt.all(:lending_id => loan_ids, :effective_on.lte => on_date)
+    received_amounts = received_till_date.blank? ? [0,0,0,0,0] : received_till_date.aggregate(:principal_received.sum,:interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum)
+    received_principal = received_amounts[0] <= 0 ? MoneyManager.default_zero_money : Money.new(received_amounts[0].to_i, default_currency)
+    received_interest = received_amounts[1] <= 0 ? MoneyManager.default_zero_money : Money.new(received_amounts[1].to_i, default_currency)
+    received_total = received_principal + received_interest
+
+    disbursed_till_date = loans.blank? ? [0,0] : LoanBaseSchedule.all(:lending_id => loans.map(&:id)).aggregate(:total_loan_disbursed.sum, :total_interest_applicable.sum)
+    principal_disbursed = disbursed_till_date[0] <= 0 ? MoneyManager.default_zero_money : Money.new(disbursed_till_date[0].to_i, default_currency)
+    interest_disbursed = disbursed_till_date[1] <= 0 ? MoneyManager.default_zero_money : Money.new(disbursed_till_date[1].to_i, default_currency)
+    total_disbursed = principal_disbursed + interest_disbursed
+    actual_outstanding_amount = total_disbursed - received_total
+    scheduled_outstanding_amount = total_disbursed - scheduled_total
+    overdue_amounts = received_principal < scheduled_principal ? scheduled_principal-received_principal : MoneyManager.default_zero_money
+
+    {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
   end
 
   #this method will return back the overdue values (principal and interest) on date.
