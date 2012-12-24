@@ -117,7 +117,7 @@
         = total_rows[:overdue_interest]
       -(1..7).each do |k|
         %td
-%br
-.flickr_pagination
-  = will_paginate @data[:loan_ids], :container => false
-%br
+  %br
+  .flickr_pagination
+    = will_paginate @data[:loan_ids], :container => false
+  %br

@@ -16,6 +16,7 @@ class LoanReceipt
   property :created_at,          *CREATED_AT
 
   belongs_to :lending
+  belongs_to :payment_transaction, :nullable => true
 
   validates_with_method :not_all_amounts_are_zero
 
@@ -27,15 +28,16 @@ class LoanReceipt
   # @param [Hash] allocation_values such as {:principal_received => principal_received_money_obj, :interest_received => interest_received_money_obj, :advance_received => advance_received_money_obj}
   # @param [Lending] on_loan
   # @param [Date] effective_on
-  def self.record_allocation_as_loan_receipt(allocation_values, performed_at, accounted_at, on_loan, effective_on)
+  def self.record_allocation_as_loan_receipt(payment_transaction, allocation_values, performed_at, accounted_at, on_loan, effective_on)
     Validators::Arguments.not_nil?(allocation_values, performed_at, accounted_at, on_loan, effective_on)
     receipt                     = Money.from_money(allocation_values)
     receipt.delete(TOTAL_RECEIVED)
-    receipt[:performed_at]      = performed_at
-    receipt[:accounted_at]      = accounted_at
-    receipt[:lending]           = on_loan
-    receipt[:effective_on]      = effective_on
-    loan_receipt                = create(receipt)
+    receipt[:payment_transaction_id] = payment_transaction.id
+    receipt[:performed_at]           = performed_at
+    receipt[:accounted_at]           = accounted_at
+    receipt[:lending]                = on_loan
+    receipt[:effective_on]           = effective_on
+    loan_receipt                     = create(receipt)
     raise Errors::DataError, loan_receipt.errors.first.first unless loan_receipt.saved?
     loan_receipt
   end
@@ -63,6 +65,15 @@ class LoanReceipt
     matching_date[:effective_on.lte] = to_date
     all_receipts                     = all(matching_date)
     add_up(all_receipts)
+  end
+
+  def self.update_loan_receipts
+    all_receipts = all(:payment_transaction_id => nil)
+    all_receipts.each do |receipt|
+      pt = PaymentTransaction.first(:payment_towards => Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT, :on_product_id => receipt.lending_id, :effective_on => receipt.effective_on, :accounted_at => receipt.accounted_at, :performed_at => receipt.performed_at)
+      pt = PaymentTransaction.first(:payment_towards => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE, :on_product_id => receipt.lending_id, :effective_on => receipt.effective_on, :accounted_at => receipt.accounted_at, :performed_at => receipt.performed_at) if pt.blank?
+      receipt.update(:payment_transaction_id => pt.id) unless pt.blank?
+    end
   end
   private
 
