@@ -6,11 +6,16 @@ class MeetingScheduleManager
 
   # Creates a new meeting schedule for the location
   def self.create_meeting_schedule(for_location, meeting_schedule_info)
-    validity_result = MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
-    is_valid = validity_result.is_a?(Array) ? validity_result.first : validity_result
-    raise Errors::BusinessValidationError, validity_result.last unless is_valid
-    meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
-    for_location.save_meeting_schedule(meeting_schedule)
+    if Mfi.first.system_state == :migration
+      meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
+      for_location.save_meeting_schedule(meeting_schedule)
+    else
+      validity_result = MeetingSchedule.validate_new_meeting_schedule(for_location, meeting_schedule_info)
+      is_valid = validity_result.is_a?(Array) ? validity_result.first : validity_result
+      raise Errors::BusinessValidationError, validity_result.last unless is_valid
+      meeting_schedule = MeetingSchedule.record_meeting_schedule(meeting_schedule_info)
+      for_location.save_meeting_schedule(meeting_schedule)
+    end
   end
 
   # Returns a series of dates which are the scheduled meeting dates
