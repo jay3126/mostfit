@@ -7,9 +7,8 @@ class SurpriseCenterExtract < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Surprise Center Extract Report from #{@from_date} to #{@to_date}"
     @user = user
-    location_facade = get_location_facade(@user)
     @page = params.blank? || params[:page].blank? ? 1 :params[:page]
-    @limit = 20
+    @limit = 10
     get_parameters(params, user)
   end
 
