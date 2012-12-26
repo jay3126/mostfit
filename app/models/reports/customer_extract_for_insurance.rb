@@ -1,6 +1,6 @@
 class CustomerExtractForInsurance < Report
 
-  attr_accessor :from_date, :to_date
+  attr_accessor :from_date, :to_date, :page
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
