@@ -34,94 +34,108 @@ class OutreachMembersReport < Report
     location_facade  = get_location_facade(@user)
     #since Suryoday has 1:1 mapping between Loan and Client, so we are counting number of loans = number of members.
     data = {:members_by_caste => {}, :members_by_religion => {}, :members_by_loan_cycle => {}, :members_by_loan_product => {}, :members_by_branch => {}, :members_by_classification => {}, :members_by_psl => {}}
+    loans = Lending.total_loans_between_dates('', @from_date, @to_date)
+    new_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].map(&:lending_id)
+    disbursed_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].map(&:lending_id)
+    repay_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].map(&:lending_id)
+    preclouse_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].map(&:lending_id)
+    loan_clients       = Client.all(:fields => [:id, :caste, :religion, :town_classification, :priority_sector_list_id])
 
     #members by caste
+    clients_caste_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.caste}
     caste_master_list = Constants::Masters::CASTE_CHOICE
     caste_master_list.each do |caste|
       caste_name = caste.to_s.humanize
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date).select{|ob| ob.borrower_caste == caste}.count
-      new_loans_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date).select{|nla| nla.borrower_caste == caste}.count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status).select{|cl| cl.borrower_caste == caste}.count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status).select{|lp| lp.borrower_caste == caste}.count
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date).select{|c| c.borrower_caste == caste}.count
+      clients    = clients_caste_group[caste]
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_caste][caste] = {:caste_name => caste_name, :opening_balance => opening_balance, :new_loans_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members by religion
+    clients_religion_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.religion}
     religion_master_list = Constants::Masters::RELIGION_CHOICE
     religion_master_list.each do |religion|
       religion_name = religion.to_s.humanize
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date).select{|ob| ob.borrower_religion == religion}.count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date).select{|nl| nl.borrower_religion == religion}.count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status).select{|cl| cl.borrower_religion == religion}.count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status).select{|pl| pl.borrower_religion == religion}.count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date).select{|cl| cl.borrower_religion == religion}.count
+      clients    = clients_religion_group[religion]
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
-      data[:members_by_religion][religion] = {:religion_name => religion_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
+      data[:members_by_religion][religion] = {:religion_name => religion_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period  , :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members by loan_cycle
     cycle_number_master = Lending.all.aggregate(:cycle_number)
     cycle_number_master.each do |loan_cycle_number|
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date, :cycle_number => loan_cycle_number).count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date, :cycle_number => loan_cycle_number).count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status, :cycle_number => loan_cycle_number).count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status, :cycle_number => loan_cycle_number).count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date, :cycle_number => loan_cycle_number).count
+      opening_balance = disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, :cycle_number => loan_cycle_number).count
+      new_loans_added_during_period = new_loans.blank? ? 0 : Lending.all(:id => new_loans, :cycle_number => loan_cycle_number).count
+      loan_closed_during_period = repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, :cycle_number => loan_cycle_number).count
+      loan_preclosed_during_period = preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, :cycle_number => loan_cycle_number).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
-      data[:members_by_loan_cycle][loan_cycle_number] = {:cycle_number => loan_cycle_number, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
+      data[:members_by_loan_cycle][loan_cycle_number] = {:cycle_number => loan_cycle_number, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members by loan_product
     loan_product_master = LendingProduct.all
     loan_product_master.each do |loan_product|
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date, :lending_product_id => loan_product.id).count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date, :lending_product_id => loan_product.id).count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status, :lending_product_id => loan_product.id).count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status, :lending_product_id => loan_product.id).count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date, :lending_product_id => loan_product.id).count
+      opening_balance = disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, :lending_product_id => loan_product.id).count
+      new_loans_added_during_period = new_loans.blank? ? 0 : Lending.all(:id => new_loans, :lending_product_id => loan_product.id).count
+      loan_closed_during_period = repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, :lending_product_id => loan_product.id).count
+      loan_preclosed_during_period = preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, :lending_product_id => loan_product.id).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
-      data[:members_by_loan_product][loan_product] = {:loan_product => loan_product.name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
+      data[:members_by_loan_product][loan_product] = {:loan_product => loan_product.name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members_by_branch
     branch_master = location_facade.all_nominal_branches
     branch_master.each do |branch|
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date, :accounted_at_origin => branch.id).count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date, :accounted_at_origin => branch.id).count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status, :accounted_at_origin => branch.id).count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status, :accounted_at_origin => branch.id).count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date, :accounted_at_origin => branch.id).count
+      opening_balance = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'disbursed_loan_status').count
+      new_loan_count_added_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'new_loan_status').count
+      loan_closed_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'repaid_loan_status').count
+      loan_preclosed_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'preclosed_loan_status').count
+      client_count_at_end_of_period = opening_balance + new_loan_count_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_branch][branch] = {:branch_name => branch.name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members by classification
+    clients_classification_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.town_classification}
     town_classification_master_list = Constants::Masters::TOWN_CLASSIFICATION
     town_classification_master_list.each do |classification|
       classification_name = classification.to_s.humanize
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date).select{|ob| ob.borrower_town_classification == classification}.count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date).select{|nl| nl.borrower_town_classification == classification}.count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status).select{|cl| cl.borrower_town_classification == classification}.count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status).select{|pl| pl.borrower_town_classification == classification}.count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date).select{|cl| cl.borrower_town_classification == classification}.count
+      clients             = clients_classification_group[classification]
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
-      data[:members_by_classification][classification] = {:classification_name => classification_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
+      data[:members_by_classification][classification] = {:classification_name => classification_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     #members by psl
+    clients_psl_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.priority_sector_list_id}
     psl_master = PrioritySectorList.all.map{|psl| psl.id}
     psl_master_list = [nil] + psl_master
     psl_master_list.each do |psl|
       psl_name = (psl != nil) ? PrioritySectorList.get(psl).name : "Not Specified"
-      opening_balance = Lending.all(:applied_on_date.lt => @from_date).select{|ob| ob.borrower_psl == psl}.count
-      new_loan_count_added_during_period = Lending.all(:applied_on_date.gte => @from_date, :applied_on_date.lte => @to_date).select{|nl| nl.borrower_psl == psl}.count
-      loan_closed_during_period = Lending.all(:repaid_on_date.gte => @from_date, :repaid_on_date.lte => @to_date, :status => :repaid_loan_status).select{|lc| lc.borrower_psl == psl}.count
-      loan_preclosed_during_period = Lending.all(:preclosed_on_date.gte => @from_date, :preclosed_on_date.lte => @to_date, :status => :preclosed_loan_status).select{|lp| lp.borrower_psl == psl}.count        
-      client_count_at_end_of_period = Lending.all(:applied_on_date.lte => @to_date).select{|cc| cc.borrower_psl == psl}.count
+      clients  = (psl != nil) ? clients_psl_group[psl.id] : clients_psl_group[nil]
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
-      data[:members_by_psl][psl] = {:psl_name => psl_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
+      data[:members_by_psl][psl] = {:psl_name => psl_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
     end
 
     return data

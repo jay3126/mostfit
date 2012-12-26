@@ -434,6 +434,15 @@ class Lending
   # TOTAL_LOAN_DISBURSED amount to be calculated on the basis of disbursements from payments
   # TOTAL_INTEREST_APPLICABLE amount to be (re)calculated whenever there is a disbursement
 
+  def self.total_loans_between_dates(status = nil, from_date = Date.today, to_date = Date.today)
+    status_key = status.blank? ? '' : LoanLifeCycle::LOAN_STATUSES.index(status.to_sym)
+    if status_key.blank?
+      l_status = repository(:default).adapter.query("select a.lending_id, a.to_status from loan_status_changes a where (a.to_status, a.lending_id) = (select b.to_status,b.lending_id from loan_status_changes b where b.lending_id = a.lending_id and (b.effective_on >= '#{from_date.strftime("%Y-%m-%d")}' or b.effective_on <= '#{to_date.strftime("%Y-%m-%d")}') order by b.effective_on desc limit 1 );")
+      l_status.blank? ? {} : l_status.group_by{|s| s.to_status}
+    else
+      repository(:default).adapter.query("select lending_id from loan_status_changes a where a.to_status = #{status_key+1} and (a.to_status, a.lending_id) = (select b.to_status,b.lending_id from loan_status_changes b where b.lending_id = a.lending_id and (b.effective_on >= '#{from_date.strftime("%Y-%m-%d")}' or b.effective_on <= '#{to_date.strftime("%Y-%m-%d")}') order by b.effective_on desc limit 1 );")
+    end
+  end
   # The total loan amount disbursed
   def total_loan_disbursed
     self.loan_payments.sum_till_date || zero_money_amount

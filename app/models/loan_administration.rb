@@ -176,11 +176,10 @@ class LoanAdministration
     loans.uniq
   end
 
-  def self.get_loans_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, till_date = on_date, count = false, status = nil)
+  def self.get_loans_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, on_date, till_date, count = false, status = nil)
     locations                                   = {}
     loan_search                                 = {}
     locations[administered_or_accounted_choice] = given_location_id
-    locations[:effective_on.gte]                = on_date
     locations[:effective_on.lte]                = till_date
     administration                              = all(locations)
     if administration.blank?
@@ -190,16 +189,15 @@ class LoanAdministration
         l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
         l_links.blank? ? 0 : l_links
       else
-        l_links = repository(:default).adapter.query("select * from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
+        l_links = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{administration.map(&:loan_id).join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
         if status.blank?
-          loan_search[:id] = l_links.map(&:loan_id)
+          loan_search[:id] = l_links
         else
           loan_search[:status] = status
-          status_key = LoanLifeCycle::LOAN_STATUSES.index(status)
-          loan_search[:id] = status_key.blank? ? [0] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.map(&:loan_id).join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND s2.effective_on >= '#{on_date.strftime("%Y-%m-%d")}' AND s2.effective_on <= '#{till_date.strftime("%Y-%m-%d")}' ORDER BY s2.effective_on desc LIMIT 1);")
+          status_key = LoanLifeCycle::LOAN_STATUSES.index(status.to_sym)
+          loan_search[:id] = status_key.blank? ? [0] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND (s2.effective_on >= '#{on_date.strftime("%Y-%m-%d")}' OR s2.effective_on <= '#{till_date.strftime("%Y-%m-%d")}') ORDER BY s2.effective_on desc LIMIT 1);")
         end
-
-        l_links.map(&:loan_id).blank? ? [] : Lending.all(loan_search)
+        l_links.blank? || loan_search[:id].blank? ? [] : Lending.all(loan_search)
       end
     end
   end
