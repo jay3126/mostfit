@@ -10,6 +10,8 @@ class CustomerExtractForInsurance < Report
     location_facade = get_location_facade(@user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -21,10 +23,6 @@ class CustomerExtractForInsurance < Report
     "Customer Extract For Insurance Report"
   end
 
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
-  end
-
   def get_location_facade(user)
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
   end
@@ -34,16 +32,13 @@ class CustomerExtractForInsurance < Report
   end
 
   def generate
-
-    reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
 
     params = {:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch}
-    loan_ids = Lending.all(params).aggregate(:id)
-
-    loan_ids.each do |l|
-      loan = Lending.get(l)
+    loan_ids = Lending.all(params).to_a.paginate(:page => @page, :per_page => @limit)
+    data[:paginated_loan_ids] = loan_ids
+    data[:loans] = {}
+    loan_ids.each do |loan|
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_id = branch ? branch.id : "Not Specified"
       branch_name = branch ? branch.name : "Not Specified"
@@ -68,7 +63,7 @@ class CustomerExtractForInsurance < Report
       service_tax = "Insurance Not Specified"
       total_premium = "Insurance Not Specified"
 
-      data[loan] = {:branch_id => branch_id, :branch_name => branch_name, :center_id => center_id, :center_name => center_name, :client_id => client_id, :client_name => client_name, :gender => gender, :date_of_birth => date_of_birth, :age_as_on_loan_disbursement_date => age_as_on_loan_disbursement_date, :guarantor_name => guarantor_name, :guarantor_relationship => guarantor_relationship, :loan_id => loan_id, :loan_lan => loan_lan, :loan_disbursement_date => loan_disbursement_date, :loan_amount => loan_amount, :loan_commencement_date => loan_commencement_date, :cover_amount => cover_amount, :premium => premium, :service_tax => service_tax, :total_premium => total_premium}
+      data[:loans][loan] = {:branch_id => branch_id, :branch_name => branch_name, :center_id => center_id, :center_name => center_name, :client_id => client_id, :client_name => client_name, :gender => gender, :date_of_birth => date_of_birth, :age_as_on_loan_disbursement_date => age_as_on_loan_disbursement_date, :guarantor_name => guarantor_name, :guarantor_relationship => guarantor_relationship, :loan_id => loan_id, :loan_lan => loan_lan, :loan_disbursement_date => loan_disbursement_date, :loan_amount => loan_amount, :loan_commencement_date => loan_commencement_date, :cover_amount => cover_amount, :premium => premium, :service_tax => service_tax, :total_premium => total_premium}
     end
     data
   end
