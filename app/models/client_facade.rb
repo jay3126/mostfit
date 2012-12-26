@@ -45,12 +45,7 @@ class ClientFacade < StandardFacade
   end
 
   def get_all_deceased_clients
-    deceased_clients = []
-    all_clients = Client.all
-    all_clients.each do |client|
-      deceased_clients << client if has_death_event?(client)
-    end
-    deceased_clients
+    DeathEvent.all.aggregate(:affected_client_id).compact rescue []
   end
 
   def mark_client_documents_recieved(client, recieved_by, recieved_on)

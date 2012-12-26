@@ -453,7 +453,11 @@ class NewClients < Application
   end
 
   def all_deceased_clients
-    @deceased_clients = client_facade.get_all_deceased_clients
+    @deceased_clients = []
+    deceased_client_ids = client_facade.get_all_deceased_clients
+    deceased_client_ids.each do |client_id|
+      @deceased_clients << Client.get(client_id)
+    end
     render
   end
 
