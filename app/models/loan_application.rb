@@ -502,6 +502,8 @@ class LoanApplication
 
   # creates a row for a loan as per highmarks pipe delimited format
   def row_to_delimited_file(datetime = DateTime.now)
+    amount = self.amount.to_f/100
+
     return [
       "CRDRQINQR",                                                             # segment identifier
       "JOIN",                                                                  # credit request type
