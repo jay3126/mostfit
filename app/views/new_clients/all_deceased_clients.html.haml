@@ -9,8 +9,8 @@
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 .shaded
   %h2= "Death Claim Documents Pending:"
-  %i Note: Upon receipt of Death Claim Documents due generation of client loan will be stopped.
   - unless @deceased_clients.blank?
+    %i Note: Upon receipt of Death Claim Documents due generation of client loan will be stopped.
     = form(:action => url(:controller => 'new_clients', :action => 'mark_claim_documents_recieved'), :method => :post) do
       %table.unsortable
         %thead
