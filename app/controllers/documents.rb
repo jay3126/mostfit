@@ -60,6 +60,7 @@ class Documents < Application
   end
 
   private
+
   def get_parent
     if params[:parent_model] and params[:parent_id]
       @parent = Kernel.const_get(params[:parent_model]).get(params[:parent_id])
