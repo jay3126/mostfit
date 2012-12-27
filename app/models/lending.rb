@@ -966,23 +966,36 @@ class Lending
   end
 
   def disburse(by_disbursement_transaction)
-    Validators::Arguments.not_nil?(by_disbursement_transaction)
+    if Mfi.first.system_state == :migration
+      on_disbursal_date = by_disbursement_transaction.effective_on
+      self.disbursed_amount   = by_disbursement_transaction.amount
+      self.disbursal_date     = on_disbursal_date
+      self.disbursed_by_staff = by_disbursement_transaction.performed_by
+      set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
+      disbursement_money_amount = by_disbursement_transaction.payment_money_amount
+      LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
+      disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
+      disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
+      disbursement_allocation
+    else
+      Validators::Arguments.not_nil?(by_disbursement_transaction)
 
-    raise Errors::InvalidStateChangeError, "Only a loan that is approved can be disbursed" unless current_loan_status == APPROVED_LOAN_STATUS
+      raise Errors::InvalidStateChangeError, "Only a loan that is approved can be disbursed" unless current_loan_status == APPROVED_LOAN_STATUS
 
-    on_disbursal_date = by_disbursement_transaction.effective_on
-    raise Errors::BusinessValidationError, "disbursal date: #{on_disbursal_date} cannot precede approval date: #{approved_on_date}" if on_disbursal_date < self.approved_on_date
+      on_disbursal_date = by_disbursement_transaction.effective_on
+      raise Errors::BusinessValidationError, "disbursal date: #{on_disbursal_date} cannot precede approval date: #{approved_on_date}" if on_disbursal_date < self.approved_on_date
 
-    #TODO validate and respond to any changes in the scheduled_first_repayment_date
-    self.disbursed_amount   = by_disbursement_transaction.amount
-    self.disbursal_date     = on_disbursal_date
-    self.disbursed_by_staff = by_disbursement_transaction.performed_by
-    set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
-    disbursement_money_amount = by_disbursement_transaction.payment_money_amount
-    LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
-    disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
-    disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
-    disbursement_allocation
+      #TODO validate and respond to any changes in the scheduled_first_repayment_date
+      self.disbursed_amount   = by_disbursement_transaction.amount
+      self.disbursal_date     = on_disbursal_date
+      self.disbursed_by_staff = by_disbursement_transaction.performed_by
+      set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
+      disbursement_money_amount = by_disbursement_transaction.payment_money_amount
+      LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
+      disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
+      disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
+      disbursement_allocation
+    end
   end
 
   def repay(by_receipt)
