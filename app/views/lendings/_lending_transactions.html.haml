@@ -62,7 +62,7 @@
         %td
           = StaffMember.get(lt.performed_by).name
         %td
-          = User.get(lt.recorded_by).name
+          = User.get(lt.recorded_by).name rescue ''
         %td
           = lt.effective_on
         %td
