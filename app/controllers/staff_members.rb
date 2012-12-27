@@ -249,7 +249,7 @@ class StaffMembers < Application
         if assign_location.new?
           @message = {:notice => "Staff assignment fail"}
         else
-          @message = {:notice => "Staff has assign to location seccussfully"}
+          @message = {:notice => "Staff posted successfully"}
         end
       rescue => ex
         @message = {:error => "An error has occured: #{ex.message}"}
