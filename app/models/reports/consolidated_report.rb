@@ -6,7 +6,7 @@ class ConsolidatedReport < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Consolidated Report from #{@from_date} to #{@to_date}"
     @user = user
-    location_facade = get_location_facade(@user)
+    location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     get_parameters(params, user)
@@ -20,22 +20,13 @@ class ConsolidatedReport < Report
     "Consolidated Report"
   end
 
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
-  end
-
-  def get_location_facade(user)
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
-  end
-
   def default_currency
     @default_currency = MoneyManager.get_default_currency
   end
 
   def generate
 
-    reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
+    reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, @user)
     data = {}
     
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
