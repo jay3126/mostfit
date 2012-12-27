@@ -24,12 +24,15 @@
     %th
       Loan Purpose
 
-  - @data.sort_by{|loan| loan.id}.each do |values|
+  - total_loans_count = 0
+  - total_count = 0
+  - @data.sort_by{|loan| loan}.each do |values|
     %tr
       %td
         = values[1][:branch_id]
       %td
         = values[1][:branch_name]
+        - total_count += 1
       %td
         = values[1][:center_id]
       %td
@@ -44,7 +47,24 @@
         = values[1][:loan_id]
       %td
         = values[1][:loan_amount]
+        - total_loans_count += values[1][:loan_amount]
       %td
         = values[1][:loan_disbursal_date]
       %td
         = values[1][:loan_purpose]
+
+  %tr.total
+    %th
+      %b Total
+    %td
+      = total_count
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+    %td
+      = total_loans_count
+    %td
+    %td
