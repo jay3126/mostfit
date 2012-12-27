@@ -6,12 +6,14 @@ class ClientGroup
   property :id,                Serial
   property :name,              String, :nullable => false
   property :number_of_members, Integer, :nullable => true, :min => 1, :max => 20, :default => 5
-  property :code,              String,  :length => 2, :nullable => false, :index => true
+  property :code,              String,  :length => 50, :nullable => false, :index => true
   property :created_by_staff_member_id,  Integer, :nullable => false, :index => true
   property :created_at, *CREATED_AT
   property :creation_date, Date, :nullable => false, :default => Date.today
 
- validates_length :code, :min => 2, :max => 2
+ if Mfi.first.system_state != :migration
+    validates_length :code, :min => 2, :max => 2
+ end
 
   has n, :clients
   belongs_to :biz_location, :nullable => true

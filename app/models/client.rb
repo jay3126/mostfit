@@ -152,7 +152,7 @@ class Client
     obj = Client.new(hash)
     admin_location = BizLocation.get center.id
     reg_location = BizLocation.get branch.id
-    obj.save
+    obj.save!
 
     #if client obj is saved, then update the client with upload_reference.
     if obj.saved?
