@@ -33,9 +33,9 @@ module CommonClient
       :name => {:nullable => false, :length => 100},
       :address => {:nullable => false},
       :pincode => {:nullable => false, :max => AddressValidation::PIN_CODE_MAX_INT_VALUE},
-      :reference => {:nullable => false, :length => 100, :format => Constants::ReferenceFormatValidations::FORMAT_REFERENCE1},
+      :reference => {:nullable => true, :length => 100, :format => Constants::ReferenceFormatValidations::FORMAT_REFERENCE1},
       :reference_type => {:default => Constants::Masters::DEFAULT_REFERENCE_TYPE},
-      :reference2 => {:nullable => false, :format => Constants::ReferenceFormatValidations::FORMAT_REFERENCE2},
+      :reference2 => {:nullable => true, :format => Constants::ReferenceFormatValidations::FORMAT_REFERENCE2},
       :reference2_type => {:default => Constants::Masters::DEFAULT_REFERENCE2_TYPE},
       :guarantor_name => {:nullable => false},
       :guarantor_relationship => {:default => Constants::Masters::OTHER_RELATIONSHIP}

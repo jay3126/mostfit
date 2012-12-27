@@ -20,13 +20,15 @@ class Client
   property :pincode,                  Integer, CommonClient::Validations.get_validation(:pincode, Client)
   property :income,                   Integer
   property :family_income,            Integer
-  property :reference,                String, CommonClient::Validations.get_validation(:reference, Client)
   property :name,                     String, CommonClient::Validations.get_validation(:name, Client)
   property :gender,                   Enum.send('[]', *GENDER_CHOICE), :nullable => true, :default => FEMALE_GENDER
   property :marital_status,           Enum.send('[]', *MARITAL_STATUS), :default => DEFAULT_MARRITAL_STATUS
+
+  property :reference,                String, CommonClient::Validations.get_validation(:reference, Client)
   property :reference_type,           Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:reference_type, Client)
   property :reference2,               String, CommonClient::Validations.get_validation(:client_reference2, LoanApplication)
   property :reference2_type,          Enum.send('[]', *REFERENCE2_TYPES), CommonClient::Validations.get_validation(:reference2_type, Client)
+
   property :spouse_name,              String, :length => 100
   property :date_of_birth,            Date
   property :spouse_date_of_birth,     Date
@@ -95,19 +97,18 @@ class Client
     validates_is_unique :reference2
     validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
     validates_with_method :is_there_space_in_the_client_group?
-#    validates_with_method :pincode , :method => :pincode_length_check?
+  end
+
+  #validations for reference and reference2 fields.
+  validates_with_method :either_reference_or_reference2_must_be_provided
+
+  def either_reference_or_reference2_must_be_provided
+    return [false, "Either Ration Card or Id Proof should be provided. Both cannot be left blank"] if (self.reference.blank? and self.reference2.blank?)
+    return true
   end
 
   def created_on; self.date_joined; end
   def counterparty; self; end
-
-#  def pincode_length_check?
-#    if :pincode
-#      true
-#    else
-#      false
-#    end
-#  end
 
   def is_there_space_in_the_client_group?
     if (self.client_group and self.client_group.nil? and self.client_group.clients and self.new?)
