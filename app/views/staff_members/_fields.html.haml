@@ -39,11 +39,6 @@
       = select :name => 'biz_location_id', :collection => BizLocation.all('location_level.level'.to_sym.not => 0).map{|d| [d.id.to_s, d.name]}, :prompt => 'Select Location'
   %tr
     %th
-      Manage Locations:
-    %td
-      = select :name => 'manage_location_ids', :collection => BizLocation.all.map{|d| [d.id.to_s, d.name]}, :class => 'multiple', :prompt => 'Select Location'
-  %tr
-    %th
       Mobile number:
     %td
       = text_field :mobile_number, :size => 15
