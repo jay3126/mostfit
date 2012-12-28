@@ -1,8 +1,11 @@
 = error_messages_for @document
 = form_for(@document, :action => url(:document, @document)) do
-  =partial :fields
+  = partial :fields
   %tr
     %td
     %td
       = submit "Save"
-=link_to_with_rights("back", resource(:documents)) if not request.xhr?
+- if params[:parent_model] == "Client"
+  = link_to_with_rights 'Back', url("new_clients/#{params[:parent_id]}?#documents")
+- else
+  = link_to_with_rights 'Back', url("user_locations/weeksheet_collection/#{params[:parent_id]}?#documents")

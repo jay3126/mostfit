@@ -52,7 +52,7 @@ class Documents < Application
         redirect url("user_locations/weeksheet_collection/#{@document.parent_id}?success_message=#{msg_str}#documents")
       end
     else
-      display(@document.parent ? @document.parent : :documents)
+      render :edit
     end
   end
 
@@ -60,7 +60,12 @@ class Documents < Application
     @document = Document.get(id)
     raise NotFound unless @document
     if @document.destroy
-      redirect resource(:documents)
+      msg_str = "Document was successfully deleted"
+      if @document.parent_model == "Client"
+        redirect url("new_clients/#{@document.parent_id}?success_message=#{msg_str}#documents")
+      else
+        redirect url("user_locations/weeksheet_collection/#{@document.parent_id}?success_message=#{msg_str}#documents")
+      end
     else
       raise InternalServerError
     end

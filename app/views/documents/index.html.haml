@@ -54,4 +54,5 @@
           -else
             = link_to 'download page 4', document.document_4.url, :target => "BLANK"
       %td
-        = link_to('Edit', url(:action => :edit, :id => document, :parent_id => @parent.id, :parent_model => @parent.class), :class => (request.xhr? ? "_remote_" : ""))
+        =# link_to('Edit', url(:action => :edit, :id => document, :parent_id => @parent.id, :parent_model => @parent.class), :class => (request.xhr? ? "_remote_" : ""))
+        = link_to('Delete', url(:action => :destroy, :id => document, :parent_id => @parent.id, :parent_model => @parent.class))
