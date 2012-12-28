@@ -1,150 +1,158 @@
 - loan_application = @loan_app
-%table.form{:style => "text-align:left;"}
-  %h2
-    Loan Application Details:
-    = link_to_with_rights "Edit", resource(loan_application, :edit), :class => 'edit'
-
-  %tr
-    %th Loan Applicantion ID
-    %td
-      = loan_application.id
-
-  %tr
-    %th Branch
-    %td
-      = BizLocation.get(loan_application.at_branch_id).name
-
-  %tr
-    %th Center
-    %td
-      = BizLocation.get(loan_application.at_center_id).name
-
-  %tr
-    %th Applicant Name
-    %td
-      = loan_application.client_name
-
-  %tr
-    %th Guarantor name
-    %td
-      = loan_application.client_guarantor_name
-
-  %tr
-    %th Guarantor relationship
-    %td
-      = loan_application.client_guarantor_relationship
-
-  %tr
-    %th Applicant DOB
-    %td
-      = loan_application.client_dob
-
-  %tr
-    %th Reference 1 (Ration Card)
-    %td
-      = loan_application.client_reference1
-
-  %tr
-    %th
-      = "Reference 2 (#{loan_application.client_reference2_type.humanize})"
-    %td
-      = loan_application.client_reference2
-
-  %tr
-    %th Applied for amount
-    %td
-      = loan_application.loan_money_amount.to_s
-
-  %tr
-    %th Address
-    %td
-      = loan_application.client_address
-
-  %tr
-    %th State
-    %td
-      = loan_application.client_state.humanize
-
-  %tr
-    %th pincode
-    %td
-      = loan_application.client_pincode
-
-  %tr
-    %th Loan application status
-    %td
-      = loan_application.status.humanize
-
-  %tr
-    %th Created by staff member
-    %td
-      = StaffMember.get(loan_application.created_by_staff_id).name rescue nil
-
-  %tr
-    %th Credit bureau status
-    %td
-      = loan_application.credit_bureau_status.humanize rescue nil
-
-  %tr
-    %th Credit bureau rejection reason
-    %td
-      = loan_application.credit_bureau_rejection_reason rescue nil
-
-  %tr
-    %th Credit bureau rated at
-    %td
-      = loan_application.credit_bureau_rated_at rescue nil
-
-  %tr
-    %th Created on
-    %td
-      = loan_application.created_on
-
-- if loan_application.to_info && loan_application.to_info.authorization_info
-  - loan_authorization = loan_application.to_info.authorization_info
-  %hr
-  %h3 Loan Application Authorization Info:
-  %table.form{:style => "text-align:left;"}
-    %tr
-      %th Loan authorization status
-      %td
-        = loan_authorization.status.humanize rescue nil
-    %tr
-      %th Loan authorization performed by
-      %td
-        = StaffMember.get(loan_authorization.performed_by_staff_id).name rescue nil
-    %tr
-      %th Loan authorization override reason
-      %td
-        = loan_authorization.override_reason rescue nil
-    %tr
-      %th Loan authorization performed on
-      %td
-        = loan_authorization.performed_on rescue nil
-
-- unless loan_application.client_verifications.blank?
-  - client_verifications = loan_application.client_verifications
-  %hr
-  %h3 Loan Application Verification Info:
-  %table.form{:style => "text-align:left;"}
-    - client_verifications.each do |cv|
+%h2 Loan Application Details:
+%div.tab_container.shaded
+  %ul.tabs
+    %li#Edit_loan_application
+      Info
+    %li#History
+      History
+  %div.tab
+    %table.form{:style => "text-align:left;"}
+      %br
+        %div{:style => "text-align:right;"}
+          = link_to_with_rights "Edit", resource(loan_application, :edit), :class => 'greenButton'
       %tr
-        %th Verification type
+        %th Loan Applicantion ID
         %td
-          = cv.verification_type rescue nil
-      %tr
-        %th Verification status
-        %td
-          = cv.verification_status.humanize rescue nil
-      %tr
-        %th Verified by
-        %td
-          = StaffMember.get(cv.verified_by_staff_id).name rescue nil
+          = loan_application.id
 
       %tr
-        %th Verified on
+        %th Branch
         %td
-          = cv.verified_on_date rescue nil
-          %br
+          = BizLocation.get(loan_application.at_branch_id).name
 
+      %tr
+        %th Center
+        %td
+          = BizLocation.get(loan_application.at_center_id).name
+
+      %tr
+        %th Applicant Name
+        %td
+          = loan_application.client_name
+
+      %tr
+        %th Guarantor name
+        %td
+          = loan_application.client_guarantor_name
+
+      %tr
+        %th Guarantor relationship
+        %td
+          = loan_application.client_guarantor_relationship
+
+      %tr
+        %th Applicant DOB
+        %td
+          = loan_application.client_dob
+
+      %tr
+        %th Reference 1 (Ration Card)
+        %td
+          = loan_application.client_reference1
+
+      %tr
+        %th
+          = "Reference 2 (#{loan_application.client_reference2_type.humanize})"
+        %td
+          = loan_application.client_reference2
+
+      %tr
+        %th Applied for amount
+        %td
+          = loan_application.loan_money_amount.to_s
+
+      %tr
+        %th Address
+        %td
+          = loan_application.client_address
+
+      %tr
+        %th State
+        %td
+          = loan_application.client_state.humanize
+
+      %tr
+        %th pincode
+        %td
+          = loan_application.client_pincode
+
+      %tr
+        %th Loan application status
+        %td
+          = loan_application.status.humanize
+
+      %tr
+        %th Created by staff member
+        %td
+          = StaffMember.get(loan_application.created_by_staff_id).name rescue nil
+
+      %tr
+        %th Credit bureau status
+        %td
+          = loan_application.credit_bureau_status.humanize rescue nil
+
+      %tr
+        %th Credit bureau rejection reason
+        %td
+          = loan_application.credit_bureau_rejection_reason rescue nil
+
+      %tr
+        %th Credit bureau rated at
+        %td
+          = loan_application.credit_bureau_rated_at rescue nil
+
+      %tr
+        %th Created on
+        %td
+          = loan_application.created_on
+
+    - if loan_application.to_info && loan_application.to_info.authorization_info
+      - loan_authorization = loan_application.to_info.authorization_info
+      %hr
+      %h3 Loan Application Authorization Info:
+      %table.form{:style => "text-align:left;"}
+        %tr
+          %th Loan authorization status
+          %td
+            = loan_authorization.status.humanize rescue nil
+        %tr
+          %th Loan authorization performed by
+          %td
+            = StaffMember.get(loan_authorization.performed_by_staff_id).name rescue nil
+        %tr
+          %th Loan authorization override reason
+          %td
+            = loan_authorization.override_reason rescue nil
+        %tr
+          %th Loan authorization performed on
+          %td
+            = loan_authorization.performed_on rescue nil
+
+    - unless loan_application.client_verifications.blank?
+      - client_verifications = loan_application.client_verifications
+      %hr
+      %h3 Loan Application Verification Info:
+      %table.form{:style => "text-align:left;"}
+        - client_verifications.each do |cv|
+          %tr
+            %th Verification type
+            %td
+              = cv.verification_type rescue nil
+          %tr
+            %th Verification status
+            %td
+              = cv.verification_status.humanize rescue nil
+          %tr
+            %th Verified by
+            %td
+              = StaffMember.get(cv.verified_by_staff_id).name rescue nil
+
+          %tr
+            %th Verified on
+            %td
+              = cv.verified_on_date rescue nil
+              %br
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
 =# link_to_with_rights '<< Back', request.env['HTTP_REFERER']

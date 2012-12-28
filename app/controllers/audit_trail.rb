@@ -53,6 +53,11 @@ class AuditTrails < Application
       model = ["Lending", @obj.class.to_s]
     end
 
+    if (params[:audit_for][:controller] == "loan_applications")
+      model = "LoanApplication"
+      id = params[:audit_for][:id]
+    end
+
     @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
     partial "audit_trails/list", :layout => false
   end
@@ -72,12 +77,12 @@ class AuditTrails < Application
 
       if params[:col] and not params[:col].blank? and @properties and @properties.include?(params[:col].to_sym) and model
         @col = if model.properties.map{|x| x.name}.include?(params[:col].to_sym)
-                 params[:col].to_sym
-               elsif model.relationships.keys.include?(params[:col]) and model.relationships[params[:col]].child_key
-                 model.relationships[params[:col]].child_key.first.name
-               else
-                 nil
-               end
+          params[:col].to_sym
+        elsif model.relationships.keys.include?(params[:col]) and model.relationships[params[:col]].child_key
+          model.relationships[params[:col]].child_key.first.name
+        else
+          nil
+        end
       end
     end
 
