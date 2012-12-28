@@ -60,6 +60,7 @@ class ChequeBooks < Application
     @issue_date = params[:cheque_book][:issue_date]
 
     # VALIDATION
+    message[:error] = "Date cannot be blank" if @issue_date.blank?
     message[:error] = "Account not found" if BankAccount.get(@bank_account_id.to_i).nil?
     message[:error] = "Please enter Start cheque number" if @start_serial.blank?
     message[:error] = "Please enter End cheque number" if @end_serial.blank?
