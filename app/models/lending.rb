@@ -182,7 +182,7 @@ class Lending
 
     #creating the loan_borrower entry.
     new_loan_borrower = LoanBorrower.assign_loan_borrower(client, applied_on_date, administered_at_origin, accounted_at_origin,
-                                                          applied_by_staff, recorded_by_user)
+      applied_by_staff, recorded_by_user)
 
     #creating new loan.
     loan_hash                                  = { }
@@ -221,13 +221,13 @@ class Lending
 
     #making enteries in intermediatory models.
     LoanBaseSchedule.create_base_schedule(applied_money_amount, total_interest_applicable, scheduled_disbursal_date, scheduled_first_repayment_date,
-                                          repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
+      repayment_frequency, num_of_installments, new_loan, principal_and_interest_amounts)
 
     LoanAdministration.assign(new_loan.administered_at_origin_location, new_loan.accounted_at_origin_location, new_loan, applied_by_staff,
-                              recorded_by_user, applied_on_date)
+      recorded_by_user, applied_on_date)
 
     FundingLineAddition.assign_tranch_to_loan(new_loan.id, funding_line_id, tranch_id, new_loan.applied_by_staff, new_loan.applied_on_date,
-                                              recorded_by_user)
+      recorded_by_user)
   end
 
   # Creates a new loan
@@ -810,6 +810,23 @@ class Lending
   def days_past_due_on_date(on_date)
     return 0 unless is_outstanding_on_date?(on_date)
     LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+  end
+
+  def loan_days_past_due(on_date = Date.today)
+    days_past_due_till_date = self.loan_due_statuses(:fields => [:id, :due_status], :on_date.lte => on_date, :order => [:id.desc])
+    return 0 if days_past_due_till_date.empty?
+
+    days_past_due_on_date = days_past_due_till_date.first
+    return 0 unless days_past_due_on_date.is_overdue?
+    unbroken_days_past_due = 0
+    days_past_due_till_date.each { |due_status_record|
+      if due_status_record.is_overdue?
+        unbroken_days_past_due += 1
+      else
+        break
+      end
+    }
+    unbroken_days_past_due
   end
 
   #this method is same as days_past_due_on_date with a small modification.

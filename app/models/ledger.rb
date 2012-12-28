@@ -109,7 +109,6 @@ class Ledger
     parent_location = LocationLink.get_parent(biz_location, open_on_date)
     parent_ledgers = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product).flatten.compact
     PRODUCT_LEDGER_TYPES.each { |product_ledger_type|
-      ledgers_size = Ledger.all.count
       ledger_classification = LedgerClassification.resolve(product_ledger_type)
 
       ledger_is_product_specific = ledger_classification.is_product_specific?
@@ -134,12 +133,14 @@ class Ledger
       ledger[:ledger_classification] = ledger_classification
       ledger[:ledger_assignment] = ledger_assignment
       product_ledger = first_or_create(ledger)
+      
       raise Errors::DataError, product_ledger.errors.first.first if product_ledger.id.nil?
       parent_ledgers = parent_ledgers.uniq unless parent_ledgers.blank?
       parent_ledger = parent_ledgers.select{|l| l.ledger_classification == ledger_classification}.first
       all_product_ledgers[ledger_classification.account_purpose] = product_ledger
-      if Ledger.all.count != ledgers_size
-        LocationLink.assign(product_ledger, parent_ledger, open_on_date) unless parent_ledger.blank?
+      unless product_ledger.id.blank?
+        link = LocationLink.first(:model_type => 'Ledger', :child_id => product_ledger.id, :effective_on => product_ledger.open_on)
+        LocationLink.assign(product_ledger, parent_ledger, open_on_date) if link.blank? && !parent_ledger.blank?
         AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => product_ledger.id, :biz_location => biz_location, :effective_on => open_on_date, :performed_by => performed_by, :recorded_by => recorded_by)
       end
     }
@@ -381,18 +382,16 @@ class Ledger
     on_date = Date.parse(on_date.to_s) if on_date.class != Date
     h_ledgers = location.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
     h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
-    ledger_classification = LedgerClassification.resolve(:loan_disbursement)
-    all_vouchers = Voucher.all(:eod => false)
+    ledger_classification = LedgerClassification.resolve(:customer_loan_disbursed)
     h_ledgers.each do |h_ledger|
       ledger_balances = {}
       postings_collection = []
-      c_ledgers = LocationLink.get_children(h_ledger, on_date)
+      c_ledgers = LocationLink.get_children_by_sql(h_ledger, on_date)
       c_vouchers = []
       c_ledgers.each do |c_ledger|
-        t_vouchers = c_ledger.vouchers.all(:eod => false)
+        t_vouchers = c_ledger.vouchers(:eod => false)
         unless t_vouchers.blank?
-          c_vouchers += all_vouchers & t_vouchers
-          all_vouchers = all_vouchers - t_vouchers
+          c_vouchers += t_vouchers
         end
       end
       c_vouchers = c_vouchers.flatten.compact.uniq unless c_vouchers.blank?
@@ -410,7 +409,7 @@ class Ledger
           total_amount = ledger_balances.values.select{|l| l.effect == :credit}.sum||MoneyManager.default_zero_money
           if total_amount > MoneyManager.default_zero_money
             voucher_postings = []
-            posting = postings_collection.select{|p| p.ledger.ledger_classification == ledger_classification && p.effect==:credit}
+            posting = postings_collection.select{|p| !p.ledger.blank? && p.ledger.ledger_classification_id == ledger_classification.id && p.effect==:credit}
             receipt_type = posting.blank? ? Constants::Transaction::RECEIPT : Constants::Transaction::PAYMENT
             postings_collection.group_by{|g| g.ledger}.each do |ledger, posting_info|
               if posting_info.size > 1
@@ -425,6 +424,28 @@ class Ledger
             end
             Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', location.id, "EOD :- "+narration)
             vouchers.each{|d| d.update(:eod=>true)}
+          end
+        end
+      end
+    end
+  end
+
+  def self.setup_location_link
+    ClientAdministration.all.each do |client_admin|
+      a_chart = AccountsChart.first(:counterparty_id => client_admin.counterparty_id)
+      ledgers = a_chart.blank? ? [] : a_chart.ledgers
+      parent_location = client_admin.registered_at_location
+      parent_ledger_ids = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product_id).flatten.compact
+      parent_ledgers = Ledger.all(:id => parent_ledger_ids)
+      unless parent_ledgers.blank?
+        links = LocationLink.all(:model_type => 'Ledger', :child_id => ledgers.map(&:id)).map(&:child_id)
+        ledgers = ledgers.select{|l| !links.include?(l.id) }
+        ledgers.each do |ledger|
+          parent_ledger = parent_ledgers.select{|l| l.ledger_classification_id == ledger.ledger_classification_id}.first
+          unless parent_ledger.blank?
+            link = LocationLink.first(:model_type => 'Ledger', :child_id => ledger.id)
+            LocationLink.assign(ledger, parent_ledger, ledger.open_on) if link.blank?
+            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1)
           end
         end
       end

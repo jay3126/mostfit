@@ -27,6 +27,7 @@
     No loans exist
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :setup_lending_disbursement_mode)) do
+    - cheque_leaf = ChequeLeaf.all(:fields => [:serial_number], :biz_location_id => params[:parent_location_id], :used => false, :type => :client)
     %table.report.weeksheet.nojs.pre_disbursed
       %thead
         %tr
@@ -83,7 +84,7 @@
           %td
             = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES, :class => 'd_mode'
           %td
-            = select :name => "lending[#{lending.id}][cheque_number]", :collection => ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false, :type => :client).map{|cl| [cl.serial_number]}, :prompt => 'Select Cheque', :class => 'cheque_no'
+            = select :name => "lending[#{lending.id}][cheque_number]", :collection => cheque_leaf, :prompt => 'Select Cheque', :class => 'cheque_no'
           %td
             = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt'
           %td

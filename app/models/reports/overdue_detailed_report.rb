@@ -54,13 +54,16 @@ class OverdueDetailedReport < Report
 
   def generate
     data = {}
-    outstanding_loans = get_reporting_facade(@user).all_outstanding_loans_on_date(@date, @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
-    data[:outstanding_loans] = outstanding_loans
+    outstanding_loans = LoanAdministration.get_loans_accounted_by_sql(@biz_location_branch, @date, false, 'disbursed_loan_status')
+
+    lendings = outstanding_loans.select {|loan| (loan.loan_days_past_due > 0)}
+    lendings = lendings.to_a.paginate(:page => @page, :per_page => @limit)
+    
+    data[:outstanding_loans] = lendings
     data[:loans] = {}
-    lendings = outstanding_loans.select {|loan| (loan.days_past_due > 0)}
-    lendings.each do |loan|
-      loan_due_status            = loan.loan_due_statuses(:due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc]).first
-      loan_overdue_status        = loan.loan_due_statuses(:due_status => Constants::Loan::OVERDUE, :on_date.lte => @date, :order => [:on_date.desc, :created_at.desc]).last
+    lendings.to_a.each do |loan|
+      loan_due_status            = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc]).first
+      loan_overdue_status        = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::OVERDUE, :on_date.lte => @date, :order => [:on_date.desc, :created_at.desc]).last
 
       unless loan_overdue_status.blank?
         member                    = loan.loan_borrower.counterparty
@@ -71,14 +74,13 @@ class OverdueDetailedReport < Report
           member_id       = member.id
           member_name     = member.name
         end
-        loan_product_name      = (loan and loan.lending_product and (not loan.nil?)) ? loan.lending_product.name : "Loan Product Not Available"
-        funding_line           = FundingLineAddition.all(:lending_id => loan.id)
-        source_of_fund             = (funding_line and (not funding_line.blank?)) ? NewFundingLine.get(funding_line.first.funding_line_id).name : "Source of Fund not Available"
-        loan_account_number        = (loan and (not loan.nil?)) ? loan.lan : "Not Specified"
-        loan_disbursed_date        = (loan and loan.disbursal_date and (not loan.nil?)) ? loan.disbursal_date : "Disbursal Date Not Available"
-        loan_end_date              = (loan and loan.last_scheduled_date and (not loan.nil?)) ? loan.last_scheduled_date : "End Date Not Available"
+        loan_product_name          = loan.lending_product.name rescue "Loan Product Not Available"
+        source_of_fund             = FundingLineAddition.get_funder_assigned_to_loan(loan.id).name rescue "Source of Fund not Available"
+        loan_account_number        = loan.lan
+        loan_disbursed_date        = loan.disbursal_date
+        loan_end_date              = loan.last_scheduled_date
         oldest_due_date            = (loan_due_status and (not loan_due_status.nil?)) ? loan_due_status.on_date : "Status Not Available"
-        days_past_due              = loan.days_past_due_on_date(@date)
+        days_past_due              = loan.loan_days_past_due(@date)
         bucket                     = set_overdue_days_range(days_past_due)
         total_principal_overdue    = loan_overdue_status.to_money[:actual_principal_outstanding]
         total_interest_overdue     = loan_overdue_status.to_money[:actual_interest_outstanding]
