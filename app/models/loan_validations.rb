@@ -6,11 +6,6 @@ module LoanValidations
     :dates_are_ordered?,
     :scheduled_disbursal_and_scheduled_first_repayment_dates_are_ordered?
   ]
-
-  DATE_VALIDATIONS_FOR_UPLOAD = [
-    :applied_date_scheduled_disbursal_date_and_scheduled_first_repayment_dates_are_all_supplied?,
-    :scheduled_disbursal_and_first_repayment_date_are_both_supplied?
-  ]
   
   def applied_date_scheduled_disbursal_date_and_scheduled_first_repayment_dates_are_all_supplied?
     return true if (applied_on_date and scheduled_disbursal_date and scheduled_first_repayment_date)

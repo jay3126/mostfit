@@ -98,9 +98,7 @@ class Lending
     [:applied_amount, :approved_amount, :disbursed_amount]
   end
 
-  if Mfi.first.system_state == :migration
-    validates_with_method *DATE_VALIDATIONS_FOR_UPLOAD #see app/models/loan_validations.rb
-  else
+  if Mfi.first.system_state != :migration
     validates_with_method *DATE_VALIDATIONS #see app/models/loan_validations.rb
   end
   
@@ -158,20 +156,11 @@ class Lending
     repayment_frequency = row[headers[:repayment_frequency]].downcase.to_sym
     tenure = row[headers[:tenure]]
 
-    date_applied = Date.parse(row[headers[:applied_on]])
-    if client.date_joined < date_applied
-      applied_on_date = date_applied
-      approved_on_date = Date.parse(row[headers[:approved_on]])
-      scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
-      scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
-      disbursal_date = Date.parse(row[headers[:disbursal_date]])
-    else
-      applied_on_date = client.date_joined
-      approved_on_date = Date.parse(row[headers[:approved_on]])
-      scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
-      scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
-      disbursal_date = Date.parse(row[headers[:disbursal_date]])
-    end
+    applied_on_date = Date.parse(row[headers[:applied_on]])
+    approved_on_date = Date.parse(row[headers[:approved_on]])
+    scheduled_disbursal_date = Date.parse(row[headers[:scheduled_disbursal_date]])
+    scheduled_first_repayment_date = Date.parse(row[headers[:scheduled_first_repayment_date]])
+    disbursal_date = Date.parse(row[headers[:disbursal_date]])
     
     applied_by_staff = StaffMember.first(:name => row[headers[:applied_by_staff]]).id
     approved_by_staff = StaffMember.first(:name => row[headers[:approved_by_staff]]).id
