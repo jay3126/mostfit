@@ -1,6 +1,6 @@
 =link_to_with_rights("Add a document", resource(:documents, :new, {:parent_id => @parent.id, :parent_model => @parent.class}), :class => (request.xhr? ? "_remote_ add greenButton" : "add greenButton"))
 %table.narrow{:width => "100%"}
-  %tr    
+  %tr
     %th
       Type
     %th
