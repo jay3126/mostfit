@@ -8,7 +8,9 @@
         "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
       }
     });
-
+- unless params[:success_message].blank?
+  .flash.notice
+    = params[:success_message]
 
 %h1== #{@biz_location.location_level.name}: <i>#{@biz_location.name}</i>
 - parent_location = LocationLink.get_parent(@biz_location)

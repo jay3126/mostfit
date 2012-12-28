@@ -2,6 +2,7 @@
   %tr
     %td
       Document type
+      %span{:style=>"color:red"} *
     %td
       = select :document_type_id, :collection => DocumentType.all.map{|x| [x.id, x.name]}, :prompt => "Choose the type of document"
   %tr
@@ -17,11 +18,13 @@
   %tr
     %td
       Date of issue
+      %span{:style=>"color:red"} *
     %td
       = date_select_for @document, :date_of_issue, :min_date => Date.new(1950, 1, 1)
   %tr
     %td
       Valid Date
+      %span{:style=>"color:red"} *
     %td
       = date_select_for @document, :valid_upto
   %tr
@@ -32,6 +35,7 @@
   %tr
     %td
       Select document
+      %span{:style=>"color:red"} *
     %td
       = file_field :document
   %tr

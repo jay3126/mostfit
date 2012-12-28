@@ -1,3 +1,7 @@
+- unless params[:success_message].blank?
+  .flash.notice
+    = params[:success_message]
+
 - at_branch = BizLocation.get(@client_admin.registered_at) rescue nil
 - at_center = BizLocation.get(@client_admin.administered_at) rescue nil
 - managed_by = LocationManagement.staff_managing_location(at_center.id, get_effective_date)
