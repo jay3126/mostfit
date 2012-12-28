@@ -1,10 +1,10 @@
 = error_messages_for @document
 = form_for(@document, :action => resource(:documents, :parent_id => @parent.id, :parent_model => @parent.class)) do
-  =partial :fields
+  = partial :fields
   %tr
     %td
     %td
-      = submit "Create"
+      = submit "Create", :class => "greenButton"
 - if params[:parent_model] == "Client"
   = link_to_with_rights 'Back', url("new_clients/#{params[:parent_id]}?#documents")
 - else
