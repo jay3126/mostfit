@@ -31,12 +31,20 @@ class LocationLink
   end
 
   def linked_and_creation_dates_are_valid?
-    Validators::Assignments.is_valid_assignment_date?(effective_on, self.parent_location, self.child_location)
+    if self.model_type == 'BizLocation'
+      Validators::Assignments.is_valid_assignment_date?(effective_on, self.parent_location, self.child_location)
+    else
+      true
+    end
   end
   
   def linked_to_one_location_only_on_one_date?
-    linked_on_same_date = LocationLink.first(:model_type => self.model_type, :child_id => self.child_id, :effective_on => self.effective_on)
-    linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] : true
+    if self.model_type == 'BizLocation'
+      linked_on_same_date = LocationLink.first(:model_type => self.model_type, :child_id => self.child_id, :effective_on => self.effective_on)
+      linked_on_same_date ? [false, "The location already has a link to another location made effective on the same date"] : true
+    else
+      true
+    end
   end
 
   # Get the 'ancestor' or parent for this location link

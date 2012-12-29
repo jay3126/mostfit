@@ -41,12 +41,12 @@ class EodProcess
      # centers = LocationLink.all_children(self.biz_location, self.on_date)
       user = self.user
       #loan_ids_for_advance = get_reporting_facade(user).all_oustanding_loan_IDs_scheduled_on_date_with_advance_balances(self.on_date)
-      loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date).compact
+      loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date, false, 'disbursed_loan_status').compact
       custom_calendars = CustomCalendar.all(:on_date.gte => self.on_date).select{|d| d.on_date != d.collection_date && Date.parse(d.updated_at.to_s) == self.on_date}
       loans.each do |loan|
         loan_schedules = loan.loan_base_schedule.get_schedule_after_date(self.on_date)
         LoanDueStatus.generate_due_status_records_till_date(loan.id, self.on_date)
-        get_loan_facade(user).adjust_advance(self.on_date, loan.id) if loan.is_outstanding? && loan.advance_balance(self.on_date) > loan.zero_money_amount
+        get_loan_facade(user).adjust_advance(self.on_date, loan.id) if loan.advance_balance(self.on_date) > loan.zero_money_amount
         custom_loan_dates = custom_calendars.select{|s| loan_schedules.map(&:on_date).include?(s.on_date) && !s.collection_date.blank?}
         custom_loan_dates.each{|cd| loan.update_loan_shechdule_according_calendar_holiday(cd.on_date, cd.collection_date, self.on_date)}
       end

@@ -430,22 +430,42 @@ class Ledger
     end
   end
 
+#  def self.setup_location_link
+#    ClientAdministration.all.each do |client_admin|
+#      a_chart = AccountsChart.first(:counterparty_id => client_admin.counterparty_id)
+#      ledgers = a_chart.blank? ? [] : a_chart.ledgers
+#      parent_location = client_admin.registered_at_location
+#      parent_ledger_ids = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product_id).flatten.compact
+#      parent_ledgers = Ledger.all(:id => parent_ledger_ids)
+#      unless parent_ledgers.blank?
+#        links = LocationLink.all(:model_type => 'Ledger', :child_id => ledgers.map(&:id)).map(&:child_id)
+#        assign_ledgers = ledgers.select{|l| !links.include?(l.id) }
+#        assign_ledgers.each do |ledger|
+#          parent_ledger = parent_ledgers.select{|l| l.ledger_classification_id == ledger.ledger_classification_id}.first
+#          unless parent_ledger.blank?
+#            LocationLink.assign(ledger, parent_ledger, ledger.open_on)
+#            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1)
+#          end
+#        end
+#      end
+#    end
+#  end
+
   def self.setup_location_link
-    ClientAdministration.all.each do |client_admin|
-      a_chart = AccountsChart.first(:counterparty_id => client_admin.counterparty_id)
-      ledgers = a_chart.blank? ? [] : a_chart.ledgers
-      parent_location = client_admin.registered_at_location
-      parent_ledger_ids = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product_id).flatten.compact
+    BizLocation.all('location_level.level' => 1).each do |parent_location|
+      clients = ClientAdministration.get_clients_registered_by_sql(parent_location.id, Date.today)
+      ledgers = Ledger.all('accounts_chart.counterparty_id' => clients.map(&:id))
+      parent_ledger_ids = parent_location.accounting_locations.map(&:product_id).flatten.compact
       parent_ledgers = Ledger.all(:id => parent_ledger_ids)
       unless parent_ledgers.blank?
         links = LocationLink.all(:model_type => 'Ledger', :child_id => ledgers.map(&:id)).map(&:child_id)
-        ledgers = ledgers.select{|l| !links.include?(l.id) }
-        ledgers.each do |ledger|
+        assign_ledgers = ledgers.select{|l| !links.include?(l.id) }
+        assign_ledgers.each do |ledger|
           parent_ledger = parent_ledgers.select{|l| l.ledger_classification_id == ledger.ledger_classification_id}.first
           unless parent_ledger.blank?
-            link = LocationLink.first(:model_type => 'Ledger', :child_id => ledger.id)
-            LocationLink.assign(ledger, parent_ledger, ledger.open_on) if link.blank?
-            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1)
+            LocationLink.assign(ledger, parent_ledger, ledger.open_on)
+            client_admin = ClientAdministration.last(:counterparty_id => ledger.accounts_chart.counterparty_id)
+            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1) unless client_admin.blank?
           end
         end
       end

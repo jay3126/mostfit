@@ -723,7 +723,10 @@ class Lending
     interest_received_during_date_range
   end
 
-  def advance_balance(on_date = Date.today); advance_received_till_date(on_date) - advance_adjusted_till_date(on_date); end
+  def advance_balance(on_date = Date.today)
+    receipt_amounts = LoanReceipt.sum_till_date_for_loans(self.id, on_date)
+    receipt_amounts[ADVANCE_RECEIVED] - receipt_amounts[ADVANCE_ADJUSTED]
+  end
 
   def overdue_amount(on_date)
     return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
