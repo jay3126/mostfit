@@ -140,7 +140,9 @@ USAGE_TEXT
               client = loan.borrower
               principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
               interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-              amount_to_be_paid = (principal_amount_from_loan_product - pos) + (interest_amount_from_loan_product - int_os)
+              principal_amount_to_be_paid = (principal_amount_from_loan_product - pos)
+              interest_amount_to_be_paid = (interest_amount_from_loan_product - int_os)
+              amount_to_be_paid = principal_amount_to_be_paid + interest_amount_to_be_paid
               money_amount_to_be_paid = amount_to_be_paid
               receipt_type = Constants::Transaction::RECEIPT
               effective_on = as_on_date
@@ -163,7 +165,7 @@ USAGE_TEXT
                 payment_allocation = loan.allocate_payment(payment_transaction, product_action, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
                 accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
                 
-                loan_ids_updated << [loan.id, loan.lan, client.id, principal_amount_from_loan_product, pos, interest_amount_from_loan_product, int_os, "Payment of #{money_amount_to_be_paid} was successfully made"]
+                loan_ids_updated << [loan.id, loan.lan, client.id, principal_amount_to_be_paid, interest_amount_to_be_paid, "Payment of #{money_amount_to_be_paid} was successfully made"]
               else
                 errors << [loan.id, loan.lan, "Payment cannot be saved because: #{payment_transaction.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
               end
