@@ -227,11 +227,16 @@ class BaseScheduleLineItem
       scheduled_interest_due             = principal_and_interest_installment[INTEREST_AMOUNT].amount
       repayment_on = Constants::Time.get_next_date(repayment_on, repayment_frequency) if (num > 1)
 
-      scheduled_principal_outstanding -= scheduled_principal_due
-      raise Errors::BusinessValidationError, "Scheduled principal due: #{scheduled_principal_due} exceeds scheduled principal outstanding: #{scheduled_principal_outstanding}" if scheduled_principal_outstanding < 0
+      if Mfi.first.system_state != :migration
+        scheduled_principal_outstanding -= scheduled_principal_due
+        raise Errors::BusinessValidationError, "Scheduled principal due: #{scheduled_principal_due} exceeds scheduled principal outstanding: #{scheduled_principal_outstanding}" if scheduled_principal_outstanding < 0
 
-      scheduled_interest_outstanding  -= scheduled_interest_due
-      raise Errors::BusinessValidationError, "Scheduled interest due: #{scheduled_interest_due} exceeds scheduled interest outstanding #{scheduled_interest_outstanding}" if scheduled_interest_outstanding < 0
+        scheduled_interest_outstanding  -= scheduled_interest_due
+        raise Errors::BusinessValidationError, "Scheduled interest due: #{scheduled_interest_due} exceeds scheduled interest outstanding #{scheduled_interest_outstanding}" if scheduled_interest_outstanding < 0
+      else
+        scheduled_principal_outstanding -= scheduled_principal_due
+        scheduled_interest_outstanding  -= scheduled_interest_due
+      end
 
       repayment = get_instance(num, repayment_on, REPAYMENT, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
       schedule_line_items << repayment
@@ -239,13 +244,17 @@ class BaseScheduleLineItem
 
     base_schedule.base_schedule_line_items = schedule_line_items.sort
     was_saved                              = base_schedule.save
-    raise Errors::DataError, base_schedule.errors.first.first unless was_saved
+    if Mfi.first.system_state != :migration
+      raise Errors::DataError, base_schedule.errors.first.first unless was_saved
+    end
     base_schedule
   end
 
   # Constructs an instance of this class
   def self.get_instance(installment, on_date, payment_type, scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due, currency)
-    Validators::Amounts.is_positive?(scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due)
+    if Mfi.first.system_state != :migration
+      Validators::Amounts.is_positive?(scheduled_principal_outstanding, scheduled_principal_due, scheduled_interest_outstanding, scheduled_interest_due)
+    end
     line_item                                  = { }
     line_item[:installment]                    = installment
     line_item[:on_date]                        = on_date

@@ -36,8 +36,12 @@ class LoanAdministration
     assignment[:performed_by]    = performed_by
     assignment[:recorded_by]     = recorded_by
     assignment[:effective_on]    = effective_on
-    loan_administration = create(assignment)
-    raise Errors::DataError, loan_administration.errors.first.first unless loan_administration.saved?
+    if Mfi.first.system_state == :migration
+      loan_administration = create!(assignment)
+    else
+      loan_administration = create(assignment)
+      raise Errors::DataError, loan_administration.errors.first.first unless loan_administration.saved?
+    end
     loan_administration
   end
 
