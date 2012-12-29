@@ -163,7 +163,7 @@ USAGE_TEXT
                 payment_allocation = loan.allocate_payment(payment_transaction, product_action, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
                 accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
                 
-                loan_ids_updated << [loan.id, loan.lan, client.id, "Payment successfully made"]
+                loan_ids_updated << [loan.id, loan.lan, client.id, principal_amount_from_loan_product, pos, interest_amount_from_loan_product, int_os, "Payment of #{money_amount_to_be_paid} was successfully made"]
               else
                 errors << [loan.id, loan.lan, "Payment cannot be saved because: #{payment_transaction.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
               end
