@@ -99,7 +99,7 @@
           %td
             = lending.approved_on_date
           %td
-            = text_field :name => "lending[#{lending.id}][disbursed_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;"
+            = text_field :name => "lending[#{lending.id}][disbursed_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :disabled => 'true'
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
