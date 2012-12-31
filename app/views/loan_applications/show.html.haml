@@ -154,5 +154,38 @@
               = cv.verified_on_date rescue nil
               %br
   %div.tab
-    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
-=# link_to_with_rights '<< Back', request.env['HTTP_REFERER']
+    %br
+    %table.report.nojs{:width => "100%"}
+      %tr
+        %th
+          For
+        %th
+          Action
+        %th
+          Changes
+        %th
+          Date
+        %th
+          User
+      - id = @loan_app.id
+      - model = "LoanApplication"
+      - @obj = Kernel.const_get(model).get(id)
+      - @trails = AuditTrail.all(:auditable_id => id, :auditable_type => model, :order => [:created_at.desc])
+      - @trails.each do |trail|
+        %tr
+          %td
+            = link_to_with_rights "#{model}(Id: #{@loan_app.id})", url(:controller => :loan_applications, :action => "show", :id => trail.auditable_id)
+          %td.text
+            %span{:class => get_status_class([:delete, :create, :update].index(trail.action))}
+              = trail.action
+          %td.text
+            %table{:width => '100%'}
+              - change = []
+              - trail.changes.each do |x|
+                - next if x.keys.include?(:amount)
+                - change << x
+              = diff_display(change, @obj, trail.action)
+          %td
+            = trail.created_at.strftime("%d-%m-%Y %H:%M")
+          %td
+            = trail.user ? trail.user.login : "admin"
