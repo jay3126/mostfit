@@ -104,6 +104,10 @@ class FeeInstance
     all(:fee_applied_on_type => FEE_ON_LOAN, :fee_applied_on_type_id => lending_ids).select{|fee_instance| fee_instance.simple_fee_product.fee_charged_on_type == FEE_CHARGED_ON_LOAN}
   end
 
+  def self.all_fee_instances_on_loan_insurance(insurance_ids)
+    all(:fee_applied_on_type => FEE_ON_INSURANCE, :fee_applied_on_type_id => insurance_ids).select{|fee_instance| fee_instance.simple_fee_product.fee_charged_on_type == PREMIUM_COLLECTED_ON_INSURANCE}
+  end
+
   def is_collected?
     not (self.fee_receipt.nil?)
   end

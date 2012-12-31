@@ -67,6 +67,14 @@ class LoanReceipt
     add_up(all_receipts)
   end
 
+  def self.sum_on_date_for_loans(loans, to_date = Date.today)
+    matching_date                    = { }
+    matching_date[:lending_id]       = loans.class == Array ? loans.flatten : [loans]
+    matching_date[:effective_on] = to_date
+    all_receipts                     = all(matching_date)
+    add_up(all_receipts)
+  end
+
   def self.sum_till_date_for_loans(loans, to_date = Date.today)
     matching_date                    = { }
     matching_date[:lending_id]       = loans.class == Array ? loans.flatten : [loans]

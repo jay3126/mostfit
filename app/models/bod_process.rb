@@ -37,7 +37,7 @@ class BodProcess
   def run_bod_process_in_thread
     bk = MyBookKeeper.new
     user = self.user
-    loans = LoanAdministration.get_loans_accounted(self.biz_location.id, self.on_date)
+    loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date)
     loans = loans.compact.uniq unless loans.blank?
     loans.each do |loan|
       LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)

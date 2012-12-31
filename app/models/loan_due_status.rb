@@ -81,62 +81,87 @@ class LoanDueStatus
 
   def self.generate_loan_due_status(for_loan_id, on_date)
     loan = Lending.get(for_loan_id)
+    loan_base_schedule = loan.loan_base_schedule
+    zero_amount = MoneyManager.default_zero_money
     raise Errors::DataError, "Unable to locate the loan for ID: #{for_loan_id}" unless loan
 
     if Mfi.first.system_state == :migration
       location_map = LoanAdministration.first(:loan_id => for_loan_id)
     else
-      location_map = LoanAdministration.get_locations(for_loan_id, on_date)
-      raise Errors::DataError, "Unable to determine loan locations" unless location_map
+      location_map = LoanAdministration.get_location_map(for_loan_id, on_date)
+      raise Errors::DataError, "Unable to determine loan locations" if location_map.blank?
     end
 
-    administered_at_id = location_map[ADMINISTERED_AT].id
-    accounted_at_id    = location_map[ACCOUNTED_AT].id
+    unless location_map.blank?
+      administered_at_id = location_map.administered_at
+      accounted_at_id    = location_map.accounted_at
 
-    due_status = {}
-    due_status[:lending_id]      = for_loan_id
-    due_status[:loan_status]     = loan.current_loan_status
-    loan_due_status              = loan.due_status_from_outstanding(on_date)
-    due_status[:due_status]      = loan_due_status
-    due_status[:administered_at] = administered_at_id
-    due_status[:accounted_at]    = accounted_at_id
-    due_status[:on_date]         = on_date
+      due_status = {}
+      due_status[:lending_id]      = for_loan_id
+      due_status[:loan_status]     = loan.loan_status_on_date(on_date)
+      due_status[:administered_at] = administered_at_id
+      due_status[:accounted_at]    = accounted_at_id
+      due_status[:on_date]         = on_date
     
-    if loan.has_loan_claim?
-      loan_claim_since = loan.has_loan_claim_since
-      if (loan_claim_since and (on_date >= loan_claim_since))
-        due_status[:has_loan_claim]       = true
-        due_status[:has_loan_claim_since] = loan_claim_since
+      if loan.has_loan_claim?
+        loan_claim_since = loan.has_loan_claim_since
+        if (loan_claim_since and (on_date >= loan_claim_since))
+          due_status[:has_loan_claim]       = true
+          due_status[:has_loan_claim_since] = loan_claim_since
+        end
       end
-    end
 
-    due_status_amounts = {}
-    due_status_amounts[SCHEDULED_PRINCIPAL_OUTSTANDING] = loan.scheduled_principal_outstanding(on_date)
-    due_status_amounts[SCHEDULED_INTEREST_OUTSTANDING]  = loan.scheduled_interest_outstanding(on_date)
-    due_status_amounts[SCHEDULED_TOTAL_OUTSTANDING]     = loan.scheduled_total_outstanding(on_date)
-    due_status_amounts[SCHEDULED_PRINCIPAL_DUE]         = loan.scheduled_principal_due(on_date)
-    due_status_amounts[SCHEDULED_INTEREST_DUE]          = loan.scheduled_interest_due(on_date)
-    due_status_amounts[SCHEDULED_TOTAL_DUE]             = loan.scheduled_total_due(on_date)
-    actual_principal_outstanding = loan.actual_principal_outstanding
-    due_status_amounts[ACTUAL_PRINCIPAL_OUTSTANDING]    = actual_principal_outstanding
-    due_status_amounts[PRINCIPAL_AT_RISK]               = (loan_due_status == OVERDUE) ? (actual_principal_outstanding) : MoneyManager.default_zero_money
-    due_status_amounts[ACTUAL_INTEREST_OUTSTANDING]     = loan.actual_interest_outstanding
-    due_status_amounts[ACTUAL_TOTAL_OUTSTANDING]        = loan.actual_total_outstanding
-    due_status_amounts[ACTUAL_TOTAL_DUE]                = loan.actual_total_due(on_date)
-    due_status_amounts[:principal_received_on_date]     = loan.principal_received_on_date(on_date)
-    due_status_amounts[:interest_received_on_date]      = loan.interest_received_on_date(on_date)
-    due_status_amounts[:principal_received_till_date]   = loan.principal_received_till_date(on_date)
-    due_status_amounts[:interest_received_till_date]    = loan.interest_received_till_date(on_date)
-    due_status_amounts[:advance_received_on_date]       = loan.advance_received_on_date(on_date)
-    due_status_amounts[:advance_adjusted_on_date]       = loan.advance_adjusted_on_date(on_date)
-    due_status_amounts[:advance_received_till_date]     = loan.advance_received_till_date(on_date)
-    due_status_amounts[:advance_adjusted_till_date]     = loan.advance_adjusted_till_date(on_date)
-    due_status_amounts[:advance_balance]                = loan.advance_balance(on_date)
-    due_status.merge!(Money.from_money(due_status_amounts))
+      schedules_info = loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date, :order => [:on_date.desc, :created_at.desc])
+      schedule_info = schedules_info.first
+      scheduled_principal_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_principal_due).sum.to_i)
+      scheduled_interest_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_interest_due).sum.to_i)
+      scheduled_total_due_till_date = scheduled_principal_till_date + scheduled_interest_till_date
+      receipt_till_date_info = LoanReceipt.sum_till_date_for_loans(loan.id, on_date)
+      receipt_on_date_info = LoanReceipt.sum_on_date_for_loans(loan.id, on_date)
+      due_status_amounts = {}
+      due_status_amounts[SCHEDULED_PRINCIPAL_OUTSTANDING] = schedule_info.blank? ? zero_amount : schedule_info.to_money[:scheduled_principal_outstanding]
+      due_status_amounts[SCHEDULED_INTEREST_OUTSTANDING]  = schedule_info.blank? ? zero_amount : schedule_info.to_money[:scheduled_interest_outstanding]
+      due_status_amounts[SCHEDULED_TOTAL_OUTSTANDING]     = due_status_amounts[SCHEDULED_PRINCIPAL_OUTSTANDING] + due_status_amounts[SCHEDULED_INTEREST_OUTSTANDING]
+      due_status_amounts[SCHEDULED_PRINCIPAL_DUE]         = schedule_info.blank? ? zero_amount : schedule_info.to_money[:scheduled_principal_due]
+      due_status_amounts[SCHEDULED_INTEREST_DUE]          = schedule_info.blank? ? zero_amount : schedule_info.to_money[:scheduled_interest_due]
+      due_status_amounts[SCHEDULED_TOTAL_DUE]             = due_status_amounts[SCHEDULED_PRINCIPAL_DUE] + due_status_amounts[SCHEDULED_INTEREST_DUE]
+
+      due_status_amounts[:principal_received_on_date]     = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:principal_received]
+      due_status_amounts[:interest_received_on_date]      = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:interest_received]
+      due_status_amounts[:principal_received_till_date]   = receipt_till_date_info.blank? ? zero_amount : receipt_till_date_info[:principal_received]
+      due_status_amounts[:interest_received_till_date]    = receipt_till_date_info.blank? ? zero_amount : receipt_till_date_info[:interest_received]
+      due_status_amounts[:advance_received_on_date]       = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:advance_received]
+      due_status_amounts[:advance_adjusted_on_date]       = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:advance_adjusted]
+      due_status_amounts[:advance_received_till_date]     = receipt_till_date_info.blank? ? zero_amount : receipt_till_date_info[:advance_received]
+      due_status_amounts[:advance_adjusted_till_date]     = receipt_till_date_info.blank? ? zero_amount : receipt_till_date_info[:advance_adjusted]
+      due_status_amounts[:advance_balance]                = due_status_amounts[:advance_received_till_date] - due_status_amounts[:advance_adjusted_till_date]
+      actual_principal_outstanding                        = loan.to_money[:disbursed_amount] - due_status_amounts[:principal_received_till_date]
+      total_received_till_date                            = due_status_amounts[:principal_received_till_date] + due_status_amounts[:interest_received_till_date]
+      due_status_amounts[ACTUAL_PRINCIPAL_OUTSTANDING]    = actual_principal_outstanding
+      due_status_amounts[ACTUAL_INTEREST_OUTSTANDING]     = loan_base_schedule.to_money[:total_interest_applicable] > due_status_amounts[:interest_received_till_date] ? loan_base_schedule.to_money[:total_interest_applicable] - due_status_amounts[:interest_received_till_date] : zero_amount
+      due_status_amounts[ACTUAL_TOTAL_OUTSTANDING]        = due_status_amounts[ACTUAL_PRINCIPAL_OUTSTANDING] + due_status_amounts[ACTUAL_INTEREST_OUTSTANDING]
+      due_status_amounts[ACTUAL_TOTAL_DUE]                = scheduled_total_due_till_date > total_received_till_date ? scheduled_total_due_till_date - total_received_till_date : zero_amount
     
-    loan_due_status_record = create(due_status)
-    raise Errors::DataError, loan_due_status_record.errors.first.first unless loan_due_status_record.saved?
-    loan_due_status_record
+      if due_status[:loan_status] == DISBURSED_LOAN_STATUS
+        if loan.scheduled_first_repayment_date > on_date
+        loan_due_status = NOT_DUE
+        elsif due_status_amounts[ACTUAL_TOTAL_DUE] > zero_amount
+          loan_due_status = OVERDUE
+        else
+          loan_due_status = DUE
+        end
+      else
+        loan_due_status = NOT_APPLICABLE
+      end
+      due_status[:due_status] = loan_due_status
+      due_status_amounts[PRINCIPAL_AT_RISK] = (loan_due_status == OVERDUE) ? (actual_principal_outstanding) : zero_amount
+
+      due_status.merge!(Money.from_money(due_status_amounts))
+
+      loan_due_status_record  = first_or_create(due_status)
+      raise Errors::DataError, loan_due_status_record.errors.first.first unless loan_due_status_record.saved?
+      loan_due_status_record
+    end
   end
 
   # If a record exists on any date, get the most recent record on the date

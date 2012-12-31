@@ -45,7 +45,7 @@ class EodProcess
       custom_calendars = CustomCalendar.all(:on_date.gte => self.on_date).select{|d| d.on_date != d.collection_date && Date.parse(d.updated_at.to_s) == self.on_date}
       loans.each do |loan|
         loan_schedules = loan.loan_base_schedule.get_schedule_after_date(self.on_date)
-        LoanDueStatus.generate_due_status_records_till_date(loan.id, self.on_date)
+        LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)
         get_loan_facade(user).adjust_advance(self.on_date, loan.id) if loan.advance_balance(self.on_date) > loan.zero_money_amount
         custom_loan_dates = custom_calendars.select{|s| loan_schedules.map(&:on_date).include?(s.on_date) && !s.collection_date.blank?}
         custom_loan_dates.each{|cd| loan.update_loan_shechdule_according_calendar_holiday(cd.on_date, cd.collection_date, self.on_date)}

@@ -45,7 +45,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt         = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount     = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_caste  = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_caste][caste] = {:caste_name => caste_name, :total_pos_per_caste => total_pos_per_caste, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_caste][caste] = {:caste_name => caste_name, :total_pos_per_caste => total_pos_per_caste, :disbursed_loan_count => loans.size}
     end
 
     clients_religion_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.religion}
@@ -58,7 +58,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt         = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount     = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_religion  = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_religion][religion] = {:religion_name => religion_name, :total_pos_per_religion => total_pos_per_religion, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_religion][religion] = {:religion_name => religion_name, :total_pos_per_religion => total_pos_per_religion, :disbursed_loan_count => loans.size}
     end
 
     #loan disbursement by loan cycle.
@@ -66,7 +66,7 @@ class OutreachLoanDisbursementReport < Report
     cycle_number_master.each do |loan_cycle_number|
       loans                  = Lending.all(:fields => [:id, :disbursed_amount], :id => disbursed_loan_ids, :cycle_number => loan_cycle_number)
       total_amount_disbursed = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
-      data[:loan_disbursement_by_loan_cycle][loan_cycle_number] = {:cycle_number => loan_cycle_number, :disbursed_loan_count => loans.count, :total_amount_disbursed => total_amount_disbursed}
+      data[:loan_disbursement_by_loan_cycle][loan_cycle_number] = {:cycle_number => loan_cycle_number, :disbursed_loan_count => loans.size, :total_amount_disbursed => total_amount_disbursed}
     end
 
     #loan_disbursement_by_loan_product
@@ -76,7 +76,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt               = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount           = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_loan_product = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_loan_product][loan_product] = {:loan_product_name => loan_product.name, :total_pos_per_loan_product => total_pos_per_loan_product, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_loan_product][loan_product] = {:loan_product_name => loan_product.name, :total_pos_per_loan_product => total_pos_per_loan_product, :disbursed_loan_count => loans.size}
     end
 
     #loan_disbursement_by_branch
@@ -86,7 +86,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt         = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount     = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_branch = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_branch][branch] = {:branch_name => branch.name, :total_pos_per_branch => total_pos_per_branch, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_branch][branch] = {:branch_name => branch.name, :total_pos_per_branch => total_pos_per_branch, :disbursed_loan_count => loans.size}
     end
 
     clients_classification_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.town_classification}
@@ -99,7 +99,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt         = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount     = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_classification = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_classification][classification] = {:classification_name => classification_name, :total_pos_per_classification => total_pos_per_classification, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_classification][classification] = {:classification_name => classification_name, :total_pos_per_classification => total_pos_per_classification, :disbursed_loan_count => loans.size}
     end
 
     clients_psl_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.priority_sector_list_id}
@@ -113,7 +113,7 @@ class OutreachLoanDisbursementReport < Report
       loan_receipt         = LoanReceipt.sum_between_dates_for_loans(loans.map(&:id), @from_date, @to_date)
       disbursed_amount     = loans.blank? ? MoneyManager.default_zero_money : Money.new(loans.map(&:disbursed_amount).sum.to_i, default_currency)
       total_pos_per_psl    = disbursed_amount > loan_receipt[:principal_received] ? disbursed_amount-loan_receipt[:principal_received] : MoneyManager.default_zero_money
-      data[:loan_disbursement_by_psl][psl] = {:psl_name => psl_name, :total_pos_per_psl => total_pos_per_psl, :disbursed_loan_count => loans.count}
+      data[:loan_disbursement_by_psl][psl] = {:psl_name => psl_name, :total_pos_per_psl => total_pos_per_psl, :disbursed_loan_count => loans.size}
     end
     
     return data

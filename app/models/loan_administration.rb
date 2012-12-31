@@ -63,13 +63,17 @@ class LoanAdministration
       ACCOUNTED_AT => accounted_at_location }
   end
 
-  # Retrieves the administered_at and accounted_at locations for a given loan on the specified date
-  def self.get_locations(for_loan_id, on_date = Date.today)
+  def self.get_location_map(for_loan_id, on_date = Date.today)
     locations                    = { }
     locations[:loan_id]          = for_loan_id
     locations[:effective_on.lte] = on_date
     locations[:order]            = [:effective_on.desc]
-    recent_assignment            = first(locations)
+    first(locations)
+  end
+
+  # Retrieves the administered_at and accounted_at locations for a given loan on the specified date
+  def self.get_locations(for_loan_id, on_date = Date.today)
+    recent_assignment = get_location_map(for_loan_id)
     recent_assignment ? recent_assignment.to_location_map : nil
   end
 
@@ -199,7 +203,7 @@ class LoanAdministration
         else
           loan_search[:status] = status
           status_key = LoanLifeCycle::LOAN_STATUSES.index(status.to_sym)
-          loan_search[:id] = status_key.blank? ? [0] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND (s2.effective_on >= '#{on_date.strftime("%Y-%m-%d")}' OR s2.effective_on <= '#{till_date.strftime("%Y-%m-%d")}') ORDER BY s2.effective_on desc LIMIT 1);")
+          loan_search[:id] = status_key.blank? ? [0] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND (s2.effective_on >= '#{on_date.strftime("%Y-%m-%d")}' OR s2.effective_on <= '#{till_date.strftime('%Y-%m-%d')}') ORDER BY s2.effective_on desc LIMIT 1);")
         end
         l_links.blank? || loan_search[:id].blank? ? [] : Lending.all(loan_search)
       end

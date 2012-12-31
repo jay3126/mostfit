@@ -125,6 +125,36 @@ class Lending
   has n, :loan_claims, 'LoanClaimProcessing'
   has n, :funds_sources
 
+  def delete_loan
+    ledger_a = LedgerAssignment.all(:product_id => self.id)
+    ledgers = Ledger.all(:ledger_assignment_id => ledger_a.map(&:id))
+    ledgers.vouchers.destroy! rescue ''
+    ledgers.ledger_postings.destroy! rescue ''
+    ledgers.destroy! rescue ''
+    ledger_a.destroy! rescue ''
+
+    self.loan_receipts.destroy! rescue ''
+    self.loan_due_statuses.destroy! rescue ''
+    self.loan_base_schedule.base_schedule_line_items.destroy! rescue ''
+    self.loan_base_schedule.destroy! rescue ''
+    self.loan_status_changes.destroy! rescue ''
+    self.loan_repaid_status.destroy! rescue ''
+    self.loan_payments.destroy! rescue ''
+    self.loan_claims.destroy! rescue ''
+    self.fund_sources.destroy! rescue ''
+
+    PaymentTransaction.all(:on_product_id => self.id).destroy! rescue ''
+    LoanBorrower.all(:lending_id => self.id).destroy! rescue ''
+    LoanAdministration.all(:loan_id => self.id).destroy! rescue ''
+    AccrualTransaction.all(:on_product_id => self.id).destroy! rescue ''
+    FundingLineAddition.all(:lending_id => self.id).destroy! rescue ''
+    LoanAssignment.all(:loan_id => self.id).destroy! rescue ''
+    FeeInstance.all_fee_instances_on_loan(self.id).each{|f| f.destory!} rescue ''
+    FeeInstance.all_fee_instances_on_loan_insurance(self.simple_insurance_policies.map(&:id)).each{|f| f.destroy!} rescue ''
+    self.simple_insurance_policies.destroy! rescue ''
+    self.destroy! rescue ''
+  end
+  
   def register_loan_claim(for_death_event, on_date)
     Validators::Arguments.not_nil?(for_death_event, on_date)
     raise Errors::BusinessValidationError, "The death event does not affect the borrower on this loan" unless (for_death_event.affected_client == self.borrower)
@@ -1107,6 +1137,8 @@ class Lending
     schedules = loan_schedules.select{|s| s.on_date == on_date}
     schedules.each{|schedule| schedule.update(:on_date => move_date)}
   end
+
+
 
   private
 
