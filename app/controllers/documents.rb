@@ -2,7 +2,7 @@ class Documents < Application
   before :get_parent, :only => [:index, :new, :edit, :create]
 
   def index
-    @documents = Document.all(:parent_id => @parent.id, :parent_model => @parent.model, :valid_upto.gte => Date.today)
+    @documents = Document.all(:parent_id => @parent.id, :parent_model => @parent.model)
     display @documents, :layout => layout?
   end
 
