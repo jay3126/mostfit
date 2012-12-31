@@ -43,8 +43,8 @@ class ConsolidatedReport < Report
       loan_repayment_principal_amt      = amounts['principal_amt']
       loan_repayment_interest_amt       = amounts['interest_amt']
       loan_fee_amt                      = amounts['fee_amt']
-      loan_outstanding_principal        = (loan_disbursed_principal_amt > loan_repayment_principal_amt) ? (loan_disbursed_principal_amt - loan_repayment_principal_amt) : (loan_repayment_principal_amt - loan_disbursed_principal_amt)
-      loan_outstanding_interest         = (loan_disbursed_interest_amt > loan_repayment_interest_amt) ? (loan_disbursed_interest_amt - loan_repayment_interest_amt) : (loan_repayment_interest_amt - loan_disbursed_interest_amt)
+      loan_outstanding_principal        = (loan_disbursed_principal_amt > loan_repayment_principal_amt) ? (loan_disbursed_principal_amt - loan_repayment_principal_amt) : MoneyManager.default_zero_money
+      loan_outstanding_interest         = (loan_disbursed_interest_amt > loan_repayment_interest_amt) ? (loan_disbursed_interest_amt - loan_repayment_interest_amt) : MoneyManager.default_zero_money
       loan_advance_collect              = amounts['advance_amt']
       loan_advance_adjust               = amounts['advance_adjustment_amt']
       loan_advance_balance              = amounts['total_advance_balance_amt']
