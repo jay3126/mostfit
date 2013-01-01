@@ -4,14 +4,14 @@ class LoanAccountStatementReport < Report
   validates_with_method :loan_lan_number_id, :lan_number_should_be_selected
 
   def initialize(params, dates, user)
-    @lan_number = (params and params[:loan_lan_number_id]) ? params[:loan_lan_number_id] : ""
-    @name = "Loan Account Statement for #{@lan_number}"
+    @loan_lan_number_id = (params and params[:loan_lan_number_id]) ? params[:loan_lan_number_id] : ""
+    @name = "Loan Account Statement for #{@loan_lan_number_id}"
     @user = user
     get_parameters(params, user)
   end
 
   def name
-    "Loan Account Statement for #{@lan_number}"
+    "Loan Account Statement for #{@loan_lan_number_id}"
   end
 
   def self.name
@@ -32,7 +32,7 @@ class LoanAccountStatementReport < Report
 
   def generate
     data = {:customer_info => {}, :loan_info => {}, :charge_history => {}, :repayments_history => {}}
-    loan = Lending.first(:lan => @lan_number)
+    loan = Lending.first(:lan => @loan_lan_number_id)
     unless loan.blank?
       member = loan.loan_borrower.counterparty
       if member.blank?
@@ -73,7 +73,7 @@ class LoanAccountStatementReport < Report
       fee_instances.each do |fee_instance|
         schedule_date  =  fee_instance.created_at
         payment_date   = fee_instance.is_collected? ? fee_instance.fee_receipt.effective_on : ''
-        due_amount     = fee_instance.money_amount
+        due_amount     = fee_instance.total_money_amount
         paid_amount    = fee_instance.is_collected? ? fee_instance.fee_receipt.fee_money_amount : MoneyManager.default_zero_money
         data[:charge_history][fee_instance.id] ={:schedule_date => schedule_date, :payment_date => payment_date, :due_amount => due_amount, :paid_amount => paid_amount}
       end
@@ -96,7 +96,7 @@ class LoanAccountStatementReport < Report
       end
       data[:customer_info] = {:member_name => member_name, :member_id => member_id, :member_address => member_address, :center_name =>  center_name,
         :loan_purpose => loan_purpose, :loan_cycle => loan_cycle, :loan_status => loan_status}
-      data[:loan_info] = {:loan_number => @lan_number, :loan_start_date => loan_start_date, :loan_end_date => loan_end_date, :total_installments => loan_tenure,
+      data[:loan_info] = {:loan_number => @loan_lan_number_id, :loan_start_date => loan_start_date, :loan_end_date => loan_end_date, :total_installments => loan_tenure,
         :disbursal_date => loan_disbursed_date, :outstanding_principal_with_overdue => outs_principalwith_overdue, :outstanding_interset_with_overdue => outs_interest_with_overdue,
         :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :installment_fallen_due => installment_fallen_due,
         :disbursed_amount => loan_disbursed_amount,:installment_remaining => installment_remaining, :total_amount_paid => total_amount_paid}
