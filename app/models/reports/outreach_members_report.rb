@@ -46,11 +46,11 @@ class OutreachMembersReport < Report
     caste_master_list = Constants::Masters::CASTE_CHOICE
     caste_master_list.each do |caste|
       caste_name = caste.to_s.humanize
-      clients    = clients_caste_group[caste]
-      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      clients    = clients_caste_group[caste].map(&:id) rescue []
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients).count
       client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_caste][caste] = {:caste_name => caste_name, :opening_balance => opening_balance, :new_loans_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
@@ -61,11 +61,11 @@ class OutreachMembersReport < Report
     religion_master_list = Constants::Masters::RELIGION_CHOICE
     religion_master_list.each do |religion|
       religion_name = religion.to_s.humanize
-      clients    = clients_religion_group[religion]
-      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      clients    = clients_religion_group[religion].map(&:id) rescue []
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients).count
       client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_religion][religion] = {:religion_name => religion_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period  , :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
@@ -98,10 +98,10 @@ class OutreachMembersReport < Report
     #members_by_branch
     branch_master = location_facade.all_nominal_branches
     branch_master.each do |branch|
-      opening_balance = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'disbursed_loan_status').count
-      new_loan_count_added_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'new_loan_status').count
-      loan_closed_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'repaid_loan_status').count
-      loan_preclosed_during_period = LoanAdministration.get_loans_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'preclosed_loan_status').count
+      opening_balance = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'disbursed_loan_status').count
+      new_loan_count_added_during_period = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'new_loan_status').count
+      loan_closed_during_period = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'repaid_loan_status').count
+      loan_preclosed_during_period = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'preclosed_loan_status').count
       client_count_at_end_of_period = opening_balance + new_loan_count_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_branch][branch] = {:branch_name => branch.name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loan_count_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
@@ -112,11 +112,11 @@ class OutreachMembersReport < Report
     town_classification_master_list = Constants::Masters::TOWN_CLASSIFICATION
     town_classification_master_list.each do |classification|
       classification_name = classification.to_s.humanize
-      clients             = clients_classification_group[classification]
-      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      clients             = clients_classification_group[classification].map(&:id) rescue []
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients).count
       client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_classification][classification] = {:classification_name => classification_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}
@@ -124,15 +124,16 @@ class OutreachMembersReport < Report
 
     #members by psl
     clients_psl_group = loan_clients.blank? ? {} : loan_clients.group_by{|c| c.priority_sector_list_id}
-    psl_master = PrioritySectorList.all.map{|psl| psl.id}
+    psl_master = PrioritySectorList.all
     psl_master_list = [nil] + psl_master
     psl_master_list.each do |psl|
-      psl_name = (psl != nil) ? PrioritySectorList.get(psl).name : "Not Specified"
+      psl_name = (psl != nil) ? psl.name : "Not Specified"
       clients  = (psl != nil) ? clients_psl_group[psl.id] : clients_psl_group[nil]
-      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
-      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients.map(&:id)).count
+      clients  = clients.blank? ? [] : clients.map(&:id)
+      opening_balance = clients.blank? || disbursed_loans.blank? ? 0 : Lending.all(:id => disbursed_loans, 'loan_borrower.counterparty_id' => clients).count
+      new_loans_added_during_period = clients.blank? || new_loans.blank? ? 0 : Lending.all(:id => new_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_closed_during_period = clients.blank? || repay_loans.blank? ? 0 : Lending.all(:id => repay_loans, 'loan_borrower.counterparty_id' => clients).count
+      loan_preclosed_during_period = clients.blank? || preclouse_loans.blank? ? 0 : Lending.all(:id => preclouse_loans, 'loan_borrower.counterparty_id' => clients).count
       client_count_at_end_of_period = opening_balance + new_loans_added_during_period + loan_closed_during_period + loan_preclosed_during_period
 
       data[:members_by_psl][psl] = {:psl_name => psl_name, :opening_balance => opening_balance, :new_loan_count_added_during_period => new_loans_added_during_period, :loan_closed_during_period => loan_closed_during_period, :loan_preclosed_during_period => loan_preclosed_during_period, :client_count_at_end_of_period => client_count_at_end_of_period}

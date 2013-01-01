@@ -83,12 +83,16 @@ class LoanReceipt
     add_up(all_receipts)
   end
 
-  def self.sum_between_dates_for_loans(loans, from_date = Date.today, to_date = Date.today)
+  def self.between_receipts(loans, from_date = Date.today, to_date = Date.today)
     matching_date                    = { }
     matching_date[:lending_id]       = loans.class == Array ? loans.flatten : [loans]
     matching_date[:effective_on.gte] = from_date
     matching_date[:effective_on.lte] = to_date
-    all_receipts                     = all(matching_date)
+    all(matching_date)
+  end
+
+  def self.sum_between_dates_for_loans(loans, from_date = Date.today, to_date = Date.today)
+    all_receipts = between_receipts(loans, from_date, to_date)
     add_up(all_receipts)
   end
 
@@ -100,7 +104,6 @@ class LoanReceipt
       receipt.update(:payment_transaction_id => pt.id) unless pt.blank?
     end
   end
-  private
 
   # Add up the money amounts on receipt and return a hash with the correct keys
   def self.add_up(receipts)
