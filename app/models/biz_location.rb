@@ -127,8 +127,7 @@ class BizLocation
 
   # Returns all locations that belong to LocationLevel
   def self.all_locations_at_level(by_level_number)
-    level = LocationLevel.get_level_by_number(by_level_number)
-    all(:location_level => level)
+    all('location_level.level' => by_level_number)
   end
 
   # Create a new location by specifying the name, the creation date, and the level number (not the level)

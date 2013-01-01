@@ -123,8 +123,7 @@ class ReportingFacade < StandardFacade
   def sum_all_loans_balances_at_accounted_locations_on_date(on_date, *at_location_ids_ary)
     loan_amounts = {}
     at_location_ids_ary.each do |location_id|
-      loans                 = LoanAdministration.get_loans_accounted_by_sql(location_id, on_date)
-      loans_ids             = loans.blank? ? [0] : loans.map(&:id)
+      loans_ids             = LoanAdministration.get_loan_ids_accounted_by_sql(location_id, on_date)
       preclose_loans        = Lending.all(:fields => [:id], :id => loans_ids, :status => :preclosed_loan_status, :preclosed_on_date.lte => on_date)
       disbursed_loans       = Lending.all(:id => loans_ids, :status => :disbursed_loan_status, :disbursal_date.lte => on_date)
       disbursed_loan_ids    = disbursed_loans.blank? ? [0] : disbursed_loans.map(&:id)
@@ -167,9 +166,9 @@ class ReportingFacade < StandardFacade
       disbursed_loan_ids    = disbursed_loans.blank? ? [0] : disbursed_loans.map(&:id)
       preclose_loan_ids     = preclose_loans.blank? ? [0] : preclose_loans
       loan_disbursement     = repository(:default).adapter.query(" SELECT SUM(total_loan_disbursed) as disbursed_principal, SUM(total_interest_applicable) as disbursed_interest FROM loan_base_schedules where lending_id IN (#{disbursed_loan_ids.join(',')})").first
-      till_on_loan_receipts = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on <= #{on_date}").first
+      till_on_loan_receipts = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on <= '#{till_date.strftime('%Y-%m-%d')}'").first
       loan_receipts         = LoanReceipt.all(:accounted_at => location_id, :effective_on.gte => on_date, :effective_on.lte => till_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum)
-      loan_preclose         = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest FROM loan_receipts where lending_id IN (#{preclose_loan_ids.join(',')}) AND effective_on >= #{on_date} AND effective_on <= #{till_date}").first
+      loan_preclose         = repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest FROM loan_receipts where lending_id IN (#{preclose_loan_ids.join(',')}) AND effective_on >= '#{on_date.strftime('%Y-%m-%d')}' AND effective_on <= '#{till_date.strftime('%Y-%m-%d')}'").first
       fee_amt               = FeeReceipt.all(:accounted_at => location_id, :effective_on.gte => on_date, :effective_on.lte => till_date).aggregate(:fee_amount.sum)
       scheduled_amounts     = BaseScheduleLineItem.all('loan_base_schedule.lending.id' => loans_ids, :on_date.gte => on_date, :on_date.lte => till_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum)
       loan_amounts[location_id]                            = {}
