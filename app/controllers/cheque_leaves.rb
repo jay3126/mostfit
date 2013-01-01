@@ -8,14 +8,41 @@ class ChequeLeaves < Application
   end
 
   def update(id, cheque_leaf)
+    message ={}
     @cheque_leaf = ChequeLeaf.get(id)
     raise NotFound unless @cheque_leaf
-    query = params[:cheque_leaf][id].first
-    if @cheque_leaf.update!(query)
-      redirect url("cheque_books/show/#{@cheque_leaf.cheque_book_id}"), :message => {:notice => "Details for cheque leaf with serial number: #{@cheque_leaf.serial_number} successfully updated"}
+    #Gate Keeping
+    @cheque_leaf_issue_date = params[:cheque_leaf][id].first[:cheque_issue_date]
+
+    #Validations
+    message[:error] = "Date cannot be blank" if @cheque_leaf_issue_date.blank?
+      if message[:error].blank?
+
+      message[:error] = "Cheque Leaf issue date cannot be before Cheque Book issue date" if Date.parse(@cheque_leaf_issue_date) < @cheque_leaf.cheque_book.issue_date
+
+      query = params[:cheque_leaf][id].first
+        if message[:error].blank?
+           if @cheque_leaf.update!(query)
+           message = {:notice => "Details for cheque leaf with serial number: #{@cheque_leaf.serial_number} successfully updated"}
+           else
+           display @cheque_leaf
+           end
+
+        else
+
+        message = {:error => "Cheque Book falied to be created because : #{message[:error]}"}
+        end
+
+     else
+     message = {:error => "Cheque Book falied to be created because : #{message[:error]}"}
+     end
+    #REDIRECT/RENDER
+    if message[:error].blank?
+      redirect request.referer, :message => message
     else
-      display @cheque_leaf
+      redirect request.referer, :message => message
     end
+ 
   end
 
   def destroy(id)

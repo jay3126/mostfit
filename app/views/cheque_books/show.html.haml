@@ -28,7 +28,7 @@
         Actions
 
   %tbody
-    - for cheque_leaf in @cheque_leaves
+    - @cheque_leaves.each do |cheque_leaf|
       %tr
         = form(:action => url(:controller => :cheque_leaves, :action => :update, :id => cheque_leaf.id), :method => :post) do
           %td
