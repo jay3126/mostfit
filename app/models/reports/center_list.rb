@@ -37,12 +37,13 @@ class CenterList < Report
   def generate
     data = {}
     location_facade = get_location_facade(@user)
-    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit) : LocationLink.all_children_by_sql(BizLocation.get(@biz_location_branch), @date).to_a.paginate(:page => @page, :per_page => @limit)
+    biz_location = BizLocation.get(@biz_location_branch) unless @biz_location_branch.blank?
+    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit) : LocationLink.all_children_by_sql(biz_location, @date).to_a.paginate(:page => @page, :per_page => @limit)
     data[:center_ids] = all_centers
     data[:centers] = {}
 
     all_centers.each do |center|
-      branch = location_facade.get_parent(BizLocation.get(center.id), @date)
+      branch = @biz_location_branch.blank? ? location_facade.get_parent(BizLocation.get(center.id), @date) : biz_location
       branch_name = branch ? branch.name : "Not Specified"
       branch_id = branch ? branch.id : "Not Specified"
       agent_name = managed_by_staff(center.id, @date)

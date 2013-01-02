@@ -15,7 +15,7 @@
         Branch Name
       %th
         Process Status
-      %th{:style => "display:none"}
+      %th
         Select All
         %br
         = check_box :name => 'select_all', :id => 'toggle_select_all'
@@ -27,11 +27,11 @@
             = location.name
           %td
             = bod.status.humanize rescue '-'
-          %td{:style => "display:none; text-align:center"}
+          %td{:style => "text-align:center"}
             - if bod.status == Constants::ProcessVerificationStatus::PENDING
-              = check_box :name => 'location_ids[]', :value => location.id, :disabled => pending_amount!=varify_amount, :class => 'eod_div'
+              = check_box :name => 'location_ids[]', :value => location.id, :class => 'eod_div'
             - else
               = check_box :name => 'process_location_ids[]', :value => location.id, :disabled => true, :checked => true
   %br
-  =# submit 'Start'
+  = submit 'Start'
 %br

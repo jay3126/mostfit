@@ -22,9 +22,11 @@ class BodProcess
   def self.bod_process_for_location(location_ids, performed_by_id, created_by_id, on_date = Date.today)
     biz_locations = BizLocation.all(:id => location_ids)
     biz_locations.each do |location|
-      eod = first(:on_date => on_date, :biz_location_id => location.id)
-      eod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
-      eod.run_bod_process_in_thread
+      bod = first(:on_date => on_date, :biz_location_id => location.id)
+      unless bod.blank?
+        bod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
+        bod.run_bod_process_in_thread
+      end
     end
   end
 
@@ -35,18 +37,20 @@ class BodProcess
   end
 
   def run_bod_process_in_thread
-    bk = MyBookKeeper.new
-    user = self.user
-    loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date)
-    loans = loans.compact.uniq unless loans.blank?
-    loans.each do |loan|
-      LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)
-      bk.accrue_all_receipts_on_loan_till_date(loan, self.on_date) if loan.is_outstanding?
-      accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
-      accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
-    end
-    #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
-    self.update(:completed_at => Time.now, :status => COMPLETED)
+    Thread.new {
+      bk = MyBookKeeper.new
+      user = self.user
+      loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date)
+      loans = loans.compact.uniq unless loans.blank?
+      loans.each do |loan|
+        LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)
+        bk.accrue_all_receipts_on_loan_till_date(loan, self.on_date) if loan.is_outstanding?
+        accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
+        accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
+      end
+      #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
+      self.update(:completed_at => Time.now, :status => COMPLETED)
+    }
   end
 
   def not_in_future?
