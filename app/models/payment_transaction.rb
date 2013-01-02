@@ -52,6 +52,7 @@ class PaymentTransaction
   property :performed_by,         *INTEGER_NOT_NULL
   property :recorded_by,          *INTEGER_NOT_NULL
   property :effective_on,         *DATE_NOT_NULL
+  property :accounting,           Boolean, :default => false
   property :created_at,           *CREATED_AT
 
   if Mfi.first.system_state != :migration

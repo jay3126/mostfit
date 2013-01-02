@@ -46,6 +46,7 @@ class BodProcess
         LoanDueStatus.generate_loan_due_status(loan.id, self.on_date)
         bk.accrue_all_receipts_on_loan_till_date(loan, self.on_date) if loan.is_outstanding?
         accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
+        
         accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
       end
       #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)

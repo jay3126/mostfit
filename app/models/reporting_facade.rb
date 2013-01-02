@@ -737,8 +737,8 @@ class ReportingFacade < StandardFacade
 
   def all_accrual_transactions_recorded_on_date(on_date, loan_id = nil)
     search = {}
-    search[:created_at.gt] = on_date
-    search[:created_at.lt] = (on_date + 1)
+    search[:effective_on.lte] = on_date
+    search[:accounting]       = false
     unless loan_id.blank?
       search[:on_product_type] = :lending
       search[:on_product_id] = loan_id

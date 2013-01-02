@@ -15,6 +15,7 @@ class AccrualTransaction
   property :performed_at,            *INTEGER_NOT_NULL
   property :accounted_at,            *INTEGER_NOT_NULL
   property :effective_on,            *DATE_NOT_NULL
+  property :accounting,               Boolean, :default => false
   property :created_at,              *CREATED_AT
 
   def money_amounts; [ :amount ]; end
