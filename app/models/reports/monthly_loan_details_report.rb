@@ -1,11 +1,11 @@
 class MonthlyLoanDetailsReport < Report
   attr_accessor :from_date, :to_date, :funding_line_id, :page
 
-  validates_with_method :funding_line_id, :funding_line_not_selected
-
   def initialize(params, dates, user)
-    @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 30
-    @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
+    @from_date = (dates && dates[:from_date]) ? dates[:from_date] : Date.today - 30
+    @to_date   = (dates && dates[:to_date]) ? dates[:to_date] : Date.today
+    all_funding_lines = NewFundingLine.all.collect {|fl| fl.id}
+    @funding_line_id = (params && params[:funding_line_id] && (!params[:funding_line_id].blank?)) ? params[:funding_line_id] : all_funding_lines
     @name = "Monthly Loan Details Report from #{@from_date} to #{@to_date}"
     @user = user
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
@@ -21,31 +21,19 @@ class MonthlyLoanDetailsReport < Report
     "Monthly Loan Details Report"
   end
 
-  def get_reporting_facade(user)
-    @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, user)
-  end
-
-  def get_location_facade(user)
-    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
-  end
-
   def default_currency
     @default_currency = MoneyManager.get_default_currency
   end
 
   def managed_by_staff(location_id, on_date)
-    location_facade = get_location_facade(@user)
+    location_facade =  FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
     location_manage = location_facade.location_managed_by_staff(location_id, on_date)
-    if location_manage.blank?
-      'Not Managed'
-    else
-      staff_member = location_manage.manager_staff_member.name
-    end
+    return location_manage.blank? ? 'Not Managed' : location_manage.manager_staff_member.name
   end
 
   def generate
-
     data     = {}
+    get_reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, @user)
     @loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id).to_a.paginate(:page => @page, :per_page => @limit)
     loans = @loan_ids.blank? ? [] : Lending.all(:id => @loan_ids)
     data[:loan_ids] = @loan_ids
@@ -69,7 +57,7 @@ class MonthlyLoanDetailsReport < Report
         religion        = member.religion.humanize
         guarantor_name  = member.guarantor_name.humanize
         occupation      = member.occupation.blank? ? 'Not Specified' : member.occupation.name.humanize
-        gender          = (member and member.gender) ? member.gender.humanize : "Not Specified"
+        gender          = (member && member.gender) ? member.gender.humanize : "Not Specified"
         pincode         = member.pincode
         psl_category    = member.psl_sub_category.blank? ? 'Not Specified' : member.psl_sub_category.name.humanize
         village_slum    = 'Not Specified'
@@ -110,8 +98,8 @@ class MonthlyLoanDetailsReport < Report
       branch                     = loan.accounted_at_origin_location
       branch_name                = branch ? branch.name : "Not Specified"
       branch_id                  = branch ? branch.id : "Not Specified"
-      loan_installment           = get_reporting_facade(@user).number_of_installments_per_loan(loan.id)
-      overdue_amount             = get_reporting_facade(@user).overdue_amounts(loan.id, @to_date)
+      loan_installment           = get_reporting_facade.number_of_installments_per_loan(loan.id)
+      overdue_amount             = get_reporting_facade.overdue_amounts(loan.id, @to_date)
       overdue_principal          = overdue_amount[:principal_overdue_amount]
       overdue_interest           = overdue_amount[:interest_overdue_amount]
       installment_remaining      = loan_installment[:installments_remaining]
@@ -161,8 +149,4 @@ class MonthlyLoanDetailsReport < Report
     data
   end
 
-  def funding_line_not_selected
-    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
-    return true
-  end
 end
