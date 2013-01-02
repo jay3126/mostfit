@@ -1,6 +1,6 @@
 class LoanAdministration
   include DataMapper::Resource
-  include Constants::Properties, Constants::Loan
+  include Constants::Properties, Constants::Loan, LoanLifeCycle
 
   property :id,              Serial
   property :loan_id,         *INTEGER_NOT_NULL
@@ -110,6 +110,10 @@ class LoanAdministration
     get_loans_at_location_by_sql(ACCOUNTED_AT, at_location_id, on_date, count, status)
   end
 
+  def self.get_loan_ids_group_vise_accounted_by_sql(at_location_id, on_date = Date.today)
+    get_loans_group_vise_at_location_by_sql(ACCOUNTED_AT, at_location_id, on_date)
+  end
+
   # Returns an (empty) list of loans accounted at a location for a date range by sql.
   def self.get_loans_accounted_for_date_range(at_location_id, on_date = Date.today, till_date = on_date)
     get_loans_at_location_for_date_range(ACCOUNTED_AT, at_location_id, on_date, till_date)
@@ -123,6 +127,10 @@ class LoanAdministration
 
   def self.get_loan_ids_accounted_for_date_range_by_sql(at_location_id, on_date = Date.today, till_date = on_date, count = false, status = nil)
     get_loans_at_location_for_date_range_by_sql(ACCOUNTED_AT, at_location_id, on_date, till_date, count, status)
+  end
+
+  def self.get_loan_ids_group_vise_accounted_for_date_range_by_sql(at_location_id, on_date = Date.today, till_date = on_date)
+    get_loans_group_vise_at_location_for_date_range_by_sql(ACCOUNTED_AT, at_location_id, on_date, till_date)
   end
   
   private
@@ -173,6 +181,58 @@ class LoanAdministration
 
         loan_search[:id].blank? ? [] : loan_search[:id]
       end
+    end
+  end
+
+  def self.get_loans_group_vise_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today)
+    locations                                   = {}
+    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
+    locations[:effective_on.lte]                = on_date
+    loan_ids                                    = all(locations).map(&:loan_id)
+    loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
+    if loan_ids.blank?
+      loans
+    else
+      l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      loan_id_status = l_loans.blank? ? [] : repository(:default).adapter.query("select a.lending_id, a.to_status from (select * from loan_status_changes x where x.lending_id IN (#{l_loans.join(',')})) a where (a.to_status, a.lending_id) = (select b.to_status,b.lending_id from loan_status_changes b where b.lending_id = a.lending_id and b.effective_on <= '#{on_date.strftime("%Y-%m-%d")}' order by b.effective_on desc limit 1 );")
+      unless loan_id_status.blank?
+        loans_by_group                 = loan_id_status.group_by{|s| s.to_status}
+        loans[STATUS_NOT_SPECIFIED]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:status_not_specified)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:status_not_specified)+1].map(&:lending_id)
+        loans[NEW_LOAN_STATUS]         = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].map(&:lending_id)
+        loans[APPROVED_LOAN_STATUS]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:approved_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:approved_loan_status)+1].map(&:lending_id)
+        loans[REJECTED_LOAN_STATUS]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:rejected_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:rejected_loan_status)+1].map(&:lending_id)
+        loans[DISBURSED_LOAN_STATUS]   = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].map(&:lending_id)
+        loans[REPAID_LOAN_STATUS]      = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].map(&:lending_id)
+        loans[PRECLOSED_LOAN_STATUS]   = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].map(&:lending_id)
+        loans[WRITTEN_OFF_LOAN_STATUS] = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:written_off_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:written_off_loan_status)+1].map(&:lending_id)
+      end
+      loans
+    end
+  end
+
+  def self.get_loans_group_vise_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, from_date = Date.today, till_date = Date.today)
+    locations                                   = {}
+    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
+    locations[:effective_on.lte]                = till_date
+    loan_ids                                    = all(locations).map(&:loan_id)
+    loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
+    if loan_ids.blank?
+      loans
+    else
+      l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      loan_id_status = l_loans.blank? ? [] : repository(:default).adapter.query("select a.lending_id, a.to_status from (select * from loan_status_changes x where x.lending_id IN (#{l_loans.join(',')})) a where (a.to_status, a.lending_id) = (select b.to_status,b.lending_id from loan_status_changes b where b.lending_id = a.lending_id and (b.effective_on >= '#{from_date.strftime("%Y-%m-%d")}' or b.effective_on <= '#{till_date.strftime("%Y-%m-%d")}') order by b.effective_on desc limit 1 );")
+      unless loan_id_status.blank?
+        loans_by_group                 = loan_id_status.group_by{|s| s.to_status}
+        loans[STATUS_NOT_SPECIFIED]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:status_not_specified)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:status_not_specified)+1].map(&:lending_id)
+        loans[NEW_LOAN_STATUS]         = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:new_loan_status)+1].map(&:lending_id)
+        loans[APPROVED_LOAN_STATUS]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:approved_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:approved_loan_status)+1].map(&:lending_id)
+        loans[REJECTED_LOAN_STATUS]    = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:rejected_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:rejected_loan_status)+1].map(&:lending_id)
+        loans[DISBURSED_LOAN_STATUS]   = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].map(&:lending_id)
+        loans[REPAID_LOAN_STATUS]      = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].map(&:lending_id)
+        loans[PRECLOSED_LOAN_STATUS]   = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].map(&:lending_id)
+        loans[WRITTEN_OFF_LOAN_STATUS] = loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:written_off_loan_status)+1].blank? ? [] : loans_by_group[LoanLifeCycle::LOAN_STATUSES.index(:written_off_loan_status)+1].map(&:lending_id)
+      end
+      loans
     end
   end
 
