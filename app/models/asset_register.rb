@@ -4,6 +4,7 @@ class AssetRegister
 
   property :id, Serial
   property :name, String, :length => 100, :nullable => false, :index => true
+  property :issued_to_staff_member_id, Integer, :nullable => true
   property :issue_date, Date, :default => Date.today, :nullable => false
   property :returned_date, Date, :nullable => true
   property :issued_by, String, :length => 100

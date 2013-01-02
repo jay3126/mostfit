@@ -4,7 +4,6 @@
 
 = form_for(@asset_register, :action => form_url, :class => "") do
   %h1 Asset Register
-  = error_messages_for @asset_register
   %fieldset
     = partial "asset_registers/edit_fields"
     = submit "Save changes"

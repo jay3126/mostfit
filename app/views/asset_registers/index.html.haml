@@ -80,7 +80,5 @@
       %tr
         %td{ :colspan => 10 }
 
-  = paginate @asset_registers
-  &nbsp;&nbsp;
   - if @biz_location
     = link_to 'Back', url("user_locations/show/#{asset_register.biz_location.id}"), :class => "grey_button"

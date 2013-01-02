@@ -1,10 +1,10 @@
-
 %i
   %b Note: Fields marked * are compulsory
-%table.tall.shaded  
+%table.tall.shaded
   %tr
     %th
-      Branch*
+      Branch
+      %span{:style=>"color:red"} *
     %td
       - if @biz_location
         = @biz_location.name
@@ -12,22 +12,26 @@
       - else
         - location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, User.first)
         - branch_collection = location_facade.all_nominal_branches
-        = select :biz_location_id, :collection => branch_collection.map{|b| [b.id, b.name]}, :prompt => "Select Branch"
+        = select :biz_location_id, :collection => branch_collection.map{|b| [b.id, b.name]}, :prompt => "Select Branch", :selected => (params[:asset_register].blank? || params[:asset_register][:biz_location_id].blank?) ? [] : params[:asset_register][:biz_location_id], :id => "parent_selector", :class => "location"
         %span.greytext select branch for entering the Asset Details
   %tr
     %th
-      Issue To*
+      Issue To
+      %span{:style=>"color:red"} *
     %td
-      = text_field :name
+      - staff_members = ((params[:asset_register].blank? || params[:asset_register][:biz_location_id].blank?) && params[:issued_to_staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(params[:asset_register][:biz_location_id].to_i, get_effective_date).map(&:staff_assigned)
+      = select :name => "issued_to_staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:issued_to_staff_member_id]
       %span.greytext name of the Staff member to whom the asset is being issued
   %tr
     %th
-      Issue Date*
+      Issue Date
+      %span{:style=>"color:red"} *
     %td
       = date_select_for @asset_register, :issue_date
   %tr
     %th
-      Issued By*
+      Issued By
+      %span{:style=>"color:red"} *
     %td
       - if @biz_location
         - staff_member = []
@@ -41,7 +45,8 @@
         %span.greytext select the staff member who issued the asset
   %tr
     %th
-      Asset Category*
+      Asset Category
+      %span{:style=>"color:red"} *
     %td
       - if @asset_category
         = @asset_category.name
@@ -50,7 +55,8 @@
         = select :asset_category_id, :collection => AssetCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Category"
   %tr
     %th
-      Asset Sub-category*
+      Asset Sub-category
+      %span{:style=>"color:red"} *
     %td
       - if @asset_sub_category
         = @asset_sub_category.name
@@ -59,7 +65,8 @@
         = select :asset_sub_category_id, :collection => AssetSubCategory.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Sub-category"
   %tr
     %th
-      Asset Type*
+      Asset Type
+      %span{:style=>"color:red"} *
     %td
       - if @asset_type
         = @asset_type.name
@@ -68,12 +75,14 @@
         = select :asset_type_id, :collection => AssetType.all.map{ |x| [x.id, x.name]}, :prompt => "Select Asset Type"
   %tr
     %th
-      Name of the item*
+      Name of the item
+      %span{:style=>"color:red"} *
     %td
       = text_field :name_of_the_item
   %tr
     %th
-      Tag number*
+      Tag number
+      %span{:style=>"color:red"} *
     %td
       = text_field :tag_no
   %tr

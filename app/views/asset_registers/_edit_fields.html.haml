@@ -9,7 +9,8 @@
     %th
       Issue To
     %td
-      = text_field :name
+      - staff_members = StaffPosting.get_staff_assigned(@asset_register.biz_location_id.to_i, get_effective_date).map(&:staff_assigned)
+      = select :name => "issued_to_staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :id => 'staff_selector', :selected => params[:issued_to_staff_member_id] || @asset_register.issued_to_staff_member_id.to_s
       %span.greytext name of the staff member to whom the asset is being issued
   %tr
     %th
