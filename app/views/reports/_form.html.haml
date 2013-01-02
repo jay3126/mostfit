@@ -270,7 +270,7 @@
           - if @report.respond_to?(:loan_lan_number_id)
             %td
               Loan LAN Number:
-              = select(:loan_lan_number_id, :collection => Lending.all.map{|l| l.lan}, :prompt => "Select LAN number", :selected => loan_lan_number_id)
+              = select(:loan_lan_number_id, :collection => Lending.all.aggregate(:lan), :prompt => "Select LAN number", :selected => loan_lan_number_id)
           - if @report.respond_to?(:branch_for_loan_application_report)
             %td
               Branch:
