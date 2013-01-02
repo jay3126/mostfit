@@ -17,11 +17,11 @@ namespace :mostfit do
     task :pos_per_loan do
       t1 = Time.now
       loan_ids = Lending.all.aggregate(:id)
-      date1 = Date.new(2012, 10, 31)
+      date1 = Date.new(2012, 11, 30)
       sl_no = 0
 
       f = File.open("tmp/pos_per_loan_#{DateTime.now.to_s}.csv", "w")
-      f.puts("\"Sl. No.\", \"Branch Name\", \"Center Name\", \"Client Id\", \"Client Name\", \"Loan System Id\", \"Loan Reference Number\", \"POS as on 31st Oct 2012\", \"IOS as on 31st Oct 2012\"")
+      f.puts("\"Sl. No.\",\"Branch Name\",\"Center Name\",\"Client Id\",\"Client Name\",\"Loan System Id\",\"Loan Reference Number\",\"POS\",\"IOS\",\"Total OS\",\"Principal Received Till Date\",\"Interest Received Till Date\",\"Total Received Till Date\"")
 
       loan_ids.each do |l|
         loan = Lending.get(l)
@@ -36,10 +36,14 @@ namespace :mostfit do
         center_name = BizLocation.get(loan.administered_at_origin).name
         branch_name = BizLocation.get(loan.accounted_at_origin).name
 
-        pos_as_on_31st_oct_2012 = loan.actual_principal_outstanding(date1)
-        ios_as_on_31st_oct_2012 = loan.actual_interest_outstanding(date1)
+        pos = loan.actual_principal_outstanding(date1)
+        ios = loan.actual_interest_outstanding(date1)
+        total_os = pos + ios
+        principal_received_till_date = loan.principal_received_till_date
+        interest_received_till_date = loan.interest_received_till_date
+        total_received_till_date = principal_received_till_date + interest_received_till_date
 
-        f.puts("#{sl_no}, \"#{branch_name}\", \"#{center_name}\", #{client_id}, \"#{client_name}\", #{loan_id}, \"#{loan_reference_number}\", #{pos_as_on_31st_oct_2012}, #{ios_as_on_31st_oct_2012}")
+        f.puts("#{sl_no},\"#{branch_name}\",\"#{center_name}\",#{client_id},\"#{client_name}\",#{loan_id},\"#{loan_reference_number}\",#{pos},#{ios},#{total_os},#{principal_received_till_date},#{interest_received_till_date},#{total_received_till_date}")
       end
       f.close
       t2 = Time.now
