@@ -79,7 +79,7 @@
           %td
             = locations.blank? ? '-' : link_to_location(locations[:accounted_at])
           %td
-            = text_field :name => "lending[#{lending.id}][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;", :readonly => true
+            = text_field :name => "lending[#{lending.id}][approved_amount]", :value => lending.to_money[:applied_amount].to_s.delete('a-z A-Z'), :style => "width:100px;"
           - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
@@ -117,5 +117,6 @@
     %b
       Or
     &nbsp;&nbsp;
-    = submit "Reject"
+    = submit "Reject",:onclick=> "if(confirm('Are you sure you want to reject the selected loan(s)?'))return true;else return false;"
     %br
+    
