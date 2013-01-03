@@ -22,12 +22,13 @@
     });
   });
 
+
 - if lendings.blank?
   %h3
     No loans exist
 - else
   = form_for(:lendings, :action => url(:controller => :lendings, :action => :setup_lending_disbursement_mode)) do
-    - cheque_leaf = ChequeLeaf.all(:fields => [:serial_number], :biz_location_id => params[:parent_location_id], :used => false, :type => :client)
+    - cheque_leaf = ChequeLeaf.all(:biz_location_id => params[:parent_location_id], :used => false, :type => :client).map(&:serial_number)
     %table.report.weeksheet.nojs.pre_disbursed
       %thead
         %tr
@@ -67,6 +68,7 @@
             Approval Date
       - loan_row_count = 1
       - lendings.each do |lending|
+  
         %tr
           %td
             = loan_row_count
@@ -84,9 +86,9 @@
           %td
             = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES, :class => 'd_mode'
           %td
-            = select :name => "lending[#{lending.id}][cheque_number]", :collection => cheque_leaf, :prompt => 'Select Cheque', :class => 'cheque_no'
+            = select :name => "lending[#{lending.id}][cheque_number]", :collection => cheque_leaf.map{|cl| cl.to_s}, :prompt => 'Select Cheque', :class => 'cheque_no'
           %td
-            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt', :disabled=> 'true'
+            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt', :disabled => 'true'
           %td
             = link_to_with_rights lending.id, resource(lending)
           %td
