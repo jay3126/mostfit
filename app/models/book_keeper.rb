@@ -32,6 +32,11 @@ module BookKeeper
     total_amount, currency, effective_on = payment_transaction.amount, payment_transaction.currency, payment_transaction.effective_on
     notation = "Voucher created for #{product_action.to_s.humanize} on #{effective_on}"
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+    if product_action == :loan_preclosure
+      received_accruals = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :on_product_type => 'lending', :on_product_id => payment_transaction.on_product_id, :effective_on.lte => payment_transaction.effective_on)
+      accrual_money = received_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(received_accruals.map(&:amount).sum.to_i)
+      payment_allocation[:principal_received] = payment_allocation[:principal_received] > accrual_money ? payment_allocation[:principal_received] - accrual_money : payment_allocation[:principal_received]
+    end
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
     receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT
     Voucher.create_generated_voucher(total_amount, receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation)
@@ -58,6 +63,9 @@ module BookKeeper
     product_action = :write_off
     loan_id = loan.id
     client_id = loan.borrower.id
+    received_accruals = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :on_product_type => 'lending', :on_product_id => loan.id, :effective_on.lte => on_date)
+    accrual_money = received_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(received_accruals.map(&:amount).sum.to_i)
+    payment_allocation[:total_received] = payment_allocation[:total_received] > accrual_money ? payment_allocation[:total_received] - accrual_money : payment_allocation[:total_received]
     total_amount = payment_allocation[:total_received]
     performed_at = LoanAdministration.get_administered_at(loan_id, Date.today)
     accounted_at = LoanAdministration.get_accounted_at(loan_id, Date.today)
@@ -94,10 +102,10 @@ module BookKeeper
     loan_schedules.each{|date| accrue_all_receipts_on_loan(loan, date)}
 
     loan_schedules.group_by{|d| [d.year,d.month]}.values.sort.each do |dates|
-        first_date = dates.first.first_day_of_month
-        last_date = dates.first.last_day_of_month
-        accrue_broken_period_interest_receipts_on_loan(loan, last_date) if loan_schedules.last > last_date
-        reverse_all_broken_period_interest_receipts(first_date) if loan_schedules.first < first_date
+      first_date = dates.first.first_day_of_month
+      last_date = dates.first.last_day_of_month
+      accrue_broken_period_interest_receipts_on_loan(loan, last_date) if loan_schedules.last > last_date
+      reverse_all_broken_period_interest_receipts(first_date) if loan_schedules.first < first_date
     end
   end
 
