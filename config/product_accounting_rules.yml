@@ -69,3 +69,9 @@ money_deposit:
     total_received: customer_cash
   credit:
     total_received: customer_bank
+accrual_reverse:
+  debit:
+    total_received: customer_loan_debtors
+  credit:
+    principal_received: customer_loan_disbursed
+    interest_received: customer_loan_interest_receipt

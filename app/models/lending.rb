@@ -973,6 +973,7 @@ class Lending
     total_principal_received = self.principal_received_till_date(write_off_on_date)
     write_off_on_amount = total_loan_disbursed - total_principal_received
     bk.account_for_write_off(self, {:total_received => write_off_on_amount}, write_off_on_date)
+    bk.account_for_accrual_reverse(self, write_off_on_date)
   end
 
   def setup_on_approval

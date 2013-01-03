@@ -33,9 +33,7 @@ module BookKeeper
     notation = "Voucher created for #{product_action.to_s.humanize} on #{effective_on}"
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     if product_action == :loan_preclosure
-      received_accruals = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :on_product_type => 'lending', :on_product_id => payment_transaction.on_product_id, :effective_on.lte => payment_transaction.effective_on)
-      accrual_money = received_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(received_accruals.map(&:amount).sum.to_i)
-      payment_allocation[:principal_received] = payment_allocation[:principal_received] > accrual_money ? payment_allocation[:principal_received] - accrual_money : payment_allocation[:principal_received]
+      account_for_accrual_reverse(Lending.get(payment_transaction.on_product_id), payment_transaction.effective_on)
     end
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
     receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT
@@ -67,13 +65,44 @@ module BookKeeper
     accrual_money = received_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(received_accruals.map(&:amount).sum.to_i)
     payment_allocation[:total_received] = payment_allocation[:total_received] > accrual_money ? payment_allocation[:total_received] - accrual_money : payment_allocation[:total_received]
     total_amount = payment_allocation[:total_received]
-    performed_at = LoanAdministration.get_administered_at(loan_id, Date.today)
-    accounted_at = LoanAdministration.get_accounted_at(loan_id, Date.today)
+    location_map = LoanAdministration.get_location_map(loan.id, Date.today)
+    performed_at = location_map.administered_at
+    accounted_at = location_map.accounted_at
     product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
     postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at.id, accounted_at.id, loan_id, client_id)
     receipt_type = Constants::Transaction::RECEIPT
     narration = "Voucher created for Loan Write Off on #{on_date}"
-    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
+    Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at, accounted_at, narration)
+  end
+
+  def account_for_accrual_reverse(loan, on_date)
+    payment_allocation = {}
+    product_action = :accrual_reverse
+    loan_id = loan.id
+    client_id = loan.borrower.id
+    principal_accruals = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :on_product_type => 'lending', :on_product_id => loan.id, :effective_on.lte => on_date)
+    interest_accruals = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_INTEREST_ALLOCATION, :on_product_type => 'lending', :on_product_id => loan.id, :effective_on.lte => on_date)
+    principal_accrual_money = principal_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal_accruals.map(&:amount).sum.to_i)
+    interest_accrual_money = interest_accruals.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(interest_accruals.map(&:amount).sum.to_i)
+    principal_received = loan.principal_received_till_date(on_date)
+    interest_received = loan.interest_received_till_date(on_date)
+    reverse_interset = interest_accrual_money > interest_received ? interest_accrual_money - interest_received : MoneyManager.default_zero_money
+    reverse_principal = principal_accrual_money > principal_received ? principal_accrual_money - principal_received : MoneyManager.default_zero_money
+    reverse_total = reverse_interset + reverse_principal
+    if reverse_total > MoneyManager.default_zero_money
+      payment_allocation[:total_received] = reverse_total
+      payment_allocation[:principal_received] = reverse_principal
+      payment_allocation[:interest_received] = reverse_interset
+      total_amount = payment_allocation[:total_received]
+      location_map = LoanAdministration.get_location_map(loan.id, Date.today)
+      performed_at = location_map.administered_at
+      accounted_at = location_map.accounted_at
+      product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+      postings = product_accounting_rule.get_due_generation_posting_info(payment_allocation, performed_at, accounted_at, loan_id, client_id)
+      receipt_type = Constants::Transaction::RECEIPT
+      narration = "Voucher created for Loan Reverse Accrual on #{on_date}"
+      Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, on_date, postings, performed_at.id, accounted_at.id, narration)
+    end
   end
 
   def self.can_accrue_on_loan_on_date?(loan, on_date)
