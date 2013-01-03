@@ -38,18 +38,20 @@ class ConsolidatedReport < Report
 
       all_payments                      = reporting_facade.sum_all_loans_balances_at_accounted_locations_for_date_range(@from_date, @to_date, *branch_id)
       amounts                           = all_payments.values.first
-      loan_disbursed_principal_amt      = amounts['disbursed_principal_amt']
-      loan_disbursed_interest_amt       = amounts['disbursed_interest_amt']
-      loan_repayment_principal_amt      = amounts['principal_amt']
-      loan_repayment_interest_amt       = amounts['interest_amt']
-      loan_fee_amt                      = amounts['fee_amt']
-      loan_outstanding_principal        = (loan_disbursed_principal_amt > loan_repayment_principal_amt) ? (loan_disbursed_principal_amt - loan_repayment_principal_amt) : MoneyManager.default_zero_money
-      loan_outstanding_interest         = (loan_disbursed_interest_amt > loan_repayment_interest_amt) ? (loan_disbursed_interest_amt - loan_repayment_interest_amt) : MoneyManager.default_zero_money
-      loan_advance_collect              = amounts['advance_amt']
-      loan_advance_adjust               = amounts['advance_adjustment_amt']
-      loan_advance_balance              = amounts['total_advance_balance_amt']
-      loan_overdue_principal            = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
-      loan_overdue_interest             = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
+      loan_total_repay_principal_amt = amounts['total_principal_amt']
+      loan_total_repay_interest_amt  = amounts['total_interest_amt']
+      loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
+      loan_disbursed_interest_amt    = amounts['disbursed_interest_amt']
+      loan_repayment_principal_amt   = amounts['principal_amt']
+      loan_repayment_interest_amt    = amounts['interest_amt']
+      loan_fee_amt                   = amounts['fee_amt']
+      loan_outstanding_principal     = loan_disbursed_principal_amt - loan_total_repay_principal_amt
+      loan_outstanding_interest      = loan_disbursed_interest_amt - loan_total_repay_interest_amt
+      loan_advance_collect           = amounts['advance_amt']
+      loan_advance_adjust            = amounts['advance_adjustment_amt']
+      loan_advance_balance           = amounts['total_advance_balance_amt']
+      loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
+      loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
 
       branch_data_map                                    = {}
       branch_data_map[:loans_applied]                    = loans_applied

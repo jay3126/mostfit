@@ -72,14 +72,16 @@ class ReportingFacade < StandardFacade
       l_level = LocationLevel.get(location_level_id)
       if l_level.level == 0
         centers << biz_locations
+        members << ClientAdministration.get_client_ids_administered_by_sql(biz_locations.map(&:id), on_date)
       elsif l_level.level == 1
         biz_locations.each do |l|
           centers << LocationLink.get_children_by_sql(l, on_date)
         end
+        members << ClientAdministration.get_client_ids_registered_by_sql(biz_locations.map(&:id), on_date)
       end
     end
     centers = centers.blank? ? [] : centers.flatten.uniq.compact
-    members = ClientAdministration.get_clients_administered_by_sql(centers.map(&:id), on_date)
+    members = members.blank? ? [] : members.flatten.uniq.compact
     
     {:locations_count => centers.count, :location_ids => centers.map(&:id), :members_count => members.count}
   end
@@ -128,7 +130,7 @@ class ReportingFacade < StandardFacade
       preclose_loan_ids     = loans[LoanLifeCycle::PRECLOSED_LOAN_STATUS]
       disbursed_loan_ids    = loans[LoanLifeCycle::DISBURSED_LOAN_STATUS]
       loan_disbursement     = disbursed_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(total_loan_disbursed) as disbursed_principal, SUM(total_interest_applicable) as disbursed_interest FROM loan_base_schedules where lending_id IN (#{disbursed_loan_ids.join(',')})").first
-      till_on_loan_receipts = loans_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on <= '#{on_date.strftime('%Y-%m-%d')}'").first
+      till_on_loan_receipts = disbursed_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{disbursed_loan_ids.join(',')}) AND effective_on <= '#{on_date.strftime('%Y-%m-%d')}'").first
       loan_receipts         = disbursed_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{disbursed_loan_ids.join(',')}) AND effective_on = '#{on_date.strftime('%Y-%m-%d')}'").first
       loan_preclose         = preclose_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest FROM loan_receipts where lending_id IN (#{preclose_loan_ids.join(',')}) AND effective_on = #{on_date}").first
       fee_amt               = FeeReceipt.all(:accounted_at => location_id, :effective_on => on_date).aggregate(:fee_amount.sum) rescue []
@@ -165,7 +167,7 @@ class ReportingFacade < StandardFacade
       preclose_loan_ids     = loans[LoanLifeCycle::PRECLOSED_LOAN_STATUS]
       disbursed_loan_ids    = loans[LoanLifeCycle::DISBURSED_LOAN_STATUS]
       loan_disbursement     = disbursed_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(total_loan_disbursed) as disbursed_principal, SUM(total_interest_applicable) as disbursed_interest FROM loan_base_schedules where lending_id IN (#{disbursed_loan_ids.join(',')})").first
-      till_on_loan_receipts = loans_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{loans_ids.join(',')}) AND effective_on <= '#{till_date.strftime('%Y-%m-%d')}'").first
+      till_on_loan_receipts = disbursed_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest, SUM(advance_received) as advance, SUM(advance_adjusted) as advance_adjustment, SUM(loan_recovery) as recovery FROM loan_receipts where lending_id IN (#{disbursed_loan_ids.join(',')}) AND effective_on <= '#{till_date.strftime('%Y-%m-%d')}'").first
       loan_receipts         = loans_ids.blank? ? [] : LoanReceipt.all(:lending_id => loans_ids, :effective_on.gte => on_date, :effective_on.lte => till_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
       loan_preclose         = preclose_loan_ids.blank? ? [] : repository(:default).adapter.query(" SELECT SUM(principal_received) as principal, SUM(interest_received) as interest FROM loan_receipts where lending_id IN (#{preclose_loan_ids.join(',')}) AND effective_on >= '#{on_date.strftime('%Y-%m-%d')}' AND effective_on <= '#{till_date.strftime('%Y-%m-%d')}'").first
       fee_amt               = FeeReceipt.all(:accounted_at => location_id, :effective_on.gte => on_date, :effective_on.lte => till_date).aggregate(:fee_amount.sum)  rescue []
@@ -186,6 +188,8 @@ class ReportingFacade < StandardFacade
       loan_amounts[location_id]['scheduled_principal_amt'] = scheduled_amounts[0].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[0].to_i)
       loan_amounts[location_id]['scheduled_interest_amt']  = scheduled_amounts[1].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[1].to_i)
 
+      loan_amounts[location_id]['total_principal_amt']       = till_on_loan_receipts.blank? || till_on_loan_receipts.principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.principal.to_i)
+      loan_amounts[location_id]['total_interest_amt']        = till_on_loan_receipts.blank? || till_on_loan_receipts.interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.interest.to_i)
       loan_amounts[location_id]['total_advance_amt']         = till_on_loan_receipts.blank? || till_on_loan_receipts.advance.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.advance.to_i)
       loan_amounts[location_id]['total_advance_adjust_amt']  = till_on_loan_receipts.blank? || till_on_loan_receipts.advance_adjustment.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.advance_adjustment.to_i)
       loan_amounts[location_id]['total_advance_balance_amt'] = loan_amounts[location_id]['total_advance_amt'] - loan_amounts[location_id]['total_advance_adjust_amt']

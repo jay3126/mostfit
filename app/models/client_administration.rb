@@ -119,8 +119,13 @@ class ClientAdministration
     get_clients_at_location(COUNTERPARTY_ADMINISTERED_AT, at_location_id, on_date)
   end
 
-  def self.get_clients_administered_by_sql(at_location_id, on_date = Date.today, count = false)
+  def self.get_client_ids_administered_by_sql(at_location_id, on_date = Date.today, count = false)
     get_clients_at_location_by_sql(COUNTERPARTY_ADMINISTERED_AT, at_location_id, on_date, count)
+  end
+
+  def self.get_clients_administered_by_sql(at_location_id, on_date = Date.today, count = false)
+    client_ids = get_clients_at_location_by_sql(COUNTERPARTY_ADMINISTERED_AT, at_location_id, on_date, count)
+    client_ids.blank? ? [] : Client.all(:id => client_ids)
   end
 
   # Returns a list of client instances that are registered at the specified location (by ID) on the specified date
@@ -128,8 +133,13 @@ class ClientAdministration
     get_clients_at_location(COUNTERPARTY_REGISTERED_AT, at_location_id, on_date)
   end
 
-  def self.get_clients_registered_by_sql(at_location_id, on_date = Date.today, count = false)
+  def self.get_client_ids_registered_by_sql(at_location_id, on_date = Date.today, count = false)
     get_clients_at_location_by_sql(COUNTERPARTY_REGISTERED_AT, at_location_id, on_date, count)
+  end
+
+  def self.get_clients_registered_by_sql(at_location_id, on_date = Date.today, count = false)
+    client_ids = get_clients_at_location_by_sql(COUNTERPARTY_REGISTERED_AT, at_location_id, on_date, count)
+    client_ids.blank? ? [] : Client.all(:id => client_ids)
   end
 
   def self.has_death_event?(client)
@@ -169,16 +179,16 @@ class ClientAdministration
     locations[administered_or_registered_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
     locations[:counterparty_type]                = Constants::Transaction::CLIENT
     locations[:effective_on.lte]                 = on_date
-    administration                               = all(locations)
-    if administration.blank?
+    client_ids                                   = all(locations).aggregate(:counterparty_id)
+    if client_ids.blank?
       count == true ? 0 : []
     else
       if count
-        l_links = repository(:default).adapter.query("select count(*) from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
+        l_links = repository(:default).adapter.query("select count(*) from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{client_ids.join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
         l_links.blank? ? 0 : l_links
       else
-        l_links = repository(:default).adapter.query("select * from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{administration.map(&:counterparty_id).join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
-        l_links.map(&:counterparty_id).blank? ? [] : Client.all(:id => l_links.map(&:counterparty_id))
+        client_ids = repository(:default).adapter.query("select ca.counterparty_id from (select * from client_administrations where counterparty_type = 1 AND counterparty_id IN (#{client_ids.join(',')})) ca where #{administered_or_registered_choice} = (select #{administered_or_registered_choice} from client_administrations ca1 where ca.counterparty_id = ca1.counterparty_id and ca.counterparty_type = 1 and ca.#{administered_or_registered_choice} IN (#{locations[administered_or_registered_choice].join(',')}) order by ca1.effective_on desc limit 1 );")
+        client_ids.blank? ? [] : client_ids
       end
     end
   end
