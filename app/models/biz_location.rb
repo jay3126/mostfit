@@ -143,7 +143,7 @@ class BizLocation
     location[:originator_by] = originator_by unless originator_by.blank?
     location[:biz_location_address] = address unless address.blank?
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
-    location[:biz_location_identifier] = get_biz_location_identifier(at_level_number)
+    location[:biz_location_identifier] = at_level_number == 1 ? get_biz_location_identifier : nil
     new_location = create(location)
     raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
     Ledger.setup_location_ledgers(new_location.creation_date, new_location.id) if new_location.location_level.level == 1
@@ -314,20 +314,18 @@ class BizLocation
     loan_product_amount.compact.uniq
   end
 
-  # Generates biz-location identifier with proper format:
-  # branch format: BR_0001(implemented)
-  # center format: CN_0001_0001(pending)
-  def self.get_biz_location_identifier(at_level_number)
+  # Generates biz-location identifier for branch with proper format:
+  # Branch format: BR_0001
+  def self.get_biz_location_identifier
     prefix = nil
-    prefix, prefix_id = "CN_", 0 if at_level_number == 0
-    prefix, prefix_id = "BR_", 1 if at_level_number == 1
+    prefix, prefix_id = "BR_", 1
     if prefix.blank?
       nil
     else
-      # Find last biz-location for location level either center or branch
+      # Find last biz-location for location level branch
       last_biz_location = BizLocation.all('location_level.level' => prefix_id).last
       if last_biz_location.blank?
-        prefix+"%.4i"%0
+        prefix+"%.4i"%1
       else
         # Find last biz-locations identifier
         identifier = last_biz_location.biz_location_identifier
@@ -339,4 +337,25 @@ class BizLocation
     end
   end
 
+  # Generates biz-location identifier for Center with proper format:
+  # Center format: CN_0001_0001
+  def self.update_biz_location_identifier_for_center(biz_location, parent_location)
+    center_prefix, center_prefix_id = "CN_", 0
+    branch_prefix = "BR_"
+    branch_identifier = parent_location.biz_location_identifier
+    splited_branch_identifier = branch_identifier.split(branch_prefix).last
+    last_biz_location = BizLocation.all('location_level.level' => center_prefix_id, :biz_location_identifier.not=> nil).last
+    if last_biz_location.blank?
+      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%1
+    else
+      # Find last biz-locations identifier
+      identifier = last_biz_location.biz_location_identifier
+      # Find last biz-location identifiers id
+      splited_identifier = identifier.split(center_prefix).last.to_i + 1
+      # Incremented identifier with proper format
+      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%splited_identifier
+    end
+    biz_location.biz_location_identifier = center_identifier
+    biz_location.save
+  end
 end
