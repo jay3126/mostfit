@@ -3,14 +3,15 @@ class BizLocation
   include Identified
   include Pdf::LoanSchedule if PDF_WRITER
   
-  property :id,         Serial
-  property :name,       String, :nullable => false
-  property :created_at, DateTime, :nullable => false, :default => DateTime.now
-  property :creation_date, Date, :nullable => false, :default => Date.today
-  property :deleted_at, ParanoidDateTime
-  property :center_disbursal_date, Date, :nullable => true, :default => Date.today
-  property :biz_location_address, String, :nullable => true
-  property :originator_by, Integer
+  property :id,                       Serial
+  property :biz_location_identifier,  String,           :nullable => true
+  property :name,                     String,           :nullable => false
+  property :created_at,               DateTime,         :nullable => false, :default => DateTime.now
+  property :creation_date,            Date,             :nullable => false, :default => Date.today
+  property :deleted_at,               ParanoidDateTime
+  property :center_disbursal_date,    Date,             :nullable => true,  :default => Date.today
+  property :biz_location_address,     String,           :nullable => true
+  property :originator_by,            Integer
 
   belongs_to :location_level
   belongs_to :upload, :nullable => true
@@ -82,7 +83,7 @@ class BizLocation
       if obj.location_level.level == 0
         #creating center cycle for center.
         obj.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => User.first.staff_member.id, :initiated_on => Date.today,
-                                 :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
+          :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => User.first.staff_member.id)
       end
       [true, obj]
     else
@@ -142,6 +143,7 @@ class BizLocation
     location[:originator_by] = originator_by unless originator_by.blank?
     location[:biz_location_address] = address unless address.blank?
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
+    location[:biz_location_identifier] = get_biz_location_identifier(at_level_number)
     new_location = create(location)
     raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
     Ledger.setup_location_ledgers(new_location.creation_date, new_location.id) if new_location.location_level.level == 1
@@ -310,6 +312,31 @@ class BizLocation
       loan_product_amount << loan_product.loan_money_amount.to_regular_amount
     end
     loan_product_amount.compact.uniq
+  end
+
+  # Generates biz-location identifier with proper format:
+  # branch format: BR_0001(implemented)
+  # center format: CN_0001_0001(pending)
+  def self.get_biz_location_identifier(at_level_number)
+    prefix = nil
+    prefix, prefix_id = "CN_", 0 if at_level_number == 0
+    prefix, prefix_id = "BR_", 1 if at_level_number == 1
+    if prefix.blank?
+      nil
+    else
+      # Find last biz-location for location level either center or branch
+      last_biz_location = BizLocation.all('location_level.level' => prefix_id).last
+      if last_biz_location.blank?
+        prefix+"%.4i"%0
+      else
+        # Find last biz-locations identifier
+        identifier = last_biz_location.biz_location_identifier
+        # Find last biz-location identifiers id
+        splited_identifier = identifier.split(prefix).last.to_i + 1
+        # Incremented identifier with proper format
+        prefix+"%.4i"%splited_identifier
+      end
+    end
   end
 
 end
