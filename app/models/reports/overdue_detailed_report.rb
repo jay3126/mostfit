@@ -54,14 +54,15 @@ class OverdueDetailedReport < Report
 
   def generate
     data = {}
-    outstanding_loans = LoanAdministration.get_loans_accounted_by_sql(@biz_location_branch, @date, false, 'disbursed_loan_status')
+    outstanding_loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(@biz_location_branch, @date, false, 'disbursed_loan_status')
 
-    lendings = outstanding_loans.select {|loan| (loan.loan_days_past_due > 0)}
+    lendings = outstanding_loan_ids.select {|loan_id| (Lending.get(loan_id).loan_days_past_due > 0)}
     lendings = lendings.to_a.paginate(:page => @page, :per_page => @limit)
     
     data[:outstanding_loans] = lendings
     data[:loans] = {}
-    lendings.to_a.each do |loan|
+    lendings.to_a.each do |loan_id|
+      loan                       = Lending.get(loan_id)
       loan_due_status            = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc]).first
       loan_overdue_status        = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::OVERDUE, :on_date.lte => @date, :order => [:on_date.desc, :created_at.desc]).last
 

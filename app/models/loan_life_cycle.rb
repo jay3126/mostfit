@@ -7,7 +7,7 @@ module LoanLifeCycle
 
   def loan_status_on_date(on_date = Date.today)
     loan_status = self.loan_status_changes(:effective_on.lte => on_date, :order => [:effective_on.desc, :created_at.desc, :id.desc]).first
-    loan_status.blank? ? NOT_APPLICABLE : loan_status.to_status
+    loan_status.blank? ? Constants::Loan::NOT_APPLICABLE : loan_status.to_status
   end
 
   def is_approved?
