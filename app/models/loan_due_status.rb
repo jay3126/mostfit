@@ -145,7 +145,7 @@ class LoanDueStatus
     
       if due_status[:loan_status] == DISBURSED_LOAN_STATUS
         if loan.scheduled_first_repayment_date > on_date
-        loan_due_status = NOT_DUE
+          loan_due_status = NOT_DUE
         elsif due_status_amounts[ACTUAL_TOTAL_DUE] > zero_amount
           loan_due_status = OVERDUE
         else
@@ -157,7 +157,7 @@ class LoanDueStatus
       due_status[:due_status] = loan_due_status
       last_due_status = first(:lending_id => for_loan_id, :on_date.lte => on_date, :order => [:on_date.desc, :created_at.desc])
       last_over_due = last_due_status.blank? ? 0 : last_due_status.day_past_due
-      today_day_past_due = last_due_status.blank? || on_date == last_due_status.on_date ? last_over_due : last_over_due+1
+      today_day_past_due = last_due_status.blank? || on_date == last_due_status.on_date ? overdue_day_on_date(for_loan_id, on_date) : last_over_due+1
       due_status[:day_past_due] = due_status[:due_status] == OVERDUE ? today_day_past_due : 0
       due_status_amounts[PRINCIPAL_AT_RISK] = (loan_due_status == OVERDUE) ? (actual_principal_outstanding) : zero_amount
 
@@ -220,13 +220,36 @@ class LoanDueStatus
     ]
   end
 
-  def overdue_day_on_date(loan_id, on_date)
+  def self.overdue_day_on_date(loan_id, on_date)
+    overdue_days = 0
     loan = Lending.get loan_id
+    first_repayment_date = loan.scheduled_first_repayment_date
+    max_overdue_days = on_date > first_repayment_date ? (on_date-first_repayment_date).to_i : 0
     loan_receipts = loan.loan_receipts(:effective_on.lte => on_date).map(&:effective_on).uniq rescue []
-    if loan_receipts.blank? && loan.is_outstanding_on_date?(on_date)
-      first_repayment_date = loan.scheduled_first_repayment_date
-      overdue_days = on_date > first_repayment_date ? on_date -first_repayment_date : 0
+    if loan.is_outstanding_on_date?(on_date)
+      if loan_receipts.blank?
+        overdue_days = max_overdue_days
+      else
+        receipt_dates = loan_receipts.include?(on_date) ? loan_receipts : loan_receipts<<on_date
+        receipt_dates.sort.reverse.each do |r_date|
+          schedule_till_date = loan.loan_base_schedule.base_schedule_line_items(:on_date.lte => r_date).aggregate(:scheduled_principal_due.sum,:scheduled_interest_due.sum) rescue []
+          loan_receipt_till_date = loan.loan_receipts(:effective_on.lte => r_date).aggregate(:principal_received.sum, :interest_received.sum) rescue []
+          if !schedule_till_date.blank? && !loan_receipt_till_date.blank?
+            total_schedule_due = schedule_till_date.sum
+            total_received = loan_receipt_till_date.sum
+            if total_schedule_due > total_received
+              overdue_days = max_overdue_days
+            else
+              overdue_days = max_overdue_days - (r_date-first_repayment_date).to_i
+              break
+            end
+          end
+        end
+      end
+    else
+      overdue_days = 0
     end
+    overdue_days
   end
 
 end

@@ -287,6 +287,15 @@ class ReportingFacade < StandardFacade
     {:actual_outstanding_amount => actual_outstanding_amount, :scheduled_outstanding_amount => scheduled_outstanding_amount, :overdue_amounts => overdue_amounts}
   end
 
+  def overdue_loans_for_location(location_id, on_date)
+    loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location_id, on_date, false, 'disbursed_loan_status')
+    loan_due_statuses = LoanDueStatus.all(:lending_id => loan_ids, :on_date => on_date).aggregate(:lending_id) rescue []
+
+    non_due_status_loans = loan_ids.blank? ? [] : loan_ids - loan_due_statuses
+    non_due_status_loans.each{|loan_id| LoanDueStatus.generate_loan_due_status(loan_id, on_date)}
+    loan_ids.blank? ? [] : repository(:default).adapter.query("Select a.lending_id from loan_due_statuses a where a.due_status = 4 AND a.lending_id IN (#{loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{on_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);")
+  end
+
   #this method will return back the overdue values (principal and interest) on date.
   def overdue_amounts(loan_id, on_date)
     result = {}

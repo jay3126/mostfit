@@ -175,6 +175,7 @@ class Voucher
   private
 
   def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode, eod = false)
+
     values = {}
     values[:total_amount] = total_amount
     values[:currency] = currency
@@ -198,6 +199,7 @@ class Voucher
       posting[:accounted_at] = p.accounted_at unless p.accounted_at.blank?
       ledger_postings.push(posting)
     }
+    debugger
     values[:ledger_postings] = ledger_postings
     voucher = create(values)
     raise Errors::DataError, voucher.errors.first.first unless voucher.saved?

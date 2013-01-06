@@ -11,7 +11,7 @@ class OverdueDetailedReport < Report
     all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
     @page = params.blank? || params[:page].blank? ? 1 :params[:page]
-    @limit = 10
+    @limit = 100
     get_parameters(params, user)
   end
 
@@ -54,17 +54,16 @@ class OverdueDetailedReport < Report
 
   def generate
     data = {}
-    outstanding_loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(@biz_location_branch, @date, false, 'disbursed_loan_status')
+    loan_ids = get_reporting_facade(User.first).overdue_loans_for_location(@biz_location_branch, @date)
 
-    lendings = outstanding_loan_ids.select {|loan_id| (Lending.get(loan_id).loan_days_past_due > 0)}
-    lendings = lendings.to_a.paginate(:page => @page, :per_page => @limit)
+    lendings = loan_ids.to_a.paginate(:page => @page, :per_page => @limit)
     
     data[:outstanding_loans] = lendings
     data[:loans] = {}
     lendings.to_a.each do |loan_id|
       loan                       = Lending.get(loan_id)
-      loan_due_status            = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc]).first
-      loan_overdue_status        = LoanDueStatus.all(:lending_id => loan.id, :due_status => Constants::Loan::OVERDUE, :on_date.lte => @date, :order => [:on_date.desc, :created_at.desc]).last
+      loan_due_status            = LoanDueStatus.first(:lending_id => loan.id, :due_status => Constants::Loan::DUE, :order => [:on_date.desc, :created_at.desc])
+      loan_overdue_status        = LoanDueStatus.first(:lending_id => loan.id, :due_status => Constants::Loan::OVERDUE, :on_date => @date)
 
       unless loan_overdue_status.blank?
         member                    = loan.loan_borrower.counterparty
@@ -80,8 +79,8 @@ class OverdueDetailedReport < Report
         loan_account_number        = loan.lan
         loan_disbursed_date        = loan.disbursal_date
         loan_end_date              = loan.last_scheduled_date
-        oldest_due_date            = (loan_due_status and (not loan_due_status.nil?)) ? loan_due_status.on_date : "Status Not Available"
-        days_past_due              = loan.loan_days_past_due(@date)
+        oldest_due_date            = (loan_due_status and (not loan_due_status.nil?)) ? loan_due_status.on_date : loan.scheduled_first_repayment_date
+        days_past_due              = loan_overdue_status.day_past_due
         bucket                     = set_overdue_days_range(days_past_due)
         total_principal_overdue    = loan_overdue_status.to_money[:actual_principal_outstanding]
         total_interest_overdue     = loan_overdue_status.to_money[:actual_interest_outstanding]

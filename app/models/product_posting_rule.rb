@@ -19,6 +19,7 @@ class ProductPostingRule
 
     ledger = LedgerAssignment.locate_ledger(counterparty_type, counterparty_id, self.ledger_classification, product_type, product_id)
     raise Errors::InvalidConfigurationError, "Unable to locate the product accounting ledger" unless ledger
+    
     PostingInfo.new(posting_money_amount.amount, posting_money_amount.currency, self.effect, ledger, payment_transaction.accounted_at, payment_transaction.performed_at)
   end
 
