@@ -27,6 +27,8 @@ USAGE_TEXT
       INTEREST_OUTSTANDING_COLUMN = 'interest_outstanding'
       TOTAL_OUTSTANDING = 'total_outstanding'
       AS_ON_DATE_COLUMN = 'as_on_date'
+      PRINCIPAL_RECEIVED_COLUMN = 'principal_received_till_date'
+      INTEREST_RECEIVED_COLUMN = 'interest_received_till_date'
 
       results = {}
       instance_file_prefix = 'single_payment' + '_' + DateTime.now.to_s
@@ -52,6 +54,7 @@ USAGE_TEXT
           loan_ids_read = []; loans_not_found = []; loan_ids_updated = []; errors = []
           FasterCSV.foreach(file_to_read, file_options) do |row|
             lan = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]; int_os_str = row[INTEREST_OUTSTANDING_COLUMN]; total_os_str = row[TOTAL_OUTSTANDING];
+            principal_received_till_date_str = row[PRINCIPAL_RECEIVED_COLUMN]; interest_received_till_date_str = row[INTEREST_RECEIVED_COLUMN];
 
             default_currency = MoneyManager.get_default_currency
             pos = nil
@@ -75,6 +78,22 @@ USAGE_TEXT
               total_os = MoneyManager.get_money_instance(total_os_str)
             rescue => ex
               errors << [lan, total_os_str, "total os not parsed"]
+              next
+            end
+
+            principal_received_till_date = nil
+            begin
+              principal_received_till_date = MoneyManager.get_money_instance(principal_received_till_date_str)
+            rescue => ex
+              errors << [lan, principal_received_till_date_str, "principal received till date not parsed"]
+              next
+            end
+
+            interest_received_till_date = nil
+            begin
+              interest_received_till_date = MoneyManager.get_money_instance(interest_received_till_date_str)
+            rescue => ex
+              errors << [lan, interest_received_till_date_str, "interest received till date not parsed"]
               next
             end
 
@@ -138,11 +157,12 @@ USAGE_TEXT
               performed_by_staff = User.first.staff_member
               recorded_by_staff = User.first
               client = loan.borrower
-              principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
-              interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-              principal_amount_to_be_paid = (principal_amount_from_loan_product - pos)
-              interest_amount_to_be_paid = (interest_amount_from_loan_product - int_os)
-              amount_to_be_paid = principal_amount_to_be_paid + interest_amount_to_be_paid
+#              principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
+#              interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
+#              principal_amount_to_be_paid = (principal_amount_from_loan_product - pos)
+#              interest_amount_to_be_paid = (interest_amount_from_loan_product - int_os)
+#              amount_to_be_paid = principal_amount_to_be_paid + interest_amount_to_be_paid
+              amount_to_be_paid = principal_received_till_date + interest_received_till_date
               money_amount_to_be_paid = amount_to_be_paid
               receipt_type = Constants::Transaction::RECEIPT
               effective_on = as_on_date
@@ -165,7 +185,7 @@ USAGE_TEXT
                 payment_allocation = loan.allocate_payment(payment_transaction, product_action, make_specific_allocation = nil, specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
                 accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
                 
-                loan_ids_updated << [loan.id, loan.lan, client.id, principal_amount_to_be_paid, interest_amount_to_be_paid, "Payment of #{money_amount_to_be_paid} was successfully made"]
+                loan_ids_updated << [loan.id, loan.lan, client.id, principal_received_till_date, interest_received_till_date, "Payment of #{money_amount_to_be_paid} was successfully made"]
               else
                 errors << [loan.id, loan.lan, "Payment cannot be saved because: #{payment_transaction.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"]
               end
