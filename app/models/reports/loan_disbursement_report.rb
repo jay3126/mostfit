@@ -31,7 +31,7 @@ class LoanDisbursementReport < Report
       loan_amount = (loan and loan.amount) ? loan.amount : "Not Specified"
       loan_disbursal_date = (loan and loan.disbursal_date) ? loan.disbursal_date : "Not Disbursed Yet"
       loan_purpose = (loan and loan.occupation and (not loan.occupation.nil?)) ? loan.occupation.name : "Loan Purpose not specified"
-      loan_interest_rate = (loan and loan.interest_rate) ? loan.interest_rate : "Interest Rate not specified"
+      loan_interest_rate = (loan and loan.interest_rate) ? (loan.interest_rate * 100) : "Interest Rate not specified"
 
       client = Client.get(loan.client_id)
       client_id = client.id
