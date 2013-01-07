@@ -11,7 +11,7 @@
       Loan product identifier
     %td
       = text_field :name => "loan_product_prefix", :value => "LP-", :readonly => true, :size => 1
-      = text_field :name => "lending_product[loan_product_identifier]", :size => 6, :maxlength => 6
+      = text_field :name => "lending_product[loan_product_identifier]", :size => 6, :maxlength => 6, :value => params[:lending_product].blank? || params[:lending_product][:loan_product_identifier].blank? ? nil : params[:lending_product][:loan_product_identifier]
       %span.greytext
         Enter 6 digit code
   %tr

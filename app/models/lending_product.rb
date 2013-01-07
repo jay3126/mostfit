@@ -29,6 +29,7 @@ class LendingProduct
   belongs_to :upload, :nullable => true
 
   validates_is_unique :name
+  validates_length    :loan_product_identifier, :min => 6
 
   #method for upload functionality.
   def self.from_csv(row, headers)
@@ -52,7 +53,7 @@ class LendingProduct
     fee_product_names = row[headers[:fee_products]].split(',')
     fee_products        = SimpleFeeProduct.all(:name => fee_product_names, :fee_charged_on_type => 'fee_charged_on_loan').map(&:id)
     preclosure_products = SimpleFeeProduct.all(:name => row[headers[:preclosure_penalty_products]],
-                                               :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
+      :fee_charged_on_type => 'preclosure_penalty_on_loan').map(&:id)
 
     #creating new lending_product.
     product = {}
@@ -71,7 +72,7 @@ class LendingProduct
       #creating the schedules.
       principal_and_interest_amounts = assemble_amortization(tenure, principal_schedules, interest_schedules)
       LoanScheduleTemplate.create_schedule_template(name, loan_money_amount, interest_amount, tenure, repayment_frequency, new_product,
-                                                    principal_and_interest_amounts)
+        principal_and_interest_amounts)
       #setting up the fees.
       unless fee_products.blank?
         fee_products.each do |fee_id|
@@ -84,7 +85,7 @@ class LendingProduct
       locations.each do |l|
         location_id = BizLocation.first(:name => l).id
         new_product.lending_product_locations.first_or_create(:biz_location_id => location_id, :effective_on => Date.today,
-                                                              :performed_by => User.first.id, :recorded_by => StaffMember.first.id)
+          :performed_by => User.first.id, :recorded_by => StaffMember.first.id)
       end
       [true, new_product]
     else

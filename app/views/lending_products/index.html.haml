@@ -8,7 +8,7 @@
     %thead
       %tr
         %td
-          Id
+          Loan product identifier
         %td
           Name
         %td
@@ -28,7 +28,7 @@
         - locations = lp.get_assign_locations(get_effective_date)
         %tr
           %td
-            = lp.id
+            = lp.loan_product_identifier rescue nil
           %td
             = link_to_with_rights lp.name, resource(lp)
           %td
