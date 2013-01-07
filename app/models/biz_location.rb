@@ -351,7 +351,7 @@ class BizLocation
       # Find last biz-locations identifier
       identifier = last_biz_location.biz_location_identifier
       # Find last biz-location identifiers id
-      splited_identifier = identifier.split(center_prefix).last.to_i + 1
+      splited_identifier = identifier.split("_").last.to_i + 1
       # Incremented identifier with proper format
       center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%splited_identifier
     end
