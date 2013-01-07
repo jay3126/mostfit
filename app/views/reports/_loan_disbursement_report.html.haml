@@ -23,6 +23,8 @@
       Loan Disbursal Date
     %th
       Loan Purpose
+    %th
+      Loan Interest Rate
 
   - total_loans_count = 0
   - total_count = 0
@@ -52,6 +54,8 @@
         = values[1][:loan_disbursal_date]
       %td
         = values[1][:loan_purpose]
+      %td
+        = values[1][:loan_interest_rate]
 
   %tr.total
     %th
@@ -66,5 +70,6 @@
     %td
     %td
       = total_loans_count
+    %td
     %td
     %td
