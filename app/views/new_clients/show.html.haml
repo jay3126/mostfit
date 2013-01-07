@@ -33,49 +33,53 @@
     %td
       = @client.name
   %tr.odd
-    %th.odd Joining Date
+    %th.odd Member Identifier
+    %td
+      = @client.client_identifier
+  %tr.even
+    %th.even Joining Date
     %td
       = @client.date_joined
-  %tr.even
-    %th.even Date of Birth
+  %tr.odd
+    %th.odd Date of Birth
     %td
       = @client.date_of_birth
-  %tr.odd
-    %th.odd Spouse Name
-    %td= @client.spouse_name
   %tr.even
-    %th.even Manager
+    %th.even Spouse Name
+    %td= @client.spouse_name
+  %tr.odd
+    %th.odd Manager
     %td
       - if managed_by.blank?
         Not Managed
       - else
         - staff_member = managed_by.manager_staff_member
         = link_to_with_rights staff_member.name, url(:controller => :staff_members, :action => :show, :id => staff_member.id)
-  %tr.odd
-    %th.odd= LocationLevel.first(:level => 1).name
-    %td= link_to_with_rights at_branch.name, url(:controller => :user_locations, :action => :show, :id => at_branch.id)
   %tr.even
-    %th.even
+    %th.even= LocationLevel.first(:level => 1).name
+    %td= link_to_with_rights at_branch.name, url(:controller => :user_locations, :action => :show, :id => at_branch.id)
+  %tr.odd
+    %th.odd
       = LocationLevel.first(:level => 0).name
     %td= link_to_with_rights at_center.name, url(:controller => :user_locations, :action => :weeksheet_collection, :id => at_center.id)
-  %tr.odd
-    %th.odd Group
+  %tr.even
+    %th.even Group
     %td
       - if @client.client_group.blank?
         Not Attached to any group
       - else
         = link_to_with_rights @client.client_group.name, url(:controller => :client_groups, :action => :show, :id => @client.client_group.id)
-  %tr.even
-    %th.even Occupation
-    %td= @client.occupation.name unless @client.occupation.blank?
   %tr.odd
-    %th.odd Priority Sector List
-    %td= @client.priority_sector_list.name if @client.priority_sector_list
+    %th.odd Occupation
+    %td= @client.occupation.name unless @client.occupation.blank?
   %tr.even
-    %th.even PSL Sub-category
+    %th.even Priority Sector List
+    %td= @client.priority_sector_list.name if @client.priority_sector_list
+  %tr.odd
+    %th.odd PSL Sub-category
     %td= @client.psl_sub_category.name if @client.psl_sub_category
   - unless client_facade.client_has_death_event?(@client)
-    %tr.odd
+    %tr.even
       %td
         = link_to_with_rights "Register Death Event", url(:controller => :new_clients, :action => :register_death_event, :id => @client.id), :class => "greenButton"
 %div.tab_container.shaded
