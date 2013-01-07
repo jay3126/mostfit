@@ -8,6 +8,14 @@
       = text_field :name
   %tr
     %th
+      Loan product identifier
+    %td
+      = text_field :name => "loan_product_prefix", :value => "LP-", :readonly => true, :size => 1
+      = text_field :name => "lending_product[loan_product_identifier]", :size => 6, :maxlength => 6
+      %span.greytext
+        Enter 6 digit code
+  %tr
+    %th
       Amount
     %td
       %span.greytext

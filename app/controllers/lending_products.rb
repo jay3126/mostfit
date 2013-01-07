@@ -24,6 +24,8 @@ class LendingProducts < Application
     # GATE-KEEPING
     name                 = params[:lending_product][:name]
     amount               = params[:lending_product][:amount]
+    lp_prefix            = params[:loan_product_prefix]
+    lp_identifier        = params[:lending_product][:loan_product_identifier]
     repayment_frequency  = params[:lending_product][:repayment_frequency]
     tenure               = params[:lending_product][:tenure]
     interest_rate        = params[:lending_product][:interest_rate]
@@ -35,13 +37,13 @@ class LendingProducts < Application
     interest_amount      = params[:lending_product_template][:interest_amount]
     principal_schedule   = params[:lending_product_template][:principal_schedule]
     interest_schedule    = params[:lending_product_template][:interest_schedule]
-
     user_id              = session.user.id
     staff_id             = session.user.staff_member.id
     @lending_product     = LendingProduct.new(params[:lending_product])
 
     # VALIDATIONS
     @message[:error] = "Name cannot be blank" if name.blank?
+    @message[:error] = "Loan product identifer must not be blank" if lp_identifier.blank?
     @message[:error] = "Name cannot be blank" if amount.blank?
     @message[:error] = "Repayment frequency cannot be blank" if repayment_frequency.blank?
     @message[:error] = "Tenure cannot be blank" if tenure.blank?
@@ -54,13 +56,14 @@ class LendingProducts < Application
     # OPERATION-PERFORMED
     if @message[:error].blank?
       begin
+        loan_product_identifier         = lp_prefix + lp_identifier
         money_amount                    = MoneyManager.get_money_instance(amount)
         money_interest_amount           = MoneyManager.get_money_instance(interest_amount)
         money_principal_schedule_amount = MoneyManager.get_money_instance(*principal_schedule.split(','))
         money_interest_schedule_amount  = MoneyManager.get_money_instance(*interest_schedule.split(','))
         fee_product_ids                 = fee_product_ids + penalty_fee_ids unless penalty_fee_ids.blank?
         insurance_product               = SimpleInsuranceProduct.get insurance_product_id unless insurance_product_id.blank?
-        lending_product                 = LendingProduct.create_lending_product(name, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount, user_id, staff_id, fee_product_ids, insurance_product)
+        lending_product                 = LendingProduct.create_lending_product(name, loan_product_identifier, money_amount, money_interest_amount, interest_rate.to_f, repayment_frequency, tenure.to_i, repayment_allocation, money_principal_schedule_amount, money_interest_schedule_amount, user_id, staff_id, fee_product_ids, insurance_product)
 
         if lending_product.new?
           @message[:error] = lending_product.error.first.join(', ')

@@ -5,6 +5,7 @@ class LendingProduct
   
   property :id,                             Serial
   property :name,                           *NAME
+  property :loan_product_identifier,        String, :nullable => false, :unique => true
   property :amount,                         *MONEY_AMOUNT
   property :currency,                       *CURRENCY
   property :interest_rate,                  *FLOAT_NOT_NULL
@@ -99,6 +100,7 @@ class LendingProduct
   # Create a loan product, and the corresponding loan schedule template
   def self.create_lending_product(
       name,
+      loan_product_identifier,
       standard_loan_money_amount,
       total_interest_applicable_money_amount,
       annual_interest_rate,
@@ -119,6 +121,7 @@ class LendingProduct
 
     product = {}
     product[:name] = name
+    product[:loan_product_identifier] = loan_product_identifier
     product[:amount] = standard_loan_money_amount.amount
     product[:currency] = standard_loan_money_amount.currency
     product[:interest_rate] = annual_interest_rate
