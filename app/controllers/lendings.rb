@@ -524,12 +524,12 @@ class Lendings < Application
     recorded_by                     = session.user.id
     make_specific_allocation        = true
     specific_principal_amount       = params[:specific_principal_amount]
-    specific_principal_money_amount = MoneyManager.get_money_instance(specific_principal_amount)
+    specific_principal_money_amount = specific_principal_amount.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance(specific_principal_amount)
     specific_interest_amount        = params[:specific_interest_amount]
-    specific_interest_money_amount  = MoneyManager.get_money_instance(specific_interest_amount)
+    specific_interest_money_amount  = specific_interest_amount.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance(specific_interest_amount)
     total_money_amount              = specific_principal_money_amount + specific_interest_money_amount
     fee_amount                      = params[:penalty_amount]
-    fee_money_amount                = MoneyManager.get_money_instance(fee_amount)
+    fee_money_amount                = fee_amount.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance(fee_amount)
     fee_product                     = @lending.get_preclosure_penalty_product
     fee_amount                      = fee_product.blank? ? MoneyManager.default_zero_money : fee_product.effective_total_amount
 
@@ -538,6 +538,7 @@ class Lendings < Application
     @errors << "Please select Reason" if reason_id.blank?
     @errors << 'Remarks cannot be blank' if remarks.blank?
     @errors << "Penalty Amount is not greater than #{fee_amount}" if fee_money_amount > fee_amount
+    @errors << "Preclosure Principal cannot be less than and equal to Zero" if specific_principal_money_amount <= MoneyManager.default_zero_money
 
     # OPERATIONS
     if @errors.blank?

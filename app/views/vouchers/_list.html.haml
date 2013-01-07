@@ -49,7 +49,7 @@
             %td
               - biz_location = p.accounted_at_location
               - cost_center = biz_location.blank? ? CostCenter.first : biz_location.cost_center
-              = cost_center.blank? ? '' : cost_center.name
+              = cost_center.blank? ? '-' : cost_center.name
             %td
               = p.ledger.name unless p.ledger.nil?
             %td

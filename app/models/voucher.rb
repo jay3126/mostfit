@@ -198,8 +198,7 @@ class Voucher
       posting[:performed_at] = p.performed_at unless p.performed_at.blank?
       posting[:accounted_at] = p.accounted_at unless p.accounted_at.blank?
       ledger_postings.push(posting)
-    }
-    debugger
+    } 
     values[:ledger_postings] = ledger_postings
     voucher = create(values)
     raise Errors::DataError, voucher.errors.first.first unless voucher.saved?

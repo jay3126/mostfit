@@ -15,9 +15,11 @@ loan_preclosure:
   debit:
     total_received: customer_cash
     principal_received: customer_loan_debtors
+    interest_received: customer_loan_debtors
   credit:
     total_received: customer_loan_debtors
     principal_received: customer_loan_disbursed
+    interest_received: customer_loan_interest_receipt
 loan_advance_adjustment:
   debit:
     advance_adjusted: customer_loan_advance_receipt
