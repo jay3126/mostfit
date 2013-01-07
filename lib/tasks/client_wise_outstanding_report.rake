@@ -293,12 +293,9 @@ namespace :mostfit do
         loan_first_repayment_date = loan.payments(:type => [:principal, :interest]).min(:received_on)
       end
 
-      if loan.payments(:type => [:principal, :interest]).empty?
-        last_payment_date_before_31st_dec_2012 = "No Payments received yet"
-      else
-        last_payment_date_before_31st_dec_2012 = loan.payments(:received_on.lte => date1, :type => [:principal, :interest]).last.received_on
-      end
-
+      loan_payments = loan.payments(:received_on.lte => date1, :type => [:principal, :interest])
+      last_payment_date_before_31st_dec_2012 = (loan_payments and not (loan_payments.empty?)) ? loan_payments.last.received_on : "No Payments received yet"
+      
       client = Client.get(loan.client_id)
       client_id = client.id
       client_name = client.name
