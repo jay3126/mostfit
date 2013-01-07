@@ -38,23 +38,33 @@ class DemandAndCollectionSummaryReport < Report
 
     reporting_facade = get_reporting_facade(@user)
     data = {}
-    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch.paginate(:page => @page, :per_page => @limit) : [@biz_location_branch].paginate(:page => @page, :per_page => @limit)
+    at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     data[:branch_ids] = at_branch_ids_ary
     data[:branches] = {}
 
     at_branch_ids_ary.each { |branch_id|
-      loan_fee_receipts = reporting_facade.aggregate_fee_receipts_on_loans_by_branches(@date, @date, *branch_id)
-      all_fee_receipts = reporting_facade.all_aggregate_fee_receipts_by_branches(@date, @date, *branch_id)
-      fee_dues = reporting_facade.all_aggregate_fee_dues_by_branches(@date, @date, *branch_id)
-      loan_balances = reporting_facade.sum_all_outstanding_loans_balances_accounted_at_locations_on_date(@date, *branch_id)
-      loan_allocations = reporting_facade.total_loan_allocation_receipts_accounted_at_locations_on_value_date(@date, *branch_id)
+      branch = BizLocation.get branch_id
+      loan_amounts_on_date = reporting_facade.total_dues_collected_and_collectable_per_location_on_date(branch_id, @date)
+
 
       branch_data_map = {}
-      branch_data_map[:loan_fee_receipts] = loan_fee_receipts
-      branch_data_map[:all_fee_receipts] = all_fee_receipts
-      branch_data_map[:fee_dues] = fee_dues
-      branch_data_map[:loan_balances] = loan_balances
-      branch_data_map[:loan_allocations] = loan_allocations
+      branch_data_map[:branch_name] = branch.name
+      branch_data_map[:ewi_schedule] = loan_amounts_on_date[:schedule_total_due]
+      branch_data_map[:ewi_advance] = loan_amounts_on_date[:advance_available]
+      branch_data_map[:overdue_ftd] = loan_amounts_on_date[:overdue_for_on_date]
+      branch_data_map[:overdue_amt] = MoneyManager.default_zero_money
+      branch_data_map[:ewi_due] = loan_amounts_on_date[:overdue_amount]
+      branch_data_map[:fee_collectable] = loan_amounts_on_date[:fee_collectable]
+      branch_data_map[:ewi_collected] = loan_amounts_on_date[:total_schedule_received]
+      branch_data_map[:overdue_ewi_collected] = loan_amounts_on_date[:overdue_received_on_date]
+      branch_data_map[:fee_collected] = loan_amounts_on_date[:fee_collected]
+      branch_data_map[:advance_amount] = loan_amounts_on_date[:advance_received]
+      branch_data_map[:other_fees_collected] = MoneyManager.default_zero_money
+      branch_data_map[:fore_closure_pos] = loan_amounts_on_date[:preclose_principal_received]
+      branch_data_map[:fore_closure_od_interest] = loan_amounts_on_date[:preclose_interest_received]
+      branch_data_map[:total_collections] = loan_amounts_on_date[:total_collection]
+      branch_data_map[:short_collections] = MoneyManager.default_zero_money
+      branch_data_map[:fee_differences] = loan_amounts_on_date[:fee_difference]
 
       data[:branches][branch_id] = branch_data_map
     }

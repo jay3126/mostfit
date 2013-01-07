@@ -36,24 +36,76 @@ class ReportingFacade < StandardFacade
   #this method will return due collected and due collectable per location on a date.
   def total_dues_collected_and_collectable_per_location_on_date(at_location_id, on_date = Date.today)
     result = {}
-    schedule_principal_due = schedule_interest_due = schedule_total_due = MoneyManager.default_zero_money
-    principal_collected = interest_collected = total_collected = overdue = MoneyManager.default_zero_money
-    biz_location = BizLocation.get at_location_id
-    if biz_location.location_level.level == 0
-      loans = LoanAdministration.get_loans_administered(at_location_id, on_date).compact
+    loans_on_date = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(at_location_id, on_date)
+    loans_before_date = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(at_location_id, on_date-1)
+
+    disbursed_loans_on_date = loans_on_date[:disbursed_loan_status]
+    preclose_loans_on_date = loans_on_date[:preclosed_loan_status]
+    disbursed_loans = loans_before_date[:disbursed_loan_status]
+    loan_schedule_items =  disbursed_loans.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => disbursed_loans, :on_date => on_date)
+    schedule_loans = loan_schedule_items.blank? ? [] : loan_schedule_items.loan_base_schedule.map(&:lending_id)
+    loan_schedules = loan_schedule_items.blank? ? [] : loan_schedule_items.aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+    loan_schedule_before_on_date = disbursed_loans.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => disbursed_loans, :on_date.lt => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+    loan_receipts_before_on_date = disbursed_loans.blank? ? [] : LoanReceipt.all(:lending_id => disbursed_loans, :effective_on.lt => on_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
+    loan_receipt_on_date = disbursed_loans.blank? ? [] : LoanReceipt.all(:lending_id => disbursed_loans, :effective_on => on_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
+    schedule_loan_receipts_on_date = schedule_loans.blank? ? [] : LoanReceipt.all(:lending_id => schedule_loans, :effective_on => on_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
+    preclose_loan_receipt_on_date = preclose_loans_on_date.blank? ? [] : LoanReceipt.all(:lending_id => preclose_loans_on_date, 'payment_transaction.payment_towards' => :payment_towards_loan_preclosure, :effective_on => on_date).aggregate(:principal_received.sum, :interest_received.sum) rescue []
+    
+    scheduled_principal = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules[0].to_i)
+    scheduled_interest = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules[1].to_i)
+    scheduled_total = scheduled_principal + scheduled_interest
+
+    advance_available = loan_receipts_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_before_on_date[2].to_i-loan_receipts_before_on_date[3].to_i)
+    if loan_schedule_before_on_date.blank?
+      overdue_principal = MoneyManager.default_zero_money
+      overdue_interest = MoneyManager.default_zero_money
     else
-      loans = LoanAdministration.get_loans_accounted(at_location_id, on_date).compact
+      if loan_receipts_before_on_date.blank?
+        overdue_principal = loan_schedule_before_on_date[0] > loan_receipts_before_on_date[0] ?  MoneyManager.get_money_instance_least_terms(loan_schedule_before_on_date[0].to_i-loan_receipts_before_on_date[0].to_i) : MoneyManager.default_zero_money
+        overdue_interest = loan_schedule_before_on_date[1] > loan_receipts_before_on_date[1] ?  MoneyManager.get_money_instance_least_terms(loan_schedule_before_on_date[1].to_i-loan_receipts_before_on_date[1].to_i) : MoneyManager.default_zero_money
+
+      else
+        overdue_principal = MoneyManager.get_money_instance_least_terms(loan_schedule_before_on_date[0].to_i)
+        overdue_interest = MoneyManager.get_money_instance_least_terms(loan_schedule_before_on_date[1].to_i)
+      end
     end
-    loans.each do |loan|
-      schedule_principal_due += (loan.scheduled_principal_due(on_date) || MoneyManager.default_zero_money)
-      schedule_interest_due += (loan.scheduled_interest_due(on_date) || MoneyManager.default_zero_money)
-      schedule_total_due += (loan.scheduled_total_due(on_date) || MoneyManager.default_zero_money)
-      principal_collected += (loan.principal_received_on_date(on_date) || MoneyManager.default_zero_money)
-      interest_collected += (loan.interest_received_on_date(on_date) || MoneyManager.default_zero_money)
-      overdue           += (loan.overdue_amount(on_date) || MoneyManager.default_zero_money)
-      total_collected += (principal_collected + interest_collected)
-    end
-    result = {:overdue_amount => overdue, :schedule_principal_due => schedule_principal_due, :schedule_interest_due => schedule_interest_due, :schedule_total_due => schedule_total_due, :principal_collected => principal_collected, :interest_collected => interest_collected, :total_collected => total_collected}
+    disbursed_loan_on_date = Lending.all(:id => disbursed_loans_on_date, :disbursal_date => on_date)
+    preclose_loan_on_date = Lending.all(:id => preclose_loans_on_date, :preclosed_on_date => on_date)
+    insurance_policies_on_date = disbursed_loan_on_date.blank? ? [] : disbursed_loan_on_date.simple_insurance_policies
+    loan_fee_instance = disbursed_loan_on_date.blank? && preclose_loan_on_date.blank? ? [] : FeeInstance.all(:fee_applied_on_type => :fee_on_loan, :fee_applied_on_type_id => disbursed_loan_on_date.map(&:id)+preclose_loan_on_date.map(&:id))
+    insurance_fee_instance = insurance_policies_on_date.blank? ? [] : FeeInstance.all(:fee_applied_on_type => :fee_on_insurance, :fee_applied_on_type_id => insurance_policies_on_date.map(&:id))
+    
+    loan_fee_amount = loan_fee_instance.blank? ? MoneyManager.default_zero_money : loan_fee_instance.map(&:total_money_amount).sum
+    insurance_fee_amount = insurance_fee_instance.blank? ? MoneyManager.default_zero_money : insurance_fee_instance.map(&:total_money_amount).sum
+    
+    total_fee_colleable_on_date = loan_fee_amount + insurance_fee_amount
+    
+    fee_receipts_on_date = FeeReceipt.all(:accounted_at => at_location_id, :effective_on => on_date).aggregate(:fee_amount.sum) rescue []
+    fee_receipt_amount = fee_receipts_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(fee_receipts_on_date.to_i)
+
+    schedule_principal_received_on_date = schedule_loan_receipts_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_loan_receipts_on_date[0].to_i)
+    schedule_interest_received_on_date = schedule_loan_receipts_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_loan_receipts_on_date[1].to_i)
+    principal_received_on_date = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date[0].to_i)
+    interest_received_on_date = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date[1].to_i)
+    overdue_principal_received_on_date = principal_received_on_date > schedule_principal_received_on_date ? principal_received_on_date - schedule_principal_received_on_date : MoneyManager.default_zero_money
+    overdue_interest_received_on_date = interest_received_on_date > schedule_interest_received_on_date ? interest_received_on_date - schedule_interest_received_on_date : MoneyManager.default_zero_money
+    advance_received_on_date = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date[2].to_i)
+    preclose_principal_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[0].to_i)
+    preclose_interest_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[1].to_i)
+    total_preclose_received_on_date = preclose_principal_received_on_date + preclose_interest_received_on_date
+    total_received_on_date = principal_received_on_date + interest_received_on_date
+    total_schedule_received_on_date = schedule_principal_received_on_date + schedule_interest_received_on_date
+    overdue_total = overdue_principal + overdue_interest
+    overdue_total_received_on_date = overdue_principal_received_on_date + overdue_interest_received_on_date
+    overdue_total_for_on_date = scheduled_total < total_received_on_date ? MoneyManager.default_zero_money : scheduled_total - total_received_on_date
+    total_collection_on_date = total_schedule_received_on_date + overdue_total_received_on_date + fee_receipt_amount + total_preclose_received_on_date + advance_received_on_date
+
+    fee_difference = total_fee_colleable_on_date > fee_receipt_amount ? total_fee_colleable_on_date-fee_receipt_amount : MoneyManager.default_zero_money
+    result = {:overdue_amount => overdue_total, :schedule_principal_due => scheduled_principal, :schedule_interest_due => scheduled_interest, :schedule_total_due => scheduled_total, :principal_collected => principal_received_on_date, :interest_collected => interest_received_on_date, :total_collected => total_received_on_date,
+      :advance_available => advance_available, :advance_received => advance_received_on_date, :preclose_principal_received => preclose_principal_received_on_date, :preclose_interest_received => preclose_interest_received_on_date, :overdue_received_on_date => overdue_total_received_on_date, :overdue_for_on_date => overdue_total_for_on_date,
+      :fee_collectable => total_fee_colleable_on_date, :fee_collected => fee_receipt_amount, :total_collection => total_collection_on_date, :schedule_principal_received => schedule_principal_received_on_date, :schedule_interest_received => schedule_interest_received_on_date, :total_schedule_received => total_schedule_received_on_date,
+      :fee_difference => fee_difference
+    }
   end
 
   #this function will give back the list of staff_members per location.
