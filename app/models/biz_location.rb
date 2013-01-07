@@ -318,7 +318,7 @@ class BizLocation
   # Branch format: BR_0001
   def self.get_biz_location_identifier
     prefix = nil
-    prefix, prefix_id = "BR_", 1
+    prefix, prefix_id = "BR-", 1
     if prefix.blank?
       nil
     else
@@ -340,17 +340,17 @@ class BizLocation
   # Generates biz-location identifier for Center with proper format:
   # Center format: CN_0001_0001
   def self.update_biz_location_identifier_for_center(biz_location, parent_location)
-    center_prefix = "CN_"
-    branch_prefix = "BR_"
+    center_prefix = "CN-"
+    branch_prefix = "BR-"
     branch_identifier = parent_location.biz_location_identifier
     splited_branch_identifier = branch_identifier.split(branch_prefix).last
     parent_branch_last_center = LocationLink.get_children_by_sql(parent_location, Date.today).all(:biz_location_identifier.not=> nil).last
     if parent_branch_last_center.blank?
-      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%1
+      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.4i"%1
     else
       parent_branch_last_centers_identifier = parent_branch_last_center.biz_location_identifier
-      last_centers_splited_identifier = parent_branch_last_centers_identifier.split("_").last.to_i + 1
-      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%last_centers_splited_identifier
+      last_centers_splited_identifier = parent_branch_last_centers_identifier.split("-").last.to_i + 1
+      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.4i"%last_centers_splited_identifier
     end
     biz_location.biz_location_identifier = center_identifier
     biz_location.save
