@@ -11,6 +11,8 @@ class Client
   before :valid?, :convert_blank_to_nil
 
   property :id,                       Serial
+  property :client_identifier,        String, :nullable => false, :default => lambda {|obj, p|
+    obj.client_identifier = Client.last(:fields => [:client_identifier]).blank? ? "%.8i"%1 : "%.8i"%((Client.last(:fields => [:client_identifier]).client_identifier).to_i + 1)}
   property :guarantor_name,           String, CommonClient::Validations.get_validation(:guarantor_name, Client)
   property :guarantor_dob,            Date
   property :guarantor_relationship,   Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:guarantor_relationship, Client)
