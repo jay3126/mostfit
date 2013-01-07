@@ -130,6 +130,7 @@ class BizLocations < Application
 
     # VALIDATIONS
 
+    message[:error] << "Please select a Parent Location for the Center" if parent_location_id.blank? && b_level == '0'
     message[:error] << "Name cannot be blank" if b_name.blank?
     message[:error] << "Disbursal Date cannot be blank" if b_level == '0' && b_disbursal_date.blank?
     message[:error] << "Please select Location Level" if b_level.blank?
