@@ -21,7 +21,7 @@
         - biz_locations.each do |biz_location|
           %tr
             %td
-              = biz_location.id
+              =  biz_location.location_level.level == 0 ||  biz_location.location_level.level == 1 ? biz_location.biz_location_identifier : biz_location.id
             %td
               = link_to_with_rights(biz_location.name, url(:controller => :user_locations, :action => :show, :id => biz_location.id))
             %td
