@@ -340,20 +340,17 @@ class BizLocation
   # Generates biz-location identifier for Center with proper format:
   # Center format: CN_0001_0001
   def self.update_biz_location_identifier_for_center(biz_location, parent_location)
-    center_prefix, center_prefix_id = "CN_", 0
+    center_prefix = "CN_"
     branch_prefix = "BR_"
     branch_identifier = parent_location.biz_location_identifier
     splited_branch_identifier = branch_identifier.split(branch_prefix).last
-    last_biz_location = BizLocation.all('location_level.level' => center_prefix_id, :biz_location_identifier.not=> nil).last
-    if last_biz_location.blank?
+    parent_branch_last_center = LocationLink.get_children_by_sql(parent_location, Date.today).all(:biz_location_identifier.not=> nil).last
+    if parent_branch_last_center.blank?
       center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%1
     else
-      # Find last biz-locations identifier
-      identifier = last_biz_location.biz_location_identifier
-      # Find last biz-location identifiers id
-      splited_identifier = identifier.split("_").last.to_i + 1
-      # Incremented identifier with proper format
-      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%splited_identifier
+      parent_branch_last_centers_identifier = parent_branch_last_center.biz_location_identifier
+      last_centers_splited_identifier = parent_branch_last_centers_identifier.split("_").last.to_i + 1
+      center_identifier = center_prefix+splited_branch_identifier+"_"+"%.4i"%last_centers_splited_identifier
     end
     biz_location.biz_location_identifier = center_identifier
     biz_location.save
