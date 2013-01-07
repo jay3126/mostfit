@@ -34,15 +34,14 @@ class CashOutFlow < Report
   end
 
   def generate
-
     reporting_facade = get_reporting_facade(@user)
     location_facade  = get_location_facade(@user)
     data = {}
     
-    if @biz_location_branch.class == Fixnum
-      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @to_date)
-    else
+    if @biz_location_branch.class == Array
       all_centers = location_facade.all_nominal_centers
+    else
+      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @to_date)
     end
 
     all_centers.each do |center|
