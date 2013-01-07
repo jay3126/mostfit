@@ -2,7 +2,7 @@ module Pdf
   module DaySheet
     require 'zip/zip'
     require 'zip/zipfilesystem'
-
+    
     def generate_collection_pdf(user_id, date)
       folder   = File.join(Merb.root, "doc", "pdfs", "staff", self.name, "collection_sheets")
       FileUtils.mkdir_p(folder)
@@ -176,10 +176,11 @@ module Pdf
                   installment_due = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
                   overdue_amt     = lending.overdue_amount(date)
                   client          = lending.borrower
+             
                   table.data.push({
                       "S. No."          => loan_row_count,
                       "Group"           => "#{client.client_group.blank? ? 'Not Specified' : client.client_group.name}",
-                      "Customer Name"   => client.name,
+                      "Customer Name"   => client.death_event.blank? ? client.name : "<strong>*<i>#{client.name}</i></strong></i>",
                       "Loan LAN No."    => lending.lan,
                       "POS"             => schedule.to_money[:scheduled_principal_outstanding],
                       "Advance"         => lending.advance_balance(date),
@@ -193,6 +194,7 @@ module Pdf
                   loan_row_count = loan_row_count + 1
                   tot_amount     += installment_due
                 end
+               
                 table.data.push({"Loan LAN No." => 'Total Amount', "Inst. Due" => tot_amount.to_s})
                 table.column_order                     = ["S. No.", "Loan LAN No.", "Customer Name", "POS", "Advance", "Inst. No.", "OD", "Inst. Due", "Inst. Paid", "Attendance"]
                 table.show_lines                       = :all
@@ -215,6 +217,7 @@ module Pdf
                 idx += 1
               end
             end
+            pdf.text "\n <i> * indicates clients under Death Cliam process</i>", :font_size => 16, :justification => :left
             pdf.save_as(filename)
             file_names[filename] = pdf
           end
@@ -391,7 +394,9 @@ module Pdf
       return pdf
     end
   end
-  
+
+
+
   module CsvRead
     require 'fastercsv'
 
