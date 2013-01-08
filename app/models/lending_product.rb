@@ -199,4 +199,8 @@ class LendingProduct
     @reporting_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::CLIENT_FACADE, user)
   end
 
+  def self.get_loan_product_identifier(loan_id)
+    lending_product = LendingProduct.get loan_id
+    lending_product.loan_product_identifier.split("LP-").last
+  end
 end

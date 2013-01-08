@@ -10,6 +10,8 @@
     %thead
       %tr
         %td
+          Loan product identifier
+        %td
           Name
         %td
           Amount
@@ -25,6 +27,8 @@
       - @lending_products.each do |lp|
         - locations = lp.get_assign_locations(get_effective_date)
         %tr
+          %td
+            = lp.loan_product_identifier rescue nil
           %td
             = link_to_with_rights lp.name, resource(lp)
           %td

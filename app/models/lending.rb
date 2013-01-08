@@ -10,7 +10,7 @@ class Lending
   after  :create,    :update_cycle_number
 
   property :id,                             Serial
-  property :lan,                            *UNIQUE_ID
+  property :lan,                            String, :nullable => false
   property :applied_amount,                 *MONEY_AMOUNT_NON_ZERO
   property :currency,                       *CURRENCY
   property :applied_on_date,                *DATE_NOT_NULL
@@ -1079,6 +1079,10 @@ class Lending
     current_status = self.status
     raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
     self.status = new_loan_status
+    loan_product_identifier = LendingProduct.get_loan_product_identifier(self.lending_product_id)
+    branch_identifier = BizLocation.get_biz_location_identifier(self.accounted_at_origin)
+    lan_id = "%.6i"%Lending.get_lan_identifier
+    self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
     raise Errors::DataError, errors.first.first unless save
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
@@ -1139,7 +1143,9 @@ class Lending
     schedules.each{|schedule| schedule.update(:on_date => move_date)}
   end
 
-
+  def self.get_lan_identifier
+    Lending.last.blank? ? 1 : (Lending.last.lan.split("-").last).to_i + 1
+  end
 
   private
 

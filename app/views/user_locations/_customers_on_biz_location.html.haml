@@ -31,7 +31,7 @@
       - @customers.each do |customer|
         %tr
           %td
-            = customer.id
+            = customer.client_identifier rescue nil
           %td
             = link_to_with_rights customer.name, url(:controller => :new_clients, :action => :show, :id => customer.id)
           %td

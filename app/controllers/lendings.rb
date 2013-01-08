@@ -37,7 +37,7 @@ class Lendings < Application
 
     #GET-KEEPING
     lending_product_id            = params[:lending_product_id]
-    lan_id                        = params[:lending][:lan]
+    lan_id                        = nil
     applied_date                  = params[:lending][:applied_on_date]
     applied_by_staff              = params[:lending][:applied_by_staff]
     schedule_disbursal_date       = params[:lending][:scheduled_disbursal_date]
@@ -54,7 +54,6 @@ class Lendings < Application
     @biz_location                 = @client_admin.administered_at_location
 
     # VALIDATIONS
-    @message[:error] << "Loan Id cannot blank" if lan_id.blank?
     @message[:error] << "Applied Date cannot blank" if applied_date.blank?
     @message[:error] << "Please select staff" if applied_by_staff.blank?
     @message[:error] << "Schedule Disbursal Date cannot blank" if schedule_disbursal_date.blank?
