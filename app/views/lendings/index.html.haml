@@ -15,24 +15,12 @@
         Loans for Disbursal
       %li#rejected_Loans
         Rejected Loans
-      %li#disbursed_loans{:style=>'display:none'}
-        Disbursed Loans
-      %li#fee_loans{:style=>'display:none'}
-        Fee Loans
-      %li#insurance_premium{:style=>'display:none'}
-        Insurance Premium
     %div.tab
-      = partial "lendings/new_loans", :lendings => @new_lendings, :type => 'approve'
+      = partial "lendings/new_loans"
     %div.tab
-      = partial "lendings/pre_disbursal_loans", :lendings => @pre_disbursal_lendings, :type => 'pre_disbursal'
+      = partial "lendings/pre_disbursal_loans"
     %div.tab
-      = partial "lendings/approve_loans", :lendings => @approved_lendings, :type => 'disburse'
+      = partial "lendings/approve_loans"
     %div.tab
-      = partial "lendings/rejected_loans", :lendings => @rejected_lendings, :type => 'reject'
-    %div.tab
-      =# partial "lendings/disburse_loans", :lendings => @disburse_lendings
-    %div.tab
-      = partial "lendings/fee_loans"
-    %div.tab
-      = partial "lendings/insurance_fee_loans"
+      = partial "lendings/rejected_loans"
  

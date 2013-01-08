@@ -9,7 +9,7 @@
     $('.select_to_payment').attr('checked',$(this).attr('checked'))});
   });
 
-- if lendings.blank?
+- if @disburse_lendings.blank?
   %h3
     No loans exist
 - else
@@ -56,7 +56,7 @@
           %th
             Payment Amount
       - loan_row_count = 1
-      - lendings.each do |lending|
+      - @disburse_lendings.each do |lending|
         %tr
           %td
             = loan_row_count

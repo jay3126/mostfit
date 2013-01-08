@@ -9,11 +9,11 @@ class Lendings < Application
         @loans = LoanAdministration.get_loans_accounted_by_sql(params[:parent_location_id], get_effective_date).group_by{|g| [g.status, g.disbursement_mode]}
       end
       @parent_location        = BizLocation.get(params[:parent_location_id])
-      @loan_ids               = @loans.blank? ? [0] : @loans.map(&:id)
+      @child_location         = BizLocation.get(params[:child_location_id]) unless params[:child_location_id].blank?
       @new_lendings           = @loans[[:new_loan_status, 'Not Specified' ]]||[]
       @pre_disbursal_lendings = @loans[[:approved_loan_status, 'Not Specified']]||[]
       @approved_lendings      = [@loans[[:approved_loan_status, 'Cheque']]||[], @loans[[:approved_loan_status, 'Cheque With Cash']]||[], @loans[[:approved_loan_status, 'Cash']]||[]].flatten
-      @rejected_lendings      = [@loans[[:rejected_loan_status, 'Not Specified']]||[], @loans[[:rejected_loan_status, 'Cheque']]||[], @loans[[:approved_loan_status, 'Cheque With Cash']]||[], @loans[[:approved_loan_status, 'Cash']]||[]].flatten
+      @rejected_lendings      = [@loans[[:rejected_loan_status, 'Not Specified']]||[], @loans[[:rejected_loan_status, 'Cheque']]||[], @loans[[:rejected_loan_status, 'Cheque With Cash']]||[], @loans[[:rejected_loan_status, 'Cash']]||[]].flatten
     end
     display @new_lendings
   end

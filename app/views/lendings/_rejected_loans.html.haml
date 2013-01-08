@@ -10,7 +10,7 @@
   });
 
 %br
-- if lendings.blank?
+- if @rejected_lendings.blank?
   %h3
     No loans exist
 - else
@@ -44,36 +44,43 @@
         %th
           Rejected Date
     - loan_row_count = 1
-    - lendings.each do |lending|
-      %tr
-        %td
-          = loan_row_count
-        %td
-          = link_to_with_rights lending.id, resource(lending)
-        %td
-          = lending.to_money[:applied_amount].to_s
-        %td
-          = lending.loan_borrower.counterparty.name
-        %td
-          = lending.applied_on_date
-        %td
-          = lending.scheduled_first_repayment_date
-        %td
-          = lending.scheduled_disbursal_date
-        %td
-          = lending.repayment_frequency
-        %td
-          = lending.tenure
-        %td
-          - locations = LoanAdministration.get_locations(lending.id, get_effective_date)
-          = locations.blank? ? '-' : link_to_location(locations[:administered_at])
-        %td
-          = locations.blank? ? '-' : link_to_location(locations[:accounted_at])
-        %td
-          = lending.rejected_by_staff.blank? ? '-' : link_to(StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff))
-        %td
-          = lending.rejected_on_date
-        - loan_row_count = loan_row_count + 1
+    - @rejected_lendings.group_by{|l| l.administered_at_origin}.each do |center_id, c_lendings|
+      - if @child_location.blank?
+        - location_map = LoanAdministration.get_location_map(c_lendings.first.id, get_effective_date)
+        - center_name = location_map.blank? ? '-' : BizLocation.get(location_map.administered_at).name
+      - else
+        - center_name = @child_location.name
+      - c_lendings.group_by{|l| l.loan_borrower}.each do |loan_borrower, lendings|
+        - client = Client.get(loan_borrower.counterparty_id)
+        - lendings.each do |lending|
+          %tr
+            %td
+              = loan_row_count
+            %td
+              = link_to_with_rights lending.id, resource(lending)
+            %td
+              = lending.to_money[:applied_amount].to_s
+            %td
+              = client.name
+            %td
+              = lending.applied_on_date
+            %td
+              = lending.scheduled_first_repayment_date
+            %td
+              = lending.scheduled_disbursal_date
+            %td
+              = lending.repayment_frequency
+            %td
+              = lending.tenure
+            %td
+              = center_name
+            %td
+              = @parent_location.blank? ? '-' : @parent_location.name
+            %td
+              = lending.rejected_by_staff.blank? ? '-' : link_to(StaffMember.get(lending.rejected_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.disbursed_by_staff))
+            %td
+              = lending.rejected_on_date
+            - loan_row_count = loan_row_count + 1
     %tfoot
       %tr.org_total
         %td{:colspan => 14}

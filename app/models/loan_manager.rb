@@ -101,15 +101,11 @@ class LoanManager
   def adjust_advance(on_date, on_loan_id, performed_by_id, using_payment_facade)
     loan = get_loan(on_loan_id)
 
-    is_schedule_date = loan.schedule_date?(on_date)
-    raise Errors::BusinessValidationError, "Advance cannot be adjusted on date: #{on_date} as the same is not a schedule date for the loan" unless is_schedule_date
-
     _advance_balance = loan.advance_balance(on_date)
-    raise Errors::BusinessValidationError, "Advance balance is not available on the loan on the date: #{on_date}" unless (_advance_balance > loan.zero_money_amount)
     _actual_total_due = loan.actual_total_due_ignoring_advance_balance(on_date)
 
     money_amount = [_advance_balance, _actual_total_due].min
-    if money_amount > MoneyManager.default_zero_money
+    if money_amount > MoneyManager.default_zero_money && loan.schedule_date?(on_date) &&_advance_balance > loan.zero_money_amount
       receipt_type = Constants::Transaction::CONTRA
       payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT
       on_product_type = Constants::Products::LENDING

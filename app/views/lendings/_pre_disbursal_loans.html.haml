@@ -6,7 +6,7 @@
 
   $(document).ready(function() {
     $('#toggle_select_to_pre_disburse').change(function() {
-      $('.select_to_disburse').attr('checked',$(this).attr('checked'))
+      $('.select_to_pre_disburse').attr('checked',$(this).attr('checked'))
     });
 
     $('.d_mode').change(function() {
@@ -23,7 +23,7 @@
   });
 
 
-- if lendings.blank?
+- if @pre_disbursal_lendings.blank?
   %h3
     No loans exist
 - else
@@ -67,52 +67,57 @@
           %th
             Approval Date
       - loan_row_count = 1
-      - lendings.each do |lending|
-  
-        %tr
-          %td
-            = loan_row_count
-          %td
-            - client = Client.get(lending.loan_borrower.counterparty_id)
-            - if (lending.applied_by_staff == session.user.staff_member.id) || client_facade.is_claim_processing_or_inactive?(client)
-              = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :disabled => true
-            - else
-              = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :class => 'select_to_pre_disburse'
-            %br
-            - if client_facade.is_claim_processing_or_inactive?(client)
-              %i Client Inactive
-            - elsif lending.applied_by_staff == session.user.staff_member.id
-              %i No privilege
-          %td
-            = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES, :class => 'd_mode'
-          %td
-            = select :name => "lending[#{lending.id}][cheque_number]", :collection => cheque_leaf.map{|cl| cl.to_s}, :prompt => 'Select Cheque', :class => 'cheque_no'
-          %td
-            = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt', :disabled => 'true'
-          %td
-            = link_to_with_rights lending.id, resource(lending)
-          %td
-            = link_to_with_rights lending.lending_product.name, resource(lending.lending_product)
-          %td
-            = lending.loan_purpose
-          %td
-            = lending.loan_borrower.counterparty.name
-          %td
-            = lending.scheduled_first_repayment_date
-          %td
-            = lending.scheduled_disbursal_date
-          %td
-            - locations = LoanAdministration.get_locations(lending.id, get_effective_date)
-            = locations.blank? ? '-' : link_to_location(locations[:administered_at])
-          %td
-            = locations.blank? ? '-' : link_to_location(locations[:accounted_at])
-          %td
-            = lending.to_money[:approved_amount].to_s
-          %td
-            = link_to_with_rights StaffMember.get(lending.approved_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.approved_by_staff)
-          %td
-            = lending.approved_on_date
-          - loan_row_count = loan_row_count + 1
+      - @pre_disbursal_lendings.group_by{|l| l.administered_at_origin}.each do |center_id, c_lendings|
+        - if @child_location.blank?
+          - location_map = LoanAdministration.get_location_map(c_lendings.first.id, get_effective_date)
+          - center_name = location_map.blank? ? '-' : BizLocation.get(location_map.administered_at).name
+        - else
+          - center_name = @child_location.name
+        - c_lendings.group_by{|l| l.loan_borrower}.each do |loan_borrower, lendings|
+          - client = Client.get(loan_borrower.counterparty_id)
+          - lendings.each do |lending|
+            %tr
+              %td
+                = loan_row_count
+              %td
+                - if (lending.applied_by_staff == session.user.staff_member.id) || client_facade.is_claim_processing_or_inactive?(client)
+                  = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :disabled => true
+                - else
+                  = check_box :name => "lending[#{lending.id}][disbursement]" ,:value => true, :class => 'select_to_pre_disburse'
+                %br
+                - if client_facade.is_claim_processing_or_inactive?(client)
+                  %i Client Inactive
+                - elsif lending.applied_by_staff == session.user.staff_member.id
+                  %i No privilege
+              %td
+                = select :name => "lending[#{lending.id}][disbursement_mode]", :collection => Constants::Loan::DISBURSEMENT_MODES, :class => 'd_mode'
+              %td
+                = select :name => "lending[#{lending.id}][cheque_number]", :collection => cheque_leaf.map{|cl| cl.to_s}, :prompt => 'Select Cheque', :class => 'cheque_no'
+              %td
+                = text_field :name => "lending[#{lending.id}][cheque_amount]", :value => lending.to_money[:approved_amount].to_s.delete("a-z A-Z"), :style => "width:70px;", :class => 'cheque_amt', :disabled => 'true'
+              %td
+                = link_to_with_rights lending.id, resource(lending)
+              %td
+                = link_to_with_rights lending.lending_product.name, resource(lending.lending_product)
+              %td
+                = lending.loan_purpose
+              %td
+                = client.name
+              %td
+                = lending.scheduled_first_repayment_date
+              %td
+                = lending.scheduled_disbursal_date
+              %td
+                = center_name
+              %td
+                = @parent_location.blank? ? '-' : @parent_location.name
+              %td
+                = lending.to_money[:approved_amount].to_s
+              %td
+                = link_to_with_rights StaffMember.get(lending.approved_by_staff).name, url(:controller => :staff_members, :action => :show, :id => lending.approved_by_staff)
+              %td
+                = lending.approved_on_date
+              - loan_row_count = loan_row_count + 1
       %tfoot
         %tr.org_total
           %td{:colspan => 18}

@@ -144,14 +144,14 @@ class LocationLink
         count == true ? 0 : []
       else
         if count
-          l_links = child_ids.blank? ? [] : repository(:default).adapter.query("select count(*) from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where parent_id = (select parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          l_links = child_ids.blank? ? [] : repository(:default).adapter.query("select count(*) from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where l.parent_id = (select l1.parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
           l_links.blank? ? 0 : l_links
         else
-          l_links = repository(:default).adapter.query("select * from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where parent_id = (select parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
-          if l_links.map(&:child_id).blank?
+          l_links = repository(:default).adapter.query("select l.child_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where l.parent_id = (select l1.parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          if l_links.blank?
             []
           else
-            model_type == 1 ? BizLocation.all(:id => l_links.map(&:child_id)) : Ledger.all(:id => l_links.map(&:child_id))
+            model_type == 1 ? BizLocation.all(:id => l_links) : Ledger.all(:id => l_links)
           end
         end
       end
