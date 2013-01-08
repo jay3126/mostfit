@@ -355,4 +355,9 @@ class BizLocation
     biz_location.biz_location_identifier = center_identifier
     biz_location.save
   end
+
+  def self.get_biz_location_identifier(biz_lcoation_id)
+    identifier = BizLocation.get(biz_lcoation_id).biz_location_identifier
+    identifier.split("-").last
+  end
 end

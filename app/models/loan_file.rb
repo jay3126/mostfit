@@ -30,7 +30,11 @@ class LoanFile
   property :at_center_id,                 Integer, :nullable => false
   property :for_cycle_number,             Integer, :nullable => false
   property :loan_file_identifier,         String,  :nullable => false,
-    :default => lambda {|obj, p| "#{obj.at_branch_id}_#{obj.at_center_id}_#{obj.created_on.strftime('%d-%m-%Y')}"}
+    :default => lambda {|obj, p| 
+    branch_identifier = BizLocation.get_biz_location_identifier(obj.at_branch_id)
+    center_identifier = BizLocation.get_biz_location_identifier(obj.at_center_id)
+    lf_no = "%.3i"%get_loan_file_identifier
+    "LF-#{branch_identifier}-#{center_identifier}-#{obj.created_on.strftime('%d%m%Y')}-#{lf_no}"}
   property :scheduled_disbursal_date,     Date, :nullable => false
   property :scheduled_first_payment_date, Date, :nullable => false
   property :created_by_staff_id,          Integer, :nullable => false
@@ -122,4 +126,7 @@ class LoanFile
     return_status
   end
 
+  def self.get_loan_file_identifier
+    LoanFile.last.blank? ? 1 : (LoanFile.last.loan_file_identifier.split("-").last).to_i + 1
+  end
 end
