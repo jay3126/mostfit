@@ -4,7 +4,7 @@ class BizLocation
   include Pdf::LoanSchedule if PDF_WRITER
   
   property :id,                       Serial
-  property :biz_location_identifier,  String,           :nullable => true
+  property :biz_location_identifier,  String,           :nullable => false
   property :name,                     String,           :nullable => false
   property :created_at,               DateTime,         :nullable => false, :default => DateTime.now
   property :creation_date,            Date,             :nullable => false, :default => Date.today
@@ -143,7 +143,7 @@ class BizLocation
     location[:originator_by] = originator_by unless originator_by.blank?
     location[:biz_location_address] = address unless address.blank?
     location[:center_disbursal_date] = default_disbursal_date unless default_disbursal_date.blank?
-    location[:biz_location_identifier] = at_level_number == 1 ? get_biz_location_identifier : nil
+    location[:biz_location_identifier] = at_level_number == 1 ? get_branch_identifier : nil
     new_location = create(location)
     raise Errors::DataError, new_location.errors.first.first unless new_location.saved?
     Ledger.setup_location_ledgers(new_location.creation_date, new_location.id) if new_location.location_level.level == 1
@@ -316,7 +316,7 @@ class BizLocation
 
   # Generates biz-location identifier for branch with proper format:
   # Branch format: BR_0001
-  def self.get_biz_location_identifier
+  def self.get_branch_identifier
     prefix = nil
     prefix, prefix_id = "BR-", 1
     if prefix.blank?
@@ -346,18 +346,48 @@ class BizLocation
     splited_branch_identifier = branch_identifier.split(branch_prefix).last
     parent_branch_last_center = LocationLink.get_children_by_sql(parent_location, Date.today).all(:biz_location_identifier.not=> nil).last
     if parent_branch_last_center.blank?
-      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.4i"%1
+      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.6i"%1
     else
       parent_branch_last_centers_identifier = parent_branch_last_center.biz_location_identifier
       last_centers_splited_identifier = parent_branch_last_centers_identifier.split("-").last.to_i + 1
-      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.4i"%last_centers_splited_identifier
+      center_identifier = center_prefix+splited_branch_identifier+"-"+"%.6i"%last_centers_splited_identifier
     end
     biz_location.biz_location_identifier = center_identifier
     biz_location.save
   end
 
-  def self.get_biz_location_identifier(biz_lcoation_id)
-    identifier = BizLocation.get(biz_lcoation_id).biz_location_identifier
+  def self.get_biz_location_identifier(biz_location_id)
+    identifier = BizLocation.get(biz_location_id).biz_location_identifier
     identifier.split("-").last
   end
+
+  # do not use..its dangerous
+  def self.update_biz_location_identifier_for_existing_branch
+    prefix = "BR-"
+    branch_code = 1
+    all_branches = BizLocation.all_locations_at_level(LocationLevel::NOMINAL_BRANCH_LEVEL)
+    all_branches.each do |b|
+      b.biz_location_identifier = prefix+"%.4i"%branch_code
+      branch_code += 1
+      b.save!
+    end
+  end
+
+  # do not use..its dangerous
+  def self.update_biz_location_identifier_for_existing_center
+    center_prefix = "CN-"
+    branch_prefix = "BR-"
+    all_branches = BizLocation.all_locations_at_level(LocationLevel::NOMINAL_BRANCH_LEVEL)
+    all_branches.each do |b|
+      center_code = 1
+      branch_identifier = b.biz_location_identifier.split(branch_prefix).last
+      all_centers = LocationLink.get_children_by_sql(b, Date.today)
+      all_centers.each do |c|
+        c.biz_location_identifier = center_prefix+branch_identifier+"-"+"%.6i"%center_code
+        c.save!
+        center_code += 1
+      end
+    end
+  end
+  
 end

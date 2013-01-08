@@ -203,4 +203,16 @@ class LendingProduct
     lending_product = LendingProduct.get loan_id
     lending_product.loan_product_identifier.split("LP-").last
   end
+
+  def self.update_loan_product_identifier_for_existing_loan_product
+    prefix = "LP-"
+    loan_product_identifier_code = 1
+    all_loan_product = LendingProduct.all
+    all_loan_product.each do |lp|
+      lp.loan_product_identifier = prefix+"%.6i"%loan_product_identifier_code
+      loan_product_identifier_code += 1
+      lp.save!
+    end
+  end
+
 end

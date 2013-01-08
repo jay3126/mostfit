@@ -132,9 +132,9 @@ class Client
     elsif headers[:client_group] and row[headers[:client_group]]
       name          = row[headers[:client_group]].strip
       client_group  = ClientGroup.first(:name => name) || ClientGroup.create(:name => name, :biz_location_id => center.id,
-                      :code => name.split(' ').join, :upload_id => row[headers[:upload_id]],
-                      :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-                      :creation_date => Date.parse(row[headers[:date_joined]]))
+        :code => name.split(' ').join, :upload_id => row[headers[:upload_id]],
+        :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
+        :creation_date => Date.parse(row[headers[:date_joined]]))
     else
       client_group  = nil
     end
@@ -323,6 +323,16 @@ class Client
       collection_sub_psl = psl.psl_sub_categories
       selected_sub_psl = sub_psl_id.blank? ? nil : PslSubCategory.get(sub_psl_id)
       return [collection_sub_psl, selected_sub_psl]
+    end
+  end
+
+  def self.update_client_identifier_for_existing_clients
+    client_identifier_code = 1
+    all_clients = Client.all(:fields => [:id])
+    all_clients.each do |client|
+      client.client_identifier = "%.8i"%client_identifier_code
+      client_identifier_code += 1
+      client.save!
     end
   end
 
