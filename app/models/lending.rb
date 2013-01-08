@@ -1147,6 +1147,19 @@ class Lending
     Lending.last.blank? ? 1 : (Lending.last.lan.split("-").last).to_i + 1
   end
 
+  def self.update_lan_for_existing_loans
+    all_loans = Lending.all(:fields => [:id,:lending_product_id, :accounted_at_origin])
+    lan_id_code = 1
+    all_loans.each do |loan|
+      loan_product_identifier = LendingProduct.get_loan_product_identifier(loan.lending_product_id)
+      branch_identifier = BizLocation.get_biz_location_identifier(loan.accounted_at_origin)
+      lan_id = "%.6i"%lan_id_code
+      loan.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
+      lan_id_code += 1
+      loan.save!
+    end
+  end
+  
   private
 
   def get_loan_fee_product
