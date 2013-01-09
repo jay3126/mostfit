@@ -133,12 +133,16 @@ module Pdf
             filename       = File.join(folder, "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}.pdf")
             pdf            = PDF::Writer.new(:orientation => :landscape, :paper => "A4")
             pdf.select_font "Times-Roman"
-            pdf.info.title = "due_collection_#{branch.id}_#{date.day}_#{date.month}_#{date.year}"
             pdf.text "<b>Suryoday Micro Finance (P) Ltd.</b>", :font_size => 24, :justification => :center
             pdf.text "Due Generation Sheet for #{branch.name} for #{date}", :font_size => 20, :justification => :center
             pdf.text("\n")
 
             center_locations.each do |center|
+              center_identifier = BizLocation.get_center_identifier_for_due_sheet(center.id)
+              trim_center_identifier = center_identifier.tr('-', '')
+              day_format = "%.2i"%date.day
+              month_format = "%.2i"%date.month
+              pdf.info.title = "DS-#{trim_center_identifier}-#{day_format}#{month_format}#{date.year}"
               center_schedules = loan_schedules.select{|s| s.loan_base_schedule.lending.administered_at_origin == center.id}
               unless center_schedules.blank?
                 location_manage     = location_facade.location_managed_by_staff(center.id, date)

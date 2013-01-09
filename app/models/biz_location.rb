@@ -361,6 +361,11 @@ class BizLocation
     identifier.split("-").last
   end
 
+  def self.get_center_identifier_for_due_sheet(biz_location_id)
+    identifier = BizLocation.get(biz_location_id).biz_location_identifier
+    identifier.split("CN-").last
+  end
+
   # do not use..its dangerous
   def self.update_biz_location_identifier_for_existing_branch
     prefix = "BR-"
