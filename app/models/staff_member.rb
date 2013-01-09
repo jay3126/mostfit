@@ -75,4 +75,13 @@ class StaffMember
     return [c_pdf, d_pdf]
   end
 
+  def is_branch_manager?
+    designation = self.designation
+    designation.blank? ? false : designation.name == 'Branch Manager'
+  end
+
+  def is_ro?
+    designation = self.designation
+    designation.blank? ? false : designation.name == 'RO'
+  end
 end

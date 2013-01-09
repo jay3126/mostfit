@@ -49,8 +49,8 @@
           %td
             = values[:arrears]
           %td
-            = values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
-            - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:scheduled_outstanding_amount]
+            = values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
+            - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
           %td
             = values[:number_of_loan_accounts_in_arrear]
           %td
