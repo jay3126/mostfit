@@ -135,6 +135,7 @@ USAGE_TEXT
 
             #making the disbursement entry.
             accounting_facade = FacadeFactory.instance.get_instance(FacadeFactory::ACCOUNTING_FACADE, User.first)
+            payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
 
             payment_transaction = PaymentTransaction.record_payment(loan.to_money[:disbursed_amount], 'payment',
               Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
@@ -144,6 +145,17 @@ USAGE_TEXT
             payment_allocation = loan.allocate_payment(payment_transaction, Constants::Transaction::LOAN_DISBURSEMENT, make_specific_allocation = nil,
               specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
             accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
+
+            #making fee payments.
+            insurance_policies = loan.simple_insurance_policies.map(&:id) rescue []
+            fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
+            fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(loan.id)
+            fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
+            fee_instances.each do |fee_instance|
+              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
+                '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
+                loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
+            end
             
             #making the single payment to match the POS at the specified date.
             principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
@@ -157,11 +169,6 @@ USAGE_TEXT
               performed_by_staff = User.first.staff_member
               recorded_by_staff = User.first
               client = loan.borrower
-#              principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
-#              interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)
-#              principal_amount_to_be_paid = (principal_amount_from_loan_product - pos)
-#              interest_amount_to_be_paid = (interest_amount_from_loan_product - int_os)
-#              amount_to_be_paid = principal_amount_to_be_paid + interest_amount_to_be_paid
               amount_to_be_paid = principal_received_till_date + interest_received_till_date
               money_amount_to_be_paid = amount_to_be_paid
               receipt_type = Constants::Transaction::RECEIPT
