@@ -33,9 +33,9 @@ class CustomerExtractForInsurance < Report
 
   def generate
     data = {}
-
-    params = {:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch}
-    loan_ids = Lending.all(params).to_a.paginate(:page => @page, :per_page => @limit)
+    #    params = {:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch}
+    loan_ids = Lending.all(:fields => [:accounted_at_origin, :administered_at_origin, :disbursal_date, :id, :lan, :applied_amount], :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
+    #    loan_ids = Lending.all(params).to_a.paginate(:page => @page, :per_page => @limit)
     data[:paginated_loan_ids] = loan_ids
     data[:loans] = {}
     loan_ids.each do |loan|
