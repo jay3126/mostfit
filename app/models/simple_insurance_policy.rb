@@ -21,6 +21,7 @@ class SimpleInsurancePolicy
   has n, :insurance_claims
 
   def money_amounts; [ :insured_amount ]; end
+  def si_money_amount; to_money_amount(:insured_amount); end
   
   def created_on; self.proposed_on; end
   def counterparty; self.client; end

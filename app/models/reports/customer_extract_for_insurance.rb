@@ -45,7 +45,8 @@ class CustomerExtractForInsurance < Report
       center = BizLocation.get(loan.administered_at_origin)
       center_id = center ? center.id : "Not Specified"
       center_name = center ? center.name : "Not Specified"
-      client = loan.loan_borrower.counterparty
+      loan_borrower = LoanBorrower.first(:counterparty_id => 1)
+      client = loan_borrower.counterparty
       client_name = client ? client.name : "Not Specified"
       client_id = client ? client.id : "Not Specified"
       gender = (client and client.gender) ? client.gender.to_s : "Not Specified"
@@ -57,8 +58,10 @@ class CustomerExtractForInsurance < Report
       loan_lan = (loan and loan.lan) ? loan.lan : "Not Specified"
       loan_disbursement_date = (loan and loan.disbursal_date) ? loan.disbursal_date : "Not Specified"
       loan_amount = (loan and loan.applied_amount) ? Money.new(loan.applied_amount.to_i, :INR).to_s : "Not Specified"
-      loan_commencement_date = (loan and loan.loan_base_schedule) ? loan.loan_base_schedule.first_receipt_on : "Not Available"
-      cover_amount = (loan and loan.simple_insurance_policies and not loan.simple_insurance_policies.blank?) ? loan.simple_insurance_policies.first.insured_amount : "Insurance Not Specified"
+      loan_base_schedule = LoanBaseSchedule.first(:fields => [:first_receipt_on], :lending_id => loan.id)
+      loan_commencement_date = (loan_base_schedule.blank?) ? "Not Available" : loan_base_schedule.first_receipt_on
+      simple_insurance_policies = SimpleInsurancePolicy.first(:lending_id => loan.id)
+      cover_amount = (simple_insurance_policies.blank?) ? "Insurance Not Specified" : simple_insurance_policies.si_money_amount.to_s
       premium = "Insurance Not Specified"
       service_tax = "Insurance Not Specified"
       total_premium = "Insurance Not Specified"
