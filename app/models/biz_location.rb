@@ -4,7 +4,7 @@ class BizLocation
   include Pdf::LoanSchedule if PDF_WRITER
   
   property :id,                       Serial
-  property :biz_location_identifier,  String,           :nullable => false
+  property :biz_location_identifier,  String,           :nullable => true
   property :name,                     String,           :nullable => false
   property :created_at,               DateTime,         :nullable => false, :default => DateTime.now
   property :creation_date,            Date,             :nullable => false, :default => Date.today
