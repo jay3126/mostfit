@@ -8,8 +8,7 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
     @name = "Disbursement and Charge Details Report from #{@from_date} to #{@to_date}"
     @user = user
     location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : ''
     @page = params.blank? || params[:page].blank? ? 1 :params[:page]
     @limit = 10
     get_parameters(params, user)
@@ -38,7 +37,11 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
   def generate
 
     data = {}
-    disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date ).aggregate(:disbursal_date)
+    if @biz_location_branch.blank?
+      disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
+    else
+      disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).aggregate(:disbursal_date)
+    end
     d_dates = disbursal_dates.to_a.paginate(:page => @page, :per_page => @limit)
     loan_products = LendingProduct.all.map(&:name)
     data[:loan_products] = loan_products

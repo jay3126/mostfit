@@ -33,9 +33,7 @@ class IncomeCashflowProjectionReport < Report
     disbursed_loan_ids = disbursed_loans.blank? ? [] : disbursed_loans.map(&:id)
 
     schedule_infos = disbursed_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => disbursed_loan_ids, :on_date.lte => @to_date, :on_date.gte => @from_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
-    accrual_interest_from_date = disbursed_loan_ids.blank? ? 0 : repository.adapter.query("Select SUM(a.interest_accrual_till_date) from loan_due_statuses a where a.lending_id IN (#{disbursed_loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{@from_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);").first
-    accrual_interest_to_date = disbursed_loan_ids.blank? ? 0 : repository.adapter.query("Select SUM(a.interest_accrual_till_date) from loan_due_statuses a where a.lending_id IN (#{disbursed_loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{@to_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);").first
-    accrual_interest = accrual_interest_from_date < accrual_interest_to_date ? accrual_interest_to_date - accrual_interest_from_date : accrual_interest_from_date - accrual_interest_to_date
+    
     disbursed_loan_amount = disbursed_loan_ids.blank? ? []  : disbursed_loans.map(&:disbursed_amount).sum
     disbursed_amount = disbursed_loan_amount.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_loan_amount.to_i)
 
@@ -43,7 +41,7 @@ class IncomeCashflowProjectionReport < Report
     schedule_interest_realisations = schedule_infos.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_infos[1].to_i)
     schedule_total_realisations = schedule_principal_realisations + schedule_interest_realisations
       
-    projected_interest_accrual = accrual_interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(accrual_interest.to_i)
+    projected_interest_accrual = schedule_interest_realisations
     projected_pos_at_monthend = disbursed_amount > schedule_principal_realisations ? disbursed_amount - schedule_principal_realisations : MoneyManager.default_zero_money
 
 
