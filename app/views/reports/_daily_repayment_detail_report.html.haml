@@ -18,26 +18,33 @@
         %th
           Interest
         %th
+          Advance
+        %th
           Amount
     %tbody
-      - @data.each do |value|
-        %tr
-          - loan = value.loan_base_schedule.lending
-          - l_locations = LoanAdministration.get_locations(loan.id, value.on_date)
-          %td
-            = l_locations.blank? ? '-' : l_locations[:accounted_at].name
-          %td
-            = l_locations.blank? ? '-' : l_locations[:administered_at].name
-          %td
-            = loan.lan
-          %td
-            = value.on_date
-          %td
-            = value.to_money[:scheduled_principal_due].to_s
-          %td
-            = value.to_money[:scheduled_interest_due].to_s
-          %td
-            = (value.to_money[:scheduled_principal_due] + value.to_money[:scheduled_interest_due]).to_s
+      - @data[:loan_payments].each do |branch_id, values|
+        - values.each do |lending_id, value|
+          %tr
+            %td
+              = value[:branch_name]
+            %td
+              = value[:center_name]
+            %td
+              = value[:lan_no]
+            %td
+              = value[:schedule_date]
+            %td
+              = value[:principal_received]
+            %td
+              = value[:interest_received]
+            %td
+              = value[:advance_received]
+            %td
+              = value[:principal_received] + value[:interest_received] + value[:advance_received]
+  %br
+  .flickr_pagination
+    = will_paginate @data[:repayments], :container => false
+  %br
 - else
   .shaded
     %h3 No records found
