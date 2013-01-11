@@ -7,9 +7,6 @@ class IncomeCashflowProjectionReport < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Income Cashflow Projection Report from #{@from_date} to #{@to_date}"
     @user = user
-    location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch] and (not (params[:biz_location_branch].empty?))) ? params[:biz_location_branch] : all_branch_ids
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
     @limit = 10
     get_parameters(params, user)
@@ -30,34 +27,27 @@ class IncomeCashflowProjectionReport < Report
   def generate
     data = {}
 
-    params = {:status => :disbursed_loan_status}
-    loan_ids = Lending.all(params).to_a.paginate(:page => @page, :per_page => @limit)
-    data[:loan_ids] = loan_ids
     data[:loans] = {}
-    loan_ids.each do |loan|
-      month = @from_date.strftime("%B")
-      year = @from_date.strftime("%Y")
-      loan_id = loan.id
-      loan_disbursal_date = loan.disbursal_date
-      projected_pos_at_monthend = loan.scheduled_principal_outstanding(@to_date)
 
-      if loan.principal_received_till_date(@from_date) > loan.principal_received_till_date(@to_date)
-        schedule_principal_realisations = loan.principal_received_till_date(@from_date) - loan.principal_received_till_date(@to_date)
-      else
-        schedule_principal_realisations = loan.principal_received_till_date(@to_date) - loan.principal_received_till_date(@from_date)
-      end
+    disbursed_loans = repository.adapter.query("select id, disbursed_amount from lendings where status = 5 and disbursal_date <= '#{@to_date.strftime('%Y-%m-%d')}'")
+    disbursed_loan_ids = disbursed_loans.blank? ? [] : disbursed_loans.map(&:id)
 
-      if loan.interest_received_till_date(@from_date) > loan.interest_received_till_date(@to_date)
-        schedule_interest_realisations = loan.interest_received_till_date(@from_date) - loan.interest_received_till_date(@to_date)
-      else
-        schedule_interest_realisations = loan.interest_received_till_date(@to_date) - loan.interest_received_till_date(@from_date)
-      end
+    schedule_infos = disbursed_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => disbursed_loan_ids, :on_date.lte => @to_date, :on_date.gte => @from_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+    accrual_interest_from_date = disbursed_loan_ids.blank? ? 0 : repository.adapter.query("Select SUM(a.interest_accrual_till_date) from loan_due_statuses a where a.lending_id IN (#{disbursed_loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{@from_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);").first
+    accrual_interest_to_date = disbursed_loan_ids.blank? ? 0 : repository.adapter.query("Select SUM(a.interest_accrual_till_date) from loan_due_statuses a where a.lending_id IN (#{disbursed_loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{@to_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);").first
+    accrual_interest = accrual_interest_from_date < accrual_interest_to_date ? accrual_interest_to_date - accrual_interest_from_date : accrual_interest_from_date - accrual_interest_to_date
+    disbursed_loan_amount = disbursed_loan_ids.blank? ? []  : disbursed_loans.map(&:disbursed_amount).sum
+    disbursed_amount = disbursed_loan_amount.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_loan_amount.to_i)
 
-      schedule_total_realisations = schedule_principal_realisations + schedule_interest_realisations
-      projected_interest_accrual = loan.accrued_interim_interest(@from_date, @to_date)
+    schedule_principal_realisations = schedule_infos.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_infos[0].to_i)
+    schedule_interest_realisations = schedule_infos.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_infos[1].to_i)
+    schedule_total_realisations = schedule_principal_realisations + schedule_interest_realisations
+      
+    projected_interest_accrual = accrual_interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(accrual_interest.to_i)
+    projected_pos_at_monthend = disbursed_amount > schedule_principal_realisations ? disbursed_amount - schedule_principal_realisations : MoneyManager.default_zero_money
 
-      data[:loans][loan] = {:month => month, :year => year, :projected_pos_at_monthend => projected_pos_at_monthend, :schedule_principal_realisations => schedule_principal_realisations, :schedule_interest_realisations => schedule_interest_realisations, :schedule_total_realisations => schedule_total_realisations, :projected_interest_accrual => projected_interest_accrual, :loan_id => loan_id, :loan_disbursal_date => loan_disbursal_date}
-    end
+
+    data[:loan] = {:from_date => @from_date, :to_date => @to_date, :projected_pos_at_monthend => projected_pos_at_monthend, :schedule_principal_realisations => schedule_principal_realisations, :schedule_interest_realisations => schedule_interest_realisations, :schedule_total_realisations => schedule_total_realisations, :projected_interest_accrual => projected_interest_accrual}
     data
   end
 end

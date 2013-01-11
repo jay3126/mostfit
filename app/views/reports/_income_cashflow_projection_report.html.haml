@@ -1,5 +1,5 @@
 = partial :form
-- if @data.blank? || @data[:loans].blank?
+- if @data.blank? || @data[:loan].blank?
   %h2 No data to display
 - else
   %table.dataTable.report.weeksheet.nojs
@@ -7,12 +7,6 @@
       %tr
         %th
           Month
-        %th
-          Year
-        %th
-          Loan Id
-        %th
-          Loan Disbursal Date
         %th
           Projected POS at Monthend
         %th
@@ -22,56 +16,18 @@
         %th
           Schedule Total EWI Realisations
         %th
-          Projected Interest Accrual
-
+          Projected Interest Accrual*
     %tbody
-      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
-      - @default_currency ||= MoneyManager.get_default_currency
-      - @data[:loans].sort_by{|loan| loan}.each do |loan, values|
-        %tr
-          %td
-            = values[:month]
-          %td
-            = values[:year]
-          %td
-            = values[:loan_id]
-          %td
-            = values[:loan_disbursal_date]
-          %td
-            = values[:projected_pos_at_monthend]
-            - accumulate_row_values[:projected_pos] += values[:projected_pos_at_monthend]
-          %td
-            = values[:schedule_principal_realisations]
-            - accumulate_row_values[:principal_realisations] += values[:schedule_principal_realisations]
-          %td
-            = values[:schedule_interest_realisations]
-            - accumulate_row_values[:interest_realisations] += values[:schedule_interest_realisations]
-          %td
-            = values[:schedule_total_realisations]
-            - accumulate_row_values[:total_realisations] += values[:schedule_total_realisations]
-          %td
-            = values[:projected_interest_accrual]
-            - accumulate_row_values[:interest_accrual] += values[:projected_interest_accrual]
-
-    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
-    %tfoot
       %tr
-        %th
-          Total
         %td
+          = @data[:loan][:from_date].strftime("%B-%Y")
         %td
+          = @data[:loan][:projected_pos_at_monthend]
         %td
+          = @data[:loan][:schedule_principal_realisations]
         %td
-          = total_rows[:projected_pos]
+          = @data[:loan][:schedule_interest_realisations]
         %td
-          = total_rows[:principal_realisations]
+          = @data[:loan][:schedule_total_realisations]
         %td
-          = total_rows[:interest_realisations]
-        %td
-          = total_rows[:total_realisations]
-        %td
-          = total_rows[:interest_accrual]
-  %br
-  .flickr_pagination
-    = will_paginate @data[:loan_ids], :container => false
-  %br
+          = @data[:loan][:projected_interest_accrual]

@@ -31,6 +31,7 @@ class LoanDueStatus
   property :advance_received_till_date,     *MONEY_AMOUNT
   property :advance_adjusted_till_date,     *MONEY_AMOUNT
   property :advance_balance,                *MONEY_AMOUNT
+  property :interest_accrual_till_date,     *MONEY_AMOUNT
   property :currency,                       *CURRENCY
   property :day_past_due,                   Integer, :default => 0
   property :created_at,                     *CREATED_AT
@@ -83,6 +84,7 @@ class LoanDueStatus
   def self.generate_loan_due_status(for_loan_id, on_date)
     loan = Lending.get(for_loan_id)
     loan_base_schedule = loan.loan_base_schedule
+    loan_schedules = loan_base_schedule.base_schedule_line_items(:order => [:on_date, :created_at])
     zero_amount = MoneyManager.default_zero_money
     raise Errors::DataError, "Unable to locate the loan for ID: #{for_loan_id}" unless loan
 
@@ -103,6 +105,7 @@ class LoanDueStatus
       due_status[:administered_at] = administered_at_id
       due_status[:accounted_at]    = accounted_at_id
       due_status[:on_date]         = on_date
+
     
       if loan.has_loan_claim?
         loan_claim_since = loan.has_loan_claim_since
@@ -112,8 +115,8 @@ class LoanDueStatus
         end
       end
 
-      schedules_info = loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date, :order => [:on_date.desc, :created_at.desc])
-      schedule_info = schedules_info.first
+      schedules_info = loan_schedules.select{|s| s.on_date <= on_date}
+      schedule_info = schedules_info.blank? ? [] : schedules_info.sort.last
       scheduled_principal_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_principal_due).sum.to_i)
       scheduled_interest_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_interest_due).sum.to_i)
       scheduled_total_due_till_date = scheduled_principal_till_date + scheduled_interest_till_date
@@ -162,7 +165,18 @@ class LoanDueStatus
       due_status_amounts[PRINCIPAL_AT_RISK] = (loan_due_status == OVERDUE) ? (actual_principal_outstanding) : zero_amount
 
       due_status.merge!(Money.from_money(due_status_amounts))
+      if !schedule_info.blank?
+        if schedule_info.on_date == on_date || loan_schedules.last.on_date <= on_date
+          due_status[:interest_accrual_till_date] = scheduled_interest_till_date.amount
+        else
+          next_schedule = loan_schedules.select{|s| s.on_date >= on_date}.first
+          next_schedule_interest = scheduled_interest_till_date + next_schedule.to_money[:scheduled_interest_due]
+          due_status[:interest_accrual_till_date] = (scheduled_interest_till_date + Allocation::Common.calculate_broken_period_interest(scheduled_interest_till_date, next_schedule_interest, schedule_info.on_date, next_schedule.on_date, on_date, loan.repayment_frequency)).amount
 
+        end
+      else
+        due_status[:interest_accrual_till_date] = zero_amount.amount
+      end
       loan_due_status_record  = first_or_create(due_status)
       raise Errors::DataError, loan_due_status_record.errors.first.first unless loan_due_status_record.saved?
       loan_due_status_record

@@ -85,10 +85,10 @@
       %tr
         %td
           - if lending_status.has_loan_claim_since.blank?
-            = lending_status.on_date
+            = lending_status.on_date.strftime('%Y-%m-%d')
           - else
             %p{:style => 'background:orange'}
-              %b= lending_status.on_date
+              %b= lending_status.on_date.strftime('%Y-%m-%d')
         %td
           = lending_status.due_status.humanize
         %td
