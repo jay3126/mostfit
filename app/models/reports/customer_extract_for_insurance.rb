@@ -33,9 +33,7 @@ class CustomerExtractForInsurance < Report
 
   def generate
     data = {}
-    #    params = {:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch}
-    loan_ids = Lending.all(:fields => [:accounted_at_origin, :administered_at_origin, :disbursal_date, :id, :lan, :applied_amount], :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
-    #    loan_ids = Lending.all(params).to_a.paginate(:page => @page, :per_page => @limit)
+    loan_ids = Lending.all(:fields => [:accounted_at_origin, :administered_at_origin, :disbursal_date, :id, :lan, :applied_amount, :lending_product_id], :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
     data[:paginated_loan_ids] = loan_ids
     data[:loans] = {}
     loan_ids.each do |loan|
@@ -62,9 +60,10 @@ class CustomerExtractForInsurance < Report
       loan_commencement_date = (loan_base_schedule.blank?) ? "Not Available" : loan_base_schedule.first_receipt_on
       simple_insurance_policies = SimpleInsurancePolicy.first(:lending_id => loan.id)
       cover_amount = (simple_insurance_policies.blank?) ? "Insurance Not Specified" : simple_insurance_policies.si_money_amount.to_s
-      premium = "Insurance Not Specified"
-      service_tax = "Insurance Not Specified"
-      total_premium = "Insurance Not Specified"
+      fee_instance = FeeInstance.first(:fee_applied_on_type =>Constants::Fee::FEE_ON_LOAN, :fee_applied_on_type_id => loan.id)
+      premium = fee_instance.fee_money_amount
+      service_tax = fee_instance.tax_money_amount
+      total_premium = fee_instance.total_money_amount
 
       data[:loans][loan] = {:branch_id => branch_id, :branch_name => branch_name, :center_id => center_id, :center_name => center_name, :client_id => client_id, :client_name => client_name, :gender => gender, :date_of_birth => date_of_birth, :age_as_on_loan_disbursement_date => age_as_on_loan_disbursement_date, :guarantor_name => guarantor_name, :guarantor_relationship => guarantor_relationship, :loan_id => loan_id, :loan_lan => loan_lan, :loan_disbursement_date => loan_disbursement_date, :loan_amount => loan_amount, :loan_commencement_date => loan_commencement_date, :cover_amount => cover_amount, :premium => premium, :service_tax => service_tax, :total_premium => total_premium}
     end
