@@ -44,7 +44,7 @@ namespace :mostfit do
         interest_received_till_date = loan.interest_received_till_date
         total_received_till_date = principal_received_till_date + interest_received_till_date
         advances = LoanReceipt.first(:advance_received.gt => 0, :lending_id => loan.id)
-        advance_received = (advances and (not advances.nil?)) ? advances.advance_received : MoneyManager.default_zero_money
+        advance_received = (advances and (not advances.nil?)) ? Money.new(advances.advance_received.to_i, :INR).to_s : MoneyManager.default_zero_money
 
         f.puts("#{sl_no},\"#{branch_name}\",\"#{center_name}\",#{client_id},\"#{client_name}\",#{loan_id},\"#{loan_reference_number}\",#{pos},#{ios},#{total_os},#{principal_received_till_date},#{interest_received_till_date},#{total_received_till_date},#{advance_received}")
       end
