@@ -97,6 +97,17 @@ class Voucher
     all(search_options)
   end
 
+  def self.get_voucher_for_cost_center(from_date, to_date, cost_centers)
+    vouchers = []
+    cost_centers.each do |cost_center_id|
+      cost_center = CostCenter.get cost_center_id
+      ledger_ids = cost_center.accounting_locations(:product_type => 'ledger').map(&:product_id)
+      l_vouchers = Ledger.all(:id => ledger_ids).vouchers(:effective_on.gte => from_date, :effective_on.lte => to_date) unless ledger_ids.blank?
+      vouchers << l_vouchers unless l_vouchers.blank?
+    end
+    vouchers.blank? ? [] : vouchers.flatten.uniq
+  end
+
   def self.to_tally_xml(voucher_list, xml_file = nil)
     xml_file ||= '/tmp/voucher.xml'
     f = File.open(xml_file,"w")

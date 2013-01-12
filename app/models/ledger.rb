@@ -472,6 +472,24 @@ class Ledger
     end
   end
 
+  def self.update_ledger_names
+    head_office = CostCenter.first(:name => 'Head Office')
+    h_ledgers = head_office.accounting_locations(:product_type => 'ledger').map(&:product)
+    ledger_names = {'Cash' =>"Cash",'Bank Account'=>'Bank Account','Loans Made' => 'Micro Finance Loan','Debtors'=>'Debtors-Mf Loan','Loans Write Off'=>'Bad Debts','Loans Advance'=>'Advance for Ewi','Interest Income'=>'Interest on Microfinance Loan','Charges Income' =>'Service Charges','Other Income'=>'Bad Debts Recover'}
+    ledger_names.each do |ledger, new_ledger|
+      h_ledger = h_ledgers.select{|l| l.name == ledger}.first
+      if !h_ledger.blank?
+        h_ledger.update(:name => new_ledger) if h_ledger.name != new_ledger
+        c_ledgers = LocationLink.get_children_by_sql(h_ledger, Date.today)
+        c_ledgers.each do |c_ledger|
+          c_name = c_ledger.name
+          c_new_name = c_name.sub(ledger, new_ledger)
+          c_ledger.update(:name => c_new_name) if c_new_name != c_name
+        end
+      end
+    end
+  end
+
   def self.get_location_facade(user)
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
   end

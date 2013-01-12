@@ -1,4 +1,8 @@
 %h1 Manage Book Keeping
+- unless @error.blank?
+  .shaded
+    .error
+      = @error.class == Array ? @error.join('<br>') : @error
 %div
   %ul
     %li#ledgers

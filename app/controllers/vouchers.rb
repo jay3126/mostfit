@@ -93,24 +93,20 @@ class Vouchers < Application
   end
 
   def tally_download
-    if params[:from_date] and params[:to_date]
-      search_options = {}
-      location_ids   = []
-      from_date      = Date.parse(params[:from_date])
-      to_date        = Date.parse(params[:to_date])
-      locations      = params[:biz_location_ids].blank? ? [] : params[:biz_location_ids]
-      locations.each do |location_id|
-        biz_location = BizLocation.get location_id
-        location_ids = location_ids + LocationLink.all_children(biz_location).map(&:id)
-      end
+    if !params[:from_date].blank? and !params[:to_date].blank? && !params[:cost_center_ids].blank?
+      from_date       = Date.parse(params[:from_date])
+      to_date         = Date.parse(params[:to_date])
+      cost_center_ids = params[:cost_center_ids].blank? ? [] : params[:cost_center_ids]
       file   = File.join("/", "tmp", "voucher_#{from_date.strftime('%Y-%m-%d')}_#{to_date.strftime('%Y-%m-%d')}_#{Time.now.to_i}.xml")
-      search_options = {:effective_on.gte => from_date, :effective_on.lte => to_date}
-      search_options.merge!(:accounted_at => locations.flatten.compact) unless locations.flatten.compact.blank?
-      voucher_list = Voucher.get_voucher_list(search_options)
+      voucher_list = Voucher.get_voucher_for_cost_center(from_date, to_date, cost_center_ids)
       Voucher.to_tally_xml(voucher_list, file)
       send_data(File.read(file), :filename => file)
     else
-      render :layout => layout?
+      @error = []
+      @error << "From Date cannot be blank" if params[:from_date].blank?
+      @error << "To Date cannot be blank" if params[:to_date].blank?
+      @error << "Please select cost center" if params[:cost_center_ids].blank?
+      redirect '/book_keepings', :message => {:error => @error}
     end
   end
 

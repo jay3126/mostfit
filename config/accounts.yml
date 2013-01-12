@@ -6,15 +6,15 @@ chart:
   assets:
     - Cash
     - Bank Account
-    - Loans Made
-    - Debtors
-    - Loans Write Off
+    - Micro Finance Loan
+    - Debtors-Mf Loan
+    - Bad Debts
   liabilities:
-    - Loans Advance
+    - Advance for Ewi
   incomes:
-    - Interest Income
-    - Charges Income
-    - Other Income
+    - Interest on Microfinance Loan
+    - Service Charges
+    - Bad Debts Recover
   expenses:
     - Salaries
     - Rent

@@ -1,7 +1,17 @@
+:javascript
+  $(document).ready(function() {
+    $('a.multiSelect').find('span').css('width', 'auto');
+    $('.multiSelectOptions').css('width', 'auto');
+  });
 .shaded
   %h1 Tally voucher download
 %form{:method => "POST", :action => url(:controller => :vouchers, :action => :tally_download, :return => params[:return])}
   %table.form
+    %tr
+      %th
+        Cost Center
+      %td
+        = select :name => 'cost_center_ids', :collection => CostCenter.all, :text_method => :name, :value_method => :id, :class => 'multiple'
     %tr
       %th
         From date
