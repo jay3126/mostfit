@@ -46,7 +46,7 @@ class MeetingCalendar
 
   # Returns an instance of MeetingInfo
   def to_info
-    MeetingInfo.new(location_id, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
+    MeetingInfo.new(location.biz_location_identifier, on_date, meeting_status, meeting_time_begins_hours, meeting_time_begins_minutes)
   end
 
   # Compare on the basis of the date
