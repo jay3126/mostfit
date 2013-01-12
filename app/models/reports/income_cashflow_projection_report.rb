@@ -29,6 +29,7 @@ class IncomeCashflowProjectionReport < Report
 
     data[:loans] = {}
 
+    
     disbursed_loans = repository.adapter.query("select id, disbursed_amount from lendings where status = 5 and disbursal_date <= '#{@to_date.strftime('%Y-%m-%d')}'")
     disbursed_loan_ids = disbursed_loans.blank? ? [] : disbursed_loans.map(&:id)
 

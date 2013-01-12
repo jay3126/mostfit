@@ -43,18 +43,22 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
       disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).aggregate(:disbursal_date)
     end
     d_dates = disbursal_dates.to_a.paginate(:page => @page, :per_page => @limit)
-    loan_products = LendingProduct.all.map(&:name)
-    data[:loan_products] = loan_products
+    data[:loan_products] = []
     data[:loan_info] = {}
     data[:disbursal_dates] = d_dates
     d_dates.each do |d_date|
       data[:loan_info][d_date] = {}
-      loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date)
+      if @biz_location_branch.blank?
+        loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date)
+      else
+        loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date, :accounted_at_origin => @biz_location_branch)
+      end
       loans.group_by{|l| l.accounted_at_origin}.each do |accounted_at_id, a_loans|
         branch = BizLocation.get accounted_at_id
         data[:loan_info][d_date][branch.name] = {}
         a_loans.group_by{|al| al.lending_product_id}.each do |loan_product_id, l_loans|
           loan_product = LendingProduct.get loan_product_id
+          data[:loan_products] << loan_product.name
           data[:loan_info][d_date][branch.name][loan_product.name] = {}
           data[:loan_info][d_date][branch.name][loan_product.name]['loans_count'] = l_loans.size
           data[:loan_info][d_date][branch.name][loan_product.name]['loans_amt_sum'] = MoneyManager.get_money_instance_least_terms(l_loans.map(&:disbursed_amount).sum.to_i)

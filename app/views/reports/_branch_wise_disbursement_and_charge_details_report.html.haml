@@ -1,138 +1,187 @@
 = partial :form
-- loan_products = LendingProduct.all.map(&:name)
-- @default_currency ||= MoneyManager.get_default_currency
-- total_rows = {}
--accumulate_row_values = {}
-- total_disbursment_count = 0
-- total_disbursemnt_amt = total_fee_colleatable = total_fee_colleated = MoneyManager.default_zero_money
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Date
-      %th
-        Branch Name
-      %th{:colspan => loan_products.size+1}
-        Disbursement
-      %th{:colspan => loan_products.size+1}
-        Disbursement Amount
-      %th{:colspan => loan_products.size+1}
-        Upfront Charges
-      %th{:colspan => loan_products.size+1}
-        Upfront Charges Collected
-    %tr
-      %th
-      %th
-      - loan_products.each do |p_name|
+- if @data.blank? || @data[:loan_info].blank?
+  %h2 No data to display
+- else
+  - loan_products = @data[:loan_products].uniq
+  - @default_currency ||= MoneyManager.get_default_currency
+  - total_rows = {}
+  - accumulate_row_values = {}
+  - date_rows = {}
+  - total_disbursment_count = 0
+  - total_disbursemnt_amt = total_fee_colleatable = total_fee_colleated = MoneyManager.default_zero_money
+  %table.unsortable.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
         %th
-          = p_name
-        - total_rows[p_name] = {}
-        - total_rows[p_name][:total_disbursed_count]  = 0
-        - total_rows[p_name][:total_disbursed_amt] = MoneyManager.default_zero_money
-        - total_rows[p_name][:total_fee_colleatable_fee_amt] = MoneyManager.default_zero_money
-        - total_rows[p_name][:total_fee_collected_amt] = MoneyManager.default_zero_money
-      %th
-        Total
-      - loan_products.each do |p_name|
+          Date
         %th
-          = p_name
-      %th
-        Total
-      - loan_products.each do |p_name|
+          Branch Name
+        %th{:colspan => loan_products.size+1}
+          Disbursement
+        %th{:colspan => loan_products.size+1}
+          Disbursement Amount
+        %th{:colspan => loan_products.size+1}
+          Upfront Charges
+        %th{:colspan => loan_products.size+1}
+          Upfront Charges Collected
+      %tr
         %th
-          = p_name
-      %th
-        Total
-      - loan_products.each do |p_name|
         %th
-          = p_name
-      %th
-        Total
-  %tbody
-    - @data[:loan_info].each do |date, d_loans|
-      - d_loans.each do |branch, b_loans|
         - loan_products.each do |p_name|
-          - accumulate_row_values[p_name] = {}
-          - accumulate_row_values[p_name][:total_disbursed_count]  = 0
-          - accumulate_row_values[p_name][:total_disbursed_amt] = MoneyManager.default_zero_money
-          - accumulate_row_values[p_name][:total_fee_colleatable_fee_amt] = MoneyManager.default_zero_money
-          - accumulate_row_values[p_name][:total_fee_collected_amt] = MoneyManager.default_zero_money
-        - r_disbursed_count = 0
-        - r_disbursed_amt = r_fee_collectable = r_fee_collected = MoneyManager.default_zero_money
-        %tr
-          %td
-            %b
-              = date
-          %td
-            = branch
-          - loan_products.each do |l_product|
+          %th
+            = p_name
+          - total_rows[p_name] = {}
+          - total_rows[p_name][:total_disbursed_count]  = 0
+          - total_rows[p_name][:total_disbursed_amt] = MoneyManager.default_zero_money
+          - total_rows[p_name][:total_fee_colleatable_fee_amt] = MoneyManager.default_zero_money
+          - total_rows[p_name][:total_fee_collected_amt] = MoneyManager.default_zero_money
+        %th
+          Total
+        - loan_products.each do |p_name|
+          %th
+            = p_name
+        %th
+          Total
+        - loan_products.each do |p_name|
+          %th
+            = p_name
+        %th
+          Total
+        - loan_products.each do |p_name|
+          %th
+            = p_name
+        %th
+          Total
+    %tbody
+      - @data[:loan_info].each do |date, d_loans|
+        - loan_products.each do |p_name|
+          - date_rows[p_name] = {}
+          - date_rows[p_name][:total_disbursed_count]  = 0
+          - date_rows[p_name][:total_disbursed_amt] = MoneyManager.default_zero_money
+          - date_rows[p_name][:total_fee_colleatable_fee_amt] = MoneyManager.default_zero_money
+          - date_rows[p_name][:total_fee_collected_amt] = MoneyManager.default_zero_money
+        - date_total_disbursed_count = 0
+        - date_total_disbursed_amt = MoneyManager.default_zero_money
+        - date_total_fee_colleatable_fee_amt = MoneyManager.default_zero_money
+        - date_total_fee_collected_amt = MoneyManager.default_zero_money
+        - d_loans.each do |branch, b_loans|
+          - loan_products.each do |p_name|
+            - accumulate_row_values[p_name] = {}
+            - accumulate_row_values[p_name][:total_disbursed_count]  = 0
+            - accumulate_row_values[p_name][:total_disbursed_amt] = MoneyManager.default_zero_money
+            - accumulate_row_values[p_name][:total_fee_colleatable_fee_amt] = MoneyManager.default_zero_money
+            - accumulate_row_values[p_name][:total_fee_collected_amt] = MoneyManager.default_zero_money
+          - r_disbursed_count = 0
+          - r_disbursed_amt = r_fee_collectable = r_fee_collected = MoneyManager.default_zero_money
+          %tr
             %td
-              - loans_count =  b_loans[l_product].blank? ? 0 : b_loans[l_product]['loans_count']
-              = loans_count
-              - accumulate_row_values[l_product][:total_disbursed_count] += loans_count
-              - r_disbursed_count += loans_count
-          %td
-            = r_disbursed_count
-          - loan_products.each do |l_product|
+              %b
+                = date
             %td
-              - disbursed_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money: b_loans[l_product]['loans_amt_sum']
-              = disbursed_amt
-              - accumulate_row_values[l_product][:total_disbursed_amt] += disbursed_amt
-              - r_disbursed_amt += disbursed_amt
-          %td
-            = r_disbursed_amt
-          - loan_products.each do |l_product|
+              = branch
+            - loan_products.each do |l_product|
+              %td
+                - loans_count =  b_loans[l_product].blank? ? 0 : b_loans[l_product]['loans_count']
+                = loans_count
+                - accumulate_row_values[l_product][:total_disbursed_count] += loans_count
+                - r_disbursed_count += loans_count
             %td
-              - fee_colleatable_fee_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money : b_loans[l_product]['colleatable_fee']
-              = fee_colleatable_fee_amt
-              - accumulate_row_values[l_product][:total_fee_colleatable_fee_amt] += fee_colleatable_fee_amt
-              - r_fee_collectable += fee_colleatable_fee_amt
-          %td
-            = r_fee_collectable
-          - loan_products.each do |l_product|
+              = r_disbursed_count
+            - loan_products.each do |l_product|
+              %td
+                - disbursed_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money: b_loans[l_product]['loans_amt_sum']
+                = disbursed_amt
+                - accumulate_row_values[l_product][:total_disbursed_amt] += disbursed_amt
+                - r_disbursed_amt += disbursed_amt
             %td
-              - fee_collected_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money : b_loans[l_product]['colleated_fee']
-              = fee_collected_amt
-              - accumulate_row_values[l_product][:total_fee_collected_amt] += fee_collected_amt
-              - r_fee_collected += fee_collected_amt
-          %td
-            = r_fee_collected
-          - total_disbursment_count += r_disbursed_count
-          - total_disbursemnt_amt += r_disbursed_amt
-          - total_fee_colleatable += r_fee_collectable
-          - total_fee_colleated += r_fee_collected
+              = r_disbursed_amt
+            - loan_products.each do |l_product|
+              %td
+                - fee_colleatable_fee_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money : b_loans[l_product]['colleatable_fee']
+                = fee_colleatable_fee_amt
+                - accumulate_row_values[l_product][:total_fee_colleatable_fee_amt] += fee_colleatable_fee_amt
+                - r_fee_collectable += fee_colleatable_fee_amt
+            %td
+              = r_fee_collectable
+            - loan_products.each do |l_product|
+              %td
+                - fee_collected_amt =  b_loans[l_product].blank? ? MoneyManager.default_zero_money : b_loans[l_product]['colleated_fee']
+                = fee_collected_amt
+                - accumulate_row_values[l_product][:total_fee_collected_amt] += fee_collected_amt
+                - r_fee_collected += fee_collected_amt
+            %td
+              = r_fee_collected
+            - total_disbursment_count += r_disbursed_count
+            - total_disbursemnt_amt += r_disbursed_amt
+            - total_fee_colleatable += r_fee_collectable
+            - total_fee_colleated += r_fee_collected
+            - date_total_disbursed_count += r_disbursed_count
+            - date_total_disbursed_amt += r_disbursed_amt
+            - date_total_fee_colleatable_fee_amt += r_fee_collectable
+            - date_total_fee_collected_amt += r_fee_collected
+
+            - loan_products.each do |l_product|
+              - unless total_rows[l_product].blank?
+                - total_rows[l_product][:total_disbursed_count] += accumulate_row_values[l_product][:total_disbursed_count]
+                - total_rows[l_product][:total_disbursed_amt] += accumulate_row_values[l_product][:total_disbursed_amt]
+                - total_rows[l_product][:total_fee_colleatable_fee_amt] += accumulate_row_values[l_product][:total_fee_colleatable_fee_amt]
+                - total_rows[l_product][:total_fee_collected_amt] += accumulate_row_values[l_product][:total_fee_collected_amt]
+
+                - date_rows[l_product][:total_disbursed_count] += accumulate_row_values[l_product][:total_disbursed_count]
+                - date_rows[l_product][:total_disbursed_amt] += accumulate_row_values[l_product][:total_disbursed_amt]
+                - date_rows[l_product][:total_fee_colleatable_fee_amt] += accumulate_row_values[l_product][:total_fee_colleatable_fee_amt]
+                - date_rows[l_product][:total_fee_collected_amt] += accumulate_row_values[l_product][:total_fee_collected_amt]
+        %tr{:location_id => date, :class => 'location_footer', :style => 'cursor:pointer;', :style => "text-align:center; background:#708890;"}
+          %td{:style => "text-align:center; background:#708890;"}
+          %td{:style => "text-align:center; background:#708890;"}
+            Total
           - loan_products.each do |l_product|
-            - unless total_rows[l_product].blank?
-              - total_rows[l_product][:total_disbursed_count] += accumulate_row_values[l_product][:total_disbursed_count]
-              - total_rows[l_product][:total_disbursed_amt] += accumulate_row_values[l_product][:total_disbursed_amt]
-              - total_rows[l_product][:total_fee_colleatable_fee_amt] += accumulate_row_values[l_product][:total_fee_colleatable_fee_amt]
-              - total_rows[l_product][:total_fee_collected_amt] += accumulate_row_values[l_product][:total_fee_collected_amt]
-  %tfoot
-    %tr
-      %th
-        Total
-      %td
-      - loan_products.each do |l_product|
+            %td{:style => "text-align:right"}
+              = date_rows[l_product][:total_disbursed_count]
+          %td
+            = date_total_disbursed_count
+          - loan_products.each do |l_product|
+            %td{:style => "text-align:right"}
+              = date_rows[l_product][:total_disbursed_amt]
+          %td
+            = date_total_disbursed_amt
+          - loan_products.each do |l_product|
+            %td{:style => "text-align:right"}
+              = date_rows[l_product][:total_fee_colleatable_fee_amt]
+          %td
+            = date_total_fee_colleatable_fee_amt
+          - loan_products.each do |l_product|
+            %td{:style => "text-align:right"}
+              = date_rows[l_product][:total_fee_collected_amt]
+          %td
+            = date_total_fee_collected_amt
+
+    %tfoot
+      %tr
+        %th
+          Total
         %td
-          = total_rows[l_product][:total_disbursed_count]
-      %td
-        = total_disbursment_count
-      - loan_products.each do |l_product|
+        - loan_products.each do |l_product|
+          %td
+            = total_rows[l_product][:total_disbursed_count]
         %td
-          = total_rows[l_product][:total_disbursed_amt]
-      %td
-        = total_disbursemnt_amt
-      - loan_products.each do |l_product|
+          = total_disbursment_count
+        - loan_products.each do |l_product|
+          %td
+            = total_rows[l_product][:total_disbursed_amt]
         %td
-          = total_rows[l_product][:total_fee_colleatable_fee_amt]
-      %td
-        = total_fee_colleatable
-      - loan_products.each do |l_product|
+          = total_disbursemnt_amt
+        - loan_products.each do |l_product|
+          %td
+            = total_rows[l_product][:total_fee_colleatable_fee_amt]
         %td
-          = total_rows[l_product][:total_fee_collected_amt]
-      %td
-        = total_fee_colleated
-%br
-.flickr_pagination
-  = will_paginate @data[:disbursal_dates], :container => false
-%br
+          = total_fee_colleatable
+        - loan_products.each do |l_product|
+          %td
+            = total_rows[l_product][:total_fee_collected_amt]
+        %td
+          = total_fee_colleated
+  %br
+  .flickr_pagination
+    = will_paginate @data[:disbursal_dates], :container => false
+  %br
