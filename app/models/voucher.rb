@@ -99,9 +99,14 @@ class Voucher
 
   def self.get_voucher_for_cost_center(from_date, to_date, cost_centers)
     vouchers = []
+    ledger_ids = []
     cost_centers.each do |cost_center_id|
       cost_center = CostCenter.get cost_center_id
-      ledger_ids = cost_center.accounting_locations(:product_type => 'ledger').map(&:product_id)
+      unless cost_center.biz_location_id.blank?
+        biz_location = cost_center.biz_location
+        ledger_ids = biz_location.accounting_locations(:product_type => 'ledger').map(&:product_id)
+      end
+      ledger_ids += cost_center.accounting_locations(:product_type => 'ledger').map(&:product_id)
       l_vouchers = Ledger.all(:id => ledger_ids).vouchers(:effective_on.gte => from_date, :effective_on.lte => to_date) unless ledger_ids.blank?
       vouchers << l_vouchers unless l_vouchers.blank?
     end
