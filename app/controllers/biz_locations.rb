@@ -158,14 +158,15 @@ class BizLocations < Application
                 meeting_facade.setup_meeting_schedule(biz_location, msi, b_meeting_number)
               end
               LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
-              msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})'successfully created center with center cycle 1"
+              msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.biz_location_identifier})'successfully created center with center cycle 1"
             else
               if b_level == '1'
                 loan_product_ids.each do |product_id|
                   biz_location.lending_product_locations.first_or_create(:lending_product_id => product_id, :effective_on => b_creation_date, :performed_by => performed_by.id, :recorded_by => recorded_by.id )
                 end
               end
-              msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.id})' successfully created"
+              biz_location_iden = b_level == '1' ? biz_location.biz_location_identifier : biz_location.id
+              msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location_iden})' successfully created"
             end
             message = {:notice => msg}
           rescue => ex
@@ -369,14 +370,15 @@ class BizLocations < Application
           if b_level == "0"
             BizLocation.update_biz_location_identifier_for_center(child_location, @parent_location)
             child_location.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => session.user.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => session.user.staff_member.id)
-            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created with center cycle 1"
+            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.biz_location_identifier})' successfully created with center cycle 1"
           else
             if b_level == '1'
               loan_product_ids.each do |product_id|
                 child_location.lending_product_locations.first_or_create(:lending_product_id => product_id, :effective_on => b_creation_date, :performed_by => performed_by.id, :recorded_by => recorded_by.id )
               end
             end
-            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{child_location.id})' successfully created"
+            biz_location_iden = b_level == '1' ? child_location.biz_location_identifier : child_location.id
+            msg = "#{child_location.location_level.name} : '#{child_location.name} (Id: #{biz_location_iden})' successfully created"
           end
           message = {:notice => msg}
         end
