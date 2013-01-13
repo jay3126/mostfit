@@ -18,16 +18,17 @@
         %th
           Projected Interest Accrual*
     %tbody
-      %tr
-        %td
-          = @data[:loan][:from_date].strftime("%B-%Y")
-        %td
-          = @data[:loan][:projected_pos_at_monthend]
-        %td
-          = @data[:loan][:schedule_principal_realisations]
-        %td
-          = @data[:loan][:schedule_interest_realisations]
-        %td
-          = @data[:loan][:schedule_total_realisations]
-        %td
-          = @data[:loan][:projected_interest_accrual]
+      - @data[:loan].each do |date, values|
+        %tr
+          %td
+            = values[:from_date].strftime("%B-%Y")
+          %td
+            = values[:projected_pos_at_monthend]
+          %td
+            = values[:schedule_principal_realisations]
+          %td
+            = values[:schedule_interest_realisations]
+          %td
+            = values[:schedule_total_realisations]
+          %td
+            = values[:projected_interest_accrual]
