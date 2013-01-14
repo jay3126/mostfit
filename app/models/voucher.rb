@@ -132,6 +132,7 @@ class Voucher
           x.TALLYMESSAGE{
             voucher_list.each do |voucher|
               center_name = voucher.accounted_at_location.name rescue ''
+              branch_name = voucher.performed_at_location.name rescue ''
               debit_postings, credit_postings = voucher.ledger_postings.group_by{ |ledger_posting| ledger_posting.effect }.values
               x.VOUCHER{
                 x.DATE voucher.effective_on.strftime("%Y%m%d")
@@ -148,14 +149,14 @@ class Voucher
                 end
                 credit_postings.each do |credit_posting|
                   x.tag! 'ALLLEDGERENTRIES.LIST' do
-                    x.LEDGERNAME(credit_posting.ledger.name)
+                    x.LEDGERNAME(credit_posting.ledger.name.gsub("#{branch_name}"+'-', ""))
                     x.ISDEEMEDPOSITIVE("No")
                     x.AMOUNT(credit_posting.to_balance.to_regular_amount)
                   end
                 end
                 debit_postings.each do |debit_posting|
                   x.tag! 'ALLLEDGERENTRIES.LIST' do
-                    x.LEDGERNAME(debit_posting.ledger.name)
+                    x.LEDGERNAME(debit_posting.ledger.name.gsub("#{branch_name}"+'-', ""))
                     x.ISDEEMEDPOSITIVE("Yes")
                     x.AMOUNT('-'+debit_posting.to_balance.to_regular_amount)
                   end
