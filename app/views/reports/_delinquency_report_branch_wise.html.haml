@@ -11,7 +11,7 @@
       %th
         OD POS
       %th
-        PAR
+        PAR (%)
 
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
@@ -32,7 +32,6 @@
           - accumulate_row_values[:loan_overdue] += values[:loan_overdue]
         %td
           = values[:par]
-          %
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
