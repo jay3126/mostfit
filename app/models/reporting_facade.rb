@@ -116,26 +116,38 @@ class ReportingFacade < StandardFacade
   end
 
   #this function will give back the list of location which is managed by staff.
-  def locations_managed_by_staffs_on_date(staff_id, on_date)
-    members = []
-    centers = []
-    locations = LocationManagement.locations_managed_by_staff_by_sql(staff_id, on_date)
+  def locations_managed_by_staffs_on_date(staff_id, from_date, to_date)
+    new_members = []
+    new_centers = []
+    exist_centers = []
+    exist_members = []
+    locations = LocationManagement.locations_managed_by_staff_by_sql(staff_id, to_date)
     locations.group_by{|g| g.location_level_id}.each do |location_level_id, biz_locations|
       l_level = LocationLevel.get(location_level_id)
       if l_level.level == 0
-        centers << biz_locations
-        members << ClientAdministration.get_client_ids_administered_by_sql(biz_locations.map(&:id), on_date)
-      elsif l_level.level == 1
+        centers= biz_locations
+       elsif l_level.level == 1
+        centers = []
         biz_locations.each do |l|
-          centers << LocationLink.get_children_by_sql(l, on_date)
+          centers << LocationLink.get_children_by_sql(l, to_date)
         end
-        members << ClientAdministration.get_client_ids_registered_by_sql(biz_locations.map(&:id), on_date)
       end
+        l_locations = centers.blank? ? [] : centers.flatten.uniq
+        n_centers = l_locations.select{|s| s.center_disbursal_date >= from_date && s.center_disbursal_date <= to_date}
+        e_centers = l_locations - n_centers
+
+        new_centers << n_centers
+        exist_centers << e_centers
+        new_members << ClientAdministration.get_client_ids_administered_by_sql(n_centers.map(&:id), to_date) unless n_centers.blank?
+        exist_members << ClientAdministration.get_client_ids_administered_by_sql(e_centers.map(&:id), to_date) unless e_centers.blank?
+
     end
-    centers = centers.blank? ? [] : centers.flatten.uniq.compact
-    members = members.blank? ? [] : members.flatten.uniq.compact
+    new_centers = new_centers.blank? ? [] : new_centers.flatten.uniq.compact
+    exist_centers = exist_centers.blank? ? [] : exist_centers.flatten.uniq.compact
+    new_members = new_members.blank? ? [] : new_members.flatten.uniq.compact
+    exist_members = exist_members.blank? ? [] : exist_members.flatten.uniq.compact
     
-    {:locations_count => centers.count, :location_ids => centers.map(&:id), :members_count => members.count}
+    {:new_locations_count => new_centers.count, :new_location_ids => new_centers.map(&:id), :new_members_count => new_members.count, :exist_locations_count => exist_centers.count, :exist_location_ids => exist_centers.map(&:id), :exist_members_count => exist_members.count}
   end
 
   # Allocations

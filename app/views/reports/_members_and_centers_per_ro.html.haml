@@ -1,7 +1,9 @@
 = partial :form
-%table.dataTable.report.weeksheet.nojs
+%table.unsortable.dataTable.report.weeksheet.nojs
   %thead
     %tr
+      %th
+        Status
       %th
         Branch Id
       %th
@@ -18,26 +20,42 @@
   %tbody
     - total_locations_count = total_members_count = 0
     - staff_count = 0
-    - @data.sort_by{|branch| branch}.each do |branch, values|
-      %tr
-        %td
-          = values[:branch_id]
-        %td
-          = values[:branch_name]
-        %td
-          = values[:staff_id]
-        %td
-          = values[:staff_name]
-          - staff_count += 1
-        %td
-          = values[:centers_members_total][:locations_count]
-          - total_locations_count += values[:centers_members_total][:locations_count]
-        %td
-          = values[:centers_members_total][:members_count]
-          - total_members_count += values[:centers_members_total][:members_count]
-
+    - @data.each do |status, values|
+      - values.each do |staff_id, value|
+        %tr
+          %td
+            = status.to_s
+          %td
+            = value[:branch_id]
+          %td
+            = value[:branch_name]
+          %td
+            = value[:staff_id]
+          %td
+            = value[:staff_name]
+            - staff_count += 1
+          %td
+            = value[:centers_total]
+            - total_locations_count += value[:centers_total]
+          %td
+            = value[:members_total]
+            - total_members_count += value[:members_total]
+      - if values.count > 0
+        %tr{:style => "text-align:center; background:#708890;"}
+          %td
+            Total
+          %td
+          %td
+          %td
+          %td
+            = values.count
+          %td
+            = @data[status].values.collect{|s| s[:centers_total]}.sum
+          %td
+            = @data[status].values.collect{|s| s[:members_total]}.sum
   %tfoot
     %tr
+      %th
       %th
         Total
       %td
