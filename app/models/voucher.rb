@@ -136,7 +136,7 @@ class Voucher
               x.VOUCHER{
                 x.DATE voucher.effective_on.strftime("%Y%m%d")
                 x.NARRATION voucher.narration
-                x.VOUCHERTYPENAME voucher.type.blank? ? voucher.voucher_type : voucher.type.to_s.upcase
+                x.VOUCHERTYPENAME voucher.type.blank? ? 'MF'+voucher.voucher_type : 'MF'+voucher.type.to_s.upcase
                 x.VOUCHERNUMBER voucher.id
                 x.REMOTEID voucher.guid
                 x.tag! 'ACCOUNTINGALLOCATIONS.LIST' do
