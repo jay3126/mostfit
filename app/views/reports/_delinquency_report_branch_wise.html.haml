@@ -1,0 +1,48 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Branch Name
+      %th
+        POS
+      %th
+        OD
+      %th
+        OD POS
+      %th
+        PAR
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - @data.sort_by{|branch| branch}.each do |branch, values|
+      %tr
+        %td
+          %b
+            = BizLocation.get(branch).name
+        %td
+          = values[:loan_outstanding_principal]
+          - accumulate_row_values[:loan_outstanding_principal] += values[:loan_outstanding_principal]
+        %td
+          = values[:loan_overdue_principal]
+          - accumulate_row_values[:loan_overdue_principal] += values[:loan_overdue_principal]
+        %td
+          = values[:loan_overdue]
+          - accumulate_row_values[:loan_overdue] += values[:loan_overdue]
+        %td
+          = values[:par]
+          %
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+        = total_rows[:loan_outstanding_principal]
+      %td
+        = total_rows[:loan_overdue_principal]
+      %td
+        = total_rows[:loan_overdue]
+      %td
