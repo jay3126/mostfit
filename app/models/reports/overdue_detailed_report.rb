@@ -37,16 +37,18 @@ class OverdueDetailedReport < Report
 
   def set_overdue_days_range(days)
     case days.to_i
-    when 0..40
-      '1-40 Days'
-    when 40..80
-      '41-80 Days'
-    when 80..120
-      '81-120 Days'
-    when 121..160
-      '121-160 Days'
-    when 161..180
-      '161-180 Days'
+    when 0..29
+      '1-29 Days'
+    when 30..59
+      '30-59 Days'
+    when 60..89
+      '60-89 Days'
+    when 90..119
+      '90-119 Days'
+    when 120..149
+      '120-149 Days'
+    when 150..179
+      '150-179 Days'
     else
       '180+ Days'
     end
