@@ -34,12 +34,14 @@ class MembersAndCentersPerRo < Report
       all_staffs = all_staff_ids.blank? ? [] : StaffMember.all(:id => all_staff_ids)
       all_staffs.each do |staff|
         staff_name = staff.name
-        centers_members_total = reporting_facade.locations_managed_by_staffs_on_date(staff.id, @from_date, @to_date)
-        if centers_members_total[:new_locations_count] > 0
-          data[:new][staff.id] = {:branch_id => branch.id, :branch_name => branch.name, :staff_name => staff_name, :staff_id => staff.id, :centers_total => centers_members_total[:new_locations_count], :members_total => centers_members_total[:new_members_count]}
-        end
-        if centers_members_total[:exist_locations_count] > 0
-          data[:exist][staff.id] = {:branch_id => branch.id, :branch_name => branch.name, :staff_name => staff_name, :staff_id => staff.id,  :centers_total => centers_members_total[:exist_locations_count], :members_total => centers_members_total[:exist_members_count]}
+        if staff.is_ro?
+          centers_members_total = reporting_facade.locations_managed_by_staffs_on_date(staff.id, @from_date, @to_date)
+          if centers_members_total[:new_locations_count] > 0
+            data[:new][staff.id] = {:branch_id => branch.id, :branch_name => branch.name, :staff_name => staff_name, :staff_id => staff.id, :centers_total => centers_members_total[:new_locations_count], :members_total => centers_members_total[:new_members_count]}
+          end
+          if centers_members_total[:exist_locations_count] > 0
+            data[:exist][staff.id] = {:branch_id => branch.id, :branch_name => branch.name, :staff_name => staff_name, :staff_id => staff.id,  :centers_total => centers_members_total[:exist_locations_count], :members_total => centers_members_total[:exist_members_count]}
+          end
         end
       end
     end
