@@ -19,9 +19,11 @@
       %th
         Foreclosure POS
       %th
+        Foreclosure Interest
+      %th
         Foreclosure Charges
       %th
-        Foreclosure Other Charges
+        Broken period/unpaid intrest Collected
 
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
@@ -44,14 +46,17 @@
         %td
           = values[:reason]
         %td
-          = values[:pre_closure_amount]
-          - accumulate_row_values[:pre_closure_amount] += values[:pre_closure_amount]
+          = values[:pre_closure_principal_amount]
+          - accumulate_row_values[:pre_closure_principal_amount] += values[:pre_closure_principal_amount]
+        %td
+          = values[:pre_closure_total_interest_accrued]
+          - accumulate_row_values[:pre_closure_total_interest_accrued] += values[:pre_closure_total_interest_accrued]
         %td
           = values[:pre_closure_charges]
           - accumulate_row_values[:pre_closure_charges] += values[:pre_closure_charges]
         %td
-          = values[:pre_closure_other_charges]
-          - accumulate_row_values[:pre_closure_other_charges] += values[:pre_closure_other_charges]
+          = values[:pre_closure_interest_amount]
+          - accumulate_row_values[:pre_closure_interest_amount] += values[:pre_closure_interest_amount]
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
     %tr
@@ -64,8 +69,10 @@
       %td
       %td
       %td
-        = total_rows[:pre_closure_amount]
+        = total_rows[:pre_closure_principal_amount]
+      %td
+        = total_rows[:pre_closure_total_interest_accrued]
       %td
         = total_rows[:pre_closure_charges]
       %td
-        = total_rows[:pre_closure_other_charges]
+        = total_rows[:pre_closure_interest_amount]

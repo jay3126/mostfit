@@ -140,7 +140,7 @@ class Lendings < Application
           lendings.each do |lending|
             if params[:submit] == 'Reject'
               lending.reject(approved_on_date, approved_by_staff)
-              Comment.save_comment(remarks, reason_id, 'Lending', lending.id, recorded_by)
+              Comment.save_comment(remarks, reason_id, 'Lending', lending.id, recorded_by, approved_on_date)
             else
               lending.approve(lending.to_money[:approved_amount], approved_on_date, approved_by_staff)
             end
@@ -245,7 +245,7 @@ class Lendings < Application
           lendings.each do |lending|
             if params[:submit] == 'Reject'
               lending.reject(disbursal_date, disbursed_by_staff)
-              Comment.save_comment(remarks, reason_id, 'Lending', lending.id, recorded_by)
+              Comment.save_comment(remarks, reason_id, 'Lending', lending.id, recorded_by, disbursal_date)
             else
               insurance_policies = lending.simple_insurance_policies.map(&:id) rescue []
               fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
@@ -488,7 +488,7 @@ class Lendings < Application
             unless preclose_lending[:fee_product].blank?
               payment_facade.record_fee_payment(preclose_lending[:fee_product].id, preclose_lending[:penalty_amount], 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, '','lending', pt.on_product_id, 'client', pt.by_counterparty_id, pt.performed_at, pt.accounted_at, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
             end
-            Comment.save_comment(remarks, reason_id, 'Lending', lending_id, recorded_by)
+            Comment.save_comment(remarks, reason_id, 'Lending', lending_id, recorded_by, effective_on)
             @message[:notice] = "Succesfully preclosed"
           end
         rescue => ex
@@ -550,7 +550,7 @@ class Lendings < Application
         unless fee_product.blank?
           payment_facade.record_fee_payment(fee_product.id, fee_money_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT, '','lending', @lending.id, 'client', @lending.loan_borrower.counterparty_id, @lending.administered_at_origin, @lending.accounted_at_origin, performed_by, effective_on, Constants::Transaction::LOAN_FEE_RECEIPT)
         end
-        Comment.save_comment(remarks, reason_id, 'Lending', @lending.id, recorded_by)
+        Comment.save_comment(remarks, reason_id, 'Lending', @lending.id, recorded_by, effective_on)
         message = {:notice => "Succesfully preclosed"}
       rescue => ex
         message = {:error => ex.message}
