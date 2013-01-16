@@ -25,8 +25,8 @@
           = values[:loan_outstanding_principal]
           - accumulate_row_values[:loan_outstanding_principal] += values[:loan_outstanding_principal]
         %td
-          = values[:loan_overdue_principal]
-          - accumulate_row_values[:loan_overdue_principal] += values[:loan_overdue_principal]
+          = values[:overdue_principal]
+          - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
         %td
           = values[:loan_overdue]
           - accumulate_row_values[:loan_overdue] += values[:loan_overdue]
