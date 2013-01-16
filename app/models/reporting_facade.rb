@@ -79,10 +79,10 @@ class ReportingFacade < StandardFacade
     end
     
     non_schedule_loans = disbursed_loans - schedule_loans
-    non_schedule = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => non_schedule_loans, :on_date.lte => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+    non_schedule = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => non_schedule_loans, :on_date.lt => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
     non_schedule_principal = non_schedule.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(non_schedule[0].to_i)
     non_schedule_interest= non_schedule.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(non_schedule[1].to_i)
-    non_schedule_loan_receipts = non_schedule.blank? ? '' : LoanReceipt.all(:lending_id => non_schedule, :effective_on.lt => on_date)
+    non_schedule_loan_receipts = non_schedule.blank? ? '' : LoanReceipt.all(:lending_id => non_schedule_loans, :effective_on.lt => on_date)
     non_schedule_loan_receipts_amt = LoanReceipt.add_up(non_schedule_loan_receipts)
     non_schedule_overdue_principal = non_schedule_principal > non_schedule_loan_receipts_amt[:principal_received] ? non_schedule_principal - non_schedule_loan_receipts_amt[:principal_received] : MoneyManager.default_zero_money
     non_schedule_overdue_interest = non_schedule_interest > non_schedule_loan_receipts_amt[:interest_received] ? non_schedule_interest - non_schedule_loan_receipts_amt[:interest_received] : MoneyManager.default_zero_money
