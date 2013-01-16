@@ -56,8 +56,8 @@ class DelinquencyReportBranchWise < Report
       
       branch_data_map                                    = {}
       branch_data_map[:loan_outstanding_principal]       = loan_outstanding_principal
-      branch_data_map[:loan_overdue_principal]           = loan_overdue_principal
-      branch_data_map[:loan_overdue]                     = loan_overdue
+      branch_data_map[:loan_overdue_principal]           = loan_overdue
+      branch_data_map[:loan_overdue]                     = loan_overdue_principal
       branch_data_map[:par]                              = par
 
       data[branch_id]                                    = branch_data_map
