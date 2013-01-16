@@ -43,8 +43,7 @@ class CustomerExtractForInsurance < Report
       center = BizLocation.get(loan.administered_at_origin)
       center_id = center ? center.id : "Not Specified"
       center_name = center ? center.name : "Not Specified"
-      loan_borrower = LoanBorrower.first(:counterparty_id => 1)
-      client = loan_borrower.counterparty
+      client = loan.loan_borrower.counterparty
       client_name = client ? client.name : "Not Specified"
       client_id = client ? client.id : "Not Specified"
       gender = (client and client.gender) ? client.gender.to_s : "Not Specified"
