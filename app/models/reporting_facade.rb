@@ -52,6 +52,7 @@ class ReportingFacade < StandardFacade
     preclose_loan_receipt_on_date = preclose_loans_on_date.blank? ? [] : LoanReceipt.all(:lending_id => preclose_loans_on_date, 'payment_transaction.payment_towards' => :payment_towards_loan_preclosure, :effective_on => on_date).aggregate(:principal_received.sum, :interest_received.sum) rescue []
 
     advance_available = loan_receipts_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_before_on_date[2].to_i-loan_receipts_before_on_date[3].to_i)
+
     Lending.all(:id => disbursed_loans, :fields => [:id, :repayment_frequency]).group_by{|l| l.repayment_frequency}.each do |frequency, loans|
       if frequency == :weekly || frequency == :biweekly
         loan_ids << repository(:default).adapter.query("select lb.lending_id from base_schedule_line_items l INNER JOIN loan_base_schedules lb ON l.loan_base_schedule_id = lb.id where DAYNAME(l.on_date) = '#{on_date.weekday.to_s}' and lb.lending_id IN (#{loans.map(&:id).join(',')})")
@@ -59,7 +60,7 @@ class ReportingFacade < StandardFacade
         loan_ids << repository(:default).adapter.query("select lb.lending_id from base_schedule_line_items l INNER JOIN loan_base_schedules lb ON l.loan_base_schedule_id = lb.id where DAYOFMONTH(l.on_date) = '#{on_date.day}' and lb.lending_id IN (#{loans.map(&:id).join(',')})")
       end
     end
-    schedule_loans = (schedule_loans + loan_ids.flatten).uniq
+    schedule_loans = schedule_loans
     if schedule_loans.blank?
       schedule_principal_due = MoneyManager.default_zero_money
       schedule_interest_due = MoneyManager.default_zero_money
