@@ -60,14 +60,14 @@ class ReportingFacade < StandardFacade
         loan_ids << repository(:default).adapter.query("select lb.lending_id from base_schedule_line_items l INNER JOIN loan_base_schedules lb ON l.loan_base_schedule_id = lb.id where DAYOFMONTH(l.on_date) = '#{on_date.day}' and lb.lending_id IN (#{loans.map(&:id).join(',')})")
       end
     end
-    schedule_loans = schedule_loans
+    schedule_loans = (schedule_loans + loan_ids.flatten).uniq
     if schedule_loans.blank?
       schedule_principal_due = MoneyManager.default_zero_money
       schedule_interest_due = MoneyManager.default_zero_money
       overdue_total_ftd = MoneyManager.default_zero_money
     else
       schedule_principal_due = MoneyManager.get_money_instance_least_terms(loan_schedule_amt[0].to_i)
-      schedule_interest_due = MoneyManager.get_money_instance_least_terms(loan_schedule_amt[0].to_i)
+      schedule_interest_due = MoneyManager.get_money_instance_least_terms(loan_schedule_amt[1].to_i)
       schedule_before_on_date = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => schedule_loans, :on_date.lt => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
       schedule_principal_before_on_date = schedule_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_before_on_date[0].to_i)
       schedule_interest_before_on_date = schedule_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_before_on_date[1].to_i)
