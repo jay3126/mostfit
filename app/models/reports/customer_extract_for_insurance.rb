@@ -33,7 +33,7 @@ class CustomerExtractForInsurance < Report
 
   def generate
     data = {}
-    loan_ids = Lending.all(:fields => [:accounted_at_origin, :administered_at_origin, :disbursal_date, :id, :lan, :applied_amount, :lending_product_id], :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
+    loan_ids = Lending.all(:fields => [:accounted_at_origin, :administered_at_origin, :disbursal_date, :id, :lan, :applied_amount, :lending_product_id, :loan_borrower_id], :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).to_a.paginate(:page => @page, :per_page => @limit)
     data[:paginated_loan_ids] = loan_ids
     data[:loans] = {}
     loan_ids.each do |loan|
@@ -43,7 +43,8 @@ class CustomerExtractForInsurance < Report
       center = BizLocation.get(loan.administered_at_origin)
       center_id = center ? center.id : "Not Specified"
       center_name = center ? center.name : "Not Specified"
-      client = loan.loan_borrower.counterparty
+      loan_borrower = LoanBorrower.get(loan.loan_borrower_id)
+      client = Client.get(loan_borrower.counterparty_id)
       client_name = client ? client.name : "Not Specified"
       client_id = client ? client.id : "Not Specified"
       gender = (client and client.gender) ? client.gender.to_s : "Not Specified"
