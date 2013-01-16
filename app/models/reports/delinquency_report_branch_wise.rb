@@ -39,6 +39,7 @@ class DelinquencyReportBranchWise < Report
     at_branch_ids_ary.each { |branch_id|
       all_payments                      = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date_for_delinquency_report(@date, *branch_id)
       amounts                           = all_payments.values.first
+
       loan_total_repay_principal_amt = amounts['total_principal_amt']
       loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
       loan_repayment_principal_amt   = amounts['principal_amt']
@@ -57,7 +58,7 @@ class DelinquencyReportBranchWise < Report
       
       branch_data_map                                    = {}
       branch_data_map[:loan_outstanding_principal]       = loan_outstanding_principal
-      branch_data_map[:loan_overdue_principal]           = overdue_principal
+      branch_data_map[:overdue_principal]                = overdue_principal
       branch_data_map[:loan_overdue]                     = loan_overdue_principal
       branch_data_map[:par]                              = par
 
