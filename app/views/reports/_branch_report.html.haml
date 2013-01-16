@@ -41,11 +41,11 @@
           %td
             = values[:staff_name]
           %td
-            = values[:centers_members_total][:locations_count]
-            - total_locations_count += values[:centers_members_total][:locations_count]
+            = values[:centers_members_total][:new_locations_count]
+            - total_locations_count += values[:centers_members_total][:new_locations_count]
           %td
-            = values[:centers_members_total][:members_count]
-            - total_members_count += values[:centers_members_total][:members_count]
+            = values[:centers_members_total][:new_members_count]
+            - total_members_count += values[:centers_members_total][:new_members_count]
           %td
             = values[:arrears]
           %td

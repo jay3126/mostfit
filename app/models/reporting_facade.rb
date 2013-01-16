@@ -124,11 +124,11 @@ class ReportingFacade < StandardFacade
     total_preclose_received_on_date = preclose_principal_received_on_date + preclose_interest_received_on_date
    
     {:scheduled_principal => schedule_principal_due, :scheduled_interest => schedule_interest_due, :scheduled_total => schedule_total,
-     :advance_amount_exist => advance_available, :overdue_ftd => overdue_total_ftd, :overdue_amt => non_schedule_overdue_total,
-     :scheduled_principal_collected => schedule_principal_received, :scheduled_interest_collected => schedule_interest_received, :scheduled_total_collected => schedule_total_received,
-     :advance_received => schedule_advance_received, :overdue_received => overdue_total_received,
-     :preclosure_pricipal => preclose_principal_received_on_date, :priclosure_interest => preclose_interest_received_on_date, :total_preclosure => total_preclose_received_on_date,
-     :fee_colleatable => total_fee_colleatable_on_date, :fee_colleated => loan_fee_receipt_amount, :insurance_fee_collected => other_fee_receipt_amount
+      :advance_amount_exist => advance_available, :overdue_ftd => overdue_total_ftd, :overdue_amt => non_schedule_overdue_total,
+      :scheduled_principal_collected => schedule_principal_received, :scheduled_interest_collected => schedule_interest_received, :scheduled_total_collected => schedule_total_received,
+      :advance_received => schedule_advance_received, :overdue_received => overdue_total_received,
+      :preclosure_pricipal => preclose_principal_received_on_date, :priclosure_interest => preclose_interest_received_on_date, :total_preclosure => total_preclose_received_on_date,
+      :fee_colleatable => total_fee_colleatable_on_date, :fee_colleated => loan_fee_receipt_amount, :insurance_fee_collected => other_fee_receipt_amount
     }
   end
 
@@ -140,7 +140,7 @@ class ReportingFacade < StandardFacade
   end
 
   #this function will give back the list of location which is managed by staff.
-  def locations_managed_by_staffs_on_date(staff_id, from_date, to_date)
+  def locations_managed_by_staffs_on_date(staff_id, to_date, from_date = nil)
     new_members = []
     new_centers = []
     exist_centers = []
@@ -157,7 +157,11 @@ class ReportingFacade < StandardFacade
         end
       end
       l_locations = centers.blank? ? [] : centers.flatten.uniq
-      n_centers = l_locations.select{|s| s.center_disbursal_date >= from_date && s.center_disbursal_date <= to_date}
+      if from_date.blank?
+        n_centers = l_locations.select{|s| s.center_disbursal_date <= to_date}
+      else
+        n_centers = l_locations.select{|s| s.center_disbursal_date >= from_date && s.center_disbursal_date <= to_date}
+      end
       e_centers = l_locations - n_centers
 
       new_centers << n_centers
