@@ -25,11 +25,11 @@
           = values[:loan_outstanding_principal]
           - accumulate_row_values[:loan_outstanding_principal] += values[:loan_outstanding_principal]
         %td
-          = values[:overdue_principal]
-          - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
-        %td
           = values[:loan_overdue]
           - accumulate_row_values[:loan_overdue] += values[:loan_overdue]
+        %td
+          = values[:overdue_principal]
+          - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
         %td
           = values[:par]
           = '%'
@@ -42,7 +42,7 @@
       %td
         = total_rows[:loan_outstanding_principal]
       %td
-        = total_rows[:overdue_principal]
-      %td
         = total_rows[:loan_overdue]
+      %td
+        = total_rows[:overdue_principal]
       %td
