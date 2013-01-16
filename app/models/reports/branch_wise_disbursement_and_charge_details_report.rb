@@ -38,9 +38,11 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
 
     data = {}
     if @biz_location_branch.blank?
-      disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
+      disbursed_loan_ids = Lending.total_loans_between_dates('disbursed_loan_status', @from_date, @to_date)
+      disbursal_dates = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
     else
-      disbursal_dates = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :accounted_at_origin => @biz_location_branch).aggregate(:disbursal_date)
+      disbursed_loan_ids = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(@biz_location_branch, @from_date, @to_date, false, 'disbursed_loan_status')
+      disbursal_dates = disbursal_dates = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
     end
     d_dates = disbursal_dates.to_a.paginate(:page => @page, :per_page => @limit)
     data[:loan_products] = []
@@ -48,11 +50,7 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
     data[:disbursal_dates] = d_dates
     d_dates.each do |d_date|
       data[:loan_info][d_date] = {}
-      if @biz_location_branch.blank?
-        loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date)
-      else
-        loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date, :accounted_at_origin => @biz_location_branch)
-      end
+      loans = Lending.all(:fields => [:id, :disbursed_amount, :accounted_at_origin, :lending_product_id], :disbursal_date => d_date, :id => disbursed_loan_ids)
       loans.group_by{|l| l.accounted_at_origin}.each do |accounted_at_id, a_loans|
         branch = BizLocation.get accounted_at_id
         data[:loan_info][d_date][branch.name] = {}
