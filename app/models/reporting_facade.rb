@@ -264,7 +264,6 @@ class ReportingFacade < StandardFacade
       loan_amounts[location_id]['interest_amt']            = loan_receipts.blank? || loan_receipts.interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.interest.to_i)
       loan_amounts[location_id]['scheduled_principal_amt'] = scheduled_amounts[0].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[0].to_i)
       loan_amounts[location_id]['scheduled_interest_amt']  = scheduled_amounts[1].blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_amounts[1].to_i)
-
       loan_amounts[location_id]['total_principal_amt']       = till_on_loan_receipts.blank? || till_on_loan_receipts.principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(till_on_loan_receipts.principal.to_i)
     end
     loan_amounts

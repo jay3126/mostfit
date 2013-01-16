@@ -47,6 +47,7 @@ class DelinquencyReportBranchWise < Report
       loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
       loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
       loan_overdue                   = loan_overdue_principal + loan_overdue_interest
+      overdue_principal              = (loan_disbursed_principal_amt - loan_total_repay_principal_amt) + loan_overdue_principal
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
         par_value = (loan_overdue_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
         par = ('%.2f' % par_value)
@@ -56,7 +57,7 @@ class DelinquencyReportBranchWise < Report
       
       branch_data_map                                    = {}
       branch_data_map[:loan_outstanding_principal]       = loan_outstanding_principal
-      branch_data_map[:loan_overdue_principal]           = loan_overdue
+      branch_data_map[:loan_overdue_principal]           = overdue_principal
       branch_data_map[:loan_overdue]                     = loan_overdue_principal
       branch_data_map[:par]                              = par
 
