@@ -92,7 +92,7 @@ class OverdueDetailedReport < Report
         total_principal_overdue    = scheduled_principal > loan_receipt_amt[:principal_received] ? scheduled_principal - loan_receipt_amt[:principal_received] : MoneyManager.default_zero_money
         total_interest_overdue     = scheduled_interest > loan_receipt_amt[:interest_received] ? scheduled_interest - loan_receipt_amt[:interest_received] : MoneyManager.default_zero_money
         total_overdue              = total_principal_overdue + total_interest_overdue
-        par                        = total_principal_overdue
+        par                        = loan.to_money[:disbursed_amount] - loan_receipt_amt[:principal_received]
         center                     = loan.administered_at_origin_location
         center_id                  = center ? center.id : "Not Specified"
         center_name                = center ? center.name : "Not Specified"
