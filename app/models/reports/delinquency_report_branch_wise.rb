@@ -41,6 +41,7 @@ class DelinquencyReportBranchWise < Report
       amounts                           = all_payments.values.first
 
       future_principal_outstanding = MoneyManager.default_zero_money
+      overdue_principal            = MoneyManager.default_zero_money
       loan_total_repay_principal_amt = amounts['total_principal_amt']
       loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
       loan_repayment_principal_amt   = amounts['principal_amt']
@@ -52,8 +53,14 @@ class DelinquencyReportBranchWise < Report
       loan_ids_overdues               = get_reporting_facade(User.first).overdue_loans_for_location(branch_id, @date)
       overdue_loan_ids               = loan_ids_overdues.blank? ? [0] : loan_ids_overdues
       overdue_loan_ids.each do |loan_id|
-        future_principal = BaseScheduleLineItem.first("loan_base_schedule.lending_id" => loan_id, "loan_base_schedule.lending.accounted_at_origin" => branch_id, :on_date.gt => @date)
-        future_principal_outstanding   += future_principal.nil? ? MoneyManager.default_zero_money : Money.new(future_principal.scheduled_principal_outstanding.to_i, default_currency)
+        loan = Lending.get(loan_id)
+        next unless loan
+        if loan.last_scheduled_date < @date
+          future_principal_outstanding += loan.actual_principal_outstanding(@date)
+        else
+          future_principal = BaseScheduleLineItem.first("loan_base_schedule.lending_id" => loan_id, "loan_base_schedule.lending.accounted_at_origin" => branch_id, :on_date.gt => @date)
+          future_principal_outstanding   += future_principal.nil? ? MoneyManager.default_zero_money : (Money.new(future_principal.scheduled_principal_outstanding.to_i, default_currency))
+        end
       end
       overdue_principal              = loan_overdue_principal + future_principal_outstanding
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
