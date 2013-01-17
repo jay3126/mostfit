@@ -48,7 +48,8 @@ class DelinquencyReportBranchWise < Report
       loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
       loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
       loan_overdue                   = loan_overdue_principal + loan_overdue_interest
-      future_principal_outstanding   = Money.new(BaseScheduleLineItem.all("loan_base_schedule.lending.accounted_at_origin" => branch_id, :on_date.gt => @date).aggregate(:scheduled_principal_outstanding.sum).to_i, default_currency)
+      overdue_loan_ids               = get_reporting_facade(User.first).overdue_loans_for_location(branch_id, @date)
+      future_principal_outstanding   = Money.new(BaseScheduleLineItem.all("loan_base_schedule.lending_id" => overdue_loan_ids, "loan_base_schedule.lending.accounted_at_origin" => branch_id, :on_date.gt => @date).aggregate(:scheduled_principal_outstanding.sum).to_i, default_currency)
       overdue_principal              = loan_overdue_principal + future_principal_outstanding
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
         par_value = (loan_overdue_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
