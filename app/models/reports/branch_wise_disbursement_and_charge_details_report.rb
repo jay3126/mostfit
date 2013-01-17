@@ -42,7 +42,7 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
       disbursal_dates = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
     else
       disbursed_loan_ids = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(@biz_location_branch, @from_date, @to_date, false, 'disbursed_loan_status')
-      disbursal_dates = disbursal_dates = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
+      disbursal_dates = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).aggregate(:disbursal_date)
     end
     d_dates = disbursal_dates.to_a.paginate(:page => @page, :per_page => @limit)
     data[:loan_products] = []
