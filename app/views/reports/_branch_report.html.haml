@@ -48,6 +48,7 @@
             - total_members_count += values[:centers_members_total][:new_members_count]
           %td
             = values[:arrears]
+            - accumulate_row_values[:total_arrears] += values[:arrears]
           %td
             = values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
             - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
@@ -70,6 +71,7 @@
         %td
           = total_members_count
         %td
+          = total_rows[:total_arrears]
         %td
           = total_rows[:scheduled_outstanding_amount]
         %td
