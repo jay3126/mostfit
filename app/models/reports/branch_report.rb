@@ -47,7 +47,6 @@ class BranchReport < Report
       branch = BizLocation.get(branch_id)
       branch_id = branch.id
       branch_name = branch.name
-      arrears = ""
       number_of_loan_accounts_in_arrear = ""
       staff_ids = reporting_facade.staff_members_per_location_on_date(branch_id, @date).aggregate(:staff_id)
       all_staffs = staff_ids.blank? ? [] : StaffMember.all(:id => staff_ids)
@@ -57,6 +56,7 @@ class BranchReport < Report
           staff_name = staff.name
           centers_members_total = reporting_facade.locations_managed_by_staffs_on_date(staff.id, @date)
           outstanding_and_overdue_amounts = reporting_facade.sum_all_outstanding_and_overdues_loans_location_centers_on_date(@date, centers_members_total[:new_location_ids].flatten)
+          arrears = outstanding_and_overdue_amounts[:total_overdue]
           data[:branches][staff] = {:branch_id => branch_id, :branch_name => branch_name, :staff_name => staff_name, :staff_id => staff_id, :centers_members_total => centers_members_total, :outstanding_and_overdue_amounts => outstanding_and_overdue_amounts, :arrears => arrears, :number_of_loan_accounts_in_arrear => number_of_loan_accounts_in_arrear}
         end
       end
