@@ -54,6 +54,7 @@ class DelinquencyReportBranchWise < Report
       overdue_loan_ids               = loan_ids_overdues.blank? ? [0] : loan_ids_overdues
       overdue_loan_ids.each do |loan_id|
         loan = Lending.get(loan_id)
+        next unless loan
         overdue_principal += loan.actual_principal_outstanding(@date)
       end
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
