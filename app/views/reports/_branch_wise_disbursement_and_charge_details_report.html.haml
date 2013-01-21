@@ -9,13 +9,14 @@
   - date_rows = {}
   - total_disbursment_count = 0
   - total_disbursemnt_amt = total_fee_colleatable = total_fee_colleated = MoneyManager.default_zero_money
-  %table.unsortable.dataTable.report.weeksheet.nojs
+  %table.dataTable.report.weeksheet.nojs
     %thead
       %tr
+        %th{:style => 'display:none'}
         %th
-          Date
+          Disbursal
         %th
-          Branch Name
+          Branch
         %th{:colspan => loan_products.size+1}
           Disbursement
         %th{:colspan => loan_products.size+1}
@@ -25,8 +26,11 @@
         %th{:colspan => loan_products.size+1}
           Upfront Charges Collected
       %tr
+        %th{:style => 'display:none'}
         %th
+          Date
         %th
+          Name
         - loan_products.each do |p_name|
           %th
             = p_name
@@ -76,6 +80,7 @@
           - r_disbursed_count = 0
           - r_disbursed_amt = r_fee_collectable = r_fee_collected = MoneyManager.default_zero_money
           %tr
+            %td{:style => 'display:none'}
             %td
               %b
                 = date
@@ -134,6 +139,7 @@
                 - date_rows[l_product][:total_fee_colleatable_fee_amt] += accumulate_row_values[l_product][:total_fee_colleatable_fee_amt]
                 - date_rows[l_product][:total_fee_collected_amt] += accumulate_row_values[l_product][:total_fee_collected_amt]
         %tr{:location_id => date, :class => 'location_footer', :style => 'cursor:pointer;', :style => "text-align:center; background:#708890;"}
+          %td{:style => 'display:none'}
           %td{:style => "text-align:center; background:#708890;"}
           %td{:style => "text-align:center; background:#708890;"}
             Total
@@ -160,6 +166,7 @@
 
     %tfoot
       %tr
+        %th{:style => 'display:none'}
         %th
           Total
         %td
