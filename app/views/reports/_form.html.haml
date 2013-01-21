@@ -25,6 +25,7 @@
   - center_for_loan_application_report = (params[report] and params[report][:center_for_loan_application_report] and not params[report][:center_for_loan_application_report].blank?) ? params[report][:center_for_loan_application_report] : nil
   - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
   - loan_lan_number_id = (params[report] and params[report][:loan_lan_number_id] and not params[report][:loan_lan_number_id].blank?) ? params[report][:loan_lan_number_id] : nil
+  - loan_lan_number = (params[report] and params[report][:loan_lan_number] and not params[report][:loan_lan_number].blank?) ? params[report][:loan_lan_number] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -111,6 +112,9 @@
       - if loan_lan_number_id
         Loan LAN Number:
         = Lending.first(:lan => loan_lan_number_id).lan
+      - if loan_lan_number
+        Loan LAN Number:
+        = loan_lan_number
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed':''}"}
@@ -271,6 +275,10 @@
             %td
               Loan LAN Number:
               = select(:loan_lan_number_id, :collection => Lending.all.aggregate(:lan), :prompt => "Select LAN number", :selected => loan_lan_number_id)
+          - if @report.respond_to?(:loan_lan_number)
+            %td
+              Loan LAN Number:
+              = text_field :loan_lan_number
           - if @report.respond_to?(:branch_for_loan_application_report)
             %td
               Branch:
