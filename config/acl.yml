@@ -289,6 +289,9 @@ supervisor :
     - biz_location_clients
     - biz_location_form
     - centers_for_selector
+    - staffs_for_selector
+    - branches_for_area
+    - clients_for_selector
     - edit
     - update_biz_location
   center_cycles :
@@ -401,6 +404,8 @@ supervisor :
     - weeksheet_payments
     - create_group_payments
     - payment_form_for_lending
+    - payment_by_staff_member
+    - payment_by_staff_member_for_location 
  # book_keeping :
  #   - all
   ledgers :
