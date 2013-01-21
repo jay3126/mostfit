@@ -31,33 +31,30 @@ class CashInflow < Report
   end
 
   def generate
-
-    reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
 
-    (@from_date..@to_date).each do |date|
-      payment_transactions = PaymentTransaction.all(:effective_on => date, :receipt_type => :receipt)
-      payment_amounts = payment_transactions.aggregate(:amount.sum)
-      payment_amount = MoneyManager.get_money_instance(Money.new(payment_amounts.to_i, :INR).to_s)
-      collection_date = date
-      collection = (payment_transactions and (not payment_transactions.empty?)) ? PaymentTransaction.all(:effective_on => date, :receipt_type => :receipt, :payment_towards => [:payment_towards_loan_repayment, :payment_towards_loan_advance_adjustment, :payment_towards_loan_preclosure, :payment_towards_loan_recovery, :payment_towards_fee_receipt]).aggregate(:amount.sum) : 0
-      actual_collection = MoneyManager.get_money_instance(Money.new(collection.to_i, :INR).to_s)
-      total_collections = (payment_transactions and (not payment_transactions.empty?)) ? payment_transactions.aggregate(:amount.sum) : 0
-      total_collection = MoneyManager.get_money_instance(Money.new(total_collections.to_i, :INR).to_s)
-      max_amount = (payment_transactions and (not payment_transactions.empty?)) ? payment_transactions.aggregate(:amount.max) : 0
-      maximum_amount = MoneyManager.get_money_instance(Money.new(max_amount.to_i, :INR).to_s)
-      min_amount = (payment_transactions and (not payment_transactions.empty?)) ? payment_transactions.aggregate(:amount.min) : 0
-      minimum_amount = MoneyManager.get_money_instance(Money.new(min_amount.to_i, :INR).to_s)
-      if ((total_collections > 0) and (not payment_transactions.empty?))
-        avg_amount = total_collections/payment_transactions.count
-        average_amount = MoneyManager.get_money_instance(Money.new(avg_amount.to_i, :INR).to_s)
-      else
-        avg_amount = 0
-        average_amount = MoneyManager.get_money_instance(Money.new(avg_amount.to_i, :INR).to_s)
-      end
+    schedule_dates = BaseScheduleLineItem.all(:on_date.gte => @from_date, :on_date.lte => @to_date).aggregate(:on_date) rescue []
+    actual_dates = BaseScheduleLineItem.all(:on_date.gte => @from_date, :on_date.lte => @to_date).aggregate(:actual_date) rescue []
+    data[:scheduled] = {}
+    data[:actual_scheduled] = {}
+    data[:from_date] = @from_date
+    data[:to_date] = @to_date
+    schedule_dates.each do |schedule_date|
+      schedules = BaseScheduleLineItem.all(:on_date => schedule_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+      schedule_principal_amt = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules[0].to_i)
+      schedule_interest_amt = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules[1].to_i)
 
-      data[date] = {:date => date, :payment_amount => payment_amount, :collection_date => collection_date, :actual_collection => actual_collection, :total_collection => total_collection, :maximum_amount => maximum_amount, :minimum_amount => minimum_amount, :average_amount => average_amount}
+      schedule_total_amt = schedule_principal_amt + schedule_interest_amt
+      data[:scheduled][schedule_date] = {:schedule_date => schedule_date, :scheduled_total_amt => schedule_total_amt}
+    end
+
+    actual_dates.each do |actual_date|
+      actual_schedules = BaseScheduleLineItem.all(:on_date => actual_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+      actual_schedule_principal_amt = actual_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(actual_schedules[0].to_i)
+      actual_schedule_interest_amt = actual_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(actual_schedules[1].to_i)
+
+      actual_schedule_total_amt = actual_schedule_principal_amt + actual_schedule_interest_amt
+      data[:actual_scheduled][actual_date] = {:actual_schedule_date => actual_date, :actual_scheduled_total_amt => actual_schedule_total_amt}
     end
     data
   end

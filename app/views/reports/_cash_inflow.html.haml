@@ -3,65 +3,38 @@
   %thead
     %tr
       %th
-        Date
+        Actual Collection Date
       %th
         Amount
       %th
         Collection Date
       %th
-        Actual Collection
-      %th
-        Total
-      %th
-        Average
-      %th
-        Maximum
-      %th
-        Minimum
-
+        Amount
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
-    - @data.sort_by{|date| date}.each do |date, values|
-      %tr
-        %td
-          = values[:date]
-        %td
-          = values[:payment_amount]
-          - accumulate_row_values[:amount] += values[:payment_amount]
-        %td
-          = values[:collection_date]
-        %td
-          = values[:actual_collection]
-          - accumulate_row_values[:actual_collection] += values[:actual_collection]
-        %td
-          = values[:total_collection]
-          - accumulate_row_values[:total_collection] += values[:total_collection]
-        %td
-          = values[:average_amount]
-          - accumulate_row_values[:average_amount] += values[:average_amount]
-        %td
-          = values[:maximum_amount]
-          - accumulate_row_values[:maximum_amount] += values[:maximum_amount]
-        %td
-          = values[:minimum_amount]
-          - accumulate_row_values[:minimum_amount] += values[:minimum_amount]
-
+    - (@data[:from_date]..@data[:to_date]).each do |date|
+      - if !@data[:scheduled][date].blank? || !@data[:actual_scheduled][date].blank?
+        %tr
+          %td
+            = @data[:scheduled][date][:schedule_date] unless @data[:scheduled][date].blank?
+          %td
+            - s_amt = @data[:scheduled][date].blank? ? MoneyManager.default_zero_money : @data[:scheduled][date][:scheduled_total_amt]
+            = s_amt
+            - accumulate_row_values[:scheduled_amount] += s_amt
+          %td
+            = @data[:actual_scheduled][date][:actual_schedule_date] unless @data[:actual_scheduled][date].blank?
+          %td
+            - r_amt = @data[:actual_scheduled][date].blank? ? MoneyManager.default_zero_money : @data[:actual_scheduled][date][:actual_scheduled_total_amt]
+            = r_amt
+            - accumulate_row_values[:actual_scheduled_amount] += r_amt
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
     %tr
       %th
         Total
       %td
-        = total_rows[:amount]
+        = total_rows[:scheduled_amount]
       %td
       %td
-        = total_rows[:actual_collection]
-      %td
-        = total_rows[:total_collection]
-      %td
-        = total_rows[:average_amount]
-      %td
-        = total_rows[:maximum_amount]
-      %td
-        = total_rows[:minimum_amount]
+        = total_rows[:actual_scheduled_amount]
