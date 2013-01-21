@@ -54,15 +54,8 @@ class DelinquencyReportBranchWise < Report
       overdue_loan_ids               = loan_ids_overdues.blank? ? [0] : loan_ids_overdues
       overdue_loan_ids.each do |loan_id|
         loan = Lending.get(loan_id)
-        next unless loan
-        if loan.last_scheduled_date < @date
-          future_principal_outstanding += loan.actual_principal_outstanding(@date)
-        else
-          future_principal = BaseScheduleLineItem.first("loan_base_schedule.lending_id" => loan_id, "loan_base_schedule.lending.accounted_at_origin" => branch_id, :on_date.gt => @date)
-          future_principal_outstanding   += future_principal.nil? ? MoneyManager.default_zero_money : (Money.new(future_principal.scheduled_principal_outstanding.to_i, default_currency))
-        end
+        overdue_principal += loan.actual_principal_outstanding(@date)
       end
-      overdue_principal              = loan_overdue_principal + future_principal_outstanding
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
         par_value = (loan_overdue_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
         par = ('%.3f' % par_value)
