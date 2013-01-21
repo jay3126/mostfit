@@ -1,36 +1,128 @@
 = partial :form
-%table.tall.shaded{:style => "width:50%;"}
-  %tr
-    %th
-    %th
-      Number of Centers
-    %th
-      Number of Groups
-  %tr
-    %th
-      At Beginning of period
-    %td
-      = @data[:centers_count_at_beginning_of_date_range]
-    %td
-      = @data[:client_groups_count_at_beginning_of_date_range]
-  %tr
-    %th
-      New joined during period      
-    %td
-      = @data[:centers_created_in_date_range]
-    %td
-      = @data[:client_groups_created_in_date_range]
-  %tr
-    %th
-      Closed during period
-    %td
-      = @data[:centers_closed_during_date_range]
-    %td
-      = @data[:client_groups_closed_during_date_range]
-  %tr
-    %th
-      At period end
-    %td
-      = @data[:centers_count_at_end_of_date_range]
-    %td
-      = @data[:client_groups_count_at_end_of_date_range]
+%table.location_weeksheet.dataTable.report.weeksheet.nojs
+  %thead{:style => 'width:1141px;'}
+    %tr
+      %th{:style => 'display:none'}
+      %th
+        S.No
+      %th
+      %th
+        Total
+  %tbody
+    %tr
+      %th{:style => 'display:none'}
+      %th
+      %th
+        Center
+      %th
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        1.
+      %td
+        ADD:# New Centers Joined During Period
+      %td
+        = @data[:centers_created_in_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        2.
+      %td
+        LESS:# New Centers Closed During Period
+      %td
+        = @data[:centers_closed_during_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+      %td
+        Centers At Period End
+      %td
+        = @data[:centers_created_in_date_range] - @data[:centers_closed_during_date_range]
+    %tr
+      %th{:style => 'display:none'}
+      %th
+      %th
+        Group
+      %th
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        1.
+      %td
+        ADD:# New Groups Joined During Period
+      %td
+        = @data[:client_groups_created_in_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        2.
+      %td
+        LESS:# New Groups Closed During Period
+      %td
+        = @data[:centers_closed_during_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+      %td
+        Groups At Period End
+      %td
+        = @data[:client_groups_created_in_date_range] - @data[:client_groups_closed_during_date_range]
+    %tr
+      %th{:style => 'display:none'}
+      %th
+      %th
+        Members
+      %th
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        1.
+      %td
+        ADD:# New Members Joined During Period
+      %td
+        = @data[:client_created_in_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        2.
+      %td
+        LESS:# Loans Matured During Period
+      %td
+        = @data[:loan_matured_in_date_range]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        3.
+      %td
+        LESS:# Loans Foreclosed During Period
+      %td
+        = @data[:loan_preclosure_in_date_range]
+    %tr
+      %th{:style => 'display:none'}
+      %th
+      %th
+        = "%age Women Members of total members"
+      %th
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        1.
+      %td
+        Total Member Base
+      %td
+        = @data[:all_clients_count]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+        2.
+      %td
+        Women
+      %td
+        = @data[:female_clients_count]
+    %tr
+      %td{:style => 'display:none'}
+      %td
+      %td
+        ="%age Of Women out of total members"
+      %td
+        = ((@data[:female_clients_count]/@data[:all_clients_count])*100).to_s + '%'
