@@ -57,7 +57,6 @@ class LoanApplications < Application
     by_staff = params[:staff_member_id]
     created_on = params[:created_on]
     center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
-    center_cycle = CenterCycle.get_cycle(@center.id, center_cycle_number)
     clients = params[:clients]
 
     # VALIDATIONS
@@ -75,7 +74,7 @@ class LoanApplications < Application
           loan_amount_str = clients[client_id][:amount]
           loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
           client = Client.get(client_id)
-          loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
+          loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle_number, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
           if loan_application.save == false
             @errors << loan_application.errors.first.to_s
           end
@@ -83,7 +82,6 @@ class LoanApplications < Application
           @errors << ex.message
         end
       end
-      center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
       fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
       @errors << "Please select atleast one client" if selected.eql?(0)
     end
