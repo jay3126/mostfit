@@ -17,22 +17,24 @@
     - center_count = 0
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
-    - @data.sort_by{|center| center}.each do |center, values|
-      %tr
-        %td
-          = values[:district_name]
-        %td
-          = values[:branch_name]
-        %td
-          = values[:center_name]
-          - center_count += 1
-        %td
-          = values[:disbursal_date]
-        %td
-          = values[:loan_amount][:total_loan_amount]
-          - accumulate_row_values[:loan_amount] += values[:loan_amount][:total_loan_amount]
+    - @data.each.each do |branch_id, b_loans|
+      - b_loans.each.each do |center_id, c_loans|
+        - c_loans.each.each do |d_date, loan|
+          %tr
+            %td
+              = loan[:district_name]
+            %td
+              = loan[:branch_name]
+            %td
+              = loan[:center_name]
+              - center_count += 1
+            %td
+              = loan[:disbursal_date]
+            %td
+              = loan[:disbursed_amount]
+              - accumulate_row_values[:loan_amount] += loan[:disbursed_amount]
 
-  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+    - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
     %tr
       %th

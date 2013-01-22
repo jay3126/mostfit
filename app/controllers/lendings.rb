@@ -395,10 +395,14 @@ class Lendings < Application
   def check_preclosure_date
     lending_id = params[:loan_id]
     @preclose_on_date = params[:effective_on]
-    @lending = Lending.get lending_id
-    preclosure_penalty_product = @lending.get_preclosure_penalty_product
-    @preclosure_penalty_amount = preclosure_penalty_product ? preclosure_penalty_product.effective_total_amount(@preclose_on_date) :
-      MoneyManager.default_zero_money
+    unless lending_id.blank?
+      @lending = Lending.get(lending_id)
+      unless @lending.blank?
+        preclosure_penalty_product = @lending.get_preclosure_penalty_product
+        @preclosure_penalty_amount = preclosure_penalty_product ? preclosure_penalty_product.effective_total_amount(@preclose_on_date) :
+          MoneyManager.default_zero_money
+      end
+    end
     render :template => "lendings/lending_preclose"
   end
 

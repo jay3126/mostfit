@@ -7,9 +7,9 @@ class CashOutFlow < Report
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
     @name = "Cash Outflow from #{@from_date} to #{@to_date}"
     @user = user
-    location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : []
+    @page = params.blank? || params[:page].blank? ? 1 :params[:page]
+    @limit = 10
     get_parameters(params, user)
   end
 
@@ -34,29 +34,34 @@ class CashOutFlow < Report
   end
 
   def generate
-    reporting_facade = get_reporting_facade(@user)
-    location_facade  = get_location_facade(@user)
     data = {}
-    
-    if @biz_location_branch.class == Array
-      all_centers = location_facade.all_nominal_centers
+    if @biz_location_branch.blank?
+      disbursed_loan_ids = Lending.total_loans_between_dates('disbursed_loan_status', @from_date, @to_date)
+      disbursal_loans = disbursed_loan_ids.blank? ? [] : Lending.all(:fields => [:id, :disbursed_amount, :disbursal_date, :accounted_at_origin, :administered_at_origin], :id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date)
     else
-      all_centers = location_facade.get_children(BizLocation.get(@biz_location_branch), @to_date)
+      disbursed_loan_ids = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(@biz_location_branch, @from_date, @to_date, false, 'disbursed_loan_status')
+      disbursal_loans = disbursed_loan_ids.blank? ? [] : Lending.all(:fields => [:id, :disbursed_amount, :disbursal_date, :accounted_at_origin, :administered_at_origin], :id => disbursed_loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date)
     end
 
-    all_centers.each do |center|
-      center_name = center.name
-      branch = location_facade.get_parent(BizLocation.get(center.id), @to_date)
-      branch_name = branch ? branch.name : "Not Specified"
-      branch_id = branch ? branch.id : "Not Specified"
-      location = LocationLink.all_parents(center, @to_date)
+    disbursal_loans.group_by{|lb| lb.accounted_at_origin}.each do |branch_id, b_loans|
+      data[branch_id] = {}
+      branch = BizLocation.get branch_id
+      branch_name = branch.name
+      location = LocationLink.all_parents(branch, @to_date)
       district = location.select{|s| s.location_level.name.downcase == 'district'}.first
       district_name = (district and (not district.blank?)) ? district.name : "Not Specified"
-      #center_count = location_facade.get_children(branch, @to_date).count
-      loan_amount  = reporting_facade.sum_all_loan_amounts_per_center_for_a_date_range(@from_date, @to_date, center.id)
-      disbursal_date = (center and center.center_disbursal_date) ? center.center_disbursal_date : "Not Specified"
 
-      data[center] = {:branch_name => branch_name, :district_name => district_name, :disbursal_date => disbursal_date, :center_name => center_name, :loan_amount => loan_amount}
+      b_loans.group_by{|lc| lc.administered_at_origin}.each do |center_id, c_loans|
+        data[branch_id][center_id] = {}
+        center = BizLocation.get center_id
+        center_name = center.name
+        c_loans.group_by{|dl| dl.disbursal_date}.each do |d_date, d_loans|
+          data[branch_id][center_id][d_date] = {}
+          disbursed_amt = d_loans.map(&:disbursed_amount).sum
+          disbursed_money_amt = MoneyManager.get_money_instance_least_terms(disbursed_amt.to_i)
+          data[branch_id][center_id][d_date] = {:branch_name => branch_name, :district_name => district_name, :disbursal_date => d_date, :center_name => center_name, :disbursed_amount => disbursed_money_amt}
+        end
+      end
     end
     data
   end
