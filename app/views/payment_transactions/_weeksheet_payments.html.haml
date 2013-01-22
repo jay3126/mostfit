@@ -25,11 +25,11 @@
     = link_to 'Show/Hide All Record', '#', :onclick => "jQuery('.payment').toggle();", :class => 'dataTables_filter'
     %div{:class => 'fg-toolbar ui-toolbar ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix'}
       Payment Only
-      = radio_button :name => 'operation', :value => 'payment', :checked=>"checked"
+      = radio_button :name => 'operation', :value => 'payment'
       Client Attendance Only
       = radio_button :name => 'operation', :value => 'client_attendance'
       Both
-      = radio_button :name => 'operation', :value => 'payment_and_client_attendance'
+      = radio_button :name => 'operation', :value => 'payment_and_client_attendance', :checked=> true
     %table.dataTable.report.weeksheet.nojs.payment
       %thead
         %tr
@@ -103,7 +103,7 @@
             %td
               = link_to_with_rights ws.borrower_name, url(:controller=> :new_clients, :action => :show, :id => ws.borrower_id)
             %td
-              = select :name => "payment_transactions[payments][#{loan_row_count}][client_attendance]", :collection => Constants::User::ATTENDANCE_STATUSES.map{|x| [x.to_s, x.to_s.humanize]}, :style => "width:100px"
+              = select :name => "payment_transactions[payments][#{loan_row_count}][client_attendance]", :collection => Constants::User::ATTENDANCE_STATUSES.map{|x| [x.to_s, x.to_s.humanize]}, :selected => Constants::User::PRESENT_ATTENDANCE_STATUS.to_s, :style => "width:100px"
             %td
               = link_to_with_rights ws.loan_id, url(:controller => :lendings, :action => :show, :id => ws.loan_id)
             %td
