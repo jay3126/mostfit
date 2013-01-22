@@ -434,7 +434,7 @@ class Lendings < Application
     @message[:error] << "Please Enter Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:total_amount].to_f <= 0}.blank?
     @message[:error] << "Please select Reason" if reason_id.blank?
     @message[:error] << 'Remarks cannot be blank' if remarks.blank?
-    @message[:error] << "Preclose Date cannot be holiday" if LocationHoliday.working_holiday?(parent_location, effective_on)
+    #@message[:error] << "Preclose Date cannot be holiday" if LocationHoliday.working_holiday?(parent_location, effective_on)
 
     begin
       if @message[:error].blank?
@@ -546,7 +546,6 @@ class Lendings < Application
     # OPERATIONS
     if @errors.blank?
       begin
-        
         loan_facade.adjust_advance_for_perclose(effective_on, @lending.id) if @lending.current_advance_available > MoneyManager.default_zero_money
         if total_money_amount > MoneyManager.default_zero_money
           payment_facade.record_payment(total_money_amount, receipt_type.to_sym, payment_towards.to_sym, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action.to_sym, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount)

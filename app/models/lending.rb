@@ -51,7 +51,7 @@ class Lending
   belongs_to :upload, :nullable => true
 
   if Mfi.first.system_state != :migration
-    validates_with_method :check_working_business_holiday?
+    #validates_with_method :check_working_business_holiday?
   end
 
   def check_working_business_holiday?
@@ -1085,7 +1085,8 @@ class Lending
       lan_id = "%.6i"%Lending.get_lan_identifier
       self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
     end
-    raise Errors::DataError, errors.first.first unless save
+    raise Errors::DataError, self.errors.first.first unless self.save
+    
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
 
