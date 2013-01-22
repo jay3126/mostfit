@@ -4,100 +4,248 @@
     $('.select').attr('checked',$(this).attr('checked'))});
   });
 
-- unless @errors.blank?
-  - if @errors.is_a?(Hash)
-    - @errors.keys.each do |client_id|
-      - if @errors[client_id]
-        .error
-          - @errors[client_id].keys.each do |key|
-            = "[Client ID: #{client_id}] #{key}: #{@errors[client_id][key]}"
-            %br
+- has_default_tranch = is_default_tranch_set? && !get_default_tranch_id.blank?
+- if has_default_tranch
+  - tranch_id = get_default_tranch_id
+  - default_tranch = NewTranch.get(tranch_id)
+  - if default_tranch.blank?
+    - has_default_tranch = false
   - else
-    - @errors.each do |error|
-      .error
-        = error
-        %br
+    - default_tranch_name = default_tranch.name
+    - default_funding_line = default_tranch.new_funding_line
+    - default_funding_line_name = default_funding_line.name
+    - default_funder = default_funding_line.new_funder.name
 
-%h1= "Create Clients from loan applications of Loan File #{@loan_file.loan_file_identifier}"
-.menu-strip{:style => "width:100%;"}
-  %h3
-    = "Branch: #{@branch.name}"
-    %br
-    = "Center: #{@center.name}"
-    %br
-    = "Center Cycle Number: #{@center_cycle_number}"
-    %br
-    - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
-    Healthcheck status:
-    = healthcheck_is_clear ? "Cleared" : "Pending"
-%hr
-
-.shaded
-  %h2 Select loan application to create client
-  - unless @loan_file.loan_applications.blank?
-    - loan_applications = @loan_file.loan_applications
-    = form(:action => url(:controller => :new_clients, :action => :create_client_for_selected_loan_application)) do
-      = hidden_field :name => "loan_file_id", :value => @loan_file.id
-      %table.dataTable.form{:style => "width:100%;"}
-        %thead
-          %tr
-            %th{:width => '5%'}
-              = check_box :id => "toggle_select"
-            %th
-              = "ID"
-            %th
-              = "Name"
-            %th
-              = "Guarantor Name"
-            %th
-              = "Applicant Birth Date"
-            %th
-              = "Ration Card No."
-            %th
-              = "Voter Card No."
-            %th
-              = "Amount"
-            %th
-              = "Address"
-            %th
-              = "State"
-            %th
-              = "Pincode"
-            %th
-              = "Status"
-        %tbody
-          - count = 0
-          - loan_applications.each do |lap|
-            - if lap.client_id.nil? && lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS
-              - count =+ 1
-              %tr
-                %td
-                  = check_box :name => "[selected][#{lap.id}]", :value => lap.id, :class => 'select'
-                %td
-                  = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
-                %td
-                  = lap.client_name
-                %td
-                  = lap.client_guarantor_name
-                %td
-                  = lap.client_dob
-                %td
-                  = lap.client_reference1
-                %td
-                  = lap.client_reference2
-                %td
-                  = lap.loan_money_amount.to_s
-                %td
-                  = lap.client_address
-                %td
-                  = lap.client_state.humanize
-                %td
-                  = lap.client_pincode
-                %td
-                  = lap.status.humanize rescue nil
-      = submit "Create client" unless count == 0
-      = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
-  - else
-    %h3 No loan applications
+%h1= "Client and Loan Creation"
+.menu-strip{:style => "width:100%; text-align: left;"}
+  = "<b>Loan File:</b> #{@loan_file.loan_file_identifier}"
   %br
-= partial :bulk_update_client_details
+  = "<b>Branch:</b> #{@branch.name}"
+  %br
+  = "<b>Center:</b> #{@center.name}"
+  %br
+  = "<b>Center Cycle Number:</b> #{@center_cycle_number}"
+  %br
+  - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+@loan_file.loan_file_identifier.to_s)
+  = "<b>Healthcheck status:</b>"
+  = healthcheck_is_clear ? "Cleared" : "Pending"
+- unless @loan_file.loan_applications.blank?
+  = form(:action => url(:controller => :new_clients, :action => :record_client_and_loan)) do
+    .menu-strip{:style => "width:100%; text-align: left;"}
+      %table
+        %tr
+          %th Application Date
+          %td
+            = @loan_file.created_on
+            = hidden_field :name => "loan[applied_on]", :value => @loan_file.created_on
+        %tr
+          %th Scheduled Disbursal Date
+          %td
+            - scheduled_disbursal_date_selected = params[:loan] && params[:loan][:scheduled_disbursal_date] ? params[:loan][:scheduled_disbursal_date] : @loan_file.scheduled_disbursal_date
+            = date_select "loan[scheduled_disbursal_date]", scheduled_disbursal_date_selected, :id =>"scheduled_disbursal_date"
+        %tr
+          %th Scheduled First Payment Date
+          %td
+            - scheduled_first_payment_date_selected = params[:loan] && params[:loan][:scheduled_first_payment_date] ? params[:loan][:scheduled_first_payment_date] : @loan_file.scheduled_first_payment_date
+            = date_select "loan[scheduled_first_payment_date]", scheduled_first_payment_date_selected, :id =>"scheduled_first_payment_date"
+          %th Applied By:
+          %td
+            = session.user.staff_member.name
+            = hidden_field :name => "loan[applied_by_staff_id]", :value => session.user.staff_member.id
+
+    %br
+    - loan_applications = @loan_file.loan_applications
+    = hidden_field :name => "loan_file_id", :value => @loan_file.id
+    %table.dataTable.form{:style => "width:100%;"}
+      %thead
+        %tr
+          %th{:width => '5%'}
+            = check_box :id => "toggle_select"
+          %th ID
+          %th Name
+          %th Amount
+          %th Funding Line
+          %th Tranch
+          %th Loan Product
+          %th Loan Purpose
+          %th Guarantor Name
+          %th DOB
+          %th Age
+          %th Age As On Date
+          %th Ration Card No.
+          %th Voter Card No.
+          %th Address
+          %th State
+          %th Pincode
+          %th Gender
+          %th Marital Status
+          %th Spouse Name
+          %th Spouse DOB
+          %th Guarantor DOB
+          %th Phone number
+          %th Telephone Typ
+          %th Income
+          %th Family Income
+          %th Occupation
+          %th PSL
+          %th Sub-PSL
+          %th Caste
+          %th Religion
+      %tbody
+        - count = 0
+        - loan_applications.each do |lap|
+          - client = lap.client_id.blank? ? "" : Client.get(lap.client_id)
+          - if lap.status == Constants::Status::LOAN_FILE_GENERATED_STATUS || lap.status == Constants::Status::CLIENT_CREATED || lap.status == Constants::Status::LOAN_CREATED
+            - count =+ 1
+            - if lap.status == Constants::Status::LOAN_CREATED
+              - is_loan_created = true
+              - lending = Lending.get(lap.lending_id)
+            - else
+              - is_loan_created = false
+            %tr
+              %td
+                - if is_loan_created
+                  %span.greytext
+                    Loan created
+                - else
+                  = check_box :name => "[selected][#{lap.id}]", :value => lap.id, :class => 'select'
+              %td
+                = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
+              %td
+                = lap.client_name
+              %td
+                = lap.loan_money_amount.to_s
+              %td
+                - if is_loan_created
+                  = loan_facade.get_funder_assigned_to_loan(lending.id).name rescue nil
+                - else
+                  - if (NewFunder.count == 0 || NewFundingLine.count == 0) && session.user.role == :operator
+                    %i No Funder or Funding Line created.
+                    = link_to("Create", resource(:new_funders))
+                  - elsif has_default_tranch
+                    = default_funding_line_name
+                    = hidden_field :name => "funding_line_id[#{lap.id}]", :value => default_funding_line.id
+                  - else
+                    - selected_funding_line = params[:funding_line_id] && params[:funding_line_id]["#{lap.id}"] ? params[:funding_line_id]["#{lap.id}"] : nil
+                    = select :name => "funding_line_id[#{lap.id}]", :collection => select_fundling_lines, :id => "funder_selector_#{lap.id}", :onchange => "fillFundingLinesForBulkLoan('#{lap.id}')", :prompt => "Select funding line", :selected => selected_funding_line
+              %td
+                - if is_loan_created
+                  = loan_facade.get_funding_line_assigned_to_loan(lending.id).name rescue nil
+                - else
+                  - if NewTranch.count == 0 && session.user.role == :operator
+                    %i No Tranch created.
+                    = link_to("Create", resource(:new_funders))
+                  - elsif has_default_tranch
+                    = default_tranch_name
+                    = hidden_field :name => "tranch_id[#{lap.id}]", :value => default_tranch.id
+                  - else
+                    - funding_lines_tranch = params[:funding_line_id] && !params[:funding_line_id]["#{lap.id}"].blank? ? NewFundingLine.get(params[:funding_line_id] && params[:funding_line_id]["#{lap.id}"]).new_tranches.map{|t| [t.id, t.name] } : nil
+                    - selected_tranch = params[:tranch_id] && params[:tranch_id]["#{lap.id}"] ? params[:tranch_id]["#{lap.id}"] : nil
+                    = select :name => "tranch_id[#{lap.id}]", :collection => funding_lines_tranch, :id => "tranch_selector_#{lap.id}", :selected => selected_tranch
+              %td
+                - if is_loan_created
+                  = lending.lending_product.name rescue "-"
+                - else
+                  - selected_loan_product = params[:clients] && params[:clients]["#{lap.id}"] && params[:clients]["#{lap.id}"][:loan_product_id] ? params[:clients]["#{lap.id}"][:loan_product_id] : nil
+                  = select :name => "clients[#{lap.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(lap.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
+              %td
+                - if is_loan_created
+                  = lending.loan_purpose rescue "-"
+                - else
+                  - selected_loan_purpose = params[:clients] && params[:clients]["#{lap.id}"] && params[:clients]["#{lap.id}"][:loan_purpose] ? params[:clients]["#{lap.id}"][:loan_purpose] : nil
+                  = select :name => "clients[#{lap.id}][loan_purpose]", :class => "loan_purpose", :collection => LoanPurpose.all.map{|lp| [lp.name]}, :prompt => "select loan purpose", :selected => selected_loan_purpose, :id => lap.id
+              %td
+                = lap.client_guarantor_name
+              %td
+                = lap.client_dob.blank? ? "-" : "#{lap.client_dob}"
+              %td
+                = lap.client_age_as_on.blank? ? lap.client_age : lap.client_age_as_on
+              %td
+                = lap.client_age_as_on_date.blank? ? Date.today : lap.client_age_as_on_date
+              %td
+                = lap.client_reference1
+              %td
+                = lap.client_reference2
+              %td
+                = lap.client_address
+              %td
+                = lap.client_state.humanize
+              %td
+                = lap.client_pincode
+              %td
+                - if client.blank?
+                  = select :name => "gender[#{lap.id}]", :collection => Constants::Masters::GENDER_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}
+                - else
+                  = client.gender.humanize rescue "-"
+              %td
+                - if client.blank?
+                  = select :name => "marital_status[#{lap.id}]", :collection => Constants::Masters::MARITAL_STATUS.map{|x| [x.to_s, x.to_s.humanize]}
+                - else
+                  = client.marital_status.blank? ? "-" : client.marital_status
+              %td
+                - if client.blank?
+                  = text_field :name => "spouse_name[#{lap.id}]", :size => 10
+                - else
+                  = client.spouse_name.blank? ? "-" : client.spouse_name
+              %td
+                - if client.blank?
+                  = date_select "spouse_date_of_birth[#{lap.id}]", (Date.today), :min_date => Date.today-36500, :max_date => Date.today-1000, :id => "spouse_date_of_birth#{lap.id}", :size => 10
+                - else
+                  = client.spouse_date_of_birth
+              %td
+                - if client.blank?
+                  = date_select "guarantor_dob[#{lap.id}]", (Date.today),  :min_date => Date.today-36500, :max_date => Date.today-1000, :id => "guarantor_dob#{lap.id}", :size => 10
+                - else
+                  = client.guarantor_dob.blank? ? "-" : client.guarantor_dob
+              %td
+                - if client.blank?
+                  = text_field :name => "telephone_number[#{lap.id}]", :size => 10
+                - else
+                  = client.telephone_number.blank? ? "-" : client.telephone_number
+              %td
+                - if client.blank?
+                  = select :name => "telephone_type[#{lap.id}]", :collection => Constants::Masters::TELEPHONE_TYPES
+                - else
+                  = client.telephone_type.blank? ? "-" : client.telephone_type
+              %td
+                - if client.blank?
+                  = text_field :name => "income[#{lap.id}]", :size => 10
+                - else
+                  = client.income.blank? ? "-" : client.income
+              %td
+                - if client.blank?
+                  = text_field :name => "family_income[#{lap.id}]", :size => 10
+                - else
+                  = client.family_income.blank? ? "-" : client.family_income
+              %td
+                - if client.blank?
+                  = select :name => "occupation_id[#{lap.id}]", :collection => Occupation.all.collect{|occ| [occ.id, occ.name]}
+                - else
+                  = client.occupation_id.blank? ? "-" : Occupation.get(client.occupation_id).name
+              %td
+                - if client.blank?
+                  = select :name => "priority_sector_list_id[#{lap.id}]", :collection => PrioritySectorList.all.collect{|ps| [ps.id, ps.name]}, :id => "psl_selector_#{lap.id}", :prompt => "select", :onchange => "fillPslSubCategoriesBulkClient(#{lap.id})"
+                - else
+                  = client.priority_sector_list_id.blank? ? "-" : client.priority_sector_list_id
+              %td
+                -# psl_sub_category_collection, psl_sub_category_selected = client.client_psl_sub_category_list
+                -# psl_sub_category_collection_mapped = psl_sub_category_collection.blank? ? psl_sub_category_collection : psl_sub_category_collection.each {|sub_psl| [sub_psl.id, sub_psl.name]}
+                - if client.blank?
+                  = select :name => "psl_sub_category_id[#{lap.id}]", :value_method => :id, :text_method => :name, :id => "psl_sub_category_selector_#{lap.id}"
+                - else
+                  = client.psl_sub_category_id.blank? ? "-" : client.psl_sub_category_id
+              %td
+                - if client.blank?
+                  = select :name => "caste[#{lap.id}]", :collection => Constants::Masters::CASTE_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}
+                - else
+                  = client.caste.humanize rescue "-"
+              %td
+                - if client.blank?
+                  = select :name => "religion[#{lap.id}]", :collection => Constants::Masters::RELIGION_CHOICE.map{|x| [x.to_s, x.to_s.humanize]}
+                - else
+                  = client.religion.humanize rescue "-"
+    = submit "Create client" unless count == 0
+    = link_to "Back", url(:controller => 'loan_files', :action => "show", :id => @loan_file.id), :class => "greenButton"
+- else
+  .shaded
+    %h3 No loan applications

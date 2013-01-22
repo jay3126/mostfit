@@ -8,9 +8,11 @@ module MarkerInterfaces
   # Loan products and loans have recurring installments, center meetings recur
   # at a particular meeting frequency, and so on
   module Recurrence
-
+    NOT_DEFINED = :not_defined
     DAILY = :daily; WEEKLY = :weekly; BIWEEKLY = :biweekly; MONTHLY = :monthly
     FREQUENCIES = [DAILY, WEEKLY, BIWEEKLY, MONTHLY]
+    REPAYMENT_FREQUENCY = [NOT_DEFINED, WEEKLY, BIWEEKLY, MONTHLY]
+    REPAYMENT_FREQUENCIES = REPAYMENT_FREQUENCY - [NOT_DEFINED]
     ACCOMODATES_FREQUENCIES = {
       DAILY => [WEEKLY, BIWEEKLY, MONTHLY],
       WEEKLY => [BIWEEKLY],

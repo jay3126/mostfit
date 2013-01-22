@@ -22,7 +22,7 @@ end
 # A loan file lists a number of loan applications that are being processed together
 class LoanFile
   include DataMapper::Resource
-  include Constants::Status
+  include Constants::Status, MarkerInterfaces::Recurrence
   include Pdf::LoanSchedule if PDF_WRITER
 
   property :id,                           Serial
@@ -45,7 +45,6 @@ class LoanFile
   property :health_status_remark,         Text, :nullable => true, :lazy => true
   property :health_check_approved_by,     Integer, :nullable => true
   property :health_check_approved_on,     DateTime, :nullable => true
-
   has n, :loan_file_additions
   has n, :loan_applications, :through => :loan_file_additions
 

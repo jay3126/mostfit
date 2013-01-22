@@ -107,28 +107,6 @@
         %td
           = loan_application.created_on
 
-    - if loan_application.to_info && loan_application.to_info.authorization_info
-      - loan_authorization = loan_application.to_info.authorization_info
-      %hr
-      %h3 Loan Application Authorization Info:
-      %table.form{:style => "text-align:left;"}
-        %tr
-          %th Loan authorization status
-          %td
-            = loan_authorization.status.humanize rescue nil
-        %tr
-          %th Loan authorization performed by
-          %td
-            = StaffMember.get(loan_authorization.performed_by_staff_id).name rescue nil
-        %tr
-          %th Loan authorization override reason
-          %td
-            = loan_authorization.override_reason rescue nil
-        %tr
-          %th Loan authorization performed on
-          %td
-            = loan_authorization.performed_on rescue nil
-
     - unless loan_application.client_verifications.blank?
       - client_verifications = loan_application.client_verifications
       %hr
@@ -153,6 +131,28 @@
             %td
               = cv.verified_on_date rescue nil
               %br
+    - if loan_application.to_info && loan_application.to_info.authorization_info
+      - loan_authorization = loan_application.to_info.authorization_info
+      %hr
+      %h3 Loan Application Authorization Info:
+      %table.form{:style => "text-align:left;"}
+        %tr
+          %th Loan authorization status
+          %td
+            = loan_authorization.status.humanize rescue nil
+        %tr
+          %th Loan authorization performed by
+          %td
+            = StaffMember.get(loan_authorization.performed_by_staff_id).name rescue nil
+        %tr
+          %th Loan authorization override reason
+          %td
+            = loan_authorization.override_reason rescue nil
+        %tr
+          %th Loan authorization performed on
+          %td
+            = loan_authorization.performed_on rescue nil
+
   %div.tab
     %br
     %table.report.nojs{:width => "100%"}

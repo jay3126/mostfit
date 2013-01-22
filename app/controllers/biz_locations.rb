@@ -117,7 +117,6 @@ class BizLocations < Application
     loan_product_ids   = params[:lending_product_ids]||[]
     b_originator_by    = params[:biz_location][:originator_by]
     b_managed_by       = params[:managed_by]
-    b_meeting          = params[:meeting_schedule]
     b_meeting_number   = params[:meeting][:meeting_numbers].to_i
     b_frequency        = params[:meeting][:meeting_frequency]
     b_begins_hours     = params[:meeting][:meeting_time_begins_hours].to_i
@@ -132,15 +131,20 @@ class BizLocations < Application
 
     message[:error] << "Please select a Parent Location for the Center" if parent_location_id.blank? && b_level == '0'
     message[:error] << "Name cannot be blank" if b_name.blank?
-    message[:error] << "Disbursal Date cannot be blank" if b_level == '0' && b_disbursal_date.blank?
     message[:error] << "Please select Location Level" if b_level.blank?
     message[:error] << "Creation Date cannot blank" if b_creation_date.blank?
-    message[:error] << "Meeting Number cannot be blank" if b_level == '0' && !b_meeting.blank? && b_meeting_number.blank?
     message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
-    message[:error] << "Please fill right value of time" if b_level == '0' && !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
-      Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
-    message[:error] << "Default Disbursal Date cannot be holiday" if b_level == '0' && !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
     message[:error] << "Creation Date cannot be before Parent Location of Creation Date" if !parent_location_id.blank? && parent_location.creation_date > b_creation_date
+
+    if b_level == '0'
+      message[:error] << "Default Disbursal Date cannot be holiday" unless configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
+      message[:error] << "Please fill right value of time" unless Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
+        Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
+      message[:error] << "Meeting frequency must not be blank(assign loan product to branch to populate meeting frequncy)" if b_frequency.blank?
+      message[:error] << "Meeting Number cannot be blank" if b_meeting_number == 0
+      message[:error] << "Disbursal Date cannot be blank" if b_disbursal_date.blank?
+    end
+
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
@@ -153,10 +157,8 @@ class BizLocations < Application
             if b_level == "0"
               BizLocation.update_biz_location_identifier_for_center(biz_location, parent_location)
               biz_location.center_cycles.create(:cycle_number => 1, :initiated_by_staff_id => session.user.staff_member.id, :initiated_on => Date.today, :status => Constants::Space::OPEN_CENTER_CYCLE_STATUS, :created_by => session.user.staff_member.id)
-              unless b_meeting.blank?
-                msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
-                meeting_facade.setup_meeting_schedule(biz_location, msi, b_meeting_number)
-              end
+              msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
+              meeting_facade.setup_meeting_schedule(biz_location, msi, b_meeting_number)
               LocationManagement.assign_manager_to_location(staff, biz_location, b_creation_date, performed_by.id, recorded_by.id) unless b_managed_by.blank?
               msg = "#{biz_location.location_level.name} : '#{biz_location.name} (Id: #{biz_location.biz_location_identifier})'successfully created center with center cycle 1"
             else
@@ -281,6 +283,17 @@ class BizLocations < Application
     end
   end
 
+  # returns repayment frequency of loan products assigned to branch
+  def repayment_frequency_for_branch
+    unless params[:parent_location_id].blank? && BizLocation.get(params[:parent_location_id]).location_level.level == 1
+      biz_location = BizLocation.get(params[:parent_location_id])
+      frequencies = biz_location.branch_loan_product_repayment_frequencies
+      return(frequencies.map{|f|"<option value = #{f}>#{f.humanize.to_s}"}.join)
+    else
+      return 0
+    end
+  end
+
   def clients_for_selector
     if params[:id].blank?
       return("<option value=''>Select Client</option>")
@@ -323,11 +336,12 @@ class BizLocations < Application
     b_address        = params[:biz_location][:biz_location_address]
     b_originator_by  = params[:biz_location][:originator_by]
     loan_product_ids = params[:lending_product_ids]||[]
-    b_meeting        = params[:meeting_schedule]
-    b_meeting_number = params[:meeting][:meeting_numbers].to_i
-    b_frequency      = params[:meeting][:meeting_frequency]
-    b_begins_hours   = params[:meeting][:meeting_time_begins_hours].to_i
-    b_begins_minutes = params[:meeting][:meeting_time_begins_minutes].to_i
+    unless params[:meeting].blank?
+      b_meeting_number = params[:meeting][:meeting_numbers].to_i
+      b_frequency      = params[:meeting][:meeting_frequency]
+      b_begins_hours   = params[:meeting][:meeting_time_begins_hours].to_i
+      b_begins_minutes = params[:meeting][:meeting_time_begins_minutes].to_i
+    end
     recorded_by      = session.user
     performed_by     = recorded_by.staff_member
     @parent_location = BizLocation.get b_id
@@ -337,23 +351,24 @@ class BizLocations < Application
     message[:error] << "Name cannot be blank" if b_name.blank?
     message[:error] << "Please select Location Level" if b_level.blank?
     message[:error] << "Parent location is invaild" if @parent_location.blank?
-    message[:error] << "Meeting Number cannot be blank" if !b_meeting.blank? && b_meeting_number.blank?
-    message[:error] << "Please fill right value of time" if !b_meeting.blank? && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
+    message[:error] << "Meeting Number cannot be blank" if  b_level == "0" && b_meeting_number.blank?
+    message[:error] << "Please fill right value of time" if b_level == "0" && !Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(b_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(b_begins_minutes)
 
     if b_creation_date.blank? || b_disbursal_date.blank?
       message[:error] << "Creation Date cannot be blank" if b_creation_date.blank?
     else
       message[:error] << "#{staff.to_s} created #{staff.creation_date} has a creation date later than #{b_creation_date}" if !b_managed_by.blank? && staff.creation_date > b_creation_date
-      message[:error] << "Default Disbursal Date cannot be holiday" if !b_meeting.blank? && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
+      message[:error] << "Default Disbursal Date cannot be holiday" if b_level == "0" && !configuration_facade.permitted_business_days_in_month(b_disbursal_date).include?(b_disbursal_date)
       message[:error] << "Creation Date cannot be before Parent Location of Center Creation Date" if !@parent_location.blank? && @parent_location.creation_date > b_creation_date
     end
-    unless b_meeting.blank?
+    if b_level == "0"
       message[:error] << "Default Disbursal Date cannot be before Center Creation Date" if !b_disbursal_date.blank? && b_creation_date > b_disbursal_date
       message[:error] << "Disbursal date is compulsory for meeting schedule" if b_disbursal_date.blank?
       message[:error] << "Number of meeting cannot be blank" if b_meeting_number.blank? || b_meeting_number == 0
-      message[:error] << "Enter Meeting time in HH:MM format of 24hours" if b_begins_hours == 0 && b_begins_minutes == 0
+      message[:error] << "Meeting frequency must not be blank(assign loan product to branch to populate meeting frequncy)" if b_frequency.blank?
     end
+
     # OPERATIONS PERFORMED
     if message[:error].blank?
       begin
@@ -362,7 +377,7 @@ class BizLocations < Application
           message = {:notice => "Location creation fail"}
         else
           location_facade.assign(child_location, @parent_location, b_creation_date)
-          unless b_meeting.blank?
+          if b_level == "0"
             msi = MeetingScheduleInfo.new(b_frequency, b_disbursal_date, b_begins_hours, b_begins_minutes)
             meeting_facade.setup_meeting_schedule(child_location, msi, b_meeting_number)
           end

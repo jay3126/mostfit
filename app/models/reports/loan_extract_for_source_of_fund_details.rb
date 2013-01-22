@@ -46,7 +46,7 @@ class LoanExtractForSourceOfFundDetails < Report
       loan_start_date = (loan and loan.loan_base_schedule) ? loan.loan_base_schedule.first_receipt_on : "Not Specified"
       loan_disbursal_date = (loan and loan.disbursal_date) ? loan.disbursal_date : "Not Specified"
       client = loan.loan_borrower.counterparty
-      client_id = client ? client.id : "Not Specified"
+      client_id = client ? client.client_identifier : "Not Specified"
       client_name = client ? client.name : "Not Specified"
       caste = (client and client.caste) ? client.caste.to_s.humanize : "Not Specified"
       religion = (client and client.religion) ? client.religion.to_s.humanize : "Not Specified"

@@ -7,6 +7,9 @@
   - loan_application = @loan_application.blank? ? LoanApplication.new : @loan_application
   %h2
     = "Center Cycle Number: #{center_cycle_number}"
+  %i Note: Either reference or reference1 value are mandatory
+  %br
+  %i Note: Either Date of birth  or Age As ON field are manadatory(if both present then 'Date Of Birth' will be considered)
   = form_for(loan_application, :action => url(:controller => :loan_applications, :action => :bulk_create_loan_applicant), :method => :post) do
     %table.unsortable.dataTable
       %thead
@@ -16,6 +19,7 @@
           %th Relationship
           %th Applicant Birth Date
           %th Age
+          %th Age As On Date
           %th Ration Card No.
           %th Reference 2 Type
           %th Reference 2 No.
@@ -33,8 +37,12 @@
             = select :client_guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :prompt => 'Select'
           %td
             = date_select :client_dob, params[:client_dob], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
+            %br
+            = text_field :name => "client_age", :id => "client_age", :readonly => 'true', :size => 2
           %td
-            = text_field :name => "client_age", :id => "client_age", :readonly => 'true', :size => 4
+            = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on]
+          %td
+            = date_select :age_as_on_date, params[:age_as_on_date], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
           %td
             = text_field :client_reference1
             = hidden_field :client_reference1_type, :value => Constants::Masters::RATION_CARD
@@ -43,21 +51,17 @@
           %td
             = text_field :client_reference2
           %td
-            - selected_amount = params[:loan_application] ? params[:loan_application][:amount] : nil
-            - loan_product_amount = @branch.branch_loan_product_amount_list
+            - selected_amount = params[:loan_application] && !params[:loan_application][:amount].blank? ? "%.2f"%(params[:loan_application][:amount] / 100) : nil
+            - loan_product_amount = @branch.same_frequency_branch_loan_product(@center)
             = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => selected_amount, :prompt => 'Select'
           %td
             = text_field :client_address
           %td
             - all_states = BizLocation.get_state_locations
-            - branch_id = @branch.nil? ? params[:parent_location_id] : @branch.id
-            - biz_location =  BizLocation.get(branch_id)
-            - if loan_application.new?
-              - state_location = biz_location.get_parent_location_at_location_level('state')
-              - state_name = state_location.blank? ? '' : state_location.name
+            - if params[:loan_application].blank?
+              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :prompt => "Select"
             - else
-              - state_name = loan_application.client_state
-            = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.humanize]}, :prompt => 'Select', :selected => state_name.downcase
+              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
           %td
             = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
             = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id

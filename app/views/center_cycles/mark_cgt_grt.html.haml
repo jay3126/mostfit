@@ -39,3 +39,21 @@
           %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}
     - else
       %h3= msg
+      - unless @loan_applications_status.blank?
+        .shaded
+          %h4 Loan Applications:
+          %table.dataTable
+            %thead
+              %tr
+                %th Loan Application ID
+                %th Applicant Name
+                %th Application status
+            %tbody
+              - @loan_applications_status.each do |loan_application|
+                %tr
+                  %td
+                    = link_to loan_application.id, "/loan_applications/#{loan_application.id}"
+                  %td
+                    = loan_application.client_name
+                  %td
+                    = loan_application.status.humanize

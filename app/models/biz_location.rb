@@ -314,6 +314,29 @@ class BizLocation
     loan_product_amount.compact.uniq
   end
 
+  # list loan product of same frequency as per center creation frequency set
+  def same_frequency_branch_loan_product(center)
+    center_frequency = center.meeting_schedules.first.meeting_frequency rescue nil
+    loan_product_amount = []
+    loan_product_list = self.lending_products.all(:repayment_frequency => center_frequency)
+    return [] if loan_product_list.blank?
+    loan_product_list.each do |loan_product|
+      loan_product_amount << loan_product.loan_money_amount.to_regular_amount
+    end
+    loan_product_amount.compact.uniq
+  end
+
+  # returns repayment frequency of loan products assigned to branch
+  def branch_loan_product_repayment_frequencies
+    loan_product = []
+    loan_product_list = self.lending_product_locations
+    loan_product_list.each do |lpc|
+      loan_product_id = lpc.lending_product_id
+      loan_product << LendingProduct.get(loan_product_id)
+    end
+    loan_product.collect{|lp| lp.repayment_frequency}.uniq
+  end
+
   # Generates biz-location identifier for branch with proper format:
   # Branch format: BR_0001
   def self.get_branch_identifier
@@ -366,7 +389,7 @@ class BizLocation
     identifier.split("CN-").last
   end
 
-  # do not use..its dangerous
+  # for one time use only- to update existing data
   def self.update_biz_location_identifier_for_existing_branch
     prefix = "BR-"
     branch_code = 1
@@ -378,7 +401,7 @@ class BizLocation
     end
   end
 
-  # do not use..its dangerous
+  # for one time use only- to update existing data
   def self.update_biz_location_identifier_for_existing_center
     center_prefix = "CN-"
     branch_prefix = "BR-"

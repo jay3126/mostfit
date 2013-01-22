@@ -20,10 +20,10 @@
     %td= @loan_application.client_address
   %tr.even
     %th.even= "Reference (#{@loan_application.client_reference1_type.humanize})"
-    %td.reference1= @loan_application.client_reference1
+    %td.reference1= @loan_application.client_reference1 rescue nil
   %tr.odd
     %th.odd= "Reference (#{@loan_application.client_reference2_type.humanize})"
-    %td.reference2= @loan_application.client_reference2
+    %td.reference2= @loan_application.client_reference2 rescue nil
 %h2 Clients
 - if @clients.blank?
   No Client match for duplicate
@@ -51,11 +51,11 @@
         %td
           = client.reference_type
         %td
-          = client.reference
+          = client.reference rescue nil
         %td
-          = client.reference2_type
+          = client.reference2_type rescue nil
         %td
-          = client.reference2
+          = client.reference2 rescue nil
 %br
 %hr
 %h2 Loan Applicants
@@ -85,11 +85,11 @@
         %td
           = la.client_reference1_type
         %td
-          = la.client_reference1
+          = la.client_reference1 rescue nil
         %td
-          = la.client_reference2_type
+          = la.client_reference2_type rescue nil
         %td
-          = la.client_reference2
+          = la.client_reference2 rescue nil
 
 :javascript
   jQuery('table.report td').each(function(){

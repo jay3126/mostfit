@@ -36,13 +36,13 @@ class OngoingLoanInformationReport < Report
     data[:loans] = {}
     loan_ids_with_disbursal_dates.each do |loan|
       client = loan.loan_borrower.counterparty
-      client_id = client ? client.id : "Not Specified"
+      client_id = client ? client.client_identifier : "Not Specified"
       client_name = client ? client.name : "Not Specified"
       loan_id = loan ? loan.id : "Not Specified"
       loan_lan = (loan and loan.lan) ? loan.lan : "Not Specified"
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_name = branch ? branch.name : "Not Specified"
-      branch_id = branch ? branch.id : "Not Specified"
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
       location = LocationLink.all_parents(branch, @to_date)
       district = location.select{|s| s.location_level.name.downcase == 'district'}.first
       district_name = (district and (not district.blank?)) ? district.name : "Not Specified"

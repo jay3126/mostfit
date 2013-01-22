@@ -7,7 +7,7 @@
       %thead
         %tr
           %td
-            = "Client ID"
+            = "Client Identifier"
           %td
             = "Name"
           %td
@@ -65,7 +65,7 @@
             %tr
               %td
                 = hidden_field :name => "client_ids[#{client_id}]", :value => client_id
-                = link_to_with_rights lap.client_id, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
+                = link_to_with_rights client.client_identifier, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
               %td
                 = link_to_with_rights lap.client_name, url(:controller => :new_clients, :action => :show, :id => lap.client_id)
               %td

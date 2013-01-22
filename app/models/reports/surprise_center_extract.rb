@@ -50,8 +50,8 @@ class SurpriseCenterExtract < Report
       center = BizLocation.get(center_id)
       branch = location_facade.get_parent(BizLocation.get(center.id))
       branch_name = branch ? branch.name : "Not Specified"
-      branch_id = branch ? branch.id : "Not Specified"
-      center_id = center.id
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
+      center_id = center.biz_location_identifier
       center_name = center.name
       center_creation_month = (center && center.creation_date) ? center.creation_date.strftime("%B") : "Not Specified"
       center_creation_year = (center && center.creation_date) ? center.creation_date.strftime("%Y") : "Not Specified"

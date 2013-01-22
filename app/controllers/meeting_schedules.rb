@@ -5,6 +5,7 @@ class MeetingSchedules < Application
 
   def new
     @biz_location     = BizLocation.get params[:biz_location_id]
+    @parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
     @meeting_schedule = MeetingSchedule.new
     render :template => 'meeting_schedules/new', :layout => layout?
   end

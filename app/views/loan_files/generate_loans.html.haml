@@ -106,7 +106,7 @@
               - row_number = row_number + 1
               = row_number
             %td
-              = client.id
+              = client.client_identifier rescue nil
             %td
               = client.reference
             %td

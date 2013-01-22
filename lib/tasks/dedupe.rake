@@ -12,13 +12,13 @@ namespace :mostfit do
 
     all_clients             = Client.all(:fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
     loan_applicants         = LoanApplicationsFacade.pending_dedupe
-    total_loan_applications = LoanApplication.all - loan_applicants
+    not_eligible_status     = Constants::Status::CPV_STATUSES - [Constants::Status::CPV2_APPROVED_STATUS] + [Constants::Status::NEW_STATUS]
+    total_loan_applications = LoanApplication.all(:status.not => not_eligible_status) - loan_applicants
 
     #checking for duplicate loan_applicants handing both the conditions, i.e, ration_card and varous id_proofs.
     loan_applicants.each do |applicant|
       loan_applicant_duplicate = false
       clients = all_clients.select{|c| c.state == applicant.client_state}
-      
       if applicant.client_id && clients.map(&:id).include?(applicant.client_id)
         LoanApplicationsFacade.new(User.first).not_duplicate(applicant.id)
         next
@@ -49,7 +49,7 @@ namespace :mostfit do
         same_reference_clients = total_loan_applications.select{|la| la.client_reference2_type == applicant.client_reference2_type and la.client_reference2 == applicant.client_reference2}
         #checking reference2 in existing clients
         same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.include?(applicant.client_reference2)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.include?(applicant.client_reference2)) }
-        #checking reference1 in existing clients only for numerice reference2
+        #checking reference1 in existing clients only for numeric reference2
         if same_client_reference.blank?
           reference2 = applicant.client_reference2.gsub(/[^0-9]/, '')
           same_client_reference = same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.include?(reference2)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.include?(reference2)) }

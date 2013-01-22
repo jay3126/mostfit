@@ -32,6 +32,8 @@ class Client
   property :reference2_type,          Enum.send('[]', *REFERENCE2_TYPES), CommonClient::Validations.get_validation(:reference2_type, Client)
 
   property :spouse_name,              String, :length => 100
+  property :age,                      Integer
+  property :age_as_on_date,           Date
   property :date_of_birth,            Date
   property :spouse_date_of_birth,     Date
   property :address,                  Text, CommonClient::Validations.get_validation(:address, Client)
@@ -97,7 +99,7 @@ class Client
     validates_with_method :date_joined, :method => :dates_make_sense
     validates_is_unique :reference 
     validates_is_unique :reference2
-    validates_with_method :date_of_birth, :method => :permissible_age_for_credit?
+    validates_with_method :date_of_birth, :method => :permissible_age_for_credit?, :if => Proc.new{ |client| !client.date_of_birth.blank? }
     validates_with_method :is_there_space_in_the_client_group?
   end
 
@@ -205,7 +207,6 @@ class Client
 
     registered_at = BizLocation.get(registered_at_location_id)
     raise ArgumentError, "Unable to determine the registered location for client" unless registered_at
-
     new_client = create(client_hash)
     raise Errors::DataError, new_client.errors.first.first unless new_client.saved?
 

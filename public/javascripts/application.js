@@ -836,6 +836,23 @@ function get_all_staff_member_on_location() {
     });
   });
 }
+
+// returns repayment frequency of loan products assigned to branch
+function get_all_repayment_frequency_on_branch() {
+  jQuery('.location').change(function() {
+    jQuery.ajax({
+      type: "GET",
+      url: "/biz_locations/repayment_frequency_for_branch/"+jQuery("#parent_selector").val(),
+      data: {
+        'parent_location_id' : jQuery("#parent_selector").val()
+      },
+      success: function(data) {
+        jQuery("#meeting_frequency_selector").html(data);
+      }
+    });
+  });
+}
+
 function get_all_ledgers_on_cost_center() {
   jQuery('.cost_center').change(function() {
     jQuery.ajax({
@@ -940,6 +957,7 @@ $(document).ready(function(){
   getClientAge();
   getDateDifference();
   fillFundingLines();
+  get_all_repayment_frequency_on_branch();
   get_all_location_on_level();
   get_all_staff_member_on_location();
   get_all_ledgers_on_cost_center();

@@ -12,8 +12,6 @@ class ClientVerification
   
   belongs_to :loan_application
   
-  validates_with_method :one_status_only_per_CPV, :record_CPV2_only_when_CPV1_approved
-
   # A CPV can only be approved or rejected
   # TODO: this somehow still allows for creating a new row for same CPV type but doesn't save it to database. WEIRD. Verified on Merb console
   def one_status_only_per_CPV

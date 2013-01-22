@@ -25,6 +25,8 @@
               %td Guarantor Name
               %td Relationship
               %td DOB
+              %td Age
+              %td Age As On Date
               %td Address
               %td
                 Approve all
@@ -50,7 +52,11 @@
                 %td
                   = loan_application.client_guarantor_relationship
                 %td
-                  = loan_application.client_dob
+                  = loan_application.client_dob.blank? ? "-" : "#{loan_application.client_dob}"
+                %td
+                  = loan_application.client_age_as_on.blank? ? loan_application.client_age : loan_application.client_age_as_on
+                %td
+                  = loan_application.client_age_as_on_date.blank? ? Date.today : loan_application.client_age_as_on_date
                 %td
                   = loan_application.client_address
                 %td

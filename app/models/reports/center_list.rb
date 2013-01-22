@@ -45,10 +45,10 @@ class CenterList < Report
     all_centers.each do |center|
       branch = @biz_location_branch.blank? ? location_facade.get_parent(BizLocation.get(center.id), @date) : biz_location
       branch_name = branch ? branch.name : "Not Specified"
-      branch_id = branch ? branch.id : "Not Specified"
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
       agent_name = managed_by_staff(center.id, @date)
       center_name = center.name
-      center_id = center.id
+      center_id = center.biz_location_identifier
       meetings = MeetingScheduleManager.get_all_meeting_schedule_infos(center).first
       meeting_dates = MeetingCalendar.next_meeting_for_location(center, @date)
       meeting_date = (meeting_dates and !meeting_dates.blank?) ? meeting_dates : "Not Specified"
@@ -61,6 +61,6 @@ class CenterList < Report
         :center_disbursal_date => center_disbursal_date}
     end
     data
-  end
+  end 
   
 end

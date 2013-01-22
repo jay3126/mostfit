@@ -1,7 +1,8 @@
 .shaded
   - if @loan_file
     %h1
-      = link_to_with_rights "Log of Loan File #{@loan_file.loan_file_identifier}", url(:controller => "loan_files", :action => "show", :id => @loan_file.id)
+      Loan File
+      = link_to_with_rights "#{@loan_file.loan_file_identifier}", url(:controller => "loan_files", :action => "show", :id => @loan_file.id)
 
   - if @loan_applications_added_to_loan_file and not @loan_applications_added_to_loan_file.empty?
     %table.dataTable{:style => "width:100%;"}
@@ -14,7 +15,11 @@
           %th
             = "Name"
           %th
+            = "DOB"
+          %th
             = "Age"
+          %th
+            = "Age As On"
           %th
             = "Address"
           %th
@@ -22,19 +27,24 @@
       %tbody
         - srno = 0
         - @loan_applications_added_to_loan_file.each do |laa|
+          - lap = LoanApplication.get(laa.loan_application_id)
           %tr
             %td
               - srno = srno + 1
               = srno
             %td
-              = link_to_with_rights laa.loan_application_id, "/loan_applications/#{laa.loan_application_id}"
+              = link_to_with_rights lap.id, "/loan_applications/#{lap.id}"
             %td
-              = laa.client_name
+              = lap.client_name
             %td
-              = (laa.client_age.nil? ? "Unknown" : laa.client_age)
+              = lap.client_dob.blank? ? "-" : "#{lap.client_dob}"
             %td
-              = laa.client_address
+              = lap.client_age_as_on.blank? ? lap.client_age : lap.client_age_as_on
             %td
-              = laa.amount
+              = lap.client_age_as_on_date.blank? ? Date.today : lap.client_age_as_on_date
+            %td
+              = lap.client_address
+            %td
+              = lap.loan_money_amount.to_s
   - else
     %h3 No recently added loan applications

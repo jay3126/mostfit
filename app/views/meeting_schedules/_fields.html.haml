@@ -8,7 +8,8 @@
     %th
       Frequency
     %td
-      = select :meeting_frequency, :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+      - frequency = @parent_biz_location.branch_loan_product_repayment_frequencies
+      = select :meeting_frequency, :collection => frequency.collect{|f| f.to_s}
   %tr
     %th
       No. Of Meetings

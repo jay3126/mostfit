@@ -76,7 +76,9 @@ class LoanApplications < Application
           loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
           client = Client.get(client_id)
           loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle.id, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
-          loan_application.save if loan_application
+          if loan_application.save == false
+            @errors << loan_application.errors.first.to_s
+          end
         rescue => ex
           @errors << ex.message
         end
@@ -127,6 +129,8 @@ class LoanApplications < Application
     guarantor_name = params[:loan_application][:client_guarantor_name]
     guarantor_relationship = params[:loan_application][:client_guarantor_relationship]
     dob = params[:client_dob]
+    age_as_on = params[:age_as_on]
+    age_as_on_date = params[:age_as_on_date]
     reference1 = params[:loan_application][:client_reference1]
     reference2 = params[:loan_application][:client_reference2]
     address = params[:loan_application][:client_address]
@@ -134,9 +138,10 @@ class LoanApplications < Application
     pincode = params[:loan_application][:client_pincode]
     created_by = params[:loan_application][:created_by_staff_id]
     created_on = params[:created_on]
-    center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
+    center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
     loan_amount_str = params[:loan_application][:amount]
-    
+
+    no_age_parameter = (dob.blank? && (age_as_on.blank? || age_as_on_date.blank?))
     # Match format of client reference1 and reference2, it should allow only alphanumeric value
     format_reference1 = /^[A-Za-z0-9]+$/
     format_reference2 = /^[A-Za-z0-9]+$/
@@ -155,9 +160,8 @@ class LoanApplications < Application
     @message[:error] << "Applicant name must not be blank" if name.blank?
     @message[:error] << "Guarantor name must not be blank" if guarantor_name.blank?
     @message[:error] << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
-    @message[:error] << "DOB name must not be blank" if dob.blank?
-    @message[:error] << "Ration card must not be blank" if reference1.blank?
-    @message[:error] << "Reference 2 ID must not be blank" if reference2.blank?
+    @message[:error] << "Either Date of birth  or Age As ON field is manadatory" if no_age_parameter
+    @message[:error] << "Either Ration card or Reference 2 is mandatory" if (reference1.blank? && reference2.blank?)
     @message[:error] << "Applied for amount must not be blank" if loan_amount_str.blank?
     @message[:error] << "Address name must not be blank" if address.blank?
     @message[:error] << "State name must not be blank" if state.blank?
@@ -165,6 +169,21 @@ class LoanApplications < Application
     @message[:error] << "Created by name must not be blank" if created_by.blank?
     @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > Date.today
 
+    unless no_age_parameter
+      if dob.blank?
+        if is_number?(age_as_on)
+          client_age_as_on = age_as_on
+          client_age_as_on_date = age_as_on_date
+          client_dob = nil
+        else
+          @message[:error] << "Age as on is not valid"
+        end
+      else
+        client_age_as_on = nil
+        client_age_as_on_date = nil
+        client_dob = dob
+      end
+    end
 
     # OPERATIONS-PERFORMED
     if @message[:error].blank?
@@ -176,7 +195,7 @@ class LoanApplications < Application
         params[:loan_application][:currency] = loan_amount_currency
         params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
         params[:loan_application][:client_reference2] = params[:loan_application][:client_reference2].strip
-        params[:loan_application] = params[:loan_application] + {:client_dob => dob, :created_on => created_on, :center_cycle_id => center_cycle.id, :created_by_user_id => session.user.id}
+        params[:loan_application] = params[:loan_application] + {:client_age_as_on => client_age_as_on, :client_age_as_on_date => client_age_as_on_date, :client_dob => client_dob, :created_on => created_on, :center_cycle_id => center_cycle_number, :created_by_user_id => session.user.id}
         @loan_application = LoanApplication.new(params[:loan_application])
 
         if @loan_application.save
@@ -188,10 +207,10 @@ class LoanApplications < Application
     else
       @message[:error] = @message[:error].flatten.join(', ')
     end
-        
+
     # POPULATING RESPONSE AND OTHER VARIABLES
     @loan_application = LoanApplication.new(params[:loan_application])
-    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id, :center_cycle_id => center_cycle_number})
 
     # RENDER/RE-DIRECT
     if @message[:error].blank?
@@ -239,6 +258,12 @@ class LoanApplications < Application
     if @errors.empty?
       clear_or_confirm_duplicate.keys.each do |lap_id|
         begin
+          loan_application = LoanApplication.get(lap_id)
+          client_verification = loan_application.client_verifications.all(:verification_type => Constants::Verification::CPV2, :verification_status=>Constants::Verification::VERIFIED_ACCEPTED).last
+          cpv2_approved_on_date = client_verification.verified_on_date
+          unless cpv2_approved_on_date.blank?
+            raise Errors::DataError, "dedupe processed on date (#{created_on}) must not before cpv2 approval date(#{cpv2_approved_on_date})" if ((Date.parse(created_on) < cpv2_approved_on_date) rescue true)
+          end
           if  clear_or_confirm_duplicate[lap_id].include?('clear')
             result = loan_applications_facade.set_cleared_not_duplicate(lap_id)
           elsif clear_or_confirm_duplicate[lap_id].include?('confirm')
@@ -250,7 +275,7 @@ class LoanApplications < Application
             message[:error] = @errors.flatten.join(', ')
           end
         rescue => ex
-          @errors << "An error has occurred for Loan Application ID #{lap_id}: #{ex.message}"
+          message[:error] = "An error has occurred for Loan Application ID #{lap_id}: #{ex.message}"
         end
  
       end

@@ -45,10 +45,10 @@ class LoanCollectionsDetailReport < Report
 
     all_center_ids_array.flatten.each do |center_id|
       center = BizLocation.get(center_id)
-      center_ids = center ? center.id : "Not Specified"
+      center_ids = center ? center.biz_location_identifier : "Not Specified"
       center_name = center ? center.name : "Not Specified"
       branch = location_facade.get_parent(BizLocation.get(center_id), @date)
-      branch_id = branch ? branch.id : "Not Specified"
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
       branch_name = branch ? branch.name : "Not Specified"
       dues_collected_and_collectable = reporting_facade.total_dues_collected_and_collectable_per_location_on_date(center_id, @date)
       receipt_number = "Not Specified"

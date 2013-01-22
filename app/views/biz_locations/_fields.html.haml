@@ -1,26 +1,23 @@
 :javascript
   $(document).ready(function() {
-    $('#meeting_schedule').attr('checked', false);
+    jQuery('.meeting_div').hide();
     $('td').find('span,div').css('width','');
     $('tr.l_product').find('span').text('Select Loan Product');
     $('#location_level_selector option:first').attr('selected', true);
     $('tr.l_product').find('input:checkbox').removeAttr('checked');
-    $('#meeting_schedule').change(function() {
-      jQuery('.meeting_div').toggle();
-    });
     $('#location_level_selector').live('change', function(){
       if(jQuery(this).val()=='0'){
-        jQuery('.center_meeting_div').show();
+        jQuery('.meeting_div').show();
         jQuery('.date').show();
         jQuery('.l_product').hide();
         jQuery('tr.l_product').find('input:checkbox').removeAttr('checked');
         jQuery('tr.l_product').find('span').text('Select Loan Product');
       }else if(jQuery(this).val()=='1'){
-        jQuery('.center_meeting_div').hide();
+        jQuery('.meeting_div').hide();
         jQuery('.date').hide();
         jQuery('.l_product').show();
       }else{
-        jQuery('.center_meeting_div').hide();
+        jQuery('.meeting_div').hide();
         jQuery('.date').hide();
         jQuery('.l_product').hide();
         jQuery('tr.l_product').find('input:checkbox').removeAttr('checked');
@@ -75,10 +72,6 @@
         Managed By
       %td
         = select :name => :managed_by, :collection => @staff_members, :text_method => :name, :value_method => :id, :class => 'staff_selection'
-    %tr{:style => "display:none", :class => 'center_meeting_div'}
-      %td
-        Create Meeting Schedule
-        = check_box :name => 'meeting_schedule', :value => true, :checked => false, :id => 'meeting_schedule'
   %div{:style => "display:table-cell; width:42%;"}
     %table.tall
       %tr{:style => "display:none", :class => 'meeting_div'}
@@ -90,7 +83,7 @@
         %th
           Meeting Frequency
         %td
-          = select :name => "meeting[meeting_frequency]", :collection => Constants::Time::MEETING_FREQUENCIES.collect{|c| c.to_s}
+          = select :name => "meeting[meeting_frequency]", :collection => [], :id => 'meeting_frequency_selector'
       %tr{:style => "display:none", :class => 'meeting_div'}
         %th
           Meeting Time

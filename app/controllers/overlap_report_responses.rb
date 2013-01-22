@@ -32,7 +32,7 @@ class OverlapReportResponses < Application
             results = reports.map do |ol|
               loan_application_id = ol["REQUEST"]["MBR_ID"]
               loan_application =  LoanApplication.get(loan_application_id)
-              next if loan_application.nil?
+              next if loan_application.nil? || loan_application.status != Constants::Status::OVERLAP_REPORT_REQUEST_GENERATED_STATUS
               response = OverlapReportResponse.new()
               response.loan_application_id = loan_application.id
               response.created_by_user_id = session.user.id

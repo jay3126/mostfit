@@ -38,15 +38,15 @@ class CustomerExtractForInsurance < Report
     data[:loans] = {}
     loan_ids.each do |loan|
       branch = BizLocation.get(loan.accounted_at_origin)
-      branch_id = branch ? branch.id : "Not Specified"
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
       branch_name = branch ? branch.name : "Not Specified"
       center = BizLocation.get(loan.administered_at_origin)
-      center_id = center ? center.id : "Not Specified"
+      center_id = center ? center.biz_location_identifier: "Not Specified"
       center_name = center ? center.name : "Not Specified"
       loan_borrower = LoanBorrower.get(loan.loan_borrower_id)
       client = Client.get(loan_borrower.counterparty_id)
       client_name = client ? client.name : "Not Specified"
-      client_id = client ? client.id : "Not Specified"
+      client_id = client ? client.client_identifier : "Not Specified"
       gender = (client and client.gender) ? client.gender.to_s : "Not Specified"
       date_of_birth = (client and client.date_of_birth) ? client.date_of_birth : "Not Specified"
       age_as_on_loan_disbursement_date = (loan and loan.disbursal_date and client and client.date_of_birth) ? (loan.disbursal_date.strftime("%Y").to_i - client.date_of_birth.strftime("%Y").to_i) : "Age not available"

@@ -2,15 +2,15 @@ module LoanApplicationWorkflow
   include Constants::Status
 
   # These are the stages in the life cycle of a loan application
-  LIFE_CYCLE_STAGES = [:creation, :dedupe, :overlap_report, :authorization, :cpv, :loan_file_generation]
+  LIFE_CYCLE_STAGES = [:creation, :cpv, :dedupe, :overlap_report, :authorization, :loan_file_generation]
 
   # Each set of states maps to a stage in the life cycle of a loan application
   STAGES_AND_STATUSES = {
     CREATION_STATUSES => :creation,
+    CPV_STATUSES => :cpv,
     DEDUPE_STATUSES => :dedupe,
     OVERLAP_REPORT_STATUSES => :overlap_report,
     AUTHORIZATION_STATUSES => :authorization,
-    CPV_STATUSES => :cpv,
     LOAN_FILE_GENERATION_STATUSES => :loan_file_generation
   }
 

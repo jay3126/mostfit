@@ -19,7 +19,9 @@
           %th Applicant Name
           %th Guarantor Name
           %th Relationship
-          %th Applicant Birth Date
+          %th Date Of Birth
+          %th Age
+          %th Age As On Date
           %th Ration Card No.
           %th Reference 2 Type
           %th Reference 2 No.
@@ -41,13 +43,17 @@
             %td
               = loan_application.client_guarantor_relationship
             %td
-              = "#{loan_application.client_dob} (Age: #{loan_application.client_age})"
+              = loan_application.client_dob.blank? ? "-" : "#{loan_application.client_dob}"
             %td
-              = loan_application.client_reference1
+              = loan_application.client_age_as_on.blank? ? loan_application.client_age : loan_application.client_age_as_on
             %td
-              = loan_application.client_reference2_type.humanize
+              = loan_application.client_age_as_on_date.blank? ? Date.today : loan_application.client_age_as_on_date
             %td
-              = loan_application.client_reference2
+              = loan_application.client_reference1.blank? ? "-" : loan_application.client_reference1
+            %td
+              = loan_application.client_reference2.blank? ? "-" : loan_application.client_reference2_type.humanize
+            %td
+              = loan_application.client_reference2.blank? ? "-" : loan_application.client_reference2
             %td
               = loan_application.loan_money_amount.to_s
             %td

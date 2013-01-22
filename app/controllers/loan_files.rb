@@ -78,8 +78,8 @@ class LoanFiles < Application
               message = {:error => "Loans cannot be saved"}
             else
               @loan_file.update(:health_check_status => Constants::Status::READY_FOR_DISBURSEMENT)
-              loan_ids = @loans.map{|x| x.id}
-              message = {:notice => "Successfully added loans with ids #{loan_ids.to_json}"}
+              loan_ids = @loans.map{|x| x.lan}
+              message = {:notice => "Successfully added loans with LAN-ids #{loan_ids.to_json}"}
             end
           rescue => ex
             message = {:error => "An error has occured: #{ex.message}"}
@@ -121,22 +121,34 @@ class LoanFiles < Application
     scheduled_disbursal_date = params[:scheduled_disbursal_date]
     scheduled_first_payment_date = params[:scheduled_first_payment_date]
     created_by_staff_id = params[:created_by_staff_id]
-    is_grt_marked = CenterCycle.is_grt_marked?(params[:child_location_id])
+    @for_cycle_number = loan_applications_facade.get_current_center_cycle_number(params[:child_location_id])
+    is_grt_marked = CenterCycle.is_grt_marked?(params[:child_location_id], @for_cycle_number)
+    grt_passed_on_date = CenterCycle.center_grt_passed_on(params[:child_location_id], @for_cycle_number)
 
-    @errors << "Staff member must not be blank" if created_by_staff_id.blank?
-    @errors << "Please Select all loan applications" unless params.key?('select_all')
-    @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
+    @is_eligible = LoanApplication.is_eligible_for_loan_file_generation({:at_branch_id => params[:parent_location_id], :at_center_id => params[:child_location_id], :center_cycle_id => @for_cycle_number})
+    unless @is_eligible == true
+      @errors << "Following Loan Applications are not eligible for Loan File Generation: #{@is_eligible.flatten.join(', ')}"
+    end
 
-    @errors << "Scheduled disbursal date must not before loan file creation date" if Date.parse(scheduled_disbursal_date) < Date.parse(created_on)
-    @errors << "Scheduled first payment date must not before loan file creation date" if Date.parse(scheduled_first_payment_date) < Date.parse(created_on)
-    @errors << "Scheduled first payment date must not before Scheduled disbursal date" if Date.parse(scheduled_first_payment_date) < Date.parse(scheduled_disbursal_date)
+    if @errors.blank?
+      unless grt_passed_on_date.blank?
+        @errors << "Loan File Creation Date/Scheduled Disbursal Date/Scheduled First Payment Date cannot be before GRT passed on date(#{grt_passed_on_date.display})" if Date.parse(grt_passed_on_date.display) > Date.parse(scheduled_disbursal_date) || Date.parse(grt_passed_on_date.display) > Date.parse(created_on) || Date.parse(grt_passed_on_date.display) > Date.parse(scheduled_first_payment_date)
+      end
+
+      @errors << "Staff member must not be blank" if created_by_staff_id.blank?
+      @errors << "Please Select all loan applications" unless params.key?('select_all')
+      @errors << "Loan file cannot be generated because GRT is not passed for this center" unless is_grt_marked
+
+      @errors << "Scheduled disbursal date must not before loan file creation date" if Date.parse(scheduled_disbursal_date) < Date.parse(created_on)
+      @errors << "Scheduled first payment date must not before loan file creation date" if Date.parse(scheduled_first_payment_date) < Date.parse(created_on)
+      @errors << "Scheduled first payment date must not before Scheduled disbursal date" if Date.parse(scheduled_first_payment_date) < Date.parse(scheduled_disbursal_date)
+    end
 
     if @errors.blank?
       begin
         @loan_applications = params['selected'].keys
         @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
         @center_id = params[:child_location_id] ? params[:child_location_id] : nil
-        @for_cycle_number = 1
         unless params[:loan_file_identifier].blank?
           @loan_file = loan_applications_facade.locate_loan_file(params[:loan_file_identifier])
           loan_applications_facade.add_to_loan_file(@loan_file.loan_file_identifier, @branch_id, @center_id, @for_cycle_number, created_by_staff_id, created_on, *@loan_applications)
@@ -208,9 +220,20 @@ class LoanFiles < Application
     @branch_id = params[:parent_location_id] ? params[:parent_location_id] : nil
     @center_id = params[:child_location_id] ? params[:child_location_id] : nil
     @center = location_facade.get_location(@center_id)
-    @center_cycle_number = 1
+    center_repayment_frequency = @center.meeting_schedules.first.meeting_frequency
+    @repayment_frequency = case center_repayment_frequency.to_s
+    when "weekly"
+      7
+    when "biweekly"
+      14
+    when "monthly"
+      30
+    else
+      0
+    end
+    @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center_id)
     @loan_file = loan_applications_facade.locate_loan_file_at_center(@branch_id, @center_id, @center_cycle_number)
-    @loan_applications_pending_loan_file_generation = loan_applications_facade.pending_loan_file_generation({:at_branch_id => @branch_id, :at_center_id => @center_id})
+    @loan_applications_pending_loan_file_generation = LoanApplication.loan_applications_ready_for_loanfile_generation({:at_branch_id => @branch_id, :at_center_id => @center_id, :center_cycle_id => @center_cycle_number})
     @loan_applications_added_to_loan_file = (not @loan_file.nil?) ? @loan_file.loan_applications : nil
   end
 

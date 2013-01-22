@@ -33,6 +33,8 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         De-dupe
+      = link_to_with_rights "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
+      %br
       = link_to_with_rights "Suspected duplicates", url(:controller => :loan_applications, :action => :suspected_duplicates, :flag => 'true'), :class => 'edit_small'
     %td{:style => "padding: 15px;"}
     %td
@@ -67,8 +69,6 @@
       %br
       %h3{:style => "border-bottom: dotted 1px #999"}
         Center formation
-      = link_to_with_rights "Record CPV", url(:controller => :client_verifications, :action => :pending_verifications, :flag => 'true'), :class => 'add_small'
-      %br
       = link_to_with_rights "Record CGT, GRT", url(:controller => :center_cycles, :action => :mark_cgt_grt, :flag => 'true'), :class => 'add_small'
   %tr
     %td

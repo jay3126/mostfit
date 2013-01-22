@@ -64,7 +64,7 @@ class PassbookLabelExtract < Report
       member_name = member ? member.name : "Not Specified"
       guarantor_name = (member and member.guarantor_name) ? member.guarantor_name : "Not Specified" 
       center = BizLocation.get(loan.administered_at_origin)
-      center_id = center ? center.id : "Not Specified"
+      center_id = center ? center.biz_location_identifier : "Not Specified"
       center_name = center ? center.name : "Not Specified"
       meeting_address = (center and center.biz_location_address) ? center.biz_location_address : "Not Specified"
       meetings = meeting_facade.get_meeting_schedules(center).first
@@ -82,7 +82,7 @@ class PassbookLabelExtract < Report
       ewi_amount_due = loan.actual_total_due(@date)     
       branch = BizLocation.get(loan.accounted_at_origin)
       branch_name = branch ? branch.name : "Not Specified"
-      branch_id = branch ? branch.id : "Not Specified"
+      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
       area = location_facade.get_parent(branch, @date)
       district = location_facade.get_parent(area, @date)
       district_name = district ? district.name : "Not Specified"

@@ -224,7 +224,6 @@ class NewClients < Application
   end
 
   def update_client_location
-    debugger
     @message        = {:error => [], :notice => []}
     assign_clients  = []
     client_params   = params[:client]
@@ -302,6 +301,101 @@ class NewClients < Application
     redirect url(:controller => :new_clients, :action => :show, :id => id)
   end
 
+  def client_and_loan_creation(id)
+    @errors = []
+    @loan_file = LoanFile.get(id)
+    raise NotFound if @loan_file.blank?
+    @center = BizLocation.get(@loan_file.at_center_id)
+    @branch = BizLocation.get(@loan_file.at_branch_id)
+    display @loan_file
+    
+  end
+
+  def record_client_and_loan
+    @errors = []
+    message = {}
+    msg = []
+    selected = params[:selected]
+    applied_on_date = params[:loan][:applied_on]
+    scheduled_disbursal_date = params[:loan][:scheduled_disbursal_date]
+    scheduled_first_payment_date = params[:loan][:scheduled_first_payment_date]
+    applied_by_staff = params[:loan][:applied_by_staff_id]
+    recorded_by_user = session.user.id
+
+    if selected.blank?
+      @errors << "Select atleast one loan application"
+    else
+      @errors << "Applied on date must not be blank" if applied_on_date.blank?
+      @errors << "Scheduled disbursal date must not be blank" if scheduled_disbursal_date.blank?
+      @errors << "Scheduled first payment date must not be blank" if scheduled_first_payment_date.blank?
+      @errors << "Applied by staff must not be blank" if applied_by_staff.blank?
+      @errors << "Scheduled disbursal date must not before application date" if Date.parse(scheduled_disbursal_date) < Date.parse(applied_on_date)
+      @errors << "Scheduled first payment date must not before application date" if Date.parse(scheduled_first_payment_date) < Date.parse(applied_on_date)
+      @errors << "Scheduled first payment date must not before Scheduled disbursal date" if Date.parse(scheduled_first_payment_date) < Date.parse(scheduled_disbursal_date)
+
+      if @errors.blank?
+        loan_application_ids = selected.keys
+        loan_application_ids.each do |lap_id|
+          begin
+            loan_application = LoanApplication.get lap_id
+            client_id = loan_application.client_id
+            if client_id.blank?
+              # simply client creation
+              @client = loan_application.create_client
+              loan_application.set_status(Constants::Status::CLIENT_CREATED)
+              # bulk update of client detail
+              client_hash = {}
+              client_hash[:marital_status] = params[:marital_status][lap_id]
+              client_hash[:caste] = params[:caste][lap_id]
+              client_hash[:income] = params[:income][lap_id]
+              client_hash[:spouse_date_of_birth] = params[:spouse_date_of_birth][lap_id]
+              client_hash[:gender] = params[:gender][lap_id]
+              client_hash[:family_income] = params[:family_income][lap_id]
+              client_hash[:telephone_type] = params[:telephone_type][lap_id]
+              client_hash[:religion] = params[:religion][lap_id]
+              client_hash[:occupation_id] = params[:occupation_id][lap_id] rescue ""
+              client_hash[:psl_sub_category_id] = params[:psl_sub_category_id][lap_id] rescue ""
+              client_hash[:spouse_name] = params[:spouse_name][lap_id]
+              client_hash[:guarantor_dob] = params[:guarantor_dob][lap_id]
+              client_hash[:priority_sector_list_id] = params[:priority_sector_list_id][lap_id] rescue ""
+              client_hash[:telephone_number] = params[:telephone_number][lap_id]
+              @client.update_client_details_in_bulk(client_hash)
+            end
+            unless loan_application.status == Constants::Status::LOAN_CREATED
+              # loan creation
+              @client = Client.get loan_application.client_id
+              applied_money_amount = MoneyManager.get_money_instance_least_terms(loan_application.amount.to_i)
+              raise NotFound, "loan product must not be blank for Cliend ID: #{lap_id}" if params[:clients][lap_id][:loan_product_id].blank?
+              raise NotFound, "loan purpose must not be blank for Client ID: #{lap_id}" if params[:clients][lap_id][:loan_purpose].blank?
+              loan_purpose = params[:clients][lap_id][:loan_purpose]
+              from_lending_product = LendingProduct.get(params[:clients][lap_id][:loan_product_id])
+              repayment_frequency = from_lending_product.repayment_frequency
+              tenure = from_lending_product.tenure
+              for_borrower = @client
+              administered_at_origin = loan_application.at_center_id
+              accounted_at_origin = loan_application.at_branch_id
+              loan_funding_line_id = params[:funding_line_id][lap_id]
+              loan_tranch_id = params[:tranch_id][lap_id]
+              loan = loan_facade.create_new_loan(applied_money_amount, repayment_frequency, tenure, from_lending_product, for_borrower, administered_at_origin, accounted_at_origin, applied_on_date, scheduled_disbursal_date, scheduled_first_payment_date, applied_by_staff, recorded_by_user, loan_funding_line_id, loan_tranch_id, nil, loan_purpose)
+              loan_application.set_status(Constants::Status::LOAN_CREATED)
+              loan_application.update(:lending_id => loan.id)
+              msg << "Loan Application ID: #{lap_id} as Client ID: #{@client.client_identifier} as Loan ID: #{loan.lan}"
+            end
+          rescue => ex
+            @errors << "An error has occured for Loan Application ID #{lap_id}: #{ex.message}"
+          end
+        end
+      end
+    end
+
+    if @errors.blank?
+      message = {:notice => "Successfully created #{msg.flatten.join(', ')}"}
+    else
+      message = {:error => @errors.flatten.join(', ')}
+    end
+    redirect url("new_clients/create_clients_for_loan_file?loan_file_id=#{params[:loan_file_id]}"), :message => message
+  end
+
   def create_clients_for_loan_file
     loan_file_id = params[:loan_file_id]
     raise NotFound, "Loan file not found" if loan_file_id.blank?
@@ -311,7 +405,7 @@ class NewClients < Application
     center_id = @loan_file.at_center_id
     @center = BizLocation.get center_id
     @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
-
+  
     display @loan_file
   end
 
@@ -529,7 +623,7 @@ class NewClients < Application
           client_hash[:telephone_number] = params[:telephone_number][client_id]
           client = Client.get client_id
           client.update_client_details_in_bulk(client_hash)
-          c_ids << client_id
+          c_ids << client.client_identifier
           message = {:notice => "Successfully updated Client ID: #{c_ids.flatten.join(', ')}."}
         rescue => ex
           @errors << "An error has occured for Client ID #{client_id}: #{ex.message}"

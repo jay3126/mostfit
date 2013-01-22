@@ -51,7 +51,7 @@
                   = client.address
                 %td
                   - if eligibility
-                    - loan_product_amount = @branch.branch_loan_product_amount_list
+                    - loan_product_amount = @branch.same_frequency_branch_loan_product(@center)
                     = select :name => "clients[#{client.id}][amount]", :collection => loan_product_amount
         %table.narrow.form{:style => "width:100%;"}
           %tfoot

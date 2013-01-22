@@ -28,6 +28,7 @@ class CenterCycles < Application
     unless @center.blank?
       @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center.id)
       @center_cycle = loan_applications_facade.get_current_center_cycle(@center.id)
+      @loan_applications_status = LoanApplication.all(:fields => [:id, :client_name, :status], :at_branch_id => branch_id, :at_center_id => center_id, :center_cycle_id => @center_cycle.id)
     end
 
     render :mark_cgt_grt
@@ -49,8 +50,14 @@ class CenterCycles < Application
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
     @center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
+    @max_loan_authorization_date = LoanApplication.all(:at_branch_id => branch_id, :at_center_id => center_id).loan_authorizations.aggregate(:performed_on).max
 
     # VALIDATIONS
+    # CGT date must not before loan application authorization date
+    unless @max_loan_authorization_date.blank?
+      @errors << "Both CGT Start Date and CGT End Date must be not before loan applciation authorization date (#{@max_loan_authorization_date.display})" if cgt_date_one < @max_loan_authorization_date || cgt_date_two < @max_loan_authorization_date
+    end
+
     unless @center_cycle.is_restarted
       # All three dates must be unique
       both_dates = [cgt_date_one_str, cgt_date_two_str]
@@ -66,6 +73,7 @@ class CenterCycles < Application
     @errors << "CGT End Date must not be future date" if cgt_date_two > Date.today
 
     @errors << "CGT recorded by must not be blank" if cgt_performed_by_staff.blank?
+
     #OPERATIONS-PERFORMED
     if @errors.blank?
       begin

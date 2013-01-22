@@ -70,6 +70,8 @@ class LoanApplication
   #basic client info
   property :client_id,                      Integer,  :nullable => true
   property :client_name,                    String, CommonClient::Validations.get_validation(:client_name, LoanApplication)
+  property :client_age_as_on,               Integer
+  property :client_age_as_on_date,          Date
   property :client_dob,                     Date
   property :client_address,                 Text, CommonClient::Validations.get_validation(:client_address, LoanApplication)
   property :client_state,                   String, :nullable => false
@@ -80,6 +82,7 @@ class LoanApplication
   property :client_reference2_type,         Enum.send('[]', *REFERENCE_TYPES), CommonClient::Validations.get_validation(:client_reference2_type, LoanApplication)
   property :client_guarantor_name,          String, CommonClient::Validations.get_validation(:client_guarantor_name, LoanApplication)
   property :client_guarantor_relationship,  Enum.send('[]', *RELATIONSHIPS), CommonClient::Validations.get_validation(:client_guarantor_relationship, LoanApplication)
+  property :lending_id,                     String
 
   belongs_to :client, :nullable => true
   belongs_to :staff_member, :parent_key => [:id], :child_key => [:created_by_staff_id]
@@ -91,9 +94,9 @@ class LoanApplication
   has n, :client_verifications
   has 1, :loan_authorization
 
+  validates_length :client_pincode, :min => 6
   validates_length :client_name, :min => 3
-  validates_present   :client_dob
-  validates_with_method :client_dob, :method => :permissible_age_for_credit?
+  validates_with_method :client_dob, :method => :permissible_age_for_credit?, :if => Proc.new{ |lap| !lap.client_dob.blank? }
   validates_with_method :client_id,  :method => :is_unique_for_center_cycle?
 
   def money_amounts; [:amount]; end
@@ -139,6 +142,8 @@ class LoanApplication
       :reference2                 => client_reference2,
       :reference2_type            => client_reference2_type,
       :date_of_birth              => client_dob,
+      :age                        => client_age_as_on,
+      :age_as_on_date             => client_age_as_on_date,
       :address                    => client_address,
       :pincode                    => client_pincode,
       :state                      => client_state,
@@ -235,20 +240,20 @@ class LoanApplication
   # @param  [String] has to be one of the statuses of Constants::Status::LOAN_APPLICATION_STATUSES
   # @return [Boolean] returns true if the status is saved else false 
   def set_status(new_status)
-    return [false, "The loan application already has this status"] if get_status == new_status
-    return [false, "The #{get_status} being tried to save is not a part of the LOAN application statuses"] unless LOAN_APPLICATION_STATUSES.include?(new_status)
-    
-    # checks to make sure that the new_status does that needs to be saved does not precede the current status in the loan application workflow
-    return [false, "The status is being updated as new"] if CREATION_STATUSES.include?(new_status) 
-    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (DEDUPE_STATUSES.include?(new_status) and (OVERLAP_REPORT_STATUSES.include?(get_status) or AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
-    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (OVERLAP_REPORT_STATUSES.include?(new_status) and (AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
-    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (AUTHORIZATION_STATUSES.include?(new_status) and (CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status) or CREATION_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
-    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (CPV_STATUSES.include?(new_status) and ((LOAN_FILE_GENERATION_STATUSES.include?(get_status)) or CREATION_STATUSES.include?(get_status) or OVERLAP_REPORT_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
-
-    # for all dead end statuses
-    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CONFIRMED_DUPLICATE_STATUS
-    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV1_REJECTED_STATUS
-    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV2_REJECTED_STATUS
+    #    return [false, "The loan application already has this status"] if get_status == new_status
+    #    return [false, "The #{get_status} being tried to save is not a part of the LOAN application statuses"] unless LOAN_APPLICATION_STATUSES.include?(new_status)
+    #
+    #    # checks to make sure that the new_status does that needs to be saved does not precede the current status in the loan application workflow
+    #    return [false, "The status is being updated as new"] if CREATION_STATUSES.include?(new_status)
+    #    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (DEDUPE_STATUSES.include?(new_status) and (OVERLAP_REPORT_STATUSES.include?(get_status) or AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    #    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (OVERLAP_REPORT_STATUSES.include?(new_status) and (AUTHORIZATION_STATUSES.include?(get_status) or CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status)))
+    #    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (AUTHORIZATION_STATUSES.include?(new_status) and (CPV_STATUSES.include?(get_status) or LOAN_FILE_GENERATION_STATUSES.include?(get_status) or CREATION_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+    #    return [false, "Loan Application status cannot change from #{get_status} to #{new_status}"] if (CPV_STATUSES.include?(new_status) and ((LOAN_FILE_GENERATION_STATUSES.include?(get_status)) or CREATION_STATUSES.include?(get_status) or OVERLAP_REPORT_STATUSES.include?(get_status) or DEDUPE_STATUSES.include?(get_status)))
+    #
+    #    # for all dead end statuses
+    #    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CONFIRMED_DUPLICATE_STATUS
+    #    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV1_REJECTED_STATUS
+    #    return [false, "Loan Application status cannot proceed further from the current status: #{get_status}"] if get_status == CPV2_REJECTED_STATUS
     self.update(:status => new_status)
   end
 
@@ -383,7 +388,7 @@ class LoanApplication
 
   #returns all loan applications which are pending for CPV1 and/or CPV2
   def self.pending_CPV(search_options = {})
-    search_options.merge!(:status => [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS, CPV1_APPROVED_STATUS, CPV1_PENDING_STATUS, CPV2_PENDING_STATUS])
+    search_options.merge!(:status => [NEW_STATUS, CPV1_APPROVED_STATUS, CPV1_PENDING_STATUS, CPV2_PENDING_STATUS])
     all(search_options)
   end
 
@@ -404,9 +409,63 @@ class LoanApplication
   end
   
   def self.pending_authorization(search_options = {})
+    valid_applications = []
     search_options.merge!(:status => OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
     pending = all(search_options)
-    pending.collect {|lap| lap.to_info}
+    pending.collect do |lap|
+      if (Date.today.mjd - Date.parse(lap.credit_bureau_rated_at.display).mjd) > 15
+        lap.dependency_destroy_for_loan_application_cb_expires
+      end
+      valid_applications << lap.to_info if lap.status == OVERLAP_REPORT_RESPONSE_MARKED_STATUS
+    end
+    valid_applications
+  end
+
+  def self.loan_applications_ready_for_loanfile_generation(search_options = {})
+    valid_applications = []
+    search_options[:status] = [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS]
+    pending = all(search_options)
+    pending.collect do |lap|
+      unless lap.credit_bureau_rated_at.blank?
+        if (Date.today.mjd - Date.parse(lap.credit_bureau_rated_at.display).mjd) > 15
+          lap.dependency_destroy_for_loan_application_cb_expires
+        end
+      end
+      valid_applications << lap if (lap.status == AUTHORIZED_APPROVED_STATUS || lap.status == AUTHORIZED_APPROVED_OVERRIDE_STATUS)
+    end
+    return valid_applications
+  end
+
+  def self.is_eligible_for_loan_file_generation(search_options = {})
+    all_applications = all(:center_cycle_id => search_options[:center_cycle_id], :at_branch_id => search_options[:at_branch_id], :at_center_id => search_options[:at_center_id])
+    all_application_statuses = all_applications.aggregate(:status)
+    must_not_have = ["1", "2", "4", "5", "7", "8", "9", "11", "12","13"]
+    result = all_application_statuses & must_not_have
+    if result.blank?
+      return true
+    else
+      lap_not_eligible = []
+      all_applications.each do |lap|
+        result.each do |status|
+          lap_not_eligible << lap if lap.status == Constants::Status::LOAN_APPLICATION_STATUSES[status.to_i - 1]
+        end
+      end
+      msg = []
+      lap_not_eligible.each do |lap|
+        msg << "(loan application ID: #{lap.id}, Status: #{lap.status.humanize rescue nil})"
+      end
+      msg
+    end
+  end
+
+  def dependency_destroy_for_loan_application_cb_expires
+    adapter = DataMapper.repository(:default).adapter
+    adapter.execute("delete from loan_authorizations where loan_application_id = #{self.id}") if self.to_info && self.to_info.authorization_info
+    self.credit_bureau_status = Constants::CreditBureau::NO_MATCH
+    self.credit_bureau_rated_at = nil
+    self.credit_bureau_rejection_reason = ''
+    self.status = Constants::Status::OVERLAP_REPORT_REQUEST_GENERATED_STATUS
+    self.save
   end
 
   # Is pending loan file generation
@@ -416,14 +475,13 @@ class LoanApplication
 
   # All loan applications pending loan file generation
   def self.pending_loan_file_generation(search_options = {})
-    search_options[:status] = CPV2_APPROVED_STATUS
-    loan_applications = all(search_options)
-    loan_applications.collect {|lap| lap.to_info}
+    search_options[:status] = [AUTHORIZED_APPROVED_STATUS, AUTHORIZED_APPROVED_OVERRIDE_STATUS]
+    all(search_options)
   end
 
   # returns all loan applications which are pending for de-dupe process
   def self.pending_dedupe
-    all(:status => NEW_STATUS)
+    all(:status => CPV2_APPROVED_STATUS)
   end
 
   # returns all loan applications which has status not_duplicate
@@ -470,12 +528,12 @@ class LoanApplication
   def self.is_center_eligible_for_cgt_grt?(branch, center)
     center_wise_loan_applications = LoanApplication.all(:at_branch_id => branch, :at_center_id => center)
     status_array = center_wise_loan_applications.aggregate(:status)
-    must_not = ["1", "2", "3", "6", "7", "8", "9", "12", "14"]
+    must_not = ["1", "2", "4", "5", "7", "8", "9", "11", "12","13"]
     result = status_array & must_not
     if status_array.blank?
       return [false, "There are no loan applications created under this center"]
     elsif !result.compact.blank?
-      return [false, "CGT, GRT can only be performed if all loan applications for this center cycle is done with CPV2 Process"]
+      return [false, "CGT, GRT can only be performed if all loan applications for this center cycle is done with Loan Authorization Process"]
     else
       return true
     end
@@ -528,9 +586,9 @@ class LoanApplication
       nil,                                                                     # member relationship name 3
       nil,                                                                     # member relationship type 4
       nil,                                                                     # member relationship name 4
-      client_dob.strftime("%d-%m-%Y"),                                         # applicant date of birth
-      client_age,                                                              # applicant age
-      Date.today.strftime("%d-%m-%Y"),                                         # applicant age as of
+      client_dob.blank? ? nil : client_dob.strftime("%d-%m-%Y"),               # applicant date of birth
+      client_age_as_on.blank? ? client_age : client_age_as_on,                 # applicant age
+      client_age_as_on_date.blank? ? Date.today.strftime("%d-%m-%Y") : client_age_as_on_date.strftime("%d-%m-%Y"),                                         # applicant age as of
       client_reference2.blank? ? nil : id_type[client_reference2_type],        # applicant id type 1
       client_reference2.blank? ? nil : client_reference2,                      # applicant id 1
       client_reference1.blank? ? nil : "ID05",                                 # applicant id type 2

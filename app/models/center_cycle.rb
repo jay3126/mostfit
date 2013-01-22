@@ -121,10 +121,15 @@ class CenterCycle
     self.save
   end
 
-  # Return true if GRT passed fro particular center
-  def self.is_grt_marked?(center_id)
-    center_cycle = CenterCycle.first(:biz_location_id => center_id, :cycle_number => 1)
+  # Return true if GRT passed fo particular center
+  def self.is_grt_marked?(center_id, for_cycle_number = 1)
+    center_cycle = CenterCycle.first(:biz_location_id => center_id, :cycle_number => for_cycle_number)
     center_cycle.grt_status == Constants::CenterFormation::GRT_PASSED ? true : false
+  end
+
+  # Return center GRT Passed on date
+  def self.center_grt_passed_on(center_id, for_cycle_number = 1)
+    CenterCycle.first(:biz_location_id => center_id, :cycle_number => for_cycle_number).grt_recorded_at rescue nil
   end
 
   # While creating center, center cycle with cycle number 1 is automatically gets created but
