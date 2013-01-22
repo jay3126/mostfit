@@ -27,7 +27,7 @@
           Overdue POS
 
     %tbody
-      - total_locations_count = total_members_count = 0
+      - total_locations_count = total_members_count = total_loans_in_arrears = 0
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
       - @default_currency ||= MoneyManager.get_default_currency
       - @data[:branches].sort_by{|staff| staff}.each do |staff, values|
@@ -54,9 +54,10 @@
             - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
           %td
             = values[:number_of_loan_accounts_in_arrear]
+            - total_loans_in_arrears += values[:number_of_loan_accounts_in_arrear]
           %td
-            = values[:outstanding_and_overdue_amounts][:overdue_amounts]
-            - accumulate_row_values[:overdue_amounts] += values[:outstanding_and_overdue_amounts][:overdue_amounts]
+            = values[:overdue_principal]
+            - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
 
     - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
     %tfoot
@@ -75,8 +76,9 @@
         %td
           = total_rows[:scheduled_outstanding_amount]
         %td
+          = total_loans_in_arrears
         %td
-          = total_rows[:overdue_amounts]
+          = total_rows[:overdue_principal]
   %br
   .flickr_pagination
     = will_paginate @data[:branch_ids], :container => false
