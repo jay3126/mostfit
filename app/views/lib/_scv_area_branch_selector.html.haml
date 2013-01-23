@@ -2,10 +2,10 @@
   %tr
     %th Area
     %th
-      = select :name => :area_id, :collection => location_facade.all_nominal_areas.map{|area| [area.id, area.name]}, :prompt => "Select area", :id => "area_selector", :selected => params[:area_id]
+      = select :name => :area_id, :collection => location_facade.all_nominal_areas.map{|area| [area.id, area.name]}, :prompt => "Select area", :id => "area_selector", :selected => params[:area_id], :class => 'chosen'
     %th Branch
     %th
-      = select :name => :branch_id, :id => "branches_in_area", :selected => params[:branch_id]
+      = select :name => :branch_id, :id => "branches_in_area", :selected => params[:branch_id], :class => 'chosen'
     %th Visit Scheduled Date
     %th
       = date_select :visit_scheduled_date, params[:visit_scheduled_date] || Date.today

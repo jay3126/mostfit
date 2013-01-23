@@ -26,6 +26,7 @@
   - lending_product_id = (params[report] and params[report][:lending_product_id] and not params[report][:lending_product_id].blank?) ? params[report][:lending_product_id] : nil
   - loan_lan_number_id = (params[report] and params[report][:loan_lan_number_id] and not params[report][:loan_lan_number_id].blank?) ? params[report][:loan_lan_number_id] : nil
   - loan_lan_number = (params[report] and params[report][:loan_lan_number] and not params[report][:loan_lan_number].blank?) ? params[report][:loan_lan_number] : nil
+  - loan_active_status = (params[report] and params[report][:loan_active_status] and not params[report][:loan_active_status].blank?) ? params[report][:loan_active_status] : nil
   - if params[:submit]
     %h3{:style => "margin-bottom: 5px;"}
       - if area_id
@@ -115,6 +116,9 @@
       - if loan_lan_number
         Loan LAN Number:
         = loan_lan_number
+      - if loan_active_status
+        Loan Status
+        = loan_active_status
     %a.expand_collapsed{:href => "#"}
       Change parameters
   %div{:class => "#{params[:submit] ? 'collapsed':''}"}
@@ -287,6 +291,10 @@
             %td
               Center:
               = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(branch_for_loan_application_report), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
+          - if @report.respond_to?(:loan_active_status)
+            %td
+              Loan Status:
+              = select(:loan_active_status, :collection => ['Live Loans', 'Close/Preclose Loans'], :include_blank => true, :selected => loan_active_status)
           - if @report.respond_to?(:effective_date)
             %td
               %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}

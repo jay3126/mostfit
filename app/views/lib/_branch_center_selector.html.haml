@@ -5,11 +5,11 @@
         %th
           Branch
         %th
-          = select :name => :branch_id, :text_method => :name, :value_method => :id, :collection => get_accessible_branches, :prompt => "Select branch", :id => 'branch_selector', :style => "width:230px;", :selected => params[:branch_id]
+          = select :name => :branch_id, :text_method => :name, :value_method => :id, :collection => get_accessible_branches, :prompt => "Select branch", :id => 'branch_selector', :style => "width:230px;", :selected => params[:branch_id], :class => 'chosen'
         %th
           Center
         %th
-          = select :name => :center_id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :style => "width:230px;", :selected => params[:center_id]
+          = select :name => :center_id, :collection => get_accessible_centers(params[:branch_id]), :prompt => "Select center", :id => 'center_selector', :style => "width:230px;", :selected => params[:center_id], :class => 'chosen'
         %td
           = submit "Proceed"
 

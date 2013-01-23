@@ -4,11 +4,11 @@
       %tr
         %th Branch:
         %th
-          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location'
+          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location chosen'
         %th Center:
         %th
           - all_centers = params[:parent_location_id].blank? ? [] : get_all_nominal_centers(params[:parent_location_id])
-          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id], :class => 'location'
+          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id], :class => 'location chosen'
         %td
           %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
         - if staff_member
@@ -17,7 +17,7 @@
           %th
             - location_id   = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
             - staff_members = (location_id.blank? && params[:staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
-            = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id]
+            = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id], :class => 'chosen'
         - if date.blank?
           %td
             Days Past Due:

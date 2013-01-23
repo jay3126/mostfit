@@ -830,8 +830,14 @@ function get_all_staff_member_on_location() {
         'parent_location_id' : jQuery("#parent_selector").val()
       },
       success: function(data) {
+        jQuery("#staff_selector_chzn").remove();
+        jQuery("#staff_selector").removeClass('chzn-done');
+        jQuery(".staff_selection").removeClass('chzn-done');
         jQuery("#staff_selector").html(data);
         jQuery(".staff_selection").html(data);
+        jQuery(".staff_selection").addClass('chosen');
+        jQuery(".staff_selection").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -847,7 +853,11 @@ function get_all_repayment_frequency_on_branch() {
         'parent_location_id' : jQuery("#parent_selector").val()
       },
       success: function(data) {
+        jQuery("#meeting_frequency_selector_chzn").remove();
+        jQuery("#meeting_frequency_selector").removeClass('chzn-done');
         jQuery("#meeting_frequency_selector").html(data);
+        jQuery("#meeting_frequency_selector").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -859,7 +869,11 @@ function get_all_ledgers_on_cost_center() {
       type: "GET",
       url: "/cost_centers/ledger_for_selector/"+jQuery(this).val(),
       success: function(data) {
+        jQuery("#c_ledgers_chzn").remove();
+        jQuery(".c_ledgers").removeClass('chzn-done');
         jQuery(".c_ledgers").html(data);
+        jQuery(".c_ledgers").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -871,7 +885,11 @@ function get_all_clients_on_center() {
       type: "GET",
       url: "/biz_locations/clients_for_selector/"+jQuery(this).val(),
       success: function(data) {
+        jQuery("#client_selector_chzn").remove();
+        jQuery("#client_selector").removeClass('chzn-done');
         jQuery("#client_selector").html(data);
+        jQuery("#client_selector").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -886,7 +904,11 @@ function getAllNominalCenters() {
         "effective_date" : jQuery("#effective_date_id").val()
       },
       success: function(data) {
+        jQuery("#child_selector_chzn").remove();
+        jQuery("#child_selector").removeClass('chzn-done');
         jQuery("#child_selector").html(data);
+        jQuery("#child_selector").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -901,7 +923,11 @@ function getAllBranchesInArea() {
         "effective_date" : jQuery("#effective_date_id").val()
       },
       success: function(data) {
+        jQuery("#branches_in_area_chzn").remove();
+        jQuery("#branches_in_area").removeClass('chzn-done');
         jQuery("#branches_in_area").html(data);
+        jQuery("#branches_in_area").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
@@ -916,7 +942,11 @@ function get_all_location_on_level() {
         "location_level" : jQuery("#location_level_selector").val()
       },
       success: function(data) {
+        jQuery("#parent_selector_chzn").remove();
+        jQuery("#parent_selector").removeClass('chzn-done');
         jQuery("#parent_selector").html(data);
+        jQuery("#parent_selector").addClass('chosen');
+        jQuery('.chosen').chosen();
       }
     });
   });
