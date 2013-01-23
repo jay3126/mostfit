@@ -80,7 +80,7 @@ class MonthlyLoanDetailsReport < Report
       loan_product_name          = loan_product.name
       tenor_in_week              = loan.tenure
       disbursement_mode          = loan.disbursement_mode
-      loan_start_date            = loan.is_outstanding? ? loan.disbursal_date : 'Not Specified'
+      loan_start_date            = loan.disbursal_date
       loan_status                = loan.status.humanize
       loan_account_number        = loan.lan
       loan_purpose               = loan.loan_purpose
@@ -160,7 +160,7 @@ class MonthlyLoanDetailsReport < Report
       if @status == 'Live Loans'
         loan_closure_date        = ''
       else
-        loan_closure_date        = loan.status == 'preclosed_loan_status' ? loan.preclosed_on_date : loan.repaid_on_date
+        loan_closure_date        = loan.status == :preclosed_loan_status ? loan.preclosed_on_date : loan.repaid_on_date
       end
       source_of_fund_id          = NewFundingLine.get(FundingLineAddition.first(:lending_id => loan.id).funding_line_id).name
       meeting_address            = center.biz_location_address
