@@ -132,13 +132,13 @@
                 - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount unless ws.loan_schedule_principal_due.blank?
               %td
                 = ws.loan_principal_overdue.to_s
-                - total_actual_principal_outstanding = total_actual_principal_outstanding + ws.loan_actual_principal_outstanding.amount unless ws.loan_actual_principal_outstanding.blank?
+                - total_actual_principal_outstanding = total_actual_principal_outstanding + ws.loan_principal_overdue.amount unless ws.loan_principal_overdue.blank?
               %td
                 = ws.loan_schedule_interest_due.to_s
                 - total_schedule_interest_due = total_schedule_interest_due + ws.loan_schedule_interest_due.amount unless ws.loan_schedule_interest_due.blank?
               %td
                 = ws.loan_interest_overdue.to_s
-                - total_actual_interest_outstanding = total_actual_interest_outstanding + ws.loan_actual_interest_outstanding.amount unless ws.loan_actual_interest_outstanding.blank?
+                - total_actual_interest_outstanding = total_actual_interest_outstanding + ws.loan_interest_overdue.amount unless ws.loan_interest_overdue.blank?
               %td
                 = ws.loan_advance_amount.to_s
                 - total_advance_amount = total_advance_amount + ws.loan_advance_amount.amount unless ws.loan_advance_amount.blank?
@@ -157,9 +157,9 @@
           %th
           %th
           %th
-          %th
           %th{:style => "text-align:right"}
             = Money.new(total_disbursed_amount,:INR).to_s
+          %th
           %th
           %th
           %th
