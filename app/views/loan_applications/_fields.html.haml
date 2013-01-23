@@ -51,7 +51,7 @@
           %td
             = text_field :client_reference2
           %td
-            - selected_amount = params[:loan_application] && !params[:loan_application][:amount].blank? ? "%.2f"%(params[:loan_application][:amount] / 100) : nil
+            - selected_amount = params[:loan_application] ? params[:loan_application][:amount] : nil
             - loan_product_amount = @branch.same_frequency_branch_loan_product(@center)
             = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => selected_amount, :prompt => 'Select'
           %td
