@@ -111,7 +111,7 @@
                 = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][counterparty_id]", :value => ws.borrower_id
                 = hidden_field :name => "payment_transactions[payments][#{loan_row_count}][product_id]", :value => ws.loan_id
               %td
-                = link_to_location biz_location
+                = biz_location.name
               %td
                 = link_to_with_rights ws.borrower_name, url(:controller=> :new_clients, :action => :show, :id => ws.borrower_id)
               %td

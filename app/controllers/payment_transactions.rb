@@ -99,8 +99,9 @@ class PaymentTransactions < Application
     # OPERATIONS PERFORMED
     if @message[:error].blank?
       begin
-        payments.each do |key, payment_value|
+        payments.values.select{|d| d[:payment]}.each do |payment_value|
           unless payment_value[:payment].blank?
+
             lending = Lending.get(payment_value[:product_id])
             if lending.is_written_off?
               payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY
@@ -167,7 +168,7 @@ class PaymentTransactions < Application
     @child_location_id   = params[:child_location_id]
     page                 = @message[:error].blank? ? params[:page].to_i+1 : params[:page]
     @@biz_location_ids = payments.values.collect{|s| s[:performed_at]}.compact.uniq
-    add_url = "?staff_member_id=#{params[:staff_member_id]}&parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}&page=#{page}&save_payment=true"
+    add_url = "?date=#{effective_on}&staff_member_id=#{params[:staff_member_id]}&parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}&page=#{page}&save_payment=true"
     # REDIRECT/RENDER
     redirect request.referer+add_url, :message => @message
   end

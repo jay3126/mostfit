@@ -1162,6 +1162,23 @@ class Lending
       loan.save!
     end
   end
+
+  def self.tag_write_off_loan
+    funders = NewFunder.all(:name => ['WRITE-OFF-2', 'WRITE-OFF'])
+    staff_id = StaffMember.first.id
+    funders.each do |funder|
+      write_off_date = funder.name == 'WRITE-OFF-2' ? Date.new(2011,12,31) : Date.new(2011,03,31)
+      funding_lines = funder.new_funding_lines
+      funding_lines.each do |funding_line|
+        loan_ids = FundingLineAddition.all(:funding_line_id => funding_line.id).aggregate(:lending_id)
+        loan_ids.each do |loan_id|
+          loan = Lending.get loan_id
+          loan.update(:write_off_approve_on_date => write_off_date, :write_off_approve => true)
+          loan.write_off(write_off_date, staff_id)
+        end
+      end
+    end
+  end
   
   private
 
