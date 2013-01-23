@@ -62,7 +62,7 @@ class PaymentTransactions < Application
       @parent_biz_location = BizLocation.get(params[:parent_location_id])
       @staff_member        = StaffMember.get(params[:staff_member_id])
       @user                = session.user
-      @biz_locations, @weeksheets = collections_facade.get_collection_sheet_for_staff(@staff_member.id, @date, page, limit)
+      @biz_locations, @weeksheets = collections_facade.get_all_collection_sheet_for_staff(@staff_member.id, @date, page, limit)
     end
     @weeksheets = @weeksheets.class == Array ? @weeksheets : [@weeksheets]
     params.delete('_message') if params[:save_payment].blank?
