@@ -1090,12 +1090,12 @@ class Lending
     current_status = self.status
     raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
     self.status = new_loan_status
-    if ((Mfi.first.system_state != :migration) and (self.status == :new_loan_status))
-      loan_product_identifier = LendingProduct.get_loan_product_identifier(self.lending_product_id)
-      branch_identifier = BizLocation.get_biz_location_identifier(self.accounted_at_origin)
-      lan_id = "%.6i"%Lending.get_lan_identifier
-      self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
-    end
+#    if ((Mfi.first.system_state != :migration) and (self.status == :new_loan_status))
+#      loan_product_identifier = LendingProduct.get_loan_product_identifier(self.lending_product_id)
+#      branch_identifier = BizLocation.get_biz_location_identifier(self.accounted_at_origin)
+#      lan_id = "%.6i"%Lending.get_lan_identifier
+#      self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
+#    end
     raise Errors::DataError, self.errors.first.first unless self.save
     
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
