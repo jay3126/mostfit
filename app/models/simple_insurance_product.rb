@@ -1,6 +1,6 @@
 class SimpleInsuranceProduct
   include DataMapper::Resource
-  include Constants::Properties, Constants::Insurance, Constants::Transaction
+  include Constants::Properties, Constants::Insurance, Constants::Transaction, Constants::Money
 
   property :id,            Serial
   property :name,          *UNIQUE_NAME
@@ -8,11 +8,15 @@ class SimpleInsuranceProduct
   property :insurance_for, Enum.send('[]', *INSURED_PERSON_RELATIONSHIPS)
   property :created_on,    *DATE_NOT_NULL
   property :created_at,    *CREATED_AT
+  property :cover_amount,  *MONEY_AMOUNT_NON_ZERO
+  property :currency,      *CURRENCY
 
   belongs_to :lending_product, :nullable => true
   has 1, :premium, 'SimpleFeeProduct'
   has n, :simple_insurance_policies
   belongs_to :upload, :nullable => true
+
+  def money_amounts; [:cover_amount]; end
 
   def total_premium_money_amount(on_date)
     self.premium ? self.premium.effective_total_amount(on_date) : nil
@@ -28,9 +32,12 @@ class SimpleInsuranceProduct
     insurance_for = row[headers[:insurance_for]].downcase.to_sym
     created_on = Date.parse(row[headers[:created_on]])
     upload_id = row[headers[:upload_id]]
+    cover_money_amount = MoneyManager.get_money_instance(row[headers[:cover_amount]])
+    cover_amount = cover_money_amount.amount
+    currency = cover_money_amount.currency
 
     obj = SimpleInsuranceProduct.new(:name => name, :insured_type => insurance_type, :insurance_for => insurance_for, :created_on => created_on,
-                                     :upload_id => upload_id)
+                                     :cover_amount => cover_amount, :currency => currency, :upload_id => upload_id)
 
     if obj.save
       fee_product = SimpleFeeProduct.first(:name => row[headers[:fee_product]])

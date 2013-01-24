@@ -3,7 +3,7 @@
       "bPaginate": false,
       "bJQueryUI": true
     });
-%h1 Insurance
+%h1 List of Insurance Products
 .menu-strip{:style => "width: 25%;"}
   = link_to 'Add Insurance', "#", :onclick =>"jQuery('#meeting_div').toggle(); return false;", :class => 'add grey_button'
   &nbsp;&nbsp;
@@ -21,11 +21,17 @@
     %thead
       %tr
         %td
-          id
+          Id
         %td
           Name
         %td
-          Fee Charge Type
+          Insured Type
+        %td
+          Insurance For
+        %td
+          Fee Product
+        %td
+          Cover Amount
         %td
           Created On
     - @insurance_products.each do |insurance_product|
@@ -35,7 +41,14 @@
         %td
           = insurance_product.name
         %td
-          = (insurance_product and insurance_product.insurance_for) ? insurance_product.insurance_for.humanize : "Not Specified" 
+          = (insurance_product.insured_type and (not insurance_product.insured_type.nil?)) ? insurance_product.insured_type.humanize : "Insurance type not specified"
+        %td
+          = (insurance_product and insurance_product.insurance_for) ? insurance_product.insurance_for.humanize : "Not Specified"
+        %td
+          - fee_product = SimpleFeeProduct.all(:simple_insurance_product_id => insurance_product.id)
+          = (fee_product and (not fee_product.blank?)) ? fee_product.first.name : "Fee product not specified"
+        %td
+          = (insurance_product.cover_amount and (not insurance_product.cover_amount.nil?)) ? insurance_product.to_money[:cover_amount].to_s : MoneyManager.default_zero_money
         %td
           = insurance_product.created_on
     %tfoot

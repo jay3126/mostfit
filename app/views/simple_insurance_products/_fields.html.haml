@@ -21,6 +21,11 @@
       = select :name => 'fee_product_id', :collection => @fee_products.map{|s| [s.id, s.name]}, :prompt => 'Select Fee'
   %tr
     %th
+      Cover Amount
+    %td
+      = text_field :cover_amount
+  %tr
+    %th
       Created On
     %td
       = date_select 'simple_insurance_product[created_on]', Date.today, {:id => 'created_on'}

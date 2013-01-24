@@ -16,16 +16,22 @@ class SimpleInsuranceProducts < Application
     insured_type  = params[:simple_insurance_product][:insured_type]
     insurance_for = params[:simple_insurance_product][:insurance_for]
     created_on    = params[:simple_insurance_product][:created_on]
-
+    amount        = params[:simple_insurance_product][:cover_amount]
+    
     #VALIDATION
     @message[:error] = 'Created On cannot be blank' if created_on.blank?
     @message[:error] = 'Fee Charge Type cannot be blank' if insurance_for.blank?
     @message[:error] = 'Name cannot be blank' if name.blank?
+    @message[:error] = 'Cover amount cannot be blank' if amount.blank?
 
     #PERFORM OPERTION
     begin
       if @message[:error].blank?
-        insurance = SimpleInsuranceProduct.new(:name => name, :insured_type => insured_type, :insurance_for => insurance_for, :created_on => created_on)
+        money_amount  = MoneyManager.get_money_instance(amount)
+        cover_amount  = money_amount.amount
+        currency      = money_amount.currency
+        insurance = SimpleInsuranceProduct.new(:name => name, :insured_type => insured_type, :insurance_for => insurance_for, :created_on => created_on,
+          :cover_amount => cover_amount, :currency => currency)
         if insurance.save
           fee = SimpleFeeProduct.get params[:fee_product_id]
           fee.update(:simple_insurance_product_id => insurance.id) unless fee.blank?
