@@ -59,7 +59,7 @@ class CustomerExtractForInsurance < Report
       loan_base_schedule = LoanBaseSchedule.first(:fields => [:first_receipt_on], :lending_id => loan.id)
       loan_commencement_date = (loan_base_schedule.blank?) ? "Not Available" : loan_base_schedule.first_receipt_on
       simple_insurance_policies = SimpleInsurancePolicy.first(:lending_id => loan.id)
-      cover_amount = (simple_insurance_policies.blank?) ? "Insurance Not Specified" : simple_insurance_policies.si_money_amount.to_s
+      cover_amount = (simple_insurance_policies and (not simple_insurance_policies.blank?) and (not simple_insurance_policies.simple_insurance_product.nil?)) ? Money.new(simple_insurance_policies.simple_insurance_product.cover_amount.to_i, default_currency) : "Cover Amount Not Specified"
       fee_instance = FeeInstance.first(:fee_applied_on_type =>Constants::Fee::FEE_ON_LOAN, :fee_applied_on_type_id => loan.id)
       premium = fee_instance.fee_money_amount rescue nil
       service_tax = fee_instance.tax_money_amount rescue nil
