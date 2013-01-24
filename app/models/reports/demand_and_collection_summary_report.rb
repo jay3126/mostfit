@@ -57,13 +57,14 @@ class DemandAndCollectionSummaryReport < Report
       branch_data_map[:ewi_due] =  total_demand > loan_amounts_on_date[:advance_amount_exist] ? total_demand - loan_amounts_on_date[:advance_amount_exist] : MoneyManager.default_zero_money
       branch_data_map[:fee_collectable] = loan_amounts_on_date[:fee_colleatable]
       branch_data_map[:ewi_collected] = loan_amounts_on_date[:scheduled_total_collected]
+      branch_data_map[:recovery_collected] = loan_amounts_on_date[:recovery_collected]
       branch_data_map[:overdue_ewi_collected] = loan_amounts_on_date[:overdue_received]
       branch_data_map[:fee_collected] = loan_amounts_on_date[:fee_colleated]
       branch_data_map[:advance_amount] = loan_amounts_on_date[:advance_received]
       branch_data_map[:other_fees_collected] = loan_amounts_on_date[:insurance_fee_collected]
       branch_data_map[:fore_closure_pos] = loan_amounts_on_date[:preclosure_pricipal]
       branch_data_map[:fore_closure_od_interest] = loan_amounts_on_date[:priclosure_interest]
-      branch_data_map[:total_collections] = loan_amounts_on_date[:scheduled_total_collected] + loan_amounts_on_date[:overdue_received] + loan_amounts_on_date[:fee_colleated] + loan_amounts_on_date[:advance_received] + loan_amounts_on_date[:insurance_fee_collected] + loan_amounts_on_date[:preclosure_pricipal] + loan_amounts_on_date[:priclosure_interest]
+      branch_data_map[:total_collections] = loan_amounts_on_date[:scheduled_total_collected] + loan_amounts_on_date[:overdue_received] + loan_amounts_on_date[:fee_colleated] + loan_amounts_on_date[:advance_received] + loan_amounts_on_date[:insurance_fee_collected] + loan_amounts_on_date[:preclosure_pricipal] + loan_amounts_on_date[:priclosure_interest] + loan_amounts_on_date[:recovery_collected]
       branch_data_map[:short_collections] = loan_amounts_on_date[:scheduled_total] > loan_amounts_on_date[:scheduled_total_collected] ? loan_amounts_on_date[:scheduled_total] - loan_amounts_on_date[:scheduled_total_collected] : MoneyManager.default_zero_money
       branch_data_map[:fee_differences] = loan_amounts_on_date[:fee_colleatable] > loan_amounts_on_date[:fee_colleated] ? loan_amounts_on_date[:fee_colleatable] - loan_amounts_on_date[:fee_colleated] : MoneyManager.default_zero_money
 

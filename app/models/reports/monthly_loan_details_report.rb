@@ -36,7 +36,7 @@ class MonthlyLoanDetailsReport < Report
   def generate
     data     = {}
     if @status == 'Live Loans'
-      @loan_ids = Lending.total_loans_on_date('disbursed_loan_status', @date).to_a.paginate(:page => @page, :per_page => @limit)
+      @loan_ids = Lending.total_loans_on_date('disbursed_loan_status', @date)
     elsif @status == 'Close/Preclose Loans'
       preclose_loans = Lending.total_loans_on_date('preclosed_loan_status', @date)
       repaid_loans = Lending.total_loans_on_date('repaid_loan_status', @date)
@@ -44,11 +44,14 @@ class MonthlyLoanDetailsReport < Report
     else
       @loan_ids = []
     end
-    loans = @loan_ids.blank? ? [] : Lending.all(:id => @loan_ids)
+    f_loans         = @funding_line_id.blank? ? @loan_ids : FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
+    @loan_ids       = @status.blank? ? f_loans.paginate(:page => @page, :per_page => @limit) : (f_loans & @loan_ids).paginate(:page => @page, :per_page => @limit)
+    
     data[:loan_ids] = @loan_ids
-    data[:loans] = {}
-    loan_borrowers = loans.blank? ? [] : loans.loan_borrower.aggregate(:counterparty_id)
-    clients = loan_borrowers.blank? ? [] : Client.all(:id => loan_borrowers)
+    data[:loans]    = {}
+    loans           = @loan_ids.blank? ? [] : Lending.all(:id => @loan_ids)
+    loan_borrowers  = loans.blank? ? [] : loans.loan_borrower.aggregate(:counterparty_id)
+    clients         = loan_borrowers.blank? ? [] : Client.all(:id => loan_borrowers)
     loans.each do |loan|
       member = clients.select{|s| s.id == loan.loan_borrower.counterparty_id}.first
 

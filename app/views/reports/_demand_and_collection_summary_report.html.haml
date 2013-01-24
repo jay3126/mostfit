@@ -7,7 +7,7 @@
       %tr
         %th{:colspan => 7}
           Demand
-        %th{:colspan => 9}
+        %th{:colspan => 10}
           Collection
         %th
           Fee
@@ -30,6 +30,8 @@
           EWI Collected
         %th
           Over Due EMI Collected
+        %th
+          Recovery Collected
         %th
           Fee Collected
         %th
@@ -80,6 +82,9 @@
             = values[:overdue_ewi_collected]
             - accumulate_row_values[:overdue_ewi_collected] += values[:overdue_ewi_collected]
           %td
+            = values[:recovery_collected]
+            - accumulate_row_values[:recovery_collected] += values[:recovery_collected]
+          %td
             = values[:fee_collected]
             - accumulate_row_values[:fee_collected] += values[:fee_collected]
           %td
@@ -125,6 +130,8 @@
           = total_rows[:ewi_collected]
         %td
           = total_rows[:overdue_ewi_collected]
+        %td
+          = total_rows[:recovery_collected]
         %td
           = total_rows[:fee_collected]
         %td
