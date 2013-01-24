@@ -1,5 +1,5 @@
 class MonthlyLoanDetailsReport < Report
-  attr_accessor :date, :loan_active_status, :page
+  attr_accessor :date, :loan_active_status, :funding_line_id, :page
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today

@@ -57,7 +57,7 @@ class PaymentTransaction
 
   if Mfi.first.system_state != :migration
     validates_with_method :disallow_future_dated_transactions
-    validates_with_method :check_receipt_no
+    #validates_with_method :check_receipt_no
   end
 
   def disallow_future_dated_transactions
