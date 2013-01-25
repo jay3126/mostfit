@@ -10,6 +10,8 @@ class LedgerPosting
   property :accounted_at,   Integer
   property :performed_at,   Integer
   property :created_at,   *CREATED_AT
+  property :deleted_at,   ParanoidDateTime
+  property :updated_at,   DateTime
 
   belongs_to :voucher
   belongs_to :ledger

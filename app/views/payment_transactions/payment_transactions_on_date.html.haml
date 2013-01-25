@@ -1,0 +1,65 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_to_payment').change(function() {
+    $('.select_to_payment').attr('checked',$(this).attr('checked'))});
+  });
+%h1
+  Payment Transactions
+%form{:action => url(:controller => :payment_transactions, :action => :payment_transactions_on_date), :method => :get}
+  = partial 'lib/branch_center_date_selector'
+- if @center_id.blank?
+  %h3
+    Please Select Center
+- else
+  - if @payment_transactions.blank?
+    %h3
+      No Payments
+  - else
+    = form_for(:payment_transactions, :action => url(:controller => :payment_transactions, :action => :destroy_payment_transactions)) do
+      %table.dataTable.report.weeksheet.nojs
+        %thead
+          %tr{:style => 'text-align:left'}
+            %th
+              Select All
+              %br
+              = check_box :id => "toggle_select_to_payment"
+            %th
+              ID
+            %th
+              Effective On
+            %th
+              Amount
+            %th
+              Receipt No.
+            %th
+              Loan Lan
+            %th
+              Performed By
+            %th
+              Recorded By
+            %th
+              By Client
+        - @payment_transactions.each do |pt|
+          - loan = Lending.get pt.on_product_id
+          - if loan.is_outstanding? || loan.is_written_off?
+            %tr
+              %td{:style => 'text-align:center'}
+                = check_box :name => "payment_trasactions[]" ,:value => pt.id, :class => "select_to_payment"
+              %td
+                = pt.id
+              %td
+                = pt.effective_on
+              %td
+                = pt.payment_money_amount
+              %td
+                = pt.receipt_no
+              %td
+                = link_to_with_rights loan.lan, url(:controller => :lendings, :action => :show, :id => loan.id)
+              %td
+                = StaffMember.get(pt.performed_by).name
+              %td
+                = User.get(pt.recorded_by).name
+              %td
+                = Client.get(pt.by_counterparty_id).name
+      = submit "Delete Payment"
+

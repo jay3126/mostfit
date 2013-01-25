@@ -20,6 +20,7 @@ class FeeReceipt
 
   belongs_to :fee_instance, :nullable => true
   belongs_to :simple_fee_product
+  belongs_to :payment_transaction, :nullable => true
 
 =begin
 A fee receipt can be for an ad-hoc fee or a scheduled fee
@@ -109,7 +110,7 @@ fee product, and when
     fee_receipt
   end
 
-  def self.record_fee_receipt(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
+  def self.record_fee_receipt(payment_transaction, fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
     Validators::Arguments.not_nil?(fee_instance, fee_money_amount, effective_on, performed_by_id, recorded_by_id)
     fee_receipt_values                          = {}
     
@@ -136,6 +137,7 @@ fee product, and when
     fee_receipt_values[:effective_on]           = effective_on
     fee_receipt_values[:performed_by]           = performed_by_id
     fee_receipt_values[:recorded_by]            = recorded_by_id
+    fee_receipt_values[:payment_transaction]    = payment_transaction
     fee_receipt                                 = create(fee_receipt_values)
     raise Errors::DataError, fee_receipt.errors.first.first unless fee_receipt.saved?
     fee_receipt

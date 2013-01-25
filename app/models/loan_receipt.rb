@@ -14,6 +14,8 @@ class LoanReceipt
   property :accounted_at,        *INTEGER_NOT_NULL
   property :effective_on,        *DATE_NOT_NULL
   property :created_at,          *CREATED_AT
+  property :deleted_at,          ParanoidDateTime
+  property :updated_at,          DateTime
 
   belongs_to :lending
   belongs_to :payment_transaction, :nullable => true

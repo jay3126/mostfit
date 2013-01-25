@@ -54,7 +54,14 @@ class PaymentTransaction
   property :effective_on,         *DATE_NOT_NULL
   property :accounting,           Boolean, :default => false
   property :created_at,           *CREATED_AT
+  property :deleted_at,           ParanoidDateTime
+  property :updated_at,           DateTime
 
+  has 1, :loan_receipt
+  has 1, :fee_receipt
+  has 1, :loan_payment
+  has 1, :voucher
+  
   if Mfi.first.system_state != :migration
     validates_with_method :disallow_future_dated_transactions
     #validates_with_method :check_receipt_no
@@ -72,7 +79,7 @@ class PaymentTransaction
 
   def check_receipt_no
     message = ''
-    if self.receipt_type == RECEIPT && self.payment_towards == PAYMENT_TOWARDS_LOAN_REPAYMENT
+    if self.receipt_type == RECEIPT && [PAYMENT_TOWARDS_LOAN_REPAYMENT, PAYMENT_TOWARDS_LOAN_RECOVERY, PAYMENT_TOWARDS_LOAN_PRECLOSURE].include?(self.payment_towards)
       if self.receipt_no.blank?
         message = [false, "Receipt Number cannot be blank"]
       elsif !PaymentTransaction.first(:receipt_no => self.receipt_no).blank?
@@ -106,6 +113,32 @@ class PaymentTransaction
     recorded_payment = create(payment)
     raise Errors::DataError, recorded_payment.errors.first.first unless recorded_payment.saved?
     recorded_payment
+  end
+
+  def delete_payment_transaction
+    if REVERT_PAYMENT_TOWARDS.include?(self.payment_towards)
+      loan_receipt = self.loan_receipt
+      voucher = self.voucher
+      fee_receipt = self.fee_receipt
+      ledger = ''
+      if voucher.blank?
+        product_action = self.product_action
+        product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(product_action)
+        posting_rules = product_accounting_rule.product_posting_rules
+        posting_rules.each do |pr|
+          ledger = LedgerAssignment.locate_ledger(self.by_counterparty_type, self.by_counterparty_id, pr.ledger_classification, self.on_product_type, self.on_product_id)
+          break unless ledger.blank?
+        end
+        unless ledger.blank?
+          p_vouchers = ledger.vouchers(:effective_on => self.effective_on, :total_amount => self.amount)
+          voucher = p_vouchers.first
+        end
+      end
+      loan_receipt.destroy unless loan_receipt.blank?
+      fee_receipt.destroy unless fee_receipt.blank?
+      voucher.destroy unless voucher.blank?
+      self.destroy
+    end
   end
 
   private

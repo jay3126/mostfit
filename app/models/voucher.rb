@@ -16,8 +16,11 @@ class Voucher
   property :performed_at,   Integer
   property :eod,            Boolean, :default => false
   property :created_at,     *CREATED_AT
+  property :deleted_at,     ParanoidDateTime
+  property :updated_at,     DateTime
 
   has n, :ledger_postings
+  belongs_to :payment_transaction, :nullable => true
   belongs_to :cost_center, :nullable => true
 
   def money_amounts; [ :total_amount ]; end
@@ -46,8 +49,8 @@ class Voucher
 
   def voucher_type; "RECEIPT"; end
 
-  def self.create_generated_voucher(total_amount, voucher_type, currency, effective_on, postings, performed_at =nil, accounted_at=nil, notation = nil, eod = false)
-    create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, GENERATED_VOUCHER, eod)
+  def self.create_generated_voucher(total_amount, voucher_type, currency, effective_on, postings, performed_at =nil, accounted_at=nil, notation = nil, payment_transaction = nil,eod = false)
+    create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, GENERATED_VOUCHER, payment_transaction, eod)
   end
 
   def self.create_manual_voucher(total_money_amount, voucher_type, effective_on, postings, performed_at = nil, accounted_at= nil, notation = nil)
@@ -190,7 +193,7 @@ class Voucher
 
   private
 
-  def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode, eod = false)
+  def self.create_voucher(total_amount, voucher_type, currency, effective_on, postings, notation, performed_at, accounted_at, generated_mode, payment_transaction = nil, eod = false)
 
     values = {}
     values[:total_amount] = total_amount
@@ -202,6 +205,7 @@ class Voucher
     values[:eod] = eod
     values[:performed_at] = performed_at unless performed_at.blank?
     values[:accounted_at] = accounted_at unless accounted_at.blank?
+    values[:payment_transaction] = payment_transaction unless payment_transaction.blank?
     ledger_postings = []
     postings.each { |p|
       next unless p.amount > 0

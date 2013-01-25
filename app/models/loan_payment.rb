@@ -11,16 +11,18 @@ class LoanPayment
   def money_amounts; [LOAN_DISBURSED]; end
 
   belongs_to :lending
+  belongs_to :payment_transaction, :nullable => true
 
   # Records a payment (typically a loan disbursement) on the loan
-  def self.record_loan_payment(loan_disbursed_amount, on_loan, effective_on)
+  def self.record_loan_payment(payment_transaction, loan_disbursed_amount, on_loan, effective_on)
     Validators::Arguments.not_nil?(loan_disbursed_amount, on_loan, effective_on)
-    payment                 = {}
-    payment[LOAN_DISBURSED] = loan_disbursed_amount.amount
-    payment[:currency]      = loan_disbursed_amount.currency
-    payment[:effective_on]  = effective_on
-    payment[:lending]       = on_loan
-    recorded_payment = create(payment)
+    payment                       = {}
+    payment[LOAN_DISBURSED]       = loan_disbursed_amount.amount
+    payment[:currency]            = loan_disbursed_amount.currency
+    payment[:effective_on]        = effective_on
+    payment[:lending]             = on_loan
+    payment[:payment_transaction] = payment_transaction
+    recorded_payment              = create(payment)
     raise Errors::DataError, "Payment was not saved on loan" unless recorded_payment.saved?
     recorded_payment
   end

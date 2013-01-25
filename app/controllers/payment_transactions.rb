@@ -173,4 +173,41 @@ class PaymentTransactions < Application
     redirect request.referer+add_url, :message => @message
   end
 
+  def payment_transactions_on_date
+    @branch_id = params[:parent_location_id]
+    @center_id = params[:child_location_id]
+    @on_date   = params[:date]
+    @error = []
+    @error << "Please Select Branch" if @branch_id.blank?
+    @error << "Please Select Center" if @center_id.blank?
+    @error << "Date cannot be blank" if @on_date.blank?
+    @payment_transactions = []
+    if @error.blank?
+      @payment_transactions = PaymentTransaction.all(:accounted_at => @branch_id, :performed_at => @center_id, :effective_on => @on_date, :payment_towards => Constants::Transaction::REVERT_PAYMENT_TOWARDS)
+    end
+    display @payment_transactions, :message => {:error => @error}
+  end
+
+  def destroy_payment_transactions
+    @error = []
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    on_date   = params[:date]
+    payments  = params[:payment_trasactions]
+
+    @error << "Please Select Check box" if payments.blank?
+    if @error.blank?
+      payments.each do |payment_id|
+        payment = PaymentTransaction.get payment_id
+        payment.delete_payment_transaction
+      end
+    end
+
+    if @error.blank?
+      redirect request.referer, :message => {:notice => "Payment Transaction successfully deleted"}
+    else
+      redirect request.referer, :message => {:notice => "Payment Transaction successfully deleted"}
+    end
+  end
+
 end

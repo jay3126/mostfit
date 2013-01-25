@@ -1,0 +1,27 @@
+.shaded
+  %table.form
+    %thead
+      %tr
+        %th Branch:
+        %th
+          = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location chosen'
+        %th Center:
+        %th
+          - all_centers = params[:parent_location_id].blank? ? [] : get_all_nominal_centers(params[:parent_location_id])
+          = select :name => "child_location_id", :text_method => :name, :value_method => :id, :collection => all_centers, :prompt => "Select center", :id => "child_selector", :selected => params[:child_location_id], :class => 'location chosen'
+        %td
+          Select Date:
+        %td
+          - date = params[:date].blank? ? get_effective_date : params[:date]
+          = date_select 'date', date, :max_date => Date.today, :size => 15
+        %td
+          = submit "Go"
+  - unless params[:parent_location_id].blank?
+    .menu-strip
+      %h3
+        Branch:
+        = BizLocation.get(params[:parent_location_id]).name
+        - unless params[:child_location_id].blank?
+          %br
+          Center:
+          = BizLocation.get(params[:child_location_id]).name

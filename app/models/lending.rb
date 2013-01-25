@@ -1024,7 +1024,7 @@ class Lending
       self.disbursed_by_staff = by_disbursement_transaction.performed_by
       set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
       disbursement_money_amount = by_disbursement_transaction.payment_money_amount
-      LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
+      LoanPayment.record_loan_payment(by_disbursement_transaction, disbursement_money_amount, self, on_disbursal_date)
       disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
       disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
       disbursement_allocation
@@ -1248,7 +1248,7 @@ class Lending
     payment_allocation = make_allocation(payment_amount, effective_on, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, adjust_advance, recover_on_loan)
     if payment_transaction.product_action == LOAN_FEE_RECEIPT
       fee_instance = FeeInstance.get(fee_instance_id)
-      fee_receipt = FeeReceipt.record_fee_receipt(fee_instance, payment_amount, effective_on, performed_by, recorded_by) unless fee_instance.blank?
+      fee_receipt = FeeReceipt.record_fee_receipt(payment_transaction, fee_instance, payment_amount, effective_on, performed_by, recorded_by) unless fee_instance.blank?
     else
       loan_receipt = LoanReceipt.record_allocation_as_loan_receipt(payment_transaction, payment_allocation, performed_at, accounted_at, self, effective_on)
     end
