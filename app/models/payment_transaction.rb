@@ -119,6 +119,7 @@ class PaymentTransaction
     if REVERT_PAYMENT_TOWARDS.include?(self.payment_towards)
       loan_receipt = self.loan_receipt
       voucher = self.voucher
+      postings = voucher.blank? ? [] : voucher.ledger_postings
       fee_receipt = self.fee_receipt
       ledger = ''
       if voucher.blank?
@@ -132,11 +133,13 @@ class PaymentTransaction
         unless ledger.blank?
           p_vouchers = ledger.vouchers(:effective_on => self.effective_on, :total_amount => self.amount)
           voucher = p_vouchers.first
+          postings = voucher.blank? ? [] : voucher.ledger_postings
         end
       end
       loan_receipt.destroy unless loan_receipt.blank?
       fee_receipt.destroy unless fee_receipt.blank?
       voucher.destroy unless voucher.blank?
+      postings.each{|p| p.destroy} unless postings.blank?
       self.destroy
     end
   end

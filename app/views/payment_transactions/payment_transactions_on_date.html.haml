@@ -44,7 +44,10 @@
           - if loan.is_outstanding? || loan.is_written_off?
             %tr
               %td{:style => 'text-align:center'}
-                = check_box :name => "payment_trasactions[]" ,:value => pt.id, :class => "select_to_payment"
+                - if loan.loan_receipts.last.effective_on == pt.effective_on
+                  = check_box :name => "payment_trasactions[]" ,:value => pt.id, :class => "select_to_payment"
+                - else
+                  'Not Last Transaction'
               %td
                 = pt.id
               %td
