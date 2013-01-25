@@ -23,6 +23,7 @@ class SimpleInsuranceProducts < Application
     @message[:error] = 'Fee Charge Type cannot be blank' if insurance_for.blank?
     @message[:error] = 'Name cannot be blank' if name.blank?
     @message[:error] = 'Cover amount cannot be blank' if amount.blank?
+    @message[:error] = 'Cover amount should be an integer value' unless is_number?(amount)
 
     #PERFORM OPERTION
     begin
