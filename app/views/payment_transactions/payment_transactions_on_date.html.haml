@@ -41,10 +41,11 @@
               By Client
         - @payment_transactions.each do |pt|
           - loan = Lending.get pt.on_product_id
-          - if loan.is_outstanding? || loan.is_written_off?
+          - loan_receipts = loan.loan_receipts
+          - if !loan_receipts.blank? && (loan.is_outstanding? || loan.is_written_off?)
             %tr
               %td{:style => 'text-align:center'}
-                - if loan.loan_receipts.last.effective_on == pt.effective_on
+                - if loan_receipts.last.effective_on == pt.effective_on
                   = check_box :name => "payment_trasactions[]" ,:value => pt.id, :class => "select_to_payment"
                 - else
                   'Not Last Transaction'

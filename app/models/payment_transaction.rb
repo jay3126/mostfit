@@ -119,6 +119,7 @@ class PaymentTransaction
     if REVERT_PAYMENT_TOWARDS.include?(self.payment_towards)
       loan_receipt = self.loan_receipt
       voucher = self.voucher
+      p_vouchers = []
       postings = voucher.blank? ? [] : voucher.ledger_postings
       fee_receipt = self.fee_receipt
       ledger = ''
@@ -128,10 +129,10 @@ class PaymentTransaction
         posting_rules = product_accounting_rule.product_posting_rules
         posting_rules.each do |pr|
           ledger = LedgerAssignment.locate_ledger(self.by_counterparty_type, self.by_counterparty_id, pr.ledger_classification, self.on_product_type, self.on_product_id)
-          break unless ledger.blank?
+          p_vouchers = ledger.blank? ? [] : ledger.vouchers(:effective_on => self.effective_on, :total_amount => self.amount)
+          break unless p_vouchers.blank?
         end
-        unless ledger.blank?
-          p_vouchers = ledger.vouchers(:effective_on => self.effective_on, :total_amount => self.amount)
+        unless p_vouchers.blank?
           voucher = p_vouchers.first
           postings = voucher.blank? ? [] : voucher.ledger_postings
         end
