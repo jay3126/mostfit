@@ -217,7 +217,7 @@ class PaymentTransactions < Application
     if @error.blank?
       redirect request.referer, :message => {:notice => "Payment Transaction successfully deleted"}
     else
-      redirect request.referer, :message => {:notice => "Payment Transaction successfully deleted"}
+      redirect request.referer, :message => {:error => @error}
     end
   end
 
