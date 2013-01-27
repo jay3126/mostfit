@@ -145,6 +145,8 @@ class PaymentTransaction
     end
   end
 
+
+
   private
 
   # Constructs the hash required to create a payment

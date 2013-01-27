@@ -1,0 +1,53 @@
+:javascript
+  $('table.destroy_payments').dataTable({
+      "sScrollX": "100%",
+      "bPaginate": false,
+      "bJQueryUI": true,
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
+    });
+- if @payment_transactions.blank?
+  %h3
+    No Payments
+- else
+  %table.destroy_payments.dataTable.report.weeksheet.nojs
+    %thead
+      %tr{:style => 'text-align:left'}
+        %th
+          ID
+        %th
+          Effective On
+        %th
+          Amount
+        %th
+          Loan Lan
+        %th
+          Performed By
+        %th
+          Recorded By
+        %th
+          By Client
+        %th
+          Deleted At
+    - @payment_transactions.each do |pt|
+      - loan = Lending.get pt.on_product_id
+      %tr
+        %td
+          = pt.id
+        %td
+          = pt.effective_on
+        %td
+          = pt.payment_money_amount
+        %td
+          = link_to_with_rights loan.lan, url(:controller => :lendings, :action => :show, :id => loan.id)
+        %td
+          = StaffMember.get(pt.performed_by).name
+        %td
+          = User.get(pt.recorded_by).name
+        %td
+          = Client.get(pt.by_counterparty_id).name
+        %td
+          = pt.deleted_at
+
