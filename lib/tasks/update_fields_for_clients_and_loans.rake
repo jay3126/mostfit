@@ -80,8 +80,8 @@ USAGE_TEXT
             client_ids_read << [client.id]
 
             #updating client fields.
-            client.caste = caste_str.to_sym
-            client.religion = religion_str.to_sym
+            client.caste = caste_str.downcase.to_sym
+            client.religion = religion_str.downcase.to_sym
             client.priority_sector_list_id = psl.id
             client.psl_sub_category_id = sub_psl.id
             client.occupation_id = client_occupation.id
