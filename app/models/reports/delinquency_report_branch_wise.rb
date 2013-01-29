@@ -40,8 +40,8 @@ class DelinquencyReportBranchWise < Report
       all_payments                      = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date_for_delinquency_report(@date, *branch_id)
       amounts                           = all_payments.values.first
 
-      future_principal_outstanding = MoneyManager.default_zero_money
-      overdue_principal            = MoneyManager.default_zero_money
+      future_principal_outstanding   = MoneyManager.default_zero_money
+      overdue_principal              = MoneyManager.default_zero_money
       loan_total_repay_principal_amt = amounts['total_principal_amt']
       loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
       loan_repayment_principal_amt   = amounts['principal_amt']

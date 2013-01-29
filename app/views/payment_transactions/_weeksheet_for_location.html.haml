@@ -37,7 +37,7 @@
             Location
           %th{:colspan => 2}
             Client
-          %th{:colspan => 3}
+          %th{:colspan => 2}
             Loan
           %th{:colspan => 3}
             Installment
@@ -64,8 +64,6 @@
             Client Attendance
           %th
             Loan Id
-          %th
-            Amount
           %th
             Due Status
           %th
@@ -117,9 +115,6 @@
               %td
                 = link_to_with_rights ws.loan_lan_no, url(:controller => :lendings, :action => :show, :id => ws.loan_id)
               %td
-                = ws.loan_disbursed_amount.to_s
-                - total_disbursed_amount = total_disbursed_amount + ws.loan_disbursed_amount.amount unless ws.loan_disbursed_amount.blank?
-              %td
                 = ws.loan_due_status.to_s.humanize
               %td
                 = ws.loan_origin_schedule_date
@@ -157,8 +152,6 @@
           %th
           %th
           %th
-          %th{:style => "text-align:right"}
-            = Money.new(total_disbursed_amount,:INR).to_s
           %th
           %th
           %th
@@ -194,3 +187,7 @@
   .flickr_pagination
     = will_paginate @biz_locations, :container => false
 %br
+:javascript
+  $(document).ready(function() {
+    jQuery('.payment').hide();
+  });

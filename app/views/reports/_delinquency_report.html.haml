@@ -1,0 +1,69 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th{:style => 'display:none'}
+      %th
+        Description
+      %th
+        Accounts
+      %th
+        Loan Amount
+      %th
+        Outstanding
+      %th
+        Overdue Principal
+      %th
+        Overdue Interest
+      %th
+        Portfolio at Risk (PAR) (%)
+      %th
+        120
+
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - loan_count = 0
+    - @data[:status].each do |s|
+      - values = @data[s]
+      %tr
+        %td{:style => 'display:none'}
+        %td
+          %b
+            = s
+        %td
+          = values[:loans_count]
+          - loan_count += values[:loans_count]
+        %td
+          = values[:loan_amount]
+          - accumulate_row_values[:loan_amount] += values[:loan_amount]
+        %td
+          = values[:outstanding]
+          - accumulate_row_values[:outstanding] += values[:outstanding]
+        %td
+          = values[:overdue_principal]
+          - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
+        %td
+          = values[:overdue_interest]
+          - accumulate_row_values[:overdue_interest] += values[:overdue_interest]
+        %td
+          = values[:par]
+          = '%'
+        %td
+          = ''
+
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th
+        Total
+      %td
+        = loan_count
+      %td
+        = total_rows[:loan_amount]
+      %td
+        = total_rows[:outstanding]
+      %td
+      %td
+      %td
+      %td

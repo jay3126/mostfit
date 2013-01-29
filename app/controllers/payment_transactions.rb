@@ -65,8 +65,6 @@ class PaymentTransactions < Application
       @biz_locations, @weeksheets = collections_facade.get_all_collection_sheet_for_staff(@staff_member.id, @date, page, limit)
     end
     @weeksheets = @weeksheets.class == Array ? @weeksheets : [@weeksheets]
-    params.delete('_message') if params[:save_payment].blank?
-    params.delete('save_payment')
     display @weeksheets
   end
 
@@ -166,11 +164,13 @@ class PaymentTransactions < Application
     @staff_member_id     = params[:staff_member_id]
     @parent_location_id  = params[:parent_location_id]
     @child_location_id   = params[:child_location_id]
+    params[:page]       = params[:page].blank? ? 1 : params[:page]
     page                 = @message[:error].blank? ? params[:page].to_i+1 : params[:page]
+    @message[:notice].uniq! unless @message[:notice].blank?
+    @message[:error].uniq! unless @message[:error].blank?
     @@biz_location_ids = payments.values.collect{|s| s[:performed_at]}.compact.uniq
-    add_url = "?date=#{effective_on}&staff_member_id=#{params[:staff_member_id]}&parent_location_id=#{params[:parent_location_id]}&child_location_id=#{params[:child_location_id]}&page=#{page}&save_payment=true"
     # REDIRECT/RENDER
-    redirect request.referer+add_url, :message => @message
+    redirect resource(:payment_transactions, :payment_by_staff_member, :date => effective_on, :staff_member_id => params[:staff_member_id], :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id], :page => page, :save_payment => true), :message => @message
   end
 
   def payment_transactions_on_date
