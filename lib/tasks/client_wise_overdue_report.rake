@@ -49,7 +49,7 @@ namespace :mostfit do
 
       loan_payments = loan.payments(:received_on.lte => date1, :type => [:principal, :interest])
       last_payment_date_before_31st_jan_2013 = (loan_payments and not (loan_payments.empty?)) ? loan_payments.last.received_on : "No Payments received yet"
-      number_of_days_in_overdue = (loan_payments and not (loan_payments.empty?)) ? (Date.today - loan_payments.last.received_on) : 0
+      number_of_days_in_overdue = (loan_payments and (loan.status == :outstanding) and not (loan_payments.empty?)) ? (Date.today - loan_payments.last.received_on) : 0
       
       client = Client.get(loan.client_id)
       client_id = client.id
