@@ -115,16 +115,19 @@ class CollectionsFacade < StandardFacade
   end
 
   #following function will generate the daily collection sheet for staff_member.
-  def get_all_collection_sheet_for_staff(staff_id, on_date, page = nil, limit = nil)
+  def get_all_collection_sheet_for_staff(staff_id, on_date, branch = nil, page = nil, limit = nil)
     collection_sheet = []
     staff            = StaffMember.get staff_id
 
     #Find all centers by loan history on particular date
+    centers = branch.blank? ? [] : LocationLink.get_children_ids_by_sql(branch, on_date)
     location_locations = LocationManagement.locations_managed_by_staff_by_sql(staff.id, on_date)
     location_ids       = location_locations.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:administered_at_origin => location_locations.map(&:id)).aggregate(:administered_at_origin)
+
     if location_ids.blank?
       biz_locations = []
     else
+      location_ids = centers & location_ids unless branch.blank?
       biz_locations = page.blank? ? BizLocation.all(:id => location_ids) : BizLocation.all(:id => location_ids).paginate(:page => page, :per_page => limit) 
     end
     biz_locations.each do |biz_location|

@@ -140,12 +140,12 @@
               %td
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][receipt_no]", :style => "width:80px"
               %td
-                - total_schedule_due =( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) - ws.loan_advance_amount
+                - total_schedule_due = ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) - (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount)
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => total_schedule_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
                 - total_amount = total_amount + total_schedule_due.amount
                 - loan_row_count = loan_row_count + 1
         %tr{:location_id => location_id, :class => 'location_footer', :style => 'cursor:pointer;'}
-          %td{:style => "text-align:center; background:#888888;"}
+          %td{:style => "text-align:center; background-color:lightSlateGray"}
             = check_box :id => "toggle_select_to_disburse", :class => "payment_#{location_id}", :onclick => "toggle_check_box(this, 'payment_#{location_id}')"
           %th
             = biz_location.name.humanize
@@ -156,18 +156,18 @@
           %th
           %th
           %th
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             = Money.new(total_schedule_principal_due,:INR).to_s
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             = Money.new(total_actual_principal_outstanding,:INR).to_s
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             = Money.new(total_schedule_interest_due,:INR).to_s
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             = Money.new(total_actual_interest_outstanding,:INR).to_s
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             = Money.new(total_advance_amount,:INR).to_s
           %th
-          %th{:style => "text-align:right"}
+          %th{:style => "text-align:right;"}
             %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
               = Money.new(total_amount,:INR).to_s
     %table.narrow.form{:style => "text-align:right;width:100%;"}
@@ -190,4 +190,6 @@
 :javascript
   $(document).ready(function() {
     jQuery('.payment').hide();
+    jQuery('tr.location_footer').find('th').css('background-color', 'lightSlateGray');
+    jQuery('tr.location_footer').find('th').css('color', 'white');
   });

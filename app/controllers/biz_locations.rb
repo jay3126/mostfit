@@ -278,7 +278,9 @@ class BizLocations < Application
       return("<option value=''>Select Staff Member</option>")
     else
       location_id = params[:child_location_id].blank? ? params[:parent_location_id] : params[:child_location_id]
-      staff_members = StaffPosting.get_staff_assigned(location_id.to_i, get_effective_date).map(&:staff_assigned)
+      location = BizLocation.get location_id
+      child_locations = LocationLink.get_children_ids_by_sql(location, get_effective_date)
+      staff_members = LocationManagement.staffs_managed_to_location_by_sql(child_locations, get_effective_date)
       return("<option value=''>Select Staff Member</option>"+staff_members.map{|staff| "<option value=#{staff.id}>#{staff.name}"}.join)
     end
   end

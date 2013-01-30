@@ -160,6 +160,30 @@ class LocationLink
     end
   end
 
+  def self.get_children_ids_by_sql(for_location, on_date = Date.today, count = false)
+    if LINK_MODEL_NAME.include?(for_location.class.name)
+      model_type = for_location.class == BizLocation ? 1 : 2
+      child_ids = repository(:default).adapter.query("SELECT child_id FROM location_links WHERE deleted_at IS NULL AND parent_id = #{for_location.id} AND model_type = #{model_type} AND effective_on >= #{on_date}")
+      if child_ids.blank?
+        count == true ? 0 : []
+      else
+        if count
+          l_links = child_ids.blank? ? [] : repository(:default).adapter.query("select count(*) from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where l.parent_id = (select l1.parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          l_links.blank? ? 0 : l_links
+        else
+          l_links = repository(:default).adapter.query("select l.child_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l where l.parent_id = (select l1.parent_id from (select * from location_links where model_type = #{model_type} and child_id IN (#{child_ids.join(',')})) l1 where l.child_id = l1.child_id and l1.model_type = #{model_type} and l.parent_id = #{for_location.id} order by l1.effective_on desc limit 1 );")
+          if l_links.blank?
+            []
+          else
+            l_links
+          end
+        end
+      end
+    else
+      count == true ? 0 : []
+    end
+  end
+
   def self.all_children_by_sql(for_location, on_date = Date.today)
     if for_location.location_level.level == 0
       []

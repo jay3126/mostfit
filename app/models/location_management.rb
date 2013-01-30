@@ -113,6 +113,27 @@ class LocationManagement
     
   end
 
+  def self.staffs_ids_managed_to_location_by_sql(location_id, on_date = Date.today)
+    Validators::Arguments.not_nil?(location_id, on_date)
+
+    staff_query = {}
+    staff_query[:managed_location_id] = location_id
+    staff_query[:effective_on.lte]    = on_date
+    staff_query[:order]               = [:effective_on.desc]
+    location_admin                    = all(staff_query)
+
+    return [] if location_admin.empty?
+
+    staff_ids = repository(:default).adapter.query("select la.manager_staff_id from (select * from location_managements where manager_staff_id IN (#{location_admin.map(&:manager_staff_id).uniq.join(',')})) la where la.managed_location_id IN (#{location_admin.map(&:managed_location_id).uniq.join(',')}) and la.managed_location_id = (select la1.managed_location_id from (select * from location_managements where manager_staff_id IN (#{location_admin.map(&:manager_staff_id).uniq.join(',')})) la1 where la.managed_location_id = la1.managed_location_id AND la.manager_staff_id = la1.manager_staff_id order by la1.effective_on desc limit 1 );")
+    staff_ids.blank? ? [] : staff_ids
+
+  end
+
+  def self.staffs_managed_to_location_by_sql(location_id, on_date = Date.today)
+    staff_ids = staffs_ids_managed_to_location_by_sql(location_id, on_date)
+    staff_ids.blank? ? [] : StaffMember.all(:id => staff_ids)
+  end
+
   def self.check_valid_obj(staff_member, location, effective_on, performed_by, recorded_by)
     Validators::Arguments.not_nil?(staff_member, location, effective_on, performed_by, recorded_by)
 
