@@ -115,6 +115,34 @@ class PaymentTransaction
     recorded_payment
   end
 
+  def self.bulk_record_payment(obj = [])
+    last_id = PaymentTransaction.last.id
+    values = []
+    obj.each do |payment|
+      last_id += 1
+      amount = payment.amount
+        currency = Constants::Money::CURRENCIES.index(payment.currency).blank? ? 0 : Constants::Money::CURRENCIES.index(:INR)+1
+      receipt_no = payment.receipt_no.blank? ? '' : payment.receipt_no
+      receipt_type = Constants::Transaction::RECEIVED_OR_PAID.index(payment.receipt_type)+1
+      payment_towards = Constants::Transaction::PAYMENT_TOWARDS_TYPES.index(payment.payment_towards)+1
+      on_product_type = Constants::Transaction::TRANSACTED_PRODUCTS.index(payment.on_product_type)+1
+      on_product_id = payment.on_product_id
+      by_counterparty_type = Constants::Transaction::COUNTERPARTIES.index(payment.by_counterparty_type)+1
+      by_counterparty_id = payment.by_counterparty_id
+      performed_at = payment.performed_at
+      accounted_at = payment.accounted_at
+      performed_by = payment.performed_by
+      recorded_by = payment.recorded_by
+      effective_on = payment.effective_on.strftime("%Y-%m-%d")
+      values << "(#{last_id}, #{amount},#{currency},'#{receipt_no}',#{receipt_type},#{payment_towards},#{on_product_type}, #{on_product_id}, #{by_counterparty_type},#{by_counterparty_id},#{performed_at},#{accounted_at}, #{performed_by},#{recorded_by},'#{effective_on}')"
+    end
+    if values.blank?
+      ''
+    else
+      "INSERT INTO payment_transactions (id, amount, currency,receipt_no,receipt_type,payment_towards,on_product_type,on_product_id, by_counterparty_type,by_counterparty_id,performed_at,accounted_at,performed_by,recorded_by,effective_on) VALUES #{values.join(',')}"
+    end
+  end
+
   def delete_payment_transaction
     if REVERT_PAYMENT_TOWARDS.include?(self.payment_towards)
       loan_receipt = self.loan_receipt

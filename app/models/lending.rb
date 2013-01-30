@@ -579,6 +579,17 @@ class Lending
       zero_money_amount
   end
 
+  def actual_total_due_kk(on_date)
+    loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
+    loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
+    total_received = (loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received] + loan_receipts_amt[:advance_received]) - loan_receipts_amt[:advance_adjusted]
+    loan_schedules = self.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date)
+    schedule_principal = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
+    schedule_interest = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_interest_due).sum.to_i)
+    total_schedule = schedule_principal + schedule_interest
+    (total_schedule > total_received) ? (total_schedule - total_received) : zero_money_amount
+  end
+
   def actual_total_due_ignoring_advance_balance(on_date)
     _scheduled_total_outstanding = scheduled_total_outstanding(on_date)
     _actual_total_outstanding    = actual_total_outstanding
@@ -596,6 +607,19 @@ class Lending
 
   def actual_total_outstanding
     actual_principal_outstanding + actual_interest_outstanding
+  end
+
+  def actual_total_outstanding_kk
+    loan_receipts_till_date = self.loan_receipts
+    loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
+    principal_received = loan_receipts_amt[:principal_received]
+    interest_received = loan_receipts_amt[:interest_received]
+    loan_schedules = self.loan_base_schedule.base_schedule_line_items
+    schedule_principal = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
+    schedule_interest = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_interest_due).sum.to_i)
+    due_principal = schedule_principal > principal_received ? schedule_principal - principal_received : zero_money_amount
+    due_interest = schedule_interest > interest_received ? schedule_interest - interest_received : zero_money_amount
+    {:total_outstanding => due_principal+due_interest, :principal_outstanding => due_principal, :interest_outstanding => due_interest}
   end
 
   def accrued_interim_interest(from_date, to_date)
@@ -817,6 +841,12 @@ class Lending
     return NOT_APPLICABLE unless is_outstanding_now?
     due_status_from_outstanding(Date.today)
   end
+
+  def current_due_status_kk(on_date)
+    return NOT_APPLICABLE unless is_outstanding_now?
+    loan_due_status = self.loan_due_statuses(:on_date => on_date).last
+    loan_due_status.blank? ? LoanDueStatus.generate_loan_due_status(self.id, on_date).due_status : loan_due_status.due_status
+  end
   
   def due_status_from_outstanding(on_date)
     return NOT_APPLICABLE unless is_outstanding_on_date?(on_date)
@@ -878,11 +908,10 @@ class Lending
 
   def allocate_payment(payment_transaction, loan_action, make_specific_allocation = false, specific_principal_amount = nil, specific_interest_amount = nil, fee_instance_id = nil, adjust_complete_advance = false)
     if Mfi.first.system_state != :migration
-      is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
+      #is_transaction_permitted_val = is_payment_permitted?(payment_transaction)
 
-      is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] :
-        [true, nil]
-      raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
+      # is_transaction_permitted, error_message = is_transaction_permitted_val.is_a?(Array) ? [is_transaction_permitted_val.first, is_transaction_permitted_val.last] : [true, nil]
+      # raise Errors::BusinessValidationError, error_message unless is_transaction_permitted
 
       if (make_specific_allocation)
         raise ArgumentError, "A principal and interest amount to allocate must be specified" unless (specific_principal_amount and specific_interest_amount)
@@ -910,23 +939,24 @@ class Lending
   end
 
   def process_allocation(payment_transaction, loan_action, allocation)
-    generate_loan_due_status_record(payment_transaction.effective_on)
+  #  generate_loan_due_status_record(payment_transaction.effective_on)
     process_status_change(payment_transaction, loan_action, allocation)
     allocation
   end
 
   def process_status_change(payment_transaction, loan_action, allocation)
     if payment_transaction.receipt_type == RECEIPT
+      outstandings = actual_total_outstanding_kk
       if ([LOAN_ADVANCE_ADJUSTMENT, LOAN_REPAYMENT].include?(loan_action))
-        if (actual_total_outstanding == zero_money_amount)
+        if (outstandings[:total_outstanding] == zero_money_amount)
           repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
           raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
-          mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, actual_principal_outstanding, actual_interest_outstanding)
+          mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, outstandings[:principal_outstanding], outstandings[:interest_outstanding])
         end
       elsif loan_action == LOAN_PRECLOSURE
         repaid_nature = LoanLifeCycle::REPAYMENT_ACTIONS_AND_REPAID_NATURES[loan_action]
         raise Errors::BusinessValidationError, "Repaid nature not configured for loan action: #{loan_action}" unless repaid_nature
-        mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, actual_principal_outstanding, actual_interest_outstanding)
+        mark_loan_repaid(repaid_nature, payment_transaction.effective_on, payment_transaction.performed_by, outstandings[:principal_outstanding], outstandings[:interest_outstanding])
       end
     end
   end
@@ -1090,12 +1120,12 @@ class Lending
     current_status = self.status
     raise Errors::InvalidStateChangeError, "Loan status is already #{new_loan_status}" if current_status == new_loan_status
     self.status = new_loan_status
-#    if ((Mfi.first.system_state != :migration) and (self.status == :new_loan_status))
-#      loan_product_identifier = LendingProduct.get_loan_product_identifier(self.lending_product_id)
-#      branch_identifier = BizLocation.get_biz_location_identifier(self.accounted_at_origin)
-#      lan_id = "%.6i"%Lending.get_lan_identifier
-#      self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
-#    end
+    #    if ((Mfi.first.system_state != :migration) and (self.status == :new_loan_status))
+    #      loan_product_identifier = LendingProduct.get_loan_product_identifier(self.lending_product_id)
+    #      branch_identifier = BizLocation.get_biz_location_identifier(self.accounted_at_origin)
+    #      lan_id = "%.6i"%Lending.get_lan_identifier
+    #      self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
+    #    end
     raise Errors::DataError, self.errors.first.first unless self.save
     
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
@@ -1191,7 +1221,6 @@ class Lending
     end
   end
   
-  private
 
   def get_loan_fee_product
     FeeAdministration.get_fee_products(self.lending_product)
@@ -1286,7 +1315,7 @@ class Lending
       return Money.add_total_to_map(resulting_allocation, TOTAL_RECEIVED)
     end
 
-    _current_due_status = (on_date < self.scheduled_first_repayment_date) ? NOT_DUE : current_due_status
+    _current_due_status = (on_date < self.scheduled_first_repayment_date) ? NOT_DUE : current_due_status_kk(on_date)
 
     #allocate when not due
     unless (adjust_advance)
@@ -1305,7 +1334,7 @@ class Lending
       resulting_allocation[INTEREST_RECEIVED]  = interest
       resulting_allocation[ADVANCE_ADJUSTED] = total_amount
     else
-      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) : self.actual_total_due(on_date)
+      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) : self.actual_total_due_kk(on_date)
        
       only_principal_and_interest = [_actual_total_due, total_amount].min
 
@@ -1332,11 +1361,13 @@ class Lending
 
   def allocate_principal_and_interest(total_money_amount, on_date)
     earlier_allocation = {}
-    earlier_allocation[:principal] = principal_received_till_date(on_date)
-    earlier_allocation[:interest]  = interest_received_till_date(on_date)
+    loan_receipts = self.loan_receipts(:effective_on.lte => on_date)
+    loan_amts = LoanReceipt.add_up(loan_receipts)
+    earlier_allocation[:principal] = loan_amts[:principal_received]
+    earlier_allocation[:interest]  = loan_amts[:interest_received]
 
     # Netoff the amount received earlier against earlier amortization items
-    all_previous_amortization_items = get_all_amortization_items_till_date(on_date)
+    all_previous_amortization_items = self.loan_base_schedule.get_all_amortization_items_till_date(on_date)
     unallocated_amortization_items = allocator.netoff_allocation(earlier_allocation, all_previous_amortization_items)
 
     # Allocation to be done on the amount that is not advance

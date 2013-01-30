@@ -38,7 +38,6 @@ module BookKeeper
     postings = product_accounting_rule.get_posting_info(payment_transaction, payment_allocation)
     receipt_type = payment_transaction.receipt_type == Constants::Transaction::PAYMENT ? payment_transaction.receipt_type : Constants::Transaction::RECEIPT
     Voucher.create_generated_voucher(total_amount, receipt_type, currency, effective_on, postings, payment_transaction.performed_at, payment_transaction.accounted_at, notation, payment_transaction)
-    payment_transaction.update(:accounting => true)
   end
 
   def account_for_due_generation(loan, payment_allocation, on_date = Date.today)

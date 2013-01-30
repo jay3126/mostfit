@@ -11,7 +11,8 @@
             = select :name => "parent_location_id", :text_method => :name, :value_method => :id, :collection => get_all_nominal_branches, :prompt => "Select branch", :id => "parent_selector", :selected => params[:parent_location_id], :class => 'location chosen'
           %th Staff Member:
           %th
-            - staff_members = (params[:parent_location_id].blank? && params[:staff_member_id].blank?) ? [] : StaffPosting.get_staff_assigned(params[:parent_location_id].to_i, get_effective_date).map(&:staff_assigned)
+            - child_locations = params[:parent_location_id].blank? ? [] : LocationLink.get_children_ids_by_sql(@parent_biz_location, get_effective_date)
+            - staff_members = child_locations.blank? ? [] : LocationManagement.staffs_managed_to_location_by_sql(child_locations, get_effective_date)
             = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id], :class => 'chosen'
           %th Select Date:
           %th

@@ -111,7 +111,7 @@ class PaymentTransactions < Application
             product_id      = payment_value[:product_id]
             performed_at    = payment_value[:performed_at]
             accounted_at    = payment_value[:accounted_at]
-            receipt_no      = payment_value[:receipt_no]
+            receipt_no      = payment_value[:receipt_no].blank? ? nil : payment_value[:receipt_no]
             if ['client_attendance','payment_and_client_attendance'].include?(operation)
               @client_attendance[cp_id]                     = {}
               @client_attendance[cp_id][:counterparty_type] = 'client'
@@ -140,19 +140,28 @@ class PaymentTransactions < Application
           end
         end
         if @message[:error].blank?
+          payments  = {}
           @payment_transactions.each do |pt|
             begin
-              money_amount = pt.to_money[:amount]
-              product_action = pt.payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY ? Constants::Transaction::LOAN_RECOVERY : Constants::Transaction::LOAN_REPAYMENT
-              payment_facade.record_payment(money_amount, pt.receipt_type, pt.payment_towards, pt.receipt_no, pt.on_product_type, pt.on_product_id, pt.by_counterparty_type, pt.by_counterparty_id, pt.performed_at, pt.accounted_at, pt.performed_by, pt.effective_on, product_action)
-              @message[:notice] << "#{operation.humanize} successfully created"
+              if pt.save
+                payments[pt] == payment_facade.record_payment_allocation(pt)
+                @message[:notice] << "#{operation.humanize} successfully created"
+              else
+                @message[:error] << "An error has occured: #{pt.errors.first}"
+              end
             rescue => ex
               @message[:error] << "An error has occured: #{ex.message}"
             end
           end
           
+          payments.each do |payment, allocation|
+            payment_facade.record_payment_accounting(payment, allocation)
+          end
+
           if ['client_attendance','payment_and_client_attendance'].include?(operation)
-            AttendanceRecord.save_and_update(@client_attendance) if @client_attendance.size > 0
+            Thread.new{
+              AttendanceRecord.save_and_update(@client_attendance) if @client_attendance.size > 0
+            }
             @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
           end
         end

@@ -113,6 +113,21 @@ class LocationManagement
     
   end
 
+  def self.location_ids_managed_by_staff_by_sql(staff_id, on_date = Date.today)
+    Validators::Arguments.not_nil?(staff_id, on_date)
+
+    locations_query = {}
+    locations_query[:manager_staff_id] = staff_id
+    locations_query[:effective_on.lte] = on_date
+    loaction_admin = all(locations_query)
+
+    return [] if loaction_admin.empty?
+
+    l_links = repository(:default).adapter.query("select la.managed_location_id from (select * from location_managements where managed_location_id IN (#{loaction_admin.map(&:managed_location_id).join(',')})) la where la.manager_staff_id = (select manager_staff_id from (select * from location_managements where managed_location_id IN (#{loaction_admin.map(&:managed_location_id).join(',')})) la1 where la.managed_location_id = la1.managed_location_id AND la.manager_staff_id = #{staff_id} order by la1.effective_on desc limit 1 );")
+    l_links.blank? ? [] : l_links
+
+  end
+
   def self.staffs_ids_managed_to_location_by_sql(location_id, on_date = Date.today)
     Validators::Arguments.not_nil?(location_id, on_date)
 

@@ -121,8 +121,8 @@ class CollectionsFacade < StandardFacade
 
     #Find all centers by loan history on particular date
     centers = branch.blank? ? [] : LocationLink.get_children_ids_by_sql(branch, on_date)
-    location_locations = LocationManagement.locations_managed_by_staff_by_sql(staff.id, on_date)
-    location_ids       = location_locations.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:administered_at_origin => location_locations.map(&:id)).aggregate(:administered_at_origin)
+    managed_location_ids = LocationManagement.location_ids_managed_by_staff_by_sql(staff.id, on_date)
+    location_ids         = managed_location_ids.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:administered_at_origin => managed_location_ids).aggregate(:administered_at_origin)
 
     if location_ids.blank?
       biz_locations = []
@@ -136,6 +136,7 @@ class CollectionsFacade < StandardFacade
       all_schedules                        = loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan_ids)
       loans_receipts                       = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids)
       schedules_on_date                    = all_schedules.select{|s| s.on_date == on_date}
+
       schedules_on_date.each do |schedule|
         loan                               = schedule.loan_base_schedule.lending
         loan_schedule_till_date            = all_schedules.select{|s| s.loan_base_schedule.lending_id == loan.id && s.on_date <= schedule.on_date}
@@ -154,7 +155,7 @@ class CollectionsFacade < StandardFacade
         loan_disbursed_interest            = loan.loan_base_schedule.to_money[:total_interest_applicable]
         loan_status                        = loan.status
         loan_disbursal_date                = loan.disbursal_date
-        loan_due_status                    = loan.current_due_status
+        loan_due_status                    = loan.current_due_status_kk(on_date)
         scheduled_installment_no           = schedule.installment
         scheduled_installment_date         = schedule.on_date
         schedule_principal_till_date       = loan_schedule_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_till_date.map(&:scheduled_principal_due).sum.to_i)

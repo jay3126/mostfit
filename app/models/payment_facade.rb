@@ -24,6 +24,17 @@ class PaymentFacade < StandardFacade
     fee_receipt_manager.record_fee_receipts(*fee_receipt_info_list)
   end
 
+  def record_payment_accounting(payment_transaction, payment_allocation)
+    Thread.new {
+      accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
+      LoanDueStatus.generate_loan_due_status(payment_transaction.on_product_id, payment_transaction.effective_on)
+    }
+  end
+
+  def record_payment_allocation(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
+    loan_facade.allocate_payment(payment_transaction, payment_transaction.on_product_id, payment_transaction.product_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, '')
+  end
+
   def record_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
     payment_transaction = PaymentTransaction.record_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, for_user.id)
     payment_allocation = loan_facade.allocate_payment(payment_transaction, on_product_id, product_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, '')

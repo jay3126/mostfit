@@ -140,7 +140,7 @@
               %td
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][receipt_no]", :style => "width:80px"
               %td
-                - total_schedule_due = ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) - (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount)
+                - total_schedule_due = ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) > (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount) ? ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) - (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount) : MoneyManager.default_zero_money
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => total_schedule_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
                 - total_amount = total_amount + total_schedule_due.amount
                 - loan_row_count = loan_row_count + 1
