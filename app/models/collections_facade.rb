@@ -122,8 +122,7 @@ class CollectionsFacade < StandardFacade
     #Find all centers by loan history on particular date
     centers = branch.blank? ? [] : LocationLink.get_children_ids_by_sql(branch, on_date)
     managed_location_ids = LocationManagement.location_ids_managed_by_staff_by_sql(staff.id, on_date)
-    location_ids         = managed_location_ids.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:administered_at_origin => managed_location_ids).aggregate(:administered_at_origin)
-
+    location_ids         = managed_location_ids.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:status => LoanLifeCycle::DISBURSED_LOAN_STATUS, :administered_at_origin => managed_location_ids).aggregate(:administered_at_origin)
     if location_ids.blank?
       biz_locations = []
     else
@@ -188,8 +187,10 @@ class CollectionsFacade < StandardFacade
           actual_principal_outstanding, actual_interest_outstanding, total_actual_outstanding,loan_lan_no,
           principal_overdue_on_date, interest_overdue_on_date)
       end
-      groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
-      collection_sheet << CollectionSheet.new(biz_location.id, biz_location.name, on_date, '', '', '', '', collection_sheet_line, groups)
+      unless collection_sheet_line.blank?
+        groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
+        collection_sheet << CollectionSheet.new(biz_location.id, biz_location.name, on_date, '', '', '', '', collection_sheet_line, groups)
+      end
     end
     page.blank? ? [location_ids, collection_sheet] : [location_ids.paginate(:page => page, :per_page => limit), collection_sheet]
   end
