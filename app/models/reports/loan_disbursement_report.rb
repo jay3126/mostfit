@@ -37,6 +37,8 @@ class LoanDisbursementReport < Report
       client_id = client.id
       client_name = client.name
       client_group = (client and client.client_group and (not client.client_group.nil?)) ? client.client_group.name : "Not attached to any group"
+      client_caste = (client and client.caste and (not client.caste.nil?)) ? client.caste.capitalize : "Caste not specified"
+      client_religion = (client and client.religion and (not client.religion.nil?)) ? client.religion.capitalize : "Religion not specified"
 
       center = Center.get(loan.c_center_id)
       center_id = center.id
@@ -47,7 +49,8 @@ class LoanDisbursementReport < Report
       branch_name = branch.name
 
       data[loan] = {:branch_id => branch_id, :branch_name => branch_name, :center_id => center_id, :center_name => center_name, :client_id => client_id, :client_name => client_name,
-        :client_group => client_group, :loan_id => loan_id, :loan_amount => loan_amount, :loan_disbursal_date => loan_disbursal_date, :loan_purpose => loan_purpose, :loan_interest_rate => loan_interest_rate
+        :client_group => client_group, :loan_id => loan_id, :loan_amount => loan_amount, :loan_disbursal_date => loan_disbursal_date, :loan_purpose => loan_purpose,
+        :loan_interest_rate => loan_interest_rate, :client_caste => client_caste, :client_religion => client_religion
       }
     end
     data

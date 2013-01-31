@@ -14,6 +14,10 @@
     %th
       Client Name
     %th
+      Caste
+    %th
+      Religion
+    %th
       Client Group Name
     %th
       Loan Id
@@ -44,6 +48,10 @@
       %td
         = values[1][:client_name]
       %td
+        = values[1][:client_caste]
+      %td
+        = values[1][:client_religion]
+      %td
         = values[1][:client_group]
       %td
         = values[1][:loan_id]
@@ -62,6 +70,8 @@
       %b Total
     %td
       = total_count
+    %td
+    %td
     %td
     %td
     %td
