@@ -122,7 +122,7 @@ class CollectionsFacade < StandardFacade
     #Find all centers by loan history on particular date
     centers = branch.blank? ? [] : LocationLink.get_children_ids_by_sql(branch, on_date)
     managed_location_ids = LocationManagement.location_ids_managed_by_staff_by_sql(staff.id, on_date)
-    location_ids         = managed_location_ids.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date).loan_base_schedule.lending(:status => LoanLifeCycle::DISBURSED_LOAN_STATUS, :administered_at_origin => managed_location_ids).aggregate(:administered_at_origin)
+    location_ids         = managed_location_ids.blank? ? [] : Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => Date.today, :status => LoanLifeCycle::DISBURSED_LOAN_STATUS, :administered_at_origin => managed_location_ids).aggregate(:administered_at_origin)
     if location_ids.blank?
       biz_locations = []
     else

@@ -144,16 +144,15 @@ class PaymentTransactions < Application
           @payment_transactions.each do |pt|
             begin
               if pt.save
-                payments[pt] == payment_facade.record_payment_allocation(pt)
+                payments[pt] = payment_facade.record_payment_allocation(pt)
                 @message[:notice] << "#{operation.humanize} successfully created"
               else
-                @message[:error] << "An error has occured: #{pt.errors.first}"
+                @message[:error] << "An error has occured: #{pt.errors.first.join(',')}"
               end
             rescue => ex
               @message[:error] << "An error has occured: #{ex.message}"
             end
           end
-          
           payments.each do |payment, allocation|
             payment_facade.record_payment_accounting(payment, allocation)
           end
