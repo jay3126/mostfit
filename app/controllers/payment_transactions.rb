@@ -95,80 +95,72 @@ class PaymentTransactions < Application
     
     # OPERATIONS PERFORMED
     if @message[:error].blank?
-      begin
-        payments.values.select{|d| d[:payment]}.each do |payment_value|
-          unless payment_value[:payment].blank?
+      payments.values.select{|d| d[:payment]}.each do |payment_value|
+        unless payment_value[:payment].blank?
 
-            lending = Lending.get(payment_value[:product_id])
-            if lending.is_written_off?
-              payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY
-            else
-              payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
-            end
-            money_amount    = MoneyManager.get_money_instance(payment_value[:amount].to_f)
-            cp_id           = payment_value[:counterparty_id]
-            product_id      = payment_value[:product_id]
-            performed_at    = payment_value[:performed_at]
-            accounted_at    = payment_value[:accounted_at]
-            receipt_no      = payment_value[:receipt_no].blank? ? nil : payment_value[:receipt_no]
-            if ['client_attendance','payment_and_client_attendance'].include?(operation)
-              @client_attendance[cp_id]                     = {}
-              @client_attendance[cp_id][:counterparty_type] = 'client'
-              @client_attendance[cp_id][:counterparty_id]   = cp_id
-              @client_attendance[cp_id][:on_date]           = effective_on
-              @client_attendance[cp_id][:at_location]       = performed_at
-              @client_attendance[cp_id][:performed_by]      = performed_by
-              @client_attendance[cp_id][:recorded_by]       = recorded_by
-              @client_attendance[cp_id][:attendance]        = payment_value[:client_attendance]
-            end
-            if(money_amount.amount > 0 && ['payment','payment_and_client_attendance'].include?(operation))
-              payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
-                :on_product_type      => product_type, :on_product_id  => product_id, :receipt_no => receipt_no,
-                :performed_at         => performed_at, :accounted_at   => accounted_at,
-                :performed_by         => performed_by, :recorded_by    => recorded_by,
-                :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
-                :receipt_type         => receipt, :payment_towards     => payment_towards)
-              if payment_transaction.valid?
-                if lending.is_payment_permitted?(payment_transaction)
-                  @payment_transactions << payment_transaction
-                else
-                  @message[:error] << "#{product_type}(#{product_id}) : {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
-                end
+          lending = Lending.get(payment_value[:product_id])
+          if lending.is_written_off?
+            payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_RECOVERY
+          else
+            payment_towards  = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+          end
+          money_amount    = MoneyManager.get_money_instance(payment_value[:amount].to_f)
+          cp_id           = payment_value[:counterparty_id]
+          product_id      = payment_value[:product_id]
+          performed_at    = payment_value[:performed_at]
+          accounted_at    = payment_value[:accounted_at]
+          receipt_no      = payment_value[:receipt_no].blank? ? nil : payment_value[:receipt_no]
+          if ['client_attendance','payment_and_client_attendance'].include?(operation)
+            @client_attendance[cp_id]                     = {}
+            @client_attendance[cp_id][:counterparty_type] = 'client'
+            @client_attendance[cp_id][:counterparty_id]   = cp_id
+            @client_attendance[cp_id][:on_date]           = effective_on
+            @client_attendance[cp_id][:at_location]       = performed_at
+            @client_attendance[cp_id][:performed_by]      = performed_by
+            @client_attendance[cp_id][:recorded_by]       = recorded_by
+            @client_attendance[cp_id][:attendance]        = payment_value[:client_attendance]
+          end
+          if(money_amount.amount > 0 && ['payment','payment_and_client_attendance'].include?(operation))
+            payment_transaction     = PaymentTransaction.new(:amount => money_amount.amount, :currency => currency, :effective_on => effective_on,
+              :on_product_type      => product_type, :on_product_id  => product_id, :receipt_no => receipt_no,
+              :performed_at         => performed_at, :accounted_at   => accounted_at,
+              :performed_by         => performed_by, :recorded_by    => recorded_by,
+              :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
+              :receipt_type         => receipt, :payment_towards     => payment_towards)
+            if payment_transaction.valid?
+              if lending.is_payment_permitted?(payment_transaction)
+                @payment_transactions << payment_transaction
               else
                 @message[:error] << "#{product_type}(#{product_id}) : {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
               end
+            else
+              @message[:error] << "#{product_type}(#{product_id}) : {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
             end
           end
         end
-        if @message[:error].blank?
-          payments  = {}
-          @payment_transactions.each do |pt|
-            begin
-              if pt.save
-                payments[pt] = payment_facade.record_payment_allocation(pt)
-                @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
-              else
-                @message[:error] << "An error has occured for #{Loan}(#{pt.on_product_id}) : #{pt.errors.first.join(',')}"
-              end
-            rescue => ex
-              @message[:error] << "An error has occured for #{Loan}(#{pt.on_product_id}) : #{ex.message}"
-            end
-          end
-
-          if ['client_attendance','payment_and_client_attendance'].include?(operation)
-            Thread.new{
-              AttendanceRecord.save_and_update(@client_attendance) if @client_attendance.size > 0
-            }
+      end
+      if @message[:error].blank?
+        payments  = {}
+        @payment_transactions.each do |pt|
+          if pt.save
+            payments[pt] = payment_facade.record_payment_allocation(pt)
             @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
+          else
+            @message[:error] << "An error has occured for #{Loan}(#{pt.on_product_id}) : #{pt.errors.first.join(',')}"
           end
-          Thread.new{
-            payments.each do |payment, allocation|
-              payment_facade.record_payment_accounting(payment, allocation)
-            end
-          }
         end
-      rescue => ex
-        @message[:error] << "An error has occured: #{ex.message}"
+
+        if ['client_attendance','payment_and_client_attendance'].include?(operation)
+          Thread.new{
+            AttendanceRecord.save_and_update(@client_attendance) if @client_attendance.size > 0
+          }
+          @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
+        end
+        Thread.new{
+          payments.each do |payment, allocation|
+            payment_facade.record_payment_accounting(payment, allocation)
+          end
+        }
       end
     end
     @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
