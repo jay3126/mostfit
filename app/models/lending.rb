@@ -1435,4 +1435,11 @@ class Lending
   # Search # ends
   ##########
 
+  def self.update_status_for_repaid
+    payment_transactions = PaymentTransaction.all(:effective_on.gte => Date.new(2013,01,01), :payment_towards => :payment_towards_loan_repayment ,:receipt_type => :receipt)
+    payment_transactions.each do |pt|
+      loan = Lending.get pt.on_product_id
+      loan.process_allocation(pt, LOAN_REPAYMENT, '') if loan.is_outstanding_now? && loan.valid?
+    end
+  end
 end

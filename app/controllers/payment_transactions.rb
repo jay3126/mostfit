@@ -27,7 +27,7 @@ class PaymentTransactions < Application
     @parent_biz_location = LocationLink.get_parent(@biz_location, @date)
     @user                = session.user
     @staff_member        = @user.staff_member
-    @weeksheet           = CollectionsFacade.new(session.user.id).get_collection_sheet(@biz_location.id, @date)
+    @weeksheet           = CollectionsFacade.new(session.user.id).get_collection_sheet_for_location(@biz_location.id, @date)
     partial 'payment_transactions/weeksheet_payments', :layout => layout?
   end
 

@@ -62,7 +62,7 @@ class UserLocations < Application
     unless @meeting_schedule.blank?
       @next_meeting      = meeting_facade.get_next_meeting(@biz_location, @date)
       @previous_meeting  = meeting_facade.get_previous_meeting(@biz_location, @date)
-      @weeksheet         = collections_facade.get_collection_sheet(@biz_location.id, @date)
+      @weeksheet         = collections_facade.get_collection_sheet_for_location(@biz_location.id, @date)
     end
     #generate scv route
     request    = Merb::Request.new(Merb::Const::REQUEST_PATH => url(:scv_checklist),Merb::Const::REQUEST_METHOD => "GET")

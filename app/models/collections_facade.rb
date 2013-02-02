@@ -195,6 +195,88 @@ class CollectionsFacade < StandardFacade
     page.blank? ? [location_ids, collection_sheet] : [location_ids.paginate(:page => page, :per_page => limit), collection_sheet]
   end
 
+  def get_collection_sheet_for_location(at_biz_location, on_date, only_installment_date = false)
+    collection_sheet_line = []
+    zero_amt              = MoneyManager.default_zero_money
+    on_date = on_date.class == Date ? on_date : Date.parse(on_date)
+    biz_location    = BizLocation.get(at_biz_location)
+    location_manage = LocationManagement.staff_managing_location(biz_location.id, on_date ) # Use this center_manager for staff ID, staff name
+    center_manager  = location_manage.manager_staff_member unless location_manage.blank?
+    manager_name    = center_manager.blank? ? 'No Manage' : center_manager.name
+    manager_id      = center_manager.blank? ? '' : center_manager.id
+
+    loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(biz_location.id, on_date, false, LoanLifeCycle::DISBURSED_LOAN_STATUS)
+    return [] if loan_ids.blank?
+
+    #    loans           = loans.select{|loan| loan.status == LoanLifeCycle::DISBURSED_LOAN_STATUS}
+    meeting_date    = meeting_facade.get_meeting(biz_location, on_date)
+    meeting_hours   = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_hours
+    meeting_minutes = meeting_date.blank? ? '00' : meeting_date.meeting_time_begins_minutes
+
+    collection_sheet_line                    = []
+    loans                                    = only_installment_date ? Lending.all(:id => loan_ids, "loan_base_schedule.base_schedule_line_items.on_date" => on_date) : Lending.all(:id => loan_ids, "loan_base_schedule.base_schedule_line_items.on_date".to_sym.lte => on_date)
+    all_schedules                            = loans.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loans.map(&:id))
+    loans_receipts                           = loans.blank? ? [] : LoanReceipt.all(:lending_id => loans.map(&:id))
+    loans.each do |loan|
+      loan_schedule_till_date                = all_schedules.select{|s| s.loan_base_schedule.lending_id == loan.id && s.on_date <= on_date}
+      schedule                               = only_installment_date ? loan_schedule_till_date.select{|s| s.on_date == on_date}.first : loan_schedule_till_date.last
+      unless schedule.blank?
+        client                               = loan.loan_borrower.counterparty
+        if client.active
+          client_name                        = client.name
+          client_id                          = client.id
+          client_group_id                    = client.client_group ? client.client_group.id : ''
+          client_group_name                  = client.client_group ? client.client_group.name : "Not attached to any group"
+          loan_id                            = loan.id
+          loan_lan_no                        = loan.lan
+          loan_receipt_on_date               = loans_receipts.select{|rl| rl.lending_id == loan.id && rl.effective_on == on_date}
+          loan_receipt_till_date             = loans_receipts.select{|rl| rl.lending_id == loan.id && rl.effective_on <= on_date}
+          loan_receipt_on_date_amt           = LoanReceipt.add_up(loan_receipt_on_date)
+          loan_receipt_till_date_amt         = LoanReceipt.add_up(loan_receipt_till_date)
+          loan_disbursed_principal           = loan.to_money[:disbursed_amount]
+          loan_disbursed_interest            = loan.loan_base_schedule.to_money[:total_interest_applicable]
+          loan_status                        = loan.status
+          loan_disbursal_date                = loan.disbursal_date
+          scheduled_installment_no           = schedule.installment
+          scheduled_installment_date         = schedule.on_date
+          schedule_principal_till_date       = loan_schedule_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_till_date.map(&:scheduled_principal_due).sum.to_i)
+          schedule_interest_till_date        = loan_schedule_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_till_date.map(&:scheduled_interest_due).sum.to_i)
+          principal_received_till_date       = loan_receipt_till_date_amt[:principal_received]
+          interest_received_till_date        = loan_receipt_till_date_amt[:interest_received]
+          advance_received_till_date         = loan_receipt_till_date_amt[:advance_received]
+          advance_adjust_till_date           = loan_receipt_till_date_amt[:advance_adjusted]
+          advance_balance_till_date          = advance_received_till_date > advance_adjust_till_date ? advance_received_till_date - advance_adjust_till_date : MoneyManager.default_zero_money
+          scheduled_principal_due            = schedule.to_money[:scheduled_principal_due]
+          scheduled_interest_due             = schedule.to_money[:scheduled_interest_due]
+          actual_principal_outstanding       = loan_disbursed_principal > principal_received_till_date ? loan_disbursed_principal - principal_received_till_date : MoneyManager.default_zero_money
+          actual_interest_outstanding        = loan_disbursed_interest > interest_received_till_date ? loan_disbursed_interest - interest_received_till_date : MoneyManager.default_zero_money
+
+          total_actual_outstanding           = actual_principal_outstanding + actual_interest_outstanding
+          principal_received                 = loan_receipt_on_date_amt[:principal_received]
+          interest_received                  = loan_receipt_on_date_amt[:interest_received]
+          advance_received                   = loan_receipt_on_date_amt[:advance_received]
+
+          principal_overdue                  = schedule_principal_till_date > principal_received_till_date ? schedule_principal_till_date - principal_received_till_date : MoneyManager.default_zero_money
+          interest_overdue                   = schedule_interest_till_date > interest_received_till_date ? schedule_interest_till_date - interest_received_till_date : MoneyManager.default_zero_money
+          principal_overdue_on_date          = principal_overdue >= scheduled_principal_due ? principal_overdue - scheduled_principal_due : principal_overdue
+          interest_overdue_on_date           = interest_overdue >= scheduled_interest_due ? interest_overdue - scheduled_interest_due : interest_overdue
+          loan_due_status                    = principal_overdue > zero_amt || interest_overdue > zero_amt ? 'Overdue' : 'Due'
+          collection_sheet_line << CollectionSheetLineItem.new(biz_location.id, biz_location.name, on_date, client_id, client_name, client_group_id,
+            client_group_name, loan_id, loan_disbursed_principal,
+            loan_status, loan_disbursal_date, loan_due_status, scheduled_installment_no, scheduled_installment_date, schedule.actual_date, '', MoneyManager.default_zero_money,
+            scheduled_principal_due, schedule[:scheduled_principal_outstanding], scheduled_interest_due, schedule[:scheduled_interest_outstanding],
+            advance_balance_till_date, principal_received, interest_received, advance_received,
+            MoneyManager.default_zero_money, MoneyManager.default_zero_money,
+            actual_principal_outstanding, actual_interest_outstanding, total_actual_outstanding,loan_lan_no,
+            principal_overdue_on_date, interest_overdue_on_date)
+        end
+      end
+    end
+    groups = collection_sheet_line.group_by{|x| [x.borrower_group_id, x.borrower_group_name]}.map{|c| c[0]}.sort_by { |obj| obj[1] }
+    CollectionSheet.new(biz_location.id, biz_location.name, on_date, meeting_hours, meeting_minutes, manager_id, manager_name, collection_sheet_line, groups)
+  end
+
+
   private
 
   def loan_facade
