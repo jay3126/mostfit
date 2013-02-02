@@ -1152,7 +1152,12 @@ class Lending
       lan_id = "%.6i"%Lending.get_lan_identifier
       self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
     end
-    raise Errors::DataError, self.errors.first.join(',') unless self.save
+    if self.valid?
+      self.save
+    else
+      error = self.errors.blank? ? 'Loan status cannot be change' : self.errors.first.join(',')
+      raise Errors::DataError, error
+    end
     
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
