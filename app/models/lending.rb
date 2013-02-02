@@ -971,6 +971,7 @@ class Lending
 
   def process_status_change(payment_transaction, loan_action, allocation)
     if payment_transaction.receipt_type == RECEIPT
+      self.reload
       outstandings = actual_total_outstanding_kk
       if ([LOAN_ADVANCE_ADJUSTMENT, LOAN_REPAYMENT].include?(loan_action))
         if (outstandings[:total_outstanding] == zero_money_amount)
@@ -1151,7 +1152,7 @@ class Lending
       lan_id = "%.6i"%Lending.get_lan_identifier
       self.lan = "LN-#{loan_product_identifier}-#{branch_identifier}-#{lan_id}"
     end
-    raise Errors::DataError, self.errors.first.first unless self.save
+    raise Errors::DataError, self.errors.first.join(',') unless self.save
     
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
   end
