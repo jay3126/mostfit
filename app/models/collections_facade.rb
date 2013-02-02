@@ -118,6 +118,7 @@ class CollectionsFacade < StandardFacade
   def get_all_collection_sheet_for_staff(staff_id, on_date, branch = nil, page = nil, limit = nil)
     collection_sheet = []
     staff            = StaffMember.get staff_id
+    zero_amt         = MoneyManager.default_zero_money
 
     #Find all centers by loan history on particular date
     centers = branch.blank? ? [] : LocationLink.get_children_ids_by_sql(branch, on_date)
@@ -135,7 +136,6 @@ class CollectionsFacade < StandardFacade
       all_schedules                        = loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan_ids)
       loans_receipts                       = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids)
       schedules_on_date                    = all_schedules.select{|s| s.on_date == on_date}
-
       schedules_on_date.each do |schedule|
         loan                               = schedule.loan_base_schedule.lending
         loan_schedule_till_date            = all_schedules.select{|s| s.loan_base_schedule.lending_id == loan.id && s.on_date <= schedule.on_date}
@@ -143,7 +143,7 @@ class CollectionsFacade < StandardFacade
         loan_receipt_till_date             = loans_receipts.select{|rl| rl.lending_id == loan.id && rl.effective_on <= schedule.on_date}
         loan_receipt_on_date_amt           = LoanReceipt.add_up(loan_receipt_on_date)
         loan_receipt_till_date_amt         = LoanReceipt.add_up(loan_receipt_till_date)
-        client                             = loan.borrower
+        client                             = loan.loan_borrower.counterparty
         client_name                        = client.name
         client_id                          = client.id
         client_group_id                    = client.client_group ? client.client_group.id : ''
@@ -154,7 +154,6 @@ class CollectionsFacade < StandardFacade
         loan_disbursed_interest            = loan.loan_base_schedule.to_money[:total_interest_applicable]
         loan_status                        = loan.status
         loan_disbursal_date                = loan.disbursal_date
-        loan_due_status                    = loan.current_due_status_kk(on_date)
         scheduled_installment_no           = schedule.installment
         scheduled_installment_date         = schedule.on_date
         schedule_principal_till_date       = loan_schedule_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_till_date.map(&:scheduled_principal_due).sum.to_i)
@@ -178,6 +177,7 @@ class CollectionsFacade < StandardFacade
         interest_overdue                   = schedule_interest_till_date > interest_received_till_date ? schedule_interest_till_date - interest_received_till_date : MoneyManager.default_zero_money
         principal_overdue_on_date          = principal_overdue >= scheduled_principal_due ? principal_overdue - scheduled_principal_due : principal_overdue
         interest_overdue_on_date           = interest_overdue >= scheduled_interest_due ? interest_overdue - scheduled_interest_due : interest_overdue
+        loan_due_status                    = principal_overdue > zero_amt || interest_overdue > zero_amt ? 'Overdue' : 'Due'
         collection_sheet_line << CollectionSheetLineItem.new(biz_location.id, biz_location.name, on_date, client_id, client_name, client_group_id,
           client_group_name, loan_id, loan_disbursed_principal,
           loan_status, loan_disbursal_date, loan_due_status, scheduled_installment_no, scheduled_installment_date, schedule.actual_date, '', MoneyManager.default_zero_money,

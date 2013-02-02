@@ -2,17 +2,20 @@ class Searches < Application
   
   def index
     if params[:query] and params[:query].length>=1
-      per_page       = request.xhr? ? 11 : 100
-      @locations     = BizLocation.search(params[:query], per_page)
-      @new_clients   = Client.search(params[:query], params[:search_on], per_page)
-      @lendings      = Lending.search(params[:query], per_page)
-      @client_groups = ClientGroup.search(params[:query], per_page)
-      @staff_members = StaffMember.search(params[:query], per_page)
-      @bookmarks     = Bookmark.search(params[:query], session.user, per_page)
-      @users         = User.search(params[:query], per_page)
-      @loan_files    = LoanFile.search(params[:query], per_page)
-      loan_app_condition = {:conditions => ["client_reference1 = ? or client_reference2 = ?",params[:query], params[:query]], :limit => per_page}
-      @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition)
+      params[:query] = params[:query].strip.split(/\W+/).first
+      unless params[:query].blank?
+        per_page       = request.xhr? ? 11 : 100
+        @locations     = BizLocation.search(params[:query], per_page)
+        @new_clients   = Client.search(params[:query], params[:search_on], per_page)
+        @lendings      = Lending.search(params[:query], per_page)
+        @client_groups = ClientGroup.search(params[:query], per_page)
+        @staff_members = StaffMember.search(params[:query], per_page)
+        @bookmarks     = Bookmark.search(params[:query], session.user, per_page)
+        @users         = User.search(params[:query], per_page)
+        @loan_files    = LoanFile.search(params[:query], per_page)
+        loan_app_condition = {:conditions => ["client_reference1 = ? or client_reference2 = ?",params[:query], params[:query]], :limit => per_page}
+        @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition)
+      end
     end
     @floating = true if request.xhr?
     render :layout => layout?
@@ -172,9 +175,9 @@ class Searches < Application
         # now we can load the relevant info for the related models
         @related_info = related_models.map do |model, relateds|
           [model,relateds.map do |r| 
-             # currently only supports aggregating on :name
-             [r[:related_model],Kernel.const_get(model.camel_case).all(:id => @result[model].keys).send(r[:related_model]).aggregate(:id,:name).to_hash] rescue nil
-           end.to_hash]
+              # currently only supports aggregating on :name
+              [r[:related_model],Kernel.const_get(model.camel_case).all(:id => @result[model].keys).send(r[:related_model]).aggregate(:id,:name).to_hash] rescue nil
+            end.to_hash]
         end.to_hash
         
         # this small couplet below turns the @result hash into a series of rows, just waiting to be printed
@@ -228,16 +231,16 @@ class Searches < Application
       end
     elsif property.class==DataMapper::Associations::ManyToOne::Relationship
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]", :collection => property.parent_model.all, 
-                    :value_method => :id, :text_method => :name,:prompt => "Choose #{property.name}", :selected => value)
+        :value_method => :id, :text_method => :name,:prompt => "Choose #{property.name}", :selected => value)
     elsif property.type==DataMapper::Types::Boolean
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]", 
-                    :collection => [["true", "yes"], ["false", "no"]], :prompt => "Choose #{property.name}", :selected => value)
+        :collection => [["true", "yes"], ["false", "no"]], :prompt => "Choose #{property.name}", :selected => value)
     elsif property.type == DataMapper::Types::Discriminator
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]",
-                    :collection => property.model.descendants.to_a.map{|e| [e.to_s, e.to_s]}, :prompt => "Choose #{property.name}", :selected => value)      
+        :collection => property.model.descendants.to_a.map{|e| [e.to_s, e.to_s]}, :prompt => "Choose #{property.name}", :selected => value)
     elsif property.type.class==Class
       return select(:id => "value_#{counter}", :name => "value[#{counter}][#{property.name}]", 
-                    :collection => property.type.flag_map.to_a, :prompt => "Choose #{property.name}", :selected => value)
+        :collection => property.type.flag_map.to_a, :prompt => "Choose #{property.name}", :selected => value)
     end
   end
 

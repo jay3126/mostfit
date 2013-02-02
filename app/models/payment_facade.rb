@@ -25,10 +25,8 @@ class PaymentFacade < StandardFacade
   end
 
   def record_payment_accounting(payment_transaction, payment_allocation)
-    Thread.new {
-      accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
-      LoanDueStatus.generate_loan_due_status(payment_transaction.on_product_id, payment_transaction.effective_on)
-    }
+    accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
+    LoanDueStatus.generate_loan_due_status(payment_transaction.on_product_id, payment_transaction.effective_on)
   end
 
   def record_payment_allocation(payment_transaction, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)

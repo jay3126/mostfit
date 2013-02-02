@@ -13,8 +13,9 @@ class LoanBorrower
   property :created_at,             *CREATED_AT
 
   has 1, :lending
+  belongs_to :counterparty, 'Client', :parent_key => [ :id ], :child_key  => [ :counterparty_id ]
 
-  def counterparty; Resolver.fetch_counterparty(self.counterparty_type, self.counterparty_id); end
+  #def counterparty; Resolver.fetch_counterparty(self.counterparty_type, self.counterparty_id); end
 
   validates_with_method :loan_applied_after_client_joined?
 

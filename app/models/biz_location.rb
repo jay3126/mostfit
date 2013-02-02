@@ -176,7 +176,7 @@ class BizLocation
     if /^\d+$/.match(q)
       BizLocation.all(:conditions => {:id => q}, :limit => per_page)
     else
-      BizLocation.all(:conditions => ["name=? or name like ?", q, q+'%'], :limit => per_page)
+      BizLocation.all(:conditions => ["name=? or name like ?", q,"#{q}%"], :limit => per_page)
     end
   end
 

@@ -12,13 +12,7 @@
         %th
           Client Name
         %th
-          Loan Id
-        %th
-          Loan Status
-        %th
-          Amount
-        %th
-          Disbursed On Date
+          Loan Lan
         %th
           Installment No.
         %th
@@ -28,11 +22,11 @@
         %th
           Schedule Principal Due
         %th
-          Actual Principal Outstanding
+          Principal Overdue
         %th
           Schedule Interest Due
         %th
-          Actual Interest Outstanding
+          Interest Overdue
         %th
           Advance Amount Balance
         %th
@@ -53,13 +47,7 @@
           %td
             = link_to_with_rights ws.borrower_name, url(:controller => :new_clients, :action => :show, :id => ws.borrower_id)
           %td
-            = link_to_with_rights ws.loan_id, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
-          %td
-            = ws.loan_status.to_s.humanize
-          %td
-            = ws.loan_disbursed_amount.to_s
-          %td
-            = ws.loan_disbursed_date
+            = link_to_with_rights ws.loan_lan_no, url(:controller => :lendings ,:action => :show, :id => ws.loan_id)
           %td
             = ws.loan_installment_number
           %td
@@ -69,11 +57,11 @@
           %td
             = ws.loan_schedule_principal_due.to_s
           %td
-            = ws.loan_actual_principal_outstanding.to_s
+            = ws.loan_principal_overdue.to_s
           %td
             = ws.loan_schedule_interest_due.to_s
           %td
-            = ws.loan_actual_interest_outstanding.to_s
+            = ws.loan_interest_overdue.to_s
           %td
             = ws.loan_advance_amount.to_s
           %td

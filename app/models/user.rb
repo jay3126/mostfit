@@ -108,7 +108,7 @@ class User
     if /^\d+$/.match(q)
       User.all(:conditions => {:id => q}, :limit => per_page)
     else
-      User.all(:conditions => ["login=? or login like ?", q, q+'%'], :limit => per_page)
+      User.all(:conditions => ["login=? or login like ?", q, "#{q}%"], :limit => per_page)
     end
   end
 

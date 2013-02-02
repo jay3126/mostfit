@@ -64,6 +64,7 @@ class Client
   has 1, :death_event, 'DeathEvent', :parent_key => [:id], :child_key => [:affected_client_id]
   has n, :attendance_records, :parent_key => [:id], :child_key => [:counterparty_id]
   has 1, :claim
+  has n, :loan_borrowers, :parent_key => [:id], :child_key => [:counterparty_id]
 
   has n, :loan_applications
 
@@ -173,7 +174,7 @@ class Client
     if /^\d+$/.match(q) && search_on == nil
       clients = all(:conditions => {:id => q}, :limit => per_page)
     else
-      clients = all(:conditions => ["reference=? or reference2=? or name like ?", q, q, q+'%'], :limit => per_page)
+      clients = all(:conditions => ["reference=? or reference2=? or name like ?", q, q, "#{q}%"], :limit => per_page)
       if clients.blank?
         q = q.gsub(/[^0-9]/, '')
         clients = all(:conditions => ["reference=? ", q], :limit => per_page)

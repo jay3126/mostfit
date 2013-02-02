@@ -51,7 +51,7 @@ class StaffMember
     if /^\d+$/.match(q)
       all(:conditions => {:id => q}, :limit => per_page)
     else
-      all(:conditions => ["name like ?", q+'%'], :limit => per_page)
+      all(:conditions => ["name like ?", "#{q}%"], :limit => per_page)
     end
   end
 

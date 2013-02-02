@@ -121,7 +121,7 @@ class PaymentTransaction
     obj.each do |payment|
       last_id += 1
       amount = payment.amount
-        currency = Constants::Money::CURRENCIES.index(payment.currency).blank? ? 0 : Constants::Money::CURRENCIES.index(:INR)+1
+      currency = Constants::Money::CURRENCIES.index(payment.currency).blank? ? 0 : Constants::Money::CURRENCIES.index(:INR)+1
       receipt_no = payment.receipt_no.blank? ? '' : payment.receipt_no
       receipt_type = Constants::Transaction::RECEIVED_OR_PAID.index(payment.receipt_type)+1
       payment_towards = Constants::Transaction::PAYMENT_TOWARDS_TYPES.index(payment.payment_towards)+1

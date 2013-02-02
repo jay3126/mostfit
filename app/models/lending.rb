@@ -328,7 +328,7 @@ class Lending
       if ([PAYMENT_TOWARDS_LOAN_REPAYMENT, PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT, PAYMENT_TOWARDS_LOAN_PRECLOSURE].include?(transaction_towards_type))
         return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
 
-        maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding : actual_total_outstanding_net_advance_balance
+        maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding_kk : actual_total_outstanding_net_advance_balance_kk
         if ((maximum_receipt_to_accept < transaction_money_amount) and Mfi.first.system_state != :migration)
           return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
         end
@@ -343,8 +343,11 @@ class Lending
         end
       end
     end
-    
-    true
+    if self.valid?
+      true
+    else
+      return [false, self.errors.first.join(',')]
+    end
   end
 
   def is_payment_transaction_permitted?(money_amount, on_date, for_staff_id, user_id)
@@ -598,11 +601,33 @@ class Lending
       zero_money_amount
   end
 
+  def actual_total_due_ignoring_advance_balance_kk(on_date)
+    loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
+    loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
+    total_received = loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received]
+    loan_schedules = self.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date)
+    schedule_principal = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
+    schedule_interest = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_interest_due).sum.to_i)
+    total_schedule = schedule_principal + schedule_interest
+    (total_schedule > total_received) ? (total_schedule - total_received) : zero_money_amount
+  end
+
   def actual_total_outstanding_net_advance_balance
     if (actual_total_outstanding > current_advance_available)
       return (actual_total_outstanding - current_advance_available)
     end
     zero_money_amount
+  end
+
+  def actual_total_outstanding_net_advance_balance_kk
+    loan_receipts_till_date = self.loan_receipts
+    loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
+    total_received = (loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received] + loan_receipts_amt[:advance_received]) - loan_receipts_amt[:advance_adjusted]
+    loan_schedules = self.loan_base_schedule.base_schedule_line_items
+    schedule_principal = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
+    schedule_interest = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_interest_due).sum.to_i)
+    total_schedule = schedule_principal + schedule_interest
+    (total_schedule > total_received) ? (total_schedule - total_received) : zero_money_amount
   end
 
   def actual_total_outstanding
@@ -939,7 +964,7 @@ class Lending
   end
 
   def process_allocation(payment_transaction, loan_action, allocation)
-  #  generate_loan_due_status_record(payment_transaction.effective_on)
+    #  generate_loan_due_status_record(payment_transaction.effective_on)
     process_status_change(payment_transaction, loan_action, allocation)
     allocation
   end
@@ -1396,7 +1421,7 @@ class Lending
     if /^\d+$/.match(q)
       Lending.all(:conditions => {:id => q}, :limit => per_page)
     else
-      Lending.all(:conditions => ["lan=? or lan like ?", q, q+'%'], :limit => per_page)
+      Lending.all(:conditions => ["lan=? or lan like ?", q, "#{q}%"], :limit => per_page)
     end
   end
 

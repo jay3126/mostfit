@@ -38,11 +38,15 @@
                       = link_to_with_rights obj.name, url(route)
                   - elsif function == :applied_amount
                     - if Lending.get(params[:query]).nil?
-                      - field = Lending.all(:lan => params[:query]).first.to_money[:applied_amount].to_s
-                      = link_to_with_rights(field, "/#{model}/#{obj.id}")
+                      - loan = Lending.all(:lan => params[:query]).first
+                      - unless loan.blank?
+                        - field = loan.to_money[:applied_amount].to_s
+                        = link_to_with_rights(field, "/#{model}/#{obj.id}")
                     - else
-                      - field = Lending.get(params[:query]).to_money[:applied_amount].to_s
-                      = link_to_with_rights(field, "/#{model}/#{obj.id}")
+                      - loan = Lending.get(params[:query])
+                      - unless loan.blank?
+                        - field = loan.to_money[:applied_amount].to_s
+                        = link_to_with_rights(field, "/#{model}/#{obj.id}")
                   - elsif model.to_sym == :locations
                     = link_to_with_rights obj.name, url(:controller => :user_locations, :action => "#{obj.location_level.level==0 ? 'weeksheet_collection' : 'show'}", :id => obj.id)
                   - else

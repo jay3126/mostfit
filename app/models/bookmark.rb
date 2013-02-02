@@ -30,7 +30,7 @@ class Bookmark
         b.share_with.include?(user.role)
       }
     else
-      all(:name.like => q+'%', :limit => per_page, :type => :system).find_all{|b|
+      all(:name.like => "%#{q}%", :limit => per_page, :type => :system).find_all{|b|
         b.share_with.include?(user.role)
       }
     end

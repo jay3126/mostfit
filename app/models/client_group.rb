@@ -36,7 +36,7 @@ class ClientGroup
     if /^\d+$/.match(q)
       all(:conditions => ["id = ? or code=?", q, q], :limit => per_page)
     else
-      all(:conditions => ["code=? or name like ?", q, q+'%'], :limit => per_page)
+      all(:conditions => ["code=? or name like ?", q, "#{q}%"], :limit => per_page)
     end
   end
 

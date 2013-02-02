@@ -54,7 +54,7 @@ class PaymentTransactions < Application
     @weeksheets      = []
     @message         = {}
     page             = params[:page].blank? ? 1 : params[:page]
-    limit            = 3
+    limit            = 5
     @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
     if @message[:error].blank?
       @date                = params[:date].blank? ? get_effective_date : Date.parse(params[:date])
@@ -92,7 +92,6 @@ class PaymentTransactions < Application
     @message[:error] << "Please Select Operation Type(Payment/Attendance/Both)" if operation.blank?
     @message[:error] << "Performed by must not be blank" if performed_by.blank?
     @message[:error] << "Please Select Check box For #{operation.humanize}" if payments.values.select{|f| f[:payment]}.blank?
-    @message[:error] << "Please Enter Amount Greater Than ZERO" if ['payment','payment_and_client_attendance'].include?(operation) && !payments.values.select{|f| f[:payment] && f[:amount].to_f <= 0}.blank?
     
     # OPERATIONS PERFORMED
     if @message[:error].blank?
@@ -130,11 +129,13 @@ class PaymentTransactions < Application
                 :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
                 :receipt_type         => receipt, :payment_towards     => payment_towards)
               if payment_transaction.valid?
-                if payment_facade.is_loan_payment_permitted?(payment_transaction)
+                if lending.is_payment_permitted?(payment_transaction)
                   @payment_transactions << payment_transaction
                 else
-                  @message[:error] << "#{@message[:error]}  #{product_type}(#{product_id}) {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
+                  @message[:error] << "#{product_type}(#{product_id}) : {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
                 end
+              else
+                @message[:error] << "#{product_type}(#{product_id}) : {#{payment_transaction.errors.collect{|error| error}.flatten.join(', ')}}"
               end
             end
           end
@@ -145,16 +146,13 @@ class PaymentTransactions < Application
             begin
               if pt.save
                 payments[pt] = payment_facade.record_payment_allocation(pt)
-                @message[:notice] << "#{operation.humanize} successfully created"
+                @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
               else
-                @message[:error] << "An error has occured: #{pt.errors.first.join(',')}"
+                @message[:error] << "An error has occured for #{Loan}(#{pt.on_product_id}) : #{pt.errors.first.join(',')}"
               end
             rescue => ex
-              @message[:error] << "An error has occured: #{ex.message}"
+              @message[:error] << "An error has occured for #{Loan}(#{pt.on_product_id}) : #{ex.message}"
             end
-          end
-          payments.each do |payment, allocation|
-            payment_facade.record_payment_accounting(payment, allocation)
           end
 
           if ['client_attendance','payment_and_client_attendance'].include?(operation)
@@ -163,6 +161,11 @@ class PaymentTransactions < Application
             }
             @message[:notice] << "#{operation.humanize} successfully created" if @message[:notice].blank?
           end
+          Thread.new{
+            payments.each do |payment, allocation|
+              payment_facade.record_payment_accounting(payment, allocation)
+            end
+          }
         end
       rescue => ex
         @message[:error] << "An error has occured: #{ex.message}"
@@ -178,7 +181,11 @@ class PaymentTransactions < Application
     @message[:error].uniq! unless @message[:error].blank?
     @@biz_location_ids = payments.values.collect{|s| s[:performed_at]}.compact.uniq
     # REDIRECT/RENDER
-    redirect resource(:payment_transactions, :payment_by_staff_member, :date => effective_on, :staff_member_id => params[:staff_member_id], :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id], :page => page, :save_payment => true), :message => @message
+    if !params[:payment_by].blank? && params[:payment_by] == 'payment_by_staff_member_ro'
+      redirect resource(:payment_transactions, :payment_by_staff_member, :date => effective_on, :staff_member_id => params[:staff_member_id], :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id], :page => page, :save_payment => true), :message => @message
+    else
+      redirect request.referer, :message => @message
+    end
   end
 
   def payment_transactions_on_date
