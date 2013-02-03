@@ -1000,7 +1000,7 @@ class Lending
     end
     set_status(status, on_date)
   end
-
+  
   def approve(approved_amount, approved_on_date, approved_by)
     #disabled validations in migration mode.
     if Mfi.first.system_state != :migration
@@ -1445,6 +1445,12 @@ class Lending
         elsif loan.status == REPAID_LOAN_STATUS
           LoanStatusChange.record_status_change(loan, DISBURSED_LOAN_STATUS, REPAID_LOAN_STATUS, pt.effective_on)
         end
+      elsif !loan.valid?
+        loan_receipt = pt.loan_receipt
+        voucher =  pt.voucher
+        loan_receipt.destroy! unless loan_receipt.blank?
+        voucher.destroy! unless voucher.blank?
+        pt.destroy!
       end
     end
   end
