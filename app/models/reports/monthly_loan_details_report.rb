@@ -42,7 +42,15 @@ class MonthlyLoanDetailsReport < Report
       repaid_loans = Lending.total_loans_on_date('repaid_loan_status', @date)
       @loan_ids = (preclose_loans+repaid_loans).to_a.paginate(:page => @page, :per_page => @limit)
     else
-      @loan_ids = []
+      if @funding_line_id.blank?
+        loans = Lending.total_loans_on_date('', @date)
+        disbursed_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:disbursed_loan_status)+1].map(&:lending_id)
+        repay_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:repaid_loan_status)+1].map(&:lending_id)
+        preclouse_loans = loans[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].blank? ? [] : loans[LoanLifeCycle::LOAN_STATUSES.index(:preclosed_loan_status)+1].map(&:lending_id)
+        @loan_ids = disbursed_loans + repay_loans + preclouse_loans
+      else
+        @loan_ids = []
+      end
     end
     f_loans         = @funding_line_id.blank? ? @loan_ids : FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
     @loan_ids       = @status.blank? ? f_loans.paginate(:page => @page, :per_page => @limit) : (f_loans & @loan_ids).paginate(:page => @page, :per_page => @limit)
@@ -89,12 +97,12 @@ class MonthlyLoanDetailsReport < Report
       loan_purpose               = loan.loan_purpose
       loan_cycle                 = loan.cycle_number
       loan_roi                   = loan_product.interest_rate
-#      loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
+      #      loan_insurance             = loan.simple_insurance_policies.blank? ? MoneyManager.default_zero_money : Money.new(loan.simple_insurance_policies.aggregate(:insured_amount.sum).to_i, default_currency)
       loan_insurance             = MoneyManager.default_zero_money
 
       loan_first_payment_date    = loan.loan_receipts.blank? ? loan.scheduled_first_repayment_date : loan.loan_receipts.first.effective_on
-#      fee_receipts               = FeeReceipt.all_paid_loan_fee_receipts(loan.id).map(&:fee_money_amount)
-#      fee_collected              = fee_receipts.blank? ? MoneyManager.default_zero_money : fee_receipts.sum
+      #      fee_receipts               = FeeReceipt.all_paid_loan_fee_receipts(loan.id).map(&:fee_money_amount)
+      #      fee_collected              = fee_receipts.blank? ? MoneyManager.default_zero_money : fee_receipts.sum
       fee_collected              = MoneyManager.default_zero_money
       installment_amount         = loan.scheduled_total_due(loan.scheduled_first_repayment_date)
       installment_frequency      = loan_product.repayment_frequency

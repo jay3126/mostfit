@@ -1439,7 +1439,13 @@ class Lending
     payment_transactions = PaymentTransaction.all(:effective_on.gte => Date.new(2013,01,01), :payment_towards => :payment_towards_loan_repayment ,:receipt_type => :receipt)
     payment_transactions.each do |pt|
       loan = Lending.get pt.on_product_id
-      loan.process_allocation(pt, LOAN_REPAYMENT, '') if loan.is_outstanding_now? && loan.valid?
+      if loan.is_outstanding_now? && loan.valid?
+        if loan.status == DISBURSED_LOAN_STATUS
+          loan.process_allocation(pt, LOAN_REPAYMENT, '')
+        elsif loan.status == REPAID_LOAN_STATUS
+          LoanStatusChange.record_status_change(loan, DISBURSED_LOAN_STATUS, REPAID_LOAN_STATUS, pt.effective_on)
+        end
+      end
     end
   end
 end
