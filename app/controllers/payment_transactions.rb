@@ -54,7 +54,7 @@ class PaymentTransactions < Application
     @weeksheets      = []
     @message         = {}
     page             = params[:page].blank? ? 1 : params[:page]
-    limit            = 5
+    limit            = 10
     @message[:error] = 'Staff Member cannot be blank' if params[:staff_member_id].blank?
     if @message[:error].blank?
       @date                = params[:date].blank? ? get_effective_date : Date.parse(params[:date])

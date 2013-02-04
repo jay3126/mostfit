@@ -87,14 +87,13 @@
           %th
             Total Due
       - loan_row_count = 1
+      - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+      - @default_currency ||= MoneyManager.get_default_currency
       - @weeksheets.group_by{|w| w.at_biz_location_id}.each do |location_id, weeksheet|
         - weeksheet       = weeksheet.first
         - biz_location    = BizLocation.get weeksheet.at_biz_location_id
         - parent_location = LocationLink.get_parent(biz_location)
-        - total_disbursed_amount, total_schedule_principal_due, total_due_principal, total_schedule_principal_outstanding, total_schedule_interest_due = 0, 0, 0, 0, 0
-        - total_schedule_interest_outstanding, total_advance_amount, total_principal_due, total_interest_due, total_amount = 0, 0, 0, 0, 0
-        - total_actual_principal_outstanding, total_actual_interest_outstanding = 0, 0
-        - grp_amount, grp_outstanding, grp_installments, grp_principal_paid, grp_principal_due, grp_interest_due, grp_interest_paid, grp_fee_due, grp_fee_paid, grp_total_due, grp_total_paid = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        - accumulate_center_values = Hash.new(MoneyManager.default_zero_money)
         - weeksheet.groups.each do |group|
           - collection_sheets = weeksheet.collection_sheet_lines.select{|cs| cs.borrower_group_id == group[0]}.sort_by{|cs| cs.borrower_name} rescue []
           - collection_sheets.each do |ws|
@@ -124,31 +123,38 @@
                 = ws.loan_schedule_date
               %td
                 = ws.loan_schedule_principal_due.to_s
-                - total_schedule_principal_due = total_schedule_principal_due + ws.loan_schedule_principal_due.amount unless ws.loan_schedule_principal_due.blank?
+                - accumulate_center_values[:schedule_principal_due] += ws.loan_schedule_principal_due
+                - accumulate_row_values[:schedule_principal_due] += ws.loan_schedule_principal_due
               %td
                 = ws.loan_principal_overdue.to_s
-                - total_actual_principal_outstanding = total_actual_principal_outstanding + ws.loan_principal_overdue.amount unless ws.loan_principal_overdue.blank?
+                - accumulate_center_values[:principal_overdue] += ws.loan_principal_overdue
+                - accumulate_row_values[:principal_overdue] += ws.loan_principal_overdue
               %td
                 = ws.loan_schedule_interest_due.to_s
-                - total_schedule_interest_due = total_schedule_interest_due + ws.loan_schedule_interest_due.amount unless ws.loan_schedule_interest_due.blank?
+                - accumulate_center_values[:schedule_interest_due] += ws.loan_schedule_interest_due
+                - accumulate_row_values[:schedule_interest_due] += ws.loan_schedule_interest_due
               %td
                 = ws.loan_interest_overdue.to_s
-                - total_actual_interest_outstanding = total_actual_interest_outstanding + ws.loan_interest_overdue.amount unless ws.loan_interest_overdue.blank?
+                - accumulate_center_values[:interest_overdue] += ws.loan_interest_overdue
+                - accumulate_row_values[:interest_overdue] += ws.loan_interest_overdue
               %td
                 = ws.loan_advance_amount.to_s
-                - total_advance_amount = total_advance_amount + ws.loan_advance_amount.amount unless ws.loan_advance_amount.blank?
+                - accumulate_center_values[:total_advance_amount] += ws.loan_advance_amount
+                - accumulate_row_values[:total_advance_amount] += ws.loan_advance_amount
               %td
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][receipt_no]", :style => "width:80px"
               %td
                 - total_schedule_due = ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) > (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount) ? ( ws.loan_schedule_principal_due + ws.loan_schedule_interest_due + ws.loan_principal_overdue + ws.loan_interest_overdue) - (ws.loan_principal_receipts + ws.loan_interest_receipts + ws.loan_advance_amount) : MoneyManager.default_zero_money
                 = text_field :name => "payment_transactions[payments][#{loan_row_count}][amount]", :value => total_schedule_due.to_s.delete("a-z A-Z"), :class => "weeksheet_total_#{biz_location.id}", :onkeyup => "update_total_on_div_amount('INR', '#{biz_location.id}');", :style => "width:100px"
-                - total_amount = total_amount + total_schedule_due.amount
+                - accumulate_center_values[:total_amount] += total_schedule_due
+                - accumulate_row_values[:total_amount] += total_schedule_due
                 - loan_row_count = loan_row_count + 1
+        - total_center_rows = Money.add_money_hash_values(@default_currency, accumulate_center_values)
         %tr{:location_id => location_id, :class => 'location_footer', :style => 'cursor:pointer;'}
           %td{:style => "text-align:center; background-color:lightSlateGray"}
             = check_box :id => "toggle_select_to_disburse", :class => "payment_#{location_id}", :onclick => "toggle_check_box(this, 'payment_#{location_id}')"
           %th
-            = biz_location.name.humanize
+            = biz_location.name.upcase
           %th
           %th
           %th
@@ -157,19 +163,52 @@
           %th
           %th
           %th{:style => "text-align:right;"}
-            = Money.new(total_schedule_principal_due,:INR).to_s
+            = total_center_rows[:schedule_principal_due]
           %th{:style => "text-align:right;"}
-            = Money.new(total_actual_principal_outstanding,:INR).to_s
+            = total_center_rows[:principal_overdue]
           %th{:style => "text-align:right;"}
-            = Money.new(total_schedule_interest_due,:INR).to_s
+            = total_center_rows[:schedule_interest_due]
           %th{:style => "text-align:right;"}
-            = Money.new(total_actual_interest_outstanding,:INR).to_s
+            = total_center_rows[:interest_overdue]
           %th{:style => "text-align:right;"}
-            = Money.new(total_advance_amount,:INR).to_s
+            = total_center_rows[:total_advance_amount]
           %th
           %th{:style => "text-align:right;"}
             %div{:id => "weeksheet_total_amount_#{biz_location.id}"}
-              = Money.new(total_amount,:INR).to_s
+              = total_center_rows[:total_amount]
+      - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+      %tfoot
+        %tr
+          %th
+          %th
+            %b
+              Grand Total
+          %th
+          %th
+          %th
+          %th
+          %th
+          %th
+          %th
+          %th
+            %b
+              = total_rows[:schedule_principal_due]
+          %th
+            %b
+              = total_rows[:principal_overdue]
+          %th
+            %b
+              = total_rows[:schedule_interest_due]
+          %th
+            %b
+              = total_rows[:interest_overdue]
+          %th
+            %b
+              = total_rows[:total_advance_amount]
+          %th
+          %th
+            %b
+              = total_rows[:total_amount]
     %table.narrow.form{:style => "text-align:right;width:100%;"}
       %tfoot
         %tr

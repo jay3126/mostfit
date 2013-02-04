@@ -29,17 +29,18 @@ class LoanCollectionsDetailReport < Report
   def generate
 
     data = {}
-    location_facade = get_location_facade(@user)
     reporting_facade = get_reporting_facade(@user)
     location = @biz_location_branch.blank? ? nil : BizLocation.get(@biz_location_branch)
     all_center_ids_array = @biz_location_branch.blank? ? [] : LocationLink.all_children_by_sql(location, @date)
-    all_center_ids_array.flatten.each do |center|
+    center_ids_repayment_on_date = all_center_ids_array.blank? ? [] : Lending.all(:administered_at_origin => all_center_ids_array.map(&:id), 'loan_base_schedule.base_schedule_line_items.on_date' => @date).aggregate(:administered_at_origin) rescue []
+    centers_repayment_on_date = center_ids_repayment_on_date.blank? ? [] : BizLocation.all(:id => center_ids_repayment_on_date)
+    centers_repayment_on_date.each do |center|
       center_id = center.id
       center_name = center ? center.name : "Not Specified"
       branch = location
       branch_name = branch ? branch.name : "Not Specified"
       dues_collected_and_collectable = reporting_facade.total_schedule_collected_and_collectable_per_center_on_date(center_id, @date)
-      receipt_number = "Not Specified"
+      receipt_number = ""
       staff_name = dues_collected_and_collectable[:managed_by_staff]
       data[staff_name] = [] if data[staff_name].blank?
       if dues_collected_and_collectable[:scheduled_total] > MoneyManager.default_zero_money
