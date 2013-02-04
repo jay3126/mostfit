@@ -33,7 +33,27 @@ class ReportingFacade < StandardFacade
     result = {:installments_remaining => installments_remaining, :installments_paid_till_date => installments_paid_till_date}
   end
 
-  #this method will return due collected and due collectable per location on a date.
+  #this method will return due collected and due collectable per location(Branch) on a date.
+  def total_schedule_collected_and_collectable_per_center_on_date(at_location_id, on_date = Date.today)
+    loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(at_location_id, on_date, false, 'disbursed_loan_status')
+    schedule_loans_on_date = Lending.all(:id => loan_ids, 'loan_base_schedule.base_schedule_line_items.on_date' => on_date)
+    loan_schedules = schedule_loans_on_date.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date, 'loan_base_schedule.lending_id' => schedule_loans_on_date.map(&:id))
+    principal_schedule_amt = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
+    interest_schedule_amt = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_interest_due).sum.to_i)
+    total_scheduled = principal_schedule_amt + interest_schedule_amt
+ 
+    loan_receipts = schedule_loans_on_date.blank? ? [] : LoanReceipt.all(:lending_id => schedule_loans_on_date.map(&:id), :effective_on => on_date)
+    loan_amts = LoanReceipt.add_up(loan_receipts)
+    principal_received = loan_amts[:principal_received]
+    interest_received = loan_amts[:interest_received]
+    total_received = principal_received + interest_received
+    managed_by_staff = LocationManagement.staff_managing_location(at_location_id, on_date)
+    staff_name = managed_by_staff.blank? ? 'Not Managed' : StaffMember.get(managed_by_staff.manager_staff_id).name
+    
+    {:managed_by_staff => staff_name, :scheduled_principal => principal_schedule_amt, :scheduled_interest => interest_schedule_amt, :scheduled_total => total_scheduled, :principal_received => principal_received, :interest_received => interest_received, :total_received => total_received}
+  end
+
+  #this method will return due collected and due collectable per location(Branch) on a date.
   def total_dues_collected_and_collectable_per_location_on_date(at_location_id, on_date = Date.today)
     result = {}
     loan_ids = []

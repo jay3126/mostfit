@@ -2,93 +2,76 @@
 %table.dataTable.report.weeksheet.nojs
   %thead
     %tr
-      %th
-        Branch Id
+      %th{:style => 'display:none'}
       %th
         Branch Name
       %th
-        Center Id
-      %th
         Center Name
-      %th{:colspan => 3}
+      %th
         Dues Collectable
-      %th{:colspan => 3}
+      %th
         Dues Collected
       %th
         Receipt Number
 
-    %tr
-      %th
-      %th
-      %th
-      %th
-      %th
-        Principal Due
-      %th
-        Interest Due
-      %th
-        Total Due
-      %th
-        Principal Received
-      %th
-        Interest Received
-      %th
-        Total Received
-      %th
-
   %tbody
     - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
     - @default_currency ||= MoneyManager.get_default_currency
-    - @data.sort_by{|center| center}.each do |center, values|
-      %tr
-        %td
-          = values[:branch_id]
-        %td
-          = values[:branch_name]
-        %td
-          = values[:center_id]
-        %td
-          = values[:center_name]
-        %td
-          - dues = values[:dues_collected_and_collectable]
-          = dues[:schedule_principal_due]
-          - accumulate_row_values[:principal_due] += dues[:schedule_principal_due]
-        %td
-          = dues[:schedule_interest_due]
-          - accumulate_row_values[:interest_due] += dues[:schedule_interest_due]
-        %td
-          = dues[:schedule_total_due]
-          - accumulate_row_values[:total_due] += dues[:schedule_total_due]
-        %td
-          = dues[:principal_collected]
-          - accumulate_row_values[:principal_collected] += dues[:principal_collected]
-        %td
-          = dues[:interest_collected]
-          - accumulate_row_values[:interest_collected] += dues[:interest_collected]
-        %td
-          = dues[:total_collected]
-          - accumulate_row_values[:total_collected] += dues[:total_collected]
-        %td
-          = values[:receipt_number]
+    - @data.each do |staff, centers|
+      - unless centers.blank?
+        - accumulate_staff_values = Hash.new(MoneyManager.default_zero_money)
+        %tr
+          %th{:style => 'display:none'}
+          %th
+          %th
+            = staff
+          %th
+          %th
+          %th
+        - centers.each do |values|
+          %tr
+            %td{:style => 'display:none'}
+            %td
+              = values[:branch_name]
+            %td
+              = values[:center_name]
+            %td
+              - dues = values[:dues_collected_and_collectable]
+              = dues[:scheduled_total]
+              - accumulate_row_values[:total_due] += dues[:scheduled_total]
+              - accumulate_staff_values[:total_due] += dues[:scheduled_total]
+            %td
+              = dues[:total_received]
+              - accumulate_row_values[:total_received] += dues[:total_received]
+              - accumulate_staff_values[:total_received] += dues[:total_received]
+            %td
+              = values[:receipt_number]
+        - total_staff = Money.add_money_hash_values(@default_currency, accumulate_staff_values)
+        %tr
+          %th{:style => 'display:none'}
+          %td{:style => "text-align:center; background:#708890;"}
+            %b Total
+          %td{:style => "text-align:center; background:#708890;"}
+          %td{:style => "text-align:center; background:#708890;"}
+            %b
+              = total_staff[:total_due]
+          %td{:style => "text-align:center; background:#708890;"}
+            %b
+              = total_staff[:total_received]
+          %td{:style => "text-align:center; background:#708890;"}
 
   - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
   %tfoot
     %tr
+      %th{:style => 'display:none'}
       %th
-        Total
-      %td
-      %td
-      %td
-      %td
-        = total_rows[:principal_due]
-      %td
-        = total_rows[:interest_due]
-      %td
-        = total_rows[:total_due]
-      %td
-        = total_rows[:principal_collected]
-      %td
-        = total_rows[:interest_collected]
-      %td
-        = total_rows[:total_collected]
-      %td
+        %b
+          Grand Total
+      %th
+      %th
+        %b
+          = total_rows[:total_due]
+      %th
+        %b
+          = total_rows[:total_received]
+      %th

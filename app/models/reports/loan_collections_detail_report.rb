@@ -6,9 +6,7 @@ class LoanCollectionsDetailReport < Report
     @date = dates[:date] || Date.today
     @name = "Loan Collections Detail Report on #{@date}"
     @user = user
-    location_facade = get_location_facade(@user)
-    all_branch_ids = location_facade.all_nominal_branches.collect {|branch| branch.id}
-    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : all_branch_ids
+    @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : []
     get_parameters(params, user)
   end
 
@@ -33,27 +31,20 @@ class LoanCollectionsDetailReport < Report
     data = {}
     location_facade = get_location_facade(@user)
     reporting_facade = get_reporting_facade(@user)
-    all_center_ids_array = []
-
-    if @biz_location_branch.class == Fixnum
-      all_center_ids_array = location_facade.get_children(BizLocation.get(@biz_location_branch), @date).map{|bl| bl.id}
-    else
-      locations = @biz_location_branch.each do |b|
-        all_center_ids_array << location_facade.get_children(BizLocation.get(b), @date).map{|blz| blz.id}
-      end
-    end
-
-    all_center_ids_array.flatten.each do |center_id|
-      center = BizLocation.get(center_id)
-      center_ids = center ? center.biz_location_identifier : "Not Specified"
+    location = @biz_location_branch.blank? ? nil : BizLocation.get(@biz_location_branch)
+    all_center_ids_array = @biz_location_branch.blank? ? [] : LocationLink.all_children_by_sql(location, @date)
+    all_center_ids_array.flatten.each do |center|
+      center_id = center.id
       center_name = center ? center.name : "Not Specified"
-      branch = location_facade.get_parent(BizLocation.get(center_id), @date)
-      branch_id = branch ? branch.biz_location_identifier : "Not Specified"
+      branch = location
       branch_name = branch ? branch.name : "Not Specified"
-      dues_collected_and_collectable = reporting_facade.total_dues_collected_and_collectable_per_location_on_date(center_id, @date)
+      dues_collected_and_collectable = reporting_facade.total_schedule_collected_and_collectable_per_center_on_date(center_id, @date)
       receipt_number = "Not Specified"
-
-      data[center] = {:branch_id => branch_id, :branch_name => branch_name, :center_id => center_id, :center_name => center_name, :dues_collected_and_collectable => dues_collected_and_collectable, :receipt_number => receipt_number}
+      staff_name = dues_collected_and_collectable[:managed_by_staff]
+      data[staff_name] = [] if data[staff_name].blank?
+      if dues_collected_and_collectable[:scheduled_total] > MoneyManager.default_zero_money
+        data[staff_name] << {:staff_name => staff_name, :branch_name => branch_name, :center_name => center_name, :dues_collected_and_collectable => dues_collected_and_collectable, :receipt_number => receipt_number}
+      end
     end
     data
   end

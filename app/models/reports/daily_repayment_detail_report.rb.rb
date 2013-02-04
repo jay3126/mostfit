@@ -69,7 +69,7 @@ class DailyRepaymentDetailReport < Report
                 p_received = l_receipt[:principal_received] > s_principal ? s_principal : s_principal - l_receipt[:principal_received]
                 l_receipt[:principal_received] = l_receipt[:principal_received] > s_principal ? l_receipt[:principal_received] - s_principal : MoneyManager.default_zero_money
               else
-                l_receipt[:principal_received] = l_receipt[:principal_received] - aj_principal
+                l_receipt[:principal_received] = l_receipt[:principal_received] > aj_principal ? l_receipt[:principal_received] - aj_principal : MoneyManager.default_zero_money
                 p_received = aj_principal
                 received_amt_till_date[:principal_received] = MoneyManager.default_zero_money
               end
@@ -78,7 +78,7 @@ class DailyRepaymentDetailReport < Report
                 i_received = l_receipt[:interest_received] > s_interest ? s_interest : s_interest - l_receipt[:interest_received]
                 l_receipt[:interest_received] = l_receipt[:interest_received] > s_interest ? l_receipt[:interest_received] - s_interest : MoneyManager.default_zero_money
               else
-                l_receipt[:interest_received] = l_receipt[:interest_received] - aj_interest
+                l_receipt[:interest_received] = l_receipt[:interest_received] > aj_interest ? l_receipt[:interest_received] - aj_interest : MoneyManager.default_zero_money
                 i_received = aj_interest
                 received_amt_till_date[:interest_received] = MoneyManager.default_zero_money
               end
