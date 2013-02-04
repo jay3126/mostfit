@@ -1,0 +1,48 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        User Id
+      %th
+        User Name
+      %th
+        Staff Member Id
+      %th
+        Staff Member Name
+      %th
+        Designation
+      %th
+        Role
+      %th
+        Login Date
+      %th
+        Login Time
+      %th
+        Logout Date
+      %th
+        Logout Time
+
+  %tbody
+    - @data.sort_by{|login| login}.each do |login, values|
+      %tr
+        %td
+          = values[:logged_in_user_id]
+        %td
+          = values[:logged_in_user_name]
+        %td
+          = values[:staff_member_id]
+        %td
+          = values[:staff_member_name]
+        %td
+          = values[:designation_name]
+        %td
+          = values[:designation_role]
+        %td
+          = values[:login_date]
+        %td
+          = values[:login_time]
+        %td
+          = values[:logout_date]
+        %td
+          = values[:logout_time]
