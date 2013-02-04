@@ -130,6 +130,13 @@
         %li
           = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
 
+      - if session.user.staff_member.designation.role_class == :operator
+        %br
+        %h2 Access Logs
+        %ul.icon_links
+          %li
+            = link_to_with_rights 'User Access Report', url("reports/UserAccessReport"), :class => 'user icon'
+
       - if Mfi.first.system_state == :migration
         %br
         %h2 Data Migration

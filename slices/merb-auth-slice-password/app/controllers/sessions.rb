@@ -26,13 +26,13 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   def check_multiple_login
     last_login = session.user.login_instances.last
     if params[:session_destory] == "true"
-      last_login.update(:logout_time => Time.now) unless last_login.blank?
+      last_login.update(:logout_time => Time.now, :logout_date => Time.now.strftime("%d-%m-%Y")) unless last_login.blank?
       session.abandon!
       message[:notice] = "The User's Session Terminated Successfully"
       redirect "/login", :message => message
     else
       if last_login.blank? || !last_login.logout_time.blank?
-        login_instance = session.user.login_instances.new(:login_time => Time.now)
+        login_instance = session.user.login_instances.new(:login_time => Time.now, :login_date => Time.now.strftime("%d-%m-%Y"))
         login_instance.save
         session.merge!(:login_id => login_instance.id)
       else
@@ -85,7 +85,7 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
     user = session.user
     unless user.blank?
       last_login = user.login_instances.last
-      last_login.update(:logout_time => Time.now) unless last_login.blank?
+      last_login.update(:logout_time => Time.now, :logout_date => Time.now.strftime("%d-%m-%Y")) unless last_login.blank?
     end
     session.abandon!
   end
