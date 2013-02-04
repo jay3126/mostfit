@@ -68,17 +68,20 @@ class ReportingFacade < StandardFacade
     loan_schedule_items =  disbursed_loans.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => disbursed_loans, :on_date => on_date)
     schedule_loans = loan_schedule_items.blank? ? [] : loan_schedule_items.loan_base_schedule.map(&:lending_id)
     loan_schedule_amt = loan_schedule_items.blank? ? [] : loan_schedule_items.aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
-
+    non_schedule_loans = disbursed_loans - schedule_loans
     loan_receipts_before_on_date = disbursed_loans.blank? ? [] : LoanReceipt.all(:lending_id => disbursed_loans, :effective_on.lt => on_date).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum, :advance_adjusted.sum) rescue []
     preclose_loan_receipt_on_date = preclose_loans_on_date.blank? ? [] : LoanReceipt.all(:lending_id => preclose_loans_on_date, 'payment_transaction.payment_towards' => :payment_towards_loan_preclosure, :effective_on => on_date).aggregate(:principal_received.sum, :interest_received.sum) rescue []
 
     advance_available = loan_receipts_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_before_on_date[2].to_i-loan_receipts_before_on_date[3].to_i)
-
-    Lending.all(:id => disbursed_loans, :fields => [:id, :repayment_frequency]).group_by{|l| l.repayment_frequency}.each do |frequency, loans|
-      if frequency == :weekly || frequency == :biweekly
-        loan_ids << repository(:default).adapter.query("select lb.lending_id from base_schedule_line_items l INNER JOIN loan_base_schedules lb ON l.loan_base_schedule_id = lb.id where DAYNAME(l.on_date) = '#{on_date.weekday.to_s}' and lb.lending_id IN (#{loans.map(&:id).join(',')})")
-      elsif frequency == :monthly
-        loan_ids << repository(:default).adapter.query("select lb.lending_id from base_schedule_line_items l INNER JOIN loan_base_schedules lb ON l.loan_base_schedule_id = lb.id where DAYOFMONTH(l.on_date) = '#{on_date.day}' and lb.lending_id IN (#{loans.map(&:id).join(',')})")
+    future_loans = non_schedule_loans.blank? ? [] : Lending.all(:id => non_schedule_loans, 'loan_base_schedule.base_schedule_line_items.on_date'.to_sym.gte => on_date).aggregate(:id) rescue []
+    past_loans = non_schedule_loans.blank? ? [] : non_schedule_loans - future_loans
+    unless past_loans.blank?
+      Lending.all(:id => past_loans, :fields => [:id, :repayment_frequency]).group_by{|l| l.repayment_frequency}.each do |frequency, loans|
+        if frequency == :weekly || frequency == :biweekly
+          loan_ids << repository(:default).adapter.query("select l.id from lendings l where DAYNAME(l.scheduled_first_repayment_date) = '#{on_date.weekday.to_s}' and l.id IN (#{loans.map(&:id).join(',')})")
+        elsif frequency == :monthly
+          loan_ids << repository(:default).adapter.query("select l.id from lendings l where DAYOFMONTH(l.scheduled_first_repayment_date) = '#{on_date.day}' and l.id IN (#{loans.map(&:id).join(',')})")
+        end
       end
     end
     schedule_loans = (schedule_loans + loan_ids.flatten).uniq

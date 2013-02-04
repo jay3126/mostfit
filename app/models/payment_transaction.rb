@@ -36,6 +36,7 @@ end
 class PaymentTransaction
   include DataMapper::Resource
   include Constants::Properties, Constants::Money, Constants::Transaction, Constants::Accounting
+  include LoanLifeCycle
   
   property :id,                   Serial
   property :amount,               *MONEY_AMOUNT_NON_ZERO
@@ -147,6 +148,7 @@ class PaymentTransaction
     if REVERT_PAYMENT_TOWARDS.include?(self.payment_towards)
       loan_receipt = self.loan_receipt
       voucher = self.voucher
+      loan = Lending.get self.on_product_id
       p_vouchers = []
       postings = voucher.blank? ? [] : voucher.ledger_postings
       fee_receipt = self.fee_receipt
@@ -164,6 +166,25 @@ class PaymentTransaction
           voucher = p_vouchers.first
           postings = voucher.blank? ? [] : voucher.ledger_postings
         end
+      end
+      if loan.is_repaid?
+        last_status = loan.loan_status_changes.first(:from_status => DISBURSED_LOAN_STATUS, :to_status => REPAID_LOAN_STATUS)
+        repaid_status = loan.loan_repaid_status
+        repaid_status.destroy! unless repaid_status.blank?
+        last_status.destroy! unless last_status.blank?
+        loan.repaid_on_date = nil
+        loan.repaid_by_staff = nil
+        loan.status = DISBURSED_LOAN_STATUS
+        loan.save!
+      elsif loan.is_preclosed?
+        last_status = loan.loan_status_changes.first(:from_status => DISBURSED_LOAN_STATUS, :to_status => PRECLOSED_LOAN_STATUS)
+        repaid_status = loan.loan_repaid_status
+        repaid_status.destroy! unless repaid_status.blank?
+        last_status.destroy! unless last_status.blank?
+        loan.preclosed_on_date = nil
+        loan.preclosed_by_staff = nil
+        loan.status = DISBURSED_LOAN_STATUS
+        loan.save!
       end
       loan_receipt.destroy unless loan_receipt.blank?
       fee_receipt.destroy unless fee_receipt.blank?
