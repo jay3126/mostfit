@@ -217,7 +217,7 @@ class BizLocation
     ops_centers = []
     ops_members = []
     user = User.first
-    locations = self.location_level.level == 0 ? [self] : LocationLink.all_children(self, on_date)
+    locations = self.location_level.level == 0 ? [self] : LocationLink.all_children_by_sql(self, on_date)
     center_locations = locations.blank? ? [] : locations.select{|l| l.location_level.level == 0}
     repayments = center_locations.blank? ? [] : PaymentTransaction.all(:effective_on => on_date, :on_product_type => :lending, :payment_towards => :payment_towards_loan_disbursement, :performed_at => center_locations.map(&:id))
     unless repayments.blank?
@@ -233,13 +233,13 @@ class BizLocation
         grt_members << center_cycle.loan_applications if center_cycle.grt_completed_on == on_date
         grt_centers << center if center_cycle.grt_completed_on == on_date
       end
-      total_clients << ClientAdministration.get_clients_administered(center.id, on_date)
-      attendance_record << AttendanceRecord.get_client_attendance_at_location(center.id, on_date)
-      payment_collection = get_reporting_facade(user).total_dues_collected_and_collectable_per_location_on_date(self.id, on_date)
-      collectable_amt += payment_collection[:schedule_total_due]
-      collected_amt += payment_collection[:total_collected]
-      overdue_amt += payment_collection[:overdue_amount]
     end
+    total_clients = ClientAdministration.get_client_ids_registered_by_sql(self.id, on_date)
+    attendance_record = AttendanceRecord.get_client_attendance_at_location(center_locations.map(&:id), on_date)
+    payment_collection = get_reporting_facade(user).total_dues_collected_and_collectable_per_location_on_date(self.id, on_date)
+    collectable_amt += payment_collection[:scheduled_total]
+    collected_amt += payment_collection[:scheduled_total_collected]
+    overdue_amt += payment_collection[:overdue_amt]
     total_clients = total_clients.flatten.uniq.count
     attendance_record = attendance_record.flatten.uniq
     absent_clients = attendance_record.select{|s| s.attendance != Constants::User::PRESENT_ATTENDANCE_STATUS }.count

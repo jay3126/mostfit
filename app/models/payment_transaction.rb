@@ -71,8 +71,8 @@ class PaymentTransaction
   def disallow_future_dated_transactions
     if self.effective_on and (self.effective_on > Date.today)
       [false, "Future dated transactions are not permitted"]
-    elsif(LocationHoliday.working_holiday?(self.performed_at_location, self.effective_on))
-      [false, "Holiday dated transactions are not permitted"]
+      #    elsif(LocationHoliday.working_holiday?(self.performed_at_location, self.effective_on))
+      #      [false, "Holiday dated transactions are not permitted"]
     else
       true
     end

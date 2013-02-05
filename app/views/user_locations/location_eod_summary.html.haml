@@ -20,7 +20,7 @@
 
 %br
 - date = params[:date]||get_effective_date
-%div{:style => "width:30%; float: right; padding: 10px; border: solid 1px lightgrey"}
+%div{:style => "width:34%; float: right; padding: 10px; border: solid 1px lightgrey"}
   = form_for(:user_locations, :action => url(:controller => :user_locations, :action => :show, :id => @biz_location.id)+'#branch_eod_summary', :method => :get) do
     Change date
     = date_select "date", date
