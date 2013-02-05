@@ -20,7 +20,7 @@
     - @data.each do |staff, centers|
       - unless centers.blank?
         - accumulate_staff_values = Hash.new(MoneyManager.default_zero_money)
-        %tr
+        %tr.header_row
           %th{:style => 'display:none'}
           %th
             Ro Name
@@ -48,7 +48,7 @@
             %td
               = values[:receipt_number]
         - total_staff = Money.add_money_hash_values(@default_currency, accumulate_staff_values)
-        %tr
+        %tr.header_row
           %th{:style => 'display:none'}
           %td{:style => "text-align:center; background:#708890;"}
             %b Total
@@ -76,3 +76,10 @@
         %b
           = total_rows[:total_received]
       %th
+:javascript
+  $(document).ready(function() {
+    total_row = jQuery('table.weeksheet').find('tbody tr').size();
+    total_header_row = jQuery('table.weeksheet').find('tbody tr.header_row').size();
+    total_row_count = total_row - total_header_row
+    jQuery('.dataTables_info').html('Total Record '+total_row_count);
+  });

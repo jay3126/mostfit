@@ -78,7 +78,7 @@
         %b= "Total:"
       %td
         #weeksheet_total_amount
-          %b= advance_amount+actual_principal+acutal_interest+@preclosure_penalty_amount
+          %b= actual_principal+acutal_interest+@preclosure_penalty_amount
     %tr
       %td
         = submit 'Preclose', :class => "greenButton"

@@ -393,7 +393,8 @@ class Lendings < Application
   end
 
   def check_preclosure_date
-    lending_id = params[:loan_id]
+    lending_id = params[:id]
+    raise NotFound, "Loan Id not found" if lending_id.blank?
     @preclose_on_date = params[:effective_on]
     unless lending_id.blank?
       @lending = Lending.get(lending_id)
@@ -416,7 +417,7 @@ class Lendings < Application
     effective_on             = params[:on_date]
     performed_by             = params[:performed_by]
     reason_id                = params[:reason]
-    remarks                  = params[:remarks]
+    remarks                  = params[:remarks]||''
     recorded_by              = session.user.id
     receipt_type             = Constants::Transaction::RECEIPT
     payment_towards          = Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE
@@ -425,7 +426,6 @@ class Lendings < Application
     currency                 = 'INR'
     product_action           = Constants::Transaction::LOAN_PRECLOSURE
     make_specific_allocation = true
-    parent_location = BizLocation.get parent_location_id
 
     @message[:error] << "Please select checkbox for Preclose loan" if lending_params.values.select{|l| l[:preclose]}.blank?
     @message[:error] << "Preclose date cannot be blank" if effective_on.blank?
@@ -433,7 +433,6 @@ class Lendings < Application
     @message[:error] << "Please Enter Interest Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:interest_amount].to_f < 0}.blank?
     @message[:error] << "Please Enter Amount Greater Than ZERO" unless lending_params.values.select{|f| f[:total_amount].to_f <= 0}.blank?
     @message[:error] << "Please select Reason" if reason_id.blank?
-    @message[:error] << 'Remarks cannot be blank' if remarks.blank?
     #@message[:error] << "Preclose Date cannot be holiday" if LocationHoliday.working_holiday?(parent_location, effective_on)
 
     begin
@@ -523,7 +522,7 @@ class Lendings < Application
     effective_on                    = params[:effective_on]
     product_action                  = params[:product_action]
     reason_id                       = params[:reason]
-    remarks                         = params[:remarks]
+    remarks                         = params[:remarks]||''
     recorded_by                     = session.user.id
     make_specific_allocation        = true
     specific_principal_amount       = params[:specific_principal_amount]
@@ -539,7 +538,6 @@ class Lendings < Application
     # VALIDATIONS
     @errors << "Preclosure date must not be future date" if Date.parse(effective_on) > Date.today
     @errors << "Please select Reason" if reason_id.blank?
-    @errors << 'Remarks cannot be blank' if remarks.blank?
     @errors << "Penalty Amount is not greater than #{fee_amount}" if fee_money_amount > fee_amount
     @errors << "Preclosure Principal cannot be less than and equal to Zero" if specific_principal_money_amount <= MoneyManager.default_zero_money
 

@@ -1,13 +1,14 @@
 %h1 Preclose loan
 .shaded
-  = form_for(@lending, :action => url(:controller => :lendings, :action => :check_preclosure_date)) do
+  = form_for(@lending, :action => resource(@lending, :check_preclosure_date), :method => 'get') do
+    - date = @preclose_on_date.blank? ? get_effective_date : @preclose_on_date
     = hidden_field :name => "loan_id", :value => @lending.id
     %table
       %tr
         %td
           %b= "Preclose on date:"
         %td
-          = date_select :effective_on, Date.today, :min_date => @lending.most_recent_payment_transaction_on_date, :max_date => Date.today
+          = date_select :effective_on, date, :min_date => @lending.most_recent_payment_transaction_on_date, :max_date => Date.today
           = submit "Go"
 
   - unless @preclose_on_date.blank?

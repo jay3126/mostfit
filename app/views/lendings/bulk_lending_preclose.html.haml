@@ -113,7 +113,7 @@
             %td
               = text_field :name => "preclose[#{lending.id}][receipt_no]", :style => "width:80px"
             %td
-              - total_due = advance_amount + actual_principal + acutal_interest + preclosure_penalty
+              - total_due = actual_principal + acutal_interest + preclosure_penalty
               %div{:id => "weeksheet_total_amount_#{lending.id}"}
                 = total_due
               = hidden_field :name => "preclose[#{lending.id}][total_amount]", :value => total_due.to_regular_amount, :class => "weeksheet_total_lending lending_total_#{lending.id}"
