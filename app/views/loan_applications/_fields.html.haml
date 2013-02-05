@@ -59,7 +59,7 @@
           %td
             - all_states = BizLocation.get_state_locations
             - if params[:loan_application].blank?
-              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :prompt => "Select"
+              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s.downcase]}, :prompt => "Select"
             - else
               = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
           %td
