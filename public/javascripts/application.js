@@ -1414,7 +1414,9 @@ function update_total_amount(currency){
 
 function update_total_on_div_amount(currency, id){
   payments = jQuery('.weeksheet_total_'+id);
+  total_locations = jQuery('.location_total_amount');
   total = 0.0
+  location_total = 0.0
   jQuery.each(payments, function(index, payment) {
     if(payment.value == ""){
       f_value = 0.0;
@@ -1423,8 +1425,18 @@ function update_total_on_div_amount(currency, id){
     }
     total = parseFloat(total) + f_value;
   });
+  jQuery.each(total_locations, function(index, l_payment) {
+    p = l_payment.value
+    if(p == ""){
+      p_value = 0.0;
+    }else{
+      p_value = parseFloat(p);
+    }
+    location_total = parseFloat(location_total) + p_value;
+  });
   jQuery('div#weeksheet_total_amount_'+id).html(total.toFixed(2) + ' ' + currency);
   jQuery(".lending_total_"+id).attr('value', total.toFixed(2));
+  jQuery("#weeksheet_total_amount").html(location_total.toFixed(2) + ' ' + currency);
 }
 
 function date_validation(){
