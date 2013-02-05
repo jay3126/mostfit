@@ -28,7 +28,7 @@ class CenterCycles < Application
     unless @center.blank?
       @center_cycle_number = loan_applications_facade.get_current_center_cycle_number(@center.id)
       @center_cycle = loan_applications_facade.get_current_center_cycle(@center.id)
-      @loan_applications_status = LoanApplication.all(:fields => [:id, :client_name, :status], :at_branch_id => branch_id, :at_center_id => center_id, :center_cycle_id => @center_cycle.id)
+      @loan_applications_status = LoanApplication.all(:fields => [:id, :client_name, :status], :at_branch_id => branch_id, :at_center_id => center_id, :center_cycle_id => @center_cycle.cycle_number)
     end
 
     render :mark_cgt_grt
@@ -89,7 +89,7 @@ class CenterCycles < Application
     else
       message = {:error => @errors.flatten.join(', ')}
     end
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id), :message => message
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.cycle_number), :message => message
   end
 
   def record_grt
@@ -124,7 +124,7 @@ class CenterCycles < Application
     else
       message = {:error => @errors.flatten.join(', ')}
     end
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id ), :message => message
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.cycle_number), :message => message
   end
 
   def restart_cgt
@@ -154,7 +154,7 @@ class CenterCycles < Application
     end
 
     # RENDER/RE-DIRECT
-    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.id)
+    redirect resource(:center_cycles, :mark_cgt_grt, :parent_location_id => branch_id, :child_location_id => center_id, :center_cycle_id => @center_cycle.cycle_number)
   end
 
   def get_date_difference
