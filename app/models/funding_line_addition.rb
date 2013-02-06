@@ -10,6 +10,8 @@ class FundingLineAddition
   property :created_by_user,     Integer,  :nullable => false
   property :created_at,          DateTime, :nullable => false, :default => DateTime.now
 
+  belongs_to :lending
+  belongs_to :new_funding_line, :child_key => [:funding_line_id], :model => 'NewFundingLine'
   def self.assign_tranch_to_loan(lending_id, funding_line_id, tranch_id, created_by_staff, created_on, created_by_user)
     funding_line_addition = {}
     funding_line_addition[:lending_id] = lending_id

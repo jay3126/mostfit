@@ -1,0 +1,105 @@
+= partial :form
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th{:style => 'display:none'}
+      %th
+        Funding Line
+      %th
+        Description
+      %th
+        Accounts
+      %th
+        Loan Amount
+      %th
+        Outstanding
+      %th
+        Overdue Principal
+      %th
+        Overdue Interest
+      %th
+        Portfolio at Risk (PAR) (%)
+      %th
+        Loan Loss Provision Rate
+  %tbody
+    - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
+    - @default_currency ||= MoneyManager.get_default_currency
+    - loan_count = 0
+    - @data[:records].each do |funding_line, f_data|
+      - accumulate_sof_values = Hash.new(MoneyManager.default_zero_money)
+      - loan_sof_count = 0
+      - @data[:status].each do |s|
+        - values = f_data[s]
+        %tr
+          %td{:style => 'display:none'}
+          %td
+            = funding_line
+          %td
+            %b
+              = s
+          %td
+            = values[:loans_count]
+            - loan_count += values[:loans_count]
+            - loan_sof_count += values[:loans_count]
+          %td
+            = values[:principal_disbursed]
+            - accumulate_row_values[:loan_amount] += values[:principal_disbursed]
+            - accumulate_sof_values[:loan_amount] += values[:principal_disbursed]
+          %td
+            = values[:outstanding_principal]
+            - accumulate_row_values[:outstanding] += values[:outstanding_principal]
+            - accumulate_sof_values[:outstanding] += values[:outstanding_principal]
+          %td
+            = values[:overdue_principal]
+            - accumulate_row_values[:overdue_principal] += values[:overdue_principal]
+            - accumulate_sof_values[:overdue_principal] += values[:overdue_principal]
+          %td
+            = values[:overdue_interest]
+            - accumulate_row_values[:overdue_interest] += values[:overdue_interest]
+            - accumulate_sof_values[:overdue_interest] += values[:overdue_interest]
+          %td
+            = values[:par]
+            = '%'
+          %td
+            = ''
+      - total_sof = Money.add_money_hash_values(@default_currency, accumulate_sof_values)
+      %tr.header_row
+        %th{:style => 'display:none'}
+        %td{:style => "text-align:center; background:#708890;"}
+        %td{:style => "text-align:center; background:#708890;"}
+          %b
+            Total
+        %td{:style => "background:#708890;"}
+          %b
+            = loan_sof_count
+        %td{:style => "background:#708890;"}
+          %b
+            = total_sof[:loan_amount]
+        %td{:style => "background:#708890;"}
+          %b
+            = total_sof[:outstanding]
+        %td{:style => "text-align:center; background:#708890;"}
+        %td{:style => "text-align:center; background:#708890;"}
+        %td{:style => "text-align:center; background:#708890;"}
+        %td{:style => "text-align:center; background:#708890;"}
+  - total_rows = Money.add_money_hash_values(@default_currency, accumulate_row_values)
+  %tfoot
+    %tr
+      %th{:style => 'display:none'}
+      %th
+      %th
+        %b
+          Grand Total
+      %td
+        %b
+          = loan_count
+      %td
+        %b
+          = total_rows[:loan_amount]
+      %td
+        %b
+          = total_rows[:outstanding]
+      %td
+      %td
+      %td
+      %td

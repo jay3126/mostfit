@@ -124,6 +124,7 @@ class Lending
   has n, :simple_insurance_policies
   has n, :loan_claims, 'LoanClaimProcessing'
   has n, :funds_sources
+  has n, :funding_line_addition
 
   def delete_loan
     ledger_a = LedgerAssignment.all(:product_id => self.id)

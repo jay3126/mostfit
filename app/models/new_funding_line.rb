@@ -12,6 +12,7 @@ class NewFundingLine
 
   belongs_to :new_funder
   has n, :new_tranches
+  has n, :funding_line_additions, :child_key => [:funding_line_id]
   belongs_to :upload, :nullable => true
   
   def money_amounts; [:amount]; end

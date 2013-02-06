@@ -462,6 +462,34 @@ class ReportingFacade < StandardFacade
     loan_ids.blank? ? [] : repository(:default).adapter.query("Select * from loan_due_statuses a where a.due_status = 4 AND a.lending_id IN (#{loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{on_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);")
   end
 
+  def get_loan_due_status_for_branch_on_date(on_date, *location_id)
+    if location_id.flatten.blank?
+      loan_ids = Lending.total_loans_on_date('disbursed_loan_status', on_date)
+    else
+      loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location_id.flatten, on_date, false, 'disbursed_loan_status') unless location_id.flatten.blank?
+    end
+    loan_due_statuses = LoanDueStatus.all(:lending_id => loan_ids, :on_date => on_date).aggregate(:lending_id) rescue []
+
+    non_due_status_loans = loan_ids.blank? ? [] : loan_ids - loan_due_statuses
+    non_due_status_loans.each{|loan_id| LoanDueStatus.generate_loan_due_status(loan_id, on_date)}
+    loan_ids.blank? ? [] : repository(:default).adapter.query("Select * from loan_due_statuses a where a.lending_id IN (#{loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{on_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);")
+  end
+
+  def get_loan_due_status_for_sof_on_date(on_date, *funding_line)
+    return {} if funding_line.blank?
+    data = {}
+    fundings = NewFundingLine.all(:id => funding_line)
+    fundings.each do |funding|
+
+      disbursed_ids = funding.funding_line_additions(:created_on.lte => on_date).lending('loan_status_changes.from_status'.to_sym.not => :disbursed_loan_status, 'loan_status_changes.effective_on'.to_sym.lte => on_date).aggregate(:id) rescue []
+      loan_due_statuses = LoanDueStatus.all(:lending_id => disbursed_ids, :on_date => on_date).aggregate(:lending_id) rescue []
+      non_due_status_loans = disbursed_ids.blank? ? [] : disbursed_ids - loan_due_statuses
+      non_due_status_loans.each{|loan_id| LoanDueStatus.generate_loan_due_status(loan_id, on_date)}
+      data[funding.name] = disbursed_ids.blank? ? [] : repository(:default).adapter.query("Select * from loan_due_statuses a where a.lending_id IN (#{disbursed_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{on_date.strftime('%Y-%m-%d')}' ORDER BY b.id desc LIMIT 1);")
+    end
+    data
+  end
+
   #this method will return back the overdue values (principal and interest) on date.
   def overdue_amounts(loan_id, on_date)
     result = {}

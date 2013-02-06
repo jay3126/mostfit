@@ -115,7 +115,7 @@ class LoanDueStatus
         end
       end
 
-      schedules_info = loan_schedules.select{|s| s.on_date <= on_date}
+      schedules_info = loan_schedules.select{|s| s.on_date < on_date}
       schedule_info = schedules_info.blank? ? [] : schedules_info.sort.last
       scheduled_principal_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_principal_due).sum.to_i)
       scheduled_interest_till_date = schedules_info.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(schedules_info.map(&:scheduled_interest_due).sum.to_i)
@@ -169,10 +169,9 @@ class LoanDueStatus
         if schedule_info.on_date == on_date || loan_schedules.last.on_date <= on_date
           due_status[:interest_accrual_till_date] = scheduled_interest_till_date.amount
         else
-          next_schedule = loan_schedules.select{|s| s.on_date >= on_date}.first
+          next_schedule = loan_schedules.select{|s| s.on_date > on_date}.first
           next_schedule_interest = scheduled_interest_till_date + next_schedule.to_money[:scheduled_interest_due]
           due_status[:interest_accrual_till_date] = (scheduled_interest_till_date + Allocation::Common.calculate_broken_period_interest(scheduled_interest_till_date, next_schedule_interest, schedule_info.on_date, next_schedule.on_date, on_date, loan.repayment_frequency)).amount
-
         end
       else
         due_status[:interest_accrual_till_date] = zero_amount.amount

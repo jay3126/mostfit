@@ -35,7 +35,7 @@ class DelinquencyReport < Report
     loan_due_statuses = []
     loan_hash = {}
     loan_status = ['Current Loans', '1-29 Days', '30-59 Days', '60-89 Days', '90-119 Days', '120-149 Days', '150-179 Days', 'Above 180 Days']
-    loan_due_statuses = get_reporting_facade(@user).get_overdue_status_for_branch_on_date(@date, @biz_location_branch)
+    loan_due_statuses = get_reporting_facade(@user).get_loan_due_status_for_branch_on_date(@date, @biz_location_branch)
     loan_hash['Current Loans'] = loan_due_statuses.select{|s| s.day_past_due == 0}
     loan_hash['1-29 Days'] = loan_due_statuses.select{|s| s.day_past_due >= 1 and s.day_past_due <= 29}
     loan_hash['30-59 Days']= loan_due_statuses.select{|s| s.day_past_due >= 30 and s.day_past_due <= 59}
@@ -76,7 +76,7 @@ class DelinquencyReport < Report
       else
         par = 0.0
       end
-      data[status] = {:status => status, :loans_count => loan_count, :loan_amount => total_loan_disbursed, :outstanding => total_outstanding, :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :par => par}
+      data[status] = {:status => status, :loans_count => loan_count, :loan_amount => total_loan_disbursed, :principal_disbursed => disbursed_principal_money_amt, :interest_disbursed => disbursed_interest_money_amt, :outstanding => total_outstanding, :outstanding_principal => outstanding_principal, :outstanding_interest => outstanding_interest, :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :par => par}
     end
     data
   end
