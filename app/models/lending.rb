@@ -591,6 +591,11 @@ class Lending
       zero_money_amount
   end
 
+  def loan_installment_amount
+    loan_schedules = self.loan_base_schedule.base_schedule_line_items(:installment.gt => 0, :payment_type => :repayment).first
+    installment_amount = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms((loan_schedules.scheduled_principal_due + loan_schedules.scheduled_interest_due).to_i)
+  end
+
   def actual_total_due_kk(on_date)
     loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
     loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
@@ -641,6 +646,10 @@ class Lending
 
   def actual_total_outstanding
     actual_principal_outstanding + actual_interest_outstanding
+  end
+
+  def actual_total_outstanding_loan(on_date)
+    actual_principal_outstanding(on_date) + actual_interest_outstanding(on_date)
   end
 
   def actual_total_outstanding_kk
