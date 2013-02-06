@@ -35,7 +35,7 @@ class ReportingFacade < StandardFacade
 
   #this method will return due collected and due collectable per location(Branch) on a date.
   def total_schedule_collected_and_collectable_per_center_on_date(at_location_id, on_date = Date.today)
-    loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(at_location_id, on_date, false, 'disbursed_loan_status')
+    loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(at_location_id, on_date-1, false, 'disbursed_loan_status')
     schedule_loans_on_date = Lending.all(:id => loan_ids, 'loan_base_schedule.base_schedule_line_items.on_date' => on_date)
     loan_schedules = schedule_loans_on_date.blank? ? [] : BaseScheduleLineItem.all(:on_date => on_date, 'loan_base_schedule.lending_id' => schedule_loans_on_date.map(&:id))
     principal_schedule_amt = loan_schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules.map(&:scheduled_principal_due).sum.to_i)
@@ -476,9 +476,9 @@ class ReportingFacade < StandardFacade
   end
 
   def get_loan_due_status_for_sof_on_date(on_date, *funding_line)
-    return {} if funding_line.blank?
+    return {} if funding_line.flatten.blank?
     data = {}
-    fundings = NewFundingLine.all(:id => funding_line)
+    fundings = NewFundingLine.all(:id => funding_line.flatten)
     fundings.each do |funding|
 
       disbursed_ids = funding.funding_line_additions(:created_on.lte => on_date).lending('loan_status_changes.from_status'.to_sym.not => :disbursed_loan_status, 'loan_status_changes.effective_on'.to_sym.lte => on_date).aggregate(:id) rescue []

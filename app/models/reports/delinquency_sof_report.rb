@@ -36,6 +36,7 @@ class DelinquencySofReport < Report
     loan_hash = {}
     loan_status = ['Current Loans', '1-29 Days', '30-59 Days', '60-89 Days', '90-119 Days', '120-149 Days', '150-179 Days', 'Above 180 Days']
     data[:status] = loan_status
+    @funding_line_id = @funding_line_id.blank? ? NewFundingLine.all.map(&:id) : [@funding_line_id]
     all_due_statuses = get_reporting_facade(@user).get_loan_due_status_for_sof_on_date(@date, @funding_line_id)
     data[:records] = {}
     all_due_statuses.each do |funding_line, loan_due_statuses|

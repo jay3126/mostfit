@@ -55,6 +55,8 @@
         %li
           = link_to_with_rights 'Users', resource(:users), :class => 'user icon'
         %li
+          = link_to_with_rights 'Payment By Branch', resource(:payment_transactions, :payment_by_branch), :class => 'user icon'
+        %li
           = link_to_with_rights 'Payment By Staff Member', resource(:payment_transactions, :payment_by_staff_member), :class => 'user icon'
         %li
           = link_to_with_rights 'Client Movement', url(:controller => :new_clients, :action => :index, :flag => 'true'), :class => 'user icon'

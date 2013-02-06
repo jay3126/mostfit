@@ -1,0 +1,47 @@
+%h1== Payment By Branch
+- date = params[:date]||get_effective_date
+%div{:style => "width:34%; float: right; padding: 10px; border: solid 1px lightgrey"}
+  = form_for(:payment_transactions, :action => resource(:payment_transactions, :payment_by_branch)) do
+    Change date
+    = date_select "date", date
+    = submit "Go"
+.menu-strip{:style => "width: 8%;"}
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
+
+%table.dataTable.report.weeksheet.nojs
+  %thead
+    %tr
+      %th
+        Select All
+        %br
+        = check_box :id => "toggle_select_all"
+      %th
+        Branch
+      %th
+        Scheduled Principal
+      %th
+        Scheduled Interest
+      %th
+        Advance Balance
+      %th
+        Collected Principal
+      %th
+        Collected Interest
+  %tbody
+    - @loans_status.each do |location_id, values|
+      %tr
+        %td{:style => 'text-align:center'}
+          = check_box :name => "payment_transactions[payments]", :value => true, :class => "payment_#{location_id}"
+        %td
+          = values[:location_name]
+        %td
+          = values[:scheduled_principal]
+        %td
+          = values[:scheduled_interest]
+        %td
+          = values[:advance_balance]
+        %td
+          = values[:principal_recevied]
+        %td
+          = values[:interest_received]

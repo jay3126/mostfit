@@ -228,4 +228,32 @@ class PaymentTransactions < Application
     end
   end
 
+  def payment_by_branch
+    @locations = BizLocation.all('location_level.level' => 1)
+    @date = params[:date]||get_effective_date
+    @date = Date.parse(@date) if @date.class != Date
+    @loans_status = {}
+    all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date).aggregate(:id) rescue []
+    all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids, :effective_on.lte => @date)
+    all_loan_schedules = all_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => all_loan_ids, :on_date => @date)
+    @locations.each do |location|
+      loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, @date, false, 'disbursed_loan_status')
+
+      loans = all_loan_ids & loan_ids
+      @loans_status[location.id] = {}
+      schedules = loans.blank? ? [] : all_loan_schedules.select{|s| loans.include?(s.loan_base_schedule.lending_id)}
+      scheduled_principal = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_principal_due).sum.to_i)
+      scheduled_interest = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_interest_due).sum.to_i)
+      loan_receipts = loans.blank? ? [] : all_loan_receipts.select{|s| loans.include?(s.lending_id) and s.effective_on <= @date}
+      loan_amounts = LoanReceipt.add_up(loan_receipts)
+      advance = loan_amounts[:advance_received] > loan_amounts[:advance_adjusted] ? loan_amounts[:advance_received] - loan_amounts[:advance_adjusted] : MoneyManager.default_zero_money
+      loan_receipts_on_date = loan_receipts.blank? ? [] : loan_receipts.select{|s| s.effective_on == @date}
+      loan_amounts_on_date = LoanReceipt.add_up(loan_receipts_on_date)
+      principal_received = loan_amounts_on_date[:principal_received]
+      interest_received = loan_amounts_on_date[:interest_received]
+      @loans_status[location.id] = {:location_name => location.name, :scheduled_principal => scheduled_principal, :scheduled_interest => scheduled_interest, :advance_balance => advance, :principal_recevied => principal_received, :interest_received => interest_received}
+    end
+    display @locations
+  end
+
 end
