@@ -142,6 +142,31 @@ class Client
       client_group  = nil
     end
 
+    #creating the PSL if not already created.
+    if headers[:priority_sector_list] and row[headers[:priority_sector_list]]
+      name = row[headers[:priority_sector_list]].strip
+      priority_sector_list = PrioritySectorList.first(:name => name) || PrioritySectorList.create(:name => name)
+    else
+      priority_sector_list = nil
+    end
+
+    #creating the sub-psl category if not already created.
+    if headers[:sub_psl_category] and row[headers[:sub_psl_category]]
+      name = row[headers[:sub_psl_category]].strip
+      priority_sector_list_id = (priority_sector_list and (not priority_sector_list.nil?)) ? priority_sector_list.id : nil
+      psl_sub_category = PslSubCategory.first(:name => name, :priority_sector_list_id => priority_sector_list_id) || PslSubCategory.create(:name => name, :priority_sector_list_id => priority_sector_list_id)
+    else
+      psl_sub_category = nil
+    end
+
+    #creating occupation if not created.
+    if headers[:occupation] and row[headers[:occupation]]
+      name = row[headers[:occupation]].strip
+      occupation = Occupation.first(:name => name) || Occupation.create(:name => name)
+    else
+      occupation = nil
+    end
+
     date_joined = Date.parse(row[headers[:date_joined]])
     
     hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
@@ -152,7 +177,10 @@ class Client
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]]}
+      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :caste => row[headers[:caste]].to_sym,
+      :religion => row[headers[:religion]].to_sym, :priority_sector_list => priority_sector_list, :psl_sub_category => psl_sub_category,
+      :occupation => occupation
+      }
 
     obj = Client.new(hash)
     admin_location = BizLocation.get center.id

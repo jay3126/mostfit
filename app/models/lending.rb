@@ -170,6 +170,14 @@ class Lending
     accounted_at_origin = BizLocation.first(:name => row[headers[:branch]]).id
     raise ArgumentError, "Branch(#{row[headers[:branch]]}) does not exist" if accounted_at_origin.blank?
 
+    #creating loan_purpose if not already created
+    if headers[:loan_purpose] and row[headers[:loan_purpose]]
+      name = row[headers[:loan_purpose]].strip
+      loan_purpose = LoanPurpose.first(:name => name) || LoanPurpose.create(:name => name)
+    else
+      loan_purpose = nil
+    end
+
     loan_product = LendingProduct.first(:name => row[headers[:loan_product]])
     lending_product_id = loan_product
     client = Client.first(:name => row[headers[:client]], :upload_reference => row[headers[:upload_reference]])
@@ -228,6 +236,7 @@ class Lending
     loan_hash[:disbursed_amount]               = disbursed_money_amount.amount
     loan_hash[:repayment_allocation_strategy]  = loan_product.repayment_allocation_strategy
     loan_hash[:status]                         = STATUS_NOT_SPECIFIED
+    loan_hash[:loan_purpose]                   = loan_purpose
 
     new_loan = Lending.new(loan_hash)
 
