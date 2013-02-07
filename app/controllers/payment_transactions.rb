@@ -278,9 +278,10 @@ class PaymentTransactions < Application
 
     # OPERATIONS PERFORMED
     if @message[:error].blank?
+      save_payments_hash = {}
       payments.each do |payment_branch_id|
-        payments = {}
         Thread.new{
+          save_payments_hash[payment_branch_id] = {}
           schedule_loans = Lending.all(:status => 'disbursed_loan_status', :accounted_at_origin => payment_branch_id, 'loan_base_schedule.base_schedule_line_items.on_date' => effective_on)
           schedule_loans.each do |loan|
             schedule = BaseScheduleLineItem.first(:on_date => effective_on, 'loan_base_schedule.lending_id' => loan.id)
@@ -289,7 +290,7 @@ class PaymentTransactions < Application
               receipt_amt_on_date = LoanReceipt.add_up(receipt_on_date)
               schedule_amount = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
               received_amt = receipt_amt_on_date[:principal_received] + receipt_amt_on_date[:interest_received]
-              total_payment_amt = schedule_amount > received_amt ? schedule_amount - received_amt : schedule_amount
+              total_payment_amt = schedule_amount >= received_amt ? schedule_amount - received_amt : schedule_amount
               if total_payment_amt > MoneyManager.default_zero_money
                 product_type = 'lending'
                 product_id = loan.id
@@ -306,12 +307,12 @@ class PaymentTransactions < Application
                   :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
                   :receipt_type         => receipt, :payment_towards     => payment_towards)
                 if payment_transaction.save
-                  payments[payment_transaction] = payment_facade.record_payment_allocation(payment_transaction)
+                  save_payments_hash[payment_branch_id][payment_transaction] = payment_facade.record_payment_allocation(payment_transaction)
                 end
               end
             end
           end
-          payments.each do |payment, allocation|
+          save_payments_hash[payment_branch_id].each do |payment, allocation|
             payment_facade.record_payment_accounting(payment, allocation)
           end
         }

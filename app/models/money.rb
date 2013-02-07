@@ -67,7 +67,7 @@ class Money
 
   # The string representation of Money as an amount in regular units and the currency
   def to_s
-    "#{to_regular_amount} #{@currency}"
+    "#{to_regular_amount}"
   end
 
   def to_regular_amount
