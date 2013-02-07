@@ -235,12 +235,11 @@ class PaymentTransactions < Application
     @loans_status = {}
     all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date, :fields => [:id, :accounted_at_origin])
     all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids.map(&:id), :effective_on.lte => @date)
-    all_loan_schedules = all_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => all_loan_ids.map(&:id), :on_date => @date)
     all_loans_group_by_location = all_loan_ids.group_by{|s| s.accounted_at_origin}
     @locations.each do |location|
       loans = all_loans_group_by_location[location.id].blank? ? [] :  all_loans_group_by_location[location.id].map(&:id)
       @loans_status[location.id] = {}
-      schedules = loans.blank? ? [] : all_loan_schedules.select{|s| loans.include?(s.loan_base_schedule.lending_id)}
+      schedules = loans.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loans, :on_date => @date)
       scheduled_principal = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_principal_due).sum.to_i)
       scheduled_interest = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_interest_due).sum.to_i)
       loan_receipts = loans.blank? ? [] : all_loan_receipts.select{|s| loans.include?(s.lending_id) and s.effective_on <= @date}
@@ -253,6 +252,77 @@ class PaymentTransactions < Application
       @loans_status[location.id] = {:location_name => location.name, :scheduled_principal => scheduled_principal, :scheduled_interest => scheduled_interest, :advance_balance => advance, :principal_recevied => principal_received, :interest_received => interest_received}
     end
     display @locations
+  end
+
+  def record_payment_by_branch
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+    @message              = {:error => [], :notice => [],:weeksheet_error => ''}
+    @payment_transactions = []
+    @client_attendance    = {}
+
+    # GATE-KEEPING
+    currency     = 'INR'
+    receipt      = 'receipt'
+    product_type = 'lending'
+    cp_type      = 'client'
+    recorded_by  = session.user.id
+    effective_on = params[:payment_transactions][:on_date]
+    payments     = params[:payment_transactions][:payments]
+    performed_by = params[:payment_transactions][:performed_by]
+
+
+    # VALIDATIONS
+    @message[:error] << "Date cannot be blank" if effective_on.blank?
+    @message[:error] << "Performed by must not be blank" if performed_by.blank?
+    @message[:error] << "Please Select Check box For Repayments" if payments.blank?
+
+    # OPERATIONS PERFORMED
+    if @message[:error].blank?
+      payments.each do |payment_branch_id|
+        payments = {}
+        Thread.new{
+          schedule_loans = Lending.all(:status => 'disbursed_loan_status', :accounted_at_origin => payment_branch_id, 'loan_base_schedule.base_schedule_line_items.on_date' => effective_on)
+          schedule_loans.each do |loan|
+            schedule = BaseScheduleLineItem.first(:on_date => effective_on, 'loan_base_schedule.lending_id' => loan.id)
+            unless schedule.blank?
+              receipt_on_date = loan.loan_receipts(:effective_on => effective_on)
+              receipt_amt_on_date = LoanReceipt.add_up(receipt_on_date)
+              schedule_amount = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
+              received_amt = receipt_amt_on_date[:principal_received] + receipt_amt_on_date[:interest_received]
+              total_payment_amt = schedule_amount > received_amt ? schedule_amount - received_amt : schedule_amount
+              if total_payment_amt > MoneyManager.default_zero_money
+                product_type = 'lending'
+                product_id = loan.id
+                receipt_no = nil
+                performed_at = loan.administered_at_origin
+                accounted_at = loan.accounted_at_origin
+                cp_type = 'client'
+                cp_id = loan.loan_borrower.counterparty_id
+                payment_towards = Constants::Transaction::PAYMENT_TOWARDS_LOAN_REPAYMENT
+                payment_transaction     = PaymentTransaction.new(:amount => total_payment_amt.amount, :currency => currency, :effective_on => effective_on,
+                  :on_product_type      => product_type, :on_product_id  => product_id, :receipt_no => receipt_no,
+                  :performed_at         => performed_at, :accounted_at   => accounted_at,
+                  :performed_by         => performed_by, :recorded_by    => recorded_by,
+                  :by_counterparty_type => cp_type, :by_counterparty_id  => cp_id,
+                  :receipt_type         => receipt, :payment_towards     => payment_towards)
+                if payment_transaction.save
+                  payments[payment_transaction] = payment_facade.record_payment_allocation(payment_transaction)
+                end
+              end
+            end
+          end
+          payments.each do |payment, allocation|
+            payment_facade.record_payment_accounting(payment, allocation)
+          end
+        }
+      end
+    end
+
+    @message[:notice] = "Branch Wise payment process started" if @message[:error].blank?
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+
+    redirect resource(:payment_transactions, :payment_by_branch, :date => effective_on), :message => @message
+
   end
 
 end

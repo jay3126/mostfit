@@ -8,40 +8,62 @@
 .menu-strip{:style => "width: 8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
 
-
-%table.dataTable.report.weeksheet.nojs
-  %thead
-    %tr
-      %th
-        Select All
-        %br
-        = check_box :id => "toggle_select_all"
-      %th
-        Branch
-      %th
-        Scheduled Principal
-      %th
-        Scheduled Interest
-      %th
-        Advance Balance
-      %th
-        Collected Principal
-      %th
-        Collected Interest
-  %tbody
-    - @loans_status.each do |location_id, values|
+= form_for(:payment_transactions, :action => resource(:payment_transactions, :record_payment_by_branch)) do
+  %table.dataTable.report.weeksheet.nojs
+    %thead
       %tr
-        %td{:style => 'text-align:center'}
-          = check_box :name => "payment_transactions[payments]", :value => true, :class => "payment_#{location_id}"
+        %th
+          Select All
+          %br
+          = check_box :id => "toggle_select_all"
+        %th
+          Branch
+        %th
+          Scheduled Principal
+        %th
+          Scheduled Interest
+        %th
+          Total Scheduled
+        %th
+          Advance Balance
+        %th
+          Collected Principal
+        %th
+          Collected Interest
+        %th
+          Total Collected
+    %tbody
+      - @loans_status.each do |location_id, values|
+        %tr
+          %td{:style => 'text-align:center'}
+            = check_box :name => "payment_transactions[payments][]", :value => location_id, :class => "payment_#{location_id}"
+          %td
+            = values[:location_name]
+          %td
+            = values[:scheduled_principal]
+          %td
+            = values[:scheduled_interest]
+          %td
+            = values[:scheduled_principal] + values[:scheduled_interest]
+          %td
+            = values[:advance_balance]
+          %td
+            = values[:principal_recevied]
+          %td
+            = values[:interest_received]
+          %td
+            = values[:principal_recevied] + values[:interest_received]
+  %table.narrow.form{:style => "text-align:right;width:100%;"}
+    %tfoot
+      %tr
         %td
-          = values[:location_name]
+          %b Chosen date
+          = date
+          = hidden_field :name => "payment_transactions[on_date]", :value => date
         %td
-          = values[:scheduled_principal]
+          %b Performed by
+          - staff_member = session.user.staff_member
+          = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
         %td
-          = values[:scheduled_interest]
-        %td
-          = values[:advance_balance]
-        %td
-          = values[:principal_recevied]
-        %td
-          = values[:interest_received]
+          = submit 'Save Payment'
+%br
