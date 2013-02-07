@@ -1,8 +1,6 @@
 class OverdueDetailedReport < Report
   attr_accessor :biz_location_branch_id, :date, :page
 
-  validates_with_method :biz_location_branch_id, :branch_should_be_selected
-
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
     @name = "Overdue Detailed Report"
@@ -114,8 +112,4 @@ class OverdueDetailedReport < Report
     data
   end
 
-  def branch_should_be_selected
-    return [false, "Branch needs to be selected"] if self.respond_to?(:biz_location_branch_id) and not self.biz_location_branch_id
-    return true
-  end
 end
