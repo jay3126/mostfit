@@ -53,10 +53,8 @@ module Highmark
           center = BizLocation.get(l.administered_at_origin_location)
           branch = BizLocation.get(l.accounted_at_origin_location)
           meetings = MeetingCalendar.last(:location_id => center.id, :on_date.lte => @to_date)
-          lh = l.get_loan_due_status_record(@to_date)
-          next if lh.nil?
           
-          rows = row(l, client, center, branch, lh, attendance_record, absent_record, meetings)
+          rows = row(l, client, center, branch, attendance_record, absent_record, meetings)
           
           #the following lines of code replace the blanks with nils
           rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
@@ -216,7 +214,7 @@ module Highmark
       }
     end
     
-    def row(loan, client, center, branch, loan_status_record, attendance_record, absent_record, meetings)
+    def row(loan, client, center, branch, attendance_record, absent_record, meetings)
       _row = {
         "CNSCRD" => [client.client_identifier.to_s.truncate(100, ""), #bank id
                      "CNSCRD", # segment identifier
