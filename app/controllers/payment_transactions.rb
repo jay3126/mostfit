@@ -233,13 +233,11 @@ class PaymentTransactions < Application
     @date = params[:date]||get_effective_date
     @date = Date.parse(@date) if @date.class != Date
     @loans_status = {}
-    all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date).aggregate(:id) rescue []
-    all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids, :effective_on.lte => @date)
-    all_loan_schedules = all_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => all_loan_ids, :on_date => @date)
+    all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date, :fields => [:id, :accounted_at_origin])
+    all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids.map(&:id), :effective_on.lte => @date)
+    all_loan_schedules = all_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => all_loan_ids.map(&:id), :on_date => @date)
     @locations.each do |location|
-      loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, @date, false, 'disbursed_loan_status')
-
-      loans = all_loan_ids & loan_ids
+      loans = Lending.all(:accounted_at_origin => location.id, :id => all_loan_ids.map(&:id)).aggregate(:id) rescue []
       @loans_status[location.id] = {}
       schedules = loans.blank? ? [] : all_loan_schedules.select{|s| loans.include?(s.loan_base_schedule.lending_id)}
       scheduled_principal = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_principal_due).sum.to_i)

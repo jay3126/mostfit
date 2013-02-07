@@ -31,7 +31,7 @@ class PreClosureCustomerDetails < Report
       remarks                   = Comment.last(:commentable_class => 'Lending', :commentable_id => loan.id, :created_on => loan.preclosed_on_date).text rescue ''
       reason                    = remarks.blank? ? '' : remarks.reason.name rescue ''
       loan_receipts             = loan.loan_receipts
-      pre_closure_receipts      = loan_receipts.select{|s| s.effective_on == loan.preclosed_on_date || (!s.payment_transaction.blank? && s.payment_transaction.payment_towards == Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE)}
+      pre_closure_receipts      = loan.loan_receipts('payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE)
       pre_closure_amt           = LoanReceipt.add_up(pre_closure_receipts)
       pre_closure_principal     = pre_closure_amt[:principal_received]
       pre_closure_interest      = pre_closure_amt[:interest_received]
