@@ -13,7 +13,7 @@ module Highmark
     end
     
     def name
-      "Common Data Format Report for #{Mfi.first.name} as on #{@to_date}"
+      "Common Data Format Report for #{Mfi.first.name} from #{@from_date} to #{@to_date}"
     end
     
     def self.name
@@ -50,12 +50,13 @@ module Highmark
         begin
           l = Lending.get(l_id)
           client = l.borrower
-          center = l.administered_at_origin_location
-          branch = l.accounted_at_origin_location
+          center = BizLocation.get(l.administered_at_origin_location)
+          branch = BizLocation.get(l.accounted_at_origin_location)
+          meetings = MeetingCalendar.last(:location_id => center.id, :on_date.lte => @to_date)
           lh = l.get_loan_due_status_record(@to_date)
           next if lh.nil?
           
-          rows = row(l, client, center, branch, lh, attendance_record, absent_record)
+          rows = row(l, client, center, branch, lh, attendance_record, absent_record, meetings)
           
           #the following lines of code replace the blanks with nils
           rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
@@ -215,26 +216,25 @@ module Highmark
       }
     end
     
-    def row(loan, client, center, branch, loan_status_record, attendance_record, absent_record)
+    def row(loan, client, center, branch, loan_status_record, attendance_record, absent_record, meetings)
       _row = {
-        "CNSCRD" => [client.id.to_s.truncate(100, ""),
-                     "CNSCRD",
-                     client.id.to_s.truncate(35, ""), 
-                     branch.id.to_s.truncate(30, ""), 
-                     center.id.to_s.truncate(30, ""),
-                     client.client_group_id.to_s.truncate(20, ""),
-                     client.name.truncate(100, ""),
+        "CNSCRD" => [client.client_identifier.to_s.truncate(100, ""), #bank id
+                     "CNSCRD", # segment identifier
+                     client.client_identifier.to_s.truncate(35, ""), # member identifier
+                     branch.biz_location_identifier.to_s.truncate(30, ""), # branch identifier
+                     center.biz_location_identifier.to_s.truncate(30, ""), # center / kendra identifier
+                     client.client_group_id.to_s.truncate(20, ""), # client group identifier
+                     client.name.truncate(100, ""), # member name
                      nil, # member name 2
                      nil, # member name 3
                      nil, # alternate name of member
-                     (client.date_of_birth ? client.date_of_birth.strftime("%d%m%Y").truncate(8,"") : nil),
-                     ((client.date_joined and client.date_of_birth) ? (client.date_joined.year - client.date_of_birth.year).to_s.truncate(3, "") : nil),
+                     (client.date_of_birth ? client.date_of_birth.strftime("%d%m%Y").truncate(8,"") : nil), #member's date of birth
+                     ((client.date_joined and client.date_of_birth) ? (client.date_joined.year - client.date_of_birth.year).to_s.truncate(3, "") : nil), # member's age on date
                      (client.date_joined ? client.date_joined.strftime("%d%m%Y").truncate(8,"") : nil),
                      (client.gender.empty? ? nil : gender[client.gender]), # client gender
-                     (client.spouse_name.empty? ? marital_status[:untagged] : marital_status[:married]),
+                     (client.marital_status.empty? ? marital_status[:untagged] : marital_status[client.marital_status.downcase.to_sym]), #marital status
                      client.spouse_name.truncate(100, ""),
                      key_person_relationship(client, 'spouse'),
-                     #(client.gender == "female" ? key_person_relationship['husband'] : key_person_relationship['wife']),
                      nil, #member 1
                      nil, #relationship with member 1
                      nil, #member 2
@@ -244,44 +244,44 @@ module Highmark
                      nil, #member 4
                      nil, #relationship with member 4
                      client.guarantor_name, #nominee name
-                     key_person_relationship[client.guarantor_relationship], #nominee relationship
+                     key_person_relationship[client.guarantor_relationship.downcase], #nominee relationship
                      ((client.date_joined and client.guarantor_dob) ? (client.date_joined.year - client.guarantor_dob.year).to_s.truncate(3, "") : nil), #nominee age
                      (client.reference2_type == :voter_id ? client.reference2.truncate(20, "") :  nil), #voters id
                      (client.reference2_type == :uid ? client.reference2.truncate(15, "") : nil), # UID
                      (client.reference2_type == :pan_card ? client.reference2.truncate(15, "") : nil), #PAN
                      (client.reference_type == :ration_card ? client.reference.truncate(20, "") : nil), #ration card
-                     client.type_of_id.to_s.truncate(20, ""), #other id type description 1
-                     client.reference.truncate(30, ""), #other id 1
+                     client.reference2_type.to_s.truncate(20, ""), #other id type description 1
+                     client.reference2.truncate(30, ""), #other id 1
                      nil, #other id type description 2
                      nil, #other id 2
                      nil, #other id type description 3
                      nil, #other id 3
                      phone[client.telephone_type.downcase.to_sym], #telephone number type 1
                      client.phone_number.truncate(15, ""), #telephone number 1
-                     nil,
-                     nil,
-                     client.poverty_status.to_s.truncate(20, ""),
-                     nil,
+                     nil, #telephone number type 2
+                     nil, #telephone number 1
+                     client.poverty_status.to_s.truncate(20, ""), #poverty index
+                     nil, #asset ownership indicator
                      nil, #number of dependents
-                     nil,
-                     nil,
-                     nil,
-                     (client.occupation.nil? ? nil : client.occupation.name.truncate(50, "")),
-                     client.total_income.to_s.truncate(9, ""),
+                     nil, #bank account - bank name
+                     nil, #bank account - branch name
+                     nil, #bank account - account number
+                     (client.occupation.nil? ? nil : client.occupation.name.truncate(50, "")), #occupation
+                     client.total_income.to_s.truncate(9, ""), #total family income
                      nil, #expenditure
-                     religion[client.religion.to_s],
-                     client.caste.to_s.truncate(30, ""),
-                     nil, # group_leader_indicator[:untagged],
-                     nil, # (CenterLeader.first(:client_id => client.id).nil? ? center_leader_indicator[:no] : center_leader_indicator[:yes]),
+                     religion[client.religion.to_s], # religion
+                     client.caste.to_s.truncate(30, ""), # caste
+                     nil, # group leader identifier.
+                     nil, # center leader identifier.
                      nil, #dummy reserved for future use
                      nil, #member name 4
                      nil, #member name 5
                      nil, #passport number
                      nil, #parent id
-                     nil,
-                     nil
+                     nil, # extraction file id
+                     nil  # severity
                     ],
-        "ADRCRD" => [client.id.to_s.truncate(100, ""),
+        "ADRCRD" => [client.client_identifier.to_s.truncate(100, ""),
                      "ADRCRD",  
                      client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #permanent address
                      ((client.state and client.state.empty?) ? nil : states[client.state.downcase.to_sym]), #state code
@@ -294,12 +294,12 @@ module Highmark
                      nil, #extraction field id
                      nil #severity
                     ],
-        "ACTCRD" => [client.id.to_s.truncate(100, ""),
+        "ACTCRD" => [client.client_identifier.to_s.truncate(100, ""),
                      "ACTCRD",
                      loan.id.to_s.truncate(35, ""),
                      loan.id.to_s.truncate(35, ""),
-                     branch.id.to_s.truncate(30, ""),
-                     center.id.to_s.truncate(30, ""),
+                     branch.biz_location_identifier.to_s.truncate(30, ""),
+                     center.biz_location_identifier.to_s.truncate(30, ""),
                      StaffMember.get(loan.applied_by_staff).name.truncate(30, ""),
                      #((loan.status(@to_date) == :repaid || loan.status(@to_date) == :written_off || loan.status(@to_date) == :preclosed) ? loan.loan_history.last.date.strftime("%d%m%Y") : @to_date.strftime("%d%m%Y").truncate(8,"")), #date of account information
                      loan_category[:jlg_individual].truncate(3, ""), #loan category
@@ -326,11 +326,11 @@ module Highmark
                      nil, #write-off reason
                      attendance_record[center.id][client.id], #no of meetings held
                      absent_record[center.id][client.id], #no of meetings missed
-                     insurance_indicator[(not loan.insurance_policy.nil?)], #insurance indicator
+                     insurance_indicator[(not loan.simple_insurance_policies.nil?)], #insurance indicator
                      (loan.simple_insurance_policies and (not loan.simple_insurance_policies.nil?) and loan.simple_insurance_policies.first.simple_insurance_product and (not loan.simple_insurance_policies.first.simple_insurance_product.nil?)) ? type_of_insurance[loan.simple_insurance_policies.first.simple_insurance_product.insured_type] : nil, #type of insurance
                      (loan.simple_insurance_policies and (not loan.simple_insurance_policies.nil?) and loan.simple_insurance_policies.simple_insurance_product and (not loan.simple_insurance_policies.simple_insurance_product.nil?)) ? (MoneyManager.get_money_instance(Money.new(loan.simple_insurance_policies.first.simple_insurance_product.cover_amount.to_i, :INR).to_s).to_s.chomp(".00 INR").truncate(10, "")) : MoneyManager.default_zero_money.to_s.chomp(".00 INR"), #sum assured / coverage
-                     meeting_day_of_the_week[center.meeting_day].to_s.truncate(3, ""), #meeting day of the week
-                     center.meeting_time.truncate(5, ""), #meeting time of the day
+                     (meetings and (not meetings.nil?)) ? meeting_day_of_the_week[Constants::Time.get_week_day(meetings.actual_date)].to_s.truncate(3, "") : nil, #meeting day of the week
+                     (meetings and (not meetings.nil?)) ? meetings.meeting_begins_at.truncate(5, "") : nil, #meeting time of the day
                      nil, #dummy reserved for future use
                      nil, #old member code
                      nil, #old member shrt number
