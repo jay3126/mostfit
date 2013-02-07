@@ -34,14 +34,7 @@ namespace :mostfit do
         t1 = Time.now
         report = Highmark::CommonDataFormat.new({}, {:to_date => to_date, :from_date => from_date}, User.first)
         data = report.generate
-        folder = File.join(Merb.root, "doc", "csv", "reports")      
-        # FileUtils.mkdir_p(folder)
-        # filename1 = File.join(folder, "#{report.name}-customer.csv")
-        # filename2 = File.join(folder, "#{report.name}-address.csv")
-        # filename3 = File.join(folder, "#{report.name}-accounts.csv")
-        # file1 = report.get_csv(data["CNSCRD"], filename1)
-        # file2 = report.get_csv(data["ADRCRD"], filename2)
-        # file3 = report.get_csv(data["ACTCRD"], filename3)
+        folder = File.join(Merb.root, "doc", "csv", "reports")
         t2 = Time.now
         puts
         puts "It took #{t2-t1} seconds to generate this report."
