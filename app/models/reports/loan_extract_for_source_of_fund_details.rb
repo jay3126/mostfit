@@ -2,8 +2,6 @@ class LoanExtractForSourceOfFundDetails < Report
 
   attr_accessor :from_date, :to_date, :funding_line_id, :page
 
-  validates_with_method :funding_line_id, :funding_line_not_selected
-
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
@@ -11,6 +9,8 @@ class LoanExtractForSourceOfFundDetails < Report
     @user = user
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
     @limit = 10
+    all_funding_line_ids = NewFundingLine.all.map{|fl| fl.id}
+    @funding_line_id = (params && params[:funding_line_id] && (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
     get_parameters(params, user)
   end
 
@@ -33,7 +33,6 @@ class LoanExtractForSourceOfFundDetails < Report
   def generate
     reporting_facade = get_reporting_facade(@user)
     data = {}
-
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
     loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).to_a.paginate(:page => @page, :per_page => @limit)
     data[:loan_ids] = loan_ids_with_disbursal_dates
@@ -70,8 +69,4 @@ class LoanExtractForSourceOfFundDetails < Report
     data
   end
 
-  def funding_line_not_selected
-    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) and not self.funding_line_id
-    return true
-  end
 end
