@@ -301,7 +301,7 @@ module Highmark
                      branch.biz_location_identifier.to_s.truncate(30, ""),
                      center.biz_location_identifier.to_s.truncate(30, ""),
                      StaffMember.get(loan.applied_by_staff).name.truncate(30, ""),
-                     #((loan.status(@to_date) == :repaid || loan.status(@to_date) == :written_off || loan.status(@to_date) == :preclosed) ? loan.loan_history.last.date.strftime("%d%m%Y") : @to_date.strftime("%d%m%Y").truncate(8,"")), #date of account information
+                     account_information_date(loan, loan.status).strftime("%d%m%Y").truncate(8,""), #date of account information
                      loan_category[:jlg_individual].truncate(3, ""), #loan category
                      client.client_group_id.to_s.truncate(20, ""),
                      loan.cycle_number.to_s.truncate(30, ""),
@@ -310,7 +310,7 @@ module Highmark
                      (loan.applied_on_date ? loan.applied_on_date.strftime("%d%m%Y").truncate(8, "") : nil),
                      (loan.approved_on_date ? loan.approved_on_date.strftime("%d%m%Y").truncate(8, "") : nil),
                      (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
-                     #( ( (loan.status == :repaid and loan_status_record.status == :repaid) || (loan.status == :preclosed and loan_status_record.status == :preclosed) || (loan.status == :claim_settlement and loan_status_record.status == :claim_settlement) ) ? loan_status_record.on_date.strftime("%d%m%Y").truncate(8, "") : nil), #loan closed
+                     (account_information_date(loan, loan.status) == @to_date) ? nil : account_information_date(loan, loan.status).strftime("%d%m%Y").truncate(8, ""), #loan closed
                      LoanReceipt.last(:lending_id => loan.id).effective_on.strftime("%d%m%Y").truncate(8, ""), #loan closed
                      (loan.applied_amoun ? loan.applied_amoun.to_i.to_s.truncate(9, "") : nil),
                      (loan.approved_amount ? loan.approved_amount.to_i.to_s.truncate(9, "") : nil), #amount approved or sanctioned
@@ -355,6 +355,18 @@ module Highmark
         :male     => "M", 
         :untagged => "U"
       }
+    end
+
+    def account_information_date(loan, status)
+      if status == :repaid_loan_status
+        return loan.repaid_on_date
+      elsif status == :preclosed_loan_status
+        return loan.preclosed_on_date
+      elsif status == :written_off_loan_status
+        return loan.write_off_on_date
+      else
+        return @to_date
+      end
     end
     
     def marital_status
