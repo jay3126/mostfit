@@ -236,8 +236,9 @@ class PaymentTransactions < Application
     all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date, :fields => [:id, :accounted_at_origin])
     all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids.map(&:id), :effective_on.lte => @date)
     all_loan_schedules = all_loan_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => all_loan_ids.map(&:id), :on_date => @date)
+    all_loans_group_by_location = all_loan_ids.group_by{|s| s.accounted_at_origin}
     @locations.each do |location|
-      loans = Lending.all(:accounted_at_origin => location.id, :id => all_loan_ids.map(&:id)).aggregate(:id) rescue []
+      loans = all_loans_group_by_location[location.id].blank? ? [] :  all_loans_group_by_location[location.id].map(&:id)
       @loans_status[location.id] = {}
       schedules = loans.blank? ? [] : all_loan_schedules.select{|s| loans.include?(s.loan_base_schedule.lending_id)}
       scheduled_principal = schedules.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedules.map(&:scheduled_principal_due).sum.to_i)

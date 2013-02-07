@@ -141,6 +141,7 @@ class ReportingFacade < StandardFacade
     overdue_loan_amts =  LoanReceipt.add_up(overdue_loan_receipts)
     overdue_principal_received = overdue_loan_amts[:principal_received]
     overdue_interest_received = overdue_loan_amts[:interest_received]
+    non_schedule_advance_received = overdue_loan_amts[:advance_received]
     overdue_total_received = overdue_principal_received + overdue_interest_received
 
     write_off_receipts = write_off_loans.blank? ? [] : LoanReceipt.all(:lending_id => write_off_loans, :effective_on => on_date)
@@ -150,11 +151,12 @@ class ReportingFacade < StandardFacade
     preclose_principal_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[0].to_i)
     preclose_interest_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[1].to_i)
     total_preclose_received_on_date = preclose_principal_received_on_date + preclose_interest_received_on_date
-   
+
+    total_advance_received = non_schedule_advance_received + schedule_advance_received
     {:scheduled_principal => schedule_principal_due, :scheduled_interest => schedule_interest_due, :scheduled_total => schedule_total,
       :advance_amount_exist => advance_available, :overdue_ftd => overdue_total_ftd, :overdue_amt => non_schedule_overdue_total,
       :scheduled_principal_collected => schedule_principal_received, :scheduled_interest_collected => schedule_interest_received, :scheduled_total_collected => schedule_total_received,
-      :advance_received => schedule_advance_received, :overdue_received => overdue_total_received, :recovery_collected => recovery_received,
+      :advance_received => total_advance_received, :overdue_received => overdue_total_received, :recovery_collected => recovery_received,
       :preclosure_pricipal => preclose_principal_received_on_date, :priclosure_interest => preclose_interest_received_on_date, :total_preclosure => total_preclose_received_on_date,
       :fee_colleatable => total_fee_colleatable_on_date, :fee_colleated => loan_fee_receipt_amount, :insurance_fee_collected => other_fee_receipt_amount
     }
