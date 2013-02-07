@@ -2,7 +2,6 @@ class LoanStatusReport < Report
 
   attr_accessor :from_date, :to_date, :funding_line_id, :page
 
-  validates_with_method :funding_line_id, :funding_line_not_selected
 
   def initialize(params, dates, user)
     @from_date = (dates && dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -11,6 +10,8 @@ class LoanStatusReport < Report
     @user = user
     @page = params.blank? || params[:page].blank? ? 1 : params[:page]
     @limit = 10
+    all_funding_line_ids = NewFundingLine.all.map{|fl| fl.id}
+    @funding_line_id = (params && params[:funding_line_id] && (not (params[:funding_line_id].empty?))) ? params[:funding_line_id] : all_funding_line_ids
     get_parameters(params, user)
   end
 
@@ -103,8 +104,4 @@ class LoanStatusReport < Report
     data
   end
 
-  def funding_line_not_selected
-    return [false, "Please select Funding Line"] if self.respond_to?(:funding_line_id) && !self.funding_line_id
-    return true
-  end
 end
