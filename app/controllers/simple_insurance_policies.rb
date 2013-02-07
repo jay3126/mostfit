@@ -1,8 +1,8 @@
 class SimpleInsurancePolicies < Application
 
   def index
-    @policies = SimpleInsurancePolicy.all
-    display @policies
+    @policies = SimpleInsurancePolicy.all.aggregate(:id).paginate(:page => params[:page], :per_page => 10)
+    display @policies, :layout => layout?
   end
 
   def new

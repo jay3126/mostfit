@@ -1,6 +1,5 @@
 :javascript
   $('table.fee').dataTable({
-      "bPaginate": false,
       "bJQueryUI": true
     });
 %h1 Insurance Policy
@@ -8,6 +7,8 @@
   %br
     .menu-strip{:style => "width: 10%;"}
       = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+.flickr_pagination
+  = will_paginate @policies, :container => false
 - if @policies.count == 0
   %p
     %i No Insurance Policy has been created yet.
@@ -25,7 +26,8 @@
           Expires On
         %td
           Status
-    - @policies.each do |policy|
+    - @policies.each do |policy_id|
+      - policy = SimpleInsurancePolicy.get policy_id
       %tr
         %td
           = link_to_with_rights policy.id, resource(policy)
@@ -51,3 +53,5 @@
     %br
     %h1 Add Insurance Claim
     Client is not eligible to Add Claim because Client has no outstanding loan
+.flickr_pagination
+  = will_paginate @policies, :container => false
