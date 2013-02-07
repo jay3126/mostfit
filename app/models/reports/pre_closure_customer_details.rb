@@ -28,8 +28,9 @@ class PreClosureCustomerDetails < Report
     lendings.each do |loan|
       member                    = loan.loan_borrower.counterparty
       status_date               = loan.preclosed_on_date
-      remarks                   = Comment.last(:commentable_class => 'Lending', :commentable_id => loan.id, :created_on => loan.preclosed_on_date).text rescue ''
-      reason                    = remarks.blank? ? '' : remarks.reason.name rescue ''
+      comment                   = Comment.last(:commentable_class => 'Lending', :commentable_id => loan.id, :created_on => loan.preclosed_on_date)
+      remarks                   = comment.blank? ? '' : comment.text rescue ''
+      reason                    = comment.blank? ? '' : Reason.get(comment.reason_id).name rescue ''
       loan_receipts             = loan.loan_receipts
       pre_closure_receipts      = loan.loan_receipts('payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE)
       pre_closure_amt           = LoanReceipt.add_up(pre_closure_receipts)
