@@ -333,7 +333,7 @@ module Highmark
                      (loan.approved_on_date ? loan.approved_on_date.strftime("%d%m%Y").truncate(8, "") : nil),
                      (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
                      (account_information_date(loan, loan.status) == @to_date) ? nil : account_information_date(loan, loan.status).strftime("%d%m%Y").truncate(8, ""), #loan closed
-                     LoanReceipt.last(:lending_id => loan.id).effective_on.strftime("%d%m%Y").truncate(8, ""), #loan closed
+                     (LoanReceipt.last(:lending_id => loan.id).nil? ? nil : LoanReceipt.last(:lending_id => loan.id).effective_on.strftime("%d%m%Y").truncate(8, "")), #loan closed
                      (loan.applied_amount ? ((MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil),
                      (loan.approved_amount ? ((MoneyManager.get_money_instance(Money.new(loan.approved_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil), #amount approved or sanctioned
                      (loan.disbursed_amount ? ((MoneyManager.get_money_instance(Money.new(loan.disbursed_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil), #amount disbursed
