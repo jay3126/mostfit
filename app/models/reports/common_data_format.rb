@@ -22,16 +22,19 @@ module Highmark
     end
     
     def generate
-      @data = { "CNSCRD" => [], "ADRCRD" => [], "ACTCRD" => [] }
+      @data = { "CNSCRD" => [], "ADRCRD" => [], "ACTCRD" => [], "BRNCRD" => [] }
       folder = File.join(Merb.root, "doc", "csv", "reports")      
       FileUtils.mkdir_p(folder)
 
       filename_cnscrd = File.join(folder, "#{self.name}-customer.csv")
       filename_adrcrd = File.join(folder, "#{self.name}-address.csv")
       filename_actcrd = File.join(folder, "#{self.name}-accounts.csv")
+      filename_brncrd = File.join(folder, "#{self.name}-branch-center-list.csv")
+
       File.new(filename_cnscrd, "w").close
       File.new(filename_adrcrd, "w").close
       File.new(filename_actcrd, "w").close
+      File.new(filename_brncrd, "w").close
 
       attendance_record = BizLocation.all("location_level.level" => 0).map{|x| [x.id, AttendanceRecord.all(:at_location => x.id, :counterparty_type => :client).aggregate(:counterparty_id, :counterparty_id.count).to_hash]}.to_hash
       absent_record = attendance_record = BizLocation.all("location_level.level" => 0).map{|x| [x.id, AttendanceRecord.all(:at_location => x.id, :counterparty_type => :client, :attendance => :absent_attendance_status).aggregate(:counterparty_id, :counterparty_id.count).to_hash]}.to_hash
@@ -39,6 +42,7 @@ module Highmark
       append_to_file_as_csv([headers["CNSCRD"]], filename_cnscrd)
       append_to_file_as_csv([headers["ADRCRD"]], filename_adrcrd)
       append_to_file_as_csv([headers["ACTCRD"]], filename_actcrd)
+      append_to_file_as_csv([headers["BRNCRD"]], filename_brncrd)
 
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Lending.all(:fields => [:id]).map{|x| x.id}.uniq
@@ -70,6 +74,7 @@ module Highmark
           rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
           rows["ADRCRD"].map!{|x| x = (x == "" ? nil : x)}
           rows["ACTCRD"].map!{|x| x = (x == "" ? nil : x)}
+          rows["BRNCRD"].map!{|x| x = (x == "" ? nil : x)}
 
           unless @data["CNSCRD"].include?(rows["CNSCRD"])
             @data["CNSCRD"] << rows["CNSCRD"]
@@ -77,6 +82,7 @@ module Highmark
             append_to_file_as_csv([rows["ADRCRD"]], filename_adrcrd)
           end
           append_to_file_as_csv([rows["ACTCRD"]], filename_actcrd)
+          append_to_file_as_csv([rows["BRNCRD"]], filename_brncrd)
         rescue
           puts "ERROR: loan_id: #{l_id}"
         end
@@ -220,7 +226,15 @@ module Highmark
                      "Ownership Indicator", #NULL
                      "Parent ID", 
                      "EXTRACTION FILE ID", 
-                     "SEVERITY"]
+                     "SEVERITY"],
+        "BRNCRD" => ["Branch Code",
+                     "Branch Name",
+                     "Center Id",
+                     "Center Name",
+                     "Center Address 1",
+                     "Center Address 2",
+                     "Center Address 3",
+                     "Center Pincode"]
       }
     end
     
@@ -352,6 +366,15 @@ module Highmark
                      client.id.to_s.truncate(100, ""), #parent id
                      nil, # extraction field id
                      nil  # severity
+                    ],
+        "BRNCRD" => [branch.id.to_s.truncate(100, ""), #branch code
+                     branch.name.truncate(100, ""), #branch name
+                     center.biz_location_identifier.to_s.truncate(30, ""),
+                     center.name.truncate(100, ""), #center identifier
+                     center.biz_location_address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #center address 1
+                     nil, #address 2
+                     nil, # address 3
+                     nil  # pin code.
                     ]
       }
     end
