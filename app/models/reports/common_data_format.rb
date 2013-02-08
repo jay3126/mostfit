@@ -9,6 +9,7 @@ module Highmark
     def initialize(params, dates, user)
       @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
       @from_date = (dates and dates[:from_date]) ? dates[:from_date] : @to_date << 3
+      @frequency_identifier = params[:frequency_identifier]
       get_parameters(params, user)
     end
     
@@ -38,13 +39,22 @@ module Highmark
       append_to_file_as_csv([headers["CNSCRD"]], filename_cnscrd)
       append_to_file_as_csv([headers["ADRCRD"]], filename_adrcrd)
       append_to_file_as_csv([headers["ACTCRD"]], filename_actcrd)
+
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Lending.all(:fields => [:id]).map{|x| x.id}.uniq
+      all_disbursed_loans_during_period = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :fields => [:id]).map{|x| x.id}.uniq
+      loans_with_status_changes_during_period = LoanStatusChange.all(:from_status => :disbursed_loan_status, :to_status => [:repaid_loan_status, :preclosed_loan_status, :written_off_loan_status], :effective_on.gte => @from_date, :effective_on.lte => @to_date).map{|x| x.lending_id}.uniq
       cut_off_date = @from_date
       ineligible_written_off_loans = Lending.all(:status => :written_off_loan_status, :write_off_on_date.lte => cut_off_date).map{|x| x.id}.uniq
       ineligible_preclosed_loans = Lending.all(:status => :preclosed_loan_status, :preclosed_on_date.lte => cut_off_date).map{|x| x.id}.uniq
       ineligible_repaid_loans = Lending.all(:status => :repaid_loan_status, :repaid_on_date.lte => cut_off_date).map{|x| x.id}.uniq
-      eligible_loans = all_loans - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
+
+      #this is done as per Suryoday's requirements. For monthly submission only those new_disbursements + status changes loans are required and for monthly all loans.
+      if @frequency_identifier == 'weekly'
+        eligible_loans = (all_disbursed_loans_during_period + loans_with_status_changes_during_period) - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
+      elsif @frequency_identifier == 'monthly'
+        eligible_loans = all_loans - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
+      end
 
       eligible_loans.each do |l_id|
         begin
