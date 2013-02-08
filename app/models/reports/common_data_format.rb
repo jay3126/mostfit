@@ -45,16 +45,16 @@ module Highmark
       ineligible_preclosed_loans = Lending.all(:status => :preclosed_loan_status, :preclosed_on_date.lte => cut_off_date).map{|x| x.id}.uniq
       ineligible_repaid_loans = Lending.all(:status => :repaid_loan_status, :repaid_on_date.lte => cut_off_date).map{|x| x.id}.uniq
       eligible_loans = all_loans - (ineligible_written_off_loans + ineligible_preclosed_loans + ineligible_repaid_loans)
-      
+
       eligible_loans.each do |l_id|
         begin
-          l = Lending.get(l_id)
-          client = l.borrower
-          center = BizLocation.get(l.administered_at_origin_location)
-          branch = BizLocation.get(l.accounted_at_origin_location)
+          loan = Lending.get(l_id)
+          client = loan.borrower
+          center = BizLocation.get(loan.administered_at_origin)
+          branch = BizLocation.get(loan.accounted_at_origin)
           meetings = MeetingCalendar.last(:location_id => center.id, :on_date.lte => @to_date)
-          
-          rows = row(l, client, center, branch, attendance_record, absent_record, meetings)
+
+          rows = row(loan, client, center, branch, attendance_record, absent_record, meetings)
           
           #the following lines of code replace the blanks with nils
           rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
@@ -69,7 +69,7 @@ module Highmark
           append_to_file_as_csv([rows["ACTCRD"]], filename_actcrd)
         rescue
           puts "ERROR: loan_id: #{l_id}"
-	end
+        end
       end
       
       return true
@@ -229,8 +229,8 @@ module Highmark
                      (client.date_of_birth ? client.date_of_birth.strftime("%d%m%Y").truncate(8,"") : nil), #member's date of birth
                      ((client.date_joined and client.date_of_birth) ? (client.date_joined.year - client.date_of_birth.year).to_s.truncate(3, "") : nil), # member's age on date
                      (client.date_joined ? client.date_joined.strftime("%d%m%Y").truncate(8,"") : nil),
-                     (client.gender.empty? ? nil : gender[client.gender]), # client gender
-                     (client.marital_status.empty? ? marital_status[:untagged] : marital_status[client.marital_status.downcase.to_sym]), #marital status
+                     ((client.gender == :gender_not_specified) ? gender_value[:untagged] : gender_value[client.gender]), # client gender
+                     ((client.marital_status == 'Single') ? marital_status_value[:untagged] : marital_status_value[client.marital_status.downcase.to_sym]), #marital status
                      client.spouse_name.truncate(100, ""),
                      key_person_relationship(client, 'spouse'),
                      nil, #member 1
@@ -241,21 +241,21 @@ module Highmark
                      nil, #relationship with member 3
                      nil, #member 4
                      nil, #relationship with member 4
-                     client.guarantor_name, #nominee name
-                     key_person_relationship[client.guarantor_relationship.downcase], #nominee relationship
+                     client.guarantor_name.truncate(100, ""), #nominee name
+                     key_person_relationship(client, client.guarantor_relationship.downcase), #nominee relationship
                      ((client.date_joined and client.guarantor_dob) ? (client.date_joined.year - client.guarantor_dob.year).to_s.truncate(3, "") : nil), #nominee age
                      (client.reference2_type == :voter_id ? client.reference2.truncate(20, "") :  nil), #voters id
                      (client.reference2_type == :uid ? client.reference2.truncate(15, "") : nil), # UID
                      (client.reference2_type == :pan_card ? client.reference2.truncate(15, "") : nil), #PAN
                      (client.reference_type == :ration_card ? client.reference.truncate(20, "") : nil), #ration card
-                     client.reference2_type.to_s.truncate(20, ""), #other id type description 1
-                     client.reference2.truncate(30, ""), #other id 1
+                     nil, #other id type description 1
+                     nil, #other id 1
                      nil, #other id type description 2
                      nil, #other id 2
                      nil, #other id type description 3
                      nil, #other id 3
                      phone[client.telephone_type.downcase.to_sym], #telephone number type 1
-                     client.phone_number.truncate(15, ""), #telephone number 1
+                     (client.telephone_number.nil? ? nil : client.telephone_number.truncate(15, "")), #telephone number 1
                      nil, #telephone number type 2
                      nil, #telephone number 1
                      client.poverty_status.to_s.truncate(20, ""), #poverty index
@@ -283,7 +283,7 @@ module Highmark
                      "ADRCRD",  
                      client.address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #permanent address
                      ((client.state and client.state.empty?) ? nil : states[client.state.downcase.to_sym]), #state code
-                     client.pincode, #pin code
+                     client.pincode.to_s.truncate(100, ""), #pin code
                      nil, #present address
                      nil, #state code
                      nil, #pin code
@@ -310,25 +310,25 @@ module Highmark
                      (loan.disbursal_date.nil? ? loan.scheduled_disbursal_date : loan.disbursal_date).strftime("%d%m%Y").truncate(8, ""),
                      (account_information_date(loan, loan.status) == @to_date) ? nil : account_information_date(loan, loan.status).strftime("%d%m%Y").truncate(8, ""), #loan closed
                      LoanReceipt.last(:lending_id => loan.id).effective_on.strftime("%d%m%Y").truncate(8, ""), #loan closed
-                     (loan.applied_amoun ? loan.applied_amoun.to_i.to_s.truncate(9, "") : nil),
-                     (loan.approved_amount ? loan.approved_amount.to_i.to_s.truncate(9, "") : nil), #amount approved or sanctioned
-                     loan.disbursed_amount.to_i.to_s.truncate(9, ""), #amount disbursed
+                     (loan.applied_amount ? ((MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil),
+                     (loan.approved_amount ? ((MoneyManager.get_money_instance(Money.new(loan.approved_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil), #amount approved or sanctioned
+                     (loan.disbursed_amount ? ((MoneyManager.get_money_instance(Money.new(loan.disbursed_amount.to_i, :INR).to_s)).to_s.chomp(".00")).truncate(9, "") : nil), #amount disbursed
                      loan.tenure.to_s.truncate(3, ""), #number of installments
                      repayment_frequency[loan.repayment_frequency], #repayment frequency
-                     (loan.loan_installment_amount.to_s.chomp(".00 INR").truncate(9, "")),   #installment amount / minimum amount due
-                     loan.actual_total_outstanding_loan(@to_date).to_s.chomp(".00 INR").truncate(9, ""),
-                     ((loan.actual_total_outstanding_loan(@to_date) > loan.scheduled_total_outstanding(@to_date)) ? (loan.actual_total_outstanding_loan(@to_date) - loan.scheduled_total_outstanding(@to_date)).to_s.chomp(".00 INR").truncate(9, "") : MoneyManager.default_zero_money.to_s.chomp(".00 INR")), #amount overdue
+                     (loan.loan_installment_amount.to_s.chomp(".00").truncate(9, "")),   #installment amount / minimum amount due
+                     loan.actual_total_outstanding_loan(@to_date).to_s.chomp(".00").truncate(9, ""),
+                     ((loan.actual_total_outstanding_loan(@to_date) > loan.scheduled_total_outstanding(@to_date)) ? (loan.actual_total_outstanding_loan(@to_date) - loan.scheduled_total_outstanding(@to_date)).to_s.chomp(".00").truncate(9, "") : MoneyManager.default_zero_money.to_s.chomp(".00")), #amount overdue
                      (loan.days_past_dues_on_date(@to_date) > 999 ? 999 : loan.days_past_dues_on_date(@to_date)).to_s.truncate(3, ""), #days past due
-                     (loan.status == :written_off_loan_status ? loan.actual_principal_outstanding(@to_date).to_s.chomp(".00 INR") : nil), #write off amount
+                     (loan.status == :written_off_loan_status ? loan.actual_principal_outstanding(@to_date).to_s.chomp(".00") : nil), #write off amount
                      (loan.write_off_on_date.nil? ? nil : loan.write_off_on_date.strftime("%d%m%Y").truncate(8, "")), #date written off
                      nil, #write-off reason
                      attendance_record[center.id][client.id], #no of meetings held
                      absent_record[center.id][client.id], #no of meetings missed
                      insurance_indicator[(not loan.simple_insurance_policies.nil?)], #insurance indicator
                      (loan.simple_insurance_policies and (not loan.simple_insurance_policies.nil?) and loan.simple_insurance_policies.first.simple_insurance_product and (not loan.simple_insurance_policies.first.simple_insurance_product.nil?)) ? type_of_insurance[loan.simple_insurance_policies.first.simple_insurance_product.insured_type] : nil, #type of insurance
-                     (loan.simple_insurance_policies and (not loan.simple_insurance_policies.nil?) and loan.simple_insurance_policies.simple_insurance_product and (not loan.simple_insurance_policies.simple_insurance_product.nil?)) ? (MoneyManager.get_money_instance(Money.new(loan.simple_insurance_policies.first.simple_insurance_product.cover_amount.to_i, :INR).to_s).to_s.chomp(".00 INR").truncate(10, "")) : MoneyManager.default_zero_money.to_s.chomp(".00 INR"), #sum assured / coverage
+                     (loan.simple_insurance_policies and (not loan.simple_insurance_policies.nil?) and loan.simple_insurance_policies.simple_insurance_product and (not loan.simple_insurance_policies.simple_insurance_product.nil?)) ? ((MoneyManager.get_money_instance(Money.new(loan.simple_insurance_policies.first.simple_insurance_product.cover_amount.to_i, :INR).to_s).to_s.chomp(".00")).truncate(10, "")) : MoneyManager.default_zero_money.to_s.chomp(".00"), #sum assured / coverage
                      (meetings and (not meetings.nil?)) ? meeting_day_of_the_week[Constants::Time.get_week_day(meetings.actual_date)].to_s.truncate(3, "") : nil, #meeting day of the week
-                     (meetings and (not meetings.nil?)) ? meetings.meeting_begins_at.truncate(5, "") : nil, #meeting time of the day
+                     (meetings and (not meetings.nil?)) ? meetings.meeting_begins_at.truncate(8, "") : nil, #meeting time of the day
                      nil, #dummy reserved for future use
                      nil, #old member code
                      nil, #old member shrt number
@@ -347,7 +347,7 @@ module Highmark
     end
     
     # specifications as required by the common data format    
-    def gender
+    def gender_value
       _gender ||= {
         :female   => "F", 
         :male     => "M", 
@@ -367,7 +367,7 @@ module Highmark
       end
     end
     
-    def marital_status
+    def marital_status_value
       _marital_status ||= {
         :married   => "M01", 
         :separated => "M02", 
