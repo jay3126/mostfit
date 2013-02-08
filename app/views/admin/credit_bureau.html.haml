@@ -14,7 +14,7 @@
       - @files.each do |f|
         %tr
           %td
-            = link_to f, url(:controller => :admin, :action => 'send_report', :filename => (File.join(@folder, f)))
+            = link_to_with_rights f, url(:controller => :admin, :action => 'send_report', :filename => (File.join(@folder, f)))
       %br
 - else
   %h3 
