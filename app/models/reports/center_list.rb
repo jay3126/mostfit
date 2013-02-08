@@ -38,7 +38,7 @@ class CenterList < Report
     data = {}
     location_facade = get_location_facade(@user)
     biz_location = BizLocation.get(@biz_location_branch) unless @biz_location_branch.blank?
-    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers.to_a.paginate(:page => @page, :per_page => @limit) : LocationLink.all_children_by_sql(biz_location, @date).to_a.paginate(:page => @page, :per_page => @limit)
+    all_centers = @biz_location_branch.blank? ? location_facade.all_nominal_centers : LocationLink.all_children_by_sql(biz_location, @date)
     data[:center_ids] = all_centers
     data[:centers] = {}
 

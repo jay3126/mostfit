@@ -1,8 +1,18 @@
+:javascript
+  $(document).ready(function() {
+    $('table.examplehi').dataTable( {
+      "sPaginationType": "four_button",
+      "sDom": '<"H"Tfr>t<"F"ip>',
+      "oTableTools": {
+        "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+      }
+    } );
+  } );
 = partial :form
 - if @data.blank? || @data[:centers].blank?
   %h2 No data to display
 - else
-  %table.dataTable.report.weeksheet.nojs
+  %table.examplehi
     %thead
       %tr
         %th
@@ -58,7 +68,3 @@
             = values[:meeting_frequency]
           %td
             = values[:center_disbursal_date]
-  %br
-  .flickr_pagination
-    = will_paginate @data[:center_ids], :container => false
-  %br
