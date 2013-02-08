@@ -121,27 +121,28 @@
         = link_to_with_rights 'Reason Master', resource(:reasons), :class => 'report icon'
 
   .admin-box
-    -# %h2 Data Administration
-    -# %ul.icon_links
-    -#   %li
-    -#     = link_to_with_rights 'History log', url(:controller => :audit_trails, :action => :show), :class => 'icon zoom'
+    %h2 Credit Bureau
+    %ul.icon_links
+      %li
+        = link_to_with_rights 'Credit Bureau Data Submission', url(:controller => 'admin', :action => "credit_bureau"), :class => 'download icon'
+      %br
 
-    .admin_box
-      %h2 Securitisation
+    %h2 Securitisation
+    %ul.icon_links
+      %li
+        = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
+
+    - if session.user.staff_member.designation.role_class == :operator
+      %br
+      %h2 Access Logs
       %ul.icon_links
         %li
-          = link_to_with_rights 'Loan Assignments', url(:controller => :loan_assignments, :action => :loan_assignment, :flag => 'true'), :class => 'icon accept'
+          = link_to_with_rights 'User Access Report', url("reports/UserAccessReport"), :class => 'user icon'
+      %br
 
-      - if session.user.staff_member.designation.role_class == :operator
-        %br
-        %h2 Access Logs
-        %ul.icon_links
-          %li
-            = link_to_with_rights 'User Access Report', url("reports/UserAccessReport"), :class => 'user icon'
-
-      - if Mfi.first.system_state == :migration
-        %br
-        %h2 Data Migration
-        %ul.icon_links
-          %li
-            = link_to_with_rights 'Upload data', url(:controller => 'uploads'), :class => 'upload icon'
+    - if Mfi.first.system_state == :migration
+      %br
+      %h2 Data Migration
+      %ul.icon_links
+        %li
+          = link_to_with_rights 'Upload data', url(:controller => 'uploads'), :class => 'upload icon'
