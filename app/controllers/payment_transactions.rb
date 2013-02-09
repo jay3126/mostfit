@@ -233,7 +233,7 @@ class PaymentTransactions < Application
     @date = params[:date]||get_effective_date
     @date = Date.parse(@date) if @date.class != Date
     @loans_status = {}
-    all_loan_ids = Lending.all('loan_base_schedule.base_schedule_line_items.on_date' => @date, :fields => [:id, :accounted_at_origin])
+    all_loan_ids = Lending.all(:status => 'disbursed_loan_status', 'loan_base_schedule.base_schedule_line_items.on_date' => @date, :fields => [:id, :accounted_at_origin])
     all_loan_receipts = all_loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => all_loan_ids.map(&:id), :effective_on.lte => @date)
     all_loans_group_by_location = all_loan_ids.group_by{|s| s.accounted_at_origin}
     @locations.each do |location|

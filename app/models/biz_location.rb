@@ -290,7 +290,7 @@ class BizLocation
     if /^\d+$/.match(q)
       BizLocation.all(:conditions => {:id => q}, :limit => per_page)
     else
-      BizLocation.all(:conditions => ["name=? or name like ?", q, q+'%'], :limit => per_page)
+      BizLocation.all(:conditions => ["name=? or name like ? or biz_location_identifier like ?", q, q+'%',q+'%'], :limit => per_page)
     end
   end
 
@@ -416,6 +416,18 @@ class BizLocation
         center_code += 1
       end
     end
+  end
+
+  def loans_advance_adjusted_on_date(on_date = Date.today)
+    loans = LoanAdministration.get_loans_administered_by_sql(self.id, on_date, false, 'disbursed_loan_status')
+    user = User.first
+    loans.each do |loan|
+      get_loan_facade(user).adjust_advance(on_date, loan.id) if loan.advance_balance(on_date) > loan.zero_money_amount && loan.schedule_date?(on_date)
+    end
+  end
+
+  def get_loan_facade(user)
+    @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, user)
   end
   
 end
