@@ -177,8 +177,8 @@ class Client
       :guarantor_dob => Date.parse(row[headers[:guarantor_date_of_birth]]), :guarantor_relationship => row[headers[:guarantor_relationship]],
       :spouse_name => row[headers[:spouse_name]], :spouse_date_of_birth => row[headers[:spouse_date_of_birth]], :address => row[headers[:address]],
       :pincode => row[headers[:pincode]], :created_by_staff_member_id => StaffMember.first(:name => row[headers[:created_by_staff]]).id,
-      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :caste => row[headers[:caste]].to_sym,
-      :religion => row[headers[:religion]].to_sym, :priority_sector_list => priority_sector_list, :psl_sub_category => psl_sub_category,
+      :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :caste => row[headers[:caste]].downcase.to_sym,
+      :religion => row[headers[:religion]].downcase.to_sym, :priority_sector_list => priority_sector_list, :psl_sub_category => psl_sub_category,
       :occupation => occupation
       }
 
