@@ -179,12 +179,20 @@ class Lending
       loan_purpose = nil
     end
 
+    tranch = NewTranch.first(:reference => row[headers[:tranch_serial_number]])
+
+    #checking if funding_line_serial_number is present or not.
+    if headers[:funding_line_serial_number] and row[headers[:funding_line_serial_number]]
+      funding_line_id = NewFundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id
+    else
+      funding_line_id = tranch.new_funding_line_id
+    end
+
     loan_product = LendingProduct.first(:name => row[headers[:loan_product]])
     lending_product_id = loan_product
     client = Client.first(:name => row[headers[:client]], :upload_reference => row[headers[:upload_reference]])
     loan_borrower_id = client
-    funding_line_id = NewFundingLine.first(:reference => row[headers[:funding_line_serial_number]]).id
-    tranch_id = NewTranch.first(:reference => row[headers[:tranch_serial_number]]).id
+    tranch_id = tranch.id
     applied_money_amount = MoneyManager.get_money_instance(row[headers[:applied_amount]])
     approved_money_amount = MoneyManager.get_money_instance(row[headers[:approved_amount]])
     disbursed_money_amount = MoneyManager.get_money_instance(row[headers[:disbursed_amount]])
