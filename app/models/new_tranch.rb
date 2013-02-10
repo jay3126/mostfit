@@ -37,12 +37,21 @@ class NewTranch
   def self.from_csv(row, headers)
     funder = NewFunder.first(:name => row[headers[:funder_name]])
     funding_line = NewFundingLine.first(:amount => MoneyManager.get_money_instance(row[headers[:funding_line]]).amount, :new_funder_id => funder.id)
+
+    if row[headers[:assignment_type]] == "e"
+      assignment_type = "encumbrance"
+    elsif row[headers[:assignment_type]] == "s"
+      assignment_type = "securitization"
+    elsif row[headers[:assignment_type]] == "ae"
+      assignment_type = "encumbrance"
+    end
+
     money_amount = MoneyManager.get_money_instance(row[headers[:amount]])
     obj = new(:new_funding_line_id => funding_line.id, :amount => money_amount.amount,
               :currency => money_amount.currency, :interest_rate => row[headers[:interest_rate]], 
               :reference => row[headers[:reference]], :disbursal_date => Date.parse(row[headers[:disbursal_date]]),
               :first_payment_date => Date.parse(row[headers[:first_payment_date]]),
-              :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :assignment_type => row[headers[:assignment_type]],
+              :last_payment_date => Date.parse(row[headers[:last_payment_date]]), :assignment_type => assignment_type,
               :created_by => User.first.id, :upload_id => row[headers[:upload_id]])
     [obj.save!, obj]
   end
