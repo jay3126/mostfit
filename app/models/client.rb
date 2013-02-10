@@ -169,7 +169,7 @@ class Client
 
     date_joined = Date.parse(row[headers[:date_joined]])
     
-    hash = {:name => row[headers[:name]], :gender => row[headers[:gender]], :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
+    hash = {:name => row[headers[:name]], :gender => row[headers[:gender]].downcase, :reference => row[headers[:reference]].tr('^A-Za-z0-9', ''),
       :reference_type => Constants::Masters::RATION_CARD, :reference2 => row[headers[:reference2]].tr('^A-Za-z0-9', ''),
       :reference2_type => row[headers[:reference2_type]], :date_of_birth => Date.parse(row[headers[:date_of_birth]]),
       :date_joined => date_joined, :client_group => client_group,
