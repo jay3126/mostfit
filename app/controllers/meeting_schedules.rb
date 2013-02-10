@@ -30,7 +30,11 @@ class MeetingSchedules < Application
     message[:error] = "No. Of Meeting must be positive" if meeting_numbers < 0
     message[:error] = "Please fill right value of time" unless Constants::Time::MEETING_HOURS_PERMISSIBLE_RANGE.include?(meeting_time_begins_hours) &&
       Constants::Time::MEETING_MINUTES_PERMISSIBLE_RANGE.include?(meeting_time_begins_minutes)
-    message[:error] = "Bigin Date cannot be holiday" unless configuration_facade.permitted_business_days_in_month(meeting_begin_on).include?(meeting_begin_on)
+
+    #disabling a validation in migration mode.
+    if Mfi.first.system_state != :migration
+      message[:error] = "Begin Date cannot be holiday" unless configuration_facade.permitted_business_days_in_month(meeting_begin_on).include?(meeting_begin_on)
+    end
 
     # OPERATIONS PERFORMED
 
