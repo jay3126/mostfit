@@ -1,0 +1,1 @@
+ALTER TABLE `lendings` ADD UNIQUE INDEX `lan_UNIQUE` (`lan` ASC);

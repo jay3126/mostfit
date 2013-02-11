@@ -10,7 +10,7 @@ class Lending
   after  :create,    :update_cycle_number
 
   property :id,                             Serial
-  property :lan,                            String, :nullable => false
+  property :lan,                            String, :nullable => false, :unique => true
   property :applied_amount,                 *MONEY_AMOUNT_NON_ZERO
   property :currency,                       *CURRENCY
   property :applied_on_date,                *DATE_NOT_NULL
