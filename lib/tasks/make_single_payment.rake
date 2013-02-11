@@ -146,17 +146,6 @@ USAGE_TEXT
               specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
             accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
 
-            #making fee payments.
-            insurance_policies = loan.simple_insurance_policies.map(&:id) rescue []
-            fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
-            fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(loan.id)
-            fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
-            fee_instances.each do |fee_instance|
-              payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
-                '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
-                loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
-            end
-            
             #making the single payment to match the POS at the specified date.
             principal_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_principal_amount.to_i, default_currency)
             interest_amount_from_loan_product = Money.new(loan.lending_product.loan_schedule_template.total_interest_amount.to_i, default_currency)

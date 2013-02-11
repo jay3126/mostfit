@@ -15,10 +15,10 @@ namespace :mostfit do
   namespace :suryoday do
 
     desc "records a single payment for each loan to match the POS data in uploads"
-    task :make_single_payment, :directory do |t, args|
+    task :make_fee_and_single_payment, :directory do |t, args|
       require 'fastercsv'
       USAGE = <<USAGE_TEXT
-[bin/]rake mostfit:suryoday:make_single_payment[<'directory'>]
+[bin/]rake mostfit:suryoday:make_fee_and_single_payment[<'directory'>]
 Convert lendings tab in the upload file to a .csv and put them into <directory>
 USAGE_TEXT
 
