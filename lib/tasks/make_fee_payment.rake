@@ -14,7 +14,7 @@ Merb.start_environment(:environment => ENV['MERB_ENV'] || 'development')
 namespace :mostfit do
   namespace :suryoday do
 
-    desc "records a single payment for each loan to match the POS data in uploads"
+    desc "records a fee payment for loans which has been uploaded in the system"
     task :make_fee_payment, :directory do |t, args|
       require 'fastercsv'
       USAGE = <<USAGE_TEXT
@@ -23,15 +23,9 @@ Convert lendings tab in the upload file to a .csv and put them into <directory>
 USAGE_TEXT
 
       LAN_NO_COLUMN = 'lan'
-      POS_COLUMN = 'principal_outstanding'
-      INTEREST_OUTSTANDING_COLUMN = 'interest_outstanding'
-      TOTAL_OUTSTANDING = 'total_outstanding'
-      AS_ON_DATE_COLUMN = 'as_on_date'
-      PRINCIPAL_RECEIVED_COLUMN = 'principal_received_till_date'
-      INTEREST_RECEIVED_COLUMN = 'interest_received_till_date'
 
       results = {}
-      instance_file_prefix = 'single_payment' + '_' + DateTime.now.to_s
+      instance_file_prefix = 'single_fee_payment' + '_' + DateTime.now.to_s
       results_file_name = File.join(Merb.root, instance_file_prefix + ".results")
       begin
 
@@ -53,65 +47,9 @@ USAGE_TEXT
           file_options = {:headers => true}
           loan_ids_read = []; loans_not_found = []; loan_ids_updated = []; errors = []
           FasterCSV.foreach(file_to_read, file_options) do |row|
-            lan = row[LAN_NO_COLUMN]; pos_str = row[POS_COLUMN]; as_on_date_str = row[AS_ON_DATE_COLUMN]; int_os_str = row[INTEREST_OUTSTANDING_COLUMN]; total_os_str = row[TOTAL_OUTSTANDING];
-            principal_received_till_date_str = row[PRINCIPAL_RECEIVED_COLUMN]; interest_received_till_date_str = row[INTEREST_RECEIVED_COLUMN];
+            lan = row[LAN_NO_COLUMN];
 
             default_currency = MoneyManager.get_default_currency
-            pos = nil
-            begin
-              pos = MoneyManager.get_money_instance(pos_str)
-            rescue => ex
-              errors << [lan, pos_str, "pos not parsed"]
-              next
-            end
-
-            int_os = nil
-            begin 
-              int_os = MoneyManager.get_money_instance(int_os_str)
-            rescue => ex
-              errors << [lan, int_os_str, "int os not parsed"]
-              next
-            end
-            
-            total_os = nil
-            begin 
-              total_os = MoneyManager.get_money_instance(total_os_str)
-            rescue => ex
-              errors << [lan, total_os_str, "total os not parsed"]
-              next
-            end
-
-            principal_received_till_date = nil
-            begin
-              principal_received_till_date = MoneyManager.get_money_instance(principal_received_till_date_str)
-            rescue => ex
-              errors << [lan, principal_received_till_date_str, "principal received till date not parsed"]
-              next
-            end
-
-            interest_received_till_date = nil
-            begin
-              interest_received_till_date = MoneyManager.get_money_instance(interest_received_till_date_str)
-            rescue => ex
-              errors << [lan, interest_received_till_date_str, "interest received till date not parsed"]
-              next
-            end
-
-            as_on_date = nil
-            begin
-              as_on_date = Date.parse(as_on_date_str)
-            rescue => ex
-              errors << [lan, as_on_date_str, "as on date not parsed"]
-              next
-            end
-
-            if (as_on_date.year < 1900)
-              p "WARNING!!! WARNING!!! WARNING!!!"
-              p "Date from the file is being read in the ancient past, for the year #{as_on_date.year}"
-              p "Hit Ctrl-C to ABORT NOW otherwise 2000 years are being added to this date as a correction"
-              as_on_date = Date.new(as_on_date.year + 2000, as_on_date.mon, as_on_date.day)
-            end
-
             loan = nil
             loan = Lending.first(:lan => lan) if lan
             unless loan
@@ -120,47 +58,30 @@ USAGE_TEXT
               next
             end
             loan_ids_read << [loan.id]
-
             default_currency = MoneyManager.get_default_currency
 
-            #approving the loan.
-            new_loan_status = LoanLifeCycle::APPROVED_LOAN_STATUS
-            current_status = loan.status
-            loan.status = new_loan_status
-            loan.save       #saving the loan with its new status.
-
-            #making the entry in loan_status_change model.
-            LoanStatusChange.record_status_change(loan, current_status, new_loan_status, loan.approved_on_date)
-            loan.setup_on_approval
-
-            #making the disbursement entry.
             accounting_facade = FacadeFactory.instance.get_instance(FacadeFactory::ACCOUNTING_FACADE, User.first)
             payment_facade = FacadeFactory.instance.get_instance(FacadeFactory::PAYMENT_FACADE, User.first)
 
-            payment_transaction = PaymentTransaction.record_payment(loan.to_money[:disbursed_amount], 'payment',
-              Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, '', 'lending',
-              loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
-              loan.disbursal_date, User.first.id)
+            if (loan.status == :disbursed_loan_status)
+              #making fee payments.
+              insurance_policies = loan.simple_insurance_policies.map(&:id) rescue []
+              fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
+              fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(loan.id)
+              fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
+              fee_instances.each do |fee_instance|
+                fee_payment = payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
+                  '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
+                  loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
 
-            payment_allocation = loan.allocate_payment(payment_transaction, Constants::Transaction::LOAN_DISBURSEMENT, make_specific_allocation = nil,
-              specific_principal_money_amount = nil, specific_interest_money_amount = nil, '')
-            accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
-
-            #making fee payments.
-            insurance_policies = loan.simple_insurance_policies.map(&:id) rescue []
-            fee_insurances     = FeeInstance.all_unpaid_loan_insurance_fee_instance(insurance_policies) unless insurance_policies.blank?
-            fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(loan.id)
-            fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
-            fee_instances.each do |fee_instance|
-              fee_payment = payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
-                '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
-                loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
-
-              if fee_payment.saved?
-                loan_ids_updated << [loan.id, loan.lan, "Payment of #{fee_instance.effective_total_amount} was successfully made"]
-              else
-                errors << [loan.id, loan.lan]
+                if fee_payment.saved?
+                  loan_ids_updated << [loan.id, loan.lan, "Payment of #{fee_instance.effective_total_amount} was successfully made"]
+                else
+                  errors << [loan.id, loan.lan, "Payment cannot be made"]
+                end
               end
+            else
+              errors << [loan.id, loan.lan, "Payment cannot be made for loans with status : #{loan.status.humanize}"]
             end
           end
 
