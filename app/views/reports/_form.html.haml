@@ -304,6 +304,11 @@
               -# primary_chart_of_accounts = accounting_facade.get_primary_chart_of_accounts
               -# ledgers = primary_chart_of_accounts.ledgers
               = select(:ledger_list, :collection => Ledger.all.uniq, :value_method => :id, :text_method => :name, :include_blank => true)
+          - if @report.respond_to?(:file_format)
+            %tr
+              %td
+                Format:
+                = select :name => 'report_format', :collection => ["CSV"], :include_blank => true, :prompt => "Select Format", :selected => params[:report_format]
       %table{:style => "padding-top: 0px;"}
         %tr
           - if @report.respond_to?(:loan_cycle)
@@ -318,9 +323,28 @@
               = check_box(:name => "#{report}[report_by_loans_created]", :value => "1", :checked => (params[report] and params[report].key?(:report_by_loans_created) and params[report][:report_by_loans_created] == "1" ? true : false))
               Report by Loans Created
 
-
         %tr
           %td
             %div{:style => "float: left"}
               = hidden_field :name => "submit", :value => "go"
               = submit "Generate", :name => "submit_button", :value => "submit"
+    %br
+    - if @report.respond_to?(:file_format)
+      - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
+      - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
+      - count = 1
+      = link_to "Download Existing Report", "#", :onclick => "jQuery('.download_link').toggle();"
+      %table{:style => "display:none", :class => 'download_link'}
+        %thead
+          %tr
+            %th S. No.
+            %th File Name
+        - files.each do |file|
+          %tr
+            %td
+              = count
+              - count += 1
+            %td
+              = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")
+
+

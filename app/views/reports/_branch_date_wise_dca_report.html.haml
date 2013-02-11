@@ -136,7 +136,7 @@
               - accumulate_row_values[:outstanding_principal] += values[:outstanding_principal]
               - branch_accumulate_row_values[:outstanding_principal] = values[:outstanding_principal]
         - branch_total_rows = Money.add_money_hash_values(@default_currency, branch_accumulate_row_values)
-        %tr{:style => "text-align:center; background:#708890;"}
+        %tr{:class => 'header_row', :style => "text-align:center; background:#708890;"}
           %th{:style => 'display:none'}
           %th
             Total
@@ -204,3 +204,10 @@
   .flickr_pagination
     = will_paginate @data[:branches], :container => false
   %br
+:javascript
+  $(document).ready(function() {
+    total_row = jQuery('table.weeksheet').find('tbody tr').size();
+    total_header_row = jQuery('table.weeksheet').find('tbody tr.header_row').size();
+    total_row_count = total_row - total_header_row
+    jQuery('.dataTables_info').html('Total Record '+total_row_count);
+  });

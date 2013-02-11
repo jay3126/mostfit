@@ -5,7 +5,7 @@ class Reports < Application
     #:periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary, SecuritizationLoanStatus, DailyRepaymentDetailReport, DemandAndCollectionSummaryReport, InsuranceClaimReport],
     :consolidated => [ConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport, MonthlyLoanDetailsReport, BranchDateWiseDcaReport, DateWiseSofDuesCollectionsAndAccrualsReport, BranchDateWiseSofDuesCollectionsAndAccrualsReport, BranchDateWiseSofDuesCollectionsAndAccrualsFilteredWithLoanProductReport],
     # :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, BranchWiseDisbursementAndChargeDetailsReport, SOFDuesCollectionAndAccrualsReport],
-#    :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport, BranchReport, LoanStatusReport, PeriodicLoanStatusReport, OutreachCenterGroupCountReport, OutreachMembersReport, OutreachLoanDisbursementReport, DelinquencyReportBranchWise, DelinquencyReport, DelinquencyReportSofLevel],
+    #    :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport, BranchReport, LoanStatusReport, PeriodicLoanStatusReport, OutreachCenterGroupCountReport, OutreachMembersReport, OutreachLoanDisbursementReport, DelinquencyReportBranchWise, DelinquencyReport, DelinquencyReportSofLevel],
     :registers    => [CustomerExtractForInsurance, InsuranceClaimReport, CenterList, PassbookLabelExtract, SurpriseCenterExtract, OngoingLoanInformationReport, BranchReport, LoanStatusReport, PeriodicLoanStatusReport, OutreachCenterGroupCountReport, OutreachMembersReport, OutreachLoanDisbursementReport, DelinquencyReportBranchWise, DelinquencyReport, DelinquencySofReport],
     :statistics => [DeviationReport, LoanApplicationsReport, CreditBureauReport, LoanFilesReport, MembersAndCentersPerRo, PreClosureCustomerDetails, SecuritisationPoolInformationReport, SecuritisationLoanDetailsReport, OverdueDetailedReport, AdvancePaymentsCurrentReport,  LoanExtractForSourceOfFundDetails, UserAccessReport],
     # :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementRegister, ScheduledDisbursementRegister, ClaimReport, InsuranceRegister, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
@@ -43,13 +43,27 @@ class Reports < Application
         render :form
       else
         if @report.valid?
-          case @report.method(:generate).arity
-          when 0
-            @data = @report.generate
-          when 1
-            @data = @report.generate(params)
+          if params[:report_format] == 'CSV'
+            Thread.new{
+              case @report.method(:generate).arity
+              when 0
+                @data = @report.generate_xls
+              when 1
+                @data = @report.generate_xls(params)
+              end
+            }
+            params.delete(:submit)
+            message[:notice] = "This report take time for generate"
+            render :form
+          else
+            case @report.method(:generate).arity
+            when 0
+              @data = @report.generate
+            when 1
+              @data = @report.generate(params)
+            end
+            display @data
           end
-          display @data
         else
           params.delete(:submit)
           message[:error] = "Report cannot be generated"          
