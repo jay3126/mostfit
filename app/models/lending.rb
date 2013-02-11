@@ -493,6 +493,14 @@ class Lending
       repository(:default).adapter.query("select lending_id from loan_status_changes a where a.to_status = #{status_key+1} and (a.to_status, a.lending_id) = (select b.to_status,b.lending_id from loan_status_changes b where b.lending_id = a.lending_id and (b.effective_on <= '#{on_date.strftime("%Y-%m-%d")}') order by b.effective_on desc limit 1 );")
     end
   end
+
+  def self.advance_avaiable_loans_for_location(location)
+    if location.location_level == 0
+      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.performed_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
+    else
+      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.accounted_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
+    end
+  end
   
   # The total loan amount disbursed
   def total_loan_disbursed

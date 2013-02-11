@@ -43,6 +43,8 @@
           = link_to_with_rights 'Mark Verification', resource(:money_deposits, :get_money_deposits), :class => 'icon accept'
         %li
           = link_to_with_rights 'Delete Payment Transactions', resource(:payment_transactions, :payment_transactions_on_date), :class => 'icon accept'
+        %li
+          = link_to_with_rights 'Advance Payment Transactions', resource(:payment_transactions, :advance_payment_by_location), :class => 'icon accept'
     .admin-box
       %h2 Manage staff, users and roles
       %ul.icon_links

@@ -1,0 +1,73 @@
+:javascript
+  $(document).ready(function() {
+  $('#toggle_select_to_payment').change(function() {
+    $('.select_to_payment').attr('checked',$(this).attr('checked'))});
+  });
+%h1
+  Advance Payment Transactions
+- params[:parent_location_id] = @branch_id
+- params[:child_location_id] = @center_id
+- params[:date] = @on_date
+%form{:action => url(:controller => :payment_transactions, :action => :advance_payment_by_location), :method => :get}
+  = partial 'lib/branch_center_date_selector'
+- if @center_id.blank?
+  %h3
+    Please Select Branch
+- else
+  %div.tab_container.shaded
+    %ul.tabs
+      %li#location_meeting
+        Payment Transaction
+    %div.tab
+      - if @loans.blank?
+        %h3
+          No Installments
+      - else
+        = form_for(:payment_transactions, :action => url(:controller => :payment_transactions, :action => :advance_adjusted_on_date)) do
+          %table.dataTable.report.weeksheet.nojs
+            %thead
+              %tr{:style => 'text-align:left'}
+                %th
+                  Select All
+                  %br
+                  = check_box :id => "toggle_select_to_payment"
+                %th
+                  Installment Amount
+                %th
+                  Available Advance Amount
+                %th
+                  Loan Lan
+                %th
+                  Loan Status
+                %th
+                  By Client
+            - @loans.each do |loan|
+              - schedule = loan.loan_base_schedule.base_schedule_line_items.first(:on_date => @on_date)
+              - advance_balance = loan.current_advance_available
+              %tr
+                %td{:style => 'text-align:center'}
+                  - if advance_balance > MoneyManager.default_zero_money
+                    = check_box :name => "payment_transactions[advance_payments][]" ,:value => loan.id, :class => "select_to_payment"
+                %td
+                  = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
+                %td
+                  = advance_balance
+                %td
+                  = link_to_with_rights loan.lan, url(:controller => :lendings, :action => :show, :id => loan.id)
+                %td
+                  = loan.status.humanize
+                %td
+                  = loan.borrower.name
+          %table.narrow.form{:style => "text-align:right;width:100%;"}
+            %tfoot
+              %tr
+                %td
+                  %b Chosen date
+                  = @on_date
+                  = hidden_field :name => "payment_transactions[on_date]", :value => @on_date
+                %td
+                  - staff_member = session.user.staff_member
+                  %b Performed by
+                  = select :name => "payment_transactions[performed_by]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+                %td
+                  = submit 'Save Advance Adjustment'

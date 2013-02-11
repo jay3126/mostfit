@@ -323,7 +323,55 @@ class PaymentTransactions < Application
     @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
 
     redirect resource(:payment_transactions, :payment_by_branch, :date => effective_on), :message => @message
+  end
 
+  def advance_payment_by_location
+    @branch_id = params[:parent_location_id]
+    @center_id = params[:child_location_id]
+    @on_date   = params[:date]
+    @error = []
+    @error << "Please Select Branch" if @branch_id.blank?
+    @error << "Date cannot be blank" if @on_date.blank?
+    @loans = []
+    if @error.blank?
+      search = {:accounted_at => @branch_id, :advance_received.not => 0.0, :effective_on => @on_date}
+      search[:performed_at] = @center_id unless @center_id.blank?
+      @loans = Lending.all(:status => :disbursed_loan_status, :administered_at_origin => @center_id, 'loan_base_schedule.base_schedule_line_items.on_date' => @on_date)
+    end
+    display @loans, :message => {:error => @error}
+  end
+
+  def advance_adjusted_on_date
+    # INITIALIZING VARIABLES USED THROUGHTOUT
+    @message              = {:error => [], :notice => [],:weeksheet_error => ''}
+
+    # GATE-KEEPING
+    recorded_by  = session.user.id
+    effective_on = Date.parse(params[:payment_transactions][:on_date])
+    payments     = params[:payment_transactions][:advance_payments]
+    performed_by = params[:payment_transactions][:performed_by]
+    branch_id    = params[:parent_location_id]
+    center_id    = params[:child_location_id]
+    on_date      = params[:date].blank? ? '' : Date.parse(params[:date])
+
+
+    # VALIDATIONS
+    @message[:error] << "Date cannot be blank" if effective_on.blank?
+    @message[:error] << "Performed by must not be blank" if performed_by.blank?
+    @message[:error] << "Please Select Check box For Repayments" if payments.blank?
+
+    # OPERATIONS PERFORMED
+    if @message[:error].blank?
+      lendings = Lending.all(:id => payments)
+      lendings.each do |loan|
+        loan_facade.adjust_advance(effective_on, loan.id) if loan.advance_balance(effective_on) > loan.zero_money_amount && loan.schedule_date?(effective_on)
+      end
+    end
+
+    @message[:notice] = "Advance amount successfully adjusted" if @message[:error].blank?
+    @message[:error].blank? ? @message.delete(:error) : @message.delete(:notice)
+
+    redirect request.referer, :message => @message
   end
 
 end

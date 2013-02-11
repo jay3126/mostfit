@@ -3,4 +3,6 @@
     = params[:report_type].snake_case.camelcase(' ')
   %h3
     Please choose the parameters you wish to generate this report on
+    %div{:style => "float:right"}
+      = link_to "Download Existing Report", "#", :onclick => "jQuery('.download_link').toggle();", :sytle => "float:right"
   = partial :form

@@ -121,7 +121,7 @@
         = loan_active_status
     %a.expand_collapsed{:href => "#"}
       Change parameters
-  %div{:class => "#{params[:submit] ? 'collapsed':''}"}
+  %div{:class => "#{params[:submit] ? 'collapsed':''}", :style => 'display:table; width:100%;'}
     = form_for(@report, :action => url(:show_report, :report_type => params[:report_type]), :method => :get, :class => "_disable_button_") do
       %table
         %tr
@@ -328,23 +328,22 @@
             %div{:style => "float: left"}
               = hidden_field :name => "submit", :value => "go"
               = submit "Generate", :name => "submit_button", :value => "submit"
-    %br
-    - if @report.respond_to?(:file_format)
-      - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
-      - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
-      - count = 1
-      = link_to "Download Existing Report", "#", :onclick => "jQuery('.download_link').toggle();"
-      %table{:style => "display:none", :class => 'download_link'}
-        %thead
-          %tr
-            %th S. No.
-            %th File Name
-        - files.each do |file|
-          %tr
-            %td
-              = count
-              - count += 1
-            %td
-              = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")
+    %div{:style => "display:table-cell; width:43%"}
+      - if @report.respond_to?(:file_format)
+        - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
+        - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
+        - count = 1
+        %table{:style => "display:none;", :class => 'download_link'}
+          %thead
+            %tr
+              %th S. No.
+              %th File Name
+          - files.each do |file|
+            %tr
+              %td
+                = count
+                - count += 1
+              %td
+                = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")
 
 
