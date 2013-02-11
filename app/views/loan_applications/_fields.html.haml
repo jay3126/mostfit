@@ -38,9 +38,9 @@
           %td
             = date_select :client_dob, params[:client_dob], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
             %br
-            = text_field :name => "client_age", :id => "client_age", :readonly => 'true', :size => 2
+            =# text_field :name => "client_age", :id => "client_age", :readonly => 'true', :size => 2
           %td
-            = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on]
+            = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on], :id => "client_age"
           %td
             = date_select :age_as_on_date, params[:age_as_on_date], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
           %td

@@ -153,7 +153,7 @@ class LoanApplications < Application
       is_reference2_format_matched = format_reference2.match reference2.strip
       @message[:error] << "Reference-2 must be alphanumeric(allowed only: a-z, A-Z, 0-9)" if is_reference2_format_matched.nil?
     end
-
+    
     # VALIDATIONS
     @message[:error] << "Applicant name must not be blank" if name.blank?
     @message[:error] << "Guarantor name must not be blank" if guarantor_name.blank?
@@ -162,10 +162,11 @@ class LoanApplications < Application
     @message[:error] << "Either Ration card or Reference 2 is mandatory" if (reference1.blank? && reference2.blank?)
     @message[:error] << "Applied for amount must not be blank" if loan_amount_str.blank?
     @message[:error] << "Address name must not be blank" if address.blank?
-    @message[:error] << "State name must not be blank" if state.blank?
     @message[:error] << "Pincode name must not be blank" if pincode.blank?
+    @message[:error] << "State name must not be blank" if state.blank?
     @message[:error] << "Created by name must not be blank" if created_by.blank?
     @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+
 
     unless no_age_parameter
       if dob.blank?
@@ -189,6 +190,7 @@ class LoanApplications < Application
         loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
         loan_amount = loan_money_amount.amount.to_i
         loan_amount_currency = loan_money_amount.currency
+        params[:loan_application][:client_pincode] = trim_lead(pincode, "0")
         params[:loan_application][:amount] = loan_amount
         params[:loan_application][:currency] = loan_amount_currency
         params[:loan_application][:client_reference1] = params[:loan_application][:client_reference1].strip
@@ -377,6 +379,12 @@ class LoanApplications < Application
 
   private
 
+  # method to left trim any digit or value of string
+  def trim_lead(string, n)
+    trimmed = string.gsub!(/^#{n}+/,'')
+    return trimmed.blank? ? string : trimmed
+  end
+  
   def get_param_value(param_name_sym)
     param_value_str = params[param_name_sym]
     param_value = (param_value_str and (not (param_value_str.empty?))) ? param_value_str : nil
