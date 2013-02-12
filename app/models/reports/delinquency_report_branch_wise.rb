@@ -37,10 +37,10 @@ class DelinquencyReportBranchWise < Report
     data = {}
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
-      all_payments                      = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date_for_delinquency_report(@date, *branch_id)
-      amounts                           = all_payments.values.first
+      branch                         = BizLocation.get branch_id
+      all_payments                   = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date_for_delinquency_report(@date, *branch_id)
+      amounts                        = all_payments.values.first
 
-      future_principal_outstanding   = MoneyManager.default_zero_money
       overdue_principal              = MoneyManager.default_zero_money
       loan_total_repay_principal_amt = amounts['total_principal_amt']
       loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
@@ -49,13 +49,14 @@ class DelinquencyReportBranchWise < Report
       loan_outstanding_principal     = loan_disbursed_principal_amt - loan_total_repay_principal_amt
       loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
       loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
-      loan_overdue                   = loan_overdue_principal + loan_overdue_interest
-      loan_ids_overdues               = get_reporting_facade(User.first).overdue_loans_for_location(branch_id, @date)
+      loan_ids_overdues              = Lending.overdue_loans_for_location_on_date(branch, @date)
       overdue_loan_ids               = loan_ids_overdues.blank? ? [0] : loan_ids_overdues
-      overdue_loan_ids.each do |loan_id|
-        loan = Lending.get(loan_id)
-        next unless loan
-        overdue_principal += loan.actual_principal_outstanding(@date)
+      unless overdue_loan_ids.blank?
+        loan_principal_disbursed = Lending.all(:id => loan_ids_overdues).aggregate(:disbursed_amount).sum rescue []
+        loan_principal_receipts = LoanReceipt.all(:lending_id => loan_ids_overdues, :effective_on.lte => @date).aggregate(:principal_received).sum
+        loan_principal_disbursed_amt = loan_principal_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_disbursed.to_i)
+        loan_principal_receipts_amt = loan_principal_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_receipts.to_i)
+        overdue_principal = loan_principal_disbursed_amt > loan_principal_receipts_amt ? loan_principal_disbursed_amt - loan_principal_receipts_amt : MoneyManager.default_zero_money
       end
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
         par_value = (loan_overdue_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)

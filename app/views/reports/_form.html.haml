@@ -121,229 +121,231 @@
         = loan_active_status
     %a.expand_collapsed{:href => "#"}
       Change parameters
-  %div{:class => "#{params[:submit] ? 'collapsed':''}", :style => 'display:table; width:100%;'}
-    = form_for(@report, :action => url(:show_report, :report_type => params[:report_type]), :method => :get, :class => "_disable_button_") do
-      %table
-        %tr
-          - if @report.respond_to?(:from_date)
-            %td
-              From:
-              = date_select_for(@report, "from_date", :date => @report.from_date)
-          - if @report.respond_to?(:to_date)
-            %td
-              To:
-              = date_select_for(@report, "to_date", :date => @report.to_date)
-          - if @report.respond_to?(:date)
-            %td
-              Date:
-              = date_select_for(@report, "date", :date => @report.date)
-          - if @report.respond_to?(:loan_product_id)
-            %td
-              Product:
-              = select(:loan_product_id, :collection => LoanProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => loan_product_id)
-          - if @report.respond_to?(:late_by_more_than_days)
-            %td
-              Late by more than:
-              = text_field(:late_by_more_than_days, :size => 10)
-              days
-          - if @report.respond_to?(:late_by_less_than_days)
-            %td
-              Late by less than:
-              = text_field(:late_by_less_than_days, :size => 10)
-              days
-          - if @report.respond_to?(:attendance_status)
-            - attendance_status_list = Attendance.attendancy_states.map{|a| [(Attendance.attendancy_states.index(a)+1), a.to_s]}
-            /- attendance_status_list.delete(attendance_status_list.first)
-            %td
-              = select(:attendance_status, :collection => attendance_status_list)
-          - if @report.respond_to?(:more_than)
-            %td
-              by more than:
-              = text_field(:more_than, :size => 3)
-          - if @report.respond_to?(:days_percentage)
-            %td
-              = select(:days_percentage, :collection => [[1, "days"], [2, "%"]])
-          - if @report.respond_to?(:month)
-            %td
-              Month:
-              = select(:month, :collection => MONTHS.map{|m| [MONTHS.index(m), m.to_s]}, :selected => month)
-          - if @report.respond_to?(:period)
-            %td
-              Period:
-              = select(:period, :collection => AccountingPeriod.all.map {|p| [p.id, p.name]}, :selected => period)
-          - if @report.respond_to?(:chosen_year)
-            %td
-              Year:
-              = select(:chosen_year, :collection => ["2010", "2011"])
-          - if @report.respond_to?(:lending_product_id)
-            %td
-              Loan Product:
-              = select(:lending_product_id, :collection => LendingProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => lending_product_id)
-          - if @report.respond_to?(:target_entity)
-            %td
-              Target Entity
-              = select(:target_entity, :collection => TargetEntity.all.map{|x| [x.id, x.type]}, :include_blank => true)
+
+  %div{:class => "#{params[:submit] ? 'collapsed':''}"}
+    %div{:style => 'display:table; width:100%;'}
+      = form_for(@report, :action => url(:show_report, :report_type => params[:report_type]), :method => :get, :class => "_disable_button_") do
+        %table
+          %tr
+            - if @report.respond_to?(:from_date)
+              %td
+                From:
+                = date_select_for(@report, "from_date", :date => @report.from_date)
+            - if @report.respond_to?(:to_date)
+              %td
+                To:
+                = date_select_for(@report, "to_date", :date => @report.to_date)
+            - if @report.respond_to?(:date)
+              %td
+                Date:
+                = date_select_for(@report, "date", :date => @report.date)
+            - if @report.respond_to?(:loan_product_id)
+              %td
+                Product:
+                = select(:loan_product_id, :collection => LoanProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => loan_product_id)
+            - if @report.respond_to?(:late_by_more_than_days)
+              %td
+                Late by more than:
+                = text_field(:late_by_more_than_days, :size => 10)
+                days
+            - if @report.respond_to?(:late_by_less_than_days)
+              %td
+                Late by less than:
+                = text_field(:late_by_less_than_days, :size => 10)
+                days
+            - if @report.respond_to?(:attendance_status)
+              - attendance_status_list = Attendance.attendancy_states.map{|a| [(Attendance.attendancy_states.index(a)+1), a.to_s]}
+              /- attendance_status_list.delete(attendance_status_list.first)
+              %td
+                = select(:attendance_status, :collection => attendance_status_list)
+            - if @report.respond_to?(:more_than)
+              %td
+                by more than:
+                = text_field(:more_than, :size => 3)
+            - if @report.respond_to?(:days_percentage)
+              %td
+                = select(:days_percentage, :collection => [[1, "days"], [2, "%"]])
+            - if @report.respond_to?(:month)
+              %td
+                Month:
+                = select(:month, :collection => MONTHS.map{|m| [MONTHS.index(m), m.to_s]}, :selected => month)
+            - if @report.respond_to?(:period)
+              %td
+                Period:
+                = select(:period, :collection => AccountingPeriod.all.map {|p| [p.id, p.name]}, :selected => period)
+            - if @report.respond_to?(:chosen_year)
+              %td
+                Year:
+                = select(:chosen_year, :collection => ["2010", "2011"])
+            - if @report.respond_to?(:lending_product_id)
+              %td
+                Loan Product:
+                = select(:lending_product_id, :collection => LendingProduct.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => lending_product_id)
+            - if @report.respond_to?(:target_entity)
+              %td
+                Target Entity
+                = select(:target_entity, :collection => TargetEntity.all.map{|x| [x.id, x.type]}, :include_blank => true)
 
 
-      %table{:style => "padding-top: 0px;"}
-        %tr
-          - if @report.respond_to?(:claim_accounted_at)
-            %br
-            %td
-              Branch
-              = select(:claim_accounted_at, :collection => get_all_nominal_branches.map{|x| [x.id, x.name]}, :include_blank => true)
-          - if @report.respond_to?(:claim_filed_on)
-            %td
-              On date
-              = date_select_for(@report, "claim_filed_on", :date => params[:insurance_claim_report] && params[:insurance_claim_report][:claim_filed_on] ? params[:insurance_claim_report][:claim_filed_on] : Date.today)
-          - if @report.respond_to?(:loan_application_status)
-            %td
-              Loan Application Status:
-              = select(:loan_application_status, :collection => Constants::Status::LOAN_APPLICATION_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_application_status, :include_blank => true, :id => "loan_application_status_selector")
-          - if @report.respond_to?(:loan_file_status)
-            %td
-              Loan File Status:
-              = select(:loan_file_status, :collection => Constants::Status::HEALTH_CHECK_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_file_status, :include_blank => true, :id => "loan_file_status_selector")
-          - if @report.respond_to?(:area_id)
-            %td
-              Area:
-              = select(:area_id, :collection => get_accessible_areas(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :selected => area_id, :id => "area_selector")
-          - if @report.respond_to?(:combo_branches)
-            %td
-              Branch:
-              = select(:combo_branches, :collection => get_accessible_combo_branches(area_id), :include_blank => true, :selected => combo_branches, :id => "combo_branch_selector")
-          - if @report.respond_to?(:branch_id)
-            %td
-              Branch:
-              = select(:branch_id , :collection => get_accessible_branches(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :selected => branch_id, :id => "branch_selector")
-          - if @report.respond_to?(:center_id)
-            %td
-              Center:          
-              = select(:center_id , :collection => get_accessible_centers(branch_id, @staff), :include_blank => true, :selected => center_id, :id => "center_selector")
-          - if @report.respond_to?(:staff_member_id)
-            %td
-              Staff member:
-              = select(:staff_member_id , :collection => get_accessible_staff_members(@staff), :include_blank => true, :selected => staff_member_id)
-          - if @report.respond_to?(:funding_line_id)
-            %td
-              Funding Line:
-              = select(:funding_line_id, :collection => NewFundingLine.all.map{|fl| [fl.id, fl.name]}, :include_blank => true, :selected => funding_line_id)
-          - if @report.respond_to?(:securitization_id)
-            %td
-              Securitization:
-              = select(:securitization_id, :collection => Securitization.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => securitization_id, :id => "securitization_selector")
-          - if @report.respond_to?(:account_id)
-            %td
-              Account:
-              = select(:account_id, :collection => get_accessible_accounts(branch_id), :include_blank => true, :selected => account_id, :id => "account_selector")
-          - if @report.respond_to?(:include_past_data)
-            %td
-              Include past data ?
-              = check_box(:name => "#{report}[include_past_data]", :value => "1", :checked => (params[report] and params[report].key?(:include_past_data) and params[report][:include_past_data] == "1" ? true : false))
-          - if @report.respond_to?(:include_unapproved_loans)
-            %td
-              Include unapproved loans ?
-              = check_box(:name => "#{report}[include_unapproved_loans]", :value => "1", :checked => (params[report] and params[report].key?(:include_unapproved_loans) and params[report][:include_unapproved_loans] == "1" ? true : false))
-          - if @report.respond_to?(:group_by_types)
-            %td
-              Group by:
-              = select(:name => "#{report}[group_by_types]", :selected => (params[report] and params[report][:group_by_types]), :collection => @report.group_types.map{|name, gt| [name, name.to_s.camelcase(" - ")]}.sort_by{|name, gt| gt}, :prompt => "select grouping")
-          - if @report.respond_to?(:ageing_interval)
-            %td
-              Ageing intervals:
-              - ages = ["3", "5", "10"]
-              = select(:ageing_interval, :collection => ages, :prompt => "select ageing multiple")
-          - if @report.respond_to?(:type_of_target)
-            %td
-              Target Type:
-              - types = ["relative", "absolute"]
-              = select(:type_of_target, :collection => types.map{|x| [x.to_s.camelcase(' '), x.to_s]}, :text_method => :first, :value_method => :last)
-          - if @report.respond_to?(:type_of_journal)
-            %td
-              Journal Type:
-              = select(:type_of_journal, :collection => JournalType.all.map{|m| [m.id, m.name]}, :prompt => "All Journal Types", :selected => type_of_journal, :include_blank => true)
-          - if @report.respond_to?(:cash_account)
-            %td
-              Account:
-              = select(:cash_account, :collection => get_accessible_cash_accounts(branch_id), :include_blank => true, :selected => cash_account, :id => "cash_account_selector")
-          - if @report.respond_to?(:bank_account)
-            %td
-              Account:
-              = select(:bank_account, :collection => get_accessible_bank_accounts(branch_id), :include_blank => true, :selected => bank_account, :id => "bank_account_selector")
-          - if @report.respond_to?(:biz_location_branch_id)
-            %td
-              Branch:
-              - branch_collection = location_facade.all_nominal_branches
-              = select(:biz_location_branch_id, :collection => branch_collection, :value_method => :id, :text_method => :name, :include_blank => true)
-          - if @report.respond_to?(:loan_lan_number_id)
-            %td
-              Loan LAN Number:
-              = select(:loan_lan_number_id, :collection => Lending.all.aggregate(:lan), :prompt => "Select LAN number", :selected => loan_lan_number_id)
-          - if @report.respond_to?(:loan_lan_number)
-            %td
-              Loan LAN Number:
-              = text_field :loan_lan_number
-          - if @report.respond_to?(:branch_for_loan_application_report)
-            %td
-              Branch:
-              = select(:branch_for_loan_application_report, :collection => get_all_nominal_branches, :value_method => :id, :text_method => :name, :include_blank => true, :id => "parent_selector", :selected => branch_for_loan_application_report)
-          - if @report.respond_to?(:center_for_loan_application_report)
-            %td
-              Center:
-              = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(branch_for_loan_application_report), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
-          - if @report.respond_to?(:loan_active_status)
-            %td
-              Loan Status:
-              = select(:loan_active_status, :collection => ['Live Loans', 'Close/Preclose Loans'], :include_blank => true, :selected => loan_active_status)
-          - if @report.respond_to?(:effective_date)
-            %td
-              %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
-          - if @report.respond_to?(:ledger_list)
-            %td
-              Ledger:
-              -# primary_chart_of_accounts = accounting_facade.get_primary_chart_of_accounts
-              -# ledgers = primary_chart_of_accounts.ledgers
-              = select(:ledger_list, :collection => Ledger.all.uniq, :value_method => :id, :text_method => :name, :include_blank => true)
-          - if @report.respond_to?(:file_format)
-            %tr
+        %table{:style => "padding-top: 0px;"}
+          %tr
+            - if @report.respond_to?(:claim_accounted_at)
+              %br
               %td
-                Format:
-                = select :name => 'report_format', :collection => ["CSV"], :include_blank => true, :prompt => "Select Format", :selected => params[:report_format]
-      %table{:style => "padding-top: 0px;"}
-        %tr
-          - if @report.respond_to?(:loan_cycle)
-            Loan Cycle:
-            - lc = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-            = select(:loan_cycle, :collection => lc, :prompt => "select loan cycle")
-          %td
-            - if @report.respond_to?(:report_by_loan_disbursed)
-              = check_box(:name => "#{report}[report_by_loan_disbursed]", :value => "1", :checked => (params[report] and params[report].key?(:report_by_loan_disbursed) and params[report][:report_by_loan_disbursed] == "1" ? true : false))
-              Show loans disbursed during selected date range only
-            - if @report.respond_to?(:report_by_loans_created)
-              = check_box(:name => "#{report}[report_by_loans_created]", :value => "1", :checked => (params[report] and params[report].key?(:report_by_loans_created) and params[report][:report_by_loans_created] == "1" ? true : false))
-              Report by Loans Created
+                Branch
+                = select(:claim_accounted_at, :collection => get_all_nominal_branches.map{|x| [x.id, x.name]}, :include_blank => true)
+            - if @report.respond_to?(:claim_filed_on)
+              %td
+                On date
+                = date_select_for(@report, "claim_filed_on", :date => params[:insurance_claim_report] && params[:insurance_claim_report][:claim_filed_on] ? params[:insurance_claim_report][:claim_filed_on] : Date.today)
+            - if @report.respond_to?(:loan_application_status)
+              %td
+                Loan Application Status:
+                = select(:loan_application_status, :collection => Constants::Status::LOAN_APPLICATION_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_application_status, :include_blank => true, :id => "loan_application_status_selector")
+            - if @report.respond_to?(:loan_file_status)
+              %td
+                Loan File Status:
+                = select(:loan_file_status, :collection => Constants::Status::HEALTH_CHECK_STATUSES.collect{|s| s.to_s.humanize}, :selected => loan_file_status, :include_blank => true, :id => "loan_file_status_selector")
+            - if @report.respond_to?(:area_id)
+              %td
+                Area:
+                = select(:area_id, :collection => get_accessible_areas(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :selected => area_id, :id => "area_selector")
+            - if @report.respond_to?(:combo_branches)
+              %td
+                Branch:
+                = select(:combo_branches, :collection => get_accessible_combo_branches(area_id), :include_blank => true, :selected => combo_branches, :id => "combo_branch_selector")
+            - if @report.respond_to?(:branch_id)
+              %td
+                Branch:
+                = select(:branch_id , :collection => get_accessible_branches(@staff), :value_method => :id, :text_method => :name, :include_blank => true, :selected => branch_id, :id => "branch_selector")
+            - if @report.respond_to?(:center_id)
+              %td
+                Center:
+                = select(:center_id , :collection => get_accessible_centers(branch_id, @staff), :include_blank => true, :selected => center_id, :id => "center_selector")
+            - if @report.respond_to?(:staff_member_id)
+              %td
+                Staff member:
+                = select(:staff_member_id , :collection => get_accessible_staff_members(@staff), :include_blank => true, :selected => staff_member_id)
+            - if @report.respond_to?(:funding_line_id)
+              %td
+                Funding Line:
+                = select(:funding_line_id, :collection => NewFundingLine.all.map{|fl| [fl.id, fl.name]}, :include_blank => true, :selected => funding_line_id)
+            - if @report.respond_to?(:securitization_id)
+              %td
+                Securitization:
+                = select(:securitization_id, :collection => Securitization.all.map{|x| [x.id, x.name]}, :include_blank => true, :selected => securitization_id, :id => "securitization_selector")
+            - if @report.respond_to?(:account_id)
+              %td
+                Account:
+                = select(:account_id, :collection => get_accessible_accounts(branch_id), :include_blank => true, :selected => account_id, :id => "account_selector")
+            - if @report.respond_to?(:include_past_data)
+              %td
+                Include past data ?
+                = check_box(:name => "#{report}[include_past_data]", :value => "1", :checked => (params[report] and params[report].key?(:include_past_data) and params[report][:include_past_data] == "1" ? true : false))
+            - if @report.respond_to?(:include_unapproved_loans)
+              %td
+                Include unapproved loans ?
+                = check_box(:name => "#{report}[include_unapproved_loans]", :value => "1", :checked => (params[report] and params[report].key?(:include_unapproved_loans) and params[report][:include_unapproved_loans] == "1" ? true : false))
+            - if @report.respond_to?(:group_by_types)
+              %td
+                Group by:
+                = select(:name => "#{report}[group_by_types]", :selected => (params[report] and params[report][:group_by_types]), :collection => @report.group_types.map{|name, gt| [name, name.to_s.camelcase(" - ")]}.sort_by{|name, gt| gt}, :prompt => "select grouping")
+            - if @report.respond_to?(:ageing_interval)
+              %td
+                Ageing intervals:
+                - ages = ["3", "5", "10"]
+                = select(:ageing_interval, :collection => ages, :prompt => "select ageing multiple")
+            - if @report.respond_to?(:type_of_target)
+              %td
+                Target Type:
+                - types = ["relative", "absolute"]
+                = select(:type_of_target, :collection => types.map{|x| [x.to_s.camelcase(' '), x.to_s]}, :text_method => :first, :value_method => :last)
+            - if @report.respond_to?(:type_of_journal)
+              %td
+                Journal Type:
+                = select(:type_of_journal, :collection => JournalType.all.map{|m| [m.id, m.name]}, :prompt => "All Journal Types", :selected => type_of_journal, :include_blank => true)
+            - if @report.respond_to?(:cash_account)
+              %td
+                Account:
+                = select(:cash_account, :collection => get_accessible_cash_accounts(branch_id), :include_blank => true, :selected => cash_account, :id => "cash_account_selector")
+            - if @report.respond_to?(:bank_account)
+              %td
+                Account:
+                = select(:bank_account, :collection => get_accessible_bank_accounts(branch_id), :include_blank => true, :selected => bank_account, :id => "bank_account_selector")
+            - if @report.respond_to?(:biz_location_branch_id)
+              %td
+                Branch:
+                - branch_collection = location_facade.all_nominal_branches
+                = select(:biz_location_branch_id, :collection => branch_collection, :value_method => :id, :text_method => :name, :include_blank => true)
+            - if @report.respond_to?(:loan_lan_number_id)
+              %td
+                Loan LAN Number:
+                = select(:loan_lan_number_id, :collection => Lending.all.aggregate(:lan), :prompt => "Select LAN number", :selected => loan_lan_number_id)
+            - if @report.respond_to?(:loan_lan_number)
+              %td
+                Loan LAN Number:
+                = text_field :loan_lan_number
+            - if @report.respond_to?(:branch_for_loan_application_report)
+              %td
+                Branch:
+                = select(:branch_for_loan_application_report, :collection => get_all_nominal_branches, :value_method => :id, :text_method => :name, :include_blank => true, :id => "parent_selector", :selected => branch_for_loan_application_report)
+            - if @report.respond_to?(:center_for_loan_application_report)
+              %td
+                Center:
+                = select(:center_for_loan_application_report, :collection => get_all_nominal_centers(branch_for_loan_application_report), :value_method => :id, :text_method => :name, :include_blank => true, :id => "child_selector", :selected => center_for_loan_application_report)
+            - if @report.respond_to?(:loan_active_status)
+              %td
+                Loan Status:
+                = select(:loan_active_status, :collection => ['Live Loans', 'Close/Preclose Loans'], :include_blank => true, :selected => loan_active_status)
+            - if @report.respond_to?(:effective_date)
+              %td
+                %input{:type => :hidden, :value => get_effective_date, :name => 'effective_date', :id => 'effective_date_id'}
+            - if @report.respond_to?(:ledger_list)
+              %td
+                Ledger:
+                -# primary_chart_of_accounts = accounting_facade.get_primary_chart_of_accounts
+                -# ledgers = primary_chart_of_accounts.ledgers
+                = select(:ledger_list, :collection => Ledger.all.uniq, :value_method => :id, :text_method => :name, :include_blank => true)
+            - if @report.respond_to?(:file_format)
+              %tr
+                %td
+                  Format:
+                  = select :name => 'report_format', :collection => ["CSV"], :include_blank => true, :prompt => "Select Format", :selected => params[:report_format]
+        %table{:style => "padding-top: 0px;"}
+          %tr
+            - if @report.respond_to?(:loan_cycle)
+              Loan Cycle:
+              - lc = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+              = select(:loan_cycle, :collection => lc, :prompt => "select loan cycle")
+            %td
+              - if @report.respond_to?(:report_by_loan_disbursed)
+                = check_box(:name => "#{report}[report_by_loan_disbursed]", :value => "1", :checked => (params[report] and params[report].key?(:report_by_loan_disbursed) and params[report][:report_by_loan_disbursed] == "1" ? true : false))
+                Show loans disbursed during selected date range only
+              - if @report.respond_to?(:report_by_loans_created)
+                = check_box(:name => "#{report}[report_by_loans_created]", :value => "1", :checked => (params[report] and params[report].key?(:report_by_loans_created) and params[report][:report_by_loans_created] == "1" ? true : false))
+                Report by Loans Created
 
-        %tr
-          %td
-            %div{:style => "float: left"}
-              = hidden_field :name => "submit", :value => "go"
-              = submit "Generate", :name => "submit_button", :value => "submit"
-    %div{:style => "display:table-cell; width:43%"}
-      - if @report.respond_to?(:file_format)
-        - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
-        - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
-        - count = 1
-        %table{:style => "display:none;", :class => 'download_link'}
-          %thead
-            %tr
-              %th S. No.
-              %th File Name
-          - files.each do |file|
-            %tr
-              %td
-                = count
-                - count += 1
-              %td
-                = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")
+          %tr
+            %td
+              %div{:style => "float: left"}
+                = hidden_field :name => "submit", :value => "go"
+                = submit "Generate", :name => "submit_button", :value => "submit"
+      %div{:style => "display:table-cell; width:#{params[:submit] ? '35%' : '43%'}"}
+        - if @report.respond_to?(:file_format)
+          - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
+          - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
+          - count = 1
+          %table{:style => "display:none;", :class => 'download_link'}
+            %thead
+              %tr
+                %th S. No.
+                %th File Name
+            - files.each do |file|
+              %tr
+                %td
+                  = count
+                  - count += 1
+                %td
+                  = link_to "#{file}", resource(:user_locations, :zip_file_download, :file_url => "#{path}/#{file}")
 
 
