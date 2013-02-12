@@ -38,28 +38,34 @@ class DelinquencyReportBranchWise < Report
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
       branch                         = BizLocation.get branch_id
-      all_payments                   = reporting_facade.sum_all_loans_balances_at_accounted_locations_on_date_for_delinquency_report(@date, *branch_id)
-      amounts                        = all_payments.values.first
+      loans                          = LoanAdministration.get_loan_ids_accounted_by_sql(branch_id, @date, false, 'disbursed_loan_status')
 
-      overdue_principal              = MoneyManager.default_zero_money
-      loan_total_repay_principal_amt = amounts['total_principal_amt']
-      loan_disbursed_principal_amt   = amounts['disbursed_principal_amt']
-      loan_repayment_principal_amt   = amounts['principal_amt']
-      loan_repayment_interest_amt    = amounts['interest_amt']
+      overdue_pos_principal          = MoneyManager.default_zero_money
+      total_overdue_amt              = MoneyManager.default_zero_money
+      loan_total_repay_principal     = loans.blank? ? [] : LoanReceipt.sum(:principal_received, :lending_id => loans, :effective_on.lte => @date)
+      loan_total_repay_principal_amt = loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_total_repay_principal.to_i)
+      loan_disbursed_principal       = loans.blank? ? [] :  Lending.sum(:disbursed_amount, :id => loans)
+      loan_disbursed_principal_amt   = loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_disbursed_principal.to_i)
       loan_outstanding_principal     = loan_disbursed_principal_amt - loan_total_repay_principal_amt
-      loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
-      loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
+
       loan_ids_overdues              = Lending.overdue_loans_for_location_on_date(branch, @date)
       overdue_loan_ids               = loan_ids_overdues.blank? ? [] : loan_ids_overdues
       unless overdue_loan_ids.blank?
         loan_principal_disbursed = Lending.sum(:disbursed_amount, :id => loan_ids_overdues)
-        loan_principal_receipts = LoanReceipt.sum(:principal_received, :lending_id => loan_ids_overdues, :effective_on.lte => @date)
+        loan_receipts = LoanReceipt.all(:lending_id => loan_ids_overdues, :effective_on.lte => @date)
+        loan_principal_receipts = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:principal_received).sum.to_i)
+        loan_interest_receipts = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:interest_received).sum.to_i)
+        loan_total_received = loan_principal_receipts + loan_interest_receipts
+        loan_scheduled_till_date = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan_ids_overdues, :on_date.lte => @date)
+        loan_scheduled_principal_due_till_date = loan_scheduled_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_scheduled_till_date.map(&:scheduled_principal_due).sum.to_i)
+        loan_scheduled_interest_due_till_date = loan_scheduled_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_scheduled_till_date.map(&:scheduled_interest_due).sum.to_i)
+        loan_total_scheduled_due_till_date = loan_scheduled_principal_due_till_date + loan_scheduled_interest_due_till_date
         loan_principal_disbursed_amt = loan_principal_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_disbursed.to_i)
-        loan_principal_receipts_amt = loan_principal_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_receipts.to_i)
-        overdue_principal = loan_principal_disbursed_amt > loan_principal_receipts_amt ? loan_principal_disbursed_amt - loan_principal_receipts_amt : MoneyManager.default_zero_money
+        total_overdue_amt = loan_principal_disbursed_amt > loan_interest_receipts ? loan_principal_disbursed_amt - loan_principal_receipts : MoneyManager.default_zero_money
+        overdue_pos_principal = loan_total_scheduled_due_till_date > loan_total_received ? loan_total_scheduled_due_till_date - loan_total_received : MoneyManager.default_zero_money
       end
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
-        par_value = (loan_overdue_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
+        par_value = (overdue_pos_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
         par = ('%.3f' % par_value)
       else
         par = 0.0
@@ -67,9 +73,9 @@ class DelinquencyReportBranchWise < Report
       
       branch_data_map                                    = {}
       branch_data_map[:loan_outstanding_principal]       = loan_outstanding_principal
-      branch_data_map[:overdue_principal]                = overdue_principal
-      branch_data_map[:loan_overdue]                     = (loan_overdue_principal + loan_overdue_interest)
-      branch_data_map[:par]                              = par
+      branch_data_map[:overdue_principal]                = total_overdue_amt
+      branch_data_map[:loan_overdue]                     = overdue_pos_principal
+      branch_data_map[:par]                              = par.to_f*100
 
       data[branch_id]                                    = branch_data_map
     }

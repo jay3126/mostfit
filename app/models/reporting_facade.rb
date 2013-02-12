@@ -412,7 +412,7 @@ class ReportingFacade < StandardFacade
     scheduled_principal = scheduled_amounts.blank? ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[0].to_i, default_currency)
     scheduled_interest  = scheduled_amounts.blank? ? MoneyManager.default_zero_money : Money.new(scheduled_amounts[1].to_i, default_currency)
 
-    received_amounts = loan_ids.blank? ? [] :  LoanReceipt.all(:lending_id => loan_ids, :effective_on.lte => on_date).aggregate(:principal_received.sum,:interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
+    received_amounts = loan_ids.blank? ? [] :  LoanReceipt.all(:lending_id => loan_ids, :effective_on.lte => on_date, 'payment_transaction.payment_towards' => PAYMENT_TOWARD_FOR_REPAYMENT).aggregate(:principal_received.sum,:interest_received.sum, :advance_received.sum, :advance_adjusted.sum, :loan_recovery.sum) rescue []
     received_principal = received_amounts.blank? ? MoneyManager.default_zero_money : Money.new(received_amounts[0].to_i, default_currency)
     received_interest = received_amounts.blank? ? MoneyManager.default_zero_money : Money.new(received_amounts[1].to_i, default_currency)
 
@@ -443,12 +443,7 @@ class ReportingFacade < StandardFacade
   end
 
   def overdue_loans_for_location_center_wise(on_date, *location_id)
-    loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(location_id.flatten, on_date, false, 'disbursed_loan_status') unless location_id.flatten.blank?
-    loan_due_statuses = LoanDueStatus.all(:lending_id => loan_ids, :on_date => on_date).aggregate(:lending_id) rescue []
-
-    non_due_status_loans = loan_ids.blank? ? [] : loan_ids - loan_due_statuses
-    non_due_status_loans.each{|loan_id| LoanDueStatus.generate_loan_due_status(loan_id, on_date)}
-    loan_ids.blank? ? [] : repository(:default).adapter.query("Select a.lending_id from loan_due_statuses a where a.due_status = 4 AND a.lending_id IN (#{loan_ids.join(',')}) AND (a.lending_id, a.id) = (select b.lending_id, b.id from loan_due_statuses b where b.lending_id = a.lending_id AND b.on_date = '#{on_date.strftime('%Y-%m-%d')}' ORDER BY b.created_at desc LIMIT 1);")
+    location_id.flatten.blank? ? [] : repository(:default).adapter.query("select lendings.id from lendings inner join loan_base_schedules on loan_base_schedules.lending_id = lendings.id where lendings.administered_at_origin IN (#{location_id.flatten.join(',')}) and (select sum(principal_received+interest_received) from loan_receipts where loan_receipts.lending_id = lendings.id and effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and deleted_at is null) < (select sum(scheduled_principal_due+scheduled_interest_due) from base_schedule_line_items where base_schedule_line_items.loan_base_schedule_id = loan_base_schedules.id and loan_base_schedules.lending_id = lendings.id and base_schedule_line_items.on_date <= '#{on_date.strftime("%Y-%m-%d")}');")
   end
 
   def get_overdue_status_for_branch_on_date(on_date, *location_id)
