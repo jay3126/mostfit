@@ -332,7 +332,7 @@
                 = submit "Generate", :name => "submit_button", :value => "submit"
       %div{:style => "display:table-cell; width:#{params[:submit] ? '35%' : '43%'}"}
         - if @report.respond_to?(:file_format)
-          - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type]}"
+          - path = "#{Merb.root}/doc/xls/company/reports/#{params[:report_type].downcase}"
           - files = Dir.entries(path).delete_if{|s| !s.include?('.csv')} rescue []
           - count = 1
           %table{:style => "display:none;", :class => 'download_link'}

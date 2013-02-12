@@ -51,5 +51,9 @@
             %td= "#{funder.name} (Id: #{funder.id})" rescue nil
             %td= "#{funding_line.name} (Id: #{funding_line.id})" rescue nil
             %td= "#{tranch.name} (Id: #{tranch.id})" rescue nil
+    %br
+    .flickr_pagination
+      = will_paginate @loan_assignments, :container => false
+    %br
   - else
     = "No loans has been assigned to either securitization or encumbrance"

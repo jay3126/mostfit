@@ -1,5 +1,5 @@
 class BranchDateWiseDcaReport < Report
-  attr_accessor :from_date, :to_date, :biz_location_branch_id
+  attr_accessor :from_date, :to_date, :biz_location_branch_id, :file_format
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -106,6 +106,40 @@ class BranchDateWiseDcaReport < Report
       end
     end
     data
+  end
+
+
+  def generate_xls
+    @limit = 100
+    name = @biz_location_branch.blank? ? 'all_branches' : BizLocation.get(@biz_location_branch).name
+    data = generate
+
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "branch_date_wise_dca_report_#{name}_From(#{@from_date.to_s})_To(#{@to_date.to_s}).csv")
+    File.new(csv_loan_file, "w").close
+    append_to_file_as_csv(headers, csv_loan_file)
+    data[:record].each do |location__id, location_values|
+      location_values.each do |date, s_value|
+        value = [s_value[:branch_name], s_value[:on_date], s_value[:dues_emi_principal], s_value[:dues_emi_interest], s_value[:dues_emi_total], s_value[:emi_collect_principal], s_value[:emi_collect_interest], s_value[:emi_collect_total],
+          s_value[:loan_fee_collect], s_value[:preclosure_collect_fee], s_value[:preclosure_collect], s_value[:total_fee_collect], s_value[:interest_accrued], s_value[:disbursed_amount], s_value[:outstanding_principal]
+        ]
+        append_to_file_as_csv([value], csv_loan_file)
+      end
+    end
+    return true
+  end
+
+  def append_to_file_as_csv(data, filename)
+    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+      data.each do |datum|
+        csv << datum
+      end
+    end
+  end
+
+  def headers
+    _headers ||= [["Branch Name", "Txn Date", "EMI Principal Due", "EMI Interest Due", "EMI Total", "EMI Principal Collceted", "EMI Interest Collected", "EMI Total Collected", "Processing Fee", "Foreclosure Fee", "Foreclosure POS", "Total Collected", "Interest Accrued", "Disbursed Amount", "POS"]]
   end
 
   def check_holiday_on_date(date)

@@ -1,5 +1,5 @@
 class DelinquencyReportBranchWise < Report
-  attr_accessor :biz_location_branch_id, :date, :page
+  attr_accessor :biz_location_branch_id, :date, :page, :file_format
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -17,7 +17,7 @@ class DelinquencyReportBranchWise < Report
   end
 
   def self.name
-    "Delinquency Report - Branch Wise"
+    "Delinquency Report Branch Wise"
   end
 
   def get_reporting_facade(user)
@@ -33,7 +33,6 @@ class DelinquencyReportBranchWise < Report
   end
 
   def generate
-    reporting_facade = FacadeFactory.instance.get_instance(FacadeFactory::REPORTING_FACADE, @user)
     data = {}
     at_branch_ids_ary = @biz_location_branch.is_a?(Array) ? @biz_location_branch : [@biz_location_branch]
     at_branch_ids_ary.each { |branch_id|
@@ -61,24 +60,53 @@ class DelinquencyReportBranchWise < Report
         loan_scheduled_interest_due_till_date = loan_scheduled_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_scheduled_till_date.map(&:scheduled_interest_due).sum.to_i)
         loan_total_scheduled_due_till_date = loan_scheduled_principal_due_till_date + loan_scheduled_interest_due_till_date
         loan_principal_disbursed_amt = loan_principal_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_disbursed.to_i)
-        total_overdue_amt = loan_principal_disbursed_amt > loan_interest_receipts ? loan_principal_disbursed_amt - loan_principal_receipts : MoneyManager.default_zero_money
+        total_overdue_amt = loan_principal_disbursed_amt > loan_principal_receipts ? loan_principal_disbursed_amt - loan_principal_receipts : MoneyManager.default_zero_money
         overdue_pos_principal = loan_total_scheduled_due_till_date > loan_total_received ? loan_total_scheduled_due_till_date - loan_total_received : MoneyManager.default_zero_money
       end
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
         par_value = (overdue_pos_principal.amount.to_f)/(loan_outstanding_principal.amount.to_f)
-        par = ('%.3f' % par_value)
+        par = par_value.to_f*100
       else
         par = 0.0
       end
       
       branch_data_map                                    = {}
+      branch_data_map[:branch_name]                      = branch.name
       branch_data_map[:loan_outstanding_principal]       = loan_outstanding_principal
       branch_data_map[:overdue_principal]                = total_overdue_amt
       branch_data_map[:loan_overdue]                     = overdue_pos_principal
-      branch_data_map[:par]                              = par.to_f*100
+      branch_data_map[:par]                              = par.round(2)
 
       data[branch_id]                                    = branch_data_map
     }
     data
+  end
+
+  def generate_xls
+    name = @biz_location_branch.is_a?(Array) ? 'all_branches' : BizLocation.get(@biz_location_branch).name
+    data = generate
+
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "deliquency_branch_wise_report_#{name}_#{@date.to_s}.csv")
+    File.new(csv_loan_file, "w").close
+    append_to_file_as_csv(headers, csv_loan_file)
+    data.each do |location_id, s_value|
+      value = [s_value[:branch_name], s_value[:loan_outstanding_principal], s_value[:overdue_principal], s_value[:loan_overdue], s_value[:par]]
+      append_to_file_as_csv([value], csv_loan_file)
+    end
+    return true
+  end
+
+  def append_to_file_as_csv(data, filename)
+    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+      data.each do |datum|
+        csv << datum
+      end
+    end
+  end
+
+  def headers
+    _headers ||= [["Branch Name", "POS", "OverDue","OverDue POS", "PAR(%)"]]
   end
 end

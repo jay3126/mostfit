@@ -1,11 +1,11 @@
 class BranchWiseDisbursementAndChargeDetailsReport < Report
 
-  attr_accessor :from_date, :to_date, :biz_location_branch_id
+  attr_accessor :from_date, :to_date, :biz_location_branch_id, :file_format
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
     @to_date   = (dates and dates[:to_date]) ? dates[:to_date] : Date.today
-    @name = "Disbursement and Charge Details Report from #{@from_date} to #{@to_date}"
+    @name = "Branch Wise Disbursement and Charge Details Report from #{@from_date} to #{@to_date}"
     @user = user
     location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, @user)
     @biz_location_branch = (params and params[:biz_location_branch_id] and (not (params[:biz_location_branch_id].empty?))) ? params[:biz_location_branch_id] : ''
@@ -15,11 +15,11 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
   end
 
   def name
-    "Disbursement and Charge Details Report for #{@from_date} to #{@to_date}"
+    "Branch Wise Disbursement and Charge Details Report for #{@from_date} to #{@to_date}"
   end
 
   def self.name
-    "Disbursement and Charge Details Report"
+    "Branch Wise Disbursement and Charge Details Report"
   end
 
   def get_reporting_facade(user)
@@ -79,6 +79,87 @@ class BranchWiseDisbursementAndChargeDetailsReport < Report
         end
       end
     end
+    data[:loan_products].uniq!
     data
+  end
+
+  def generate_xls
+    data = generate
+    heading = ["Date", "Branch Name"]
+    data[:loan_products].each do |product|
+      heading << "Disb.(count)- "+product.to_s
+    end
+    heading << "Disb.(count)- Total"
+    data[:loan_products].each do |product|
+      heading << "Disb.(Amt)- "+product.to_s
+    end
+    heading << "Disb.(Amt)- Total"
+    data[:loan_products].each do |product|
+      heading << "Charges(colleatable)- "+product.to_s
+    end
+    heading << "Charges(colleatable)- Total"
+    data[:loan_products].each do |product|
+      heading << "Charges(colleated)- "+product.to_s
+    end
+    heading << "Charges(colleated)- Total"
+    
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "disbursement_and_charge_details_report_From(#{@from_date.to_s})_To(#{@to_date.to_s}).csv")
+    File.new(csv_loan_file, "w").close
+    append_to_file_as_csv([heading], csv_loan_file)
+    data[:loan_info].each do |date, b_values|
+      b_values.each.each do |b_name, p_values|
+        value = [date, b_name]
+        l_count = 0
+        data[:loan_products].each do |product|
+          unless p_values[product].blank?
+            l_count += p_values[product]['loans_count']
+            value << p_values[product]['loans_count']
+          end
+        end
+        value << l_count
+        l_amt = MoneyManager.default_zero_money
+        data[:loan_products].each do |product|
+          unless p_values[product].blank?
+            l_amt += p_values[product]['loans_amt_sum']
+            value << p_values[product]['loans_amt_sum']
+          end
+        end
+        value << l_amt
+
+        fee_c = MoneyManager.default_zero_money
+        data[:loan_products].each do |product|
+          unless p_values[product].blank?
+            fee_c += p_values[product]['colleatable_fee']
+            value << p_values[product]['colleatable_fee']
+          end
+        end
+        value << fee_c
+
+        fee_r = MoneyManager.default_zero_money
+        data[:loan_products].each do |product|
+          unless p_values[product].blank?
+            fee_r += p_values[product]['colleated_fee']
+            value << p_values[product]['colleated_fee']
+          end
+        end
+        value << fee_r
+        append_to_file_as_csv([value], csv_loan_file)
+      end
+    end
+    return true
+  end
+
+  def append_to_file_as_csv(data, filename)
+    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+      data.each do |datum|
+        csv << datum
+      end
+    end
+  end
+
+  def headers
+    _headers ||= [["Date", "Branch Name", "Disb.", "Customer Name", "Loan Account Number", "Date", "Remarks", "Reason", "Foreclosure POS", "Foreclosure Interest", "Foreclosure Charges", "Broken period/unpaid intrest Collected"]]
   end
 end

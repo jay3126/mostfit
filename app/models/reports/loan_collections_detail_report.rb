@@ -74,7 +74,7 @@ class LoanCollectionsDetailReport < Report
         end
       end
     end
-    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join())
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
     FileUtils.mkdir_p(folder)
     csv_loan_file = File.join(folder, "loan_collections_detail_report_#{name}_#{@date.to_s}.csv")
     File.new(csv_loan_file, "w").close

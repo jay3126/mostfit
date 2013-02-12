@@ -1,6 +1,6 @@
 class CenterList < Report
 
-  attr_accessor :biz_location_branch_id, :date, :page
+  attr_accessor :biz_location_branch_id, :date, :page, :file_format
 
   def initialize(params, dates, user)
     @date = dates[:date] || Date.today
@@ -61,6 +61,35 @@ class CenterList < Report
         :center_disbursal_date => center_disbursal_date}
     end
     data
-  end 
+  end
+
+  def generate_xls
+    @limit = 100
+    name = @biz_location_branch.blank? ? 'all_branches' : BizLocation.get(@biz_location_branch).name
+    data = generate
+
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "center_list_report_#{name}_(#{@date.to_s}).csv")
+    File.new(csv_loan_file, "w").close
+    append_to_file_as_csv(headers, csv_loan_file)
+    data[:centers].each do |location_name, s_value|
+      value = [s_value[:branch_name], s_value[:agent_name], s_value[:center_name], s_value[:meeting_date], s_value[:meeting_time], s_value[:meeting_frequency], s_value[:center_disbursal_date]]
+      append_to_file_as_csv([value], csv_loan_file)
+    end
+    return true
+  end
+
+  def append_to_file_as_csv(data, filename)
+    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+      data.each do |datum|
+        csv << datum
+      end
+    end
+  end
+
+  def headers
+    _headers ||= [["Branch Name", "Agent Name", "Center Name", "Meeting Date", "Meeting Time", "Meeting Frequency", "Disbursal Date"]]
+  end
   
 end

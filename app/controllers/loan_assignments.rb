@@ -3,7 +3,9 @@ class LoanAssignments < Application
   require "tempfile"
 
   def loan_assignment
-    @loan_assignments = get_all_loan_assignments
+    page = params[:page]||1
+    limit = params[:limit]||100
+    @loan_assignments = LoanAssignment.all.paginate(:page => page, :per_page => limit)
     render
   end
 

@@ -41,17 +41,17 @@
           %td
             = values[:staff_name]
           %td
-            = values[:centers_members_total][:new_locations_count]
-            - total_locations_count += values[:centers_members_total][:new_locations_count]
+            = values[:center_count]
+            - total_locations_count += values[:center_count]
           %td
-            = values[:centers_members_total][:new_members_count]
-            - total_members_count += values[:centers_members_total][:new_members_count]
+            = values[:members_count]
+            - total_members_count += values[:members_count]
           %td
             = values[:arrears]
             - accumulate_row_values[:total_arrears] += values[:arrears]
           %td
-            = values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
-            - accumulate_row_values[:scheduled_outstanding_amount] += values[:outstanding_and_overdue_amounts][:actual_principal_outstanding_amount]
+            = values[:manage_center_outstanding]
+            - accumulate_row_values[:scheduled_outstanding_amount] += values[:manage_center_outstanding]
           %td
             = values[:number_of_loan_accounts_in_arrear]
             - total_loans_in_arrears += values[:number_of_loan_accounts_in_arrear]

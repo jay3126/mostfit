@@ -1,5 +1,5 @@
 class PreClosureCustomerDetails < Report
-  attr_accessor :from_date, :to_date
+  attr_accessor :from_date, :to_date, :file_format
 
   def initialize(params, dates, user)
     @from_date = (dates and dates[:from_date]) ? dates[:from_date] : Date.today - 7
@@ -14,7 +14,7 @@ class PreClosureCustomerDetails < Report
   end
 
   def self.name
-    "Pre-Closure Customer Details "
+    "Pre Closure Customer Details "
   end
 
   def default_currency
@@ -65,5 +65,33 @@ class PreClosureCustomerDetails < Report
         :loan_account_number => loan_account_number, :pre_closure_total_interest_accrued => total_preclosure_int }
     end
     data
+  end
+
+  def generate_xls
+    data = generate
+
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "pre_clousure_report_From(#{@from_date.to_s})_To(#{@to_date.to_s}).csv")
+    File.new(csv_loan_file, "w").close
+    append_to_file_as_csv(headers, csv_loan_file)
+    data.each do |loan_id, s_value|
+      value = [s_value[:branch_name], s_value[:center_name], s_value[:member_name], s_value[:loan_account_number], s_value[:on_date], s_value[:remarks], s_value[:reason], s_value[:pre_closure_principal_amount],
+        s_value[:pre_closure_interest_amount], s_value[:pre_closure_charges], s_value[:pre_closure_total_interest_accrued]]
+      append_to_file_as_csv([value], csv_loan_file)
+    end
+    return true
+  end
+
+  def append_to_file_as_csv(data, filename)
+    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+      data.each do |datum|
+        csv << datum
+      end
+    end
+  end
+
+  def headers
+    _headers ||= [["Branch Name", "Center Name", "Customer Name", "Loan Account Number", "Date", "Remarks", "Reason", "Foreclosure POS", "Foreclosure Interest", "Foreclosure Charges", "Broken period/unpaid intrest Collected"]]
   end
 end
