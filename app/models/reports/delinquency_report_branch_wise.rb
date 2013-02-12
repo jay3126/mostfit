@@ -50,12 +50,12 @@ class DelinquencyReportBranchWise < Report
       loan_overdue_principal         = amounts['scheduled_principal_amt'] > loan_repayment_principal_amt ? (amounts['scheduled_principal_amt'] - loan_repayment_principal_amt) : MoneyManager.default_zero_money
       loan_overdue_interest          = amounts['scheduled_interest_amt'] > loan_repayment_interest_amt ? (amounts['scheduled_interest_amt'] - loan_repayment_interest_amt) : MoneyManager.default_zero_money
       loan_ids_overdues              = Lending.overdue_loans_for_location_on_date(branch, @date)
-      overdue_loan_ids               = loan_ids_overdues.blank? ? [0] : loan_ids_overdues
+      overdue_loan_ids               = loan_ids_overdues.blank? ? [] : loan_ids_overdues
       unless overdue_loan_ids.blank?
-        loan_principal_disbursed = Lending.all(:id => loan_ids_overdues, :fields => [:disbursed_amount])
-        loan_principal_receipts = LoanReceipt.all(:fields => [:principal_received], :lending_id => loan_ids_overdues, :effective_on.lte => @date)
-        loan_principal_disbursed_amt = loan_principal_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_disbursed.sum.to_i)
-        loan_principal_receipts_amt = loan_principal_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_receipts.sum.to_i)
+        loan_principal_disbursed = Lending.sum(:disbursed_amount, :id => loan_ids_overdues)
+        loan_principal_receipts = LoanReceipt.sum(:principal_received, :lending_id => loan_ids_overdues, :effective_on.lte => @date)
+        loan_principal_disbursed_amt = loan_principal_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_disbursed.to_i)
+        loan_principal_receipts_amt = loan_principal_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_principal_receipts.to_i)
         overdue_principal = loan_principal_disbursed_amt > loan_principal_receipts_amt ? loan_principal_disbursed_amt - loan_principal_receipts_amt : MoneyManager.default_zero_money
       end
       if loan_outstanding_principal.amount > MoneyManager.default_zero_money.amount
