@@ -53,7 +53,8 @@ class LoanAssignments < Application
           funding_line_id    = row["Funding line ID"]
           tranch_id          = row["Tranch ID"]
           assignment_type    = row["Assignment type"]
-          loan_id = loan_id_str.to_i
+          lan_id_str         = loan_id_str
+          loan_id            = Lending.first(:lan => lan_id_str).blank? ? '' : Lending.first(:lan => loan_id_str).id
           effective_on_date = effective_on_str.blank? ? '' : Date.parse(effective_on_str)
           loans_data[row_no] = {
             :loan_id            => loan_id,
