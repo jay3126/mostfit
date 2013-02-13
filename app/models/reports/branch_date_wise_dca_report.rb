@@ -127,7 +127,6 @@ class BranchDateWiseDcaReport < Report
         append_to_file_as_csv([value], csv_loan_file)
       end
     end
-    File.new(csv_loan_file, "w").close
     return true
   end
 

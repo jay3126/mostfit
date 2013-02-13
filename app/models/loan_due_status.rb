@@ -241,9 +241,9 @@ class LoanDueStatus
     schedules = loan.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date, :installment.not => 0)
     schedule_dates = schedules.blank? ? [] : schedules.map(&:on_date)
 
-    loan_receipts = loan.loan_receipts(:effective_on.lte => on_date)
+    loan_receipts = loan.loan_receipts(:effective_on.lte => on_date, :is_advance_adjusted => false)
     loan_receipts_date = loan_receipts.blank? ? [] : loan_receipts.map(&:effective_on)
-    total_received = loan_receipts.blank? ? 0 :loan_receipts.map(&:principal_received).sum.to_i + loan_receipts.map(&:interest_received).sum.to_i
+    total_received = loan_receipts.blank? ? 0 : loan_receipts.map(&:principal_received).sum.to_i + loan_receipts.map(&:interest_received).sum.to_i + loan_receipts.map(&:advance_received).sum.to_i
     if loan.is_outstanding_on_date?(on_date)
       if loan_receipts.blank?
         overdue_days = max_overdue_days

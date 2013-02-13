@@ -91,7 +91,7 @@ class LoanCollectionsDetailReport < Report
   end
   
   def append_to_file_as_csv(data, filename)
-    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+    FasterCSV.open(filename, "a", {:col_sep => ","}) do |csv|
       data.each do |datum|
         csv << datum
       end

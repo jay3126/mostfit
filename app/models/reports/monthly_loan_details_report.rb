@@ -229,14 +229,14 @@ class MonthlyLoanDetailsReport < Report
 
       folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
       FileUtils.mkdir_p(folder)
-      csv_loan_file = File.join(folder, "mld_#{location.name}report_(#{@date.to_s}).csv")
+      location_name = location.name
+      csv_loan_file = File.join(folder, "mld_#{location_name}report_(#{@date.to_s}).csv")
       File.new(csv_loan_file, "w").close
       append_to_file_as_csv(headers, csv_loan_file)
       data.each do |loan_id, s_value|
-        value = [s_value[:loan_lan], s_value[:status], s_value[:disbursed_amt], s_value[:principal_received], s_value[:interest_recevied], s_value[:overdue_principal], s_value[:overdue_interest], s_value[:pos]]
+        value = [location_name, s_value[:loan_lan], s_value[:status], s_value[:disbursed_amt], s_value[:principal_received], s_value[:interest_recevied], s_value[:overdue_principal], s_value[:overdue_interest], s_value[:pos]]
         append_to_file_as_csv([value], csv_loan_file)
       end
-      File.new(csv_loan_file, "w").close
     end
     return true
   end
@@ -250,6 +250,6 @@ class MonthlyLoanDetailsReport < Report
   end
 
   def headers
-    _headers ||= [["Loan Lan", "Status", "Disbursed Amt", "Principal Received", "Interest Received", "Overdue Principal", "Interest Principal", "POS"]]
+    _headers ||= [["Branch Name", "Loan Lan", "Status", "Disbursed Amt", "Principal Received", "Interest Received", "Overdue Principal", "Overdue Principal", "POS"]]
   end
 end

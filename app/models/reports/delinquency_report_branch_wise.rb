@@ -95,7 +95,6 @@ class DelinquencyReportBranchWise < Report
       value = [s_value[:branch_name], s_value[:loan_outstanding_principal], s_value[:overdue_principal], s_value[:loan_overdue], s_value[:par]]
       append_to_file_as_csv([value], csv_loan_file)
     end
-    File.new(csv_loan_file, "w").close
     return true
   end
 
