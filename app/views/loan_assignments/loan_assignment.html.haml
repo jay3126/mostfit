@@ -40,7 +40,8 @@
           %td Tranch
       %tbody
         - @loan_assignments.each do |la|
-          - loan = Lending.get(la.loan_id)
+          -# loan = Lending.get(la.loan_id)
+          - loan = Lending.first(:fields => [:id, :lan], :id => la.loan_id)
           - funder = NewFunder.get la.funder_id rescue nil
           - funding_line = NewFundingLine.get la.funding_line_id rescue nil
           - tranch = NewTranch.get la.tranch_id rescue nil

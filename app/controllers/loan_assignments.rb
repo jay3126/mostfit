@@ -56,7 +56,8 @@ class LoanAssignments < Application
           tranch_id          = row["Tranch ID"]
           assignment_type    = row["Assignment type"]
           lan_id_str         = loan_id_str
-          loan_id            = Lending.first(:lan => lan_id_str).blank? ? '' : Lending.first(:lan => loan_id_str).id
+          #          loan_id            = Lending.first(:lan => lan_id_str).blank? ? '' : Lending.first(:lan => loan_id_str).id
+          loan_id            = Lending.first(:fields => [:id],:lan => lan_id_str).blank? ? '' : Lending.first(:fields => [:id], :lan => loan_id_str).id
           effective_on_date = effective_on_str.blank? ? '' : Date.parse(effective_on_str)
           loans_data[row_no] = {
             :loan_id            => loan_id,
@@ -171,10 +172,9 @@ class LoanAssignments < Application
 
   def get_all_loan_assignments
     loan_assignments = []
-    all_loan_assignments = LoanAssignment.all
-    aggregated_ids = all_loan_assignments.aggregate(:loan_id)
+    aggregated_ids = LoanAssignment.all.aggregate(:loan_id)
     aggregated_ids.each do |loan_id|
-      loan_assignments << LoanAssignment.all(:loan_id => loan_id).last
+      loan_assignments << LoanAssignment.all(:fields => [:id, :loan_id, :funder_id, :funding_line_id, :tranch_id], :loan_id => loan_id).last
     end
     loan_assignments
   end
