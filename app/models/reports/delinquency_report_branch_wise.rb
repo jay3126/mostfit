@@ -41,11 +41,11 @@ class DelinquencyReportBranchWise < Report
 
       overdue_pos_principal          = MoneyManager.default_zero_money
       total_overdue_amt              = MoneyManager.default_zero_money
-      loan_total_repay_principal     = loans.blank? ? [] : LoanReceipt.sum(:principal_received, :lending_id => loans, :effective_on.lte => @date)
-      loan_total_repay_principal_amt = loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_total_repay_principal.to_i)
       loan_disbursed_principal       = loans.blank? ? [] :  Lending.sum(:disbursed_amount, :id => loans)
       loan_disbursed_principal_amt   = loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_disbursed_principal.to_i)
-      loan_outstanding_principal     = loan_disbursed_principal_amt - loan_total_repay_principal_amt
+      schedule_till_principal        = loans.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loans, :on_date.lte => @date)
+      schedule_till_principal_amt    = schedule_till_principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_till_principal.to_i)
+      loan_outstanding_principal     = loan_disbursed_principal_amt - schedule_till_principal_amt
 
       loan_ids_overdues              = Lending.overdue_loans_for_location_on_date(branch, @date)
       overdue_loan_ids               = loan_ids_overdues.blank? ? [] : loan_ids_overdues
@@ -95,11 +95,12 @@ class DelinquencyReportBranchWise < Report
       value = [s_value[:branch_name], s_value[:loan_outstanding_principal], s_value[:overdue_principal], s_value[:loan_overdue], s_value[:par]]
       append_to_file_as_csv([value], csv_loan_file)
     end
+    File.new(csv_loan_file, "w").close
     return true
   end
 
   def append_to_file_as_csv(data, filename)
-    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+    FasterCSV.open(filename, "a", {:col_sep => ","}) do |csv|
       data.each do |datum|
         csv << datum
       end

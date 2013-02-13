@@ -18,9 +18,9 @@ class DailyRepaymentDetailReport < Report
   end
 
   def generate
-    loan_receipts = @paginate.blank? ? LoanReceipt.all(:effective_on => @date).paginate(:page => @page, :per_page => @limit) :  LoanReceipt.all(:effective_on => @date)
+    loan_receipts = @paginate.blank? ? LoanReceipt.all(:is_advance_adjusted => false, :effective_on => @date).paginate(:page => @page, :per_page => @limit) :  LoanReceipt.all(:is_advance_adjusted => false, :effective_on => @date)
     data = {}
-    data[:repayments] = @paginate.blank? ? LoanReceipt.all(:effective_on => @date).aggregate(:id).paginate(:page => @page, :per_page => @limit) : LoanReceipt.all(:effective_on => @date).aggregate(:id)
+    data[:repayments] = @paginate.blank? ? LoanReceipt.all(:is_advance_adjusted => false, :effective_on => @date).aggregate(:id).paginate(:page => @page, :per_page => @limit) : LoanReceipt.all(:is_advance_adjusted => false, :effective_on => @date).aggregate(:id)
     data[:loan_payments] = {}
     loan_receipts.group_by{|r| r.accounted_at}.each do |branch_id, receipts|
       data[:loan_payments][branch_id] = {}
@@ -49,7 +49,7 @@ class DailyRepaymentDetailReport < Report
 
         else
           schedules = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => lending_id, :installment.not => 0, :order => [:on_date])
-          receipts_till_date = loan.loan_receipts(:effective_on.lt => @date)
+          receipts_till_date = loan.loan_receipts(:is_advance_adjusted => false, :effective_on.lt => @date)
           received_amt_till_date = LoanReceipt.add_up(receipts_till_date)
           schedules.each do |schedule|
             s_principal = MoneyManager.get_money_instance_least_terms(schedule.scheduled_principal_due.to_i)
@@ -112,6 +112,7 @@ class DailyRepaymentDetailReport < Report
         end
       end
     end
+    File.new(csv_loan_file, "w").close
     return true
   end
 

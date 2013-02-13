@@ -49,10 +49,10 @@ class BranchDateWiseDcaReport < Report
       preclosure_loan_ids = branch_loans[:preclosed_loan_status].blank? ? [] : branch_loans[:preclosed_loan_status]
       repaid_loan_ids = branch_loans[:repaid_loan_status].blank? ? [] : branch_loans[:repaid_loan_status]
       total_loans = disbursed_loan_ids + repaid_loan_ids
-      loan_receipts = LoanReceipt.all(:accounted_at => branch_id, 'payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARD_FOR_REPAYMENT, :effective_on.lte => @to_date)
-      preclose_loan_receipts = LoanReceipt.all(:accounted_at => branch_id, 'payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE, :effective_on.lte => @to_date)
+      loan_receipts = LoanReceipt.all(:is_advance_adjusted => false, :accounted_at => branch_id, 'payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARD_FOR_REPAYMENT, :effective_on.lte => @to_date)
+      preclose_loan_receipts = LoanReceipt.all(:is_advance_adjusted => false, :accounted_at => branch_id, 'payment_transaction.payment_towards' => Constants::Transaction::PAYMENT_TOWARDS_LOAN_PRECLOSURE, :effective_on.lte => @to_date)
       disbursment_loans = PaymentTransaction.all(:accounted_at => branch_id, :payment_towards => Constants::Transaction::PAYMENT_TOWARDS_LOAN_DISBURSEMENT, :effective_on.gte => @from_date, :effective_on.lte => @to_date)
-      total_disbursed = disbursed_loan_ids.blank? ? [] : Lending.all(:id => disbursed_loan_ids).aggregate(:disbursed_amount.sum) rescue []
+      total_disbursed = total_loans.blank? ? [] : Lending.sum(:disbursed_amount, :id => total_loans)
       total_disbured_amt = total_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(total_disbursed.to_i)
       loan_schedules = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => total_loans,:on_date.gte => @from_date, :on_date.lte => @to_date)
       loan_fee = FeeReceipt.all_paid_loan_fee_receipts_on_accounted_at_for_date_range(branch_id, @from_date, @to_date)
@@ -79,6 +79,8 @@ class BranchDateWiseDcaReport < Report
 
         received_principal = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date.map(&:principal_received).sum.to_i)
         received_interest = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date.map(&:interest_received).sum.to_i)
+        received_advance = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date.map(&:advance_received).sum.to_i)
+        received_recovery = loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_on_date.map(&:loan_recovery).sum.to_i)
         total_received = received_principal + received_interest
 
         preclose_principal = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date.map(&:principal_received).sum.to_i)
@@ -91,17 +93,15 @@ class BranchDateWiseDcaReport < Report
         total_collection = total_received + preclose_principal + processing_fee_on_date + preclose_fee_on_date
         d_loans = disbursment_loans.blank? ? [] : disbursment_loans.select{|s| s.effective_on == on_date}
         disbursed_money_amt = d_loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(d_loans.map(&:amount).sum.to_i)
-
-        loan_receipts_till_date = loan_receipts.to_a.select{|r| r.effective_on <= on_date}
-        principal_amt_till_date = loan_receipts_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_till_date.map(&:principal_received).sum.to_i)
-
-        pos_on_date = total_disbured_amt > principal_amt_till_date ? total_disbured_amt - principal_amt_till_date : MoneyManager.default_zero_money
+        schedule_principal_till_date = BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => total_loans, :on_date.lte => on_date)
+        schedule_principal_till_date_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.to_i)
+        pos_on_date = total_disbured_amt > schedule_principal_till_date_amt ? total_disbured_amt - schedule_principal_till_date_amt : MoneyManager.default_zero_money
         data[:record][branch_id][on_date] = {
           :branch_name => branch_name, :branch_id => branch_id, :on_date => on_date,
           :dues_emi_principal => scheduled_principal , :dues_emi_interest => scheduled_interest, :dues_emi_total => scheduled_total,
           :emi_collect_principal => received_principal, :emi_collect_interest => received_interest, :emi_collect_total => total_received,
           :loan_fee_collect => processing_fee_on_date, :preclosure_collect_fee => preclose_fee_on_date, :preclosure_collect => preclose_principal, :total_fee_collect => total_collection,
-          :interest_accrued => scheduled_interest, :disbursed_amount => disbursed_money_amt, :outstanding_principal => pos_on_date
+          :interest_accrued => scheduled_interest, :disbursed_amount => disbursed_money_amt, :outstanding_principal => pos_on_date, :advance_received => received_advance, :loan_recovery => received_recovery
         }
       end
     end
@@ -127,11 +127,12 @@ class BranchDateWiseDcaReport < Report
         append_to_file_as_csv([value], csv_loan_file)
       end
     end
+    File.new(csv_loan_file, "w").close
     return true
   end
 
   def append_to_file_as_csv(data, filename)
-    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+    FasterCSV.open(filename, "a", {:col_sep => ","}) do |csv|
       data.each do |datum|
         csv << datum
       end

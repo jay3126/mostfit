@@ -133,6 +133,7 @@ class OverdueDetailedReport < Report
         s_value[:days_past_due], s_value[:bucket], s_value[:total_principal_overdue], s_value[:total_interest_overdue],s_value[:total_overdue],s_value[:par]]
       append_to_file_as_csv([value], csv_loan_file)
     end
+    File.new(csv_loan_file, "w").close
     return true
   end
 

@@ -236,12 +236,13 @@ class MonthlyLoanDetailsReport < Report
         value = [s_value[:loan_lan], s_value[:status], s_value[:disbursed_amt], s_value[:principal_received], s_value[:interest_recevied], s_value[:overdue_principal], s_value[:overdue_interest], s_value[:pos]]
         append_to_file_as_csv([value], csv_loan_file)
       end
+      File.new(csv_loan_file, "w").close
     end
     return true
   end
 
   def append_to_file_as_csv(data, filename)
-    FasterCSV.open(filename, "a", {:col_sep => "|"}) do |csv|
+    FasterCSV.open(filename, "a", {:col_sep => ","}) do |csv|
       data.each do |datum|
         csv << datum
       end
