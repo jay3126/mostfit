@@ -45,6 +45,12 @@ class PaymentFacade < StandardFacade
     accounting_facade.account_for_payment_transaction(payment_transaction, payment_allocation)
   end
 
+  #this method is same as record_fee_payment but accounting is disabled.
+  def record_fee_payment_for_fee_rake_task(fee_instance_id, money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, make_specific_allocation = false, specific_principal_money_amount = nil, specific_interest_money_amount = nil)
+    payment_transaction = PaymentTransaction.record_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, for_user.id)
+    payment_allocation = loan_facade.allocate_payment(payment_transaction, on_product_id, product_action, make_specific_allocation, specific_principal_money_amount, specific_interest_money_amount, fee_instance_id)
+  end
+
   def record_adjust_advance_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, product_action, adjust_complete_advance = false)
     payment_transaction = PaymentTransaction.record_payment(money_amount, receipt_type, payment_towards, receipt_no, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, performed_by, effective_on, for_user.id)
     payment_allocation = loan_facade.allocate_payment(payment_transaction, on_product_id, product_action, false, nil, nil, '', adjust_complete_advance)

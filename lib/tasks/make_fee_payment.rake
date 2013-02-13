@@ -70,7 +70,7 @@ USAGE_TEXT
               fee_instances      = FeeInstance.all_unpaid_loan_fee_instance(loan.id)
               fee_instances      = fee_instances + fee_insurances unless fee_insurances.blank?
               fee_instances.each do |fee_instance|
-                fee_payment = payment_facade.record_fee_payment(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
+                fee_payment = payment_facade.record_fee_payment_for_fee_rake_task(fee_instance.id, fee_instance.effective_total_amount, 'receipt', Constants::Transaction::PAYMENT_TOWARDS_FEE_RECEIPT,
                   '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
                   loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
 
