@@ -96,7 +96,7 @@ class DailyRepaymentDetailReport < Report
   end
   
   def generate_xls
-    @paginate = ture
+    @paginate = true
     data = generate
 
     folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
