@@ -65,6 +65,7 @@ class PaymentTransaction
   
   if Mfi.first.system_state != :migration
     validates_with_method :disallow_future_dated_transactions
+    validates_with_method :is_payment_permitted?
     #validates_with_method :check_receipt_no
   end
 
@@ -75,6 +76,17 @@ class PaymentTransaction
       #      [false, "Holiday dated transactions are not permitted"]
     else
       true
+    end
+  end
+
+  def is_payment_permitted?
+    if self.on_product_type == :lending
+      loan = Lending.get(self.on_product_id)
+      if loan.blank?
+        [false, "Loan Not Exists"]
+      else
+        loan.is_payment_permitted?(self)
+      end
     end
   end
 
