@@ -345,8 +345,7 @@ class Lending
     if ([RECEIPT, CONTRA].include?(transaction_receipt_type))
       if ([PAYMENT_TOWARDS_LOAN_REPAYMENT, PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT, PAYMENT_TOWARDS_LOAN_PRECLOSURE].include?(transaction_towards_type))
         return [false, "Repayments cannot be accepted on loans that are not outstanding"] unless is_outstanding_on_date?(transaction_effective_on)
-
-        maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding_kk : actual_total_outstanding_net_advance_balance_kk
+        maximum_receipt_to_accept = (transaction_receipt_type == CONTRA) ? actual_total_outstanding_kk[:total_outstanding] : actual_total_outstanding_net_advance_balance_kk
         if ((maximum_receipt_to_accept < transaction_money_amount) and Mfi.first.system_state != :migration)
           return [false, "Repayment cannot be accepted on the loan at the moment exceeding #{maximum_receipt_to_accept.to_s}"]
         end
@@ -1013,7 +1012,7 @@ class Lending
   end
 
   def process_status_change(payment_transaction, loan_action, allocation)
-    if payment_transaction.receipt_type == RECEIPT
+    if [RECEIPT, CONTRA].include?(payment_transaction.receipt_type)
       self.reload
       outstandings = actual_total_outstanding_kk
       if ([LOAN_ADVANCE_ADJUSTMENT, LOAN_REPAYMENT].include?(loan_action))
@@ -1045,7 +1044,7 @@ class Lending
   end
   
   def approve(approved_amount, approved_on_date, approved_by)
-    #disabled validations in migration mode.
+    #disabled validations in migration mode.ipt_type == CONTRA) ? actual_total_outstanding_kk[:total_outstanding] :
     if Mfi.first.system_state != :migration
       Validators::Arguments.not_nil?(approved_amount, approved_on_date, approved_by)
       raise Errors::BusinessValidationError, "approved amount #{approved_amount.to_s} cannot exceed applied amount #{to_money_amount(self.applied_amount)}" if approved_amount.amount > self.applied_amount
