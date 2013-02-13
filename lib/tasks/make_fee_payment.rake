@@ -74,11 +74,7 @@ USAGE_TEXT
                   '','lending', loan.id, 'client', loan.loan_borrower.counterparty_id, loan.administered_at_origin, loan.accounted_at_origin, loan.disbursed_by_staff,
                   loan.disbursal_date, Constants::Transaction::LOAN_FEE_RECEIPT)
 
-                if fee_payment.saved?
-                  loan_ids_updated << [loan.id, loan.lan, "Payment of #{fee_instance.effective_total_amount} was successfully made"]
-                else
-                  errors << [loan.id, loan.lan, "Payment cannot be made"]
-                end
+                loan_ids_updated << [loan.id, loan.lan, "Payment of #{fee_instance.effective_total_amount} was successfully made"]
               end
             else
               errors << [loan.id, loan.lan, "Payment cannot be made for loans with status : #{loan.status.humanize}"]
