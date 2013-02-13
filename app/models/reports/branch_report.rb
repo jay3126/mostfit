@@ -75,7 +75,7 @@ class BranchReport < Report
           end
           number_of_loan_accounts_in_arrear = overdue_loan_ids.count
           loan_ids = LoanAdministration.get_loan_ids_administered_by_sql(manage_centers.flatten, @date, false,'disbursed_loan_status')
-          loan_disbursed = Lending.sum(:disbursed_amount, :id => loan_ids)
+          loan_disbursed = loan_ids.blank? ? [] : Lending.sum(:disbursed_amount, :id => loan_ids)
           loan_disbursed_amt = loan_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_disbursed.to_i)
           loan_schedule_principal_till_date = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @date)
           loan_schedule_principal_amt = loan_schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_principal_till_date.to_i)

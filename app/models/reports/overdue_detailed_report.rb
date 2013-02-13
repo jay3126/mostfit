@@ -55,9 +55,9 @@ class OverdueDetailedReport < Report
   def generate
     data = {}
     loan_ids = []
-    @biz_location_branch.to_s.each do |location_id|
+    @biz_location_branch.to_a.each do |location_id|
       location = BizLocation.get location_id
-      loan_ids << Lending.overdue_loans_for_location_on_date(location, @date)
+      loan_ids << Lending.overdue_loans_for_location_on_date(location, @date) unless location.blank?
     end
 
     lendings_ids = @paginate == nil ? loan_ids.flatten.to_a.paginate(:page => @page, :per_page => @limit) : loan_ids.flatten.to_a
