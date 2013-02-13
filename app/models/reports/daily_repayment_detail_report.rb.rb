@@ -18,9 +18,9 @@ class DailyRepaymentDetailReport < Report
   end
 
   def generate
-    loan_receipts = @paginate==false ? LoanReceipt.all(:effective_on => @date).paginate(:page => @page, :per_page => @limit) :  LoanReceipt.all(:effective_on => @date)
+    loan_receipts = @paginate.blank? ? LoanReceipt.all(:effective_on => @date).paginate(:page => @page, :per_page => @limit) :  LoanReceipt.all(:effective_on => @date)
     data = {}
-    data[:repayments] = @paginate==false ? LoanReceipt.all(:effective_on => @date).aggregate(:id).paginate(:page => @page, :per_page => @limit) : LoanReceipt.all(:effective_on => @date).aggregate(:id)
+    data[:repayments] = @paginate.blank? ? LoanReceipt.all(:effective_on => @date).aggregate(:id).paginate(:page => @page, :per_page => @limit) : LoanReceipt.all(:effective_on => @date).aggregate(:id)
     data[:loan_payments] = {}
     loan_receipts.group_by{|r| r.accounted_at}.each do |branch_id, receipts|
       data[:loan_payments][branch_id] = {}
@@ -96,7 +96,7 @@ class DailyRepaymentDetailReport < Report
   end
   
   def generate_xls
-    @paginate = true
+    @paginate = ture
     data = generate
 
     folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
