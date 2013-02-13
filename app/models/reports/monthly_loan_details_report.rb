@@ -208,41 +208,43 @@ class MonthlyLoanDetailsReport < Report
 
   def generate_xls
     data     = {}
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
+    FileUtils.mkdir_p(folder)
     locations = BizLocation.all('location_level.level' => 1)
     locations.each do |location|
-      loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, @date, false, 'disbursed_loan_status')
-      loans = Lending.all(:id => loan_ids, :fields => [:id, :disbursed_amount,:lan])
-      loans.each do |loan|
-        data[loan.id] = {:loan_lan => loan.lan, :status => loan.status, :disbursed_amt => loan.to_money[:disbursed_amount]}
-        schedule_principal_till_date = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan.id, :on_date.lte => @date, :fields => [:id, :scheduled_principal_due, :scheduled_interest_due])
-
-        schedule_principal_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.map(&:scheduled_principal_due).sum.to_i)
-        schedule_interest_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.map(&:scheduled_interest_due).sum.to_i)
-        pos = loan.to_money[:disbursed_amount] > schedule_principal_amt ? loan.to_money[:disbursed_amount] - schedule_principal_amt : MoneyManager.default_zero_money
-        loan_receipts_till_date = loan.loan_receipts(:effective_on.lte => @date, :fields => [:id, :principal_received, :interest_received])
-        received_principal = loan_receipts_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_till_date.map(&:principal_received).sum.to_i)
-        received_interest = loan_receipts_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_till_date.map(&:interest_received).sum.to_i)
-        overdue_principal =  schedule_principal_amt > received_principal ? schedule_principal_amt - received_principal : MoneyManager.default_zero_money
-        overdue_interest = schedule_interest_amt > received_interest ? schedule_interest_amt - received_interest : MoneyManager.default_zero_money
-        data[loan.id] = {:loan_lan => loan.lan, :status => loan.status, :disbursed_amt => loan.to_money[:disbursed_amount], :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :pos => pos, :principal_received => received_principal, :interest_recevied => received_interest}
-      end
-
-      folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
-      FileUtils.mkdir_p(folder)
       location_name = location.name
       csv_loan_file = File.join(folder, "mld_#{location_name}report_(#{@date.to_s}).csv")
-      File.new(csv_loan_file, "w").close
-      append_to_file_as_csv(headers, csv_loan_file)
-      data.each do |loan_id, s_value|
-        value = [location_name, s_value[:loan_lan], s_value[:status], s_value[:disbursed_amt], s_value[:principal_received], s_value[:interest_recevied], s_value[:overdue_principal], s_value[:overdue_interest], s_value[:pos]]
-        append_to_file_as_csv([value], csv_loan_file)
+
+      FasterCSV.open(csv_loan_file, "w", {:col_sep => ","}) do |csv|
+        csv << headers
+        loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, @date, false, 'disbursed_loan_status')
+        loans = Lending.all(:id => loan_ids, :fields => [:id, :disbursed_amount,:lan])
+        loans.each do |loan|
+          data[loan.id] = {:loan_lan => loan.lan, :status => loan.status, :disbursed_amt => loan.to_money[:disbursed_amount]}
+          schedule_principal_till_date = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan.id, :on_date.lte => @date, :fields => [:id, :scheduled_principal_due, :scheduled_interest_due])
+
+          schedule_principal_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.map(&:scheduled_principal_due).sum.to_i)
+          schedule_interest_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.map(&:scheduled_interest_due).sum.to_i)
+          pos = loan.to_money[:disbursed_amount] > schedule_principal_amt ? loan.to_money[:disbursed_amount] - schedule_principal_amt : MoneyManager.default_zero_money
+          loan_receipts_till_date = loan.loan_receipts(:is_advance_adjusted => false, :effective_on.lte => @date, :fields => [:id, :principal_received, :interest_received])
+          received_principal = loan_receipts_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_till_date.map(&:principal_received).sum.to_i)
+          received_interest = loan_receipts_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts_till_date.map(&:interest_received).sum.to_i)
+          overdue_principal =  schedule_principal_amt > received_principal ? schedule_principal_amt - received_principal : MoneyManager.default_zero_money
+          overdue_interest = schedule_interest_amt > received_interest ? schedule_interest_amt - received_interest : MoneyManager.default_zero_money
+          data[loan.id] = {:branch_name => location.name, :loan_lan => loan.lan, :status => loan.status, :disbursed_amt => loan.to_money[:disbursed_amount], :overdue_principal => overdue_principal, :overdue_interest => overdue_interest, :pos => pos, :principal_received => received_principal, :interest_recevied => received_interest}
+          s_value = data[loan.id]
+          value = [s_value[:branch_name], s_value[:loan_lan], s_value[:status], s_value[:disbursed_amt], s_value[:principal_received], s_value[:interest_recevied], s_value[:overdue_principal], s_value[:overdue_interest], s_value[:pos]]
+          csv << value
+        end
       end
+      
     end
     return true
   end
 
   def append_to_file_as_csv(data, filename)
-    FasterCSV.open(filename, "a", {:col_sep => ","}) do |csv|
+    FasterCSV.open(filename, "w", {:col_sep => ","}) do |csv|
+      csv << headers
       data.each do |datum|
         csv << datum
       end
@@ -250,6 +252,6 @@ class MonthlyLoanDetailsReport < Report
   end
 
   def headers
-    _headers ||= [["Branch Name", "Loan Lan", "Status", "Disbursed Amt", "Principal Received", "Interest Received", "Overdue Principal", "Overdue Principal", "POS"]]
+    _headers ||= ["Branch Name", "Loan Lan", "Status", "Disbursed Amt", "Principal Received", "Interest Received", "Overdue Principal", "Overdue Principal", "POS"]
   end
 end
