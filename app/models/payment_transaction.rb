@@ -198,11 +198,12 @@ class PaymentTransaction
         loan.status = DISBURSED_LOAN_STATUS
         loan.save!
       end
-      loan_receipt.destroy unless loan_receipt.blank?
-      fee_receipt.destroy unless fee_receipt.blank?
-      voucher.destroy unless voucher.blank?
-      postings.each{|p| p.destroy} unless postings.blank?
-      self.destroy
+      loan_receipt.update!(:deleted_at => DateTime.now) unless loan_receipt.blank?
+      fee_receipt.update!(:deleted_at => DateTime.now) unless fee_receipt.blank?
+      voucher.update!(:deleted_at => DateTime.now) unless voucher.blank?
+      postings.each{|p| p.update!(:deleted_at => DateTime.now)} unless postings.blank?
+      self.deleted_at = DateTime.now
+      self.save!
     end
   end
 
