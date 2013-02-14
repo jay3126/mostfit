@@ -116,7 +116,7 @@ class LoanApplication
   # @param for_center_cycle [Object]
   def self.all_loan_application_client_ids_for_center_cycle(for_center_id, for_center_cycle)
     raise ArgumentError, "No center cycle available at center #{for_center_id}" unless (for_center_cycle and (for_center_cycle.cycle_number > 0))
-    all(:at_center_id => for_center_id, :center_cycle_id => for_center_cycle.id).aggregate(:client_id).compact
+    all(:at_center_id => for_center_id, :center_cycle_id => for_center_cycle.cycle_number).aggregate(:client_id).compact
   end
 
   def self.create_for_client(loan_money_amount, client, loan_amount, at_branch, at_center, for_cycle, by_staff, on_date, user_id)

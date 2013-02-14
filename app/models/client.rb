@@ -115,6 +115,10 @@ class Client
   def created_on; self.date_joined; end
   def counterparty; self; end
 
+  def client_age
+    date_of_birth.nil? ? nil : (Date.today.year - date_of_birth.year)
+  end
+
   def is_there_space_in_the_client_group?
     if (self.client_group and self.client_group.nil? and self.client_group.clients and self.new?)
       return [false, "The number of clients in this group exceeds the maximum number of members permissible"] if self.client_group.clients.count > self.client_group.number_of_members
@@ -180,7 +184,7 @@ class Client
       :created_by_user_id => User.first.id, :upload_id => row[headers[:upload_id]], :caste => row[headers[:caste]].downcase.to_sym,
       :religion => row[headers[:religion]].downcase.to_sym, :priority_sector_list => priority_sector_list, :psl_sub_category => psl_sub_category,
       :occupation => occupation
-      }
+    }
 
     obj = Client.new(hash)
     admin_location = BizLocation.get center.id
