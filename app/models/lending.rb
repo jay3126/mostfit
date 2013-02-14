@@ -493,12 +493,16 @@ class Lending
     end
   end
 
-  def self.advance_avaiable_loans_for_location(location)
+  def self.advance_avaiable_loans_for_location(location, on_date = Date.today)
     if location.location_level.level == 0
-      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.performed_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
+      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and a.performed_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
     else
-      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.accounted_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
+      repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and a.accounted_at = #{location.id} and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
     end
+  end
+
+  def self.all_advance_avaiable_loans_for_location(on_date = Date.today)
+    repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
   end
 
   def self.overdue_loans_for_location_on_date(location, on_date = Date.today)
