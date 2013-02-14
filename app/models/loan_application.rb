@@ -600,7 +600,7 @@ class LoanApplication
       at_center_id,                                                            # kendra id
       amount,                                                                  # applied for amount / current balance
       client_guarantor_name,                                                   # key person name
-      client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_s.downcase.to_sym], # key person relationship
+      client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_sym], # key person relationship
       nil,                                                                     # nominee name
       nil,                                                                     # nominee relationship
       nil, #client.telephone_type ? phone[client.telephone_type.to_s.downcase.to_sym] : nil, # applicant telephone number type 1
@@ -623,20 +623,20 @@ class LoanApplication
   private
   def key_person_relationship
     @key_person_relationship ||= {
-      :father          => "K01",
-      :husband         => "K02",
-      :mother          => "K03",
-      :son             => "K04",
-      :daughter        => "K05",
-      :wife            => "K06",
-      :brother         => "K07",
-      :mother_in_law   => "K08",
-      :father_in_law   => "K09",
-      :daughter_in_law => "K10",
-      :sister_in_law   => "K11",
-      :son_in_law      => "K12",
-      :brother_in_law  => "K13",
-      :other           => "K15"
+      :Father          => "K01",
+      :Husband         => "K02",
+      :Mother          => "K03",
+      :Son             => "K04",
+      :Daughter        => "K05",
+      :Wife            => "K06",
+      :Brother         => "K07",
+      :"Mother-In-law"   => "K08",
+      :"Father-In-law"   => "K09",
+      :"Daughter-In-law" => "K10",
+      :"Sister-In-Law"   => "K11",
+      :"Son-In-Law"      => "K12",
+      :"Brother-In-law" => "K13",
+      :"Other"          => "K15"
     }
   end
 
