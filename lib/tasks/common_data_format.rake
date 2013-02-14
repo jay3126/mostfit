@@ -37,7 +37,7 @@ USAGE_TEXT
       elsif (args[:to_date] and args[:from_date] and args[:frequency_identifier])
         to_date = Date.strptime(args[:to_date], "%d-%m-%Y")
         from_date = Date.strptime(args[:from_date], "%d-%m-%Y")
-        frequency_identifier = args[:frequency_identifier]
+        frequency_identifier = args[:frequency_identifier].downcase
         t1 = Time.now
         report = Highmark::CommonDataFormat.new({:frequency_identifier => frequency_identifier}, {:to_date => to_date, :from_date => from_date}, User.first)
         data = report.generate
