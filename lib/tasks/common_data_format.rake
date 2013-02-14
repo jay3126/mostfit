@@ -22,6 +22,8 @@ namespace :mostfit do
 rake mostfit:highmark:generate[<to_date>,<from_date>,'frequency_identifier']
 NOTE: Make sure there are no spaces after and before the comma separating the two arguments.
 Both to_date and from_date has to be supplied. Also frequency_identifier is also necessary to be supplied.
+Frequency Identifier which are accepted are as follows :- 'monthly' and 'weekly'.
+Choose 'monthly' if you want to generate the report for whole month. choose 'weekly' if you want to generate this report only for a small period.
 The format for the date is DD-MM-YYYY. The date has to be enclosed in single quotes. For 6th August 2011 it shall be '06-08-2011'.
 Enter 'monthly' if you want to generate the Credit Bureau files for a month or enter 'weekly' if you want to run this report for a week
 EXAMPLE: rake mostfit:highmark:generate['13-07-2011','monthly']
@@ -33,6 +35,8 @@ USAGE_TEXT
       elsif args[:from_date].nil?
         p USAGE
       elsif args[:frequency_identifier].nil?
+        p USAGE
+      elsif (args[:frequency_identifier].downcase != 'weekly' || args[:frequency_identifier].downcase != 'monthly')
         p USAGE
       elsif (args[:to_date] and args[:from_date] and args[:frequency_identifier])
         to_date = Date.strptime(args[:to_date], "%d-%m-%Y")

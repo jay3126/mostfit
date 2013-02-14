@@ -26,10 +26,10 @@ module Highmark
       folder = File.join(Merb.root, "doc", "csv", "reports")      
       FileUtils.mkdir_p(folder)
 
-      filename_cnscrd = File.join(folder, "#{self.name}-customer.csv")
-      filename_adrcrd = File.join(folder, "#{self.name}-address.csv")
-      filename_actcrd = File.join(folder, "#{self.name}-accounts.csv")
-      filename_brncrd = File.join(folder, "#{self.name}-branch-center-list.csv")
+      filename_cnscrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-customer.csv")
+      filename_adrcrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-address.csv")
+      filename_actcrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-accounts.csv")
+      filename_brncrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-branch-center-list.csv")
 
       File.new(filename_cnscrd, "w").close
       File.new(filename_adrcrd, "w").close
