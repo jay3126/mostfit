@@ -82,7 +82,7 @@ class AdvancePaymentsCurrentReport < Report
     File.new(csv_loan_file, "w").close
     append_to_file_as_csv(headers, csv_loan_file)
     data[:records].each do |loan_id, s_value|
-      value = [s_value[:branch_name], s_value[:center_name], s_value[:fco_name], s_value[:loan_account_number], s_value[:par], [:member_name],[:advance_payment]]
+      value = [s_value[:branch_name], s_value[:center_name], s_value[:fco_name], s_value[:loan_account_number], s_value[:member_name], s_value[:advance_payment]]
       append_to_file_as_csv([value], csv_loan_file)
     end
     return true
