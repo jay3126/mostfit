@@ -56,6 +56,8 @@ class BranchDateWiseDcaReport < Report
       total_disbured_amt = total_disbursed.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(total_disbursed.to_i)
       loan_schedules = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => total_loans,:on_date.gte => @from_date, :on_date.lte => @to_date)
       loan_fee = FeeReceipt.all_paid_loan_fee_receipts_on_accounted_at_for_date_range(branch_id, @from_date, @to_date)
+      p_loans = preclosure_loan_ids.blank? ? [] : Lending.all(:fields => [:id,:preclosed_on_date], :id => preclosure_loan_ids)
+      p_loans_schedules = p_loans.blank? ? [] : p_loans.loan_base_schedule.base_schedule_line_items(:on_date.lte => @to_date)
       process_fee = loan_fee[:loan_fee_receipts].blank? ? [] : loan_fee[:loan_fee_receipts]
       preclose_fee = loan_fee[:loan_preclousure_fee_receipts].blank? ? [] : loan_fee[:loan_preclousure_fee_receipts]
       data[:record][branch_id] = {}
@@ -65,8 +67,8 @@ class BranchDateWiseDcaReport < Report
         if preclosure_loan_ids.blank?
           preclose_schedules = []
         else
-          p_loans = Lending.all(:fields => [:id], :id => preclosure_loan_ids, :preclosed_on_date.gte => on_date )
-          preclose_schedules = p_loans.blank? ? [] : p_loans.loan_base_schedule.base_schedule_line_items(:on_date => on_date)
+          p_loans_after_on_date = p_loans.select{|s| s.preclosed_on_date >= on_date}
+          preclose_schedules = p_loans_after_on_date.blank? ? [] : p_loans_schedules.select{|s| s.on_date == on_date && p_loans_after_on_date.include?(s.loan_base_schedule.lending_id)}
         end
         loan_schedules_on_date = schedules_on_date + preclose_schedules
         scheduled_principal = loan_schedules_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules_on_date.map(&:scheduled_principal_due).sum.to_i)
@@ -84,6 +86,7 @@ class BranchDateWiseDcaReport < Report
         total_received = received_principal + received_interest
 
         preclose_principal = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date.map(&:principal_received).sum.to_i)
+        preclose_interest = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date.map(&:interest_received).sum.to_i)
 
         processing_fee_receipt = process_fee.blank? ? [] : process_fee.select{|s| s.effective_on == on_date}
         preclose_fee_receipt = preclose_fee.blank? ? [] : preclose_fee.select{|s| s.effective_on == on_date}
@@ -100,7 +103,7 @@ class BranchDateWiseDcaReport < Report
           :branch_name => branch_name, :branch_id => branch_id, :on_date => on_date,
           :dues_emi_principal => scheduled_principal , :dues_emi_interest => scheduled_interest, :dues_emi_total => scheduled_total,
           :emi_collect_principal => received_principal, :emi_collect_interest => received_interest, :emi_collect_total => total_received,
-          :loan_fee_collect => processing_fee_on_date, :preclosure_collect_fee => preclose_fee_on_date, :preclosure_collect => preclose_principal, :total_fee_collect => total_collection,
+          :loan_fee_collect => processing_fee_on_date, :preclosure_collect_fee => preclose_fee_on_date, :preclosure_principal => preclose_principal, :preclosure_interest => preclose_interest, :total_fee_collect => total_collection,
           :interest_accrued => scheduled_interest, :disbursed_amount => disbursed_money_amt, :outstanding_principal => pos_on_date, :advance_received => received_advance, :loan_recovery => received_recovery
         }
       end
@@ -122,7 +125,7 @@ class BranchDateWiseDcaReport < Report
     data[:record].each do |location__id, location_values|
       location_values.each do |date, s_value|
         value = [s_value[:branch_name], s_value[:on_date], s_value[:dues_emi_principal], s_value[:dues_emi_interest], s_value[:dues_emi_total], s_value[:emi_collect_principal], s_value[:emi_collect_interest], s_value[:emi_collect_total],
-          s_value[:advance_received],s_value[:loan_recovery], s_value[:loan_fee_collect], s_value[:preclosure_collect_fee], s_value[:preclosure_collect], (s_value[:total_fee_collect]+s_value[:advance_received]+s_value[:loan_recovery]), s_value[:interest_accrued], s_value[:disbursed_amount], s_value[:outstanding_principal]
+          s_value[:advance_received],s_value[:loan_recovery], s_value[:loan_fee_collect], s_value[:preclosure_principal], s_value[:preclosure_interest], s_value[:preclosure_collect_fee], (s_value[:total_fee_collect]+s_value[:advance_received]+s_value[:loan_recovery]), s_value[:interest_accrued], s_value[:disbursed_amount], s_value[:outstanding_principal]
         ]
         append_to_file_as_csv([value], csv_loan_file)
       end
@@ -139,7 +142,7 @@ class BranchDateWiseDcaReport < Report
   end
 
   def headers
-    _headers ||= [["Branch Name", "Txn Date", "EMI Principal Due", "EMI Interest Due", "EMI Total", "EMI Principal Collceted", "EMI Interest Collected", "EMI Total Collected", "Advance Amt","Recovey Amt","Processing Fee", "Foreclosure Fee", "Foreclosure POS", "Total Collected", "Interest Accrued", "Disbursed Amount", "POS"]]
+    _headers ||= [["Branch Name", "Txn Date", "EMI Principal Due", "EMI Interest Due", "EMI Total", "EMI Principal Collceted", "EMI Interest Collected", "EMI Total Collected", "Advance Amt","Recovey Amt","Processing Fee",  "Foreclosure POS", "Foreclosure Interest", "Foreclosure Fee", "Total Collected", "Interest Accrued", "Disbursed Amount", "POS"]]
   end
 
   def check_holiday_on_date(date)

@@ -10,7 +10,7 @@
           Branch
         %th{:colspan => 3}
           DUES
-        %th{:colspan => 9}
+        %th{:colspan => 10}
           COLLECTIONS
         %th{:colspan => 3}
           DISBURSAL, ACCRUAL, POS
@@ -30,9 +30,7 @@
           Recovery
         %th
           Processing
-        %th
-          Foreclosure
-        %th
+        %th{:colspan => 3}
           Foreclosure
         %th
           Total
@@ -67,11 +65,13 @@
         %th
           Fees
         %th
-          Fees
+          Principal
         %th
-          POS
+          Interest
         %th
-          Collection
+          Fee
+        %th
+          Amount
         %th
           Accrued
         %th
@@ -128,13 +128,17 @@
               - accumulate_row_values[:loan_fee_collect] += values[:loan_fee_collect]
               - branch_accumulate_row_values[:loan_fee_collect] += values[:loan_fee_collect]
             %td
+              = values[:preclosure_principal]
+              - accumulate_row_values[:preclosure_principal] += values[:preclosure_principal]
+              - branch_accumulate_row_values[:preclosure_principal] += values[:preclosure_principal]
+            %td
+              = values[:preclosure_interest]
+              - accumulate_row_values[:preclosure_interest] += values[:preclosure_interest]
+              - branch_accumulate_row_values[:preclosure_interest] += values[:preclosure_interest]
+            %td
               = values[:preclosure_collect_fee]
               - accumulate_row_values[:preclosure_collect_fee] += values[:preclosure_collect_fee]
               - branch_accumulate_row_values[:preclosure_collect_fee]  += values[:preclosure_collect_fee]
-            %td
-              = values[:preclosure_collect]
-              - accumulate_row_values[:preclosure_collect] += values[:preclosure_collect]
-              - branch_accumulate_row_values[:preclosure_collect] += values[:preclosure_collect]
             %td
               - t_collection = values[:total_fee_collect] + values[:advance_received] + values[:loan_recovery]
               = t_collection
@@ -176,9 +180,11 @@
           %td
             = branch_total_rows[:loan_fee_collect]
           %td
-            = branch_total_rows[:preclosure_collect_fee]
+            = branch_total_rows[:preclosure_principal]
           %td
-            = branch_total_rows[:preclosure_collect]
+            = branch_total_rows[:preclosure_interest]
+          %td
+            = branch_total_rows[:preclosure_collect_fee]
           %td
             = branch_total_rows[:total_fee_collect]
           %td
@@ -214,9 +220,11 @@
           %td
             = total_rows[:loan_fee_collect]
           %td
-            = total_rows[:preclosure_collect_fee]
+            = total_rows[:preclosure_principal]
           %td
-            = total_rows[:preclosure_collect]
+            = total_rows[:preclosure_interest]
+          %td
+            = total_rows[:preclosure_collect_fee]
           %td
             = total_rows[:total_fee_collect]
           %td
