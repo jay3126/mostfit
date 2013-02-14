@@ -180,12 +180,16 @@ class ClientVerification
 
   # Creates a new CPV record
   def self.record_verification(loan_application_id, verification_type, verification_status, by_staff, on_date, by_user_id)
-    create(:loan_application_id => loan_application_id,
-      :verification_type => verification_type,
-      :verification_status => verification_status,
-      :verified_by_staff_id => by_staff,
-      :verified_on_date => on_date,
-      :created_by_user_id => by_user_id)
+    begin
+      create(:loan_application_id => loan_application_id,
+        :verification_type => verification_type,
+        :verification_status => verification_status,
+        :verified_by_staff_id => by_staff,
+        :verified_on_date => on_date,
+        :created_by_user_id => by_user_id)
+    rescue => ex
+      raise Errors::DataError, "Unknown request, please click Go button to resolve"
+    end
   end
 
 end
