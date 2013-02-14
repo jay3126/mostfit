@@ -342,7 +342,7 @@ module Highmark
                      (loan.loan_installment_amount.to_s.chomp(".00").truncate(9, "")),   #installment amount / minimum amount due
                      loan.actual_total_outstanding_loan(@to_date).to_s.chomp(".00").truncate(9, ""),
                      ((loan.actual_total_outstanding_loan(@to_date) > loan.scheduled_total_outstanding(@to_date)) ? (loan.actual_total_outstanding_loan(@to_date) - loan.scheduled_total_outstanding(@to_date)).to_s.chomp(".00").truncate(9, "") : MoneyManager.default_zero_money.to_s.chomp(".00")), #amount overdue
-                     (loan.days_past_dues_on_date(@to_date) > 999 ? 999 : loan.days_past_dues_on_date(@to_date)).to_s.truncate(3, ""), #days past due
+                     (LoanDueStatus.overdue_day_on_date(loan.id, @to_date) > 999 ? 999 : LoanDueStatus.overdue_day_on_date(loan.id, @to_date)).to_s.truncate(3, ""), #days past due
                      (loan.status == :written_off_loan_status ? loan.actual_principal_outstanding(@to_date).to_s.chomp(".00") : nil), #write off amount
                      (loan.write_off_on_date.nil? ? nil : loan.write_off_on_date.strftime("%d%m%Y").truncate(8, "")), #date written off
                      nil, #write-off reason
