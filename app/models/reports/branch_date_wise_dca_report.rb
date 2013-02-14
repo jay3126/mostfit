@@ -93,7 +93,7 @@ class BranchDateWiseDcaReport < Report
         total_collection = total_received + preclose_principal + processing_fee_on_date + preclose_fee_on_date
         d_loans = disbursment_loans.blank? ? [] : disbursment_loans.select{|s| s.effective_on == on_date}
         disbursed_money_amt = d_loans.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(d_loans.map(&:amount).sum.to_i)
-        schedule_principal_till_date = BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => total_loans, :on_date.lte => on_date)
+        schedule_principal_till_date = total_loans.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => total_loans, :on_date.lte => on_date)
         schedule_principal_till_date_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.to_i)
         pos_on_date = total_disbured_amt > schedule_principal_till_date_amt ? total_disbured_amt - schedule_principal_till_date_amt : MoneyManager.default_zero_money
         data[:record][branch_id][on_date] = {
