@@ -31,12 +31,20 @@ EXAMPLE: rake mostfit:highmark:generate['13-07-2011','monthly']
 USAGE_TEXT
 
       if args[:to_date].nil?
+        puts "'to_date' cannot be blank. Please see the instructions below on how to run the rake task"
+        puts "\n"
         p USAGE
       elsif args[:from_date].nil?
+        puts "'from_date' cannot be blank. Please see the instructions below on how to run the rake task"
+        puts "\n"
         p USAGE
       elsif args[:frequency_identifier].nil?
+        puts "'frequency_identifier' cannot be blank. Please see the instructions below on how to run the rake task"
+        puts "\n"
         p USAGE
-      elsif (args[:frequency_identifier].downcase != 'weekly' || args[:frequency_identifier].downcase != 'monthly')
+      elsif !['weekly','monthly'].include?(args[:frequency_identifier].downcase)
+        puts "Invalid 'frequency_identifier'. Allowed values are - 'monthly' and 'weekly'. Please see the instructions below on how to run the rake task"
+        puts "\n"
         p USAGE
       elsif (args[:to_date] and args[:from_date] and args[:frequency_identifier])
         to_date = Date.strptime(args[:to_date], "%d-%m-%Y")
