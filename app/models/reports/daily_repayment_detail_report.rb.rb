@@ -124,7 +124,7 @@ class DailyRepaymentDetailReport < Report
   end
 
   def headers
-    _headers ||= [["Branch Name", "Center Name", "Loan Account Number", "Schedule Date", "Principal", "Interest", "Amount"]]
+    _headers ||= [["Branch Name", "Center Name", "Client Name","Loan Account Number", "Schedule Date", "Principal", "Interest", "Amount"]]
   end
 
 end
