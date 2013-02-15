@@ -14,7 +14,7 @@ module Highmark
     end
     
     def name
-      "Common Data Format Report for #{Mfi.first.name} from #{@from_date} to #{@to_date}"
+      "Common_Data_Format_Report_for_#{Mfi.first.name}_from_#{@from_date}_to_#{@to_date}"
     end
     
     def self.name
