@@ -4,8 +4,10 @@
       = error
       %br
 
-%h1 Bulk Upload Loan Applications
-
+%h1 Loan Assignments
+.menu-strip{:style => "width: 32%;"}
+  = link_to_with_rights "Click to Download xls file format", url(:controller => :loan_applications, :action => :download_xls_file_format), :class => "grey_button"
+%br
 .shaded
   %h2 Upload File
   

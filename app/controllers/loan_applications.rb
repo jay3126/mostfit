@@ -34,7 +34,37 @@ class LoanApplications < Application
         csv_filepath = File.join(csv_folder, filename)
 
         User.convert_xls_to_csv(xls_filepath, csv_filepath)
-        
+
+        converted_csv_file = Dir.entries(csv_folder).select{|d| d.split('.').include?('csv')}.to_s
+        fq_file_path = File.join(csv_folder, converted_csv_file)
+        output_folder = File.join("#{Merb.root}/public/upload/bulk_upload_loan_applications", "results")
+        FileUtils.mkdir_p(output_folder)
+        file_to_write = File.join(output_folder, "bulk_upload_loan_applications" + ".results.csv")
+        file_options = {:headers =>  true}
+
+        applications_data = {}
+        row_no = 1
+        FasterCSV.foreach(fq_file_path, file_options) do |row|
+          row_no              += 1
+          name = row["Name"]
+          guarantor_name = row["Guarantor name"]
+          guarantor_relationship = row["Guarantor relationship"]
+          dob = row["Dob"]
+          age_as_on = row["Age as on"]
+          age_as_on_date = row["Age as on date"]
+          reference1 = row["Reference1"]
+          reference2 = row["Reference2"]
+          address = row["Address"]
+          state = row["State"]
+          pincode = row["Pincode"]
+          #branch_id = row["branch_id"]
+          #center_id = row["center_id"]
+          #created_by = row["created_by"]
+          #created_on = row["created_on"]
+          #center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
+          loan_amount_str = row["loan_amount_str"]
+        end
+
       rescue => ex
         @errors << ex.message
       end
@@ -42,6 +72,9 @@ class LoanApplications < Application
     render :bulk_upload_loan_applications
   end
 
+  def download_xls_file_format
+    send_file('public/bulk_upload_loan_applications_file_format.xls', :filename => ('public/bulk_upload_loan_applications_file_format.xls'.split("/")[-1].chomp))
+  end
   # Only List all clients under selected center
   def bulk_new
     # INITIALIZING VARIABLES USED THROUGHOUT
