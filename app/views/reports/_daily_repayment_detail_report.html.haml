@@ -18,7 +18,9 @@
         %th
           Interest
         %th
-          Amount
+          Advance
+        %th
+          Recovery
     %tbody
       - @data[:loan_payments].each do |branch_id, values|
         - values.each do |lending_id, date_values|
@@ -37,7 +39,9 @@
               %td
                 = value[:interest_received]
               %td
-                = value[:principal_received] + value[:interest_received]
+                = value[:advance_received]
+              %td
+                = value[:recovery_reveived]
   %br
   .flickr_pagination
     = will_paginate @data[:repayments], :container => false
