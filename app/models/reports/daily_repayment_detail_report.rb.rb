@@ -14,7 +14,7 @@ class DailyRepaymentDetailReport < Report
   end
 
   def self.name
-    "Daily Repayment Report"
+    "Daily Repayment Detail Report"
   end
 
   def generate
@@ -101,7 +101,7 @@ class DailyRepaymentDetailReport < Report
 
     folder = File.join(Merb.root, "doc", "xls", "company",'reports', self.class.name.split(' ').join().downcase)
     FileUtils.mkdir_p(folder)
-    csv_loan_file = File.join(folder, "repayment_detail_report_(#{@to_date.to_s}).csv")
+    csv_loan_file = File.join(folder, "daily_repayment_detail_report_(#{@date.to_s}).csv")
     File.new(csv_loan_file, "w").close
     append_to_file_as_csv(headers, csv_loan_file)
     data[:loan_payments].each do |location_id, b_values|
@@ -112,7 +112,6 @@ class DailyRepaymentDetailReport < Report
         end
       end
     end
-    File.new(csv_loan_file, "w").close
     return true
   end
 
