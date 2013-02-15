@@ -140,10 +140,10 @@
               - accumulate_row_values[:preclosure_collect_fee] += values[:preclosure_collect_fee]
               - branch_accumulate_row_values[:preclosure_collect_fee]  += values[:preclosure_collect_fee]
             %td
-              - t_collection = values[:total_fee_collect] + values[:advance_received] + values[:loan_recovery]
+              - t_collection = values[:emi_collect_total] + values[:loan_fee_collect] + values[:advance_received] + values[:loan_recovery] + values[:preclosure_collect_fee] + values[:preclosure_interest] + values[:preclosure_principal]
               = t_collection
-              - accumulate_row_values[:total_fee_collect] += t_collection
-              - branch_accumulate_row_values[:total_fee_collect] += t_collection
+              - accumulate_row_values[:total_collection] += t_collection
+              - branch_accumulate_row_values[:total_collection] += t_collection
             %td
               = values[:interest_accrued]
               - accumulate_row_values[:interest_accrued] += values[:interest_accrued]
@@ -186,7 +186,7 @@
           %td
             = branch_total_rows[:preclosure_collect_fee]
           %td
-            = branch_total_rows[:total_fee_collect]
+            = branch_total_rows[:total_collection]
           %td
             = branch_total_rows[:interest_accrued]
           %td
@@ -226,7 +226,7 @@
           %td
             = total_rows[:preclosure_collect_fee]
           %td
-            = total_rows[:total_fee_collect]
+            = total_rows[:total_collection]
           %td
             = total_rows[:interest_accrued]
           %td

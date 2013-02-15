@@ -124,8 +124,9 @@ class BranchDateWiseDcaReport < Report
     append_to_file_as_csv(headers, csv_loan_file)
     data[:record].each do |location__id, location_values|
       location_values.each do |date, s_value|
+        total_collcection = s_value[:emi_collect_total] + s_value[:advance_received] + s_value[:loan_recovery] + s_value[:loan_fee_collect] + s_value[:preclosure_principal] + s_value[:preclosure_interest] + s_value[:preclosure_collect_fee]
         value = [s_value[:branch_name], s_value[:on_date], s_value[:dues_emi_principal], s_value[:dues_emi_interest], s_value[:dues_emi_total], s_value[:emi_collect_principal], s_value[:emi_collect_interest], s_value[:emi_collect_total],
-          s_value[:advance_received],s_value[:loan_recovery], s_value[:loan_fee_collect], s_value[:preclosure_principal], s_value[:preclosure_interest], s_value[:preclosure_collect_fee], (s_value[:total_fee_collect]+s_value[:advance_received]+s_value[:loan_recovery]), s_value[:interest_accrued], s_value[:disbursed_amount], s_value[:outstanding_principal]
+          s_value[:advance_received],s_value[:loan_recovery], s_value[:loan_fee_collect], s_value[:preclosure_principal], s_value[:preclosure_interest], s_value[:preclosure_collect_fee], total_collcection, s_value[:interest_accrued], s_value[:disbursed_amount], s_value[:outstanding_principal]
         ]
         append_to_file_as_csv([value], csv_loan_file)
       end
