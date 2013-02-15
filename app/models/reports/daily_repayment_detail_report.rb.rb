@@ -107,7 +107,7 @@ class DailyRepaymentDetailReport < Report
     data[:loan_payments].each do |location_id, b_values|
       b_values.each do |loan_id, l_values|
         l_values.each do |on_date, s_value|
-          value = [s_value[:branch_name], s_value[:center_name], s_value[:member_name], s_value[:lan_no], s_value[:schedule_date], s_value[:principal_received], s_value[:interest_received],s_value[:principal_received]+s_value[:interest_received]]
+          value = [s_value[:branch_name], s_value[:center_name], s_value[:lan_no], s_value[:schedule_date], s_value[:principal_received], s_value[:interest_received],s_value[:principal_received]+s_value[:interest_received]]
           append_to_file_as_csv([value], csv_loan_file)
         end
       end
@@ -124,7 +124,7 @@ class DailyRepaymentDetailReport < Report
   end
 
   def headers
-    _headers ||= [["Branch Name", "Center Name", "Client Name","Loan Account Number", "Schedule Date", "Principal", "Interest", "Amount"]]
+    _headers ||= [["Branch Name", "Center Name", "Loan Account Number", "Schedule Date", "Principal", "Interest", "Amount"]]
   end
 
 end
