@@ -1,0 +1,14 @@
+- unless @errors.blank?
+  - @errors.each do |error|
+    .error
+      = error
+      %br
+
+%h1 Bulk Upload Loan Applications
+
+.shaded
+  %h2 Upload File
+  
+  %form{:action => url(:controller => :loan_applications, :action => :upload_loan_applications), :enctype => "multipart/form-data", :method => "post"}
+    %input{:name => "file", :size => "80", :type => "file"}
+    %input{:type => "submit", :value => "Upload"}

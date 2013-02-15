@@ -28,7 +28,7 @@ Merb::Router.prepare do
   resources :cost_centers
   resources :transaction_summaries
   resources :loan_files,               :id => %r(\d+)
-  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get], :duplicate_record => [:get]}
+  resources :loan_applications,        :id => %r(\d+), :collection => {:suspected_duplicates => [:get], :bulk_create => [:post], :bulk_create_loan_applicant => [:post], :bulk_new => [:post], :loan_application_list => [:get], :duplicate_record => [:get], :bulk_upload_loan_applications => [:post], :upload_loan_applications => [:post]}
   resources :overlap_report_responses, :id => %r(\d+)
   resources :overlap_report_requests, :id => %r(\d+)
   resources :center_cycles, :id => %r(\d+), :collection => {:mark_cgt_grt => [:post]}

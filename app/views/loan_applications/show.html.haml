@@ -130,7 +130,7 @@
             %th Verified on
             %td
               = cv.verified_on_date rescue nil
-              %br
+              %hr
     - if loan_application.to_info && loan_application.to_info.authorization_info
       - loan_authorization = loan_application.to_info.authorization_info
       %hr

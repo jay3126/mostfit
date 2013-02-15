@@ -14,6 +14,8 @@
     %td
       %h3{:style => "border-bottom: dotted 1px #999"}
         Loan Applications
+      = link_to_with_rights "Bulk Upload Loan Applications", url(:controller => :loan_applications, :action => :bulk_upload_loan_applications), :class => 'add_small'
+      %br
       = link_to_with_rights "New loan applicants", url(:controller => :loan_applications, :action => :bulk_create, :flag => 'true'), :class => 'add_small'
       %br
       = link_to_with_rights "New loans for existing clients", url(:controller => :loan_applications, :action => :bulk_new, :flag => 'true'), :class => 'add_small'

@@ -10,6 +10,38 @@ class LoanApplications < Application
     display @loan_app
   end
 
+  def bulk_upload_loan_applications
+    render
+  end
+
+  def upload_loan_applications
+    @errors = []
+
+    # VALIDATIONS
+    @errors << "Please select file" if params[:file].blank?
+    @errors << "Invalid file selection (Accepts .xls extension file only)" if params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel"
+    if @errors.blank?
+      begin
+        filename = params[:file][:filename]
+        xls_folder = File.join("#{Merb.root}/public/uploads", "bulk_upload_loan_applications", "uploaded_xls")
+        FileUtils.mkdir_p(xls_folder)
+        xls_filepath = File.join(xls_folder, filename)
+        FileUtils.mv(params[:file][:tempfile].path, xls_filepath)
+        
+        csv_folder = File.join("#{Merb.root}/public/uploads", "bulk_upload_loan_applications", "converted_csv")
+        FileUtils.mkdir_p(csv_folder)
+        FileUtils.rm_rf("#{csv_folder}/.")
+        csv_filepath = File.join(csv_folder, filename)
+
+        User.convert_xls_to_csv(xls_filepath, csv_filepath)
+        
+      rescue => ex
+        @errors << ex.message
+      end
+    end
+    render :bulk_upload_loan_applications
+  end
+
   # Only List all clients under selected center
   def bulk_new
     # INITIALIZING VARIABLES USED THROUGHOUT
