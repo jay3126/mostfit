@@ -25,7 +25,11 @@ class BodProcess
       bod = first(:on_date => on_date, :biz_location_id => location.id)
       unless bod.blank?
         bod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
-        bod.run_bod_process_in_thread
+        if location.bod_processes.count == 1
+          bod.run_bod_process_in_thread_first_time
+        else
+          bod.run_bod_process_in_thread
+        end
       end
     end
   end
@@ -49,6 +53,40 @@ class BodProcess
         
         accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
       end
+      #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
+      self.update(:completed_at => Time.now, :status => COMPLETED)
+    }
+  end
+
+  def run_bod_process_in_thread_first_time
+    Thread.new {
+      bk = MyBookKeeper.new
+      loans = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(self.biz_location.id, self.on_date)
+      disbursed_loans = loans[:disbursed_loan_status]
+      repaid_loans = loans[:repaid_loan_status]
+      write_off_loans = loans[:written_off_loan_status]
+      preclouse_loans = loans[:preclosed_loan_status]
+      total_loans = preclouse_loans+write_off_loans+disbursed_loans+repaid_loans
+      total_loans.each do |loan_id|
+        loan = Lending.get(loan_id, :fields => [:id, :repaid_on_date, :write_off_on_date, :reclosed_on_date])
+        if disbursed_loans.include?(loan_id)
+          last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => self.on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
+        elsif repaid_loans.include?(loan_id)
+          last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.repaid_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
+        elsif write_off_loans.include?(loan_id)
+          last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.write_off_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
+        elsif preclouse_loans.include?(loan_id)
+          last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.preclosed_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
+        else
+          last_schedule_date = nil
+        end
+        unless last_schedule_date.blank?
+          bk.accrue_regular_receipts_on_loan_till_date(loan, last_schedule_date)
+#          accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
+#          accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
+        end
+      end
+
       #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)
       self.update(:completed_at => Time.now, :status => COMPLETED)
     }

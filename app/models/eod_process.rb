@@ -24,8 +24,11 @@ class EodProcess
     @biz_locations.each do |location|
       eod = first(:on_date => on_date, :biz_location_id => location.id)
       eod.update(:started_at => Time.now, :performed_by => performed_by_id, :created_by => created_by_id, :status => IN_PROCESS)
-      eod.run_eod_process_in_thread
-      
+      if location.eod_processes.count == 1
+        eod.run_eod_process_in_thread_first_time
+      else
+        eod.run_eod_process_in_thread
+      end
     end
   end
 
@@ -38,7 +41,7 @@ class EodProcess
   def run_eod_process_in_thread
     Thread.new {
       bk = MyBookKeeper.new
-     # centers = LocationLink.all_children(self.biz_location, self.on_date)
+      # centers = LocationLink.all_children(self.biz_location, self.on_date)
       user = self.user
       #loan_ids_for_advance = get_reporting_facade(user).all_oustanding_loan_IDs_scheduled_on_date_with_advance_balances(self.on_date)
       loans = LoanAdministration.get_loans_accounted_by_sql(self.biz_location.id, self.on_date, false, 'disbursed_loan_status').compact
@@ -51,6 +54,25 @@ class EodProcess
         custom_loan_dates.each{|cd| loan.update_loan_shechdule_according_calendar_holiday(cd.on_date, cd.collection_date, self.on_date)}
       end
       Ledger.location_accounting_eod(self.biz_location, self.on_date)
+      self.update(:completed_at => Time.now, :status => COMPLETED)
+      Ledger.head_office_eod(self.on_date) if EodProcess.first(:on_date => self.on_date, :status.not => COMPLETED).blank?
+    }
+  end
+
+  def run_eod_process_in_thread_first_time
+    Thread.new {
+      bk = MyBookKeeper.new
+      # centers = LocationLink.all_children(self.biz_location, self.on_date)
+      user = self.user
+      #loan_ids_for_advance = get_reporting_facade(user).all_oustanding_loan_IDs_scheduled_on_date_with_advance_balances(self.on_date)
+      advance_loans = Lending.advance_avaiable_loans_for_location(self.biz_location, self.on_date)
+      advance_loans.each do |loan_id|
+        schedule_date = BaseScheduleLineItem.first(:on_date=> self.on_date, 'loan_base_schedule.lending_id'=> loan_id)
+        get_loan_facade(user).adjust_advance(self.on_date, loan_id) unless schedule_date.blank?
+      end
+      Ledger.run_branch_eod_accounting_first_time_payment_trasaction(self.biz_location, self.on_date)
+      Ledger.run_branch_eod_accounting_first_time_accrual_trasaction(self.biz_location, self.on_date)
+      Ledger.run_branch_eod_accounting_mark_write_off_accounting(self.biz_location, self.on_date)
       self.update(:completed_at => Time.now, :status => COMPLETED)
       Ledger.head_office_eod(self.on_date) if EodProcess.first(:on_date => self.on_date, :status.not => COMPLETED).blank?
     }

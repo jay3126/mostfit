@@ -47,6 +47,7 @@ class Lending
   property :cycle_number,                   Integer, :default => 1, :nullable => false, :index => true
   property :disbursement_mode,              Enum.send('[]', *DISBURSEMENT_MODES), :nullable => false, :default => NOT_SPECIFIED
   property :cheque_number,                  Integer, :nullable => true
+  property :mark_write_off_accounting,      Boolean, :default => false
 
   belongs_to :upload, :nullable => true
 

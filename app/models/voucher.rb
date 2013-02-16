@@ -21,6 +21,7 @@ class Voucher
 
   has n, :ledger_postings
   belongs_to :payment_transaction, :nullable => true
+  belongs_to :accrual_transaction, :nullable => true
   belongs_to :cost_center, :nullable => true
 
   def money_amounts; [ :total_amount ]; end
@@ -205,7 +206,13 @@ class Voucher
     values[:eod] = eod
     values[:performed_at] = performed_at unless performed_at.blank?
     values[:accounted_at] = accounted_at unless accounted_at.blank?
-    values[:payment_transaction] = payment_transaction unless payment_transaction.blank?
+    unless payment_transaction.blank?
+      if payment_transaction.class == AccrualTransaction
+        values[:accrual_transaction] = payment_transaction
+      else
+        values[:payment_transaction] = payment_transaction
+      end
+    end
     ledger_postings = []
     postings.each { |p|
       next unless p.amount > 0

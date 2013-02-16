@@ -87,16 +87,16 @@ module BookKeeper
     principal_received = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:principal_received).sum.to_i)
     interest_received = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:interest_received).sum.to_i)
 
-#    if loan.status == PRECLOSED_LOAN_STATUS
-#      preclose_receipts = loan.loan_receipts('payment_transaction.payment_towards' => PAYMENT_TOWARDS_LOAN_PRECLOSURE)
-#      preclose_principal = preclose_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_receipts.map(&:principal_received).sum.to_i)
-#      preclose_interest = preclose_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_receipts.map(&:interest_received).sum.to_i)
-#
-#      interest_received = interest_received + preclose_interest
-#      total_principal_received = preclose_principal + principal_received
-#      principal_non_received = total_principal_received < loan.to_money[:disbursed_amount] ? loan.to_money[:disbursed_amount] - total_principal_received : MoneyManager.default_zero_money
-#      principal_accrual_money = principal_accrual_money + principal_non_received
-#    end
+    #    if loan.status == PRECLOSED_LOAN_STATUS
+    #      preclose_receipts = loan.loan_receipts('payment_transaction.payment_towards' => PAYMENT_TOWARDS_LOAN_PRECLOSURE)
+    #      preclose_principal = preclose_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_receipts.map(&:principal_received).sum.to_i)
+    #      preclose_interest = preclose_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_receipts.map(&:interest_received).sum.to_i)
+    #
+    #      interest_received = interest_received + preclose_interest
+    #      total_principal_received = preclose_principal + principal_received
+    #      principal_non_received = total_principal_received < loan.to_money[:disbursed_amount] ? loan.to_money[:disbursed_amount] - total_principal_received : MoneyManager.default_zero_money
+    #      principal_accrual_money = principal_accrual_money + principal_non_received
+    #    end
 
     reverse_interset = interest_accrual_money > interest_received ? interest_accrual_money - interest_received : MoneyManager.default_zero_money
     reverse_principal = principal_accrual_money > principal_received ? principal_accrual_money - principal_received : MoneyManager.default_zero_money
@@ -172,6 +172,46 @@ module BookKeeper
       end
     end
   end
+  
+  def accrue_regular_receipts_on_loan_till_date(loan, on_date)
+    if AccrualTransaction.first(:on_product_id => loan.id, :on_product_type => 'lending', :effective_on => on_date).blank?
+      schedule_items = BaseScheduleLineItem.all(:fields => [:id, SCHEDULED_PRINCIPAL_DUE, SCHEDULED_INTEREST_DUE], 'loan_base_schedule.lending_id' => loan.id , :on_date.lte => on_date)
+      unless schedule_items.blank?
+        scheduled_principal_due = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_PRINCIPAL_DUE).sum.to_i)
+        scheduled_interest_due  = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_INTEREST_DUE).sum.to_i)
+        accrual_temporal_type = ACCRUE_REGULAR
+        receipt_type = RECEIPT
+        on_product_type, on_product_id = LENDING, loan.id
+        by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+        location_map = LoanAdministration.get_location_map(loan.id, on_date)
+        raise ArgumentError, "Location is not defined on #{on_date} for Loan(#{loan.id})" if location_map.blank?
+        accounted_at = location_map.accounted_at
+        performed_at = location_map.administered_at
+        effective_on = on_date
+        AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+        AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+      end
+    end
+  end
+
+  def accrue_broken_period_interest_receipts_on_loan_first_time_eod(loan, on_date)
+    return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
+    broken_period_interest = loan.broken_period_interest_due(on_date)
+    accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+    receipt_type = RECEIPT
+    on_product_type, on_product_id = LENDING, loan.id
+    by_counterparty_type, by_counterparty_id = Resolver.resolve_counterparty(loan.borrower)
+    location_map = LoanAdministration.get_location_map(loan.id, on_date)
+    raise ArgumentError, "Location is not defined on #{on_date} for Loan(#{loan.id})" if location_map.blank?
+    accounted_at = location_map.accounted_at
+    performed_at = location_map.administered_at
+    effective_on = on_date
+    Validators::Arguments.not_nil?(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+    accrual = AccrualTransaction.new(AccrualTransaction.to_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type))
+    reversal_accrual = accrual.to_reversed_broken_period_accrual
+    raise Errors::DataError, reversal_accrual.errors.first.first unless reversal_accrual.save
+  end
+
 
   def accrue_broken_period_interest_receipts_on_loan(loan, on_date)
     return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)

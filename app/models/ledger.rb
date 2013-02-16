@@ -299,6 +299,8 @@ class Ledger
       end
     end
   end
+
+
   def self.run_branch_bod_accounting(location, on_date = Date.today)
     loans = get_location_facade(User.first).get_loans_accounted(location.id, on_date)
     loans = loans.compact.uniq unless loans.blank?
@@ -430,26 +432,26 @@ class Ledger
     end
   end
 
-#  def self.setup_location_link
-#    ClientAdministration.all.each do |client_admin|
-#      a_chart = AccountsChart.first(:counterparty_id => client_admin.counterparty_id)
-#      ledgers = a_chart.blank? ? [] : a_chart.ledgers
-#      parent_location = client_admin.registered_at_location
-#      parent_ledger_ids = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product_id).flatten.compact
-#      parent_ledgers = Ledger.all(:id => parent_ledger_ids)
-#      unless parent_ledgers.blank?
-#        links = LocationLink.all(:model_type => 'Ledger', :child_id => ledgers.map(&:id)).map(&:child_id)
-#        assign_ledgers = ledgers.select{|l| !links.include?(l.id) }
-#        assign_ledgers.each do |ledger|
-#          parent_ledger = parent_ledgers.select{|l| l.ledger_classification_id == ledger.ledger_classification_id}.first
-#          unless parent_ledger.blank?
-#            LocationLink.assign(ledger, parent_ledger, ledger.open_on)
-#            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1)
-#          end
-#        end
-#      end
-#    end
-#  end
+  #  def self.setup_location_link
+  #    ClientAdministration.all.each do |client_admin|
+  #      a_chart = AccountsChart.first(:counterparty_id => client_admin.counterparty_id)
+  #      ledgers = a_chart.blank? ? [] : a_chart.ledgers
+  #      parent_location = client_admin.registered_at_location
+  #      parent_ledger_ids = parent_location.blank? ? [] : parent_location.accounting_locations.map(&:product_id).flatten.compact
+  #      parent_ledgers = Ledger.all(:id => parent_ledger_ids)
+  #      unless parent_ledgers.blank?
+  #        links = LocationLink.all(:model_type => 'Ledger', :child_id => ledgers.map(&:id)).map(&:child_id)
+  #        assign_ledgers = ledgers.select{|l| !links.include?(l.id) }
+  #        assign_ledgers.each do |ledger|
+  #          parent_ledger = parent_ledgers.select{|l| l.ledger_classification_id == ledger.ledger_classification_id}.first
+  #          unless parent_ledger.blank?
+  #            LocationLink.assign(ledger, parent_ledger, ledger.open_on)
+  #            AccountingLocation.first_or_create(:product_type => 'ledger', :product_id => ledger.id, :biz_location_id => client_admin.administered_at, :effective_on => ledger.open_on, :performed_by => 1, :recorded_by => 1)
+  #          end
+  #        end
+  #      end
+  #    end
+  #  end
 
   def self.setup_location_link
     BizLocation.all('location_level.level' => 1).each do |parent_location|
@@ -489,6 +491,94 @@ class Ledger
       end
     end
   end
+
+  def self.run_branch_eod_accounting_first_time_payment_trasaction(location, on_date = Date.today)
+    payment_transactions = PaymentTransaction.all(:accounted_at => location.id, :effective_on.lte => on_date, :accounting => false)
+    payment_transaction_group_by = payment_transactions.group_by{|s| s.payment_towards}
+    payment_transaction_group_by.each do |type, type_payments|
+      payment_group_by_date = type_payments.group_by{|s| s.effective_on}
+      payment_group_by_date.each do |effective_on, payments|
+        total_amount = MoneyManager.get_money_instance_least_terms(payments.map(&:amount).sum.to_i)
+        action = payments.first.product_action
+        if type == :payment_towards_loan_disbursement
+          payment_allocation = {:loan_disbursed => total_amount, :total_paid => total_amount}
+        elsif type == :payment_towards_fee_receipt
+          payment_allocation = {:total_received => total_amount}
+        elsif type == :payment_towards_loan_repayment
+          loan_receipt_amt = LoanReceipt.all(:payment_transaction_id => payments.map(&:id)).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum)
+          collect_principal = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[0].to_i)
+          collect_interest = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[1].to_i)
+          collect_advance = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[2].to_i)
+          payment_allocation = {:total_received => total_amount, :interest_received => collect_interest, :principal_received => collect_principal, :advance_received => collect_advance}
+        elsif type == :payment_towards_loan_advance_adjustment
+          loan_receipt_amt = LoanReceipt.sum(:advance_adjusted, :payment_transaction_id => payments.map(&:id))
+          adjusted_advance = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt.to_i)
+          payment_allocation = {:advance_adjusted => adjusted_advance}
+        elsif type == :payment_towards_loan_recovery
+          loan_receipt_amt = LoanReceipt.sum(:loan_recovery, :payment_transaction_id => payments.map(&:id))
+          recovery_amt = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt.to_i)
+          payment_allocation = {:advance_adjusted => recovery_amt}
+        elsif type == :payment_towards_loan_preclosure
+          loan_receipt_amt = LoanReceipt.all(:payment_transaction_id => payments.map(&:id)).aggregate(:principal_received.sum, :interest_received.sum)
+          collect_principal = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[0].to_i)
+          collect_interest = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[1].to_i)
+          payment_allocation = {:total_received => total_amount, :interest_received => collect_interest, :principal_received => collect_principal}
+        end
+        if total_amount > MoneyManager.default_zero_money
+          product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
+          postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
+          receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
+          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+          PaymentTransaction.all(:id => payments.map(&:id)).update!(:accounting => true)
+        end
+      end
+    end
+  end
+
+  def self.run_branch_eod_accounting_first_time_accrual_trasaction(location, on_date = Date.today)
+    accrual_transactions = AccrualTransaction.all(:accounted_at => location.id, :accounting => false)
+    accural_transaction_group_by_type = accrual_transactions.blank? ? [] : accrual_transactions.group_by{|s| s.accrual_allocation_type}
+    accural_transaction_group_by_type.each do |allocation_type, a_payments|
+      a_payments_group_by_type = a_payments.group_by{|s| s.accrual_temporal_type}
+      a_payments_group_by_type.each do |type, type_payments|
+        type_payments_group_by_on_date = type_payments.group_by{|s| s.effective_on}
+        type_payments_group_by_on_date.each do |effective_on, payments|
+          total_amount = MoneyManager.get_money_instance_least_terms(payments.map(&:amount).sum.to_i)
+          action = payments.first.product_action
+          payment_allocation = {:total_accrued => total_amount}
+          if total_amount > MoneyManager.default_zero_money
+            product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
+            postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
+            receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+            AccrualTransaction.all(:id => payments.map(&:id)).update!(:accounting => true)
+          end
+        end
+      end
+    end
+  end
+
+  def self.run_branch_eod_accounting_mark_write_off_accounting(location, on_date = Date.today)
+    write_off_loan_ids = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, on_date, false, 'written_off_loan_status')
+    write_off_loans = Lending.all(:id => write_off_loan_ids, :mark_write_off_accounting => false)
+    unless write_off_loans.blank?
+      loan_group_by_date = write_off_loans.group_by{|s| s.write_off_on_date}
+      loan_group_by_date.each do |write_off_date, w_loans|
+        total_outstanding = w_loans.map(:disbursed_amount).sum.to_i - LoanReceipt.sum(:principal_received, :lending_id => w_loans.map(&:id))
+        total_amount = MoneyManager.get_money_instance_least_terms(total_outstanding)
+        payment_allocation = {:total_received => total_amount}
+        action = :write_off
+        if total_amount > MoneyManager.default_zero_money
+          product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
+          postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
+          receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
+          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, write_off_date, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+          Lending.all(:id => w_loans.map(&:id)).update(:mark_write_off_accounting => true)
+        end
+      end
+    end
+  end
+
 
   def self.get_location_facade(user)
     @location_facade ||= FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user)
