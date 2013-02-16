@@ -27,11 +27,12 @@ class DailyRepaymentDetailReport < Report
       data[:loan_payments][branch_id] = {}
       receipts.group_by{|l| l.lending_id}.each do |lending_id, l_receipts|
         data[:loan_payments][branch_id][lending_id] = {}
+        data[:loan_payments][branch_id][lending_id][@date] = []
         loan = Lending.get(lending_id)
         loan_lan = loan.lan
         center_name = BizLocation.get(loan.administered_at_origin).name
         l_receipts.each do |l_receipt|
-          data[:loan_payments][branch_id][lending_id][l_receipt.effective_on] = {:schedule_date => l_receipt.effective_on, :loan_id => lending_id, :lan_no => loan_lan, :branch_id => branch_id, :branch_name => branch_name, :center_name => center_name, :principal_received => l_receipt.to_money[:principal_received], :interest_received => l_receipt.to_money[:interest_received], :advance_received => l_receipt.to_money[:advance_received], :recovery_reveived => l_receipt.to_money[:loan_recovery]}
+          data[:loan_payments][branch_id][lending_id][@date] << {:schedule_date => l_receipt.effective_on, :loan_id => lending_id, :lan_no => loan_lan, :branch_id => branch_id, :branch_name => branch_name, :center_name => center_name, :principal_received => l_receipt.to_money[:principal_received], :interest_received => l_receipt.to_money[:interest_received], :advance_received => l_receipt.to_money[:advance_received], :recovery_reveived => l_receipt.to_money[:loan_recovery]}
         end
       end
     end
@@ -49,9 +50,11 @@ class DailyRepaymentDetailReport < Report
     append_to_file_as_csv(headers, csv_loan_file)
     data[:loan_payments].each do |location_id, b_values|
       b_values.each do |loan_id, l_values|
-        l_values.each do |on_date, s_value|
-          value = [s_value[:branch_name], s_value[:center_name], s_value[:lan_no], s_value[:schedule_date], s_value[:principal_received], s_value[:interest_received],s_value[:advance_received],s_value[:recovery_reveived]]
-          append_to_file_as_csv([value], csv_loan_file)
+        l_values.each do |on_date, d_values|
+          d_values.each do |s_value|
+            value = [s_value[:branch_name], s_value[:center_name], s_value[:lan_no], s_value[:schedule_date], s_value[:principal_received], s_value[:interest_received],s_value[:advance_received],s_value[:recovery_reveived]]
+            append_to_file_as_csv([value], csv_loan_file)
+          end
         end
       end
     end
