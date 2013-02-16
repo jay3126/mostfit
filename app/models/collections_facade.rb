@@ -138,7 +138,7 @@ class CollectionsFacade < StandardFacade
       schedules_on_date                    = all_schedules.select{|s| s.on_date == on_date}
       schedules_on_date.each do |schedule|
         loan                               = schedule.loan_base_schedule.lending
-        loan_schedule_till_date            = all_schedules.select{|s| s.loan_base_schedule.lending_id == loan.id && s.on_date < schedule.on_date}
+        loan_schedule_till_date            = all_schedules.select{|s| s.loan_base_schedule.lending_id == loan.id && s.on_date <= schedule.on_date}
         loan_receipt_on_date               = loans_receipts.select{|rl| rl.lending_id == loan.id && rl.effective_on == schedule.on_date}
         loan_receipt_till_date             = loans_receipts.select{|rl| rl.lending_id == loan.id && rl.effective_on <= schedule.on_date}
         loan_receipt_on_date_amt           = LoanReceipt.add_up(loan_receipt_on_date)
