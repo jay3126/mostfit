@@ -77,4 +77,39 @@ class AccrualTransaction
     all_broken_period_accruals_on_date.reject {|bpial| bpial.is_reversed?}
   end
 
+  def self.reversed_accruals_for_not_recevied(loan_id, on_date = Date.today)
+    loan_receipts = LoanReceipt.all(:lending_id => loan_id)
+    principal_accrued_transaction  = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :accrual_temporal_type => ACCRUE_REGULAR, :on_product_id => loan_id, :on_product_type => 'lending', :effective_on.lte => on_date)
+    interest_accrued_transaction  = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_INTEREST_ALLOCATION, :accrual_temporal_type => ACCRUE_REGULAR, :on_product_id => loan_id, :on_product_type => 'lending', :effective_on.lte => on_date)
+    principal_received = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:principal_received).sum.to_i)
+    interest_received =  loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.map(&:interest_received).sum.to_i)
+
+    principal_accrued = principal_accrued_transaction.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal_accrued_transaction.map(&:amount).sum.to_i)
+    interest_accrued = interest_accrued_transaction.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(interest_accrued_transaction.map(&:amount).sum.to_i)
+    if principal_received < principal_accrued
+      principal_accrual_obj = principal_accrued_transaction.first
+      original_accrual_attributes = principal_accrual_obj.attributes.dup
+      original_accrual_attributes.delete(:id)
+      original_accrual_attributes.delete(:created_at)
+      principal_reversal_attributes = original_accrual_attributes
+      principal_reversal_attributes[:amount] = (principal_accrued - principal_received).amount
+      principal_reversal_attributes[:accrual_temporal_type] = REVERSE_ACCRUE_REGULAR
+      principal_reversal_attributes[:accrual_allocation_type] = REVERSE_ACCRUE_PRINCIPAL_ALLOCATION
+      principal_reversal_attributes[:effective_on] = on_date
+      AccrualTransaction.first_or_create(principal_reversal_attributes)
+    end
+    if interest_received < interest_accrued
+      interest_accrual_obj = interest_accrued_transaction.first
+      original_accrual_attributes = interest_accrual_obj.attributes.dup
+      original_accrual_attributes.delete(:id)
+      original_accrual_attributes.delete(:created_at)
+      interest_reversal_attributes = original_accrual_attributes
+      interest_reversal_attributes[:amount] = (interest_accrued - interest_received).amount
+      interest_reversal_attributes[:accrual_temporal_type] = REVERSE_ACCRUE_REGULAR
+      interest_reversal_attributes[:accrual_allocation_type] = REVERSE_ACCRUE_INTEREST_ALLOCATION
+      interest_reversal_attributes[:effective_on] = on_date
+      AccrualTransaction.first_or_create(interest_reversal_attributes)
+    end
+  end
+
 end

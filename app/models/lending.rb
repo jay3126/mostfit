@@ -1207,6 +1207,8 @@ class Lending
     end
     
     LoanStatusChange.record_status_change(self, current_status, new_loan_status, effective_on)
+    self.reload
+    AccrualTransaction.reversed_accruals_for_not_recevied(self.id, effective_on) if [REPAID_LOAN_STATUS, PRECLOSED_LOAN_STATUS,WRITTEN_OFF_LOAN_STATUS ].include?(self.status)
   end
 
   # Fetch all the loans to update funding lines

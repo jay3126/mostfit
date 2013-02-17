@@ -505,7 +505,7 @@ class Ledger
         elsif type == :payment_towards_fee_receipt
           payment_allocation = {:total_received => total_amount}
         elsif type == :payment_towards_loan_repayment
-          loan_receipt_amt = LoanReceipt.all(:payment_transaction_id => payments.map(&:id)).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum)
+          loan_receipt_amt = LoanReceipt.all(:is_advance_adjusted => false, :payment_transaction_id => payments.map(&:id)).aggregate(:principal_received.sum, :interest_received.sum, :advance_received.sum)
           collect_principal = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[0].to_i)
           collect_interest = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[1].to_i)
           collect_advance = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[2].to_i)
@@ -528,7 +528,7 @@ class Ledger
           product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
           postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
           receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
-          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{effective_on}")
           PaymentTransaction.all(:id => payments.map(&:id)).update!(:accounting => true)
         end
       end
@@ -550,7 +550,7 @@ class Ledger
             product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
             postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
             receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
-            Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, effective_on, postings, location.id, '', "EOD Voucher Entry For #{action} on #{effective_on}")
             AccrualTransaction.all(:id => payments.map(&:id)).update!(:accounting => true)
           end
         end
@@ -564,15 +564,15 @@ class Ledger
     unless write_off_loans.blank?
       loan_group_by_date = write_off_loans.group_by{|s| s.write_off_on_date}
       loan_group_by_date.each do |write_off_date, w_loans|
-        total_outstanding = w_loans.map(:disbursed_amount).sum.to_i - LoanReceipt.sum(:principal_received, :lending_id => w_loans.map(&:id))
-        total_amount = MoneyManager.get_money_instance_least_terms(total_outstanding)
+        total_outstanding = w_loans.map(&:disbursed_amount).sum.to_i - LoanReceipt.sum(:principal_received, :lending_id => w_loans.map(&:id))
+        total_amount = MoneyManager.get_money_instance_least_terms(total_outstanding.to_i)
         payment_allocation = {:total_received => total_amount}
         action = :write_off
         if total_amount > MoneyManager.default_zero_money
           product_accounting_rule = ProductAccountingRule.resolve_rule_for_product_action(action)
           postings = product_accounting_rule.get_location_posting_info(payment_allocation, location.id, on_date)
           receipt_type = action == LOAN_DISBURSEMENT ? Constants::Transaction::PAYMENT : Constants::Transaction::RECEIPT
-          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, write_off_date, postings, location.id, '', "EOD Voucher Entry For #{action} on #{on_date}")
+          Voucher.create_generated_voucher(total_amount.amount, receipt_type, total_amount.currency, write_off_date, postings, location.id, '', "EOD Voucher Entry For #{action} on #{write_off_date}")
           Lending.all(:id => w_loans.map(&:id)).update(:mark_write_off_accounting => true)
         end
       end

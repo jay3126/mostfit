@@ -77,3 +77,13 @@ non_received_accrual_reversed:
     interest_received: customer_loan_interest_receipt
   credit:
     total_received: customer_loan_debtors
+loan_accrue_regular_principal_reversal:
+  debit:
+    total_accrued: customer_loan_disbursed
+  credit:
+    total_accrued: customer_loan_debtors
+loan_accrue_regular_interest_reversal:
+  debit:
+    total_accrued: customer_loan_interest_receipt
+  credit:
+    total_accrued: customer_loan_debtors

@@ -6,7 +6,7 @@ class Voucher
   property :id,             Serial
   property :guid,           *UNIQUE_ID
   property :type,           Enum.send('[]', *VOUCHER_TYPE), :nullable => false
-  property :total_amount,   *MONEY_AMOUNT_NON_ZERO
+  property :total_amount,   *MONEY_AMOUNT
   property :currency,       *CURRENCY
   property :effective_on,   *DATE_NOT_NULL
   property :narration,      String, :length => 1024
@@ -27,11 +27,19 @@ class Voucher
   def money_amounts; [ :total_amount ]; end
 
   validates_present :effective_on
-  validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?#OOO, :validate_all_post_to_unique_accounts?
-  validates_with_method :manual_voucher_permitted?
+  # validates_with_method :validate_has_both_debits_and_credits?, :postings_are_each_valid?, :postings_are_valid_together?, :postings_add_up?#OOO, :validate_all_post_to_unique_accounts?
+  #validates_with_method :manual_voucher_permitted?
 
   def performed_at_location; BizLocation.get(self.performed_at); end
   def accounted_at_location; BizLocation.get(self.accounted_at); end
+
+  def check_all_validation_manual
+    validate_has_both_debits_and_credits?
+    postings_are_each_valid?
+    postings_are_valid_together?
+    postings_add_up?
+    manual_voucher_permitted?
+  end
 
   def cost_center?(cost_center_id)
     if cost_center_id.blank?
@@ -227,9 +235,14 @@ class Voucher
       ledger_postings.push(posting)
     } 
     values[:ledger_postings] = ledger_postings
-    voucher = create(values)
-    raise Errors::DataError, voucher.errors.first.first unless voucher.saved?
-    voucher
+    voucher = new(values)
+    valid = voucher.check_all_validation_manual
+    if valid == true
+      voucher.save!
+    else
+      raise Errors::DataError, "voucher is not valid"
+    end
+
   end
 
 end

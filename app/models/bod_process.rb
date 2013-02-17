@@ -70,18 +70,24 @@ class BodProcess
       total_loans.each do |loan_id|
         loan = Lending.get(loan_id, :fields => [:id, :repaid_on_date, :write_off_on_date, :reclosed_on_date])
         if disbursed_loans.include?(loan_id)
+          close_date = ''
           last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => self.on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
         elsif repaid_loans.include?(loan_id)
+          close_date = loan.repaid_on_date
           last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.repaid_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
         elsif write_off_loans.include?(loan_id)
+          close_date = loan.write_off_on_date
           last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.write_off_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
         elsif preclouse_loans.include?(loan_id)
+          close_date = loan.preclosed_on_date
           last_schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => loan.preclosed_on_date, 'loan_base_schedule.lending_id' => loan_id) rescue nil
         else
+          close_date = ''
           last_schedule_date = nil
         end
         unless last_schedule_date.blank?
           bk.accrue_regular_receipts_on_loan_till_date(loan, last_schedule_date)
+          AccrualTransaction.reversed_accruals_for_not_recevied(loan_id, close_date) unless close_date.blank?
 #          accrual_transactions = get_reporting_facade(user).all_accrual_transactions_recorded_on_date(self.on_date, loan.id)
 #          accrual_transactions.each{|accrual| bk.account_for_accrual(accrual)} unless accrual_transactions.blank?
         end
