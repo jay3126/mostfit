@@ -194,6 +194,72 @@ module BookKeeper
     end
   end
 
+  def accrue_regular_receipts_on_loan_till_date1(loan_id, on_date)
+
+    if AccrualTransaction.first(:on_product_id => loan_id, :on_product_type => 'lending', :effective_on => on_date).blank?
+      loan = Lending.get(loan_id, :fields => [:id, :status, :repaid_on_date, :write_off_on_date, :reclosed_on_date, :accounted_at_origin, :administered_at_origin])
+      if loan.status == :disbursed_loan_status
+        schedule_date = on_date
+      elsif loan.status == :written_off_loan_status
+        schedule_date = loan.write_off_on_date
+      elsif loan.status == :preclosed_loan_status
+        schedule_date =loan.preclosed_on_date
+      elsif loan.status == :repaid_loan_status
+        schedule_date = loan.repaid_on_date
+      else
+        schedule_date = ''
+      end
+      schedule_items = BaseScheduleLineItem.all(:fields => [:id, SCHEDULED_PRINCIPAL_DUE, SCHEDULED_INTEREST_DUE], 'loan_base_schedule.lending_id' => loan.id , :on_date.lte => schedule_date)
+      unless schedule_items.blank?
+        scheduled_principal_due = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_PRINCIPAL_DUE).sum.to_i)
+        scheduled_interest_due  = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_INTEREST_DUE).sum.to_i)
+        broken_period_interest = loan.broken_period_interest_due(on_date) if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:on_date).include?(on_date) && loan.status == :disbursed_loan_status
+        accrual_temporal_type = ACCRUE_REGULAR
+        broaken_accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+        receipt_type = RECEIPT
+        on_product_type, on_product_id = LENDING, loan.id
+        by_counterparty_type = 'client'
+        by_counterparty_id = loan.loan_borrower.counterparty_id
+        accounted_at = loan.accounted_at_origin
+        performed_at = loan.administered_at_origin
+        effective_on = schedule_date
+        accruals = []
+        accruals << AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+        accruals << AccrualTransaction.reversed_accruals_for_not_recevied(loan_id, schedule_date) if loan.status != :disbursed_loan_status
+        if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:on_date).include?(on_date) && loan.status == :disbursed_loan_status
+          accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, broaken_accrual_temporal_type) if broken_period_interest > MoneyManager.default_zero_money
+        end
+        accruals.each do |accrual|
+          account_for_accrual(accrual) unless accrual.blank?
+        end
+      end
+    end
+  end
+
+  def accrue_broken_period_receipts_on_loan_till_date(loan_id, last_month_date)
+    if AccrualTransaction.first(:on_product_id => loan_id, :on_product_type => 'lending', :effective_on => last_month_date).blank?
+      loan = Lending.get(loan_id, :fields => [:id, :status])
+      if loan.is_outstanding_on_date?(last_month_date)
+        broken_period_interest = loan.broken_period_interest_due(last_month_date)
+        accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+        receipt_type = RECEIPT
+        on_product_type, on_product_id = LENDING, loan.id
+        by_counterparty_type = 'client'
+        by_counterparty_id = loan.loan_borrower.counterparty_id
+        accounted_at = loan.accounted_at_origin
+        performed_at = loan.administered_at_origin
+        effective_on = last_month_date
+        accrual = AccrualTransaction.new(AccrualTransaction.to_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type))
+        reversal_accrual = accrual.to_reversed_broken_period_accrual
+        raise Errors::DataError, reversal_accrual.errors.first.first unless reversal_accrual.save
+        account_for_accrual(reversal_accrual) unless reversal_accrual.blank?
+        reversal_accrual
+      end
+    end
+
+  end
+
   def accrue_broken_period_interest_receipts_on_loan_first_time_eod(loan, on_date)
     return unless BookKeeper.can_accrue_on_loan_on_date?(loan, on_date)
     broken_period_interest = loan.broken_period_interest_due(on_date)
@@ -207,7 +273,7 @@ module BookKeeper
     performed_at = location_map.administered_at
     effective_on = on_date
     Validators::Arguments.not_nil?(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-    accrual = AccrualTransaction.new(AccrualTransaction.to_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type))
+    accrual = AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
     reversal_accrual = accrual.to_reversed_broken_period_accrual
     raise Errors::DataError, reversal_accrual.errors.first.first unless reversal_accrual.save
   end
