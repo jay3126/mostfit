@@ -16,6 +16,7 @@ class Response
   #
   property :completion_status, Enum.send('[]', *COMPLETION_STATUSES), :nullable => false, :index => true
   property :result_status, Enum.send('[]', *RESULT_STATUSES), :nullable => false, :index => true, :default => PENDING_RESULT_STATUS
+  property :answers, Text
 
   belongs_to :target_entity
   belongs_to :filler

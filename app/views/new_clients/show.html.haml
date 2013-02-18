@@ -45,6 +45,14 @@
     %td
       = @client.date_of_birth
   %tr.even
+    %th.even Age as on Date
+    %td
+      = @client.age_as_on_date
+  %tr.odd
+    %th.odd Age
+    %td
+      = @client.age
+  %tr.even
     %th.even Spouse Name
     %td= @client.spouse_name
   %tr.odd

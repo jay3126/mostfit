@@ -1,0 +1,608 @@
+%h1
+  Pachecklists controller, show action
+%p
+  - @ans = @pachecklist.answers
+  - @hash = Hash[*@ans.split(',')]
+  - @answers = Array.new
+  - @answers.push(@hash.values)
+  - @answers = @hash.values.to_a
+  - @total = @answers.length
+  - @pachecklist2 = @pachecklist.id
+  - i=0
+%p
+  %table.tall
+    %tr{:width => "100%"}
+      %th{:width => "10%"}
+        = label ""
+      %th{:width => "80%"}
+        = label ""
+      %th{:width => "10%"}
+        =  label ""
+    %tr
+      %td{:width => "10%"}
+      %td{:width => "80%"}
+        = label "Branch Related"
+      %td{:width => "10%"}
+    %tr
+      %td
+        = 1
+      %td
+        = "Is the claim amount paid?"
+      %td
+        - if @hash["1"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 2
+      %td
+        = "BM AO and Ro read on time?"
+      %td
+        - if @hash["2"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 3
+      %td
+        = "Pledge conducted?"
+      %td
+        - if @hash["3"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 4
+      %td
+        = "Is RO carryin stationary which are required ?"
+      %td
+        - if @hash["4"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 5
+      %td
+        = "Are Employees carrying ID cards ?"
+      %td
+        - if @hash["5"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "Registers"
+      %td
+    %tr
+      %td
+        = 6
+      %td
+        = "Petty cash register maintained ?"
+      %td
+        - if @hash["6"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 7
+      %td
+        = "Member attendance register maintained ?"
+      %td
+        - if @hash["7"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 8
+      %td
+        = "Center meeting Review ?"
+      %td
+        - if @hash["8"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 9
+      %td
+        = "Death claim Register ?"
+      %td
+        - if @hash["9"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 10
+      %td
+        = "Stock register maintained ?"
+      %td
+        - if @hash["10"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 11
+      %td
+        = "Key register maintained ?"
+      %td
+        - if @hash["11"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 12
+      %td
+        = "Statutory registers maintained ?"
+      %td
+        - if @hash["12"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 13
+      %td
+        = "Movement register  ?"
+      %td
+        - if @hash["13"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 14
+      %td
+        = "Member attendance register maintained ?"
+      %td
+        - if @hash["14"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "Process"
+      %td
+    %tr
+      %td
+        = 15
+      %td
+        = "Disbursement process followed ?"
+      %td
+        - if @hash["15"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 16
+      %td
+        = "Collection process followed ?"
+      %td
+        - if @hash["16"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 17
+      %td
+        = "Display of statutory and legal documents ?"
+      %td
+        - if @hash["17"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 18
+      %td
+        = "Display are survey chart and branch approval ?"
+      %td
+        - if @hash["18"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "Center meeting"
+      %td
+    %tr
+      %td
+        = 19
+      %td
+        = "Is Ro coming on time for meetings ?"
+      %td
+        - if @hash["19"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 20
+      %td
+        = "Are the meetings conducted on scheduled time ?"
+      %td
+        - if @hash["20"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 21
+      %td
+        = "Is the collection of EMI happening as per process ?"
+      %td
+        - if @hash["21"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 22
+      %td
+        = "Are proper reciept given and maintained in the center life ?"
+      %td
+        - if @hash["22"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 23
+      %td
+        = "Currency details for Rs 500 and and 1000 by RO ?"
+      %td
+        - if @hash["23"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 24
+      %td
+        = "Pledge conducted before the meeting ?"
+      %td
+        - if @hash["24"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 25
+      %td
+        = "Passbook updation with out any dicrepancy ?"
+      %td
+        - if @hash["25"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "GRT"
+      %td
+    %tr
+      %td
+        = 26
+      %td
+        = "Is the BM reached on time ?"
+      %td
+        - if @hash["26"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 27
+      %td
+        = "Is the BM conducting GRT as per policy ?"
+      %td
+        - if @hash["27"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 28
+      %td
+        = "Are the application forms and details are verified with members ?"
+      %td
+        - if @hash["28"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 29
+      %td
+        = "Is BM carrying the GRT chart ?"
+      %td
+        - if @hash["29"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "CGT"
+      %td
+    %tr
+      %td
+        = 30
+      %td
+        = "Is the RO reached on time?"
+      %td
+        - if @hash["30"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 31
+      %td
+        = "Does he follows the CGT kit ?"
+      %td
+        - if @hash["31"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 32
+      %td
+        = "Are the members aware of the regularity requirement ?"
+      %td
+        - if @hash["32"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 33
+      %td
+        = "Pledge conducted before the meeting ?"
+      %td
+        - if @hash["33"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 34
+      %td
+        = "Are the members aware of the transactions IRR ?"
+      %td
+        - if @hash["34"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 35
+      %td
+        = "Are the members aware of the processing the charges and insurances ?"
+      %td
+        - if @hash["35"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 36
+      %td
+        = "Are the members aware of the JLG concept ?"
+      %td
+        - if @hash["36"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+      %td
+        = label"AO CPV"
+      %td
+    %tr
+      %td
+        = 37
+      %td
+        = "Is AO attending the every members house for verifications  ?"
+      %td
+        - if @hash["37"] == "1"
+          = label "yes"
+        - else
+          = label "No"  
+    %tr
+      %td
+        = 38
+      %td
+        = "Is he capturing the details and applying the credit names and income criteria ?"
+      %td
+        - if @hash["38"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 39
+      %td
+        = "Is AO sending the credit buereou into correctly and ontime ?"
+      %td
+        - if @hash["39"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+      %td
+        = label "RO CPV"
+      %td
+    %tr
+      %td
+        = 40
+      %td
+        = "Is RO visiting every members house for rent ?"
+      %td
+        - if @hash["40"] == "1"
+          = label "yes"
+        - else
+          = label "No"   
+    %tr
+      %td
+        = 41
+      %td
+        = "Is RO informing the credit norms for loan availability ?"
+      %td
+        - if @hash["41"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+      %td
+        = label "Disbursment"
+      %td
+    %tr
+      %td
+        = 42
+      %td
+        = "AO and BM both are present for disbursement ?"
+      %td
+        - if @hash["42"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 43
+      %td
+        = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
+      %td
+        - if @hash["43"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 44
+      %td
+        = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
+      %td
+        - if @hash["44"] == "1"
+          = label "yes"
+        - else
+          = label "No"  
+    %tr
+      %td
+        = 45
+      %td
+        = "Are they collecting fees as per norms ?"
+      %td
+        - if @hash["45"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 46
+      %td
+        = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
+      %td
+        - if @hash["46"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+      %td
+        = label "Banking and collection amount"
+      %td
+    %tr
+      %td
+        = 47
+      %td
+        = "Are all the RO's are returning back on time ?"
+      %td
+        - if @hash["47"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 48
+      %td
+        = "Is the AO sending the cash report ti HO as specified timee and format ?"
+      %td
+        - if @hash["48"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 49
+      %td
+        = "Is the collection amount banked as per process ?"
+      %td
+        - if @hash["49"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 50
+      %td
+        = "Is the pending member disbursment happening in presence of center ?"
+      %td
+        - if @hash["50"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+      %td
+        = label "Insurance and Claims"
+      %td
+    %tr
+      %td
+        = 51
+      %td
+        = "Is the insurance documents collected on time as intimated?"
+      %td
+        - if @hash["51"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 52
+      %td
+        = "Is the claim papers submitted ontime to HO ?"
+      %td
+        - if @hash["52"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 53
+      %td
+        = "Is the claim amount paid ?"
+      %td
+        - if @hash["53"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+= link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
+|
+= link_to 'Back', url(:pachecklists)

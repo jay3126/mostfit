@@ -1,5 +1,10 @@
 Merb.logger.info("Compiling routes...")
 Merb::Router.prepare do
+  resources :surprise_center_visits
+  resources :surprise_visit_centers
+  resources :processaudits, :collection => {:answers => [:get],:allanswers => [:get,:post]}
+  resources :pachecklists, :collection => {:answers => [:get],:allanswers => [:get],:updateanswers => [:get,:put]}
+  resources :checklist_news
 
   resources :asset_categories do
     resources :asset_sub_categories do

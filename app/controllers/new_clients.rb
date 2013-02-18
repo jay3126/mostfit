@@ -46,6 +46,8 @@ class NewClients < Application
     reference2_type         = params[:client][:reference2_type]
     reference2              = params[:client][:reference2]
     date_of_birth           = params[:client][:date_of_birth]
+    age                     = params[:client][:age]
+    age_as_on_date          = params[:client][:age_as_on_date]
     date_joined             = params[:client][:date_joined]
     spouse_name             = params[:client][:spouse_name]
     spouse_date_of_birth    = params[:client][:spouse_date_of_birth]
@@ -66,7 +68,7 @@ class NewClients < Application
     religion                = params[:client][:religion]
     picture                 = params[:client][:picture]
     classification          = params[:client][:town_classification]
-
+    
     # remove leading and trailing spaces from reference-1 and reference-2
     reference = reference.strip unless reference.blank?
     reference2 = reference2.strip unless reference2.blank?
@@ -74,9 +76,26 @@ class NewClients < Application
     # VALIDATIONS
     @message[:error] = "Date joined must not be future date" if date_joined && Date.parse(date_joined) > Date.today
 
+     no_age_parameter = (date_of_birth.blank? && (age.blank? || age_as_on_date.blank?))
+     @message[:error] = "Either Date of birth  or Age As ON field is manadatory" if no_age_parameter
+
+    unless no_age_parameter
+      if date_of_birth.blank?
+      
+          age = age
+          age_as_on_date = age_as_on_date
+          date_of_birth = nil
+       
+      else
+        age = nil
+        age_as_on_date = nil
+        date_of_birth = date_of_birth
+      end
+    end
+
     # OPERATIONS PERFORMED
     fields = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
-      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
+      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth,:age => age, :age_as_on_date => age_as_on_date,:date_joined => date_joined,
       :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
       :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
       :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
@@ -88,8 +107,9 @@ class NewClients < Application
     if @message[:error].blank?
       begin
         @biz_location = BizLocation.get biz_location_id
+        
         parent_biz_location = LocationLink.get_parent(@biz_location, get_effective_date)
-
+        
 
         @client_new = Client.create_client(fields, biz_location_id, parent_biz_location.id)
 
@@ -134,6 +154,8 @@ class NewClients < Application
     reference2_type         = params[:client][:reference2_type]
     reference2              = params[:client][:reference2]
     date_of_birth           = params[:client][:date_of_birth]
+    age                     = params[:client][:age]
+    age_as_on_date          = params[:client][:age_as_on_date]
     date_joined             = params[:client][:date_joined]
     spouse_name             = params[:client][:spouse_name]
     spouse_date_of_birth    = params[:client][:spouse_date_of_birth]
@@ -161,11 +183,27 @@ class NewClients < Application
 
     # VALIDATIONS
     @message[:error] = "Date joined must not be future date" if date_joined && Date.parse(date_joined) > Date.today
+     no_age_parameter = (date_of_birth.blank? && (age.blank? || age_as_on_date.blank?))
+     @message[:error] = "Either Date of birth  or Age As ON field is manadatory" if no_age_parameter
+
+    unless no_age_parameter
+      if date_of_birth.blank?
+      
+          age = age
+          age_as_on_date = age_as_on_date
+          date_of_birth = nil
+       
+      else
+        age = nil
+        age_as_on_date = nil
+        date_of_birth = date_of_birth
+      end
+    end
 
     # OPERATIONS PERFORMED
     @client = Client.get client_id
     @client.attributes = {:client_group_id => client_group_id,:name => name, :gender => gender, :marital_status => marital_status, :reference_type => reference_type,
-      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth, :date_joined => date_joined,
+      :reference => reference, :reference2_type => reference2_type, :reference2 => reference2, :date_of_birth => date_of_birth,:age => age, :age_as_on_date => age_as_on_date, :date_joined => date_joined,
       :spouse_name => spouse_name, :spouse_date_of_birth => spouse_date_of_birth, :guarantor_name => guarantor_name, :guarantor_dob => guarantor_dob,
       :guarantor_relationship => guarantor_relationship, :address => address, :state => state, :pincode => pincode, :telephone_number => telephone_number,
       :telephone_type => telephone_type, :income => income, :family_income => family_income, :priority_sector_list_id => priority_sector_list_id,
@@ -174,6 +212,7 @@ class NewClients < Application
     if @message[:error].blank?
       begin
         if @client.save
+         
           @message = {:notice => "Client: '#{@client.name} (#{@client.id})' updated successfully"}
         else
           @message = { :error => @client.errors.collect{|error| error}.flatten.join(', ')}

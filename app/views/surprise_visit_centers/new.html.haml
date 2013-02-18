@@ -1,0 +1,13 @@
+%h1 SurpriseVisitCenters controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/surprise_visit_centers/new.html.erb
+
+= error_messages_for @surprise_visit_center
+
+= form_for(@surprise_visit_center, :action => url(:surprise_visit_centers) ) do
+  %p
+    = submit "Create"
+
+= link_to 'Back', url(:surprise_visit_centers)

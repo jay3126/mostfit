@@ -1,0 +1,28 @@
+
+= error_messages_for @processaudit
+
+= form_for(@processaudit, :action => url(:processaudits) ) do
+  %p
+    %table.tall
+      %tr{:width => "100%"}
+        %th{:width => "10%"}
+          = label ""
+        %th{:width => "80%"}
+          = label ""
+        %th{:width => "10%"}
+          =  label ""
+      %tr
+        %td{:width => "10%"}
+        %td{:width => "80%"}
+          = label "Branch Related"
+        %td{:width => "10%"}
+      %tr
+        %td
+          = 1
+        %td
+          = "Is the claim amount paid?"
+        %td
+          = check_box :answers[]
+    = submit "Create"
+
+= link_to 'Back', url(:processaudits)

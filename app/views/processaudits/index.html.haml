@@ -1,0 +1,16 @@
+%h1
+  Processaudits controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/processaudits/index.html.erb
+%table
+  %tr
+  - for processaudit in @processaudits
+    %tr
+      %td
+        = link_to 'Show', url(:processaudit, processaudit)
+      %td
+        = link_to 'Edit', url(:edit_processaudit,  processaudit)
+
+= link_to 'New', url(:new_processaudit)

@@ -28,7 +28,6 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
       @staff_id=params[:staff_id]
       @staff_name=params[:staff_name]
       @referral_url=params[:referral_url]
-
       @checklists = @checklist_type.checklists
       @responses = @checklists.blank? ? [] : @checklists.first.get_responses(@target_entity_type, @target_entity_id)
       #@checklists=Checklist.all
@@ -81,7 +80,10 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
   def create(checklist)
     @checklist = Checklist.new(checklist)
+   
     if @checklist.save
+     
+     @checklist.attributes = { :answers => "#{@file_id}.json" }
       redirect resource(@checklist), :message => {:notice => "Checklist was successfully created"}
     else
       message[:error] = "Checklist failed to be created"
@@ -111,6 +113,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
   def fill_in_checklist(id)
     @checklist = Checklist.get(id)
+
     @checklist_type=@checklist.checklist_type
 
     @target_entity_id=params[:target_entity_id]
@@ -126,7 +129,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     @staff_id=params[:staff_id]
     @staff_name=params[:staff_name]
     @referral_url=params[:referral_url]
-
+    #raise hash.values.inspect
     @sections=@checklist.sections
 
 
@@ -138,8 +141,8 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     #find for which checklist is data being captured
     @checklist=Checklist.get(params[:checklist_id])
     @checklist_type=ChecklistType.get(@checklist.checklist_type_id)
-
-
+    
+ 
     parameter_hash=Hash.new
     parameter_hash[:checklist_type_id]=@checklist_type.id
     parameter_hash[:checklist_area]= 'healthcheck'
@@ -151,7 +154,7 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:loc1_name]= params[:loc1_name]
     parameter_hash[:loc1_id]= params[:loc1_id]
     parameter_hash[:loc2_type]= params[:loc2_type]
-    parameter_hash[:loc2_name]= params[:loc2_name]
+    parameter_hash[:loc2_name]= 
     parameter_hash[:loc2_id]= params[:loc2_id]
     parameter_hash[:no_of_applications]= params[:no_of_applications]
     parameter_hash[:effective_date]= params[:effective_date]
@@ -159,6 +162,8 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
     parameter_hash[:staff_name]= params[:staff_name]
     parameter_hash[:staff_role]= "support"
     parameter_hash[:referral_url]= params[:referral_url]
+   
+     @checklist.save!
 
     if @checklist_type.name == "Surprise Center Visit"
       VisitSchedule.create(:visit_scheduled_date => Date.today(),:visited_on => Date.today(),:staff_member_id => session.user.id, :biz_location_id => params[:loc2_id] )
@@ -170,24 +175,26 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
 
     #create target enitity
     @target_entity=TargetEntity.first_or_create(:name => params[:target_entity_name], :type => params[:target_entity_type], :model_record_id => params[:target_entity_id].to_i)
-
+    
     if !params[:result_status].blank?
       @result_status = params[:result_status]
+
     end
 
-
+   
     begin
       #find all sections of that checklist
       @sections=@checklist.sections
 
-      @sections.each do |section|
-        #check for validations...
+      @sections.each do |section|  
+     #check for validations...
         # an exception should be raised if any yes/no answers are blank
         #section.checkpoints.each do |checkpoint|
         #  if params["checkpoint_#{checkpoint.id}".to_sym].blank?
         #    raise Exception
         #  end
         #end
+        
         if @checklist.checklist_type.is_cc_checklist? && params[:target_entity_type] == 'Client'
           raise Exception, "Client Phone Number cannot be blank" if Client.get(params[:target_entity_id]).telephone_number.blank?
         end
@@ -345,4 +352,4 @@ class ChecklisterSlice::Checklists < ChecklisterSlice::Application
   end
 
 
-end # Checklists
+end # Checklistsparams[:loc2_name]

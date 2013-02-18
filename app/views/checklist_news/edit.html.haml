@@ -1,0 +1,15 @@
+%h1
+  ChecklistNews controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/checklist_news/edit.html.erb
+= error_messages_for @checklist_news
+
+= form_for(@checklist_news, :action => url(:checklist_news, @checklist_news)) do
+  %p
+    = submit "Update"
+
+= link_to 'Show', url(:checklist_news, @checklist_news)
+|
+= link_to 'Back', url(:checklist_news)

@@ -6,7 +6,7 @@ class Application < Merb::Controller
   before :ensure_can_do
   before :insert_session_to_observer
   before :add_collections, :only => [:index, :show]
-  
+
   @@controllers  = ["clients", "payments", "staff_members", "funders", "portfolios", "funding_lines"]
   @@dependant_deletable_associations = ["history", "audit_trails", "attendances", "portfolio_loans", "postings"]
 

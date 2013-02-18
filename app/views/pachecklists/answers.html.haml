@@ -1,0 +1,666 @@
+- params[:q1_1] = 0
+- params[:q2_2] = 0
+- params[:q3_3] = 0
+- params[:q4_4] = 0
+- params[:q5_5] = 0
+- params[:q6_6] = 0
+- params[:q7_7] = 0
+- params[:q8_8] = 0
+- params[:q9_9] = 0
+- params[:q10_10] = 0
+- params[:q11_11] = 0
+- params[:q12_12] = 0
+- params[:q13_13] = 0
+- params[:q14_14] = 0
+- params[:q15_15] = 0
+- params[:q16_16] = 0
+- params[:q17_17] = 0
+- params[:q18_18] = 0
+- params[:q19_19] = 0
+- params[:q20_20] = 0
+- params[:q21_21] = 0
+- params[:q22_22] = 0
+- params[:q23_23] = 0
+- params[:q24_24] = 0
+- params[:q25_25] = 0
+- params[:q26_26] = 0
+- params[:q27_27] = 0
+- params[:q28_28] = 0
+- params[:q29_29] = 0
+- params[:q30_30] = 0
+- params[:q31_31] = 0
+- params[:q32_32] = 0
+- params[:q33_33] = 0
+- params[:q34_34] = 0
+- params[:q35_35] = 0
+- params[:q36_36] = 0
+- params[:q37_37] = 0
+- params[:q38_38] = 0
+- params[:q39_39] = 0
+- params[:q40_40] = 0
+- params[:q41_41] = 0
+- params[:q42_42] = 0
+- params[:q43_43] = 0
+- params[:q44_44] = 0
+- params[:q45_45] = 0
+- params[:q46_46] = 0
+- params[:q47_47] = 0
+- params[:q48_48] = 0
+- params[:q49_49] = 0
+- params[:q50_50] = 0
+- params[:q51_51] = 0
+- params[:q52_52] = 0
+- params[:q53_53] = 0
+
+
+-@manager = LocationManagement.staff_managing_location(@biz_location_id, get_effective_date)
+-@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
+= error_messages_for @pachecklist
+= form_for(@packlist2, :action => url(:allanswers_pachecklists)  )do
+  %p
+    %table.tall
+      %tr
+        %td
+          = label "Branch Name"
+        %td 
+          = text_field :value => @biz_location.name,:disabled=>true
+      %tr 
+        %td
+          = label "Name of the branch manager"
+        %td
+          = text_field :value => @managed_by.name,:disabled=>true
+      %tr
+        %td
+          = label "Name of the Area Manager"
+        %td
+          = "area"
+      %tr
+        %td
+          = label "Date of Audit"
+        %td
+          = date_select :date_of_audit
+      %tr
+        %td
+          = label "audit period"
+        %td
+          = text_field :audit_period
+  %p
+    %table.tall
+      %tr
+        %th
+          = label "Positives"
+        %th
+      %tr
+        %td
+          = label "1"
+        %td 
+          = text_field :positive1
+      %tr 
+        %td
+          = label "2"
+        %td
+          = text_field :postive2
+      %tr
+        %td
+          = label "3"
+        %td
+          = text_field :positive3
+      %tr
+        %th
+          = label "Deviations"
+        %th
+      %tr
+        %td
+          = label "1"
+        %td
+          = text_field :deviation1
+      %tr
+        %td
+          = label "2"
+        %td
+          = text_field :deviation2
+      %tr
+        %td
+          = label "3"
+        %td
+          = text_field :deviation3
+  %p
+
+  %p
+    %table.tall
+      %tr{:width => "100%"}
+        %th{:width => "10%"}
+          = label ""
+        %th{:width => "80%"}
+          = label ""
+        %th{:width => "10%"}
+          =  label ""
+      %tr
+        %td{:width => "10%"}
+        %td{:width => "80%"}
+          = label "Branch Related"
+        %td{:width => "10%"}
+      %tr
+        %td
+          = 1
+        %td
+          = "Is the claim amount paid?"
+        %td
+          = check_box :q1_1, :id => "1"
+      %tr
+        %td
+          = 2
+        %td
+          = "BM AO and Ro read on time?"
+        %td
+          = check_box :q2_2,  :id => "2" 
+      %tr
+        %td
+          = 3
+        %td
+          = "Pledge conducted?"
+        %td
+          = check_box :q3_3, :id => "3" 
+      %tr
+        %td
+          = 4
+        %td
+          = "Is RO carryin stationary which are required ?"
+        %td
+          = check_box :q4_4
+      %tr
+        %td
+          = 5
+        %td
+          = "Are Employees carrying ID cards ?"
+        %td
+          = check_box :q5_5
+      %tr
+        %td
+        %td
+          = label "Registers"
+        %td
+      %tr
+        %td
+          = 6
+        %td
+          = "Petty cash register maintained ?"
+        %td
+          = check_box :q6_6
+      %tr
+        %td
+          = 7
+        %td
+          = "Member attendance register maintained ?"
+        %td
+          = check_box :q7_7
+      %tr
+        %td
+          = 8
+        %td
+          = "Center meeting Review ?"
+        %td
+          = check_box :q8_8
+      %tr
+        %td
+          = 9
+        %td
+          = "Death claim Register ?"
+        %td
+          = check_box :q9_9
+      %tr
+        %td
+          = 10
+        %td
+          = "Stock register maintained ?"
+        %td
+          = check_box :q10_10
+      %tr
+        %td
+          = 11
+        %td
+          = "Key register maintained ?"
+        %td
+          = check_box :q11_11
+      %tr
+        %td
+          = 12
+        %td
+          = "Statutory registers maintained ?"
+        %td
+          = check_box :q12_12
+      %tr
+        %td
+          = 13
+        %td
+          = "Movement register  ?"
+        %td
+          = check_box :q13_13
+      %tr
+        %td
+          = 14
+        %td
+          = "Member attendance register maintained ?"
+        %td
+          = check_box :q14_14
+      %tr
+        %td
+        %td
+          = label "Process"
+        %td
+      %tr
+        %td
+          = 15
+        %td
+          = "Disbursement process followed ?"
+        %td
+          = check_box :q15_15
+      %tr
+        %td
+          = 16
+        %td
+          = "Collection process followed ?"
+        %td
+          = check_box :q16_16
+      %tr
+        %td
+          = 17
+        %td
+          = "Display of statutory and legal documents ?"
+        %td
+          = check_box :q17_17
+      %tr
+        %td
+          = 18
+        %td
+          = "Display are survey chart and branch approval ?"
+        %td
+          = check_box :q18_18
+      %tr
+        %td
+        %td
+          = label "Center meeting"
+        %td
+      %tr
+        %td
+          = 19
+        %td
+          = "Is Ro coming on time for meetings ?"
+        %td
+          = check_box :q19_19
+      %tr
+        %td
+          = 20
+        %td
+          = "Are the meetings conducted on scheduled time ?"
+        %td
+          = check_box :q20_20
+      %tr
+        %td
+          = 21
+        %td
+          = "Is the collection of EMI happening as per process ?"
+        %td
+          = check_box :q21_21
+      %tr
+        %td
+          = 22
+        %td
+          = "Are proper reciept given and maintained in the center life ?"
+        %td
+          = check_box :q22_22
+      %tr
+        %td
+          = 23
+        %td
+          = "Currency details for Rs 500 and and 1000 by RO ?"
+        %td
+          = check_box :q23_23
+      %tr
+        %td
+          = 24
+        %td
+          = "Pledge conducted before the meeting ?"
+        %td
+          = check_box :q24_24
+      %tr
+        %td
+          = 25
+        %td
+          = "Passbook updation with out any dicrepancy ?"
+        %td
+          = check_box :q25_25
+      %tr
+        %td
+        %td
+          = label "GRT"
+        %td
+      %tr
+        %td
+          = 26
+        %td
+          = "Is the BM reached on time ?"
+        %td
+          = check_box :q26_26
+      %tr
+        %td
+          = 27
+        %td
+          = "Is the BM conducting GRT as per policy ?"
+        %td
+          = check_box :q27_27
+      %tr
+        %td
+          = 28
+        %td
+          = "Are the application forms and details are verified with members ?"
+        %td
+          = check_box :q28_28
+      %tr
+        %td
+          = 29
+        %td
+          = "Is BM carrying the GRT chart ?"
+        %td
+          = check_box :q29_29
+      %tr
+        %td
+        %td
+          = label "CGT"
+        %td
+      %tr
+        %td
+          = 30
+        %td
+          = "Is the RO reached on time?"
+        %td
+          = check_box :q30_30
+      %tr
+        %td
+          = 31
+        %td
+          = "Does he follows the CGT kit ?"
+        %td
+          = check_box :q31_31
+      %tr
+        %td
+          = 32
+        %td
+          = "Are the members aware of the regularity requirement ?"
+        %td
+          = check_box :q32_32
+      %tr
+        %td
+          = 33
+        %td
+          = "Pledge conducted before the meeting ?"
+        %td
+          = check_box :q33_33
+      %tr
+        %td
+          = 34
+        %td
+          = "Are the members aware of the transactions IRR ?"
+        %td
+          = check_box :q34_34
+      %tr
+        %td
+          = 35
+        %td
+          = "Are the members aware of the processing the charges and insurances ?"
+        %td
+          = check_box :q35_35
+      %tr
+        %td
+          = 36
+        %td
+          = "Are the members aware of the JLG concept ?"
+        %td
+          = check_box :q36_36
+      %tr
+        %td
+        %td
+          = label"AO CPV"
+        %td
+      %tr
+        %td
+          = 37
+        %td
+          = "Is AO attending the every members house for verifications  ?"
+        %td
+          = check_box :q37_37
+      %tr
+        %td
+          = 38
+        %td
+          = "Is he capturing the details and applying the credit names and income criteria ?"
+        %td
+          = check_box :q38_38 
+      %tr
+        %td
+          = 39
+        %td
+          = "Is AO sending the credit buereou into correctly and ontime ?"
+        %td
+          = check_box :q39_39
+      %tr
+        %td
+        %td
+          = label "RO CPV"
+        %td
+      %tr
+        %td
+          = 40
+        %td
+          = "Is RO visiting every members house for rent ?"
+        %td
+          = check_box :q40_40  
+      %tr
+        %td
+          = 41
+        %td
+          = "Is RO informing the credit norms for loan availability ?"
+        %td
+          = check_box :q41_41
+      %tr
+        %td
+        %td
+          = label "Disbursment"
+        %td
+      %tr
+        %td
+          = 42
+        %td
+          = "AO and BM both are present for disbursement ?"
+        %td
+          = check_box :q42_42
+      %tr
+        %td
+          = 43
+        %td
+          = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
+        %td
+          = check_box :q43_43
+      %tr
+        %td
+          = 44
+        %td
+          = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
+        %td
+          = check_box :q44_44 
+      %tr
+        %td
+          = 45
+        %td
+          = "Are they collecting fees as per norms ?"
+        %td
+          = check_box :q45_45
+      %tr
+        %td
+          = 46
+        %td
+          = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
+        %td
+          = check_box :q46_46
+      %tr
+        %td
+        %td
+          = label "Banking and collection amount"
+        %td
+      %tr
+        %td
+          = 47
+        %td
+          = "Are all the RO's are returning back on time ?"
+        %td
+          = check_box :q47_47
+      %tr
+        %td
+          = 48
+        %td
+          = "Is the AO sending the cash report ti HO as specified timee and format ?"
+        %td
+          = check_box :q48_48
+      %tr
+        %td
+          = 49
+        %td
+          = "Is the collection amount banked as per process ?"
+        %td
+          = check_box :q49_49
+      %tr
+        %td
+          = 50
+        %td
+          = "Is the pending member disbursment happening in presence of center ?"
+        %td
+          = check_box :q50_50
+      %tr
+        %td
+        %td
+          = label "Insurance and Claims"
+        %td
+      %tr
+        %td
+          = 51
+        %td
+          = "Is the insurance documents collected on time as intimated?"
+        %td
+          = check_box :q51_51
+      %tr
+        %td
+          = 52
+        %td
+          = "Is the claim papers submitted ontime to HO ?"
+        %td
+          = check_box :q52_52
+      %tr
+        %td
+          = 53
+        %td
+          = "Is the claim amount paid ?"
+        %td
+          = check_box :q53_53
+          = hidden_field :biz_location_id, :value => @biz_location_id
+  %p
+    %table.tall
+      %tr
+        %th
+          = label "Creteria"
+        %th
+          = label "Total Score"
+        %th
+          = label "Audit Score"
+      %tr{:width => "500px"}
+        %td
+          = label "Process"
+          %br
+          No.of SCV's conducted per day
+          %br
+          SCV's completed - 90% to 100%- 10 marks  
+          %br
+          SCV's completed - 80% to 90%-  9 marks   
+          %br
+          SCV's completed - 70% to 80%- 8 marks    
+          %br
+          SCV's completed - 60% to 70%- 7 marks    
+          %br
+          SCV's completed - 50% to 60%- 6 marks    
+          %br
+        %td 
+          = text_field :scv_perday, :size => "6px"  
+      %tr{:width => "500px"}
+        %td
+          = label "No.of 1st meetings attended during audit period"
+          %br
+          First meetings completed - 90% to 100%- 10 marks  
+          %br
+          First meetings completed - 80% to 90%-  9 marks   
+          %br
+          First meetings completed - 70% to 80%- 8 marks    
+          %br
+          First meetings completed - 60% to 70%- 7 marks    
+          %br
+          First meetings completed - 50% to 60%- 6 marks    
+          %br
+        %td 
+          = text_field :meeting_attended_during_ap, :size => "6px" 
+      %tr{:width => "500px"}
+        %td
+          = label "Branch management"
+          %br
+          Quality of CPV's and data collection from field 
+          %br
+          Updations of cash registers on daily basis   
+          %br
+          Disbusrment of photo uploading    
+          %br
+          Updation of other general registers
+          %br
+          Statutory fulfilment
+          %br
+          BM's quality SCV
+          %br
+          BM's participation in cash related activities
+          %br
+          BM's quality of GRT
+          %br
+        %td 
+          = text_field :branch_management, :size => "6px"  
+      %tr{:width => "500px"}
+        %td
+          = label "Social Audit"
+          %br
+          Members awareness of savings 
+          %br
+          Average percentage of Bank account holders
+          %br
+          Quality and intensity of social message 
+        %td 
+          = text_field :social_audit, :size => "6px" 
+      %tr{:width => "500px"}
+        %td
+          = label "Supervision"
+          %br
+          No.of visits made by Area manager and Audit manager during audit period
+          %br
+          Area Manager -  
+          %br
+          Audit Manager    
+          %br
+          Updation of other general registers
+          %br
+          Statutory fulfilment
+          %br
+          BM's quality SCV
+          %br
+          BM's participation in cash related activities
+          %br
+          BM's quality of GRT
+          %br
+        %td 
+          = text_field :supervision, :size => "6px"
+    = submit "Create"
+ 
+
+= link_to 'Back', url(:pachecklists)

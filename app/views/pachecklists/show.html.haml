@@ -1,0 +1,881 @@
+
+= link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
+|
+= link_to 'Back', url(:pachecklists)
+|
+= link_to "User_location", url(:user_location,@pachecklist.biz_location_id)
+
+-@manager = LocationManagement.staff_managing_location(@pachecklist.biz_location_id, get_effective_date)
+-@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
+- @biz_location = BizLocation.get(@pachecklist.biz_location_id)
+- @date = get_effective_date
+- @area_manager = LocationLink.get_parent(@biz_location,@date)
+
+%h1
+
+  - @ans = @pachecklist.answers
+  - @hash = Hash[*@ans.split(',')]
+  - @answers = Array.new
+  - @answers.push(@hash.values)
+  - @answers = @hash.values.to_a
+  - @total = @answers.length
+  - @pachecklist2 = @pachecklist.id
+  - i=0
+#DataTables_Table_0_wrapper.dataTables_wrapper{:role => "grid"}
+  .fg-toolbar.ui-toolbar.ui-widget-header.ui-corner-tl.ui-corner-tr.ui-helper-clearfix
+    .DTTT_container.ui-buttonset.ui-buttonset-multi
+      %a#ToolTables_DataTables_Table_0_4.DTTT_button.ui-button.ui-state-default.DTTT_button_print{:title => "View print view"}
+        %span Print
+%p
+  %table.tall
+    %tr
+      %td
+        = label "Branch Name"
+      %td 
+        = text_field :value => @biz_location.name,:disabled=>true
+    %tr 
+      %td
+        = label "Name of the branch manager"
+      %td
+        = text_field :value => @managed_by.name,:disabled=>true
+    %tr
+      %td
+        = label "Name of the Area Manager"
+      %td
+        = text_field :value => @area_manager, :disabled => true
+    %tr
+      %td
+        = label "Date of Audit"
+      %td
+        = text_field :value => @pachecklist.date_of_audit,:disabled => true
+    %tr
+      %td
+        = label "audit period"
+      %td
+        = text_field :value => @pachecklist.audit_period,:disabled => true
+    %tr
+      %th{:align => "center"}
+        = label "Positives"
+      %th
+      %th
+    %tr
+      %td
+        = label "1"
+      %td 
+        = text_field :value => @pachecklist.positive1,:disabled => true
+    %tr 
+      %td
+        = label "2"
+      %td
+        = text_field :value => @pachecklist.postive2,:disabled => true
+    %tr
+      %td
+        = label "3"
+      %td
+        = text_field :value => @pachecklist.positive3,:disabled => true
+    %tr
+      %th{:align => "left"}
+        = label "Deviations"
+      %th
+      %th
+    %tr
+      %td
+        = label "1"
+      %td
+        = text_field :value => @pachecklist.deviation1,:disabled => true
+    %tr
+      %td
+        = label "2"
+      %td
+        = text_field :value => @pachecklist.deviation2,:disabled => true
+    %tr
+      %td
+        = label "3"
+      %td
+        = text_field :value => @pachecklist.deviation3,:disabled => true
+    %tr
+      %td
+      %td
+        = label " Quantitative Aspects "
+      %td
+    %tr
+      %th{:width => "10%"}
+      %th{:align => "left"}
+        Branch Related
+      %th{:width => "10%"}
+    %tr
+      %td
+        = 1
+      %td
+        = "Is the claim amount paid?"
+      %td
+        - if @hash["1"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 2
+      %td
+        = "BM AO and Ro read on time?"
+      %td
+        - if @hash["2"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 3
+      %td
+        = "Pledge conducted?"
+      %td
+        - if @hash["3"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 4
+      %td
+        = "Is RO carryin stationary which are required ?"
+      %td
+        - if @hash["4"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 5
+      %td
+        = "Are Employees carrying ID cards ?"
+      %td
+        - if @hash["5"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "Registers"
+      %th
+    %tr
+      %td
+        = 6
+      %td
+        = "Petty cash register maintained ?"
+      %td
+        - if @hash["6"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 7
+      %td
+        = "Member attendance register maintained ?"
+      %td
+        - if @hash["7"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 8
+      %td
+        = "Center meeting Review ?"
+      %td
+        - if @hash["8"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 9
+      %td
+        = "Death claim Register ?"
+      %td
+        - if @hash["9"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 10
+      %td
+        = "Stock register maintained ?"
+      %td
+        - if @hash["10"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 11
+      %td
+        = "Key register maintained ?"
+      %td
+        - if @hash["11"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 12
+      %td
+        = "Statutory registers maintained ?"
+      %td
+        - if @hash["12"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 13
+      %td
+        = "Movement register  ?"
+      %td
+        - if @hash["13"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 14
+      %td
+        = "Member attendance register maintained ?"
+      %td
+        - if @hash["14"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "Process"
+      %th
+    %tr
+      %td
+        = 15
+      %td
+        = "Disbursement process followed ?"
+      %td
+        - if @hash["15"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 16
+      %td
+        = "Collection process followed ?"
+      %td
+        - if @hash["16"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 17
+      %td
+        = "Display of statutory and legal documents ?"
+      %td
+        - if @hash["17"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 18
+      %td
+        = "Display are survey chart and branch approval ?"
+      %td
+        - if @hash["18"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th
+        = label "Center meeting"
+      %th
+    %tr
+      %td
+        = 19
+      %td
+        = "Is Ro coming on time for meetings ?"
+      %td
+        - if @hash["19"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 20
+      %td
+        = "Are the meetings conducted on scheduled time ?"
+      %td
+        - if @hash["20"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 21
+      %td
+        = "Is the collection of EMI happening as per process ?"
+      %td
+        - if @hash["21"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 22
+      %td
+        = "Are proper reciept given and maintained in the center life ?"
+      %td
+        - if @hash["22"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 23
+      %td
+        = "Currency details for Rs 500 and and 1000 by RO ?"
+      %td
+        - if @hash["23"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 24
+      %td
+        = "Pledge conducted before the meeting ?"
+      %td
+        - if @hash["24"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 25
+      %td
+        = "Passbook updation with out any dicrepancy ?"
+      %td
+        - if @hash["25"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "GRT"
+      %th
+    %tr
+      %td
+        = 26
+      %td
+        = "Is the BM reached on time ?"
+      %td
+        - if @hash["26"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 27
+      %td
+        = "Is the BM conducting GRT as per policy ?"
+      %td
+        - if @hash["27"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 28
+      %td
+        = "Are the application forms and details are verified with members ?"
+      %td
+        - if @hash["28"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 29
+      %td
+        = "Is BM carrying the GRT chart ?"
+      %td
+        - if @hash["29"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "CGT"
+      %th
+    %tr
+      %td
+        = 30
+      %td
+        = "Is the RO reached on time?"
+      %td
+        - if @hash["30"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 31
+      %td
+        = "Does he follows the CGT kit ?"
+      %td
+        - if @hash["31"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 32
+      %td
+        = "Are the members aware of the regularity requirement ?"
+      %td
+        - if @hash["32"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 33
+      %td
+        = "Pledge conducted before the meeting ?"
+      %td
+        - if @hash["33"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 34
+      %td
+        = "Are the members aware of the transactions IRR ?"
+      %td
+        - if @hash["34"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 35
+      %td
+        = "Are the members aware of the processing the charges and insurances ?"
+      %td
+        - if @hash["35"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 36
+      %td
+        = "Are the members aware of the JLG concept ?"
+      %td
+        - if @hash["36"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %th
+      %th{:align => "center"}
+        = label"AO CPV"
+      %th
+    %tr
+      %td
+        = 37
+      %td
+        = "Is AO attending the every members house for verifications  ?"
+      %td
+        - if @hash["37"] == "1"
+          = label "yes"
+        - else
+          = label "No"  
+    %tr
+      %td
+        = 38
+      %td
+        = "Is he capturing the details and applying the credit names and income criteria ?"
+      %td
+        - if @hash["38"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 39
+      %td
+        = "Is AO sending the credit buereou into correctly and ontime ?"
+      %td
+        - if @hash["39"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %th
+      %th
+        = label "RO CPV"
+      %th
+    %tr
+      %td
+        = 40
+      %td
+        = "Is RO visiting every members house for rent ?"
+      %td
+        - if @hash["40"] == "1"
+          = label "yes"
+        - else
+          = label "No"   
+    %tr
+      %td
+        = 41
+      %td
+        = "Is RO informing the credit norms for loan availability ?"
+      %td
+        - if @hash["41"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "Disbursment"
+      %th
+    %tr
+      %td
+        = 42
+      %td
+        = "AO and BM both are present for disbursement ?"
+      %td
+        - if @hash["42"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 43
+      %td
+        = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
+      %td
+        - if @hash["43"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 44
+      %td
+        = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
+      %td
+        - if @hash["44"] == "1"
+          = label "yes"
+        - else
+          = label "No"  
+    %tr
+      %td
+        = 45
+      %td
+        = "Are they collecting fees as per norms ?"
+      %td
+        - if @hash["45"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 46
+      %td
+        = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
+      %td
+        - if @hash["46"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+      %td
+        = label "Banking and collection amount"
+      %td
+    %tr
+      %td
+        = 47
+      %td
+        = "Are all the RO's are returning back on time ?"
+      %td
+        - if @hash["47"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 48
+      %td
+        = "Is the AO sending the cash report ti HO as specified timee and format ?"
+      %td
+        - if @hash["48"] == "1"
+          = label "yes"
+        - else
+          = label "No" 
+    %tr
+      %td
+        = 49
+      %td
+        = "Is the collection amount banked as per process ?"
+      %td
+        - if @hash["49"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 50
+      %td
+        = "Is the pending member disbursment happening in presence of center ?"
+      %td
+        - if @hash["50"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %th
+      %th{:align => "center"}
+        = label "Insurance and Claims"
+      %th
+    %tr
+      %td
+        = 51
+      %td
+        = "Is the insurance documents collected on time as intimated?"
+      %td
+        - if @hash["51"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 52
+      %td
+        = "Is the claim papers submitted ontime to HO ?"
+      %td
+        - if @hash["52"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+    %tr
+      %td
+        = 53
+      %td
+        = "Is the claim amount paid ?"
+      %td
+        - if @hash["53"] == "1"
+          = label "yes"
+        - else
+          = label "No"
+ 
+- @i = 0
+- @answers.each do |item|
+  - if item == "1"
+    - @i+=1
+  - else
+- @rank = (@i.to_i * 100)/(@answers.length)
+- @marks = 0
+- if @rank >= 90 && @rank <= 100
+  - @marks = 10
+- elsif @rank >= 80 && @rank <= 90
+  - @marks = 9
+- elsif @rank >= 70 && @rank <= 80
+  - @marks = 8
+- elsif @rank >= 60 && @rank <= 70
+  - @marks = 7
+- elsif @rank >= 50 && @rank <= 60
+  - @marks = 6
+- else
+  - @marks = 0
+%hr
+%h1
+%table
+%tr
+%td
+= label "SubTotal:"
+%td
+= @i
+%tr
+%td
+
+%td
+
+%br
+
+%center
+  %h1
+    = label "Qualitative Aspects"
+       
+  %p
+    %table.tall
+      %tr
+        %th
+          = label "Creteria"
+        %th
+          = label "Total Score"
+        %th
+          = label "Audit Score"
+      %tr{:width => "500px"}
+        %td
+          =  "Process"
+          %br
+          No.of SCV's conducted per day
+          %br
+          SCV's completed - 90% to 100%- 10 marks  
+          %br
+          SCV's completed - 80% to 90%-  9 marks   
+          %br
+          SCV's completed - 70% to 80%- 8 marks    
+          %br
+          SCV's completed - 60% to 70%- 7 marks    
+          %br
+          SCV's completed - 50% to 60%- 6 marks    
+          %br
+        %td 
+          = text_field :value => @pachecklist.scv_perday, :size => "6px",:disabled => true
+      %tr{:width => "500px"}
+        %td
+          = "No.of 1st meetings attended during audit period"
+          %br
+          First meetings completed - 90% to 100%- 10 marks  
+          %br
+          First meetings completed - 80% to 90%-  9 marks   
+          %br
+          First meetings completed - 70% to 80%- 8 marks    
+          %br
+          First meetings completed - 60% to 70%- 7 marks    
+          %br
+          First meetings completed - 50% to 60%- 6 marks    
+          %br
+        %td 
+          = text_field :value => @pachecklist.meeting_attended_during_ap, :size => "6px" ,:disabled => true
+      %tr{:width => "500px"}
+        %td
+          =  "Branch management"
+          %br
+          Quality of CPV's and data collection from field 
+          %br
+          Updations of cash registers on daily basis   
+          %br
+          Disbusrment of photo uploading    
+          %br
+          Updation of other general registers
+          %br
+          Statutory fulfilment
+          %br
+          BM's quality SCV
+          %br
+          BM's participation in cash related activities
+          %br
+          BM's quality of GRT
+          %br
+        %td 
+          = text_field :value => @pachecklist.branch_management, :size => "6px"  ,:disabled => true
+      %tr{:width => "500px"}
+        %td
+          =  "Social Audit"
+          %br
+          Members awareness of savings 
+          %br
+          Average percentage of Bank account holders
+          %br
+          Quality and intensity of social message 
+        %td 
+          = text_field :value => @pachecklist.social_audit, :size => "6px" ,:disabled => true
+      %tr{:width => "500px"}
+        %td
+          = "Supervision"
+          %br
+          No.of visits made by Area manager and Audit manager during audit period
+          %br
+          Area Manager -  
+          %br
+          Audit Manager    
+          %br
+          Updation of other general registers
+          %br
+          Statutory fulfilment
+          %br
+          BM's quality SCV
+          %br
+          BM's participation in cash related activities
+          %br
+          BM's quality of GRT
+          %br
+        %td 
+          = text_field :value => @pachecklist.supervision, :size => "6px",:disabled => true
+
+- @qualitative_score = @pachecklist.scv_perday + @pachecklist.meeting_attended_during_ap + @pachecklist.branch_management + @pachecklist.social_audit + @pachecklist.supervision
+
+%p 
+  %table.tall
+    %tr
+      %th
+        = label  "Final Score:"
+      %th
+        = label  ""
+    %tr
+      %td
+        = label "Quantitative Aspects "
+      %td
+        = @i
+    %tr
+      %td
+        = label "Qualitative Aspects "
+      %td
+        = @qualitative_score
+    %tr
+      %td
+        = label "Grand Total"
+      %td
+        = @i + @qualitative_score
+
+%p
+  %table
+    %tr
+      %td
+        = label " Branch: "
+      %td
+        = @biz_location.name
+      %td 
+        = label "Audit Period:"
+      %td
+        = @pachecklist.audit_period
+    %tr
+      %td
+        = label "Name of the Auditor:"
+      %td
+        = @pachecklist.performed_by
+    %tr
+      %td 
+        = label "Signature"
+      %td
+        = label "_____________________"
+      %td
+        = label "BM(Sign)"
+      %td
+        = label "_____________________"
+
+
+
+= link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
+|
+= link_to 'Back', url(:pachecklists)
+|
+= link_to "User_location", url(:user_location,@pachecklist.biz_location_id)

@@ -1,0 +1,16 @@
+%h1
+  SurpriseVisitCenters controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/surprise_visit_centers/index.html.erb
+%table
+  %tr
+  - for surprise_visit_center in @surprise_visit_centers
+    %tr
+      %td
+        = link_to 'Show', url(:surprise_visit_center, surprise_visit_center)
+      %td
+        = link_to 'Edit', url(:edit_surprise_visit_center,  surprise_visit_center)
+
+= link_to 'New', url(:new_surprise_visit_center)

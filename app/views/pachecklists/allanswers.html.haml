@@ -1,0 +1,445 @@
+%h2
+%br
+= error_messages_for @pachecklist
+= form_for(@packlist2, :action => url(:allanswers_pachecklists)  )do
+  %p
+    %table.tall
+      %tr{:width => "100%"}
+        %th{:width => "10%"}
+          = label ""
+        %th{:width => "80%"}
+          = label ""
+        %th{:width => "10%"}
+          =  label ""
+      %tr
+        %td{:width => "10%"}
+        %td{:width => "80%"}
+          = label "Branch Related"
+        %td{:width => "10%"}
+      %tr
+        %td
+          = 1
+        %td
+          = "Is the claim amount paid?"
+        %td
+          = check_box :q1_1
+      %tr
+        %td
+          = 2
+        %td
+          = "BM AO and Ro read on time?"
+        %td
+          = check_box :q2_2
+      %tr
+        %td
+          = 3
+        %td
+          = "Pledge conducted?"
+        %td
+          = check_box :q3_3
+      %tr
+        %td
+          = 4
+        %td
+          = "Is RO carryin stationary which are required ?"
+        %td
+          = check_box :q4_4
+      %tr
+        %td
+          = 5
+        %td
+          = "Are Employees carrying ID cards ?"
+        %td
+          = check_box :q5_5
+      %tr
+        %td
+        %td
+          = label "Registers"
+        %td
+      %tr
+        %td
+          = 6
+        %td
+          = "Petty cash register maintained ?"
+        %td
+          = check_box :q6_6
+      %tr
+        %td
+          = 7
+        %td
+          = "Member attendance register maintained ?"
+        %td
+          = check_box :q7_7
+      %tr
+        %td
+          = 8
+        %td
+          = "Center meeting Review ?"
+        %td
+          = check_box :q8_8
+      %tr
+        %td
+          = 9
+        %td
+          = "Death claim Register ?"
+        %td
+          = check_box :q9_9
+      %tr
+        %td
+          = 10
+        %td
+          = "Stock register maintained ?"
+        %td
+          = check_box :q10_10
+      %tr
+        %td
+          = 11
+        %td
+          = "Key register maintained ?"
+        %td
+          = check_box :q11_11
+      %tr
+        %td
+          = 12
+        %td
+          = "Statutory registers maintained ?"
+        %td
+          = check_box :q12_12
+      %tr
+        %td
+          = 13
+        %td
+          = "Movement register  ?"
+        %td
+          = check_box :q13_13
+      %tr
+        %td
+          = 14
+        %td
+          = "Member attendance register maintained ?"
+        %td
+          = check_box :q14_14
+      %tr
+        %td
+        %td
+          = label "Process"
+        %td
+      %tr
+        %td
+          = 15
+        %td
+          = "Disbursement process followed ?"
+        %td
+          = check_box :q15_15
+      %tr
+        %td
+          = 16
+        %td
+          = "Collection process followed ?"
+        %td
+          = check_box :q16_16
+      %tr
+        %td
+          = 17
+        %td
+          = "Display of statutory and legal documents ?"
+        %td
+          = check_box :q17_17
+      %tr
+        %td
+          = 18
+        %td
+          = "Display are survey chart and branch approval ?"
+        %td
+          = check_box :q18_18
+      %tr
+        %td
+        %td
+          = label "Center meeting"
+        %td
+      %tr
+        %td
+          = 19
+        %td
+          = "Is Ro coming on time for meetings ?"
+        %td
+          = check_box :q19_19
+      %tr
+        %td
+          = 20
+        %td
+          = "Are the meetings conducted on scheduled time ?"
+        %td
+          = check_box :q20_20
+      %tr
+        %td
+          = 21
+        %td
+          = "Is the collection of EMI happening as per process ?"
+        %td
+          = check_box :q21_21
+      %tr
+        %td
+          = 22
+        %td
+          = "Are proper reciept given and maintained in the center life ?"
+        %td
+          = check_box :q22_22
+      %tr
+        %td
+          = 23
+        %td
+          = "Currency details for Rs 500 and and 1000 by RO ?"
+        %td
+          = check_box :q23_23
+      %tr
+        %td
+          = 24
+        %td
+          = "Pledge conducted before the meeting ?"
+        %td
+          = check_box :q24_24
+      %tr
+        %td
+          = 25
+        %td
+          = "Passbook updation with out any dicrepancy ?"
+        %td
+          = check_box :q25_25
+      %tr
+        %td
+        %td
+          = label "GRT"
+        %td
+      %tr
+        %td
+          = 26
+        %td
+          = "Is the BM reached on time ?"
+        %td
+          = check_box :q26_26
+      %tr
+        %td
+          = 27
+        %td
+          = "Is the BM conducting GRT as per policy ?"
+        %td
+          = check_box :q27_27
+      %tr
+        %td
+          = 28
+        %td
+          = "Are the application forms and details are verified with members ?"
+        %td
+          = check_box :q28_28
+      %tr
+        %td
+          = 29
+        %td
+          = "Is BM carrying the GRT chart ?"
+        %td
+          = check_box :q29_29
+      %tr
+        %td
+        %td
+          = label "CGT"
+        %td
+      %tr
+        %td
+          = 30
+        %td
+          = "Is the RO reached on time?"
+        %td
+          = check_box :q30_30
+      %tr
+        %td
+          = 31
+        %td
+          = "Does he follows the CGT kit ?"
+        %td
+          = check_box :q31_31
+      %tr
+        %td
+          = 32
+        %td
+          = "Are the members aware of the regularity requirement ?"
+        %td
+          = check_box :q32_32
+      %tr
+        %td
+          = 33
+        %td
+          = "Pledge conducted before the meeting ?"
+        %td
+          = check_box :q33_33
+      %tr
+        %td
+          = 34
+        %td
+          = "Are the members aware of the transactions IRR ?"
+        %td
+          = check_box :q34_34
+      %tr
+        %td
+          = 35
+        %td
+          = "Are the members aware of the processing the charges and insurances ?"
+        %td
+          = check_box :q35_35
+      %tr
+        %td
+          = 36
+        %td
+          = "Are the members aware of the JLG concept ?"
+        %td
+          = check_box :q36_36
+      %tr
+        %td
+        %td
+          = label"AO CPV"
+        %td
+      %tr
+        %td
+          = 37
+        %td
+          = "Is AO attending the every members house for verifications  ?"
+        %td
+          = check_box :q37_37
+      %tr
+        %td
+          = 38
+        %td
+          = "Is he capturing the details and applying the credit names and income criteria ?"
+        %td
+          = check_box :q38_38 
+      %tr
+        %td
+          = 39
+        %td
+          = "Is AO sending the credit buereou into correctly and ontime ?"
+        %td
+          = check_box :q39_39
+      %tr
+        %td
+        %td
+          = label "RO CPV"
+        %td
+      %tr
+        %td
+          = 40
+        %td
+          = "Is RO visiting every members house for rent ?"
+        %td
+          = check_box :q40_40  
+      %tr
+        %td
+          = 41
+        %td
+          = "Is RO informing the credit norms for loan availability ?"
+        %td
+          = check_box :q41_41
+      %tr
+        %td
+        %td
+          = label "Disbursment"
+        %td
+      %tr
+        %td
+          = 42
+        %td
+          = "AO and BM both are present for disbursement ?"
+        %td
+          = check_box :q42_42
+      %tr
+        %td
+          = 43
+        %td
+          = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
+        %td
+          = check_box :q43_43
+      %tr
+        %td
+          = 44
+        %td
+          = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
+        %td
+          = check_box :q44_44 
+      %tr
+        %td
+          = 45
+        %td
+          = "Are they collecting fees as per norms ?"
+        %td
+          = check_box :q45_45
+      %tr
+        %td
+          = 46
+        %td
+          = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
+        %td
+          = check_box :q46_46
+      %tr
+        %td
+        %td
+          = label "Banking and collection amount"
+        %td
+      %tr
+        %td
+          = 47
+        %td
+          = "Are all the RO's are returning back on time ?"
+        %td
+          = check_box :q47_47
+      %tr
+        %td
+          = 48
+        %td
+          = "Is the AO sending the cash report ti HO as specified timee and format ?"
+        %td
+          = check_box :q48_48
+      %tr
+        %td
+          = 49
+        %td
+          = "Is the collection amount banked as per process ?"
+        %td
+          = check_box :q49_49
+      %tr
+        %td
+          = 50
+        %td
+          = "Is the pending member disbursment happening in presence of center ?"
+        %td
+          = check_box :q50_50
+      %tr
+        %td
+        %td
+          = label "Insurance and Claims"
+        %td
+      %tr
+        %td
+          = 51
+        %td
+          = "Is the insurance documents collected on time as intimated?"
+        %td
+          = check_box :q51_51
+      %tr
+        %td
+          = 52
+        %td
+          = "Is the claim papers submitted ontime to HO ?"
+        %td
+          = check_box :q52_52
+      %tr
+        %td
+          = 53
+        %td
+          = "Is the claim amount paid ?"
+        %td
+          = check_box :q53_53
+      = submit "Create"
+
+= link_to 'Back', url(:pachecklists)
+= link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
+|
+= link_to 'Back', url(:pachecklists)

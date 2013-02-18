@@ -4,6 +4,7 @@ class DeviationType
   property :id, Serial
   property :name, String ,:nullable=>false
 
+
   validates_is_unique :name
 
 

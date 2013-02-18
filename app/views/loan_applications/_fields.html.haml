@@ -5,6 +5,20 @@
   %h3 No Center cycle exists for this center. Please create one from the center show page
 - else
   - loan_application = @loan_application.blank? ? LoanApplication.new : @loan_application
+  %br
+  .shaded
+    %h2 Bulk Upload Loan Applications
+    %br
+    = link_to_with_rights "Click to Download xls file format", url(:controller => :loan_applications, :action => :download_xls_file_format), :class => "grey_button"
+    %br
+    %br
+    %form{:action => url(:controller => :loan_applications, :action => :upload_loan_applications), :enctype => "multipart/form-data", :method => "post"}
+      %input{:name => "file", :size => "80", :type => "file"}
+      = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id
+      = hidden_field :name => 'child_location_id', :value => @center.nil? ? params[:child_location_id] : @center.id
+      %input{:type => "submit", :value => "Upload"}
+  %br
+  %hr
   %h2
     = "Center Cycle Number: #{center_cycle_number}"
   %i Note: Either reference or reference1 value are mandatory

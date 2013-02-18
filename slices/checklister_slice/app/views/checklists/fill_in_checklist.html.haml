@@ -15,12 +15,13 @@
   %hr
   .shaded
     = form(:action => url(:checklister_slice_capture_checklist_data) ) do
+     
       %table.tall
         %tr
           %th
             = label " Staff Member:"
           %td
-            = text_field :name => :staff_name ,:value=>params[:staff_name] ,:disabled=>true
+            = text_field :name => :staff_name ,:value=>params[:staff_name] ,:disabled=>false
             = hidden_field :staff_name ,:value=>params[:staff_name]
         %tr{:style =>"display:#{['Branch','Center'].include?(params[:target_entity_type].to_s) ? 'none' : ''}"}
           %th

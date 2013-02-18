@@ -6,6 +6,7 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   before :ensure_authenticated, :only => [:update]
   before :check_multiple_login, :only => [:update]
 
+
   # redirect from an after filter for max flexibility
   # We can then put it into a slice and ppl can easily 
   # customize the action
@@ -15,6 +16,10 @@ class MerbAuthSlicePassword::Sessions < MerbAuthSlicePassword::Application
   def update
     "Add an after filter to do stuff after login"
     # this is where the default scope hooks go
+  end
+
+  def session_off
+   
   end
 
   def destroy

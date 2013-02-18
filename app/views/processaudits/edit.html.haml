@@ -1,0 +1,16 @@
+%h1
+  Processaudits controller, edit action
+%p
+  Edit this file in
+  %tt
+    app/views/processaudits/edit.html.erb
+= error_messages_for @processaudit
+
+= form_for(@processaudit, :action => url(:processaudit, @processaudit)) do
+  %p
+    
+    = submit "Update"
+
+= link_to 'Show', url(:processaudit, @processaudit)
+|
+= link_to 'Back', url(:processaudits)

@@ -3,6 +3,7 @@ class Checklist
 
   property :id, Serial
   property :name, Text, :nullable => false
+  property :answers , Text
 
   property :created_at, DateTime, :nullable => false, :default => Date.today
   property :deleted_at, DateTime

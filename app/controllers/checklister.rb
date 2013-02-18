@@ -5,7 +5,7 @@ class Checklister < Application
   end
 
   def process_audit_checklist
-
+   
   end
 
   def healthcheck_checklist

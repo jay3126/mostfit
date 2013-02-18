@@ -17,6 +17,8 @@
 operator : all
 
 administrator :
+  visit_schedules :
+     - all
   home :
     - all
   browse :
@@ -24,6 +26,8 @@ administrator :
   admin :
     - all
   biz_locations :
+    - all
+  pachecklists :
     - all
   staff_members :
     - all
@@ -89,6 +93,8 @@ administrator :
     - all
 ################
 executive :
+  visit_schedules :
+     - index
   home :
     - all
 #  admin :
@@ -98,6 +104,9 @@ executive :
   attendances :
     - index
     - create
+  pachecklists :
+      - index
+      - show
   staff_members :
 #     - index
      - show_branches
@@ -254,6 +263,11 @@ supervisor :
 #    - edit
 #    - update
 #    - show
+  pachecklists :
+     - index
+     - show
+  visit_schedules :
+     - index
   staff_members :
      - index
      - show_branches
@@ -490,6 +504,8 @@ support :
     - create
     - bulk_entry
     - show
+  visit_schedules :
+     - index
   location_holidays :
 #    - all
     - index
@@ -596,6 +612,11 @@ finops :
 #    - show
   ledgers :
     - all
+  pachecklists :
+    - index
+    - show
+  visit_schedules :
+     - index
   vouchers :
     - all
 #  cost_centers :
@@ -934,6 +955,9 @@ accountant :
     - all
   admin :
     - index
+  pachecklists :
+     - index
+     - show
   asset_register :
      - all
 #    - index
@@ -952,6 +976,8 @@ accountant :
      - show_clients
      - show_disbursed
      - day_sheet
+  visit_schedules :
+     - index
 #     - disbursement_sheet
      - show
 #     - edit
@@ -1157,6 +1183,8 @@ auditor :
   audit_trails:
     - index
     - show
+  visit_schedules :
+     - index
   location_holidays :
 #    - all
     - index
@@ -1193,6 +1221,10 @@ auditor :
     - show_accounts
     - show
 #    - new
+  pachecklists :
+    - all
+    - answers
+    - updateanswers
   documents :
 #    - all
     - show
@@ -1324,7 +1356,7 @@ telecaller :
   home :
     - all
   browse :
-    - all
+    - all				
 #  accounting_rules :
 #    - index
 #    - show
@@ -1336,7 +1368,8 @@ telecaller :
 #    - edit
 #    - update
 #    - show
-
+  visit_schedules :
+     - index
 #  attendances :
 #    - index
 #    - create
@@ -1430,6 +1463,7 @@ telecaller :
 #    - create
 #    - create_repayment_on_lending
     - show
+
 #    - edit
 #    - update
 #   - update_lending_approve_to_disburse

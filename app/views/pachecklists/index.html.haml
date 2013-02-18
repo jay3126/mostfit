@@ -1,0 +1,22 @@
+%h1 Process Audit
+= link_to 'New Process Audit ', url(:answers_pachecklists,:biz_location_id => @biz_location)
+%table.dataTable
+  %thead
+    %tr
+      %th Process Audit ID
+      %th Performed By
+      %th Performed On
+      %th 
+  - @pachecklists.each do |pa|
+    - if @biz_location.to_i == pa.biz_location_id.to_i
+      %tr
+        %td
+          = pa.id
+        %td
+          = session.user.name
+        %td
+          = pa.name
+        %td
+          = link_to 'Show', url(:pachecklist, pa)
+          |
+          = link_to 'Edit', url(:edit_pachecklist,  pa)

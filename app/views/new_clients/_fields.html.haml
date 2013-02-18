@@ -70,6 +70,17 @@
       = date_select_for @client, :date_of_birth, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
   %tr
     %th
+
+      Age as on Date
+    %td
+      = date_select_for @client, :age_as_on_date, :min_date => Date.today-36500, :max_date => Date.today-1000, :holiday => false
+  %tr
+    %th
+      Age
+    %td
+      = text_field :age, :size => 10
+  %tr
+    %th
       <span style="color:red">*</span>
       Date joined
     %td

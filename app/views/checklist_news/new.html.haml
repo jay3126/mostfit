@@ -1,0 +1,30 @@
+%h1 ChecklistNews controller, new action
+
+%p 
+  Edit this file in 
+  %tt app/views/checklist_news/new.html.erb
+
+= error_messages_for @checklist_news
+= form_for(@checklist_news, :action => url(:checklist_news) ) do
+  %p
+    %hr
+    %table.tall
+      %tr
+        %th{:width => "40px;"}
+          = label "s.no"
+        %th{:width => "600px;"}
+          = label "question"
+        %th{:width => "300px;"}
+          =  label " checkbox"
+      %tr
+        %td{:width => "40px;"}
+          = label "1"
+        %td{:width => "600px;"}
+          = label "Branch open on time ?"
+        %td{:width => "300px;"}
+          = check_box :branch_open
+     
+
+    = submit "Create"
+
+= link_to 'Back', url(:checklist_news)

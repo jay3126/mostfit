@@ -12,7 +12,7 @@
 .menu-strip{:style => "width: 50%;"}
   = link_to 'Edit', resource(@biz_location, :edit), :class => 'add grey_button'
   - if @biz_location.location_level.level == 1
-    = link_to 'Process Audit', url_for_process_audit_checklist('Process Audit',"Center", @biz_location, @biz_location, @biz_location, session.user.staff_member, Date.today, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+    = link_to 'Process Audit', url(:pachecklists,:biz_location => @biz_location), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
 
 %table.loan{ :style => "width: 45%; border: solid 1px #cfcfcf; margin: 5px; " }
   %tr.even

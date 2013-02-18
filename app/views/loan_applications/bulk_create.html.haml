@@ -3,14 +3,17 @@
   .error
     = "#{@message[:error]}"
     %br
+- unless @errors.blank?
+  .error
+    = @errors.flatten.join(',')
 %form{:action => url(:controller => :loan_applications, :action => :bulk_create), :method => :get}
   = partial 'lib/biz_location_selector'
 
 %br
 %hr
-
 = partial :fields
   
+
 %br
 %hr
-  = partial :all_loan_applications
+= partial :all_loan_applications

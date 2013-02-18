@@ -15,7 +15,7 @@ class BizLocation
 
   belongs_to :location_level
   belongs_to :upload, :nullable => true
-
+  
   has n, :meeting_schedules, :through => Resource
   has 1, :address
   has n, :permitted_pin_codes, 'AddressPinCode'
@@ -33,7 +33,8 @@ class BizLocation
   has n, :lending_product_locations
   has n, :lending_products, :through => :lending_product_locations
   has n, :center_cycles
-
+  has n, :pachecklists
+ 
   #validation to be disabled in migration mode.
   if Mfi.first.system_state != :migration
     validates_with_method :location_level_precedes_biz_location?

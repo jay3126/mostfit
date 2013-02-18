@@ -438,7 +438,8 @@ class BizLocations < Application
     render :template => 'location_levels/fetch_locations', :layout => layout?
   end
 
-  def location_checklists
+  def location_checklists  
+   @biz_location  = BizLocation.get(:id)
     @parent_location = params[:parent_location_id].blank? ? '' : BizLocation.get(params[:parent_location_id])
     @child_location  = params[:child_location_id].blank? ? '' : BizLocation.get(params[:child_location_id])
     @clients         = @child_location.blank? ? [] : ClientAdministration.get_clients_administered(@child_location.id, get_effective_date)

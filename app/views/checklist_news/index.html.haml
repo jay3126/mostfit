@@ -1,0 +1,16 @@
+%h1
+  ChecklistNews controller, index action
+%p
+  Edit this file in
+  %tt
+    app/views/checklist_news/index.html.erb
+%table
+  %tr
+  - for checklist_news in @checklist_news
+    %tr
+      %td
+        = link_to 'Show', url(:checklist_news, checklist_news)
+      %td
+        = link_to 'Edit', url(:edit_checklist_news,  checklist_news)
+
+= link_to 'New', url(:new_checklist_news)

@@ -10,11 +10,12 @@ class LoanApplications < Application
     display @loan_app
   end
 
-  def bulk_upload_loan_applications
-    render
-  end
-
   def upload_loan_applications
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @center = BizLocation.get(center_id) unless center_id.blank?
+    @branch = BizLocation.get(branch_id) unless center_id.blank?
+    error_msg = []
     @errors = []
 
     # VALIDATIONS
@@ -45,36 +46,117 @@ class LoanApplications < Application
         applications_data = {}
         row_no = 1
         FasterCSV.foreach(fq_file_path, file_options) do |row|
-          row_no              += 1
-          name = row["Name"]
-          guarantor_name = row["Guarantor name"]
+          row_no += 1
+          branch_id              = branch_id
+          center_id              = center_id
+          center_cycle_number    = loan_applications_facade.get_current_center_cycle_number(center_id)
+          name                   = row["Name"]
+          guarantor_name         = row["Guarantor name"]
           guarantor_relationship = row["Guarantor relationship"]
-          dob = row["Dob"]
-          age_as_on = row["Age as on"]
-          age_as_on_date = row["Age as on date"]
-          reference1 = row["Reference1"]
-          reference2 = row["Reference2"]
-          address = row["Address"]
-          state = row["State"]
-          pincode = row["Pincode"]
-          #branch_id = row["branch_id"]
-          #center_id = row["center_id"]
-          #created_by = row["created_by"]
-          #created_on = row["created_on"]
-          #center_cycle_number = loan_applications_facade.get_current_center_cycle_number(center_id)
-          loan_amount_str = row["loan_amount_str"]
+          dob                    = row["Dob"]
+          age_as_on              = row["Age as on"]
+          age_as_on_date         = row["Age as on date"]
+          reference1             = row["Ration card no"]
+          reference2_type        = row["Reference2 type"]
+          reference2             = row["Reference2"]
+          address                = row["Address"]
+          state                  = row["State"]
+          pincode                = row["Pincode"]
+          loan_amount_str        = row["Amount"]
+
+          loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
+          loan_amount = loan_money_amount.amount.to_i
+          loan_amount_currency = loan_money_amount.currency
+
+          no_age_parameter = (dob.blank? && (age_as_on.blank? || age_as_on_date.blank?))
+          # Match format of client reference1 and reference2, it should allow only alphanumeric value
+          format_reference1 = /^[A-Za-z0-9]+$/
+          format_reference2 = /^[A-Za-z0-9]+$/
+
+          unless reference1.blank?
+            is_reference1_format_matched = format_reference1.match reference1.strip
+            error_msg << "Reference-1 must be alphanumeric(allowed only: a-z, A-Z, 0-9)" if is_reference1_format_matched.nil?
+          end
+
+          unless reference2.blank?
+            is_reference2_format_matched = format_reference2.match reference2.strip
+            error_msg << "Reference-2 must be alphanumeric(allowed only: a-z, A-Z, 0-9)" if is_reference2_format_matched.nil?
+          end
+
+          # VALIDATIONS
+          error_msg << "Applicant name must not be blank" if name.blank?
+          error_msg << "Guarantor name must not be blank" if guarantor_name.blank?
+          error_msg << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
+          error_msg << "Either Date of birth  or Age As ON field is manadatory" if no_age_parameter
+          error_msg << "Either Ration card or Reference 2 is mandatory" if (reference1.blank? && reference2.blank?)
+          error_msg << "Applied for amount must not be blank" if loan_amount_str.blank?
+          error_msg << "Address name must not be blank" if address.blank?
+          error_msg << "State name must not be blank" if state.blank?
+          error_msg << "Pincode name must not be blank" if pincode.blank?
+
+          unless no_age_parameter
+            if dob.blank?
+              if is_number?(age_as_on)
+                client_age_as_on = age_as_on
+                client_age_as_on_date = age_as_on_date
+                client_dob = nil
+              else
+                error_msg << "Age as on is not valid"
+              end
+            else
+              client_age_as_on = nil
+              client_age_as_on_date = nil
+              client_dob = dob
+            end
+          end
+
+          if error_msg.blank?
+            begin
+              loan_application = LoanApplication.new({:at_branch_id => branch_id,
+                  :at_center_id => center_id,
+                  :center_cycle_id => center_cycle_number,
+                  :created_by_staff_id => session.user.id,
+                  :created_by_user_id => session.user.staff_member.id,
+                  :created_on => Date.today,
+                  :amount => loan_amount,
+                  :currency => loan_amount_currency,
+                  :client_name => name,
+                  :client_age_as_on => age_as_on,
+                  :client_age_as_on_date => age_as_on_date,
+                  :client_dob => dob,
+                  :client_address => address,
+                  :client_state =>  state,
+                  :client_pincode => pincode,
+                  :client_reference1 => reference1,
+                  :client_reference1_type => Constants::Masters::RATION_CARD,
+                  :client_reference2 => reference2,
+                  :client_reference2_type => reference2_type,
+                  :client_guarantor_name => guarantor_name,
+                  :client_guarantor_relationship => guarantor_relationship})
+              unless loan_application.save
+                @errors << loan_application.errors.to_a.flatten.join(", ")
+              end
+            rescue => ex
+              @errors << ex.message
+            end
+          else
+            @errors << "Error in row no: #{row_no}: #{error_msg.flatten.join(', ')}"
+          end
         end
 
       rescue => ex
         @errors << ex.message
       end
     end
-    render :bulk_upload_loan_applications
+
+    @all_loan_applications = loan_applications_facade.get_all_loan_applications_for_branch_and_center({:at_branch_id => branch_id, :at_center_id => center_id})
+    render :template => 'loan_applications/bulk_create'
   end
 
   def download_xls_file_format
     send_file('public/bulk_upload_loan_applications_file_format.xls', :filename => ('public/bulk_upload_loan_applications_file_format.xls'.split("/")[-1].chomp))
   end
+
   # Only List all clients under selected center
   def bulk_new
     # INITIALIZING VARIABLES USED THROUGHOUT

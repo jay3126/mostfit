@@ -2,6 +2,7 @@ class LendingProducts < Application
 
   def index
     @client = Client.get params[:client_id]
+    
     @lending_products = LendingProduct.all
     if @lending_products.blank?
       redirect resource(:lending_products, :new)
