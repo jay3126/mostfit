@@ -1,7 +1,15 @@
+:javascript
+  $('table.process_audit').dataTable({
+    "sScrollX": "100%",
+    "bPaginate": false,
+    "bJQueryUI": true,
+    "sDom": '<"H"Tfr>t<"F"ip>',
+    "oTableTools": {
+      "sSwfPath": "/swf/copy_csv_xls_pdf.swf"
+    }
+  });
 
 = link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
-|
-= link_to 'Back', url(:pachecklists)
 |
 = link_to "User_location", url(:user_location,@pachecklist.biz_location_id)
 
@@ -27,12 +35,13 @@
       %a#ToolTables_DataTables_Table_0_4.DTTT_button.ui-button.ui-state-default.DTTT_button_print{:title => "View print view"}
         %span Print
 %p
-  %table.tall
-    %tr
-      %td
-        = label "Branch Name"
-      %td 
-        = text_field :value => @biz_location.name,:disabled=>true
+  %table.tall.report.weeksheet.nojs.process_audit
+    %thead	
+      %tr
+        %td
+          = label "Branch Name"
+        %td 
+          = text_field :value => @biz_location.name,:disabled=>true
     %tr 
       %td
         = label "Name of the branch manager"
