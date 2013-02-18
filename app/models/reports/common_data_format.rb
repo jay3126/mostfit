@@ -29,12 +29,14 @@ module Highmark
       filename_cnscrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-customer.csv")
       filename_adrcrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-address.csv")
       filename_actcrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-accounts.csv")
-      filename_brncrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-branch-center-list.csv")
+      filename_brncrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-branch-list.csv")
+      filename_cencrd = File.join(folder, "#{self.name}-#{@frequency_identifier}-center-list.csv")
 
       File.new(filename_cnscrd, "w").close
       File.new(filename_adrcrd, "w").close
       File.new(filename_actcrd, "w").close
       File.new(filename_brncrd, "w").close
+      File.new(filename_cencrd, "w").close
 
       attendance_record = BizLocation.all("location_level.level" => 0).map{|x| [x.id, AttendanceRecord.all(:at_location => x.id, :counterparty_type => :client).aggregate(:counterparty_id, :counterparty_id.count).to_hash]}.to_hash
       absent_record = attendance_record = BizLocation.all("location_level.level" => 0).map{|x| [x.id, AttendanceRecord.all(:at_location => x.id, :counterparty_type => :client, :attendance => :absent_attendance_status).aggregate(:counterparty_id, :counterparty_id.count).to_hash]}.to_hash
@@ -43,6 +45,7 @@ module Highmark
       append_to_file_as_csv([headers["ADRCRD"]], filename_adrcrd)
       append_to_file_as_csv([headers["ACTCRD"]], filename_actcrd)
       append_to_file_as_csv([headers["BRNCRD"]], filename_brncrd)
+      append_to_file_as_csv([headers["CENCRD"]], filename_cencrd)
 
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Lending.all(:fields => [:id]).map{|x| x.id}.uniq
@@ -74,7 +77,6 @@ module Highmark
           rows["CNSCRD"].map!{|x| x = (x == "" ? nil : x)}
           rows["ADRCRD"].map!{|x| x = (x == "" ? nil : x)}
           rows["ACTCRD"].map!{|x| x = (x == "" ? nil : x)}
-          rows["BRNCRD"].map!{|x| x = (x == "" ? nil : x)}
 
           unless @data["CNSCRD"].include?(rows["CNSCRD"])
             @data["CNSCRD"] << rows["CNSCRD"]
@@ -82,9 +84,51 @@ module Highmark
             append_to_file_as_csv([rows["ADRCRD"]], filename_adrcrd)
           end
           append_to_file_as_csv([rows["ACTCRD"]], filename_actcrd)
-          append_to_file_as_csv([rows["BRNCRD"]], filename_brncrd)
         rescue
           puts "ERROR: loan_id: #{l_id}"
+        end
+      end
+
+      #following will generate branch list.
+      branch_list = BizLocation.all("location_level.level" => 1).aggregate(:id)
+      branch_list.each do |b_id|
+        begin
+          branch = BizLocation.get(b_id)
+          branch_id = branch.id
+          branch_name = branch.name
+          branch_identifier = branch.biz_location_identifier
+          branch_address = branch.biz_location_address
+
+          branch_rows = b_row(branch_id, branch_name, branch_identifier, branch_address)
+
+          #the following lines of code replace the blanks with nils
+          branch_rows["BRNCRD"].map!{|x| x = (x == "" ? nil : x)}
+          append_to_file_as_csv([branch_rows["BRNCRD"]], filename_brncrd)
+        rescue
+          puts "ERROR: branch_id: #{b_id}"
+        end
+      end
+
+      #following will generate center list.
+      center_list = BizLocation.all("location_level.level" => 0).aggregate(:id)
+      center_list.each do |c_id|
+        begin
+          center = BizLocation.get(c_id)
+          center_id = center.id
+          center_name = center.name
+          center_identifier = center.biz_location_identifier
+          center_address = center.biz_location_address
+          branch = LocationLink.get_parent(center)
+          branch_name = branch.name
+          branch_code = branch.id
+
+          center_rows = c_row(branch_code, branch_name, center_identifier, center_name, center_address)
+
+          #the following lines of code replace the blanks with nils
+          center_rows["CENCRD"].map!{|x| x = (x == "" ? nil : x)}
+          append_to_file_as_csv([center_rows["CENCRD"]], filename_cencrd)
+        rescue
+          puts "ERROR: center_id: #{c_id}"
         end
       end
       
@@ -226,8 +270,21 @@ module Highmark
                      "Ownership Indicator", #NULL
                      "Parent ID", 
                      "EXTRACTION FILE ID", 
-                     "SEVERITY"],
-        "BRNCRD" => ["Branch Code",
+                     "SEVERITY"]
+      }
+    end
+
+    def branch_headers
+      _branch_headers ||= {
+        "BRNCRD" => ["GHS Id",
+                     "GHS Description",
+                     "GHS Address"]
+      }
+    end
+
+    def center_headers
+      _center_headers ||= {
+        "CENCRD" => ["Branch Code",
                      "Branch Name",
                      "Center Id",
                      "Center Name",
@@ -235,6 +292,29 @@ module Highmark
                      "Center Address 2",
                      "Center Address 3",
                      "Center Pincode"]
+      }
+    end
+
+    def b_row(branch_id, branch_name, branch_identifier, branch_address)
+      _b_row = {
+        "BRNCRD" => [branch_id.to_s.truncate(30, ""), #ghs_id
+                     branch_name.to_s.truncate(50, ""),  #ghs_name
+                     branch_address.to_s.truncate(100, "") #address
+                    ]
+      }
+    end
+
+    def c_row(branch_code, branch_name, center_identifier, center_name, center_address)
+      _c_row = {
+        "CENCRD" => [branch_code.to_s.truncate(30, ""), #branch_code
+                     branch_name.to_s.truncate(50, ""), #branch name
+                     center_identifier.to_s.truncate(50, ""), #center id
+                     center_name.to_s.truncate(50, ""), #center name
+                     center_address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #center address1
+                     nil, #center address 2
+                     nil, #center address 3
+                     nil #center pincode.
+                     ]
       }
     end
     
@@ -366,15 +446,6 @@ module Highmark
                      client.id.to_s.truncate(100, ""), #parent id
                      nil, # extraction field id
                      nil  # severity
-                    ],
-        "BRNCRD" => [branch.id.to_s.truncate(100, ""), #branch code
-                     branch.name.truncate(100, ""), #branch name
-                     center.biz_location_identifier.to_s.truncate(30, ""),
-                     center.name.truncate(100, ""), #center identifier
-                     center.biz_location_address.gsub("\n", " ").gsub("\r", " ").truncate(200, ""), #center address 1
-                     nil, #address 2
-                     nil, # address 3
-                     nil  # pin code.
                     ]
       }
     end
@@ -388,6 +459,7 @@ module Highmark
       }
     end
 
+    #calculating the overdue amounts.
     def loan_overdue_amounts(loan, from_date, to_date)
       if ((loan.disbursal_date >= from_date) and (loan.disbursal_date <= to_date))
         return MoneyManager.default_zero_money
