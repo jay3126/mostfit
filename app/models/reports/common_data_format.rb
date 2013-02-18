@@ -49,12 +49,21 @@ module Highmark
 
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Lending.all(:fields => [:id]).map{|x| x.id}.uniq
-      all_disbursed_loans_during_period = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :fields => [:id]).map{|x| x.id}.uniq
-      loans_with_status_changes_during_period = LoanStatusChange.all(:from_status => :disbursed_loan_status, :to_status => [:repaid_loan_status, :preclosed_loan_status, :written_off_loan_status], :effective_on.gte => @from_date, :effective_on.lte => @to_date).map{|x| x.lending_id}.uniq
+      all_disbursed_loans = Lending.all(:disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date, :fields => [:id])
+      all_disbursed_loans_during_period = (all_disbursed_loans and (not all_disbursed_loans.nil?)) ? all_disbursed_loans.map{|x| x.id}.uniq : []
+      
+      loans_with_status_changes = LoanStatusChange.all(:from_status => :disbursed_loan_status, :to_status => [:repaid_loan_status, :preclosed_loan_status, :written_off_loan_status], :effective_on.gte => @from_date, :effective_on.lte => @to_date)
+      loans_with_status_changes_during_period = (loans_with_status_changes and (not loans_with_status_changes.nil?)) ? loans_with_status_changes.map{|x| x.lending_id}.uniq : []
       cut_off_date = @from_date
-      ineligible_written_off_loans = Lending.all(:status => :written_off_loan_status, :write_off_on_date.lte => cut_off_date).map{|x| x.id}.uniq
-      ineligible_preclosed_loans = Lending.all(:status => :preclosed_loan_status, :preclosed_on_date.lte => cut_off_date).map{|x| x.id}.uniq
-      ineligible_repaid_loans = Lending.all(:status => :repaid_loan_status, :repaid_on_date.lte => cut_off_date).map{|x| x.id}.uniq
+
+      ineligible_written_off = Lending.all(:status => :written_off_loan_status, :write_off_on_date.lte => cut_off_date)
+      ineligible_written_off_loans = (ineligible_written_off and (ineligible_written_off.nil?)) ? ineligible_written_off.map{|x| x.id}.uniq : []
+
+      ineligible_preclosed = Lending.all(:status => :preclosed_loan_status, :preclosed_on_date.lte => cut_off_date)
+      ineligible_preclosed_loans = (ineligible_preclosed and (not ineligible_preclosed.nil?)) ? ineligible_preclosed.map{|x| x.id}.uniq : []
+
+      ineligible_repaid = Lending.all(:status => :repaid_loan_status, :repaid_on_date.lte => cut_off_date)
+      ineligible_repaid_loans = (ineligible_repaid and (not ineligible_repaid.nil?)) ? ineligible_repaid.map{|x| x.id}.uniq : []
 
       #this is done as per Suryoday's requirements. For monthly submission only those new_disbursements + status changes loans are required and for monthly all loans.
       if @frequency_identifier == 'weekly'
