@@ -318,8 +318,8 @@ module Highmark
                     ],
         "ACTCRD" => [client.client_identifier.to_s.truncate(100, ""),
                      "ACTCRD",
-                     loan.id.to_s.truncate(35, ""),
-                     loan.id.to_s.truncate(35, ""),
+                     loan.lan.to_s.truncate(65, ""),
+                     loan.lan.to_s.truncate(65, ""),
                      branch.biz_location_identifier.to_s.truncate(30, ""),
                      center.biz_location_identifier.to_s.truncate(30, ""),
                      StaffMember.get(loan.applied_by_staff).name.truncate(30, ""),
@@ -341,7 +341,7 @@ module Highmark
                      repayment_frequency[loan.repayment_frequency], #repayment frequency
                      (loan.loan_installment_amount.to_s.chomp(".00").truncate(9, "")),   #installment amount / minimum amount due
                      loan.actual_total_outstanding_loan(@to_date).to_s.chomp(".00").truncate(9, ""),
-                     ((loan.actual_total_outstanding_loan(@to_date) > loan.scheduled_total_outstanding(@to_date)) ? (loan.actual_total_outstanding_loan(@to_date) - loan.scheduled_total_outstanding(@to_date)).to_s.chomp(".00").truncate(9, "") : MoneyManager.default_zero_money.to_s.chomp(".00")), #amount overdue
+                     loan_overdue_amounts(loan, @from_date, @to_date).to_s.chomp(".00"), #overdue_amounts
                      (LoanDueStatus.overdue_day_on_date(loan.id, @to_date) > 999 ? 999 : LoanDueStatus.overdue_day_on_date(loan.id, @to_date)).to_s.truncate(3, ""), #days past due
                      (loan.status == :written_off_loan_status ? loan.actual_principal_outstanding(@to_date).to_s.chomp(".00") : nil), #write off amount
                      (loan.write_off_on_date.nil? ? nil : loan.write_off_on_date.strftime("%d%m%Y").truncate(8, "")), #date written off
@@ -386,6 +386,16 @@ module Highmark
         :male     => "M", 
         :untagged => "U"
       }
+    end
+
+    def loan_overdue_amounts(loan, from_date, to_date)
+      if ((loan.disbursal_date >= from_date) and (loan.disbursal_date <= to_date))
+        return MoneyManager.default_zero_money
+      elsif (loan.actual_total_outstanding_loan(to_date) > loan.scheduled_total_outstanding(to_date))
+        return (loan.actual_total_outstanding_loan(to_date) - loan.scheduled_total_outstanding(to_date))
+      else
+        return MoneyManager.default_zero_money
+      end
     end
 
     def account_information_date(loan, status)
