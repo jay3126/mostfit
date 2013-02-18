@@ -129,7 +129,7 @@ class OverdueDetailedReport < Report
     File.new(csv_loan_file, "w").close
     append_to_file_as_csv(headers, csv_loan_file)
     data[:loans].each do |loan_id, s_value|
-      value = [s_value[:branch_name], s_value[:center_name], s_value[:member_name], s_value[:product_name], s_value[:source_of_fund], s_value[:loan_disbursed_date], s_value[:loan_end_date], s_value[:oldest_due_date],
+      value = [s_value[:branch_name], s_value[:center_name], s_value[:member_id], s_value[:member_name], s_value[:loan_account_number], s_value[:product_name], s_value[:source_of_fund], s_value[:loan_disbursed_date], s_value[:loan_end_date], s_value[:oldest_due_date],
         s_value[:days_past_due], s_value[:bucket], s_value[:total_principal_overdue], s_value[:total_interest_overdue],s_value[:total_overdue],s_value[:par]]
       append_to_file_as_csv([value], csv_loan_file)
     end
@@ -145,7 +145,7 @@ class OverdueDetailedReport < Report
   end
 
   def headers
-    _headers ||= [["Branch Name", "Center Name", "Customer Name", "Product", "Source Of Fund", "Loan Disbursed Date", "Loan End Date", "Oldest Due Date", "Days Past Due", "Bucket", "Total Principal Overdue","Total Interest Overdue","Total Overdue","PAR"]]
+    _headers ||= [["Branch Name", "Center Name", "Customer ID", "Customer Name", "Loan ID", "Product", "Source Of Fund", "Loan Disbursed Date", "Loan End Date", "Oldest Due Date", "Days Past Due", "Bucket", "Total Principal Overdue","Total Interest Overdue","Total Overdue","PAR"]]
   end
 
 end
