@@ -24,24 +24,25 @@
     %tbody
       - @data[:loan_payments].each do |branch_id, values|
         - values.each do |lending_id, date_values|
-          - date_values.each do |date, value|
-            %tr
-              %td
-                = value[:branch_name]
-              %td
-                = value[:center_name]
-              %td
-                = value[:lan_no]
-              %td
-                = value[:schedule_date]
-              %td
-                = value[:principal_received]
-              %td
-                = value[:interest_received]
-              %td
-                = value[:advance_received]
-              %td
-                = value[:recovery_reveived]
+          - date_values.each do |date, d_values|
+            - d_values.each do |value|
+              %tr
+                %td
+                  = value[:branch_name]
+                %td
+                  = value[:center_name]
+                %td
+                  = value[:lan_no]
+                %td
+                  = value[:schedule_date]
+                %td
+                  = value[:principal_received]
+                %td
+                  = value[:interest_received]
+                %td
+                  = value[:advance_received]
+                %td
+                  = value[:recovery_reveived]
   %br
   .flickr_pagination
     = will_paginate @data[:repayments], :container => false

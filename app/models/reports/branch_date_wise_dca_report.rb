@@ -68,7 +68,7 @@ class BranchDateWiseDcaReport < Report
           preclose_schedules = []
         else
           p_loans_after_on_date = p_loans.select{|s| s.preclosed_on_date >= on_date}
-          preclose_schedules = p_loans_after_on_date.blank? ? [] : p_loans_schedules.select{|s| s.on_date == on_date && p_loans_after_on_date.include?(s.loan_base_schedule.lending_id)}
+          preclose_schedules = p_loans_after_on_date.blank? ? [] : p_loans_schedules.select{|s| s.on_date == on_date && p_loans_after_on_date.map(&:id).include?(s.loan_base_schedule.lending_id)}
         end
         loan_schedules_on_date = schedules_on_date + preclose_schedules
         scheduled_principal = loan_schedules_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedules_on_date.map(&:scheduled_principal_due).sum.to_i)

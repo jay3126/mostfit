@@ -102,7 +102,7 @@ class LoanManager
     loan = get_loan(on_loan_id)
 
     _advance_balance = loan.advance_balance(on_date)
-    _actual_total_due = loan.actual_total_due_ignoring_advance_balance(on_date)
+    _actual_total_due = loan.actual_total_due_ignoring_advance_balance_kk(on_date)
 
     money_amount = [_advance_balance, _actual_total_due].min
     if money_amount > MoneyManager.default_zero_money && loan.schedule_date?(on_date) &&_advance_balance > loan.zero_money_amount

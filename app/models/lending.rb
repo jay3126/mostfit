@@ -506,6 +506,10 @@ class Lending
     repository(:default).adapter.query("select a.lending_id from loan_receipts a where a.effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and a.deleted_at is null group by a.lending_id having sum(a.advance_received) > sum(a.advance_adjusted)")
   end
 
+  def self.all_over_amount_loans
+    repository(:default).adapter.query("select lendings.id from lendings inner join loan_base_schedules on loan_base_schedules.lending_id = lendings.id where (select sum(principal_received+interest_received+advance_received) from loan_receipts where loan_receipts.is_advance_adjusted = 0 and loan_receipts.lending_id = lendings.id and deleted_at is null) > (select sum(scheduled_principal_due+scheduled_interest_due) from base_schedule_line_items where base_schedule_line_items.loan_base_schedule_id = loan_base_schedules.id and loan_base_schedules.lending_id = lendings.id);")
+  end
+
   def self.overdue_loans_for_location_on_date(location, on_date = Date.today)
     if location.location_level.level == 0
       repository(:default).adapter.query("select lendings.id from lendings inner join loan_base_schedules on loan_base_schedules.lending_id = lendings.id where lendings.administered_at_origin = #{location.id} and (select sum(principal_received+interest_received+advance_received) from loan_receipts where loan_receipts.is_advance_adjusted = 0 and loan_receipts.lending_id = lendings.id and effective_on <= '#{on_date.strftime("%Y-%m-%d")}' and deleted_at is null) < (select sum(scheduled_principal_due+scheduled_interest_due) from base_schedule_line_items where base_schedule_line_items.loan_base_schedule_id = loan_base_schedules.id and loan_base_schedules.lending_id = lendings.id and base_schedule_line_items.on_date <= '#{on_date.strftime("%Y-%m-%d")}');")
@@ -645,7 +649,7 @@ class Lending
   end
 
   def actual_total_due_ignoring_advance_balance_kk(on_date)
-    loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
+    loan_receipts_till_date = self.loan_receipts(:is_advance_adjusted => false, :effective_on.lte => on_date)
     loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
     total_received = loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received]
     loan_schedules = self.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date)
@@ -1501,6 +1505,15 @@ class Lending
         voucher.destroy! unless voucher.blank?
         pt.destroy!
       end
+    end
+  end
+
+  def self.advance_adjusted_all_loans_till_date(on_date)
+    advance_loan_ids= all_advance_avaiable_loans_for_location(on_date)
+    loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, User.first)
+    advance_loan_ids.each do |loan_id|
+      schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => on_date, 'loan_base_schedule.lending_id'=> loan_id)
+      loan_facade.adjust_advance(schedule_date, loan_id) unless schedule_date.blank?
     end
   end
 end

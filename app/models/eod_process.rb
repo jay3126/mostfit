@@ -67,7 +67,7 @@ class EodProcess
       #loan_ids_for_advance = get_reporting_facade(user).all_oustanding_loan_IDs_scheduled_on_date_with_advance_balances(self.on_date)
       advance_loans = Lending.advance_avaiable_loans_for_location(self.biz_location, self.on_date)
       advance_loans.each do |loan_id|
-        schedule_date = BaseScheduleLineItem.max(:on_date, :on_date=> self.on_date, 'loan_base_schedule.lending_id'=> loan_id)
+        schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => self.on_date, 'loan_base_schedule.lending_id'=> loan_id)
         get_loan_facade(user).adjust_advance(schedule_date, loan_id) unless schedule_date.blank?
       end
       Ledger.run_branch_eod_accounting_first_time_payment_trasaction(self.biz_location, self.on_date)

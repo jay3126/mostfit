@@ -286,7 +286,7 @@ class PaymentTransactions < Application
           schedule_loans.each do |loan|
             schedule = BaseScheduleLineItem.first(:on_date => effective_on, 'loan_base_schedule.lending_id' => loan.id)
             unless schedule.blank?
-              receipt_on_date = loan.loan_receipts(:effective_on => effective_on)
+              receipt_on_date = loan.loan_receipts.reload(:effective_on => effective_on)
               receipt_amt_on_date = LoanReceipt.add_up(receipt_on_date)
               schedule_amount = schedule.to_money[:scheduled_principal_due] + schedule.to_money[:scheduled_interest_due]
               received_amt = receipt_amt_on_date[:principal_received] + receipt_amt_on_date[:interest_received]
