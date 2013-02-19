@@ -67,7 +67,10 @@
         %li
           = link_to_with_rights 'CheckLists', resource(:biz_locations,:location_checklists), :class => 'user icon'
         %li
+          = link_to_with_rights 'Staff Member Movement', url(:controller => :staff_members, :action => :staff_movement), :class => 'user icon'
+        %li
           = link_to_with_rights 'Surprise Center Visit', resource(:visit_schedules), :class => 'icon holiday'
+
   .admin-box
     %h2 Manage financial products, funds, rules, and accounting
     %ul.icon_links

@@ -54,7 +54,7 @@
             %td= "#{tranch.name} (Id: #{tranch.id})" rescue nil
     %br
     .flickr_pagination
-      = will_paginate @loan_assignments, :container => false
+      = will_paginate @pagination_loan_assingnments, :params => { :controller => "loan_assignments", :action => "loan_assignment", :container => false}
     %br
   - else
     = "No loans has been assigned to either securitization or encumbrance"

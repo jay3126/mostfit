@@ -290,6 +290,18 @@ class StaffMembers < Application
     display @location_manages, :layout => layout?
   end
 
+  def staff_movement
+    staff_member_id = params[:staff_member_id]
+    if staff_member_id.blank?
+      @manage_locations = []
+      @staff_member = nil
+    else
+      @staff_member = StaffMember.get params[:staff_member_id]
+      @manage_locations = LocationManagement.locations_managed_by_staff(@staff_member.id, get_effective_date)
+    end
+    display @manage_locations
+  end
+
   private
   def determine_layout
     return "printer" if params[:layout] and params[:layout]=="printer"

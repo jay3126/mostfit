@@ -2,10 +2,13 @@ class LoanAssignments < Application
 
   require "tempfile"
 
+  def index
+    @loan_assignments = get_all_loan_assignments
+    render :loan_assignment
+  end
+
   def loan_assignment
-    page = params[:page]||1
-    limit = params[:limit]||100
-    @loan_assignments = LoanAssignment.all.paginate(:page => page, :per_page => limit)
+    @loan_assignments = get_all_loan_assignments
     render
   end
 
@@ -171,12 +174,11 @@ class LoanAssignments < Application
   private
 
   def get_all_loan_assignments
-    loan_assignments = []
-    aggregated_ids = LoanAssignment.all.aggregate(:loan_id)
-    aggregated_ids.each do |loan_id|
-      loan_assignments << LoanAssignment.all(:fields => [:id, :loan_id, :funder_id, :funding_line_id, :tranch_id], :loan_id => loan_id).last
-    end
-    loan_assignments
+    page = params[:page]||1
+    limit = params[:limit]||20
+    @all_loan_assignments = LoanAssignment.all
+    @pagination_loan_assingnments = @all_loan_assignments.blank? ? [] : @all_loan_assignments.map(&:id).paginate(:page => page, :per_page => limit)
+    @loan_assignments = @all_loan_assignments.paginate(:page => page, :per_page => limit)
   end
 
 end

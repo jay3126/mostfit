@@ -88,7 +88,7 @@ class OverdueDetailedReport < Report
           oldest_due_date            = (loan_due_status and (not loan_due_status.nil?)) ? loan_due_status.on_date : loan.scheduled_first_repayment_date
           days_past_due              = loan_overdue_status.day_past_due
           bucket                     = set_overdue_days_range(days_past_due)
-          loan_receipt_till_date     = loan.loan_receipts(:effective_on.lte => @date)
+          loan_receipt_till_date     = loan.loan_receipts(:effective_on.lte => @date, :is_advance_adjusted => false)
           loan_receipt_amt           = LoanReceipt.add_up(loan_receipt_till_date)
           loan_schedule_till_date    = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan.id, :on_date.lte => @date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
           scheduled_principal        = loan_schedule_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_schedule_till_date[0].to_i)

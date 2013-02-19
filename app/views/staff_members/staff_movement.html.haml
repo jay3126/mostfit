@@ -1,7 +1,7 @@
-%h1== Payment By Staff Member
+%h1== Staff Member Movement
 .menu-strip{:style => "width: 8%;"}
   = link_to_with_rights "Back", url(:admin), :class => "grey_button"
-= form_for(:lendings, :action => resource(:payment_transactions, :payment_by_staff_member)) do
+= form_for(:lendings, :action => url(:controller => :staff_members, :action => :staff_movement)) do
   .shaded
     %table.form
       %thead
@@ -19,4 +19,26 @@
 - if @staff_member.blank?
   Please Select Staff Member
 - else
-  = partial 'weeksheet_for_location'
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th
+          location id
+        %th
+          location Name
+        %th
+          Location Level
+        %th
+          Effective Date for manage
+    %tbody
+      - @manage_locations.each do |location_manage|
+        - location = location_manage.managed_location
+        %tr
+          %td
+            =location.biz_location_identifier
+          %td
+            = location.name
+          %td
+            = location.location_level.level
+          %td
+            = location_manage.effective_on
