@@ -19,6 +19,9 @@ class Pachecklist
   property :deviation3, Text
   property :performed_by, String
   
+
+
+
   belongs_to :biz_location
   
 end

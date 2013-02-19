@@ -308,6 +308,15 @@ class Pachecklists < Application
    @deviation1 = params[:deviation1]
    @deviation2 = params[:deviation2]
    @deviation3 = params[:deviation3]
+     if @scv_perday.to_i < 6 || @scv_perday.to_i > 10
+           message[:error] = "Values must be either 0 or between 6 - 10"
+	   elsif @scv_perday == "0"
+		   raise "exception".inspect	
+	   else
+	    	   raise "true".inspect
+	   end
+
+
    @text =  @ans.map {|k,vs| vs.map {|v| "#{k},#{v}"}}.join(",")
    @name = Time.now.to_s
    @pachecklist = Pachecklist.new
