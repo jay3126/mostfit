@@ -89,10 +89,19 @@ class LoanApplications < Application
           error_msg << "Guarantor relationship must not be blank" if guarantor_relationship.blank?
           error_msg << "Either Date of birth  or Age As ON field is manadatory" if no_age_parameter
           error_msg << "Either Ration card or Reference 2 is mandatory" if (reference1.blank? && reference2.blank?)
-          error_msg << "Applied for amount must not be blank" if loan_amount_str.blank?
-          error_msg << "Address name must not be blank" if address.blank?
-          
+          error_msg << "Address name must not be blank" if address.blank?   
           error_msg << "Pincode name must not be blank" if pincode.blank?
+
+          if loan_amount_str.blank?
+            error_msg << "Amount must not be blank"
+          else
+            loan_product_amount = @branch.same_frequency_branch_loan_product(@center)
+            is_valid_amount = loan_product_amount.blank? ? false : loan_product_amount.map{|amount| amount.to_f}.include?(loan_amount_str.to_f)
+            unless is_valid_amount
+              error_msg << "Loan Amount is not valid"
+            end
+          end
+
           if state.blank?
             error_msg << "State name must not be blank"
           else
@@ -102,6 +111,7 @@ class LoanApplications < Application
               error_msg << "State not found"
             end
           end
+
           unless no_age_parameter
             if dob.blank?
               if is_number?(age_as_on)
