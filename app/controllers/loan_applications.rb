@@ -91,9 +91,17 @@ class LoanApplications < Application
           error_msg << "Either Ration card or Reference 2 is mandatory" if (reference1.blank? && reference2.blank?)
           error_msg << "Applied for amount must not be blank" if loan_amount_str.blank?
           error_msg << "Address name must not be blank" if address.blank?
-          error_msg << "State name must not be blank" if state.blank?
+          
           error_msg << "Pincode name must not be blank" if pincode.blank?
-
+          if state.blank?
+            error_msg << "State name must not be blank"
+          else
+            all_states = BizLocation.get_state_locations
+            is_valid_state = all_states.map{|k| k.name.downcase}.include?(state.downcase)
+            unless is_valid_state
+              error_msg << "State not found"
+            end
+          end
           unless no_age_parameter
             if dob.blank?
               if is_number?(age_as_on)
@@ -125,7 +133,7 @@ class LoanApplications < Application
                   :client_age_as_on_date => client_age_as_on_date,
                   :client_dob => client_dob,
                   :client_address => address,
-                  :client_state =>  state,
+                  :client_state =>  state.capitalize,
                   :client_pincode => pincode,
                   :client_reference1 => reference1,
                   :client_reference1_type => Constants::Masters::RATION_CARD,
@@ -242,7 +250,7 @@ class LoanApplications < Application
     redirect resource(:loan_applications, :bulk_new, :parent_location_id => branch_id, :child_location_id => center_id ), :message => message
   end
 
-  # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system 
+  # this function is responsible for creating new loan applications for new loan applicants a.k.a. clients that do not exist in the system
   def bulk_create
     branch_id = params[:parent_location_id]
     center_id = params[:child_location_id]
