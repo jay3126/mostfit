@@ -32,7 +32,7 @@
   = link_to 'Process Audit', url(:pachecklists,:biz_location => @biz_location), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
 - unless @child_location.blank?
   - if check_checklist_parameters(@child_location.location_level, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil)
-    = link_to 'Surprise Center Visit', url_for_checklist('Surprise Center Visit', "Center", @child_location, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
+    = link_to 'Surprise Center Visit', url(:surprise_center_visits,:biz_location => @biz_location,:center => @child_location, :branch =>@parent_location, :child_locationb => @child_location), :class => 'add grey_button', :style => "margin: 0px; padding-right: 6px; padding-left: 32px;"
   - else
     = link_to "Surprise Center Visit Not Available", "#", :class => "add grey_button", :disabled=>true
   - if check_checklist_parameters(@child_location.location_level, @parent_location, @child_location, session.user.staff_member, get_effective_date, params, nil)

@@ -18,15 +18,17 @@
         %td
           = label "Branch"
         %td
+          = text_field :value => @branch_name, :disabled => true
       %tr
         %td
           = label "Center"
         %td   
+          = text_field :value => @center_name, :disabled => true
       %tr
         %td
           = label "Value Date"
         %td    
-          = text_field :value_date 
+          = date_select :value_date 
     %table 
       %tr
         %th
@@ -36,11 +38,157 @@
         %td
           = label "1"
         %td
-          = label "CONFIRM THAT LESS THAN 3 MEMBERS ARRIVED LATE"
+          CONFIRM THAT LESS THAN 3 MEMBERS ARRIVED LATE
         %td
-          = radio_button :members_late 
-          = radio_button :members_late 
-          
+          = radio_button :members_late, :value => "1"
+          Yes
+          = radio_button :members_late, :value => "0"
+          NO
+      %tr
+        %td
+          = label "2"
+        %td
+          CONFIRM THAT LESS THAN 3 MEMBERS WERE ABSENT 
+        %td
+          = radio_button :members_absent, :value => "1"
+          Yes
+          = radio_button :members_absent, :value => "0"
+          NO          
+      %tr
+        %td
+          = label "3"
+        %td
+          CONFIRM THAT THE CENTER LEADER WAS PRESENT AT THE MEETING 
+        %td
+          = radio_button :leader_was_present_at_meeting, :value => "1"
+          Yes
+          = radio_button :leader_was_present_at_meeting, :value => "0"
+          NO
+      %tr
+        %td
+          = label "4"
+        %td
+          CONFIRM THAT THE CENTER MEMBERS FOLLOWED PROCEDURES 
+        %td
+          = radio_button :center_members_followed_procedures, :value => "1"
+          Yes
+          = radio_button :center_members_followed_procedures, :value => "0"
+          NO
+      %tr
+        %td
+          = label "5"
+        %td
+          CONFIRM THAT THE FIELD OFFICER FOLLOWED PROCEDURES
+        %td
+          = radio_button :field_office_followed_procedures, :value => "1"
+          Yes
+          = radio_button :field_office_followed_procedures, :value => "0"
+          NO
+      %tr
+        %td
+          = label "6"
+        %td
+          CONFIRM THAT THE CENTER LEADER MAINTAINS UP-TO-DATE ATTENDANCE,REGISTERS AND RECEIPTS 
+        %td
+          = radio_button :center_leaders_attendance_utdate, :value => "1"
+          Yes
+          = radio_button :center_leaders_attendance_utdate, :value => "0"
+          NO
+      %tr
+        %td
+          = label "7"
+        %td
+          CONFIRM THAT THE PASSBOOKS AND CENTER FILE WERE UP-TO-DATE AND WITHOUT ANY DISCREPANCY 
+        %td
+          = radio_button :pbook_and_centers_uptdate, :value => "1"
+          Yes
+          = radio_button :pbook_and_centers_uptdate, :value => "0"
+          NO
+      %tr
+        %td
+          = label "8"
+        %td
+          CONFIRM THAT NO MEMBER PAID ANY ADDITIONAL MONEY TO ANY MEMBER/AGENT OR EMPLOYEE 
+        %td
+          = radio_button :no_member_paind_any_add_money, :value => "1"
+          Yes
+          = radio_button :no_member_paind_any_add_money, :value => "0"
+          NO
+      %tr
+        %td
+          = label "9"
+        %td
+          CONFIRM THAT ALL CLAIMS HAVE BEEN SETTLED AND NO AMOUNT IS PENDING 
+        %td
+          = radio_button :all_claims_settled_no_pending, :value => "1"
+          Yes
+          = radio_button :all_claims_settled_no_pending, :value => "0"
+          NO
+      %tr
+        %td
+          = label "10"
+        %td
+          CONFIRM THAT THE CENTER MEETING PLACE OR TIME NOT CHANGED
+        %td
+          = radio_button :all_center_meeting_plcae_ntchgd, :value => "1"
+          Yes
+          = radio_button :all_center_meeting_plcae_ntchgd, :value => "0"
+          NO
+      %tr
+        %td
+          = label "11"
+        %td
+          CONFIRM THAT CENTER FILE HAS BEEN UPDATED WITH PREVIOUS SURPRISE VISITS 
+        %td
+          = radio_button :concern_about_center, :value => "1"
+          Yes
+          = radio_button :concern_about_center, :value => "0"
+          NO
+      %tr
+        %td
+          = label "12"
+        %td
+          ARE THERE ANY CONCERNS ABOUT THIS CENTER
+        %td
+          = radio_button :file_update_with_previous_scvs, :value => "1"
+          Yes
+          = radio_button :file_update_with_previous_scvs, :value => "0"
+          NO
+      %tr
+        %td
+          = label "13"
+        %td
+          General Comments
+        %td 
+          = text_area :genreal_comments
+      %tr
+        %td
+          = label "14"
+        %td
+          Customer Comments
+        %td 
+          = text_area :customer_comments
+      %tr
+        %td
+          = label "15"
+        %td
+          Name of the Officer
+        %td 
+          = text_field :name_of_officer
+      %tr
+        %td
+          = label "16"
+        %td
+          Date
+        %td 
+          = date_select :date
+      %tr
+        %td
+          = label "17"
+        %td
+          Place
+        %td 
+          = text_field :place
 
     = submit "Create"
 

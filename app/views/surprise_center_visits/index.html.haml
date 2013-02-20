@@ -1,4 +1,3 @@
-
 %table
   %tr
   - for surprise_center_visit in @surprise_center_visits
@@ -8,4 +7,4 @@
       %td
         = link_to 'Edit', url(:edit_surprise_center_visit,  surprise_center_visit)
 
-= link_to 'New', url(:new_surprise_center_visit)
+= link_to 'New', url(:new_surprise_center_visit,:center => @center, :branch => @branch)

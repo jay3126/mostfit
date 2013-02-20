@@ -3,6 +3,10 @@ class SurpriseCenterVisits < Application
 
   def index
     @surprise_center_visits = SurpriseCenterVisit.all
+    @center = params[:center]
+    @branch = params[:branch]
+    @center_name = BizLocation.get(@center).name
+    @branch_name = BizLocation.get(@branch).name
     display @surprise_center_visits
   end
 
@@ -15,6 +19,11 @@ class SurpriseCenterVisits < Application
   def new
     only_provides :html
     @surprise_center_visit = SurpriseCenterVisit.new
+    @center = params[:center]
+    @branch = params[:branch]
+    @center_name = BizLocation.get(@center).name
+
+    @branch_name = BizLocation.get(@branch).name
     display @surprise_center_visit
   end
 
@@ -27,7 +36,7 @@ class SurpriseCenterVisits < Application
 
   def create(surprise_center_visit)
     @surprise_center_visit = SurpriseCenterVisit.new(surprise_center_visit)
-    raise @surprise_center_visit.inspect
+
     if @surprise_center_visit.save
       redirect resource(@surprise_center_visit), :message => {:notice => "SurpriseCenterVisit was successfully created"}
     else
