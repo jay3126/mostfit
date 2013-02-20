@@ -240,7 +240,7 @@ module BookKeeper
   def accrue_broken_period_receipts_on_loan_till_date(loan_id, last_month_date)
     if AccrualTransaction.first(:on_product_id => loan_id, :on_product_type => 'lending', :effective_on => last_month_date).blank?
       loan = Lending.get(loan_id, :fields => [:id, :status])
-      if loan.is_outstanding_on_date?(last_month_date)
+      if loan.disbursal_date < last_month_date && loan.is_outstanding_on_date?(last_month_date)
         broken_period_interest = loan.broken_period_interest_due(last_month_date)
         accrual_temporal_type = ACCRUE_BROKEN_PERIOD
         receipt_type = RECEIPT

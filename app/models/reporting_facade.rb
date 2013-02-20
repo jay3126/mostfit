@@ -89,32 +89,35 @@ class ReportingFacade < StandardFacade
       schedule_principal_due = MoneyManager.default_zero_money
       schedule_interest_due = MoneyManager.default_zero_money
       overdue_total_ftd = MoneyManager.default_zero_money
+      schedule_advance_balance = MoneyManager.default_zero_money
     else
       schedule_principal_due = MoneyManager.get_money_instance_least_terms(loan_schedule_amt[0].to_i)
       schedule_interest_due = MoneyManager.get_money_instance_least_terms(loan_schedule_amt[1].to_i)
       schedule_before_on_date = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => schedule_loans, :on_date.lt => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
       schedule_principal_before_on_date = schedule_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_before_on_date[0].to_i)
       schedule_interest_before_on_date = schedule_before_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_before_on_date[1].to_i)
-      loan_receipts_before_on_date = LoanReceipt.all(:lending_id => schedule_loans, :effective_on.lt => on_date)
+      loan_receipts_before_on_date = LoanReceipt.all(:is_advance_adjusted => false, :lending_id => schedule_loans, :effective_on.lt => on_date)
       loan_receipts_amt = LoanReceipt.add_up(loan_receipts_before_on_date) 
       overdue_principal_ftd = schedule_principal_before_on_date > loan_receipts_amt[:principal_received] ? schedule_principal_before_on_date - loan_receipts_amt[:principal_received] : MoneyManager.default_zero_money
       overdue_interest_ftd = schedule_interest_before_on_date > loan_receipts_amt[:interest_received] ? schedule_interest_before_on_date - loan_receipts_amt[:interest_received] : MoneyManager.default_zero_money
+      schedule_advance_balance = loan_receipts_amt[:advance_received] > loan_receipts_amt[:advance_adjusted] ? loan_receipts_amt[:advance_received] - loan_receipts_amt[:advance_adjusted] : MoneyManager.default_zero_money
       overdue_total_ftd = overdue_principal_ftd + overdue_interest_ftd
+      overdue_total_ftd = schedule_advance_balance < overdue_total_ftd ? schedule_advance_balance - overdue_total_ftd : MoneyManager.default_zero_money
     end
     
     non_schedule_loans = disbursed_loans - schedule_loans
     non_schedule = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => non_schedule_loans, :on_date.lt => on_date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
     non_schedule_principal = non_schedule.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(non_schedule[0].to_i)
     non_schedule_interest= non_schedule.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(non_schedule[1].to_i)
-    non_schedule_loan_receipts = non_schedule.blank? ? '' : LoanReceipt.all(:lending_id => non_schedule_loans, :effective_on.lt => on_date)
+    non_schedule_loan_receipts = non_schedule.blank? ? '' : LoanReceipt.all(:is_advance_adjusted => false, :lending_id => non_schedule_loans, :effective_on.lt => on_date)
     non_schedule_loan_receipts_amt = LoanReceipt.add_up(non_schedule_loan_receipts)
     non_schedule_overdue_principal = non_schedule_principal > non_schedule_loan_receipts_amt[:principal_received] ? non_schedule_principal - non_schedule_loan_receipts_amt[:principal_received] : MoneyManager.default_zero_money
     non_schedule_overdue_interest = non_schedule_interest > non_schedule_loan_receipts_amt[:interest_received] ? non_schedule_interest - non_schedule_loan_receipts_amt[:interest_received] : MoneyManager.default_zero_money
     non_schedule_overdue_total = non_schedule_overdue_principal + non_schedule_overdue_interest
     schedule_total = schedule_principal_due + schedule_interest_due
 
-    disbursed_loan_on_date = Lending.all(:id => disbursed_loans_on_date, :disbursal_date => on_date)
-    preclose_loan_on_date = Lending.all(:id => preclose_loans_on_date, :preclosed_on_date => on_date)
+    disbursed_loan_on_date = Lending.all(:id => disbursed_loans_on_date, :disbursal_date => on_date, :fields => [:id, :disbursed_amount])
+    preclose_loan_on_date = Lending.all(:id => preclose_loans_on_date, :preclosed_on_date => on_date, :fields => [:id, :disbursed_amount])
     insurance_policies_on_date = disbursed_loan_on_date.blank? ? [] : disbursed_loan_on_date.simple_insurance_policies
     loan_fee_instance = disbursed_loan_on_date.blank? && preclose_loan_on_date.blank? ? [] : FeeInstance.all(:fee_applied_on_type => :fee_on_loan, :fee_applied_on_type_id => disbursed_loan_on_date.map(&:id)+preclose_loan_on_date.map(&:id))
     insurance_fee_instance = insurance_policies_on_date.blank? ? [] : FeeInstance.all(:fee_applied_on_type => :fee_on_insurance, :fee_applied_on_type_id => insurance_policies_on_date.map(&:id))
@@ -124,29 +127,28 @@ class ReportingFacade < StandardFacade
     
     total_fee_colleatable_on_date = loan_fee_amount + insurance_fee_amount
     
-    loan_fee_receipts_on_date = FeeReceipt.all(:fee_applied_on_type => :fee_on_loan, :accounted_at => at_location_id, :effective_on => on_date).aggregate(:fee_amount.sum) rescue []
+    loan_fee_receipts_on_date = FeeReceipt.sum(:fee_amount, :fee_amount.not => nil, :fee_applied_on_type => :fee_on_loan, :accounted_at => at_location_id, :effective_on => on_date) rescue []
     loan_fee_receipt_amount = loan_fee_receipts_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_fee_receipts_on_date.to_i)
 
-    other_loan_fee_receipts_on_date = FeeReceipt.all(:fee_applied_on_type => :fee_on_insurance, :accounted_at => at_location_id, :effective_on => on_date).aggregate(:fee_amount.sum) rescue []
+    other_loan_fee_receipts_on_date = FeeReceipt.sum(:fee_amount, :fee_amount.not => nil, :fee_applied_on_type => :fee_on_insurance, :accounted_at => at_location_id, :effective_on => on_date) rescue []
     other_fee_receipt_amount = other_loan_fee_receipts_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(other_loan_fee_receipts_on_date.to_i)
 
-    schedule_loan_receipts = schedule_loans.blank? ? [] : LoanReceipt.all(:lending_id => schedule_loans, :effective_on => on_date, 'payment_transaction.payment_towards' => [PAYMENT_TOWARDS_LOAN_REPAYMENT,PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT])
+    schedule_loan_receipts = schedule_loans.blank? ? [] : LoanReceipt.all(:is_advance_adjusted => false, :lending_id => schedule_loans, :effective_on => on_date, 'payment_transaction.payment_towards' => [PAYMENT_TOWARDS_LOAN_REPAYMENT])
     schedule_loan_amts =  LoanReceipt.add_up(schedule_loan_receipts)
     schedule_principal_received = schedule_loan_amts[:principal_received]
     schedule_interest_received = schedule_loan_amts[:interest_received]
     schedule_advance_received = schedule_loan_amts[:advance_received]
     schedule_total_received = schedule_principal_received + schedule_interest_received
 
-    overdue_loan_receipts = non_schedule_loans.blank? ? [] : LoanReceipt.all(:is_advance_adjusted => false, :lending_id => non_schedule_loans, :effective_on => on_date, 'payment_transaction.payment_towards' => [PAYMENT_TOWARDS_LOAN_REPAYMENT,PAYMENT_TOWARDS_LOAN_ADVANCE_ADJUSTMENT])
+    overdue_loan_receipts = non_schedule_loans.blank? ? [] : LoanReceipt.all(:is_advance_adjusted => false, :lending_id => non_schedule_loans, :effective_on => on_date, 'payment_transaction.payment_towards' => [PAYMENT_TOWARDS_LOAN_REPAYMENT])
     overdue_loan_amts =  LoanReceipt.add_up(overdue_loan_receipts)
     overdue_principal_received = overdue_loan_amts[:principal_received]
     overdue_interest_received = overdue_loan_amts[:interest_received]
     non_schedule_advance_received = overdue_loan_amts[:advance_received]
     overdue_total_received = overdue_principal_received + overdue_interest_received
 
-    write_off_receipts = write_off_loans.blank? ? [] : LoanReceipt.all(:is_advance_adjusted => false, :lending_id => write_off_loans, :effective_on => on_date)
-    write_off_amts    = LoanReceipt.add_up(write_off_receipts)
-    recovery_received = write_off_amts[:loan_recovery]
+    write_off_amts = write_off_loans.blank? ? [] : LoanReceipt.sum(:loan_recovery, :is_advance_adjusted => false, :accounted_at => at_location_id, :effective_on => on_date)
+    recovery_received = write_off_amts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(write_off_amts.to_i)
 
     preclose_principal_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[0].to_i)
     preclose_interest_received_on_date = preclose_loan_receipt_on_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(preclose_loan_receipt_on_date[1].to_i)
@@ -154,7 +156,7 @@ class ReportingFacade < StandardFacade
 
     total_advance_received = non_schedule_advance_received + schedule_advance_received
     {:scheduled_principal => schedule_principal_due, :scheduled_interest => schedule_interest_due, :scheduled_total => schedule_total,
-      :advance_amount_exist => advance_available, :overdue_ftd => overdue_total_ftd, :overdue_amt => non_schedule_overdue_total,
+      :scheduled_advance_balance => schedule_advance_balance, :advance_amount_exist => advance_available, :overdue_ftd => overdue_total_ftd, :overdue_amt => non_schedule_overdue_total,
       :scheduled_principal_collected => schedule_principal_received, :scheduled_interest_collected => schedule_interest_received, :scheduled_total_collected => schedule_total_received,
       :advance_received => total_advance_received, :overdue_received => overdue_total_received, :recovery_collected => recovery_received,
       :preclosure_pricipal => preclose_principal_received_on_date, :priclosure_interest => preclose_interest_received_on_date, :total_preclosure => total_preclose_received_on_date,
