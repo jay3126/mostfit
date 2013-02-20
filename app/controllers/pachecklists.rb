@@ -298,6 +298,11 @@ class Pachecklists < Application
 	@ans[52] = @q52
 	@ans[53] = @q53
    @scv_perday = params[:scv_perday]
+   if @scv_perday == "0" || @scv_perday == "6" || @scv_perday == "7"|| @scv_perday == "8"|| @scv_perday == "9"|| @scv_perday == "10"
+       
+   elsif @scv_perday.to_i > 0 || @scv_per_day.to_i < 6 || @scv_perday.to_i > 10
+     redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save "}
+   end
    @meeting_attended_during_ap = params[:meeting_attended_during_ap]
    @branch_management = params[:branch_management]
    @social_audit = params[:social_audit]
@@ -326,11 +331,12 @@ class Pachecklists < Application
    @file_id = session.user.id
    @hash = Marshal.load(serialized_hash)
      @pachecklist.attributes = { :answers => @text}
+      @pachecklist.attributes = { :scv_perday => @scv_perday }
      @pachecklist.attributes = { :performed_by => @performed_by }
      @pachecklist.attributes = { :biz_location_id => @biz_location_id}
      @pachecklist.attributes = { :date_of_audit => @date_of_audit }
      @pachecklist.attributes = { :audit_period => @audit_period }
-     @pachecklist.attributes = { :scv_perday => @scv_perday }
+
      @pachecklist.attributes = { :meeting_attended_during_ap => @meeting_attended_during_ap }
      @pachecklist.attributes = { :branch_management => @branch_management }
      @pachecklist.attributes = { :social_audit => @social_audit }
@@ -341,10 +347,13 @@ class Pachecklists < Application
      @pachecklist.attributes = { :deviation1 => @deviation1 }
      @pachecklist.attributes = { :deviation2 => @deviation2 }
      @pachecklist.attributes = { :deviation3 => @deviation3 }
-
-     @pachecklist.save  
-      redirect url(:pachecklist,@pachecklist.id)
-	display @pachecklist
+     
+     if @pachecklist.save
+      redirect resource(@pachecklist), :message => {:notice => "process audit checklist was successfully created"}
+    else
+      message[:error] = "process audit  failed to be created please enter valid integer values for qualitative fields"
+      redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save "}
+    end
   end 
   def edit(id)
     only_provides :html

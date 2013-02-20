@@ -63,6 +63,11 @@
       %td
         = text_field :value => @pachecklist.audit_period,:disabled => true
     %tr
+      %td
+        %h2 Key Findings:
+      %td
+      %td 
+    %tr
       %th{:align => "center"}
         = label "Positives"
       %th
@@ -105,7 +110,7 @@
     %tr
       %td
       %td
-        = label " Quantitative Aspects "
+        %h2 Quantitative Aspects 
       %td
     %tr
       %th{:width => "10%"}
@@ -728,9 +733,7 @@
 %br
 
 %center
-  %h1
-    = label "Qualitative Aspects"
-       
+  %h2 Qualitative Aspects      
   %p
     %table.tall
       %tr
@@ -757,7 +760,7 @@
           SCV's completed - 50% to 60%- 6 marks    
           %br
         %td 
-          = text_field :value => @pachecklist.scv_perday, :size => "6px",:disabled => true
+          = @pachecklist.scv_perday
       %tr{:width => "500px"}
         %td
           = "No.of 1st meetings attended during audit period"
@@ -773,7 +776,7 @@
           First meetings completed - 50% to 60%- 6 marks    
           %br
         %td 
-          = text_field :value => @pachecklist.meeting_attended_during_ap, :size => "6px" ,:disabled => true
+          = @pachecklist.meeting_attended_during_ap
       %tr{:width => "500px"}
         %td
           =  "Branch management"
@@ -795,7 +798,7 @@
           BM's quality of GRT
           %br
         %td 
-          = text_field :value => @pachecklist.branch_management, :size => "6px"  ,:disabled => true
+          = @pachecklist.branch_management
       %tr{:width => "500px"}
         %td
           =  "Social Audit"
@@ -806,7 +809,7 @@
           %br
           Quality and intensity of social message 
         %td 
-          = text_field :value => @pachecklist.social_audit, :size => "6px" ,:disabled => true
+          = @pachecklist.social_audit
       %tr{:width => "500px"}
         %td
           = "Supervision"
@@ -828,9 +831,9 @@
           BM's quality of GRT
           %br
         %td 
-          = text_field :value => @pachecklist.supervision, :size => "6px",:disabled => true
+          = @pachecklist.supervision
 
-- @qualitative_score = @pachecklist.scv_perday + @pachecklist.meeting_attended_during_ap + @pachecklist.branch_management + @pachecklist.social_audit + @pachecklist.supervision
+- @qualitative_score = @pachecklist.scv_perday.to_i + @pachecklist.meeting_attended_during_ap.to_i + @pachecklist.branch_management.to_i + @pachecklist.social_audit.to_i + @pachecklist.supervision.to_i
 
 %p 
   %table.tall

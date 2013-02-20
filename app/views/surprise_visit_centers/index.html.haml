@@ -1,9 +1,5 @@
 %h1
-  SurpriseVisitCenters controller, index action
-%p
-  Edit this file in
-  %tt
-    app/views/surprise_visit_centers/index.html.erb
+  Surprise Visit Center
 %table
   %tr
   - for surprise_visit_center in @surprise_visit_centers
@@ -13,4 +9,4 @@
       %td
         = link_to 'Edit', url(:edit_surprise_visit_center,  surprise_visit_center)
 
-= link_to 'New', url(:new_surprise_visit_center,:center => @center_name, :branch => @branch_name)
+= link_to 'New', url(:new_surprise_visit_center,:center => @center, :branch => @branch,:biz_location => @biz_location), :class => "green_button"

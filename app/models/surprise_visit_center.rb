@@ -1,4 +1,4 @@
-class SurpriseCenterVisit
+class SurpriseVisitCenter
   include DataMapper::Resource
   
   property :id, Serial
@@ -21,5 +21,10 @@ class SurpriseCenterVisit
   property :name_of_officer, String
   property :date , Date
   property :place, String
+  property :center, String
+  property :branch, String
+
+  belongs_to :biz_location
+
 
 end
