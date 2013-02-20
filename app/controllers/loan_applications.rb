@@ -150,7 +150,7 @@ class LoanApplications < Application
                   :client_reference2 => reference2,
                   :client_reference2_type => reference2_type,
                   :client_guarantor_name => guarantor_name,
-                  :client_guarantor_relationship => guarantor_relationship})
+                  :client_guarantor_relationship => guarantor_relationship.split("-").collect{|r| r.capitalize}.join('-')})
               unless loan_application.save
                 @errors << loan_application.errors.to_a.flatten.join(", ")
               end

@@ -630,12 +630,12 @@ class LoanApplication
       :Daughter        => "K05",
       :Wife            => "K06",
       :Brother         => "K07",
-      :"Mother-In-law"   => "K08",
-      :"Father-In-law"   => "K09",
-      :"Daughter-In-law" => "K10",
+      :"Mother-In-Law"   => "K08",
+      :"Father-In-Law"   => "K09",
+      :"Daughter-In-Law" => "K10",
       :"Sister-In-Law"   => "K11",
       :"Son-In-Law"      => "K12",
-      :"Brother-In-law" => "K13",
+      :"Brother-In-Law" => "K13",
       :"Other"          => "K15"
     }
   end
