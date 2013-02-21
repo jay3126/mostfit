@@ -20,6 +20,7 @@ class LoanApplications < Application
 
     # VALIDATIONS
     @errors << "Please select file" if params[:file].blank?
+    debugger
     @errors << "Invalid file selection (Accepts .xls extension file only)" if params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel"
     if @errors.blank?
       begin
@@ -58,7 +59,7 @@ class LoanApplications < Application
           age_as_on_date         = row["Age as on date"]
           reference1             = row["Ration card no"]
           reference2_type        = row["Reference2 type"]
-          reference2             = row["Reference2"]
+          reference2             = row["Reference2 No."]
           address                = row["Address"]
           state                  = row["State"]
           pincode                = row["Pincode"]
@@ -148,7 +149,7 @@ class LoanApplications < Application
                   :client_reference1 => reference1,
                   :client_reference1_type => Constants::Masters::RATION_CARD,
                   :client_reference2 => reference2,
-                  :client_reference2_type => reference2_type,
+                  :client_reference2_type => reference2.blank? ? Constants::Masters::DEFAULT_REFERENCE2_TYPE : reference2_type,
                   :client_guarantor_name => guarantor_name,
                   :client_guarantor_relationship => guarantor_relationship.split("-").collect{|r| r.capitalize}.join('-')})
               unless loan_application.save
