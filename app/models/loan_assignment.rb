@@ -21,12 +21,12 @@ class LoanAssignment
 
   def cannot_both_sell_and_encumber
     validate_value = true
-    if self.new?
-      any_loan_assignment = LoanAssignment.last(:loan_id => self.loan_id)
-      validate_value = (any_loan_assignment.blank? || any_loan_assignment.is_additional_encumbered) ? true :
-        [false, "There is already an assignment for the loan with ID #{self.loan_id} in effect"]
-    end
-    validate_value
+    #    if self.new?
+    #      any_loan_assignment = LoanAssignment.last(:loan_id => self.loan_id)
+    #      validate_value = (any_loan_assignment.blank? || any_loan_assignment.is_additional_encumbered) ? true :
+    #        [false, "There is already an assignment for the loan with ID #{self.loan_id} in effect"]
+    #    end
+    #    validate_value
   end
 
   def loan_exists?

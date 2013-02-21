@@ -1243,19 +1243,19 @@ class Lending
   end
 
   def self.is_loan_eligible_for_loan_assignments?(loan_id)
-    loan_assignment_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
-    loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan_id, Date.today)
+    #    loan_assignment_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
+    #    loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan_id, Date.today)
     loan = Lending.get loan_id
     client = Client.get(loan.loan_borrower.counterparty_id)
     msg = "Ineligible Loan for assignment"
     if Client.is_claim_processing_or_inactive?(client)
       return [false, msg+" (Client is under claim processing)"]
     end
-    unless loan_assignment.blank? 
-      if !(loan_assignment.is_additional_encumbered)
-        return [false, msg+" (Loan is already assigned)"]
-      end
-    end
+    #    unless loan_assignment.blank?
+    #      if !(loan_assignment.is_additional_encumbered)
+    #        return [false, msg+" (Loan is already assigned)"]
+    #      end
+    #    end
     unless loan.is_outstanding?
       return [false, msg+" (Loan does not have outstanding)"]
     end

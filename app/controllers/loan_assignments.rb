@@ -114,22 +114,29 @@ class LoanAssignments < Application
                   if (assignment_type != "s" && assignment_type != "e" && assignment_type != "ae")
                     msg << "Assignment type: #{assignment_type} is not defined.(Use 's' for Securitization and 'e' for Encumbrance and 'ae' for Additional Encumbrance)"
                   else
-                    if (loan_assignment && loan_assignment.is_additional_encumbered) || (is_default_tranch_set? && get_default_tranch_id == tranch_id.to_i)
-                      if assignment_type == "s"
-                        assignment_nature = securitization
-                      else
-                        assignment_nature = encumbrance
-                      end
+                    if (is_default_tranch_set? && get_default_tranch_id) && (!loan_assignment.blank? && loan_assignment.tranch_id == get_default_tranch_id)
+                      assignment_nature = assignment_type == "s" ? securitization : encumbrance
+                    elsif (assignment_type == "e" || assignment_type == "ae") && (is_default_tranch_set? && get_default_tranch_id == tranch_id.to_i)
+                      assignment_nature = assignment_type == "s" ? securitization : encumbrance
                     else
-                      if (assignment_type == "s" && tranch.assignment_type == "securitization")
-                        assignment_nature = securitization
-                      elsif (assignment_type == "e" && tranch.assignment_type == "encumbrance") || (assignment_type == "ae")
-                        assignment_nature = encumbrance
+                      if (loan_assignment && loan_assignment.is_additional_encumbered) || (is_default_tranch_set? && get_default_tranch_id == tranch_id.to_i)
+                        if assignment_type == "s"
+                          assignment_nature = securitization
+                        else
+                          assignment_nature = encumbrance
+                        end
                       else
-                        msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
+                        if (assignment_type == "s" && tranch.assignment_type == "securitization")
+                          assignment_nature = securitization
+                        elsif (assignment_type == "e" && tranch.assignment_type == "encumbrance") || (assignment_type == "ae")
+                          assignment_nature = encumbrance
+                        else
+                          msg << "Tranch ID: #{tranch.id} can only be used for #{tranch.assignment_type}"
+                        end
                       end
                     end
-                    if assignment_nature == :securitised
+
+                    if msg.blank? && assignment_nature == :securitised
                       msg << "Ineligible Loan for assignment: (Loan does not have minimum #{get_no_of_minimum_repayments} repayments)" unless (Lending.get(id).loan_receipts.size >= get_no_of_minimum_repayments)
                     end
                   end
@@ -176,7 +183,7 @@ class LoanAssignments < Application
   def get_all_loan_assignments
     page = params[:page]||1
     limit = params[:limit]||20
-    @all_loan_assignments = LoanAssignment.all
+    @all_loan_assignments = LoanAssignment.all(:order => [:created_at.desc])
     @pagination_loan_assingnments = @all_loan_assignments.blank? ? [] : @all_loan_assignments.map(&:id).paginate(:page => page, :per_page => limit)
     @loan_assignments = @all_loan_assignments.paginate(:page => page, :per_page => limit)
   end
