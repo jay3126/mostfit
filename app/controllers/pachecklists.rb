@@ -175,9 +175,9 @@ class Pachecklists < Application
      @pachecklist.attributes = { :deviation2 => @deviation2 }
      @pachecklist.attributes = { :deviation3 => @deviation3 }
      if @pachecklist.save
-      redirect url(:pachecklist,@pachecklist.id)
+      redirect "/pachecklists?biz_location=#{@biz_location_id}", :message => {:notice => "process audit checklist was successfully created"}
      end  
-      redirect url(:user_location,@biz_location_id)
+      redirect "/pachecklists?biz_location=#{@biz_location_id}"
   end
   def allanswers
    only_provides :html

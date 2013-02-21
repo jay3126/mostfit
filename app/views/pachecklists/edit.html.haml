@@ -108,6 +108,8 @@
           = label "audit period"
         %td
           = text_field :audit_period
+  %h2
+    Key Findings:
   %p
     %table.tall
       %tr
@@ -148,7 +150,8 @@
           = label "3"
         %td
           = text_field :deviation3
-
+  %h2
+    %center Quantitative Aspects
   %p
     %table.tall
       %tr{:width => "100%"}
@@ -586,17 +589,19 @@
         %td
           = check_box :q53_53
           = hidden_field :biz_id, :value => @biz_location.id
+  %h2
+    %center Quantitative Aspects
   %p
-    %table.tall
+    %table.tall.report.weeksheet.nojs.process_audit
       %tr
-        %th
+        %th{:align => "left",:style=>"width:600px;"}
           = label "Creteria"
         %th
           = label "Total Score"
         %th
           = label "Audit Score"
       %tr{:width => "500px"}
-        %td
+        %td{:align => "left",:style=>"width:600px;"}
           = label "Process"
           %br
           No.of SCV's conducted per day
@@ -614,7 +619,7 @@
         %td 
           = text_field :scv_perday, :size => "6px"  
       %tr{:width => "500px"}
-        %td
+        %td{:align => "left",:style=>"width:600px;"}
           = label "No.of 1st meetings attended during audit period"
           %br
           First meetings completed - 90% to 100%- 10 marks  
@@ -630,7 +635,7 @@
         %td 
           = text_field :meeting_attended_during_ap, :size => "6px" 
       %tr{:width => "500px"}
-        %td
+        %td{:align => "left",:style=>"width:600px;"}
           = label "Branch management"
           %br
           Quality of CPV's and data collection from field 
@@ -652,7 +657,7 @@
         %td 
           = text_field :branch_management, :size => "6px"  
       %tr{:width => "500px"}
-        %td
+        %td{:align => "left",:style=>"width:600px;"}
           = label "Social Audit"
           %br
           Members awareness of savings 
@@ -663,7 +668,7 @@
         %td 
           = text_field :social_audit, :size => "6px" 
       %tr{:width => "500px"}
-        %td
+        %td{:align => "left",:style=>"width:600px;"}
           = label "Supervision"
           %br
           No.of visits made by Area manager and Audit manager during audit period
