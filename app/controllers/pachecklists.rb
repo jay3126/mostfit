@@ -298,10 +298,10 @@ class Pachecklists < Application
 	@ans[52] = @q52
 	@ans[53] = @q53
    @scv_perday = params[:scv_perday]
-   if @scv_perday == "0" || @scv_perday == "6" || @scv_perday == "7"|| @scv_perday == "8"|| @scv_perday == "9"|| @scv_perday == "10"
+   if @scv_perday == "0" || @scv_perday == "6" || @scv_perday == "7"|| @scv_perday == "8"|| @scv_perday == "9"|| @scv_perday == "10" || @scv_perday == "" || @scv_perday == nil
        
    elsif @scv_perday.to_i > 0 || @scv_per_day.to_i < 6 || @scv_perday.to_i > 10
-     redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save "}
+     redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save please enter  valid integer values to qualitative aspects  "}
    end
    @meeting_attended_during_ap = params[:meeting_attended_during_ap]
    @branch_management = params[:branch_management]
@@ -313,13 +313,7 @@ class Pachecklists < Application
    @deviation1 = params[:deviation1]
    @deviation2 = params[:deviation2]
    @deviation3 = params[:deviation3]
-     if @scv_perday.to_i < 6 || @scv_perday.to_i > 10
-           message[:error] = "Values must be either 0 or between 6 - 10"
-	   elsif @scv_perday == "0"
-		   raise "exception".inspect	
-	   else
-	    	   raise "true".inspect
-	   end
+     
 
 
    @text =  @ans.map {|k,vs| vs.map {|v| "#{k},#{v}"}}.join(",")
@@ -352,7 +346,7 @@ class Pachecklists < Application
       redirect resource(@pachecklist), :message => {:notice => "process audit checklist was successfully created"}
     else
       message[:error] = "process audit  failed to be created please enter valid integer values for qualitative fields"
-      redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save "}
+      redirect url(:answers_pachecklists, :biz_location_id => @biz_location_id), :message => {:notice => "process audit failed to save,please enter valid integer values for qualitative fields "}
     end
   end 
   def edit(id)

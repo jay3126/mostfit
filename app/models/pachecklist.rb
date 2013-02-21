@@ -31,7 +31,7 @@ class Pachecklist
   validates_with_method :supervision , :method => :supervision?
 
   def scv_perday?
-   if scv_perday == "6" || scv_perday == "7" || scv_perday == "8" || scv_perday == "9" ||scv_perday == "10" || scv_perday == "0"
+   if scv_perday == "6" || scv_perday == "7" || scv_perday == "8" || scv_perday == "9" ||scv_perday == "10" || scv_perday == "0"|| @scv_perday == "" || @scv_perday == nil
      return [true,"yes"]
    else
      return [false,"No"]
@@ -39,7 +39,7 @@ class Pachecklist
   end
  
    def meeting_attended_during_ap?
-   if meeting_attended_during_ap == "6" || meeting_attended_during_ap == "7" || meeting_attended_during_ap == "8" || meeting_attended_during_ap == "9" || meeting_attended_during_ap == "10" || meeting_attended_during_ap == "0"
+   if meeting_attended_during_ap == "6" || meeting_attended_during_ap == "7" || meeting_attended_during_ap == "8" || meeting_attended_during_ap == "9" || meeting_attended_during_ap == "10" || meeting_attended_during_ap == "0" || meeting_attended_during_ap == "" || meeting_attended_during_ap == nil
      return [true,"yes"]
    else
      return [false,"No"]
@@ -47,7 +47,7 @@ class Pachecklist
   end
  
    def branch_management?
-   if branch_management == "6" || branch_management == "7" || branch_management == "8" || branch_management == "9" || branch_management == "10" || branch_management == "0"
+   if branch_management == "6" || branch_management == "7" || branch_management == "8" || branch_management == "9" || branch_management == "10" || branch_management == "0"|| branch_management == "" || branch_management == nil
      return [true,"yes"]
    else
      return [false,"No"]
@@ -55,7 +55,7 @@ class Pachecklist
   end
   
     def social_audit?
-   if social_audit == "6" || social_audit == "7" || social_audit == "8" || social_audit == "9" || social_audit == "10" || social_audit == "0"
+   if social_audit == "6" || social_audit == "7" || social_audit == "8" || social_audit == "9" || social_audit == "10" || social_audit == "0" || social_audit == nil || social_audit == ""
      return [true,"yes"]
    else
      return [false,"No"]
@@ -63,7 +63,7 @@ class Pachecklist
   end 
   
     def supervision?
-   if supervision == "6" || supervision == "7" || supervision == "8" || supervision == "9" || supervision == "10" || supervision == "0"
+   if supervision == "6" || supervision == "7" || supervision == "8" || supervision == "9" || supervision == "10" || supervision == "0"|| supervision == "" || supervision == nil
      return [true,"yes"]
    else
      return [false,"No"]

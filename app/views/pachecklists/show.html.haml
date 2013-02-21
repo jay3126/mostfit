@@ -29,47 +29,48 @@
   - @total = @answers.length
   - @pachecklist2 = @pachecklist.id
   - i=0
-#DataTables_Table_0_wrapper.dataTables_wrapper{:role => "grid"}
-  .fg-toolbar.ui-toolbar.ui-widget-header.ui-corner-tl.ui-corner-tr.ui-helper-clearfix
-    .DTTT_container.ui-buttonset.ui-buttonset-multi
-      %a#ToolTables_DataTables_Table_0_4.DTTT_button.ui-button.ui-state-default.DTTT_button_print{:title => "View print view"}
-        %span Print
 %p
-  %table.tall.report.weeksheet.nojs.process_audit
-    %thead	
-      %tr
-        %td
-          = label "Branch Name"
-        %td 
-          = text_field :value => @biz_location.name,:disabled=>true
+  %table.tall.report.weeksheet.nojs.process_audit	
+    %tr
+      %td
+      %td{:align => "left"}
+        Branch Name
+      %td{:align => "left"}
+        = text_field :value => @biz_location.name,:disabled=>true
     %tr 
       %td
-        = label "Name of the branch manager"
-      %td
+      %td{:align => "left"}
+        Name of the branch manager
+      %td{:align => "left"}
         = text_field :value => @managed_by.name,:disabled=>true
     %tr
       %td
-        = label "Name of the Area Manager"
-      %td
+      %td{:align => "left"}
+        Name of the Area Manager
+      %td{:align => "left"}
         = text_field :value => @area_manager, :disabled => true
     %tr
       %td
-        = label "Date of Audit"
-      %td
+      %td{:align => "left"}
+        Date of Audit
+      %td{:align => "left"}
         = text_field :value => @pachecklist.date_of_audit,:disabled => true
     %tr
       %td
-        = label "audit period"
-      %td
+      %td{:align => "left"}
+        Audit period
+      %td{:align => "left"}
         = text_field :value => @pachecklist.audit_period,:disabled => true
     %tr
       %td
-        %h2 Key Findings:
       %td
+        %h2 
+          %center
+            Key Findings:
       %td 
     %tr
       %th{:align => "center"}
-        = label "Positives"
+        %h4 Positives
       %th
       %th
     %tr
@@ -77,19 +78,22 @@
         = label "1"
       %td 
         = text_field :value => @pachecklist.positive1,:disabled => true
+      %td
     %tr 
       %td
         = label "2"
       %td
         = text_field :value => @pachecklist.postive2,:disabled => true
+      %td
     %tr
       %td
         = label "3"
       %td
         = text_field :value => @pachecklist.positive3,:disabled => true
+      %td
     %tr
       %th{:align => "left"}
-        = label "Deviations"
+        %h4 Deviations
       %th
       %th
     %tr
@@ -97,794 +101,790 @@
         = label "1"
       %td
         = text_field :value => @pachecklist.deviation1,:disabled => true
+      %td
     %tr
       %td
         = label "2"
       %td
         = text_field :value => @pachecklist.deviation2,:disabled => true
+      %td
     %tr
       %td
         = label "3"
       %td
         = text_field :value => @pachecklist.deviation3,:disabled => true
-    %tr
       %td
-      %td
-        %h2 Quantitative Aspects 
-      %td
+
+%center
+  %h2 Quantitative Aspects 
+
+  %table.tall.report.weeksheet.nojs.process_audit
     %tr
       %th{:width => "10%"}
       %th{:align => "left"}
-        Branch Related
+        %h4 
+          Branch Related
       %th{:width => "10%"}
     %tr
-      %td
-        = 1
-      %td
-        = "Is the claim amount paid?"
-      %td
+      %td{:align => "left"}
+        1
+      %td{:align => "left"}
+        Is the claim amount paid?
+      %td{:align => "left"}
         - if @hash["1"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 2
-      %td
+      %td{:align => "left"}
         = "BM AO and Ro read on time?"
-      %td
+      %td{:align => "left"}
         - if @hash["2"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 3
-      %td
+      %td{:align => "left"}
         = "Pledge conducted?"
-      %td
+      %td{:align => "left"}
         - if @hash["3"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 4
-      %td
+      %td{:align => "left"}
         = "Is RO carryin stationary which are required ?"
-      %td
+      %td{:align => "left"}
         - if @hash["4"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 5
-      %td
+      %td{:align => "left"}
         = "Are Employees carrying ID cards ?"
-      %td
+      %td{:align => "left"}
         - if @hash["5"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th{:align => "center"}
-        = label "Registers"
+        %h4 Registers
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 6
-      %td
+      %td{:align => "left"}
         = "Petty cash register maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["6"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 7
-      %td
+      %td{:align => "left"}
         = "Member attendance register maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["7"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 8
-      %td
+      %td{:align => "left"}
         = "Center meeting Review ?"
-      %td
+      %td{:align => "left"}
         - if @hash["8"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 9
-      %td
+      %td{:align => "left"}
         = "Death claim Register ?"
-      %td
+      %td{:align => "left"}
         - if @hash["9"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 10
-      %td
+      %td{:align => "left"}
         = "Stock register maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["10"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 11
-      %td
+      %td{:align => "left"}
         = "Key register maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["11"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 12
-      %td
+      %td{:align => "left"}
         = "Statutory registers maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["12"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 13
-      %td
+      %td{:align => "left"}
         = "Movement register  ?"
-      %td
+      %td{:align => "left"}
         - if @hash["13"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 14
-      %td
+      %td{:align => "left"}
         = "Member attendance register maintained ?"
-      %td
+      %td{:align => "left"}
         - if @hash["14"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th{:align => "center"}
-        = label "Process"
+        %h4 Process
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 15
-      %td
+      %td{:align => "left"}
         = "Disbursement process followed ?"
-      %td
+      %td{:align => "left"}
         - if @hash["15"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 16
-      %td
+      %td{:align => "left"}
         = "Collection process followed ?"
-      %td
+      %td{:align => "left"}
         - if @hash["16"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 17
-      %td
+      %td{:align => "left"}
         = "Display of statutory and legal documents ?"
-      %td
+      %td{:align => "left"}
         - if @hash["17"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 18
-      %td
+      %td{:align => "left"}
         = "Display are survey chart and branch approval ?"
-      %td
+      %td{:align => "left"}
         - if @hash["18"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th
-        = label "Center meeting"
+        %h4 Center meeting
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 19
-      %td
+      %td{:align => "left"}
         = "Is Ro coming on time for meetings ?"
-      %td
+      %td{:align => "left"}
         - if @hash["19"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 20
-      %td
+      %td{:align => "left"}
         = "Are the meetings conducted on scheduled time ?"
-      %td
+      %td{:align => "left"}
         - if @hash["20"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 21
-      %td
+      %td{:align => "left"}
         = "Is the collection of EMI happening as per process ?"
-      %td
+      %td{:align => "left"}
         - if @hash["21"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 22
-      %td
+      %td{:align => "left"}
         = "Are proper reciept given and maintained in the center life ?"
-      %td
+      %td{:align => "left"}
         - if @hash["22"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 23
-      %td
+      %td{:align => "left"}
         = "Currency details for Rs 500 and and 1000 by RO ?"
-      %td
+      %td{:align => "left"}
         - if @hash["23"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 24
-      %td
+      %td{:align => "left"}
         = "Pledge conducted before the meeting ?"
-      %td
+      %td{:align => "left"}
         - if @hash["24"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 25
-      %td
+      %td{:align => "left"}
         = "Passbook updation with out any dicrepancy ?"
-      %td
+      %td{:align => "left"}
         - if @hash["25"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th{:align => "center"}
-        = label "GRT"
+        %h4 GRT
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 26
-      %td
+      %td{:align => "left"}
         = "Is the BM reached on time ?"
-      %td
+      %td{:align => "left"}
         - if @hash["26"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 27
-      %td
+      %td{:align => "left"}
         = "Is the BM conducting GRT as per policy ?"
-      %td
+      %td{:align => "left"}
         - if @hash["27"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 28
-      %td
+      %td{:align => "left"}
         = "Are the application forms and details are verified with members ?"
-      %td
+      %td{:align => "left"}
         - if @hash["28"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 29
-      %td
+      %td{:align => "left"}
         = "Is BM carrying the GRT chart ?"
-      %td
+      %td{:align => "left"}
         - if @hash["29"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th{:align => "center"}
-        = label "CGT"
+        %h4 CGT
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 30
-      %td
+      %td{:align => "left"}
         = "Is the RO reached on time?"
-      %td
+      %td{:align => "left"}
         - if @hash["30"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 31
-      %td
+      %td{:align => "left"}
         = "Does he follows the CGT kit ?"
-      %td
+      %td{:align => "left"}
         - if @hash["31"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 32
-      %td
+      %td{:align => "left"}
         = "Are the members aware of the regularity requirement ?"
-      %td
+      %td{:align => "left"}
         - if @hash["32"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 33
-      %td
+      %td{:align => "left"}
         = "Pledge conducted before the meeting ?"
-      %td
+      %td{:align => "left"}
         - if @hash["33"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 34
-      %td
+      %td{:align => "left"}
         = "Are the members aware of the transactions IRR ?"
-      %td
+      %td{:align => "left"}
         - if @hash["34"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 35
-      %td
+      %td{:align => "left"}
         = "Are the members aware of the processing the charges and insurances ?"
-      %td
+      %td{:align => "left"}
         - if @hash["35"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 36
-      %td
+      %td{:align => "left"}
         = "Are the members aware of the JLG concept ?"
-      %td
+      %td{:align => "left"}
         - if @hash["36"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
       %th
       %th{:align => "center"}
-        = label"AO CPV"
+        %h4 AO CPV
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 37
-      %td
+      %td{:align => "left"}
         = "Is AO attending the every members house for verifications  ?"
-      %td
+      %td{:align => "left"}
         - if @hash["37"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"  
+          No  
     %tr
-      %td
+      %td{:align => "left"}
         = 38
-      %td
+      %td{:align => "left"}
         = "Is he capturing the details and applying the credit names and income criteria ?"
-      %td
+      %td{:align => "left"}
         - if @hash["38"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 39
-      %td
+      %td{:align => "left"}
         = "Is AO sending the credit buereou into correctly and ontime ?"
-      %td
+      %td{:align => "left"}
         - if @hash["39"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
       %th
       %th
-        = label "RO CPV"
+        %h4 RO CPV
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 40
-      %td
+      %td{:align => "left"}
         = "Is RO visiting every members house for rent ?"
-      %td
+      %td{:align => "left"}
         - if @hash["40"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"   
+          No   
     %tr
-      %td
+      %td{:align => "left"}
         = 41
-      %td
+      %td{:align => "left"}
         = "Is RO informing the credit norms for loan availability ?"
-      %td
+      %td{:align => "left"}
         - if @hash["41"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
       %th
       %th{:align => "center"}
-        = label "Disbursment"
+        %h4 Disbursment
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 42
-      %td
+      %td{:align => "left"}
         = "AO and BM both are present for disbursement ?"
-      %td
+      %td{:align => "left"}
         - if @hash["42"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 43
-      %td
+      %td{:align => "left"}
         = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
-      %td
+      %td{:align => "left"}
         - if @hash["43"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 44
-      %td
+      %td{:align => "left"}
         = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
-      %td
+      %td{:align => "left"}
         - if @hash["44"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"  
+          No  
     %tr
-      %td
+      %td{:align => "left"}
         = 45
-      %td
+      %td{:align => "left"}
         = "Are they collecting fees as per norms ?"
-      %td
+      %td{:align => "left"}
         - if @hash["45"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 46
-      %td
+      %td{:align => "left"}
         = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
-      %td
+      %td{:align => "left"}
         - if @hash["46"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
-      %td
-        = label "Banking and collection amount"
-      %td
+      %th
+      %th
+        %h4 Banking and collection amount
+      %th
     %tr
-      %td
+      %td{:align => "left"}
         = 47
-      %td
+      %td{:align => "left"}
         = "Are all the RO's are returning back on time ?"
-      %td
+      %td{:align => "left"}
         - if @hash["47"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 48
-      %td
+      %td{:align => "left"}
         = "Is the AO sending the cash report ti HO as specified timee and format ?"
-      %td
+      %td{:align => "left"}
         - if @hash["48"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No" 
+          No 
     %tr
-      %td
+      %td{:align => "left"}
         = 49
-      %td
+      %td{:align => "left"}
         = "Is the collection amount banked as per process ?"
-      %td
+      %td{:align => "left"}
         - if @hash["49"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 50
-      %td
+      %td{:align => "left"}
         = "Is the pending member disbursment happening in presence of center ?"
-      %td
+      %td{:align => "left"}
         - if @hash["50"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
       %th
       %th{:align => "center"}
-        = label "Insurance and Claims"
+        %h4 Insurance and Claims
       %th
     %tr
-      %td
+      %td{:align => "left"}
         = 51
-      %td
+      %td{:align => "left"}
         = "Is the insurance documents collected on time as intimated?"
-      %td
+      %td{:align => "left"}
         - if @hash["51"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 52
-      %td
+      %td{:align => "left"}
         = "Is the claim papers submitted ontime to HO ?"
-      %td
+      %td{:align => "left"}
         - if @hash["52"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
+          No
     %tr
-      %td
+      %td{:align => "left"}
         = 53
-      %td
+      %td{:align => "left"}
         = "Is the claim amount paid ?"
-      %td
+      %td{:align => "left"}
         - if @hash["53"] == "1"
-          = label "yes"
+          yes
         - else
-          = label "No"
- 
-- @i = 0
-- @answers.each do |item|
-  - if item == "1"
-    - @i+=1
-  - else
-- @rank = (@i.to_i * 100)/(@answers.length)
-- @marks = 0
-- if @rank >= 90 && @rank <= 100
-  - @marks = 10
-- elsif @rank >= 80 && @rank <= 90
-  - @marks = 9
-- elsif @rank >= 70 && @rank <= 80
-  - @marks = 8
-- elsif @rank >= 60 && @rank <= 70
-  - @marks = 7
-- elsif @rank >= 50 && @rank <= 60
-  - @marks = 6
-- else
-  - @marks = 0
-%hr
-%h1
-%table
-%tr
-%td
-= label "SubTotal:"
-%td
-= @i
-%tr
-%td
-
-%td
-
-%br
-
-%center
-  %h2 Qualitative Aspects      
-  %p
-    %table.tall
-      %tr
-        %th
-          = label "Creteria"
-        %th
-          = label "Total Score"
-        %th
-          = label "Audit Score"
-      %tr{:width => "500px"}
-        %td
-          =  "Process"
-          %br
-          No.of SCV's conducted per day
-          %br
-          SCV's completed - 90% to 100%- 10 marks  
-          %br
-          SCV's completed - 80% to 90%-  9 marks   
-          %br
-          SCV's completed - 70% to 80%- 8 marks    
-          %br
-          SCV's completed - 60% to 70%- 7 marks    
-          %br
-          SCV's completed - 50% to 60%- 6 marks    
-          %br
-        %td 
-          = @pachecklist.scv_perday
-      %tr{:width => "500px"}
-        %td
-          = "No.of 1st meetings attended during audit period"
-          %br
-          First meetings completed - 90% to 100%- 10 marks  
-          %br
-          First meetings completed - 80% to 90%-  9 marks   
-          %br
-          First meetings completed - 70% to 80%- 8 marks    
-          %br
-          First meetings completed - 60% to 70%- 7 marks    
-          %br
-          First meetings completed - 50% to 60%- 6 marks    
-          %br
-        %td 
-          = @pachecklist.meeting_attended_during_ap
-      %tr{:width => "500px"}
-        %td
-          =  "Branch management"
-          %br
-          Quality of CPV's and data collection from field 
-          %br
-          Updations of cash registers on daily basis   
-          %br
-          Disbusrment of photo uploading    
-          %br
-          Updation of other general registers
-          %br
-          Statutory fulfilment
-          %br
-          BM's quality SCV
-          %br
-          BM's participation in cash related activities
-          %br
-          BM's quality of GRT
-          %br
-        %td 
-          = @pachecklist.branch_management
-      %tr{:width => "500px"}
-        %td
-          =  "Social Audit"
-          %br
-          Members awareness of savings 
-          %br
-          Average percentage of Bank account holders
-          %br
-          Quality and intensity of social message 
-        %td 
-          = @pachecklist.social_audit
-      %tr{:width => "500px"}
-        %td
-          = "Supervision"
-          %br
-          No.of visits made by Area manager and Audit manager during audit period
-          %br
-          Area Manager -  
-          %br
-          Audit Manager    
-          %br
-          Updation of other general registers
-          %br
-          Statutory fulfilment
-          %br
-          BM's quality SCV
-          %br
-          BM's participation in cash related activities
-          %br
-          BM's quality of GRT
-          %br
-        %td 
-          = @pachecklist.supervision
-
-- @qualitative_score = @pachecklist.scv_perday.to_i + @pachecklist.meeting_attended_during_ap.to_i + @pachecklist.branch_management.to_i + @pachecklist.social_audit.to_i + @pachecklist.supervision.to_i
-
-%p 
-  %table.tall
-    %tr
-      %th
-        = label  "Final Score:"
-      %th
-        = label  ""
+          No
+          - @i = 0
+          - @answers.each do |item|
+            - if item == "1"
+              - @i+=1
+            - else
+          - @rank = (@i.to_i * 100)/(@answers.length)
+          - @marks = 0
+          - if @rank >= 90 && @rank <= 100
+            - @marks = 10
+          - elsif @rank >= 80 && @rank <= 90
+            - @marks = 9
+          - elsif @rank >= 70 && @rank <= 80
+            - @marks = 8
+          - elsif @rank >= 60 && @rank <= 70
+            - @marks = 7
+          - elsif @rank >= 50 && @rank <= 60
+            - @marks = 6
+          - else
+            - @marks = 0
     %tr
       %td
-        = label "Quantitative Aspects "
+      %td{:align => "left"}
+        %h4 SubTotal:
       %td
         = @i
+
+%center
+  %h2 Qualitative Aspects
+  %table.tall.report.weeksheet.nojs.process_audit
     %tr
+      %th{:align => "left",:style=>"width:600px;"}
+        %h4 Creteria 
+      %th{:align => "left"}
+        %h4 Total Score
+      %th{:align => "left"}
+        %h4 Audit Score
+    %tr
+      %td{:align => "left",:style=>"width:600px;"}
+        %h4 Process
+        %br
+        No.of SCV's conducted per day
+        %br
+        SCV's completed - 90% to 100%- 10 marks  
+        %br
+        SCV's completed - 80% to 90%-  9 marks   
+        %br
+        SCV's completed - 70% to 80%- 8 marks    
+        %br
+        SCV's completed - 60% to 70%- 7 marks    
+        %br
+        SCV's completed - 50% to 60%- 6 marks    
+        %br
+      %td 
+        = @pachecklist.scv_perday
       %td
-        = label "Qualitative Aspects "
+    %tr
+      %td{:align => "left",:style=>"width:600px;"}
+        %h4 No.of 1st meetings attended during audit period"
+        %br
+        First meetings completed - 90% to 100%- 10 marks  
+        %br
+        First meetings completed - 80% to 90%-  9 marks   
+        %br
+        First meetings completed - 70% to 80%- 8 marks    
+        %br
+        First meetings completed - 60% to 70%- 7 marks    
+        %br
+        First meetings completed - 50% to 60%- 6 marks    
+        %br
+      %td 
+        = @pachecklist.meeting_attended_during_ap
       %td
+    %tr
+      %td{:align => "left",:style=>"width:600px;"}
+        %h4 Branch management
+        %br
+        Quality of CPV's and data collection from field 
+        %br
+        Updations of cash registers on daily basis   
+        %br
+        Disbusrment of photo uploading    
+        %br
+        Updation of other general registers
+        %br
+        Statutory fulfilment
+        %br
+        BM's quality SCV
+        %br
+        BM's participation in cash related activities
+        %br
+        BM's quality of GRT
+        %br
+      %td 
+        = @pachecklist.branch_management
+      %td
+    %tr
+      %td{:align => "left",:style=>"width:600px;"}
+        %h5 Social Audit
+        %br
+        Members awareness of savings 
+        %br
+        Average percentage of Bank account holders
+        %br
+        Quality and intensity of social message 
+      %td 
+        = @pachecklist.social_audit
+      %td
+    %tr
+      %td{:align => "left",:style=>"width:600px;"}
+        %h5 Supervision
+        %br
+        No.of visits made by Area manager and Audit manager during audit period
+        %br
+        Area Manager -  
+        %br
+        Audit Manager    
+        %br
+        Updation of other general registers
+        %br
+        Statutory fulfilment
+        %br
+        BM's quality SCV
+        %br
+        BM's participation in cash related activities
+        %br
+        BM's quality of GRT
+        %br
+      %td 
+        = @pachecklist.supervision
+      %td
+        - @qualitative_score = @pachecklist.scv_perday.to_i + @pachecklist.meeting_attended_during_ap.to_i + @pachecklist.branch_management.to_i + @pachecklist.social_audit.to_i + @pachecklist.supervision.to_i
+  %table.tall.report.weeksheet.nojs.process_audit  
+    %tr
+      %th
+      %th
+        %h4 Final Score:
+      %th
+        
+    %tr
+      %td{:align => "left"}
+      %td{:align => "left"}
+        %h4 Quantitative Aspects 
+      %td{:align => "left"}
+        = @i
+    %tr
+      %td{:align => "left"}
+      %td{:align => "left"}
+        %h4 Qualitative Aspects 
+      %td{:align => "left"}
         = @qualitative_score
     %tr
-      %td
-        = label "Grand Total"
-      %td
+      %td{:align => "left"}
+      %td{:align => "left"}
+        %h4 Grand Total
+      %td{:align => "left"}
         = @i + @qualitative_score
-
-%p
-  %table
     %tr
-      %td
-        = label " Branch: "
-      %td
-        = @biz_location.name
-      %td 
-        = label "Audit Period:"
-      %td
-        = @pachecklist.audit_period
-    %tr
-      %td
-        = label "Name of the Auditor:"
-      %td
-        = @pachecklist.performed_by
-    %tr
-      %td 
-        = label "Signature"
-      %td
-        = label "_____________________"
-      %td
-        = label "BM(Sign)"
-      %td
-        = label "_____________________"
+      %table.tall.report.weeksheet.nojs.process_audit
+        %tr
+          %td{:align => "left"}
+            = label " Branch: "
+            = @biz_location.name
+          %td{:align => "left"}
+            = label "Audit Period:"
+            = @pachecklist.audit_period
+        %tr
+          %td{:align => "left"}
+            = label "Name of the Auditor:"
+            = @pachecklist.performed_by
+          %td{:align => "left"}
 
+        %tr 
+          %td{:align => "left"}
+            = label "Signature:"
+            = label "_____________________"
+          %td{:align => "left"}
+            = label "BM(Sign):"
+            = label "_____________________"
 
+           
 
 = link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
 |
