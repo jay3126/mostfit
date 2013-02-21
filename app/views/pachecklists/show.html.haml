@@ -11,7 +11,7 @@
 
 = link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
 |
-= link_to 'Back', "/pachecklists?biz_location=#{@biz_location_id}"
+= link_to 'Back', "/pachecklists?biz_location=#{@biz_location.id}"
 
 -@manager = LocationManagement.staff_managing_location(@pachecklist.biz_location_id, get_effective_date)
 -@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
@@ -888,5 +888,5 @@
 
 = link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
 |
-= link_to 'Back', "/pachecklists?biz_location=#{@biz_location_id}"
+= link_to 'Back', "/pachecklists?biz_location=#{@biz_location.id}"
 
