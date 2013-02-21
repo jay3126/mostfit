@@ -54,6 +54,10 @@ class LoanBaseSchedule
     self.base_schedule_line_items.sort.collect { |line_item| line_item.on_date }
   end
 
+  def get_schedule_actual_dates
+    self.base_schedule_line_items.sort.collect { |line_item| line_item.actual_date }
+  end
+
   def get_schedule_date_range
     get_schedule_dates.first..get_schedule_dates.last
   end
@@ -61,6 +65,10 @@ class LoanBaseSchedule
   # Tests whether the specified date is a schedule date on the amortization
   def is_schedule_date?(on_date)
     get_schedule_dates.include?(on_date)
+  end
+
+  def is_schedule_actual_date?(on_date)
+    get_schedule_actual_dates.include?(on_date)
   end
 
   # Gets the immediately previous and current schedule dates

@@ -61,15 +61,50 @@ class BodProcess
   def run_bod_process_in_thread_first_time
     Thread.new {
       bk = MyBookKeeper.new
-      loans = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(self.biz_location.id, self.on_date)
+      first_date = self.on_date.first_day_of_month
+      last_month_last_date = first_date - 1
+      last_date = self.on_date.last_day_of_month
+      loans = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(self.biz_location.id, last_month_last_date)
       disbursed_loans = loans[:disbursed_loan_status]
       repaid_loans = loans[:repaid_loan_status]
       write_off_loans = loans[:written_off_loan_status]
       preclouse_loans = loans[:preclosed_loan_status]
       total_loans = preclouse_loans+write_off_loans+disbursed_loans+repaid_loans
       total_loans.each do |loan_id|
-        bk.accrue_regular_receipts_on_loan_till_date1(loan_id, self.on_date)
-        bk.accrue_broken_period_receipts_on_loan_till_date(loan_id, self.on_date.first_day_of_month-1)
+        if disbursed_loans.include?(loan_id)
+          status = :disbursed_loan_status
+        elsif repaid_loans.include?(loan_id)
+          status = :repaid_loan_status
+        elsif write_off_loans.include?(loan_id)
+          status =:written_off_loan_status
+        elsif preclouse_loans.include?(loan_id)
+          status = :preclosed_loan_status
+        else
+          status = ''
+        end
+        bk.accrue_regular_receipts_on_loan_till_date_dec(loan_id, status, last_month_last_date) unless status.blank?
+      end
+
+      loans_j = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(self.biz_location.id, self.on_date)
+      disbursed_loans_j = loans_j[:disbursed_loan_status]
+      repaid_loans_j = loans_j[:repaid_loan_status]
+      write_off_loans_j = loans_j[:written_off_loan_status]
+      preclouse_loans_j = loans_j[:preclosed_loan_status]
+      total_loans_j = preclouse_loans_j+write_off_loans_j+disbursed_loans_j+repaid_loans_j
+      total_loans_j.each do |loan_id|
+        if disbursed_loans.include?(loan_id)
+          status = :disbursed_loan_status
+        elsif repaid_loans.include?(loan_id)
+          status = :repaid_loan_status
+        elsif write_off_loans.include?(loan_id)
+          status =:written_off_loan_status
+        elsif preclouse_loans.include?(loan_id)
+          status = :preclosed_loan_status
+        else
+          status = ''
+        end
+        bk.accrue_broken_period_interest_receipts_reverse_on_date(loan_id, status, first_date)
+        bk.accrue_regular_receipts_on_loan_from_date_to_date(loan_id, status, first_date, last_date) unless status.blank?
       end
 
       #Ledger.run_branch_bod_accounting(self.biz_location, self.on_date)

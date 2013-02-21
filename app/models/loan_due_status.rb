@@ -70,6 +70,11 @@ class LoanDueStatus
     unbroken_days_past_due
   end
 
+    def self.unbroken_days_past_due_kk(for_loan_id, on_date)
+    generate_loan_due_status(for_loan_id, on_date)
+    last(:lending_id => for_loan_id, :on_date => on_date).day_past_due
+  end
+
   # The total number of days (not necessarily consecutive) that a loan was overdue upto the specified date
   def self.cumulative_days_past_due(for_loan_id, on_date)
     #TODO

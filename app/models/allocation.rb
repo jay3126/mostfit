@@ -87,14 +87,14 @@ module Allocation
       raise ArgumentError, "Dates: #{prior_period_date}, #{period_ends}, #{later_period_date} appear to be invalid for computing broken period interest" unless ((prior_period_date < period_ends) and (period_ends < later_period_date))
       total_number_of_days = 0
       if (loan_repayment_frequency == MarkerInterfaces::Recurrence::MONTHLY)
-        total_number_of_days = (later_period_date - prior_period_date) + 1
+        total_number_of_days = (later_period_date - prior_period_date).to_i
       else
         total_number_of_days = MarkerInterfaces::Recurrence::FREQUENCIES_AS_PSEUDO_DAYS[loan_repayment_frequency]
       end
       raise Errors::BusinessValidationError, "Unable to determine the number of days between scheduled repayment dates" unless (total_number_of_days > 0)
 
       interim_interest = ios_earlier > ios_later ? (ios_earlier - ios_later) : (ios_later - ios_earlier)
-      fractional_days_left = (period_ends - prior_period_date)/total_number_of_days
+      fractional_days_left = (period_ends - prior_period_date).to_f/total_number_of_days
       interim_interest * fractional_days_left
     end
 
