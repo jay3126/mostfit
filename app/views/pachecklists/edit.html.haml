@@ -693,7 +693,6 @@
 
 
 %br
-= link_to 'Back', url(:pachecklists)
-= link_to 'Edit',  url(:edit_pachecklist,  @pachecklist)
-|
-= link_to 'Back', url(:pachecklists)
+= link_to 'Back', "/pachecklists?biz_location=#{@biz_location_id}"
+
+
