@@ -72,10 +72,15 @@
             = text_field :client_address
           %td
             - all_states = BizLocation.get_state_locations
-            - if params[:loan_application].blank?
-              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s.downcase]}, :prompt => "Select"
+            - branch_state = @branch.get_parent_location_at_location_level('state')
+            - all_states = branch_state.blank? ? BizLocation.get_state_locations : [branch_state.name]
+            - if branch_state.blank?
+              - if params[:loan_application].blank?
+                = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s.downcase]}, :prompt => "Select"
+              - else
+                = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
             - else
-              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
+              = text_field :client_state, :value => branch_state.name.capitalize, :readonly => true
           %td
             = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
             = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id
