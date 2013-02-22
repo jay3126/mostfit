@@ -57,7 +57,7 @@
             - max_year = year - 18
             - min_date = Date.parse("#{min_year}-#{month}-#{day}")
             - max_date = Date.parse("#{max_year}-#{month}-#{day}")
-            = date_select :client_dob, params[:client_dob], :min_date => min_date, :max_date => max_date, :size => 10, :holiday => false
+            = date_select :client_dob, params[:client_dob] || max_date, :min_date => min_date, :max_date => max_date, :size => 10, :holiday => false
           %td
             = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on]
           %td
