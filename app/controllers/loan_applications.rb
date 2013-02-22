@@ -20,7 +20,6 @@ class LoanApplications < Application
 
     # VALIDATIONS
     @errors << "Please select file" if params[:file].blank?
-    debugger
     @errors << "Invalid file selection (Accepts .xls extension file only)" if params[:file][:content_type] && params[:file][:content_type] != "application/vnd.ms-excel"
     if @errors.blank?
       begin
