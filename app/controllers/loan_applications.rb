@@ -172,7 +172,7 @@ class LoanApplications < Application
   end
 
   def download_xls_file_format
-    send_file('public/bulk_upload_loan_applications_file_format.xls', :filename => ('public/bulk_upload_loan_applications_file_format.xls'.split("/")[-1].chomp))
+    send_file('public/sample_file_for_loan_applications_bulk_upload.xls', :filename => ('public/sample_file_for_loan_applications_bulk_upload.xls'.split("/")[-1].chomp))
   end
 
   # Only List all clients under selected center
