@@ -663,7 +663,7 @@ class Lending
   end
 
   def actual_total_due_ignoring_advance_balance_kk(on_date)
-    loan_receipts_till_date = self.loan_receipts(:is_advance_adjusted => false, :effective_on.lte => on_date)
+    loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
     loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
     total_received = loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received]
     loan_schedules = self.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date)
@@ -959,13 +959,13 @@ class Lending
   end
 
   def days_past_due
-    days_past_due_on_date(Date.today)
+    days_past_dues_on_date(Date.today)
   end
 
-  def days_past_due_on_date(on_date)
-    return 0 unless is_outstanding_on_date?(on_date)
-    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
-  end
+#  def days_past_due_on_date(on_date)
+#    return 0 unless is_outstanding_on_date?(on_date)
+#    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+#  end
 
   def loan_days_past_due(on_date = Date.today)
     days_past_due_till_date = self.loan_due_statuses(:fields => [:id, :due_status], :on_date.lte => on_date, :order => [:id.desc])
@@ -1434,7 +1434,7 @@ class Lending
       resulting_allocation[INTEREST_RECEIVED]  = interest
       resulting_allocation[ADVANCE_ADJUSTED] = total_amount
     else
-      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) : self.actual_total_due_kk(on_date)
+      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance_kk(on_date) : self.actual_total_due_kk(on_date)
        
       only_principal_and_interest = [_actual_total_due, total_amount].min
 

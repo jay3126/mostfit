@@ -92,18 +92,18 @@ class BodProcess
       preclouse_loans_j = loans_j[:preclosed_loan_status]
       total_loans_j = preclouse_loans_j+write_off_loans_j+disbursed_loans_j+repaid_loans_j
       total_loans_j.each do |loan_id|
-        if disbursed_loans.include?(loan_id)
+        if disbursed_loans_j.include?(loan_id)
           status = :disbursed_loan_status
-        elsif repaid_loans.include?(loan_id)
+        elsif repaid_loans_j.include?(loan_id)
           status = :repaid_loan_status
-        elsif write_off_loans.include?(loan_id)
+        elsif write_off_loans_j.include?(loan_id)
           status =:written_off_loan_status
-        elsif preclouse_loans.include?(loan_id)
+        elsif preclouse_loans_j.include?(loan_id)
           status = :preclosed_loan_status
         else
           status = ''
         end
-        bk.accrue_broken_period_interest_receipts_reverse_on_date(loan_id, status, first_date)
+        bk.accrue_broken_period_interest_receipts_reverse_on_date(loan_id, first_date)
         bk.accrue_regular_receipts_on_loan_from_date_to_date(loan_id, status, first_date, last_date) unless status.blank?
       end
 
