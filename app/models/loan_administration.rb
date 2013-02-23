@@ -176,9 +176,8 @@ class LoanAdministration
         else
           loan_search[:status] = status
           status_key = LoanLifeCycle::LOAN_STATUSES.index(status.to_sym)
-          loan_search[:id] = status_key.blank? ? [] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND s2.effective_on <= '#{on_date.strftime('%Y-%m-%d')}' ORDER BY s2.effective_on desc LIMIT 1);")
+          loan_search[:id] = (l_links.blank? || status_key.blank?) ? [] : repository(:default).adapter.query("select lending_id from (select * from loan_status_changes where lending_id IN (#{l_links.join(',')})) s1 where s1.to_status = #{status_key+1} AND s1.to_status = (select to_status from loan_status_changes s2 where s2.lending_id = s1.lending_id AND s2.effective_on <= '#{on_date.strftime('%Y-%m-%d')}' ORDER BY s2.effective_on desc LIMIT 1);")
         end
-
         loan_search[:id].blank? ? [] : loan_search[:id]
       end
     end
