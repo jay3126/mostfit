@@ -56,7 +56,8 @@ class Client
   property :claim_document_status,       Enum.send('[]', *CLAIM_DOCUMENTS_STATUS), :default => CLAIM_DOCUMENTS_PENDING
   property :claim_document_recieved_by,  Integer
   property :cliam_document_recieved_on,  Date
-  property :town_classification,           Enum.send('[]', *TOWN_CLASSIFICATION), :nullable => true, :default => DEFAULT_CLASSIFICATION
+  property :town_classification,         Enum.send('[]', *TOWN_CLASSIFICATION), :nullable => true, :default => DEFAULT_CLASSIFICATION
+  property :is_loan_applicant,           Boolean, :default => false
 
   property :upload_reference,      Integer, :unique => true    #property added for upload functionality.
 
@@ -98,8 +99,8 @@ class Client
     validates_present   :date_joined
     validates_attachment_thumbnails :picture
     validates_with_method :date_joined, :method => :dates_make_sense
-    validates_is_unique :reference 
-    validates_is_unique :reference2
+    validates_is_unique :reference, :if => Proc.new{|client| client.is_loan_applicant == false}
+    validates_is_unique :reference2, :if => Proc.new{|client| client.is_loan_applicant == false}
     validates_with_method :date_of_birth, :method => :permissible_age_for_credit?, :if => Proc.new{ |client| !client.date_of_birth.blank? }
     validates_with_method :is_there_space_in_the_client_group?
   end
