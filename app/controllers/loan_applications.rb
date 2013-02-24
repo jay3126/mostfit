@@ -135,7 +135,7 @@ class LoanApplications < Application
                   :center_cycle_id => center_cycle_number,
                   :created_by_staff_id => session.user.id,
                   :created_by_user_id => session.user.staff_member.id,
-                  :created_on => Date.today,
+                  :created_on => get_effective_date,
                   :amount => loan_amount,
                   :currency => loan_amount_currency,
                   :client_name => name,
