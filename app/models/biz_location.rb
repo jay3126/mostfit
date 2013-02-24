@@ -328,10 +328,10 @@ class BizLocation
     loan_product_amount.compact.uniq
   end
 
-  # list loan product names of same frequency as per center creation frequency set
-  def same_frequency_branch_loan_product_name_list(center)
+  # list loan product names of same frequency as per center creation frequency set and with same loan product amount as loan application loan amount
+  def same_frequency_branch_loan_product_name_list(center, loan_amount)
     center_frequency = center.meeting_schedules.first.meeting_frequency rescue nil
-    loan_product_list = self.lending_products.all(:repayment_frequency => center_frequency)
+    loan_product_list = self.lending_products.all(:repayment_frequency => center_frequency, :amount => loan_amount)
     return [] if loan_product_list.blank?
     loan_product_list.compact.uniq
   end
