@@ -147,7 +147,7 @@
                   = lending.lending_product.name rescue "-"
                 - else
                   - selected_loan_product = params[:clients] && params[:clients]["#{lap.id}"] && params[:clients]["#{lap.id}"][:loan_product_id] ? params[:clients]["#{lap.id}"][:loan_product_id] : nil
-                  = select :name => "clients[#{lap.id}][loan_product_id]", :collection => LendingProduct.get_all_loan_product_for_loan_amount(lap.amount).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
+                  = select :name => "clients[#{lap.id}][loan_product_id]", :collection => @branch.same_frequency_branch_loan_product_name_list(@center).map{|lp| [lp.id, lp.name]}, :prompt => "select loan product", :selected => selected_loan_product
               %td
                 - if is_loan_created
                   = lending.loan_purpose rescue "-"
