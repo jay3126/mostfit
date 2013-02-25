@@ -79,514 +79,514 @@
 
 -@manager = LocationManagement.staff_managing_location(@biz_location_id, get_effective_date)
 -@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
+- @biz_location = BizLocation.get(@biz_location_id)
+- @date = get_effective_date
+- @area_manager = LocationLink.get_parent(@biz_location,@date)
 = error_messages_for @pachecklist
 = form_for(@packlist2, :action => url(:updateanswers_pachecklists, @pachecklist2)  )do
   %p
-    %table.tall
+    %table.tall.report.weeksheet.nojs.process_audit
       %tr
-        %td
-          = label "Branch Name"
-        %td 
+        %td{:align => "left", :style=>"width:60%;"}
+          Branch Name
+        %td{:align => "left"}
           = text_field :value => @biz_location.name,:disabled=>true
       %tr 
-        %td
-          = label "Name of the branch manager"
-        %td
+        %td{:align => "left", :style=>"width:60%;"}
+          Name of the branch manager
+        %td{:align => "left"}
           = text_field :value => @managed_by.name,:disabled=>true
       %tr
-        %td
-          = label "Name of the Area Manager"
-        %td
-          = "area"
+        %td{:align => "left", :style=>"width:60%;"}
+          Name of the Area Manager
+        %td{:align => "left"}
+          = text_field :value => @area_manager, :disabled => true
       %tr
-        %td
-          = label "Date of Audit"
-        %td
+        %td{:align => "left", :style=>"width:60%;"}
+          Date of Audit
+        %td{:align => "left"}
           = date_select :date_of_audit
       %tr
-        %td
-          = label "audit period"
-        %td
+        %td{:align => "left", :style=>"width:60%;"}
+          Audit period
+        %td{:align => "left"}
           = text_field :audit_period
   %h2
     Key Findings:
   %p
-    %table.tall
+    %table.tall.report.weeksheet.nojs.process_audit
       %tr
         %th
-          = label "Positives"
+          %h4 Positives
         %th
       %tr
-        %td
-          = label "1"
-        %td 
-          = text_field :positive1
+        %td{:align => "left"}
+          1
+        %td{:align => "left"}
+          = select :positive1,:collection => ["BM has connected up with all centers", "BM's interaction quality is good","Excellent GRT","Hard team work","Excellent Branch hygiene","BM's has good command"]
       %tr 
-        %td
-          = label "2"
-        %td
-          = text_field :postive2
+        %td{:align => "left"}
+          2
+        %td{:align => "left"}
+          = select :postive2,:collection => ["BM has connected up with all centers", "BM's interaction quality is good","Excellent GRT","Hard team work","Excellent Branch hygiene","BM's has good command"]
       %tr
-        %td
-          = label "3"
-        %td
-          = text_field :positive3
+        %td{:align => "left"}
+          3
+        %td{:align => "left"}
+          = select :positive3,:collection => ["BM has connected up with all centers", "BM's interaction quality is good","Excellent GRT","Hard team work","Excellent Branch hygiene","BM's has good command"]
       %tr
         %th
-          = label "Deviations"
+          %h4 Deviations
         %th
       %tr
-        %td
-          = label "1"
-        %td
-          = text_field :deviation1
+        %td{:align => "left"}
+          1
+        %td{:align => "left"}
+          = select :deviation1,:collection => ["Needs improvement at disbursment", "Needs following the GRT process","Needs followup on Bank's Ali's and savings initive","Needs to improve supervision CGT needs improvement","Social initiative needs more focus,Especially in bank no followip details","Needs followup on socail activity","BM arrange dummy meetings for ","Needs people monitoring of BM's service","Needs proper monitoring of 1st emi meeting","Needs to attend all 1st emi meetings","Needs foucs on capturing savings details at center"]
       %tr
-        %td
-          = label "2"
-        %td
-          = text_field :deviation2
+        %td{:align => "left"}
+          2
+        %td{:align => "left"}
+          = select :deviation2,:collection => ["Needs improvement at disbursment", "Needs following the GRT process","Needs followup on Bank's Ali's and savings initive","Needs to improve supervision CGT needs improvement","Social initiative needs more focus,Especially in bank no followip details","Needs followup on socail activity","BM arrange dummy meetings for ","Needs people monitoring of BM's service","Needs proper monitoring of 1st emi meeting","Needs to attend all 1st emi meetings","Needs foucs on capturing savings details at center"]
       %tr
-        %td
-          = label "3"
-        %td
-          = text_field :deviation3
+        %td{:align => "left"}
+          3
+        %td{:align => "left"}
+          = select :deviation3,:collection => ["Needs improvement at disbursment", "Needs following the GRT process","Needs followup on Bank's Ali's and savings initive","Needs to improve supervision CGT needs improvement","Social initiative needs more focus,Especially in bank no followip details","Needs followup on socail activity","BM arrange dummy meetings for ","Needs people monitoring of BM's service","Needs proper monitoring of 1st emi meeting","Needs to attend all 1st emi meetings","Needs foucs on capturing savings details at center"]
   %h2
     %center Quantitative Aspects
   %p
-    %table.tall
+    %table.tall.report.weeksheet.nojs.process_audit
       %tr{:width => "100%"}
         %th{:width => "10%"}
-          = label ""
           = hidden_field :pachecklist_id, :value => @pachecklist_id
         %th{:width => "80%"}
-          = label ""
         %th{:width => "10%"}
-          =  label ""
       %tr
         %td{:width => "10%"}
         %td{:width => "80%"}
-          = label "Branch Related"
+          %h4 Branch Related
         %td{:width => "10%"}
       %tr
-        %td
+        %td{:align => "left"}
           = 1
-        %td
+        %td{:align => "left"}
           = "Is the claim amount paid?"
-        %td
+        %td{:align => "left"}
           = check_box :q1_1
       %tr
-        %td
+        %td{:align => "left"}
           = 2
-        %td
+        %td{:align => "left"}
           = "BM AO and Ro read on time?"
-        %td
+        %td{:align => "left"}
           = check_box :q2_2
       %tr
-        %td
+        %td{:align => "left"}
           = 3
-        %td
+        %td{:align => "left"}
           = "Pledge conducted?"
-        %td
+        %td{:align => "left"}
           = check_box :q3_3
       %tr
-        %td
+        %td{:align => "left"}
           = 4
-        %td
+        %td{:align => "left"}
           = "Is RO carryin stationary which are required ?"
-        %td
+        %td{:align => "left"}
           = check_box :q4_4
       %tr
-        %td
+        %td{:align => "left"}
           = 5
-        %td
+        %td{:align => "left"}
           = "Are Employees carrying ID cards ?"
-        %td
+        %td{:align => "left"}
           = check_box :q5_5
       %tr
-        %td
-        %td
-          = label "Registers"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Registers
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 6
-        %td
+        %td{:align => "left"}
           = "Petty cash register maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q6_6
       %tr
-        %td
+        %td{:align => "left"}
           = 7
-        %td
+        %td{:align => "left"}
           = "Member attendance register maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q7_7
       %tr
-        %td
+        %td{:align => "left"}
           = 8
-        %td
+        %td{:align => "left"}
           = "Center meeting Review ?"
-        %td
+        %td{:align => "left"}
           = check_box :q8_8
       %tr
-        %td
+        %td{:align => "left"}
           = 9
-        %td
+        %td{:align => "left"}
           = "Death claim Register ?"
-        %td
+        %td{:align => "left"}
           = check_box :q9_9
       %tr
-        %td
+        %td{:align => "left"}
           = 10
-        %td
+        %td{:align => "left"}
           = "Stock register maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q10_10
       %tr
-        %td
+        %td{:align => "left"}
           = 11
-        %td
+        %td{:align => "left"}
           = "Key register maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q11_11
       %tr
-        %td
+        %td{:align => "left"}
           = 12
-        %td
+        %td{:align => "left"}
           = "Statutory registers maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q12_12
       %tr
-        %td
+        %td{:align => "left"}
           = 13
-        %td
+        %td{:align => "left"}
           = "Movement register  ?"
-        %td
+        %td{:align => "left"}
           = check_box :q13_13
       %tr
-        %td
+        %td{:align => "left"}
           = 14
-        %td
+        %td{:align => "left"}
           = "Member attendance register maintained ?"
-        %td
+        %td{:align => "left"}
           = check_box :q14_14
       %tr
-        %td
-        %td
-          = label "Process"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Process
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 15
-        %td
+        %td{:align => "left"}
           = "Disbursement process followed ?"
-        %td
+        %td{:align => "left"}
           = check_box :q15_15
       %tr
-        %td
+        %td{:align => "left"}
           = 16
-        %td
+        %td{:align => "left"}
           = "Collection process followed ?"
-        %td
+        %td{:align => "left"}
           = check_box :q16_16
       %tr
-        %td
+        %td{:align => "left"}
           = 17
-        %td
+        %td{:align => "left"}
           = "Display of statutory and legal documents ?"
-        %td
+        %td{:align => "left"}
           = check_box :q17_17
       %tr
-        %td
+        %td{:align => "left"}
           = 18
-        %td
+        %td{:align => "left"}
           = "Display are survey chart and branch approval ?"
-        %td
+        %td{:align => "left"}
           = check_box :q18_18
       %tr
-        %td
-        %td
-          = label "Center meeting"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Center meeting
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 19
-        %td
+        %td{:align => "left"}
           = "Is Ro coming on time for meetings ?"
-        %td
+        %td{:align => "left"}
           = check_box :q19_19
       %tr
-        %td
+        %td{:align => "left"}
           = 20
-        %td
+        %td{:align => "left"}
           = "Are the meetings conducted on scheduled time ?"
-        %td
+        %td{:align => "left"}
           = check_box :q20_20
       %tr
-        %td
+        %td{:align => "left"}
           = 21
-        %td
+        %td{:align => "left"}
           = "Is the collection of EMI happening as per process ?"
-        %td
+        %td{:align => "left"}
           = check_box :q21_21
       %tr
-        %td
+        %td{:align => "left"}
           = 22
-        %td
+        %td{:align => "left"}
           = "Are proper reciept given and maintained in the center life ?"
-        %td
+        %td{:align => "left"}
           = check_box :q22_22
       %tr
-        %td
+        %td{:align => "left"}
           = 23
-        %td
+        %td{:align => "left"}
           = "Currency details for Rs 500 and and 1000 by RO ?"
-        %td
+        %td{:align => "left"}
           = check_box :q23_23
       %tr
-        %td
+        %td{:align => "left"}
           = 24
-        %td
+        %td{:align => "left"}
           = "Pledge conducted before the meeting ?"
-        %td
+        %td{:align => "left"}
           = check_box :q24_24
       %tr
-        %td
+        %td{:align => "left"}
           = 25
-        %td
+        %td{:align => "left"}
           = "Passbook updation with out any dicrepancy ?"
-        %td
+        %td{:align => "left"}
           = check_box :q25_25
       %tr
-        %td
-        %td
-          = label "GRT"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 GRT
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 26
-        %td
+        %td{:align => "left"}
           = "Is the BM reached on time ?"
-        %td
+        %td{:align => "left"}
           = check_box :q26_26
       %tr
-        %td
+        %td{:align => "left"}
           = 27
-        %td
+        %td{:align => "left"}
           = "Is the BM conducting GRT as per policy ?"
-        %td
+        %td{:align => "left"}
           = check_box :q27_27
       %tr
-        %td
+        %td{:align => "left"}
           = 28
-        %td
+        %td{:align => "left"}
           = "Are the application forms and details are verified with members ?"
-        %td
+        %td{:align => "left"}
           = check_box :q28_28
       %tr
-        %td
+        %td{:align => "left"}
           = 29
-        %td
+        %td{:align => "left"}
           = "Is BM carrying the GRT chart ?"
-        %td
+        %td{:align => "left"}
           = check_box :q29_29
       %tr
-        %td
-        %td
-          = label "CGT"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 CGT
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 30
-        %td
+        %td{:align => "left"}
           = "Is the RO reached on time?"
-        %td
+        %td{:align => "left"}
           = check_box :q30_30
       %tr
-        %td
+        %td{:align => "left"}
           = 31
-        %td
+        %td{:align => "left"}
           = "Does he follows the CGT kit ?"
-        %td
+        %td{:align => "left"}
           = check_box :q31_31
       %tr
-        %td
+        %td{:align => "left"}
           = 32
-        %td
+        %td{:align => "left"}
           = "Are the members aware of the regularity requirement ?"
-        %td
+        %td{:align => "left"}
           = check_box :q32_32
       %tr
-        %td
+        %td{:align => "left"}
           = 33
-        %td
+        %td{:align => "left"}
           = "Pledge conducted before the meeting ?"
-        %td
+        %td{:align => "left"}
           = check_box :q33_33
       %tr
-        %td
+        %td{:align => "left"}
           = 34
-        %td
+        %td{:align => "left"}
           = "Are the members aware of the transactions IRR ?"
-        %td
+        %td{:align => "left"}
           = check_box :q34_34
       %tr
-        %td
+        %td{:align => "left"}
           = 35
-        %td
+        %td{:align => "left"}
           = "Are the members aware of the processing the charges and insurances ?"
-        %td
+        %td{:align => "left"}
           = check_box :q35_35
       %tr
-        %td
+        %td{:align => "left"}
           = 36
-        %td
+        %td{:align => "left"}
           = "Are the members aware of the JLG concept ?"
-        %td
+        %td{:align => "left"}
           = check_box :q36_36
       %tr
-        %td
-        %td
-          = label"AO CPV"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 AO CPV
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 37
-        %td
+        %td{:align => "left"}
           = "Is AO attending the every members house for verifications  ?"
-        %td
+        %td{:align => "left"}
           = check_box :q37_37
       %tr
-        %td
+        %td{:align => "left"}
           = 38
-        %td
+        %td{:align => "left"}
           = "Is he capturing the details and applying the credit names and income criteria ?"
-        %td
+        %td{:align => "left"}
           = check_box :q38_38 
       %tr
-        %td
+        %td{:align => "left"}
           = 39
-        %td
+        %td{:align => "left"}
           = "Is AO sending the credit buereou into correctly and ontime ?"
-        %td
+        %td{:align => "left"}
           = check_box :q39_39
       %tr
-        %td
-        %td
-          = label "RO CPV"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 RO CPV
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 40
-        %td
+        %td{:align => "left"}
           = "Is RO visiting every members house for rent ?"
-        %td
+        %td{:align => "left"}
           = check_box :q40_40  
       %tr
-        %td
+        %td{:align => "left"}
           = 41
-        %td
+        %td{:align => "left"}
           = "Is RO informing the credit norms for loan availability ?"
-        %td
+        %td{:align => "left"}
           = check_box :q41_41
       %tr
-        %td
-        %td
-          = label "Disbursment"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Disbursment
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 42
-        %td
+        %td{:align => "left"}
           = "AO and BM both are present for disbursement ?"
-        %td
+        %td{:align => "left"}
           = check_box :q42_42
       %tr
-        %td
+        %td{:align => "left"}
           = 43
-        %td
+        %td{:align => "left"}
           = "Approval form BH for absent members is taken if loans are disbursment to other members ?"
-        %td
+        %td{:align => "left"}
           = check_box :q43_43
       %tr
-        %td
+        %td{:align => "left"}
           = 44
-        %td
+        %td{:align => "left"}
           = "Are two photographs taking during disbursment and downloaded to branch picassa file?"
-        %td
+        %td{:align => "left"}
           = check_box :q44_44 
       %tr
-        %td
+        %td{:align => "left"}
           = 45
-        %td
+        %td{:align => "left"}
           = "Are they collecting fees as per norms ?"
-        %td
+        %td{:align => "left"}
           = check_box :q45_45
       %tr
-        %td
+        %td{:align => "left"}
           = 46
-        %td
+        %td{:align => "left"}
           = "Is the AO conforming the pending disbursment to accounts ans Ops ?"
-        %td
+        %td{:align => "left"}
           = check_box :q46_46
       %tr
-        %td
-        %td
-          = label "Banking and collection amount"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Banking and collection amount
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 47
-        %td
+        %td{:align => "left"}
           = "Are all the RO's are returning back on time ?"
-        %td
+        %td{:align => "left"}
           = check_box :q47_47
       %tr
-        %td
+        %td{:align => "left"}
           = 48
-        %td
+        %td{:align => "left"}
           = "Is the AO sending the cash report ti HO as specified timee and format ?"
-        %td
+        %td{:align => "left"}
           = check_box :q48_48
       %tr
-        %td
+        %td{:align => "left"}
           = 49
-        %td
+        %td{:align => "left"}
           = "Is the collection amount banked as per process ?"
-        %td
+        %td{:align => "left"}
           = check_box :q49_49
       %tr
-        %td
+        %td{:align => "left"}
           = 50
-        %td
+        %td{:align => "left"}
           = "Is the pending member disbursment happening in presence of center ?"
-        %td
+        %td{:align => "left"}
           = check_box :q50_50
       %tr
-        %td
-        %td
-          = label "Insurance and Claims"
-        %td
+        %td{:align => "left"}
+        %td{:align => "left"}
+          %h4 Insurance and Claims
+        %td{:align => "left"}
       %tr
-        %td
+        %td{:align => "left"}
           = 51
-        %td
+        %td{:align => "left"}
           = "Is the insurance documents collected on time as intimated?"
-        %td
+        %td{:align => "left"}
           = check_box :q51_51
       %tr
-        %td
+        %td{:align => "left"}
           = 52
-        %td
+        %td{:align => "left"}
           = "Is the claim papers submitted ontime to HO ?"
-        %td
+        %td{:align => "left"}
           = check_box :q52_52
       %tr
-        %td
+        %td{:align => "left"}
           = 53
-        %td
+        %td{:align => "left"}
           = "Is the claim amount paid ?"
-        %td
+        %td{:align => "left"}
           = check_box :q53_53
           = hidden_field :biz_id, :value => @biz_location.id
   %h2
@@ -595,14 +595,14 @@
     %table.tall.report.weeksheet.nojs.process_audit
       %tr
         %th{:align => "left",:style=>"width:600px;"}
-          = label "Creteria"
+          Creteria"
         %th
-          = label "Total Score"
+          Total Score"
         %th
-          = label "Audit Score"
+          Audit Score"
       %tr{:width => "500px"}
         %td{:align => "left",:style=>"width:600px;"}
-          = label "Process"
+          Process"
           %br
           No.of SCV's conducted per day
           %br
@@ -617,10 +617,12 @@
           SCV's completed - 50% to 60%- 6 marks    
           %br
         %td 
+          10
+        %td
           = text_field :scv_perday, :size => "6px"  
       %tr{:width => "500px"}
         %td{:align => "left",:style=>"width:600px;"}
-          = label "No.of 1st meetings attended during audit period"
+          No.of 1st meetings attended during audit period"
           %br
           First meetings completed - 90% to 100%- 10 marks  
           %br
@@ -632,11 +634,13 @@
           %br
           First meetings completed - 50% to 60%- 6 marks    
           %br
+        %td
+          10
         %td 
           = text_field :meeting_attended_during_ap, :size => "6px" 
       %tr{:width => "500px"}
         %td{:align => "left",:style=>"width:600px;"}
-          = label "Branch management"
+          Branch management"
           %br
           Quality of CPV's and data collection from field 
           %br
@@ -654,22 +658,26 @@
           %br
           BM's quality of GRT
           %br
+        %td
+          10
         %td 
           = text_field :branch_management, :size => "6px"  
       %tr{:width => "500px"}
         %td{:align => "left",:style=>"width:600px;"}
-          = label "Social Audit"
+          Social Audit"
           %br
           Members awareness of savings 
           %br
           Average percentage of Bank account holders
           %br
-          Quality and intensity of social message 
+          Quality and intensity of social message
+        %td
+          10 
         %td 
           = text_field :social_audit, :size => "6px" 
       %tr{:width => "500px"}
         %td{:align => "left",:style=>"width:600px;"}
-          = label "Supervision"
+          Supervision"
           %br
           No.of visits made by Area manager and Audit manager during audit period
           %br
@@ -687,6 +695,8 @@
           %br
           BM's quality of GRT
           %br
+        %td
+          10
         %td 
           = text_field :supervision, :size => "6px"
     = submit "Update"

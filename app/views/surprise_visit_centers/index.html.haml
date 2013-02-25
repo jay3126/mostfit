@@ -1,12 +1,33 @@
 %h1
   Surprise Visit Center
-%table
-  %tr
-  - for surprise_visit_center in @surprise_visit_centers
-    %tr
-      %td
-        = link_to 'Show', url(:surprise_visit_center, surprise_visit_center)
-      %td
-        = link_to 'Edit', url(:edit_surprise_visit_center,  surprise_visit_center)
 
-= link_to 'New', url(:new_surprise_visit_center,:center => @center, :branch => @branch,:biz_location => @biz_location), :class => "green_button"
+= link_to 'New Surprise Visit Center', url(:new_surprise_visit_center,:center => @center, :branch => @branch,:biz_location => @biz_location), :class => "greenButton"
+%br
+%br
+
+%table.dataTable
+  %thead
+    %tr
+      %th SCV ID
+      %th Branch Name By
+      %th Center Name On
+      %th Performed By
+      %th
+  - @surprise_visit_centers.each do |scv|
+    - if @biz_location.to_i == scv.biz_location_id.to_i
+      %tr
+        %td
+          = scv.id
+        %td
+          = scv.branch
+        %td
+          = scv.center
+        %td
+          = scv.staff_member
+        %td
+          = link_to 'Show', url(:surprise_visit_center, scv.id)
+          = link_to 'Edit', url(:edit_surprise_visit_center,  scv.id)
+
+
+
+

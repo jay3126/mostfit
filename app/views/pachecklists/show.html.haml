@@ -757,9 +757,10 @@
         %br
         SCV's completed - 50% to 60%- 6 marks    
         %br
+      %td
+        10
       %td 
         = @pachecklist.scv_perday
-      %td
     %tr
       %td{:align => "left",:style=>"width:600px;"}
         %h4 No.of 1st meetings attended during audit period"
@@ -774,9 +775,10 @@
         %br
         First meetings completed - 50% to 60%- 6 marks    
         %br
+      %td
+        10
       %td 
         = @pachecklist.meeting_attended_during_ap
-      %td
     %tr
       %td{:align => "left",:style=>"width:600px;"}
         %h4 Branch management
@@ -797,9 +799,10 @@
         %br
         BM's quality of GRT
         %br
+      %td
+        10
       %td 
         = @pachecklist.branch_management
-      %td
     %tr
       %td{:align => "left",:style=>"width:600px;"}
         %h5 Social Audit
@@ -809,9 +812,10 @@
         Average percentage of Bank account holders
         %br
         Quality and intensity of social message 
+      %td
+        10
       %td 
         = @pachecklist.social_audit
-      %td
     %tr
       %td{:align => "left",:style=>"width:600px;"}
         %h5 Supervision
@@ -832,9 +836,11 @@
         %br
         BM's quality of GRT
         %br
+      %td
+        10
       %td 
         = @pachecklist.supervision
-      %td
+
         - @qualitative_score = @pachecklist.scv_perday.to_i + @pachecklist.meeting_attended_during_ap.to_i + @pachecklist.branch_management.to_i + @pachecklist.social_audit.to_i + @pachecklist.supervision.to_i
   %table.tall.report.weeksheet.nojs.process_audit  
     %tr

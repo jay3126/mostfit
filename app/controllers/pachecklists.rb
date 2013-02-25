@@ -236,12 +236,47 @@ class Pachecklists < Application
    @q51 = params[:q51_51]
    @q52 = params[:q52_52]
    @q53 = params[:q53_53]
+   @a1 = params[:a1]
+   @a2 = params[:a2]
+   @a3 = params[:a3]
+   @a4 = params[:a4]
+   @a5 = params[:a5]
+   @a6 = params[:a6]
+   @a7 = params[:a7]
+   @a8 = params[:a8]
+   @a9 = params[:a9]
+   @b1 = params[:b1]
+   @b2 = params[:b2]
+   @b3 = params[:b3]
+   @b4 = params[:b4]
+   @b5 = params[:b5]
+   @b6 = params[:b6]
+   @b7 = params[:b7]
+   @c1 = params[:c1]
+   @c2 = params[:c2]   
+   @c3 = params[:c3]
+   @c4 = params[:c4]
+   @c5 = params[:c5]
+   @c6 = params[:c6]
+   @c7 = params[:c7]
+
    
   @date_of_audit = params[:date_of_audit]
   @audit_period = params[:audit_period]
   @filled_by = session.user.staff_member_id
   @performed = StaffMember.get(@filled_by)
   @performed_by = @performed.name
+
+  @cgt = Array.new
+  @cgt.push(@a1,@a2,@a3,@a4,@a5,@a6,@a7,@a8,@a9,@b1,@b2,@b3,@b4,@b5,@b6,@b7,@c1,@c2,@c3,@c4,@c5,@c6,@c7)
+  @cgt_i = 0
+  @cgt.each do |cgt|
+	   if cgt == "1"
+	   @cgt_i+=1
+	   else 
+	    @ans[31] = "0"
+	   end
+        end
 
 	@ans = Hash.new
 	@ans[1] = @q1
@@ -274,7 +309,12 @@ class Pachecklists < Application
 	@ans[28] = @q28
 	@ans[29] = @q29
 	@ans[30] = @q30
-	@ans[31] = @q31
+
+        if @cgt_i == 23
+  	 @ans[31] = "1"
+        else 
+  	 @ans[31] = "0"
+        end
 	@ans[32] = @q32
 	@ans[33] = @q33
 	@ans[34] = @q34
@@ -297,6 +337,7 @@ class Pachecklists < Application
 	@ans[51] = @q51
 	@ans[52] = @q52
 	@ans[53] = @q53
+  
    @scv_perday = params[:scv_perday]
    if @scv_perday == "0" || @scv_perday == "6" || @scv_perday == "7"|| @scv_perday == "8"|| @scv_perday == "9"|| @scv_perday == "10" || @scv_perday == "" || @scv_perday == nil
        
@@ -325,7 +366,7 @@ class Pachecklists < Application
    @file_id = session.user.id
    @hash = Marshal.load(serialized_hash)
      @pachecklist.attributes = { :answers => @text}
-      @pachecklist.attributes = { :scv_perday => @scv_perday }
+     @pachecklist.attributes = { :scv_perday => @scv_perday }
      @pachecklist.attributes = { :performed_by => @performed_by }
      @pachecklist.attributes = { :biz_location_id => @biz_location_id}
      @pachecklist.attributes = { :date_of_audit => @date_of_audit }
