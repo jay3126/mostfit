@@ -48,6 +48,8 @@
                   Recorded By
                 %th
                   By Client
+                %th
+                  Created At
             - @payment_transactions.each do |pt|
               - loan = Lending.get pt.on_product_id
               - loan_receipts = loan.loan_receipts
@@ -76,6 +78,8 @@
                     = User.get(pt.recorded_by).name
                   %td
                     = Client.get(pt.by_counterparty_id).name
+                  %td
+                    = pt.created_at
           = submit "Delete Payment"
     %div.tab
       %input{:type => "hidden", :name => "_load_remote", :value => resource(:payment_transactions, :destroy_payment_transactions_on_date, :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id], :date => params[:date])}

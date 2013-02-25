@@ -50,11 +50,16 @@
           %td
             = select :client_guarantor_relationship, :collection => Constants::Masters::RELATIONSHIPS.each{|x| [x.to_s, x]}, :prompt => 'Select'
           %td
-            = date_select :client_dob, params[:client_dob], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
-            %br
-            =# text_field :name => "client_age", :id => "client_age", :readonly => 'true', :size => 2
+            - day = Date.today.day
+            - month = Date.today.month
+            - year = Date.today.year
+            - min_year = year - 55
+            - max_year = year - 18
+            - min_date = Date.parse("#{min_year}-#{month}-#{day}")
+            - max_date = Date.parse("#{max_year}-#{month}-#{day}")
+            = date_select :client_dob, params[:client_dob] || max_date, :min_date => min_date, :max_date => max_date, :size => 10, :holiday => false
           %td
-            = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on], :id => "client_age"
+            = text_field :name => "age_as_on", :size => 2, :maxlength => 2, :value => params[:age_as_on]
           %td
             = date_select :age_as_on_date, params[:age_as_on_date], :min_date => Date.today-36500, :max_date => Date.today-1000, :size => 10, :holiday => false
           %td
@@ -72,10 +77,15 @@
             = text_field :client_address
           %td
             - all_states = BizLocation.get_state_locations
-            - if params[:loan_application].blank?
-              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s.downcase]}, :prompt => "Select"
+            - branch_state = @branch.get_parent_location_at_location_level('state')
+            - all_states = branch_state.blank? ? BizLocation.get_state_locations : [branch_state.name]
+            - if branch_state.blank?
+              - if params[:loan_application].blank?
+                = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s.downcase]}, :prompt => "Select"
+              - else
+                = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
             - else
-              = select :client_state, :collection => all_states.map{|x| [x.name.downcase, x.name.to_s]}, :selected => params[:loan_application] ? params[:loan_application][:client_state] : ''
+              = text_field :client_state, :value => branch_state.name.capitalize, :readonly => true
           %td
             = text_field :client_pincode, :size => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH, :maxlength => AddressValidation::PIN_CODE_MAX_TEXT_LENGTH
             = hidden_field :name => 'parent_location_id', :value => @branch.nil? ? params[:parent_location_id] : @branch.id

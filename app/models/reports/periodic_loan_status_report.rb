@@ -30,14 +30,17 @@ class PeriodicLoanStatusReport < Report
     data = {}
 
     loan_ids = FundingLineAddition.all(:funding_line_id => @funding_line_id).aggregate(:lending_id)
-    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, :disbursal_date.gte => @from_date, :disbursal_date.lte => @to_date).to_a.paginate(:page => @page, :per_page => @limit)
+    loan_ids_with_disbursal_dates = Lending.all(:id => loan_ids, 'loan_base_schedule.base_schedule_line_items.on_date'.to_sym.gte => @from_date, 'loan_base_schedule.base_schedule_line_items.on_date'.to_sym.lte => @to_date).to_a.paginate(:page => @page, :per_page => @limit)
     data[:loan_ids] = loan_ids_with_disbursal_dates
     data[:loans] = {}
+    zero_amount = MoneyManager.default_zero_money
 
     if !loan_ids_with_disbursal_dates.blank?
       loan_ids_with_disbursal_dates.each do |loan|
         loan_id = loan ? loan.id : "Not Specified"
+        loan_lan = loan.lan
         loan_amount = (loan && loan.applied_amount) ? MoneyManager.get_money_instance(Money.new(loan.applied_amount.to_i, :INR).to_s) : Money.default_money_amount(:INR)
+        disbursed_interest = loan.loan_base_schedule.to_money[:total_interest_applicable]
         loan_status = loan.status.to_s.humanize
         loan_disbursal_date = (loan && loan.disbursal_date) ? loan.disbursal_date : "Not Specified"
         loan_closure_date = (loan && loan.last_scheduled_date) ? loan.last_scheduled_date : "Not Specified"
@@ -51,57 +54,55 @@ class PeriodicLoanStatusReport < Report
         district_name = (district && (not district.blank?)) ? district.name : "Not Specified"
         installments_remaining = reporting_facade.number_of_installments_per_loan(loan.id)
         no_of_installments_remaining = installments_remaining[:installments_remaining]
-        principal_outstanding_beginning_of_week = loan.scheduled_principal_outstanding(@from_date)
+        loan_base_schedules = BaseScheduleLineItem.all('loan_base_schedule.lending_id' => loan.id)
+        loan_receipts = loan.loan_receipts(:is_advance_adjusted => false)
 
-        if loan.scheduled_principal_due(@to_date) > loan.scheduled_principal_due(@from_date)
-          principal_due_during_week = loan.scheduled_principal_due(@to_date) - loan.scheduled_principal_due(@from_date)
-        else
-          principal_due_during_week = loan.scheduled_principal_due(@from_date) - loan.scheduled_principal_due(@to_date)
-        end
+        loan_base_schedules_till_from_date = loan_base_schedules.blank? ? [] : loan_base_schedules.select{|s| s.on_date <= @from_date}
+        loan_receipts_till_from_date = loan_receipts.blank? ? [] : loan_receipts.select{|s| s.effective_on <= @from_date}
+        principal_schedule_till_from_date = loan_base_schedules_till_from_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_base_schedules_till_from_date.map(&:scheduled_principal_due).sum.to_i)
+        interest_schedule_till_from_date = loan_base_schedules_till_from_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_base_schedules_till_from_date.map(&:scheduled_interest_due).sum.to_i)
+        principal_outstanding_from_date = loan_amount > principal_schedule_till_from_date ?  loan_amount - principal_schedule_till_from_date : zero_amount
+        interest_outstanding_from_date = disbursed_interest > interest_schedule_till_from_date ?  disbursed_interest - interest_schedule_till_from_date : zero_amount
+        principal_received_from_date = loan_receipts_till_from_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_till_from_date.map(&:principal_received).sum.to_i)
+        interest_received_from_date = loan_receipts_till_from_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_till_from_date.map(&:interest_received).sum.to_i)
+        
+        loan_base_schedules_till_to_date = loan_base_schedules.blank? ? [] : loan_base_schedules.select{|s| s.on_date <= @to_date}
+        loan_receipts_till_to_date = loan_receipts.blank? ? [] : loan_receipts.select{|s| s.effective_on <= @to_date}
+        principal_schedule_till_to_date = loan_base_schedules_till_to_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_base_schedules_till_to_date.map(&:scheduled_principal_due).sum.to_i)
+        interest_schedule_till_to_date = loan_base_schedules_till_to_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_base_schedules_till_to_date.map(&:scheduled_interest_due).sum.to_i)
+        principal_outstanding_to_date = loan_amount > principal_schedule_till_to_date ?  loan_amount - principal_schedule_till_to_date : zero_amount
+        interest_outstanding_to_date = disbursed_interest > interest_schedule_till_to_date ?  disbursed_interest - interest_schedule_till_to_date : zero_amount
+        principal_received_to_date = loan_receipts_till_to_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_till_to_date.map(&:principal_received).sum.to_i)
+        interest_received_to_date = loan_receipts_till_to_date.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_till_to_date.map(&:interest_received).sum.to_i)
 
-        if loan.principal_received_till_date(@from_date) > loan.principal_received_till_date(@to_date)
-          principal_paid_during_week = loan.principal_received_till_date(@from_date) - loan.principal_received_till_date(@to_date)
-        else
-          principal_paid_during_week = loan.principal_received_till_date(@to_date) - loan.principal_received_till_date(@from_date)
-        end
 
-        if loan.scheduled_principal_outstanding(@to_date) > loan.actual_principal_outstanding(@to_date)
-          principal_overdue = loan.scheduled_principal_outstanding(@to_date) - loan.actual_principal_outstanding(@to_date)
-        else
-          principal_overdue = loan.actual_principal_outstanding(@to_date) - loan.scheduled_principal_outstanding(@to_date)
-        end
+        principal_due_during_week = principal_schedule_till_to_date > principal_schedule_till_from_date ? principal_schedule_till_to_date - principal_schedule_till_from_date : zero_amount
+        interest_due_during_week = interest_schedule_till_to_date > interest_schedule_till_from_date ? interest_schedule_till_to_date - interest_schedule_till_from_date : zero_amount
+        
+        loan_receipts_during_week = loan_receipts.select{|s| s.effective_on >= @to_date && s.effective_on <= @from_date}
+        principal_paid_during_week = loan_receipts_during_week.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_during_week.map(&:principal_received).sum.to_i)
+        interest_paid_during_week = loan_receipts_during_week.blank? ? zero_amount : MoneyManager.get_money_instance_least_terms(loan_receipts_during_week.map(&:interest_received).sum.to_i)
 
-        current_principal_outstanding = loan.actual_principal_outstanding(@to_date)
-        interest_outstanding_beginning_of_week = loan.scheduled_interest_outstanding(@from_date)
 
-        if loan.scheduled_interest_due(@from_date) > loan.scheduled_interest_due(@to_date)
-          interest_due_during_week = loan.scheduled_interest_due(@from_date) - loan.scheduled_interest_due(@to_date)
-        else
-          interest_due_during_week = loan.scheduled_interest_due(@to_date) - loan.scheduled_interest_due(@from_date)
-        end
+        principal_overdue = principal_schedule_till_to_date > principal_received_to_date ? principal_schedule_till_to_date - principal_received_to_date : zero_amount
+        interest_overdue = interest_schedule_till_to_date > interest_received_to_date ? interest_schedule_till_to_date - interest_received_to_date : zero_amount
 
-        if loan.interest_received_till_date(@from_date) > loan.interest_received_till_date(@to_date)
-          interest_paid_during_week = loan.interest_received_till_date(@from_date) - loan.interest_received_till_date(@to_date)
-        else
-          interest_paid_during_week = loan.interest_received_till_date(@to_date) - loan.interest_received_till_date(@from_date)
-        end
-
-        if loan.scheduled_interest_outstanding(@to_date) > loan.actual_interest_outstanding(@to_date)
-          interest_overdue = loan.scheduled_interest_outstanding(@to_date) - loan.actual_interest_outstanding(@to_date)
-        else
-          interest_overdue = loan.actual_interest_outstanding(@to_date) - loan.scheduled_interest_outstanding(@to_date)
-        end
-
+        schedule_till_current_date = loan_base_schedules.blank? ? [] : loan_base_schedules.select{|s| s.on_date <= Date.today}
+        principal_schedule_till_current_date = schedule_till_current_date.blank? ? [] : MoneyManager.get_money_instance_least_terms(schedule_till_current_date.map(&:scheduled_principal_due).sum.to_i)
+        interest_schedule_till_current_date = schedule_till_current_date.blank? ? [] : MoneyManager.get_money_instance_least_terms(schedule_till_current_date.map(&:scheduled_interest_due).sum.to_i)
+        
+        current_principal_outstanding = loan_amount > principal_schedule_till_current_date ? loan_amount - principal_schedule_till_current_date : zero_amount
+        current_interest_outstanding = disbursed_interest > interest_schedule_till_current_date ? disbursed_interest - interest_schedule_till_current_date : zero_amount
         number_of_days_overdue = loan.days_past_dues_on_date(@from_date)
-        current_interest_outstanding = loan.actual_interest_outstanding(@to_date)
 
-        data[:loans][loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :district_name => district_name,
+
+        data[:loans][loan] = {:client_id => client_id, :client_name => client_name, :loan_id => loan_id, :loan_lan => loan_lan, :district_name => district_name,
           :branch_name => branch_name, :no_of_installments_remaining => no_of_installments_remaining,
-          :principal_outstanding_beginning_of_week => principal_outstanding_beginning_of_week,
+          :principal_outstanding_beginning_of_week => principal_outstanding_from_date,
           :principal_due_during_week => principal_due_during_week, :principal_paid_during_week => principal_paid_during_week,
           :principal_overdue => principal_overdue, :number_of_days_principal_overdue => number_of_days_overdue,
           :current_principal_outstanding => current_principal_outstanding,
-          :interest_outstanding_beginning_of_week => interest_outstanding_beginning_of_week, :interest_due_during_week => interest_due_during_week,
+          :interest_outstanding_beginning_of_week => interest_outstanding_from_date, :interest_due_during_week => interest_due_during_week,
           :interest_paid_during_week => interest_paid_during_week, :interest_overdue => interest_overdue,
           :number_of_days_interest_overdue => number_of_days_overdue, :current_interest_outstanding => current_interest_outstanding,
           :loan_amount => loan_amount, :loan_disbursal_date => loan_disbursal_date, :loan_status => loan_status,

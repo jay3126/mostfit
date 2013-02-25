@@ -14,6 +14,10 @@
             - child_locations = params[:parent_location_id].blank? ? [] : LocationLink.get_children_ids_by_sql(@parent_biz_location, get_effective_date)
             - staff_members = child_locations.blank? ? [] : LocationManagement.staffs_managed_to_location_by_sql(child_locations, get_effective_date)
             = select :name => "staff_member_id", :collection => staff_members, :text_method => :name, :value_method => :id, :prompt => 'Select Staff Member', :id => 'staff_selector', :selected => params[:staff_member_id], :class => 'chosen'
+          %th Select Date:
+          %th
+            - date = params[:date].blank? ? get_effective_date : params[:date]
+            = date_select 'date', date, :max_date => Date.today, :size => 15
           %td
             = submit "Go"
 - if @staff_member.blank?

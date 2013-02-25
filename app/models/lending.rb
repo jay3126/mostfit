@@ -402,8 +402,17 @@ class Lending
     self.loan_base_schedule.get_schedule_dates
   end
 
+  def schedule_actual_dates
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
+    self.loan_base_schedule.get_schedule_actual_dates
+  end
+
   def last_scheduled_date
     schedule_dates.sort.last
+  end
+
+  def last_actual_scheduled_date
+    schedule_actual_dates.sort.last
   end
 
   # Gets a Range that begins with the first schedule date (disbursement) and ends with the last schedule date
@@ -416,6 +425,11 @@ class Lending
   def schedule_date?(on_date)
     raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
     self.loan_base_schedule.is_schedule_date?(on_date)
+  end
+
+  def schedule_actual_date?(on_date)
+    raise Errors::InitialisationNotCompleteError, "A loan base schedule is not currently available for the loan to provide schedule dates" unless self.loan_base_schedule
+    self.loan_base_schedule.is_schedule_actual_date?(on_date)
   end
 
   # Gets the immediately previous and current (or next) schedule dates
@@ -649,7 +663,7 @@ class Lending
   end
 
   def actual_total_due_ignoring_advance_balance_kk(on_date)
-    loan_receipts_till_date = self.loan_receipts(:is_advance_adjusted => false, :effective_on.lte => on_date)
+    loan_receipts_till_date = self.loan_receipts(:effective_on.lte => on_date)
     loan_receipts_amt = LoanReceipt.add_up(loan_receipts_till_date)
     total_received = loan_receipts_amt[:principal_received] + loan_receipts_amt[:interest_received]
     loan_schedules = self.loan_base_schedule.base_schedule_line_items(:on_date.lte => on_date)
@@ -718,15 +732,17 @@ class Lending
 
   def broken_period_interest_due(on_date)
     return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
-    return zero_money_amount if schedule_date?(on_date)
-    return zero_money_amount if on_date >= last_scheduled_date
+    return zero_money_amount if schedule_actual_date?(on_date)
+    return zero_money_amount if on_date >= last_actual_scheduled_date
 
-    previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_dates)
-    next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_dates)
-
-    ios_earlier = scheduled_interest_outstanding(previous_schedule_date)
-    ios_later = scheduled_interest_outstanding(next_schedule_date)
-
+    previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_actual_dates)
+    next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_actual_dates)
+    schedules = self.loan_base_schedule.base_schedule_line_items(:actual_date => [previous_schedule_date, next_schedule_date])
+    return zero_money_amount if schedules.blank?
+    return zero_money_amount if schedules.select{|s| s.actual_date == previous_schedule_date}.first.blank?
+    return zero_money_amount if schedules.select{|s| s.actual_date == next_schedule_date}.first.blank?
+    ios_earlier = schedules.select{|s| s.actual_date == previous_schedule_date}.first.to_money[:scheduled_interest_outstanding]
+    ios_later =  schedules.select{|s| s.actual_date == next_schedule_date}.first.to_money[:scheduled_interest_outstanding]
     Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, previous_schedule_date, next_schedule_date, on_date, self.repayment_frequency)
   end
   
@@ -943,13 +959,13 @@ class Lending
   end
 
   def days_past_due
-    days_past_due_on_date(Date.today)
+    days_past_dues_on_date(Date.today)
   end
 
-  def days_past_due_on_date(on_date)
-    return 0 unless is_outstanding_on_date?(on_date)
-    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
-  end
+#  def days_past_due_on_date(on_date)
+#    return 0 unless is_outstanding_on_date?(on_date)
+#    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+#  end
 
   def loan_days_past_due(on_date = Date.today)
     days_past_due_till_date = self.loan_due_statuses(:fields => [:id, :due_status], :on_date.lte => on_date, :order => [:id.desc])
@@ -972,7 +988,7 @@ class Lending
   def days_past_dues_on_date(on_date)
     if self.disbursal_date < on_date
       return 0 unless is_outstanding_on_date?(on_date)
-      LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+      LoanDueStatus.unbroken_days_past_due_kk(self.id, on_date)
     else
       return 0
     end
@@ -1243,19 +1259,12 @@ class Lending
   end
 
   def self.is_loan_eligible_for_loan_assignments?(loan_id)
-    #    loan_assignment_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_ASSIGNMENT_FACADE, User.first)
-    #    loan_assignment = loan_assignment_facade.get_loan_assigned_to(loan_id, Date.today)
     loan = Lending.get loan_id
     client = Client.get(loan.loan_borrower.counterparty_id)
     msg = "Ineligible Loan for assignment"
     if Client.is_claim_processing_or_inactive?(client)
       return [false, msg+" (Client is under claim processing)"]
     end
-    #    unless loan_assignment.blank?
-    #      if !(loan_assignment.is_additional_encumbered)
-    #        return [false, msg+" (Loan is already assigned)"]
-    #      end
-    #    end
     unless loan.is_outstanding?
       return [false, msg+" (Loan does not have outstanding)"]
     end
@@ -1418,7 +1427,7 @@ class Lending
       resulting_allocation[INTEREST_RECEIVED]  = interest
       resulting_allocation[ADVANCE_ADJUSTED] = total_amount
     else
-      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance(on_date) : self.actual_total_due_kk(on_date)
+      _actual_total_due = adjust_advance ? self.actual_total_due_ignoring_advance_balance_kk(on_date) : self.actual_total_due_kk(on_date)
        
       only_principal_and_interest = [_actual_total_due, total_amount].min
 

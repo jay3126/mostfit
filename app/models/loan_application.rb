@@ -133,7 +133,7 @@ class LoanApplication
     new(hash)
   end
 
-  #mapping of loan application to client
+  # mapping of loan application to client
   def to_client
     _to_client = {
       :name                       => client_name,
@@ -152,7 +152,8 @@ class LoanApplication
       :created_by_staff_member_id => created_by_staff_id,
       :created_by_user_id         => created_by_user_id,
       :center_id                  => at_center_id,
-      :date_joined                => created_on
+      :date_joined                => created_on,
+      :is_loan_applicant          => true
     }
   end
 
@@ -167,6 +168,7 @@ class LoanApplication
     administered_at_location_id = self.at_center_id
     registered_at_location_id = self.at_branch_id
     client_hash = self.to_client
+    debugger
     client_for_loan_application = Client.record_client(client_hash, administered_at_location_id, registered_at_location_id)
     self.client = client_for_loan_application
     save

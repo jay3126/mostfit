@@ -58,7 +58,7 @@ class LoanApplications < Application
           age_as_on_date         = row["Age as on date"]
           reference1             = row["Ration card no"]
           reference2_type        = row["Reference2 type"]
-          reference2             = row["Reference2"]
+          reference2             = row["Reference2 No."]
           address                = row["Address"]
           state                  = row["State"]
           pincode                = row["Pincode"]
@@ -135,7 +135,7 @@ class LoanApplications < Application
                   :center_cycle_id => center_cycle_number,
                   :created_by_staff_id => session.user.id,
                   :created_by_user_id => session.user.staff_member.id,
-                  :created_on => Date.today,
+                  :created_on => get_effective_date,
                   :amount => loan_amount,
                   :currency => loan_amount_currency,
                   :client_name => name,
@@ -148,7 +148,7 @@ class LoanApplications < Application
                   :client_reference1 => reference1,
                   :client_reference1_type => Constants::Masters::RATION_CARD,
                   :client_reference2 => reference2,
-                  :client_reference2_type => reference2_type,
+                  :client_reference2_type => reference2.blank? ? Constants::Masters::DEFAULT_REFERENCE2_TYPE : reference2_type,
                   :client_guarantor_name => guarantor_name,
                   :client_guarantor_relationship => guarantor_relationship.split("-").collect{|r| r.capitalize}.join('-')})
               unless loan_application.save
@@ -172,7 +172,7 @@ class LoanApplications < Application
   end
 
   def download_xls_file_format
-    send_file('public/bulk_upload_loan_applications_file_format.xls', :filename => ('public/bulk_upload_loan_applications_file_format.xls'.split("/")[-1].chomp))
+    send_file('public/sample_file_for_loan_applications_bulk_upload.xls', :filename => ('public/sample_file_for_loan_applications_bulk_upload.xls'.split("/")[-1].chomp))
   end
 
   # Only List all clients under selected center

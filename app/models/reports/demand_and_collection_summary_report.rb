@@ -50,7 +50,7 @@ class DemandAndCollectionSummaryReport < Report
       branch_data_map = {}
       branch_data_map[:branch_name] = branch.name
       branch_data_map[:ewi_schedule] = loan_amounts_on_date[:scheduled_total]
-      branch_data_map[:ewi_advance] = loan_amounts_on_date[:advance_amount_exist]
+      branch_data_map[:ewi_advance] = loan_amounts_on_date[:scheduled_advance_balance]
       branch_data_map[:overdue_ftd] = loan_amounts_on_date[:overdue_ftd]
       branch_data_map[:overdue_amt] = loan_amounts_on_date[:overdue_amt]
       total_demand = loan_amounts_on_date[:scheduled_total] +loan_amounts_on_date[:overdue_ftd]+loan_amounts_on_date[:overdue_amt]

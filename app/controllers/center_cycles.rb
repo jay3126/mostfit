@@ -69,8 +69,8 @@ class CenterCycles < Application
     @errors << "CGT End Date must not be before CGT Start Date" if cgt_date_two < cgt_date_one
 
     # Future date validations
-    @errors << "CGT Start Date must not be future date" if cgt_date_one > Date.today
-    @errors << "CGT End Date must not be future date" if cgt_date_two > Date.today
+    @errors << "CGT Start Date must not be future date" if cgt_date_one > get_effective_date
+    @errors << "CGT End Date must not be future date" if cgt_date_two > get_effective_date
 
     @errors << "CGT recorded by must not be blank" if cgt_performed_by_staff.blank?
 
@@ -104,7 +104,7 @@ class CenterCycles < Application
     @center_cycle = loan_applications_facade.get_current_center_cycle(center_id)
 
     # VALIDATIONS
-    @errors << "GRT completed on date must not be future date" if grt_completed_on > Date.today
+    @errors << "GRT completed on date must not be future date" if grt_completed_on > get_effective_date
     @errors << "GRT recorded by must not be blank" if grt_completed_by_staff.blank?
     @errors << "Please select GRT status either pass or fail" if grt_status.blank?
     @errors << "GRT completed on date must be before CGT End Date" if grt_completed_on < @center_cycle.cgt_date_two
