@@ -33,26 +33,26 @@ namespace :mostfit do
         #checking for duplications start here inside the loop.rake mostfit:update_loan_application_status
       elsif (applicant.client_reference1 and applicant.client_reference1.length>0)
         #checking reference1 in existing loan applications
-        same_reference_clients = total_loan_applications.select{|la| la.client_reference1_type == applicant.client_reference1_type and la.client_reference1 == applicant.client_reference1}
+        same_reference_clients = total_loan_applications.select{|la| la.client_reference1_type == applicant.client_reference1_type and la.client_reference1.downcase == applicant.client_reference1.downcase}
         #checking reference1 in existing clients
-        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.include?(applicant.client_reference1)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.include?(applicant.client_reference1)) }
-        #checking reference1 in existing clients only for numerice reference1
+        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.downcase.include?(applicant.client_reference1.downcase)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.downcase.include?(applicant.client_reference1.downcase)) }
+        #checking reference1 in existing clients only for numeric reference1
         if same_client_reference.blank?
-          reference1 = applicant.client_reference1.gsub(/[^0-9]/, '')
-          same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.include?(reference1)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.include(reference1)) }
+          reference1 = applicant.client_reference1.downcase.gsub(/[^0-9]/, '')
+          same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.downcase.include?(reference1)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.downcase.include(reference1)) }
         end
         loan_applicant_duplicate = true unless same_reference_clients.blank? && same_client_reference.blank?
       end
 
       if (applicant.client_reference2 and applicant.client_reference2.length>0)
         #checking reference2 in existing loan applications.
-        same_reference_clients = total_loan_applications.select{|la| la.client_reference2_type == applicant.client_reference2_type and la.client_reference2 == applicant.client_reference2}
+        same_reference_clients = total_loan_applications.select{|la| la.client_reference2_type == applicant.client_reference2_type and la.client_reference2.downcase == applicant.client_reference2.downcase}
         #checking reference2 in existing clients
-        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.include?(applicant.client_reference2)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.include?(applicant.client_reference2)) }
+        same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.downcase.include?(applicant.client_reference2.downcase)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.downcase.include?(applicant.client_reference2.downcase)) }
         #checking reference1 in existing clients only for numeric reference2
         if same_client_reference.blank?
-          reference2 = applicant.client_reference2.gsub(/[^0-9]/, '')
-          same_client_reference = same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.include?(reference2)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.include?(reference2)) }
+          reference2 = applicant.client_reference2.downcase.gsub(/[^0-9]/, '')
+          same_client_reference = same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference2_type and c.reference.downcase.include?(reference2)) || (c.reference2_type == applicant.client_reference2_type and c.reference2.downcase.include?(reference2)) }
         end
         loan_applicant_duplicate = true unless same_reference_clients.blank? && same_client_reference.blank?
       end
