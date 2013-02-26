@@ -11,6 +11,8 @@ Merb::Router.prepare do
     end
   end
 
+  resources :money_deposit_categories
+
   resources :new_funders do
     resources :new_funding_lines do
       resources :new_tranches
