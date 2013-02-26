@@ -55,7 +55,7 @@ class LoanBaseSchedule
   end
 
   def get_schedule_actual_dates
-    self.base_schedule_line_items.sort.collect { |line_item| line_item.actual_date }
+    self.base_schedule_line_items.sort.collect { |line_item| line_item.actual_date}
   end
 
   def get_schedule_date_range

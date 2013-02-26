@@ -118,7 +118,7 @@ class Lending
   belongs_to :loan_borrower
   has 1, :loan_base_schedule
   has n, :loan_payments
-  has n, :loan_receipts
+  has n, :loan_receipts, :conditions => {:deleted_at => nil}
   has n, :loan_status_changes
   has n, :loan_due_statuses
   has 1, :loan_repaid_status
@@ -736,14 +736,27 @@ class Lending
     return zero_money_amount if on_date >= last_actual_scheduled_date
 
     previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_actual_dates)
+    actual_previous_schedule_date = previous_schedule_date
     next_schedule_date = Constants::Time.get_immediately_next_date(on_date, *schedule_actual_dates)
+    if previous_schedule_date == schedule_actual_dates.first
+      if self.repayment_frequency == MarkerInterfaces::Recurrence::MONTHLY
+        month_last_date = (next_schedule_date.first_day_of_month-1)
+        year = month_last_date.year
+        month = month_last_date.month
+        day = next_schedule_date.day
+        actual_previous_schedule_date = Date.new(year,month,day)
+      elsif self.repayment_frequency == MarkerInterfaces::Recurrence::BIWEEKLY
+        actual_previous_schedule_date = next_schedule_date - 14
+      end
+    end
+    return zero_money_amount if on_date < actual_previous_schedule_date
     schedules = self.loan_base_schedule.base_schedule_line_items(:actual_date => [previous_schedule_date, next_schedule_date])
     return zero_money_amount if schedules.blank?
     return zero_money_amount if schedules.select{|s| s.actual_date == previous_schedule_date}.first.blank?
     return zero_money_amount if schedules.select{|s| s.actual_date == next_schedule_date}.first.blank?
     ios_earlier = schedules.select{|s| s.actual_date == previous_schedule_date}.first.to_money[:scheduled_interest_outstanding]
     ios_later =  schedules.select{|s| s.actual_date == next_schedule_date}.first.to_money[:scheduled_interest_outstanding]
-    Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, previous_schedule_date, next_schedule_date, on_date, self.repayment_frequency)
+    Allocation::Common.calculate_broken_period_interest(ios_earlier, ios_later, actual_previous_schedule_date, next_schedule_date, on_date, self.repayment_frequency)
   end
   
   def get_scheduled_amortization(on_date)
@@ -1518,6 +1531,8 @@ class Lending
   end
 
   def self.advance_adjusted_all_loans_till_date(on_date)
+    payment_transactions = PaymentTransaction.all(:receipt_type => :contra)
+    payment_transactions.each{|d| PaymentTransaction.delete_payment_transaction(d.id)}
     advance_loan_ids= all_advance_avaiable_loans_for_location(on_date)
     loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, User.first)
     advance_loan_ids.each do |loan_id|

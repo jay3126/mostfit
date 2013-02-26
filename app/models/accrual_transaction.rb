@@ -27,15 +27,15 @@ class AccrualTransaction
     PRODUCT_ACTIONS_FOR_ACCRUAL_TRANSACTIONS[self.on_product_type][self.accrual_temporal_type][self.accrual_allocation_type]
   end
   
-  def self.record_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-    Validators::Arguments.not_nil?(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-    accrual = to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+  def self.record_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type, accounting = false)
+    Validators::Arguments.not_nil?(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type, accounting)
+    accrual = to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type, accounting)
     recorded_accrual = first_or_create(accrual)
     raise Errors::DataError, recorded_accrual.errors.first.first unless recorded_accrual.saved?
     recorded_accrual
   end
 
-  def self.to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
+  def self.to_accrual(accrual_allocation_type, money_amount, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type, accounting = false)
     accrual = {}
     accrual[:accrual_allocation_type] = accrual_allocation_type
     accrual[:amount] = money_amount.amount
@@ -49,6 +49,7 @@ class AccrualTransaction
     accrual[:accounted_at] = accounted_at
     accrual[:effective_on] = effective_on
     accrual[:accrual_temporal_type] = accrual_temporal_type
+    accrual[:accounting] = accounting
     accrual
   end
 
@@ -78,6 +79,7 @@ class AccrualTransaction
   end
 
   def self.reversed_accruals_for_not_recevied(loan_id, on_date = Date.today)
+    loan = Lending.get(loan_id)
     loan_receipts = LoanReceipt.all(:lending_id => loan_id)
     principal_accrued_transaction  = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_PRINCIPAL_ALLOCATION, :accrual_temporal_type => ACCRUE_REGULAR, :on_product_id => loan_id, :on_product_type => 'lending', :effective_on.lte => on_date)
     interest_accrued_transaction  = AccrualTransaction.all(:accrual_allocation_type => ACCRUE_INTEREST_ALLOCATION, :accrual_temporal_type => ACCRUE_REGULAR, :on_product_id => loan_id, :on_product_type => 'lending', :effective_on.lte => on_date)
@@ -117,53 +119,33 @@ class AccrualTransaction
     FileUtils.mkdir_p(folder)
     csv_loan_file = File.join(folder, "accrual.csv")
     File.new(csv_loan_file, "w").close
-    header = [["Loan lan" ,"Principal Accrued Date", 'Principal Accrued',"Interest Accrued Date", "Interest Accrued", "Broken Peroid Date", "Broken Period", "Reverse Principal Date", "Reverse Principal Due", "Reverse Interset Date", "Reverse Interest Due"]]
+    header = [["Loan lan" ,"Jan Principal Due Date", 'Jan Principal Due',"Jan Interest Due Date", "Jan Interest Due", "Jan Broken Reverse Interest", "Jan Broken Peroid Interest", "Reverse Principal Date", "Reverse Principal Due", "Reverse Interset Date", "Reverse Interest Due"]]
     append_to_file_as_csv(header, csv_loan_file)
     loans = LoanAdministration.get_loan_ids_accounted_by_sql(location_id, Date.today, false, '')
     accruals = all(:on_product_id => loans).group_by{|s| s.on_product_id}
     accruals.each do |loan_id, l_accruals|
       lan = Lending.get(loan_id).lan
-      dec_accruals = []
       jan_accruals = []
-      dec_accruals = l_accruals.select{|s| s.effective_on >= Date.new(2012,12,1) and s.effective_on <= Date.new(2012,12,31)}
-      unless dec_accruals.blank?
-        d_value = [lan]
-        d_principal_accrued = dec_accruals.select{|s| s.accrual_allocation_type == ACCRUE_PRINCIPAL_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}.first
-        d_interest_accrued = dec_accruals.select{|s| s.accrual_allocation_type == ACCRUE_INTEREST_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}.first
-        d_broken_accrued = dec_accruals.select{|s| s.accrual_temporal_type == ACCRUE_BROKEN_PERIOD}.first
-        d_principal_reversed = dec_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_PRINCIPAL_ALLOCATION}.first
-        d_interest_reversed = dec_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_INTEREST_ALLOCATION}.first
-        d_value << "#{d_principal_accrued.blank? ? '-' : d_principal_accrued.effective_on}"
-        d_value <<  "#{d_principal_accrued.blank? ? '-' : d_principal_accrued.to_money[:amount]}"
-        d_value <<  "#{d_interest_accrued.blank? ? '-' : d_interest_accrued.effective_on}"
-        d_value <<  "#{d_interest_accrued.blank? ? '-' : d_interest_accrued.to_money[:amount]}"
-        d_value <<  "#{d_broken_accrued.blank? ? '-' : d_broken_accrued.effective_on}"
-        d_value <<  "#{d_broken_accrued.blank? ? '-' : d_broken_accrued.to_money[:amount]}"
-        d_value <<  "#{d_principal_reversed.blank? ? '-' : d_principal_reversed.effective_on}"
-        d_value <<  "#{d_principal_reversed.blank? ? '-' : d_principal_reversed.to_money[:amount]}"
-        d_value <<  "#{d_interest_reversed.blank? ? '-' : d_interest_reversed.effective_on}"
-        d_value <<  "#{d_interest_reversed.blank? ? '-' : d_interest_reversed.to_money[:amount]}"
-      end
       jan_accruals = l_accruals.select{|s| s.effective_on >= Date.new(2013,1,1) and s.effective_on <= Date.new(2013,1,31)}
       unless jan_accruals.blank?
         j_value = [lan]
-        j_principal_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_PRINCIPAL_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}.first
-        j_interest_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_INTEREST_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}.first
-        j_broken_accrued = jan_accruals.select{|s| s.accrual_temporal_type == ACCRUE_BROKEN_PERIOD}.first
-        j_principal_reversed = jan_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_PRINCIPAL_ALLOCATION}.first
-        j_interest_reversed = jan_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_INTEREST_ALLOCATION}.first
-        j_value <<  "#{j_principal_accrued.blank? ? '-' : j_principal_accrued.effective_on}"
-        j_value <<  "#{j_principal_accrued.blank? ? '-' : j_principal_accrued.to_money[:amount]}"
-        j_value <<  "#{j_interest_accrued.blank? ? '-' : j_interest_accrued.effective_on}"
-        j_value <<  "#{j_interest_accrued.blank? ? '-' : j_interest_accrued.to_money[:amount]}"
-        j_value <<  "#{j_broken_accrued.blank? ? '-' : j_broken_accrued.effective_on}"
-        j_value <<  "#{j_broken_accrued.blank? ? '-' : j_broken_accrued.to_money[:amount]}"
-        j_value <<  "#{j_principal_reversed.blank? ? '-' : j_principal_reversed.effective_on}"
-        j_value <<  "#{j_principal_reversed.blank? ? '-' : j_principal_reversed.to_money[:amount]}"
-        j_value <<  "#{j_interest_reversed.blank? ? '-' : j_interest_reversed.effective_on}"
-        j_value <<  "#{j_interest_reversed.blank? ? '-' : j_interest_reversed.to_money[:amount]}"
+        j_broken_interest_reverse = jan_accruals.select{|s| s.accrual_temporal_type == REVERSE_BROKEN_PERIOD_ACCRUAL}
+        j_principal_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_PRINCIPAL_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}
+        j_interest_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_INTEREST_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}
+        j_broken_accrued = jan_accruals.select{|s| s.accrual_temporal_type == ACCRUE_BROKEN_PERIOD}
+        j_principal_reversed = jan_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_PRINCIPAL_ALLOCATION}
+        j_interest_reversed = jan_accruals.select{|s| s.accrual_allocation_type == REVERSE_ACCRUE_INTEREST_ALLOCATION}
+        j_value <<  "#{j_principal_accrued.blank? ? '-' : j_principal_accrued.first.effective_on}"
+        j_value <<  "#{j_principal_accrued.blank? ? '-' : (j_principal_accrued.map(&:amount).sum/100).to_f}"
+        j_value <<  "#{j_interest_accrued.blank? ? '-' : j_interest_accrued.first.effective_on}"
+        j_value <<  "#{j_interest_accrued.blank? ? '-' : (j_interest_accrued.map(&:amount).sum/100).to_f}"
+        j_value <<  "#{j_broken_interest_reverse.blank? ? '-' : (j_broken_interest_reverse.map(&:amount).sum/100).to_f}"
+        j_value <<  "#{j_broken_accrued.blank? ? '-' : (j_broken_accrued.map(&:amount).sum/100).to_f}"
+        j_value <<  "#{j_principal_reversed.blank? ? '-' : j_principal_reversed.first.effective_on}"
+        j_value <<  "#{j_principal_reversed.blank? ? '-' : (j_principal_reversed.map(&:amount).sum/100).to_f}"
+        j_value <<  "#{j_interest_reversed.blank? ? '-' : j_interest_reversed.first.effective_on}"
+        j_value <<  "#{j_interest_reversed.blank? ? '-' : (j_interest_reversed.map(&:amount).sum/100).to_f}"
       end
-      append_to_file_as_csv([d_value], csv_loan_file) unless d_value.blank?
       append_to_file_as_csv([j_value], csv_loan_file) unless j_value.blank?
     end
   end
