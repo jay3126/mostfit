@@ -248,7 +248,7 @@ module BookKeeper
           by_counterparty_id = loan.loan_borrower.counterparty_id
           accounted_at = loan.accounted_at_origin
           performed_at = loan.administered_at_origin
-          AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, last_broken_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type, true)
+          AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, last_broken_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, schedule_date , accrual_temporal_type, true)
         end
       end
     end
