@@ -1,11 +1,18 @@
 .shaded
   - branch_name = BizLocation.get(params[:parent_location_id]).name rescue nil
   - center_name = BizLocation.get(params[:child_location_id]).name rescue nil
+  - @child_location_id = params[:child_location_id] rescue nil
+  - @parent_location_id = params[:parent_location_id] rescue nil
+
   - if branch_name.blank?
     %h3= "Generate request file for all Branches and all Centers"
   - elsif center_name.blank?
     %h3= "Generate request file for Branch: #{branch_name}"
   - else
     %h3= "Generate request file for Branch: #{branch_name}, Center: #{center_name}"
-  = link_to_with_rights "Generate", url(:controller => "overlap_report_requests", :action => "generate_cb_request_file", :parent_location_id => params[:parent_location_id], :child_location_id => params[:child_location_id]), :class => 'greenButton'
+  %form{:action => url(:controller => :overlap_report_requests, :action => :generate_cb_request_file), :method => :get} 
+    = select :type,:collection => ["HighMark File", "Equvifax file"]
+    = hidden_field :child_location_id , :value => @child_location_id
+    = hidden_field :parent_location_id , :value => @parent_location_id
+    = submit "Generate" , :class => 'greenButton'
 %br

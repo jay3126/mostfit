@@ -1,6 +1,7 @@
 class OverlapReportRequests < Application
 
   def index
+    type = params[:type]
     folder = File.join(Merb.root, "docs","highmark","requests")
     FileUtils.mkdir_p folder
     @files = Dir.glob(File.join(folder, "*csv"))
@@ -10,6 +11,17 @@ class OverlapReportRequests < Application
   def send_csv(filename)
     send_file(filename, :filename => (filename.split("/")[-1].chomp))
   end
+  def request_xml
+    branch_id = params[:parent_location_id]
+    center_id = params[:child_location_id]
+    @branch = location_facade.get_location(branch_id) if branch_id
+    @center = location_facade.get_location(center_id) if center_id
+    xmlfolder  = File.join(Merb.root, "docs","Equvifax","requests")
+    FileUtils.mkdir_p xmlfolder
+    @files_equvifax = Dir.glob(File.join(xmlfolder, "*csv"))
+
+   render
+ end
 
   def request_file
 
@@ -35,7 +47,23 @@ class OverlapReportRequests < Application
     # GATE-KEEPING
     branch = params[:parent_location_id]
     center = params[:child_location_id]
+    type = params[:type]
+    if type == "Equvifax file"
+      condition_hash.merge!(:at_branch_id => branch) unless branch.blank?
+      condition_hash.merge!(:at_center_id => center) unless center.blank?
 
+    # OPERATIONS PERFORMED
+    begin
+      loan_applications_facade.generate_credit_bureau_request_file(condition_hash)
+      message = {:notice => "Request xml file generated succesfully."}
+    rescue => ex
+      @errors << ex.message
+      message = {:error => @errors.to_s}
+    end
+
+    # RENDER/RE-DIRECT
+    redirect url(:controller => "overlap_report_requests", :action => "request_xml", :parent_location_id => branch, :child_location_id => center), :message => message 
+    else
     condition_hash.merge!(:at_branch_id => branch) unless branch.blank?
     condition_hash.merge!(:at_center_id => center) unless center.blank?
 
@@ -50,6 +78,7 @@ class OverlapReportRequests < Application
 
     # RENDER/RE-DIRECT
     redirect url(:controller => "overlap_report_requests", :action => "request_file", :parent_location_id => branch, :child_location_id => center), :message => message
+  end
   end
 
 end

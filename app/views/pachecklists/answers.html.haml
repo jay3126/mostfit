@@ -79,7 +79,10 @@
 -@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
 - @biz_location = BizLocation.get(@biz_location_id)
 - @date = get_effective_date
-- @area_manager = LocationLink.get_parent(@biz_location,@date)
+- @area_manager = LocationLink.get_parent(@biz_location,@date).id
+- @manager_area = LocationManagement.staff_managing_location(@area_manager, get_effective_date)
+- @area_managed_by = @manager.blank? ? '' : StaffMember.get(@manager_area.manager_staff_id)
+
 = error_messages_for @pachecklist
 = form_for(@packlist2, :action => url(:allanswers_pachecklists)  )do
   %p
@@ -98,7 +101,7 @@
         %td{:align => "left", :style=>"width:60%;"}
           Name of the Area Manager
         %td
-          = text_field :value => @area_manager,:disabled=>true
+          = text_field :value => @area_managed_by.name,:disabled=>true
       %tr
         %td{:align => "left", :style=>"width:60%;"}
           Date of Audit

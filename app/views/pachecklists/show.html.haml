@@ -17,7 +17,10 @@
 -@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
 - @biz_location = BizLocation.get(@pachecklist.biz_location_id)
 - @date = get_effective_date
-- @area_manager = LocationLink.get_parent(@biz_location,@date)
+- @area_manager = LocationLink.get_parent(@biz_location,@date).id
+- @manager_area = LocationManagement.staff_managing_location(@area_manager, get_effective_date)
+- @area_managed_by = @manager.blank? ? '' : StaffMember.get(@manager_area.manager_staff_id)
+
 
 %h1
 
@@ -48,7 +51,7 @@
       %td{:align => "left"}
         Name of the Area Manager
       %td{:align => "left"}
-        = text_field :value => @area_manager, :disabled => true
+        = text_field :value => @area_managed_by.name, :disabled => true
     %tr
       %td
       %td{:align => "left"}
