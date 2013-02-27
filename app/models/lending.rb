@@ -1178,7 +1178,7 @@ class Lending
       self.disbursed_by_staff = by_disbursement_transaction.performed_by
       set_status(DISBURSED_LOAN_STATUS, on_disbursal_date)
       disbursement_money_amount = by_disbursement_transaction.payment_money_amount
-      LoanPayment.record_loan_payment(disbursement_money_amount, self, on_disbursal_date)
+      LoanPayment.record_loan_payment(by_disbursement_transaction, disbursement_money_amount, self, on_disbursal_date)
       disbursement_allocation = {LOAN_DISBURSED => by_disbursement_transaction.payment_money_amount}
       disbursement_allocation = Money.add_total_to_map(disbursement_allocation, TOTAL_PAID)
       disbursement_allocation
@@ -1531,8 +1531,8 @@ class Lending
   end
 
   def self.advance_adjusted_all_loans_till_date(on_date)
-    payment_transactions = PaymentTransaction.all(:receipt_type => :contra)
-    payment_transactions.each{|d| PaymentTransaction.delete_payment_transaction(d.id)}
+#    payment_transactions = PaymentTransaction.all(:receipt_type => :contra)
+#    payment_transactions.each{|d| PaymentTransaction.delete_payment_transaction(d.id)}
     advance_loan_ids= all_advance_avaiable_loans_for_location(on_date)
     loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, User.first)
     advance_loan_ids.each do |loan_id|
