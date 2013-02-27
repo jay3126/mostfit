@@ -11,8 +11,8 @@
 
 .shaded
   %h2
-    = "Bank Branch Accounts"
-  %table.form{:style => "width:100%;"}
+    = "List of Accounts under #{@bank_branch.name} Branch"
+  %table.dataTable.weeksheet.report.nojs
     %thead
       %tr
         %th
@@ -22,7 +22,11 @@
         %th
           = "Account No."
         %th
-          = "Created Date"
+          = "Creation Date"
+        %th
+          = "Created At"
+        %th
+          = "Created by User"
     %tbody
       - @bank_accounts.each do |ba|
         %tr
@@ -34,4 +38,8 @@
             = ba.account_no
           %td
             = ba.created_at.strftime('%d/%m/%Y')
+          %td
+            = ba.created_at
+          %td
+            = User.first(ba.created_by_user_id).first.login
 %br
