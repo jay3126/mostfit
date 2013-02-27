@@ -1,0 +1,44 @@
+%h1
+  List of Money Deposit Categories
+
+.menu-strip{:style => "width: 38%"}
+  = link_to_with_rights "Add a new Money Deposit Category", '#', :class => 'add grey_button', :onclick => "jQuery('#money_deposit_category').toggle(); return false;"
+  &nbsp;&nbsp;
+  = link_to_with_rights "Back", url(:admin), :class => "grey_button"
+
+#money_deposit_category{:style => "display : #{@money_deposit_categories.blank? ? false : 'none' }", :class => 'shaded'}
+  = partial :fields
+
+%br
+- unless @money_deposit_categories.blank?
+  %table.dataTable.report.weeksheet.nojs
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Deposit Category Name
+        %th
+          Created By Staff Member
+        %th
+          Created By User
+        %th
+          Created At
+        %th
+          Actions
+    - @money_deposit_categories.each do |mdc|
+      %tr
+        %td
+          = mdc.id
+        %td
+          = mdc.category_name
+        %td
+          = mdc.created_by_staff
+        %td
+          = mdc.created_by_user
+        %td
+          = mdc.created_at
+        %td
+
+- else
+  %h3 No Money Deposit Category created yet.

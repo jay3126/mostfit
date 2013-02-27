@@ -237,6 +237,21 @@ module BookKeeper
         #account_for_accrual(accrual) unless accrual.blank?
       end
     end
+    if status != :disbursed_loan_status && status != :repaid_loan_status
+      unless loan.schedule_actual_dates.include?(schedule_date)
+        last_broken_interest_due = loan.broken_period_interest_due(schedule_date-1)
+        if last_broken_interest_due > MoneyManager.default_zero_money
+          accrual_temporal_type = ACCRUE_REGULAR
+          receipt_type = RECEIPT
+          on_product_type, on_product_id = LENDING, loan.id
+          by_counterparty_type = 'client'
+          by_counterparty_id = loan.loan_borrower.counterparty_id
+          accounted_at = loan.accounted_at_origin
+          performed_at = loan.administered_at_origin
+          AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, last_broken_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, schedule_date , accrual_temporal_type, true)
+        end
+      end
+    end
   end
 
   def accrue_regular_receipts_on_loan_from_date_to_date(loan_id, status, from_date, to_date)
@@ -278,6 +293,21 @@ module BookKeeper
       accruals << AccrualTransaction.reversed_accruals_for_not_recevied(loan_id, schedule_date) if status != :disbursed_loan_status
       accruals.each do |accrual|
         #account_for_accrual(accrual) unless accrual.blank?
+      end
+    end
+    if status != :disbursed_loan_status && status != :repaid_loan_status
+      unless loan.schedule_actual_dates.include?(schedule_date)
+        last_broken_interest_due = loan.broken_period_interest_due(schedule_date-1)
+        if last_broken_interest_due > MoneyManager.default_zero_money
+          accrual_temporal_type = ACCRUE_REGULAR
+          receipt_type = RECEIPT
+          on_product_type, on_product_id = LENDING, loan.id
+          by_counterparty_type = 'client'
+          by_counterparty_id = loan.loan_borrower.counterparty_id
+          accounted_at = loan.accounted_at_origin
+          performed_at = loan.administered_at_origin
+          AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, last_broken_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, schedule_date, accrual_temporal_type, true)
+        end
       end
     end
   end

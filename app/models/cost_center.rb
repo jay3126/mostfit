@@ -8,7 +8,7 @@ class CostCenter
   property :created_at, DateTime, :nullable => false, :default => DateTime.now
 
   belongs_to :biz_location, 'BizLocation', :nullable => true
-  has n, :vouchers
+  has n, :vouchers, :conditions => {:deleted_at => nil}
   has n, :accounting_locations
 
   validates_present :name

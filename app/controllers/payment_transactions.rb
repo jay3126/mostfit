@@ -216,8 +216,7 @@ class PaymentTransactions < Application
     @error << "Please Select Check box" if payments.blank?
     if @error.blank?
       payments.each do |payment_id|
-        payment = PaymentTransaction.get payment_id
-        payment.delete_payment_transaction
+        PaymentTransaction.delete_payment_transaction payment_id
       end
     end
 

@@ -44,8 +44,8 @@ module Highmark
       append_to_file_as_csv([headers["CNSCRD"]], filename_cnscrd)
       append_to_file_as_csv([headers["ADRCRD"]], filename_adrcrd)
       append_to_file_as_csv([headers["ACTCRD"]], filename_actcrd)
-      append_to_file_as_csv([headers["BRNCRD"]], filename_brncrd)
-      append_to_file_as_csv([headers["CENCRD"]], filename_cencrd)
+      append_to_file_as_csv([branch_headers["BRNCRD"]], filename_brncrd)
+      append_to_file_as_csv([center_headers["CENCRD"]], filename_cencrd)
 
       # REPAID, WRITTEN_OFF AND PRECLOSED loans are treated as closed loans
       all_loans = Lending.all(:fields => [:id]).map{|x| x.id}.uniq
@@ -64,6 +64,9 @@ module Highmark
 
       ineligible_repaid = Lending.all(:status => :repaid_loan_status, :repaid_on_date.lte => cut_off_date)
       ineligible_repaid_loans = (ineligible_repaid and (not ineligible_repaid.nil?)) ? ineligible_repaid.map{|x| x.id}.uniq : []
+
+      branch_list = BizLocation.all("location_level.level" => 1).aggregate(:id)
+      center_list = BizLocation.all("location_level.level" => 0).aggregate(:id)
 
       #this is done as per Suryoday's requirements. For monthly submission only those new_disbursements + status changes loans are required and for monthly all loans.
       if @frequency_identifier == 'weekly'
@@ -99,7 +102,6 @@ module Highmark
       end
 
       #following will generate branch list.
-      branch_list = BizLocation.all("location_level.level" => 1).aggregate(:id)
       branch_list.each do |b_id|
         begin
           branch = BizLocation.get(b_id)
@@ -119,7 +121,6 @@ module Highmark
       end
 
       #following will generate center list.
-      center_list = BizLocation.all("location_level.level" => 0).aggregate(:id)
       center_list.each do |c_id|
         begin
           center = BizLocation.get(c_id)

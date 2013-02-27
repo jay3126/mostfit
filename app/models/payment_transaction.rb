@@ -205,6 +205,12 @@ class PaymentTransaction
       self.deleted_at = DateTime.now
       self.save!
     end
+
+  end
+
+  def self.delete_payment_transaction(p_id)
+    payment = get(p_id)
+    payment.delete_payment_transaction
   end
 
 

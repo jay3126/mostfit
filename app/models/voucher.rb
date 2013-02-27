@@ -19,7 +19,7 @@ class Voucher
   property :deleted_at,     ParanoidDateTime
   property :updated_at,     DateTime
 
-  has n, :ledger_postings
+  has n, :ledger_postings, :conditions => {:deleted_at => nil}
   belongs_to :payment_transaction, :nullable => true
   belongs_to :accrual_transaction, :nullable => true
   belongs_to :cost_center, :nullable => true

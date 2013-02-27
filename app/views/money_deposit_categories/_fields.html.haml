@@ -1,0 +1,16 @@
+= form_for(@money_deposit_category, :action => url(:money_deposit_categories)) do
+  %table.tall.shaded
+    %tr
+      %th
+        Deposit Category Name
+      %td
+        = text_field :category_name
+        = hidden_field :name => 'created_by_staff_member_id', :value => get_session_user_id
+        = hidden_field :name => 'created_by_user_id', :value => session.user.id
+      %td
+        = submit "Create Money Deposit Category", :class => "grey_button"
+        &nbsp;&nbsp;
+        %b
+          Or
+        &nbsp;&nbsp;
+        = link_to_with_rights 'Cancel', '#', :onclick => "jQuery('#money_deposit_category').hide(); return false;", :class => "grey_button"

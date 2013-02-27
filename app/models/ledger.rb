@@ -20,7 +20,7 @@ class Ledger
   property :created_at,               *CREATED_AT
   property :type,                     Discriminator
 
-  has n, :ledger_postings
+  has n, :ledger_postings, :conditions => {:deleted_at => nil}
   has n, :posting_rules
   has n, :vouchers, :through => :ledger_postings
   belongs_to :account_group, :nullable => true
