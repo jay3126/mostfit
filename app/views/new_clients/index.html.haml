@@ -60,15 +60,19 @@
             %th
               Select Center
             %th
-              = select :name=>"client[biz_location_id]", :collection => @child_locations.collect{|b| [b.id, b.name] }
+              = select :name=>"client[biz_location_id]", :collection => @child_locations.collect{|b| [b.id, b.name] }, :class => 'chosen'
             %th
               To Be Moved On:
             %td
-              = date_select "move_on_date", get_effective_date
+              = date_select "move_on_date", get_effective_date, :size => 8
             %th
               Performed by:
             %th
               - staff_member  = session.user.staff_member
-              = select :name => "client[move_by_staff]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s
+              = select :name => "client[move_by_staff]", :text_method => :name, :value_method => :id, :collection => [staff_member], :prompt => "Select staff member", :selected => staff_member.id.to_s, :style => "width:300px;", :class => 'chosen'
             %th
               = submit "Save"
+:javascript
+  $(document).ready(function() {
+    $('div.chzn-container-single').css('width','230px');
+  });
