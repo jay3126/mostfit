@@ -37,15 +37,10 @@ class DataAccessObserver
         unless @_user.nil?
           user_role = @_user.staff_member.designation.role_class
           #this has been done to create logs for re-schedule of loans only when the action is not create.
-          if ((model == "BaseScheduleLineItem") && (@action != :create))
-            log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log, :user_role => user_role,
-                                 :auditable_type => model, :user => @_user, :created_at => DateTime.now)
-            log.save
-          else
-            log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log, :user_role => user_role,
-                                 :auditable_type => model, :user => @_user, :created_at => DateTime.now)
-            log.save
-          end
+          return if ((model == "BaseScheduleLineItem") && (@action == :create))
+          log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log, :user_role => user_role,
+                               :auditable_type => model, :user => @_user, :created_at => DateTime.now)
+          log.save
         end
       end
     rescue Exception => e
