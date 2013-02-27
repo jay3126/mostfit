@@ -6,7 +6,7 @@ class BankAccounts < Application
     if @bank_account.save
       redirect resource(@bank_branch.bank,@bank_branch), :message => {:notice => "Bank Account: #{@bank_account.name} created successfully"}
     else
-      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => error_messages(@bank_account)}
+      redirect resource(@bank_branch.bank,@bank_branch), :message => {:error => "Bank Account failed to be created because: #{@bank_account.errors.instance_variable_get("@errors").map{|k, v| v.join(", ")}.join(", ")}"}
     end
   end
 

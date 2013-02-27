@@ -1,5 +1,5 @@
 %h1
-  = "Banks"
+  = "List of Banks"
 .menu-strip{:style => "width: 20%;"}
   = link_to_with_rights 'Add Bank','#', :onclick => "jQuery('#new_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
   &nbsp;&nbsp;
@@ -8,19 +8,67 @@
 = partial 'form'
 - if @banks && !@banks.empty?
   .shaded
-    %table.form{:style => "width:100%;"}
+    %table.dataTable.weeksheet.report.nojs
       %thead
         %tr
           %th
             = "ID"
           %th
-            = "Name"
+            = "Bank Name"
+          %th
+            = "No. of Branches"
+          %th
+            = "Created At"
+          %th
+            = "Created by User"
+          %th
+            = "Actions"
       %tbody
         - @banks.each do |bank|
           %tr
             %td
               = bank.id
+              - @bank = bank.id
             %td
-              = link_to bank.name , resource(bank)
+              = link_to_with_rights bank.name , resource(bank)
+            %td
+              = bank.bank_branches.count rescue 0
+            %td
+              = bank.created_at
+            %td
+              = User.first(bank.created_by_user_id).first.login
+            %td
+              = link_to_with_rights "Add a new branch and account", '#', :onclick => "jQuery('#new_branch_form').toggle();", :class => "add grey_button", :style => "margin: 0px; padding-right: 3px;"
 - else
   No Banks found.
+
+#new_branch_form{:style => 'display : none'}
+  %form{:action => url(:controller => :bank_branches, :action => :create), :method => :post, :class => "tall shaded"}
+    %table.tall.shaded#TextBoxesGroup
+      %tr{:id => 'tr_0'}
+        %th
+          Branch
+        %td
+          = text_field :name => 'bank_branch[0][bank_branch]', :style => "width:70%"
+          = hidden_field :name => 'bank_id', :value => @bank
+        %th
+          Location
+        %td
+          = select :name => "bank_branch[0][location]", :collection => get_all_nominal_branches, :text_method => 'name', :value_method => 'id', :class => 'biz_location'
+        %th
+          Account Name
+        %td
+          = text_field :name => "bank_branch[0][account][0][account_name]", :style => "width:70%", :class => 'biz_account'
+        %th
+          Account No.
+        %td
+          = text_field :name => "bank_branch[0][account][0][account_no]", :style => "width:70%"
+        %td
+          = link_to "Account", '#', :onclick => 'add_account_text_field(0); return false;', :class => "grey_button"
+    = submit "Create"
+    &nbsp;&nbsp;
+    %b
+      Or
+    &nbsp;&nbsp;
+    = link_to_with_rights "Cancel", '#', :onclick => "jQuery('#new_branch_form').hide();", :class => "grey_button"
+%br

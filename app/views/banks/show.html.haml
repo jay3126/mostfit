@@ -11,16 +11,22 @@
 
 .shaded
   %h2
-    = "Bank Branches"
-  %table.form{:style => "width:100%;"}
+    = "List of Branches under #{@bank.name} Bank"
+  %table.dataTable.weeksheet.report.nojs
     %thead
       %tr
         %th
           ID
         %th
-          Name
+          Branch Name
+        %th
+          No. of Accconts
         %th
           Location
+        %th
+          Created At
+        %th
+          Created By User
     %tbody
       - @bank_branches.each do |bb|
         %tr
@@ -29,5 +35,11 @@
           %td
             = link_to bb.name, resource(@bank,bb)
           %td
+            = bb.bank_accounts.count rescue 0
+          %td
             = link_to_location(bb.biz_location) unless bb.biz_location.blank?
+          %td
+            = bb.created_at
+          %td
+            = User.first(bb.created_by_user_id).first.login
 %br

@@ -1,6 +1,6 @@
 class DataAccessObserver
   include DataMapper::Observer
-  observe *(DataMapper::Model.descendants.to_a - [AccrualTransaction, AuditTrail, LoanDueStatus, ClientAdministration, LoanAuthorization, ClientVerification, LoanFile, LoanApplication, FundingLineAddition, Securitization, Encumberance, BaseScheduleLineItem, LoanBorrower, LoanStatusChange, LoanBaseSchedule, LoanAdministration, LoginInstance, Voucher, Ledger, CostCenter, AccountingRule, OverlapReportResponse, Upload, JournalType, LocationLink, TimedAmount, LoanScheduleTemplate, FeeAdministration, AccountsChart, LendingProductLocation, MeetingCalendar, ScheduleTemplateLineItem, MeetingSchedule, LocationManagement, AccountingLocation, LoanPayment, LoanReceipt, LedgerAssignment, LedgerPosting, PaymentTransaction, LoanRepaidStatus, Comment, FeeInstance] + [BizLocation, ClientGroup, Client, Lending, StaffMember, SimpleFeeProduct, SimpleInsurancePolicy, CenterCycle, Mfi, LocationLevel, ThirdParty, LoanPurpose, Occupation, ClientGroup, PrioritySectorList, PslSubCategory, DocumentType, StockRegister, AssetCategory, AssetSubCategory, AssetType, Reason, AssetRegister, LocationHoliday, ChequeBook, NewFunder, NewFundingLine, NewTranch, LoanApplication, LoanAssignment]).uniq # strange bug where observer drops some of the descnedants.
+  observe *(DataMapper::Model.descendants.to_a - [AccrualTransaction, AuditTrail, LoanDueStatus, ClientAdministration, LoanAuthorization, ClientVerification, LoanFile, LoanApplication, FundingLineAddition, Securitization, Encumberance, LoanBorrower, LoanStatusChange, LoanBaseSchedule, LoanAdministration, LoginInstance, Voucher, Ledger, CostCenter, AccountingRule, OverlapReportResponse, Upload, JournalType, LocationLink, TimedAmount, LoanScheduleTemplate, FeeAdministration, AccountsChart, LendingProductLocation, MeetingCalendar, ScheduleTemplateLineItem, MeetingSchedule, LocationManagement, AccountingLocation, LoanPayment, LoanReceipt, LedgerAssignment, LedgerPosting, PaymentTransaction, LoanRepaidStatus, Comment, FeeInstance] + [BizLocation, ClientGroup, Client, Lending, StaffMember, SimpleFeeProduct, SimpleInsurancePolicy, CenterCycle, Mfi, LocationLevel, ThirdParty, LoanPurpose, Occupation, ClientGroup, PrioritySectorList, PslSubCategory, DocumentType, StockRegister, AssetCategory, AssetSubCategory, AssetType, Reason, AssetRegister, LocationHoliday, ChequeBook, NewFunder, NewFundingLine, NewTranch, LoanApplication, LoanAssignment, BaseScheduleLineItem]).uniq # strange bug where observer drops some of the descnedants.
 
   def self.insert_session(id)
     @_session = ObjectSpace._id2ref(id)
@@ -36,6 +36,8 @@ class DataAccessObserver
         model = (/Lending$/.match(obj.class.to_s) ? "Lending" : obj.class.to_s)
         unless @_user.nil?
           user_role = @_user.staff_member.designation.role_class
+          #this has been done to create logs for re-schedule of loans only when the action is not create.
+          return if ((model == "BaseScheduleLineItem") && (@action == :create))
           log = AuditTrail.new(:auditable_id => obj.id, :action => @action, :changes => diff.to_yaml, :type => :log, :user_role => user_role,
                                :auditable_type => model, :user => @_user, :created_at => DateTime.now)
           log.save

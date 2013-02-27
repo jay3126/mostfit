@@ -213,6 +213,14 @@ class PaymentTransaction
     payment.delete_payment_transaction
   end
 
+  def self.fee_payment_transaction_for_jan
+    fee_payments = all(:payment_towards => PAYMENT_TOWARDS_FEE_RECEIPT, :effective_on.lte => Date.new(2013,1,31), :effective_on.gte => Date.new(2013,1,1))
+    bk = MyBookKeeper.new
+    fee_payments.each do |payment|
+      bk.account_for_payment_transaction(payment, {:total_received => payment.to_money[:amount]})
+    end
+  end
+
 
 
   private
