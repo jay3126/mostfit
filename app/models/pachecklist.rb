@@ -5,7 +5,7 @@ class Pachecklist
   property :answers, Text
   property :name, String
   property :date_of_audit, Date
-  property :audit_period, String
+  property :audit_period, Date
   property :scv_perday, String
   property :meeting_attended_during_ap, String
   property :branch_management, String

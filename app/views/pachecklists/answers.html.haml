@@ -1,12 +1,3 @@
-= js_include_tag 'jquery.reveal.js'
-= js_include_tag 'jquery-1.4.4.min.js'
-= css_include_tag "reveal.css"
-
-%a#myModal.big-link{:href => "#" }
-  click
-#myModal.reveal-modal
-  hi
-  %a.close-reveal-modal{:href => "#" } OK
 - params[:q1_1] = 0
 - params[:q2_2] = 0
 - params[:q3_3] = 0
@@ -84,7 +75,6 @@
 - params[:c5] = 0
 - params[:c6] = 0
 - params[:c7] = 0
-
 -@manager = LocationManagement.staff_managing_location(@biz_location_id, get_effective_date)
 -@managed_by = @manager.blank? ? '' : StaffMember.get(@manager.manager_staff_id)
 - @biz_location = BizLocation.get(@biz_location_id)
@@ -118,7 +108,7 @@
         %td{:align => "left", :style=>"width:60%;"}
           Audit period
         %td
-          = text_field :audit_period
+          = date_select :audit_period
   %h2
     Key Findings:
   %p

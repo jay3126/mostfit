@@ -4,6 +4,7 @@ class Pachecklists < Application
   def index
     @pachecklists = Pachecklist.all
      @biz_location = params[:biz_location]
+     
     display @pachecklists
   end
 
@@ -22,6 +23,7 @@ class Pachecklists < Application
   end
   def answers
    only_provides :html
+  # @biz_location_id = params[:biz_location_id]
    @biz_location_id = params[:biz_location_id]
    @biz_location = BizLocation.get(@biz_location_id)
    display @pachecklist
@@ -273,8 +275,6 @@ class Pachecklists < Application
   @cgt.each do |cgt|
 	   if cgt == "1"
 	   @cgt_i+=1
-	   else 
-	    @ans[31] = "0"
 	   end
         end
 
