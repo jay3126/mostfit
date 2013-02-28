@@ -975,10 +975,10 @@ class Lending
     days_past_dues_on_date(Date.today)
   end
 
-#  def days_past_due_on_date(on_date)
-#    return 0 unless is_outstanding_on_date?(on_date)
-#    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
-#  end
+  #  def days_past_due_on_date(on_date)
+  #    return 0 unless is_outstanding_on_date?(on_date)
+  #    LoanDueStatus.unbroken_days_past_due(self.id, on_date)
+  #  end
 
   def loan_days_past_due(on_date = Date.today)
     days_past_due_till_date = self.loan_due_statuses(:fields => [:id, :due_status], :on_date.lte => on_date, :order => [:id.desc])
@@ -1531,13 +1531,15 @@ class Lending
   end
 
   def self.advance_adjusted_all_loans_till_date(on_date)
-#    payment_transactions = PaymentTransaction.all(:receipt_type => :contra)
-#    payment_transactions.each{|d| PaymentTransaction.delete_payment_transaction(d.id)}
+    payment_transactions = PaymentTransaction.all(:receipt_type => :contra, :accounted_at => 59)
+    payment_transactions.each do |d| 
+      PaymentTransaction.delete_payment_transaction(d.id) if Lending.get(d.on_product_id).is_outstanding_now?
+    end
     advance_loan_ids= all_advance_avaiable_loans_for_location(on_date)
     loan_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOAN_FACADE, User.first)
     advance_loan_ids.each do |loan_id|
       schedule_date = BaseScheduleLineItem.max(:on_date, :on_date.lte => on_date, 'loan_base_schedule.lending_id'=> loan_id)
-      loan_facade.adjust_advance(schedule_date, loan_id) unless schedule_date.blank?
+      loan_facade.adjust_advance(schedule_date, loan_id) if Lending.get(loan_id).is_outstanding_now? && !schedule_date.blank?
     end
   end
 end
