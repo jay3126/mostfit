@@ -2,7 +2,7 @@ class Reports < Application
   include DateParser
   Types = {
     :periodic     => [DailyReport, WeeklyReport, DailyTransactionSummary], 
-    :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport], 
+    :consolidated => [ConsolidatedReport, StaffConsolidatedReport, QuarterConsolidatedReport, AggregateConsolidatedReport, ClientWiseOutstandingReport], 
     :registers    => [TransactionLedger, LoanSanctionRegister, LoanDisbursementReport, ScheduledDisbursementRegister, LoyaltyBonus, ClaimReport, InsuranceRegister, CattleInsuranceExpiryReport, PortfolioAllocationReport, OfflinePayments, OfflineAttendance],
     :statistics   => [LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, MissingGuarantorReport, LastUpdateReport], 
     :targets_and_projections  => [CashProjectedReport, ProjectedReport, TargetReport, StaffTargetReport, MonthlyTargetReport, IncentiveReport],

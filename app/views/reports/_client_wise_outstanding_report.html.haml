@@ -1,0 +1,114 @@
+= partial :form
+%table.report.nojs
+  %tr.header
+    %th
+      Branch Id
+    %th
+      Branch Name
+    %th
+      Center Id
+    %th
+      Center Name
+    %th
+      Client Id
+    %th
+      Client Name
+    %th
+      Caste
+    %th
+      Religion
+    %th
+      Gender
+    %th
+      Client Group Name
+    %th
+      Loan Id
+    %th
+      Loan Amount
+    %th
+      Loan Disbursal Date
+    %th
+      Loan Purpose
+    %th
+      Loan Interest Rate
+    %th
+      Cycle Number
+    %th
+      Tenure
+    %th
+      Installment Frequency
+    %th
+      Loan Product
+    %th
+      First Payment Date
+    %th
+      Last Payment Date (before the selected date)
+    %th
+      Principal Outstanding (as on selected date)
+
+  - total_loans_count = 0
+  - total_count = 0
+  - total_principal_outstanding = 0
+  - @data.sort_by{|loan| loan}.each do |values|
+    %tr
+      %td
+        = values[1][:branch_id]
+      %td
+        = values[1][:branch_name]
+        - total_count += 1
+      %td
+        = values[1][:center_id]
+      %td
+        = values[1][:center_name]
+      %td
+        = values[1][:client_id]
+      %td
+        = values[1][:client_name]
+      %td
+        = values[1][:client_caste]
+      %td
+        = values[1][:client_religion]
+      %td
+        = values[1][:client_gender]
+      %td
+        = values[1][:client_group]
+      %td
+        = values[1][:loan_id]
+      %td
+        = values[1][:loan_amount]
+        - total_loans_count += values[1][:loan_amount]
+      %td
+        = values[1][:loan_disbursal_date]
+      %td
+        = values[1][:loan_purpose]
+      %td
+        = values[1][:loan_interest_rate]
+      %td
+        = values[1][:loan_cycle_number]
+      %td
+        = values[1][:loan_number_of_installments]
+      %td
+        = values[1][:loan_installment_frequency]
+      %td
+        = values[1][:loan_product]
+      %td
+        = values[1][:loan_first_repayment_date]
+      %td
+        = values[1][:last_payment_date_before_date1]
+      %td
+        = values[1][:principal_outstanding_as_on_date1]
+        - total_principal_outstanding += values[1][:principal_outstanding_as_on_date1]
+
+  %tr.total
+    %th
+      %b Total
+    %td
+      = total_count
+    - (1..9).times do
+      %td
+    %td
+      = total_loans_count
+    - (1..9).times do
+      %td
+    %td
+      = total_principal_outstanding
