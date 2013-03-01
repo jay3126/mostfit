@@ -1541,7 +1541,7 @@ function getDateDifference() {
           jQuery("#days_between_dates").val("0");
         }
         else {
-          jQuery("#days_between_dates").val(data);
+          jQuery("#days_between_dates").val(parseInt(data) + 1);
         }
       }
     });

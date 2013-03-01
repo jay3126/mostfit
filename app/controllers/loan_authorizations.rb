@@ -34,7 +34,7 @@ class LoanAuthorizations < Application
 
     @errors << "Staff member is not selected " if by_staff.blank?
     @errors << "Please select loan authorization status for atleast one loan application" if params[:status].blank?
-    @errors << "Created on date must not be future date" if Date.parse(on_date) > Date.today
+    @errors << "Created on date must not be future date" if Date.parse(on_date) > get_effective_date
 
     # OPERATIONS PERFORMED
 
@@ -46,7 +46,7 @@ class LoanAuthorizations < Application
           loan_application = LoanApplication.get(lap)
           credit_bureau_status = loan_application.credit_bureau_status
           final_status = loan_applications_facade.check_loan_authorization_status(credit_bureau_status, authorization_status)
-          #          raise Errors::DataError, "Authorized on date(#{on_date}) must not before credit bureau rated on date(#{loan_application.credit_bureau_rated_at.display})" if ((Date.parse(on_date) < Date.parse(loan_application.credit_bureau_rated_at.display)) rescue true)
+          raise Errors::DataError, "Authorized on date(#{on_date}) must not before credit bureau rated on date(#{loan_application.credit_bureau_rated_at.display})" if ((Date.parse(on_date) < Date.parse(loan_application.credit_bureau_rated_at.display)) rescue true)
           if final_status == Constants::Status::APPLICATION_APPROVED
             loan_applications_facade.authorize_approve(lap, by_staff, on_date)
 

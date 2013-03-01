@@ -88,7 +88,7 @@
                 = hidden_field :name => 'by_staff_id', :value => get_session_user_id
               %td
                 %b Created On:
-                = date_select("performed_on", Date.today, :max_date => Date.today, :id => "performed_on", :size => 8)
+                = date_select("performed_on", get_effective_date, :max_date => get_effective_date, :id => "performed_on", :size => 8)
               %td{:style => "text-align:right;"}
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "button", :onclick => "reset_all_fields();"}

@@ -5,6 +5,7 @@ class OverlapReportResponse
   
   property :id,                   Serial
   property :created_at,           DateTime
+  property :rated_on,             Date
   property :created_by_user_id,   Integer
   property :total_outstanding,    Float
   property :overdue_amount,       Float
@@ -20,11 +21,11 @@ class OverlapReportResponse
   def update_loan_application_status
     loan_application = LoanApplication.get(self.loan_application_id)
     raise NotFound unless loan_application
-    loan_application.record_credit_bureau_response(rate_report) 
+    loan_application.record_credit_bureau_response(rate_report, self.rated_on)
   end
 
   # this checks the response against the accepted limits and marks the status appropriately
-  def process_response
+  def process_response(effective_date)
     unless self.response_text.blank?
       r = JSON::parse(response_text)
       responses = [r["RESPONSES"]["RESPONSE"]].flatten rescue []
@@ -59,6 +60,7 @@ class OverlapReportResponse
     else
       self.not_matched = true
     end
+    self.rated_on = effective_date
     self.save
   end
 
