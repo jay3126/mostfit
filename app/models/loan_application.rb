@@ -621,7 +621,62 @@ class LoanApplication
       nil                                                                      # applicant address 2 pincode
     ]
   end
+  def row_to_equvifax_file(datetime = DateTime.now)
+    amount = self.amount.to_f/100
 
+    return [
+      "Reference Number",  
+      nil,                                                           # segment identifier
+      "Member ID",                                                                  # credit request type
+      nil,                                                                     # credit report transaction id
+      "Inquiry Purpose",                                                             # credit inquiry purpose type
+      nil,                      
+      "Transaction Amount",
+      nil,                                               # credit inquiry purpose type description
+      "ConsumerName",                         # credit report transaction date time
+      client_name,                                                             # applicant name 1
+      nil,
+      "Additional Type1",
+      nil,               
+      "Additional Name1",
+      nil,   
+     "Additional Type2", 
+     nil,
+     "Additional Name2",
+     nil,
+     "Address & City",
+     nil,
+     "State/Union Territory",
+     nil,
+     "Postal Pin",
+     nil,
+     "Ration Card",
+     nil,
+     "Voter ID",
+      nil,
+     "Additional Id 1",
+     nil,
+     "Additional Id 2",
+     nil,
+     "National ID Card",
+     nil,
+     "Tax ID / PAN",
+     nil,
+     "Phone (Home)",  
+     nil,
+     "Phone (Mobile)",
+     nil,
+     "DOB",
+     nil,
+     "Gender",
+     nil,
+     "Branch ID",
+     nil,
+     "Kendra ID",
+     nil,
+       
+    ]
+  end
   private
   def key_person_relationship
     @key_person_relationship ||= {
@@ -704,7 +759,7 @@ class LoanApplication
       :pondicherry        => "PY"
     }
   end
-
+  
   # All searches
 
   def self.search(search_options = {})
