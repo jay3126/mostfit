@@ -228,20 +228,22 @@ class LoanApplications < Application
     @errors << "No client is aligible to apply for New Loan Application" if clients.blank?
     @errors << "Please select a Staff Member" if by_staff.blank?
     @errors << "Please select a created on date" if created_on.blank?
-    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > get_effective_date
 
     # OPERATIONS-PERFORMED
     if @errors.blank?
       client_ids = clients.keys
       client_ids.each do |client_id|
         begin
-          selected += 1 unless clients[client_id][:selected].blank?
-          loan_amount_str = clients[client_id][:amount]
-          loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
-          client = Client.get(client_id)
-          loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle_number, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
-          if loan_application.save == false
-            @errors << loan_application.errors.first.to_s
+          unless clients[client_id][:selected].blank?
+            selected += 1
+            loan_amount_str = clients[client_id][:amount]
+            loan_money_amount = MoneyManager.get_money_instance(loan_amount_str) if loan_amount_str
+            client = Client.get(client_id)
+            loan_application = loan_applications_facade.create_for_client(loan_money_amount, client, clients[client_id][:amount].to_i, branch_id.to_i, center_id.to_i, center_cycle_number, by_staff.to_i, created_on) if clients[client_id][:selected] == "on"
+            if loan_application.save == false
+              @errors << loan_application.errors.first.to_s
+            end
           end
         rescue => ex
           @errors << ex.message
@@ -330,7 +332,7 @@ class LoanApplications < Application
     @message[:error] << "Pincode name must not be blank" if pincode.blank?
     @message[:error] << "State name must not be blank" if state.blank?
     @message[:error] << "Created by name must not be blank" if created_by.blank?
-    @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+    @message[:error] << "Created on date must not be future date" if Date.parse(created_on) > get_effective_date
 
 
     unless no_age_parameter
@@ -414,7 +416,7 @@ class LoanApplications < Application
     # VALIDATIONS
     @errors << 'Please select Staff member' unless staff_member_id
     @errors <<  'Please select Action either Cleared not duplicate or Confirm duplicate' unless clear_or_confirm_duplicate
-    @errors << "Created on date must not be future date" if Date.parse(created_on) > Date.today
+    @errors << "Created on date must not be future date" if Date.parse(created_on) > get_effective_date
 
     # POPULATING RESPONSE AND OTHER VARIABLES
     get_de_dupe_loan_applications
