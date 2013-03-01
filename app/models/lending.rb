@@ -749,6 +749,7 @@ class Lending
         actual_previous_schedule_date = next_schedule_date - 14
       end
     end
+    return zero_money_amount if actual_previous_schedule_date == on_date || next_schedule_date == on_date
     return zero_money_amount if on_date < actual_previous_schedule_date
     schedules = self.loan_base_schedule.base_schedule_line_items(:actual_date => [previous_schedule_date, next_schedule_date])
     return zero_money_amount if schedules.blank?

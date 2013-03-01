@@ -64,6 +64,7 @@ class BodProcess
       first_date = self.on_date.first_day_of_month
       last_month_last_date = first_date - 1
       last_date = self.on_date.last_day_of_month
+
       loans = LoanAdministration.get_loan_ids_group_vise_accounted_by_sql(self.biz_location.id, last_month_last_date)
       disbursed_loans = loans[:disbursed_loan_status]
       repaid_loans = loans[:repaid_loan_status]
