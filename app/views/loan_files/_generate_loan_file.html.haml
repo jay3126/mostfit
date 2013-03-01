@@ -59,7 +59,7 @@
           %tr
             %td
               = "Created on"
-              = date_select("created_on", params[:created_on] || Date.today, :id => "created_on", :size => 10)
+              = date_select("created_on", params[:created_on] ||  get_effective_date, :id => "created_on", :size => 10)
             %td
               = "Scheduled Disbursal"
               = date_select("scheduled_disbursal_date", params[:scheduled_disbursal_date] || center_disbursal_date, :id => "scheduled_disbursal_date", :size => 10)

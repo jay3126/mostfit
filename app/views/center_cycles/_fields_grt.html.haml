@@ -17,11 +17,11 @@
           %td
             = @center_cycle.cgt_date_two
         %tr
-          %th CGT recorded by:
+          %th CGT completed by:
           %td
             = StaffMember.get(@center_cycle.cgt_performed_by_staff).name
         %tr
-          %th CGT recorded on:
+          %th CGT completed on:
           %td
             = @center_cycle.cgt_recorded_at.display
 
@@ -50,7 +50,7 @@
                   = hidden_field :name => 'grt_completed_by_staff', :value => get_session_user_id
                 %td
                   %b GRT recorded on:
-                  = date_select :grt_completed_on, Date.today
+                  = date_select :grt_completed_on, get_effective_date, :max_date => get_effective_date
                   = submit 'Save', :class => "grey_button"
       - else
         %table.form
@@ -68,7 +68,3 @@
               %th GRT completed by:
               %td
                 = StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
-            %tr
-              %th GRT recorded on:
-              %td
-                = @center_cycle.grt_recorded_at.display
