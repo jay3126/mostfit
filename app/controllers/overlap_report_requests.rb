@@ -41,7 +41,7 @@ class OverlapReportRequests < Application
 
     # OPERATIONS PERFORMED
     begin
-      loan_applications_facade.generate_credit_bureau_request_file(condition_hash)
+      loan_applications_facade.generate_credit_bureau_request_file(get_effective_date, condition_hash)
       message = {:notice => "Request file generated succesfully."}
     rescue => ex
       @errors << ex.message

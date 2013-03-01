@@ -536,7 +536,7 @@ class LoanApplications < Application
   def get_client_age
     begin
       client_dob = Date.parse(params[:client_date_of_birth])
-      today_date = Date.today
+      today_date = get_effective_date
       age = client_dob.blank? ? 0 : today_date.year - client_dob.year
       return("#{age}")
     rescue => ex
@@ -573,7 +573,7 @@ class LoanApplications < Application
 
   def fetch_existing_clients_for_new_loan_application(center_id, center_cycle_number)
     center_cycle = loan_applications_facade.get_center_cycle(center_id, center_cycle_number) # TO BE REMOVED ONCE THE REQUIRED REFACTORING IS DONE ON THE MODEL
-    client_from_center = client_facade.get_clients_administered(center_id.to_i, Date.today)
+    client_from_center = client_facade.get_clients_administered(center_id.to_i, get_effective_date)
     client_ids_from_center = client_from_center.collect{|client| client.id}
     client_ids_from_existing_loan_applications = loan_applications_facade.all_loan_application_client_ids_for_center_cycle(center_id, center_cycle)
     final_client_ids = client_ids_from_center - client_ids_from_existing_loan_applications
