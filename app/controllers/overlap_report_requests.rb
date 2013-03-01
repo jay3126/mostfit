@@ -46,6 +46,7 @@ class OverlapReportRequests < Application
     @errors = []
     message = {}
     condition_hash = {}
+
     # GATE-KEEPING
     @branch = params[:parent_location_id]
     @center = params[:child_location_id]
@@ -55,7 +56,9 @@ class OverlapReportRequests < Application
 
     # OPERATIONS PERFORMED
     begin
-      loan_applications_facade.generate_credit_bureau_request_file(cb_type,condition_hash)
+
+      loan_applications_facade.generate_credit_bureau_request_file(cb_type, get_effective_date, condition_hash)
+
       message = {:notice => "Request file generated succesfully."}
     rescue => ex
       @errors << ex.message

@@ -30,6 +30,7 @@
           %th Location
           %th Pincode
           %th Status
+          %th Created on
           %th Updated at
       %tbody
         - @all_loan_applications.sort.each do |loan_application|
@@ -64,6 +65,8 @@
               = loan_application.client_pincode
             %td
               = loan_application.status.humanize
+            %td
+              = loan_application.created_on
             %td
               = loan_application.updated_at
   - else

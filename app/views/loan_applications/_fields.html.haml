@@ -103,7 +103,7 @@
               = hidden_field :name => 'loan_application[created_by_staff_id]', :value => get_session_user_id
             %th
               Created On:
-              = date_select :created_on, (params[:created_on] || Date.today), {:max_date => Date.today}
+              = date_select :created_on, (params[:created_on] || get_effective_date), {:max_date => get_effective_date}
             %th{:style => "width:20%"}
               = submit 'Create and Continue', :style => "width:80%"
             %th{:style => "width:20%"}

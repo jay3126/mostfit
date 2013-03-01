@@ -200,8 +200,8 @@ class LoanApplicationsFacade < StandardFacade
   end
 
   # generates credit bureau request file for particular branch and center
-  def generate_credit_bureau_request_file(cb_type,search_option = {})
-    OverlapReportRequest.generate_credit_bureau_request_file(cb_type,search_option)
+  def generate_credit_bureau_request_file(cb_type, effective_date, search_option = {})
+    OverlapReportRequest.generate_credit_bureau_request_file(cb_type, effective_date, search_option)
   end
 
   def is_center_eligible_for_cgt_grt?(branch, center)

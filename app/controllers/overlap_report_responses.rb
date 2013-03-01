@@ -38,7 +38,7 @@ class OverlapReportResponses < Application
               response.created_by_user_id = session.user.id
               response.response_text = ol.to_json
               responses << response
-              response.process_response
+              response.process_response(get_effective_date)
             end
         
             if results.include?(false)

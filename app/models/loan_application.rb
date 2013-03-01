@@ -270,7 +270,7 @@ class LoanApplication
     return status
   end
 
-  def record_credit_bureau_response(credit_bureau_rejection_reason)
+  def record_credit_bureau_response(credit_bureau_rejection_reason, credit_bureau_rated_on)
     if credit_bureau_rejection_reason.blank?
       credit_bureau_status = RATED_POSITIVE
     else
@@ -280,7 +280,7 @@ class LoanApplication
     LoanApplication.transaction do |t|
       status = self.set_status(OVERLAP_REPORT_RESPONSE_MARKED_STATUS)
       self.credit_bureau_status = credit_bureau_status
-      self.credit_bureau_rated_at = DateTime.now
+      self.credit_bureau_rated_at = credit_bureau_rated_on
       self.credit_bureau_rejection_reason = credit_bureau_rejection_reason
       save
       t.rollback unless status == true

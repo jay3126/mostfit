@@ -96,7 +96,7 @@
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv1][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv1"}
                       %td
-                        = date_select("[verified_on_date][cpv1][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
+                        = date_select("[verified_on_date][cpv1][#{l.id}]", get_effective_date, :max_date => get_effective_date, :id => "verified_on_date_cpv1_#{l.id}", :size => 10)
                       %td
                         = select :name => "[verified_by_staff_id][cpv1][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else
@@ -120,7 +120,7 @@
                       %td{:style => center_text}
                         %input{:name => "[verification_status][cpv2][#{l.id}]", :type => "radio", :value => Constants::Verification::VERIFIED_REJECTED, :class => "reject_all_cpv2"}
                       %td
-                        = date_select("[verified_on_date][cpv2][#{l.id}]", Date.today, :max_date => Date.today, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
+                        = date_select("[verified_on_date][cpv2][#{l.id}]", get_effective_date, :max_date => get_effective_date, :id => "verified_on_date_cpv2_#{l.id}", :size => 8)
                       %td
                         = select :name => "[verified_by_staff_id][cpv2][#{l.id}]", :text_method => :name, :value_method => :id, :style => 'width: 11em', :collection => staffmember
                     - else

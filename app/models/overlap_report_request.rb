@@ -30,7 +30,7 @@ class OverlapReportRequest
     self.set_status(SENT_STATUS)
   end
 
-  def self.generate_credit_bureau_request_file(cb_type,search_option)
+  def self.generate_credit_bureau_request_file(cb_type, effective_date, search_option)
     type = cb_type
 
     errors = {}
@@ -43,7 +43,7 @@ class OverlapReportRequest
 
     folder = File.join(Merb.root, "docs","highmark","requests")
     FileUtils.mkdir_p folder
-    filename = File.join(folder, "#{credit_bureau_name}.#{request_name}.#{DateTime.now.strftime('%Y-%m-%d_%H:%M')}.csv")
+    filename = File.join(folder, "#{credit_bureau_name}.#{request_name}.#{effective_date.strftime('%Y-%m-%d') + "_" + (Time.now.strftime('%H:%M'))}.csv")
     FasterCSV.open(filename, "w", {:col_sep => "|"}) do |csv|
       loan_applications.each do |loan_application|
         begin
@@ -61,7 +61,7 @@ class OverlapReportRequest
 
     log_folder = File.join(Merb.root, "log","highmark","requests")
     FileUtils.mkdir_p log_folder
-    error_filename = File.join(log_folder, "#{credit_bureau_name}.#{request_name}.#{DateTime.now.strftime('%Y-%m-%d_%H:%M')}.csv")
+    error_filename = File.join(log_folder, "#{credit_bureau_name}.#{request_name}.#{effective_date.strftime('%Y-%m-%d') + "_" + (Time.now.strftime('%H:%M'))}.csv")
     FasterCSV.open(error_filename, "w", {:col_sep => "|"}) do |csv|
       csv << ["ROW GENERATION ERROR FOR THE LOAN APPLICATIONS"]
       errors[:generation_errors].keys.each do |e|
