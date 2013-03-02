@@ -49,7 +49,7 @@ class LoanFile
   has n, :loan_applications, :through => :loan_file_additions
 
   def name
-    "loan_file_#{self.loan_file_identifier}"
+    self.loan_file_identifier
   end
 
   def to_info
