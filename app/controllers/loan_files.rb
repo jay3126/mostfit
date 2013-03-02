@@ -7,6 +7,7 @@ class LoanFiles < Application
   end
 
   # For generating loan
+  #! This method is no longer in use
   def generate_loans(id)
     # INITIALIZATION
     @errors = []

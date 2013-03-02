@@ -10,7 +10,7 @@
           %tr
             %th CGT Start Date:
             %td
-              = date_select :cgt_date_one, get_effective_date
+              = date_select :cgt_date_one, get_effective_date, :max_date => get_effective_date
             %th No. of days
             %td
               = text_field :name => :days_difference, :readonly => 'true', :id => "days_between_dates", :size => 5
@@ -20,7 +20,7 @@
           %tr
             %th CGT End Date:
             %td
-              = date_select :cgt_date_two, get_effective_date
+              = date_select :cgt_date_two, get_effective_date, :max_date => get_effective_date
           %table.narrow.form{:style => "width:100%;"}
             %tfoot
               %tr

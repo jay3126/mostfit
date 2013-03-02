@@ -23,7 +23,10 @@ class Pachecklist
 
 
   belongs_to :biz_location
-
+<<<<<<< HEAD
+=======
+  validates_present :audit_period
+>>>>>>> 0aaa3d4d52cea25948bdc4595a38eb9a42b2a2a2
   validates_with_method :scv_perday , :method => :scv_perday?
   validates_with_method :meeting_attended_during_ap , :method => :meeting_attended_during_ap?
   validates_with_method :branch_management , :method => :branch_management?

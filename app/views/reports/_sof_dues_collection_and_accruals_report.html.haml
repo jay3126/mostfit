@@ -6,36 +6,39 @@
     %thead
       %tr
         %th
-          Branch Name
+          Branch
         %th{:colspan => 3}
-          Dues
-        %th{:colspan => 7}
-          Collections
+          DUES
+        %th{:colspan => 10}
+          COLLECTIONS
         %th{:colspan => 3}
-          Disbursal, Accrual, POS
-
+          DISBURSAL, ACCRUAL, POS
       %tr
         %th
+          Branch
         %th{:colspan => 3}
-          EWI Due
+          EMI Due
         %th{:colspan => 3}
-          EWI Collected
+          EMI Collected
+        %th
+          Advance
+        %th
+          Recovery
         %th
           Processing
-        %th
-          Foreclosure
-        %th
+        %th{:colspan => 3}
           Foreclosure
         %th
           Total
+        %th
+          Interest
         %th
           Disbursed
         %th
-          Interest
-        %th
-          Outstanding
+          Principal
       %tr
         %th
+          Name
         %th
           Principal
         %th
@@ -49,20 +52,25 @@
         %th
           Total
         %th
-          Fees
+          Amt
+        %th
+          Amt
         %th
           Fees
         %th
-          POS
+          Principal
         %th
-          Collected
+          Interest
+        %th
+          Fee
         %th
           Amount
         %th
           Accrued
         %th
+          Amount
+        %th
           Principal
-
     %tbody
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
       - @default_currency ||= MoneyManager.get_default_currency
@@ -90,23 +98,34 @@
             = values[:emi_collect_total]
             - accumulate_row_values[:emi_collect_total] += values[:emi_collect_total]
           %td
+            = values[:advance_collection]
+            - accumulate_row_values[:advance_collection] += values[:advance_collection]
+          %td
+            = values[:recovery_collection]
+            - accumulate_row_values[:recovery_collection] += values[:recovery_collection]
+          %td
             = values[:loan_fee_collect]
             - accumulate_row_values[:loan_fee_collect] += values[:loan_fee_collect]
+          %td
+            = values[:preclosure_principal_collect]
+            - accumulate_row_values[:preclosure_principal_collect] += values[:preclosure_principal_collect]
+          %td
+            = values[:preclosure_interest_collect]
+            - accumulate_row_values[:preclosure_interest_collect] += values[:preclosure_interest_collect]
           %td
             = values[:preclosure_collect_fee]
             - accumulate_row_values[:preclosure_collect_fee] += values[:preclosure_collect_fee]
           %td
-            = values[:preclosure_collect]
-            - accumulate_row_values[:preclosure_collect] += values[:preclosure_collect]
-          %td
-            = values[:total_fee_collect]
-            - accumulate_row_values[:total_fee_collect] += values[:total_fee_collect]
-          %td
-            = values[:disbursed_amount]
-            - accumulate_row_values[:disbursed_amount] += values[:disbursed_amount]
+            - preclosure_collection = values[:preclosure_principal_collect] + values[:preclosure_interest_collect] + values[:preclosure_collect_fee]
+            - total_collection = preclosure_collection + values[:loan_fee_collect] + values[:advance_collection] + values[:recovery_collection] + values[:emi_collect_total]
+            = total_collection
+            - accumulate_row_values[:total_collect] += total_collection
           %td
             = values[:interest_accrued]
             - accumulate_row_values[:interest_accrued] += values[:interest_accrued]
+          %td
+            = values[:disbursed_amount]
+            - accumulate_row_values[:disbursed_amount] += values[:disbursed_amount]
           %td
             = values[:outstanding_principal]
             - accumulate_row_values[:outstanding_principal] += values[:outstanding_principal]
@@ -128,13 +147,19 @@
           %td
             = total_rows[:emi_collect_total]
           %td
+            = total_rows[:advance_collection]
+          %td
+            = total_rows[:recovery_collection]
+          %td
             = total_rows[:loan_fee_collect]
+          %td
+            = total_rows[:preclosure_principal_collect]
+          %td
+            = total_rows[:preclosure_interest_collect]
           %td
             = total_rows[:preclosure_collect_fee]
           %td
-            = total_rows[:preclosure_collect]
-          %td
-            = total_rows[:total_fee_collect]
+            = total_rows[:total_collect]
           %td
             = total_rows[:disbursed_amount]
           %td

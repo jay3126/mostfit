@@ -36,8 +36,6 @@ class CenterCycles < Application
 
   def record_cgt
     @errors = []
-    both_dates = []
-    unique_dates = []
 
     # GATE-KEEPING
     cgt_date_one_str = params[:cgt_date_one]
@@ -58,13 +56,6 @@ class CenterCycles < Application
       @errors << "Both CGT Start Date and CGT End Date must be not before loan applciation authorization date (#{@max_loan_authorization_date.display})" if cgt_date_one < @max_loan_authorization_date || cgt_date_two < @max_loan_authorization_date
     end
 
-    unless @center_cycle.is_restarted
-      # All three dates must be unique
-      both_dates = [cgt_date_one_str, cgt_date_two_str]
-      unique_dates = both_dates.uniq
-      @errors << "Both CGT Start Date and CGT End Date must be different" unless both_dates.eql?(unique_dates)
-    end
-    
     # greater than and less than validations on all three dates
     @errors << "CGT End Date must not be before CGT Start Date" if cgt_date_two < cgt_date_one
 
@@ -77,7 +68,7 @@ class CenterCycles < Application
     #OPERATIONS-PERFORMED
     if @errors.blank?
       begin
-        @record_cgt = @center_cycle.update(:cgt_date_one => cgt_date_one, :cgt_date_two => cgt_date_two, :cgt_performed_by_staff => cgt_performed_by_staff, :cgt_recorded_at => DateTime.now())
+        @record_cgt = @center_cycle.update(:cgt_date_one => cgt_date_one, :cgt_date_two => cgt_date_two, :cgt_performed_by_staff => cgt_performed_by_staff, :cgt_recorded_at => get_effective_date)
         if @record_cgt
           message = {:notice => "CGT successfully completed"}
         else
@@ -112,7 +103,7 @@ class CenterCycles < Application
     #OPERATIONS-PERFORMED
     if @errors.blank?
       begin
-        @record_cgt = @center_cycle.update(:grt_status => grt_status, :grt_completed_by_staff => grt_completed_by_staff, :grt_completed_on => grt_completed_on, :grt_recorded_at => DateTime.now())
+        @record_cgt = @center_cycle.update(:grt_status => grt_status, :grt_completed_by_staff => grt_completed_by_staff, :grt_completed_on => grt_completed_on, :grt_recorded_at => get_effective_date)
         if @record_cgt
           message = {:notice => "GRT successfully completed"}
         else
