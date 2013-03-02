@@ -638,7 +638,7 @@ class LoanApplication
      BizLocation.get(at_branch_id).name,                                               # applicant address 1 city
      states[(client_state).to_sym],                                # applicant address 1 state
      client_pincode,    #"Address & City"
-     "Ration Card",
+     client_reference1, #"Ration Card",
 
       nil,#"Additional Id 1",
      nil, # "Additional Id 2",
@@ -646,10 +646,10 @@ class LoanApplication
      nil,     #"Tax ID / PAN",
      nil,     #"Phone (Home)",  
      nil,     #"Phone (Mobile)",
-     nil,    #"DOB",
+     client_dob,    #"DOB",
      nil,#     "Gender",
-     nil,#     "Branch ID",
-     nil,#     "Kendra ID",
+     at_center_id,#     "Branch ID",
+     at_center_id,#     "Kendra ID",
        
     ]
   end
