@@ -625,55 +625,31 @@ class LoanApplication
     amount = self.amount.to_f/100
 
     return [
-      "Reference Number",  
-      nil,                                                           # segment identifier
-      "Member ID",                                                                  # credit request type
-      nil,                                                                     # credit report transaction id
-      "Inquiry Purpose",                                                             # credit inquiry purpose type
-      nil,                      
-      "Transaction Amount",
-      nil,                                               # credit inquiry purpose type description
-      "ConsumerName",                         # credit report transaction date time
-      client_name,                                                             # applicant name 1
-      nil,
-      "Additional Type1",
-      nil,               
-      "Additional Name1",
-      nil,   
-     "Additional Type2", 
-     nil,
-     "Additional Name2",
-     nil,
-     "Address & City",
-     nil,
-     "State/Union Territory",
-     nil,
-     "Postal Pin",
-     nil,
+      nil,                                                                    #ReferenceID                                                
+      nil,                                                                    #Member ID
+       "OE" ,                                                          # credit inquiry purpose type           
+      nil,                                                                   # Transaction Amount
+     client_name,                                                             # Consumer name
+     client_reference2.blank? ? nil : id_type[client_reference2_type],  # Additional Type 
+     client_reference2.blank? ? nil : client_reference2,   # "Additional Name1",  
+     client_reference1.blank? ? nil : "ID05",    #"Additional Type2", 
+     client_reference1.blank? ? nil : client_reference1,  # "Additional Name2",
+     client_address,                                                          # applicant address 1
+     BizLocation.get(at_branch_id).name,                                               # applicant address 1 city
+     states[(client_state).to_sym],                                # applicant address 1 state
+     client_pincode,    #"Address & City"
      "Ration Card",
-     nil,
-     "Voter ID",
-      nil,
-     "Additional Id 1",
-     nil,
-     "Additional Id 2",
-     nil,
-     "National ID Card",
-     nil,
-     "Tax ID / PAN",
-     nil,
-     "Phone (Home)",  
-     nil,
-     "Phone (Mobile)",
-     nil,
-     "DOB",
-     nil,
-     "Gender",
-     nil,
-     "Branch ID",
-     nil,
-     "Kendra ID",
-     nil,
+
+      nil,#"Additional Id 1",
+     nil, # "Additional Id 2",
+     nil,     #"National ID Card",
+     nil,     #"Tax ID / PAN",
+     nil,     #"Phone (Home)",  
+     nil,     #"Phone (Mobile)",
+     nil,    #"DOB",
+     nil,#     "Gender",
+     nil,#     "Branch ID",
+     nil,#     "Kendra ID",
        
     ]
   end
