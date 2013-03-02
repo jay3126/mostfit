@@ -32,7 +32,7 @@
               %td
                 = lf.loan_applications.count
               %td
-                - healthcheck_is_clear = Checklist.is_healthcheck_complete?("loan_file_"+lf.loan_file_identifier.to_s)
+                - healthcheck_is_clear = Checklist.is_healthcheck_complete?(lf.loan_file_identifier.to_s)
                 = healthcheck_is_clear ? "Cleared" : "Pending"
     
   - else
