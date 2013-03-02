@@ -102,7 +102,7 @@ class ReportingFacade < StandardFacade
       overdue_interest_ftd = schedule_interest_before_on_date > loan_receipts_amt[:interest_received] ? schedule_interest_before_on_date - loan_receipts_amt[:interest_received] : MoneyManager.default_zero_money
       schedule_advance_balance = loan_receipts_amt[:advance_received] > loan_receipts_amt[:advance_adjusted] ? loan_receipts_amt[:advance_received] - loan_receipts_amt[:advance_adjusted] : MoneyManager.default_zero_money
       overdue_total_ftd = overdue_principal_ftd + overdue_interest_ftd
-      overdue_total_ftd = schedule_advance_balance < overdue_total_ftd ? schedule_advance_balance - overdue_total_ftd : MoneyManager.default_zero_money
+      overdue_total_ftd = schedule_advance_balance > overdue_total_ftd ? schedule_advance_balance - overdue_total_ftd : MoneyManager.default_zero_money
     end
     
     non_schedule_loans = disbursed_loans - schedule_loans

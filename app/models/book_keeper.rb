@@ -238,6 +238,7 @@ module BookKeeper
       end
     end
     if status != :disbursed_loan_status && status != :repaid_loan_status
+      loan = Lending.get(loan_id, :fields => [:id, :status, :repaid_on_date, :write_off_on_date, :reclosed_on_date, :accounted_at_origin, :administered_at_origin]) if loan.blank?
       unless loan.schedule_actual_dates.include?(schedule_date)
         last_broken_interest_due = loan.broken_period_interest_due(schedule_date-1)
         if last_broken_interest_due > MoneyManager.default_zero_money
@@ -296,6 +297,7 @@ module BookKeeper
       end
     end
     if status != :disbursed_loan_status && status != :repaid_loan_status
+      loan = Lending.get(loan_id, :fields => [:id, :status, :repaid_on_date, :write_off_on_date, :reclosed_on_date, :accounted_at_origin, :administered_at_origin]) if loan.blank?
       unless loan.schedule_actual_dates.include?(schedule_date)
         last_broken_interest_due = loan.broken_period_interest_due(schedule_date-1)
         if last_broken_interest_due > MoneyManager.default_zero_money
