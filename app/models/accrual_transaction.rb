@@ -117,13 +117,14 @@ class AccrualTransaction
   def self.record_in_csv_file(location_id = nil)
 
     locations = location_id.blank? ? BizLocation.all('location_level.level' => 1) : [BizLocation.get(location_id)]
+    folder = File.join(Merb.root, "doc", "xls", "company",'reports', 'generate_accrual')
+    FileUtils.mkdir_p(folder)
+    csv_loan_file = File.join(folder, "jan_accrual.csv")
+    File.new(csv_loan_file, "w").close
+    header = [["Branch Name","Loan lan" ,"Jan Principal Due Date", 'Jan Principal Due',"Jan Interest Due Date", "Jan Interest Due", "Jan Broken Reverse Interest", "Jan Broken Peroid Interest", "Reverse Principal Date", "Reverse Principal Due", "Reverse Interset Date", "Reverse Interest Due"]]
+    append_to_file_as_csv(header, csv_loan_file)
     locations.each do |location|
-      folder = File.join(Merb.root, "doc", "xls", "company",'reports', 'generate_accrual')
-      FileUtils.mkdir_p(folder)
-      csv_loan_file = File.join(folder, "#{location.name}_accrual.csv")
-      File.new(csv_loan_file, "w").close
-      header = [["Loan lan" ,"Jan Principal Due Date", 'Jan Principal Due',"Jan Interest Due Date", "Jan Interest Due", "Jan Broken Reverse Interest", "Jan Broken Peroid Interest", "Reverse Principal Date", "Reverse Principal Due", "Reverse Interset Date", "Reverse Interest Due"]]
-      append_to_file_as_csv(header, csv_loan_file)
+
       loans = LoanAdministration.get_loan_ids_accounted_by_sql(location.id, Date.today, false, '')
       accruals = all(:on_product_id => loans).group_by{|s| s.on_product_id}
       accruals.each do |loan_id, l_accruals|
@@ -131,7 +132,7 @@ class AccrualTransaction
         jan_accruals = []
         jan_accruals = l_accruals.select{|s| s.effective_on >= Date.new(2013,1,1) and s.effective_on <= Date.new(2013,1,31)}
         unless jan_accruals.blank?
-          j_value = [lan]
+          j_value = [location.name, lan]
           j_broken_interest_reverse = jan_accruals.select{|s| s.accrual_temporal_type == REVERSE_BROKEN_PERIOD_ACCRUAL}
           j_principal_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_PRINCIPAL_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}
           j_interest_accrued = jan_accruals.select{|s| s.accrual_allocation_type == ACCRUE_INTEREST_ALLOCATION and s.accrual_temporal_type == ACCRUE_REGULAR}
