@@ -113,6 +113,22 @@ class BodProcess
     }
   end
 
+  def run_missing_loan_accrual(loan_ids = [])
+    bk = MyBookKeeper.new
+    loan_status = [:disbursed_loan_status, :repaid_loan_status, :written_off_loan_status, :preclosed_loan_status]
+    loan_ids.each do |loan_id|
+      loan = Lending.get(loan_id)
+      dec_last_date = Date.new(2012,12,31)
+      dec_status = loan.loan_status_on_date(dec_last_date)
+      bk.accrue_regular_receipts_on_loan_till_date_dec(loan_id, dec_status, dec_last_date) if loan_status.include?(dec_status).blank?
+      jan_last_date = Date.new(2013,1,31)
+      jan_first_date = Date.new(2013,1,1)
+      jan_status = loan.loan_status_on_date(jan_last_date)
+      bk.accrue_broken_period_interest_receipts_reverse_on_date(loan_id, jan_first_date)
+      bk.accrue_regular_receipts_on_loan_from_date_to_date(loan_id, jan_status, jan_first_date, jan_last_date) if loan_status.include?(jan_status).blank?
+    end
+  end
+
   def not_in_future?
     return true if created_on and (created_on<=Date.today)
     [false, "BOD cannot be done on future dates"]

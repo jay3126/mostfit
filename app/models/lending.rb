@@ -731,7 +731,7 @@ class Lending
   end
 
   def broken_period_interest_due(on_date)
-    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
+    return zero_money_amount unless (self.disbursal_date)
     return zero_money_amount if schedule_actual_date?(on_date)
     return zero_money_amount if on_date >= last_actual_scheduled_date
 

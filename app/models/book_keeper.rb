@@ -210,28 +210,31 @@ module BookKeeper
       else
         schedule_date = ''
       end
+      effective_on = ''
+      broaken_accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+      receipt_type = RECEIPT
+      on_product_type, on_product_id = LENDING, loan.id
+      by_counterparty_type = 'client'
+      by_counterparty_id = loan.loan_borrower.counterparty_id
+      accounted_at = loan.accounted_at_origin
+      performed_at = loan.administered_at_origin
       schedule_items = BaseScheduleLineItem.all(:fields => [:id, SCHEDULED_PRINCIPAL_DUE, SCHEDULED_INTEREST_DUE], 'loan_base_schedule.lending_id' => loan.id , :actual_date.lte => schedule_date)
+
       unless schedule_items.blank?
         effective_on = schedule_items.map(&:actual_date).max
         scheduled_principal_due = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_PRINCIPAL_DUE).sum.to_i)
         scheduled_interest_due  = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_INTEREST_DUE).sum.to_i)
-        broken_period_interest = loan.broken_period_interest_due(last_date_of_month) if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:actual_date).include?(on_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
         accrual_temporal_type = ACCRUE_REGULAR
-        broaken_accrual_temporal_type = ACCRUE_BROKEN_PERIOD
-        receipt_type = RECEIPT
-        on_product_type, on_product_id = LENDING, loan.id
-        by_counterparty_type = 'client'
-        by_counterparty_id = loan.loan_borrower.counterparty_id
-        accounted_at = loan.accounted_at_origin
-        performed_at = loan.administered_at_origin
 
-        accruals << AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-
-        if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:actual_date).include?(on_date) && status == :disbursed_loan_status && effective_on != last_date_of_month
-          accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, last_date_of_month, broaken_accrual_temporal_type) if broken_period_interest > MoneyManager.default_zero_money
-        end
+        accruals << AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type) if scheduled_principal_due > MoneyManager.default_zero_money
+        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type) if scheduled_interest_due > MoneyManager.default_zero_money
       end
+
+      broken_period_interest = loan.broken_period_interest_due(last_date_of_month) if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:actual_date).include?(on_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
+      if Constants::Time.is_last_day_of_month?(on_date) && !schedule_items.map(&:actual_date).include?(on_date) && status == :disbursed_loan_status && effective_on != last_date_of_month
+        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, last_date_of_month, broaken_accrual_temporal_type) if broken_period_interest > MoneyManager.default_zero_money
+      end
+
       accruals << AccrualTransaction.reversed_accruals_for_not_recevied(loan_id, schedule_date) if status != :disbursed_loan_status
       accruals.each do |accrual|
         #account_for_accrual(accrual) unless accrual.blank?
@@ -271,25 +274,29 @@ module BookKeeper
       else
         schedule_date = ''
       end
+      effective_on = ''
+      broaken_accrual_temporal_type = ACCRUE_BROKEN_PERIOD
+      receipt_type = RECEIPT
+      on_product_type, on_product_id = LENDING, loan.id
+      by_counterparty_type = 'client'
+      by_counterparty_id = loan.loan_borrower.counterparty_id
+      accounted_at = loan.accounted_at_origin
+      performed_at = loan.administered_at_origin
       schedule_items = BaseScheduleLineItem.all(:fields => [:id, SCHEDULED_PRINCIPAL_DUE, SCHEDULED_INTEREST_DUE], 'loan_base_schedule.lending_id' => loan.id , :actual_date.lte => schedule_date, :actual_date.gte => from_date)
+
       unless schedule_items.blank?
         effective_on = schedule_items.map(&:actual_date).max
         scheduled_principal_due = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_PRINCIPAL_DUE).sum.to_i)
         scheduled_interest_due  = MoneyManager.get_money_instance_least_terms(schedule_items.map(&SCHEDULED_INTEREST_DUE).sum.to_i)
-        broken_period_interest = loan.broken_period_interest_due(to_date) if Constants::Time.is_last_day_of_month?(to_date) && !schedule_items.map(&:actual_date).include?(to_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
         accrual_temporal_type = ACCRUE_REGULAR
-        broaken_accrual_temporal_type = ACCRUE_BROKEN_PERIOD
-        receipt_type = RECEIPT
-        on_product_type, on_product_id = LENDING, loan.id
-        by_counterparty_type = 'client'
-        by_counterparty_id = loan.loan_borrower.counterparty_id
-        accounted_at = loan.accounted_at_origin
-        performed_at = loan.administered_at_origin
-        accruals << AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type)
-        if Constants::Time.is_last_day_of_month?(to_date) && !schedule_items.map(&:actual_date).include?(to_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
-          accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, last_date_of_month, broaken_accrual_temporal_type) if broken_period_interest > MoneyManager.default_zero_money
-        end
+
+        accruals << AccrualTransaction.record_accrual(ACCRUE_PRINCIPAL_ALLOCATION, scheduled_principal_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type) if scheduled_principal_due > MoneyManager.default_zero_money
+        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, scheduled_interest_due, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, effective_on, accrual_temporal_type) if scheduled_interest_due > MoneyManager.default_zero_money
+      end
+
+      broken_period_interest = loan.broken_period_interest_due(to_date) if Constants::Time.is_last_day_of_month?(to_date) && !schedule_items.map(&:actual_date).include?(to_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
+      if Constants::Time.is_last_day_of_month?(to_date) && !schedule_items.map(&:actual_date).include?(to_date) && effective_on != last_date_of_month && status == :disbursed_loan_status
+        accruals << AccrualTransaction.record_accrual(ACCRUE_INTEREST_ALLOCATION, broken_period_interest, receipt_type, on_product_type, on_product_id, by_counterparty_type, by_counterparty_id, performed_at, accounted_at, last_date_of_month, broaken_accrual_temporal_type) if broken_period_interest > MoneyManager.default_zero_money
       end
       accruals << AccrualTransaction.reversed_accruals_for_not_recevied(loan_id, schedule_date) if status != :disbursed_loan_status
       accruals.each do |accrual|
