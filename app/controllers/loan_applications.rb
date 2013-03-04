@@ -524,11 +524,26 @@ class LoanApplications < Application
     reference2         = @loan_application.client_reference2
     no_reference1      = reference1.gsub(/[^0-9]/, '')
     no_reference2      = reference2.gsub(/[^0-9]/, '')
-    
-    @clients           = Client.all(:conditions => ["reference IN ? or reference2 IN ?", [reference1, reference2], [reference1, reference2]])
-    @clients           = Client.all(:conditions => ["reference IN ? or reference2 IN ?", [no_reference1, no_reference2], [no_reference1, no_reference2]]) if @clients.blank?
-    @clients           = Client.all(:conditions => ["reference LIKE ? or reference LIKE ? or reference2 LIKE ? or reference2 LIKE ?", "%#{no_reference1}%", "%#{no_reference2}%", "%#{no_reference1}%", "%#{no_reference2}%"]) if @clients.blank?
-    loan_app_condition = {:conditions => ["client_reference1 IN ? or client_reference2 IN ?",[reference1, reference2], [reference1, reference2]]}
+    if !reference1.blank? && !reference2.blank?
+      @clients           = Client.all(:conditions => ["reference like ? or reference2 like ?", reference1, reference2])
+      @clients           = Client.all(:conditions => ["reference like ? or reference2 like ?", no_reference1, no_reference2]) if @clients.blank?
+      @clients           = Client.all(:conditions => ["reference LIKE ? or reference LIKE ? or reference2 LIKE ? or reference2 LIKE ?", "%#{no_reference1}%", "%#{no_reference2}%", "%#{no_reference1}%", "%#{no_reference2}%"]) if @clients.blank?
+      loan_app_condition = {:conditions => ["client_reference1 like ? or client_reference2 like ?", reference1, reference2]}
+    else
+      if !reference1.blank?
+        @clients           = Client.all(:conditions => ["reference like ?", reference1])
+        @clients           = Client.all(:conditions => ["reference like ?", no_reference1]) if @clients.blank?
+        @clients           = Client.all(:conditions => ["reference LIKE ? or reference LIKE ?", "%#{no_reference1}%", "%#{no_reference1}%"]) if @clients.blank?
+        loan_app_condition = {:conditions => ["client_reference1 like ?", reference1]}
+      end
+
+      if !reference2.blank?
+        @clients           = Client.all(:conditions => ["reference2 like ?", reference2])
+        @clients           = Client.all(:conditions => ["reference2 like ?", no_reference2]) if @clients.blank?
+        @clients           = Client.all(:conditions => ["reference2 LIKE ? or reference2 LIKE ?", "%#{reference2}%", "%#{no_reference2}%"]) if @clients.blank?
+        loan_app_condition = {:conditions => ["client_reference2 like ?", reference2]}
+      end
+    end
     @loan_applications = LoanApplication.get_all_loan_applications_for_branch_and_center(loan_app_condition) - [@loan_application]
     display @loan_applicaion
   end

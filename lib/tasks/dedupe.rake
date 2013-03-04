@@ -14,11 +14,11 @@ namespace :mostfit do
     loan_applicants         = LoanApplicationsFacade.pending_dedupe
     not_eligible_status     = Constants::Status::CPV_STATUSES - [Constants::Status::CPV2_APPROVED_STATUS] + [Constants::Status::NEW_STATUS]
     total_loan_applications = LoanApplication.all(:status.not => not_eligible_status) - loan_applicants
-    all_clients             = total_loan_applications.blank? ? [] : Client.all(:state => total_loan_applications.map(&:client_state), :fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
+    all_clients             = loan_applicants.blank? ? [] : Client.all(:state.like => loan_applicants.map(&:client_state), :fields => [:id, :name,:reference_type, :reference,:reference2_type, :reference2])
     #checking for duplicate loan_applicants handing both the conditions, i.e, ration_card and varous id_proofs.
     loan_applicants.each do |applicant|
       loan_applicant_duplicate = false
-      clients = all_clients.select{|c| c.state == applicant.client_state}
+      clients = all_clients.select{|c| c.state.downcase == applicant.client_state.downcase}
       if applicant.client_id && clients.map(&:id).include?(applicant.client_id)
         LoanApplicationsFacade.new(User.first).not_duplicate(applicant.id)
         next

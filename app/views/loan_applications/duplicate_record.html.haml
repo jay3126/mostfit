@@ -50,11 +50,11 @@
           = client.name
         %td
           = client.reference_type
-        %td
+        %td.match
           = client.reference rescue nil
         %td
           = client.reference2_type rescue nil
-        %td
+        %td.match
           = client.reference2 rescue nil
 %br
 %hr
@@ -84,31 +84,33 @@
           = la.client_name
         %td
           = la.client_reference1_type
-        %td
+        %td.match
           = la.client_reference1 rescue nil
         %td
           = la.client_reference2_type rescue nil
-        %td
+        %td.match
           = la.client_reference2 rescue nil
 
 :javascript
-  jQuery('table.report td').each(function(){
+  jQuery('table.report td.match').each(function(){
     reference1 = false
     reference2 = false
     val = jQuery(this).text();
-    if(jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference1.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference1}") >= 0){
-      jQuery(this).css('background','LightSeaGreen');
-      reference1 = true
-    }
-    if(jQuery.trim(val) == "#{@loan_application.client_reference2}" || jQuery.trim(val) == "#{@loan_application.client_reference2.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference2}") >= 0){
-      jQuery(this).css('background','Orchid');
-      reference2 = true
-    }
-    if(reference1 == true){
-      jQuery('table.loan td.reference1').css('background', 'LightSeaGreen');
-    }
-    if(reference2 == true){
-      jQuery('table.loan td.reference2').css('background','Orchid');
-    }
+    if(jQuery.trim(val) != ''){
+      if(jQuery.trim("#{@loan_application.client_reference1}").length != 0 && (jQuery.trim(val) == "#{@loan_application.client_reference1}" || jQuery.trim(val) == "#{@loan_application.client_reference1.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference1}") >= 0)){
+        jQuery(this).css('background','LightSeaGreen');
+        reference1 = true
+      }
+      if(jQuery.trim("#{@loan_application.client_reference2}").length != 0 && (jQuery.trim(val) == "#{@loan_application.client_reference2}" || jQuery.trim(val) == "#{@loan_application.client_reference2.gsub(/[^0-9]/, '')}" || val.toLowerCase().indexOf("#{@loan_application.client_reference2}") >= 0)){
+        jQuery(this).css('background','Orchid');
+        reference2 = true
+      }
+      if(reference1 == true){
+        jQuery('table.loan td.reference1').css('background', 'LightSeaGreen');
+      }
+      if(reference2 == true){
+        jQuery('table.loan td.reference2').css('background','Orchid');
+      }
+   }
 
   })
