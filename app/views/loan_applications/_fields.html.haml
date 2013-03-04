@@ -6,6 +6,8 @@
 - else
   - loan_application = @loan_application.blank? ? LoanApplication.new : @loan_application
   %br
+  %h2
+    = "Center Cycle Number: #{center_cycle_number}"
   .shaded
     %h2 Bulk Upload Loan Applications
     %br
@@ -19,8 +21,6 @@
       %input{:type => "submit", :value => "Upload"}
   %br
   %hr
-  %h2
-    = "Center Cycle Number: #{center_cycle_number}"
   %i Note: Either reference or reference1 value are mandatory
   %br
   %i Note: Either Date of birth  or Age As ON field are manadatory(if both present then 'Date Of Birth' will be considered)

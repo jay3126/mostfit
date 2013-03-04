@@ -13,6 +13,30 @@ class CenterCycles < Application
     redirect url(:controller => :user_locations, :action => :weeksheet_collection, :id => center_id), :message => message
   end
 
+  def update
+    is_eligible = []
+    center_id = params[:id]
+    current_center_cycle_number = params[:current_center_cycle_number]
+    center_cycle = loan_applications_facade.get_center_cycle(center_id, current_center_cycle_number)
+    center_cycle.cycle_number = current_center_cycle_number.to_i + 1
+    loan_ids = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => current_center_cycle_number).map{|la| la.lending_id}.compact
+    loan_ids.each do |loan_id|
+      loan = Lending.get loan_id
+      status = loan.status
+      if (status == LoanLifeCycle::STATUS_NOT_SPECIFIED || status == LoanLifeCycle::NEW_LOAN_STATUS ||
+            status == LoanLifeCycle::APPROVED_LOAN_STATUS || status == LoanLifeCycle::DISBURSED_LOAN_STATUS)
+        is_eligible << false
+      end
+    end
+    if is_eligible.blank?
+      center_cycle.save
+      message = {:notice => "center cycle has been updated successfully"}
+    else
+      message = {:error => "center cycle cannot be updated there may be some active loans"}
+    end
+    redirect url("user_locations/weeksheet_collection/#{center_id}"), :message => message
+  end
+
   def mark_cgt_grt
     @errors = []
     branch_id = params[:parent_location_id]
