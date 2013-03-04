@@ -27,7 +27,7 @@ class OverlapReportResponses < Application
           @responses = nil
 
           @data = Crack::XML.parse(File.read(filepath))
-          reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten
+          reports = [@data["OVERLAP_REPORT_FILE"]["OVERLAP_REPORTS"]["OVERLAP_REPORT"]].flatten 
           OverlapReportResponse.transaction do |t|
             results = reports.map do |ol|
               loan_application_id = ol["REQUEST"]["MBR_ID"]

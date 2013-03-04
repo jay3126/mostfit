@@ -23,7 +23,7 @@ class Pachecklist
 
 
   belongs_to :biz_location
-
+  
   validates_with_method :scv_perday , :method => :scv_perday?
   validates_with_method :meeting_attended_during_ap , :method => :meeting_attended_during_ap?
   validates_with_method :branch_management , :method => :branch_management?

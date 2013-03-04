@@ -35,9 +35,14 @@ class OverlapReportRequests < Application
 
     # Show Already generated request file to download
     folder = File.join(Merb.root, "docs","highmark","requests")
-    FileUtils.mkdir_p folder
-    @files = Dir.glob(File.join(folder, "*csv"))
+    equvifax_folder = File.join(Merb.root, "docs","equvifax","requests")
 
+    FileUtils.mkdir_p folder
+    FileUtils.mkdir_p equvifax_folder
+
+    @files_highmark = Dir.glob(File.join(folder, "*csv"))
+    @equvifax_files = Dir.glob(File.join(equvifax_folder, "*csv"))
+    @files = @files_highmark + @equvifax_files
     render
   end
 
