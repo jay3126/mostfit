@@ -158,21 +158,18 @@ class LoanAdministration
   end
 
   def self.get_loans_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, count = false, status = nil, funder_id = nil)
-    locations                                   = {}
+    locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
+    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loan_search                                 = {}
-    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
-    locations[:effective_on.lte]                = on_date
-    loan_ids                                    = all(locations).aggregate(:loan_id) rescue []
     if loan_ids.blank?
       count == true ? 0 : []
     else
       if count
-        l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
-
-        l_links.blank? ? 0 : l_links
+        #l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+        loan_ids.blank? ? 0 : loan_ids.count
       else
-        l_links = repository(:default).adapter.query("select la.loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
-
+        #l_links = repository(:default).adapter.query("select la.loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+        l_links = loan_ids
         unless funder_id.blank?
           l_links = l_links.blank? ? [] : repository(:default).adapter.query("select a.lending_id from funding_line_additions a inner join (select lending_id, max(id) max_id from funding_line_additions where created_on <= '#{on_date.strftime('%Y-%m-%d')}' group by lending_id ) as b on a.id = b.max_id where a.lending_id in (#{l_links.join(',')}) and a.funder_id = #{funder_id};")
         end
@@ -190,15 +187,14 @@ class LoanAdministration
   end
 
   def self.get_loans_group_vise_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, funder_id = nil)
-    locations                                   = {}
-    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
-    locations[:effective_on.lte]                = on_date
-    loan_ids                                    = all(locations).map(&:loan_id)
+    locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
+    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
     if loan_ids.blank?
       loans
     else
-      l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      #l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      l_loans = loan_ids
       unless funder_id.blank?
         l_loans = l_loans.blank? ? [] : repository(:default).adapter.query("select a.lending_id from funding_line_additions a inner join (select lending_id, max(id) max_id from funding_line_additions where created_on <= '#{on_date.strftime('%Y-%m-%d')}' group by lending_id ) as b on a.id = b.max_id where a.lending_id in (#{l_loans.join(',')}) and a.funder_id = #{funder_id};")
       end
@@ -219,15 +215,14 @@ class LoanAdministration
   end
 
   def self.get_loans_group_vise_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, from_date = Date.today, till_date = Date.today, funder_id = nil)
-    locations                                   = {}
-    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
-    locations[:effective_on.lte]                = till_date
-    loan_ids                                    = all(locations).map(&:loan_id)
+    locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
+    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
     if loan_ids.blank?
       loans
     else
-      l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      # l_loans = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} IN (#{locations[administered_or_accounted_choice].join(',')}) order by la1.effective_on desc limit 1 );")
+      l_loans = loan_ids
       unless funder_id.blank?
         l_loans = l_loans.blank? ? [] : repository(:default).adapter.query("select a.lending_id from funding_line_additions a inner join (select lending_id, max(id) max_id from funding_line_additions where created_on <= '#{till_date.strftime('%Y-%m-%d')}' group by lending_id ) as b on a.id = b.max_id where a.lending_id in (#{l_loans.join(',')}) and a.funder_id = #{funder_id};")
       end
@@ -271,20 +266,19 @@ class LoanAdministration
   end
 
   def self.get_loans_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, on_date, till_date, count = false, status = nil, funder_id = nil)
-    locations                                   = {}
     loan_search                                 = {}
-    locations[administered_or_accounted_choice] = given_location_id.class == Array ? given_location_id : [given_location_id]
-    locations[:effective_on.lte]                = till_date
-    loan_ids                                    = all(locations).aggregate(:loan_id)
+    locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
+    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     if loan_ids.blank?
       count == true ? 0 : []
     else
       if count
-        l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
+        #l_links = repository(:default).adapter.query("select count(*) from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
+        l_links = loan_ids
         l_links.blank? ? 0 : l_links
       else
-        l_links = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
-
+        #l_links = repository(:default).adapter.query("select loan_id from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la where la.#{administered_or_accounted_choice} = (select #{administered_or_accounted_choice} from (select * from loan_administrations where loan_id IN (#{loan_ids.join(',')})) la1 where la.loan_id = la1.loan_id AND la.#{administered_or_accounted_choice} = '#{given_location_id}' order by la1.effective_on desc limit 1 );")
+        l_links = loan_ids
         unless funder_id.blank?
           l_links = l_links.blank? ? [] : repository(:default).adapter.query("select a.lending_id from funding_line_additions a inner join (select lending_id, max(id) max_id from funding_line_additions where created_on <= '#{till_date.strftime('%Y-%m-%d')}' group by lending_id ) as b on a.id = b.max_id where a.lending_id in (#{l_links.join(',')}) and a.funder_id = #{funder_id};")
         end

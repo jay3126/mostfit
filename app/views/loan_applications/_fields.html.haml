@@ -71,8 +71,11 @@
             = text_field :client_reference2
           %td
             - selected_amount = params[:loan_application] ? params[:loan_application][:amount] : nil
+            - unless selected_amount.blank?
+              - money = MoneyManager.get_money_instance_least_terms(params[:loan_application][:amount])
+              - selected_amount = money.to_regular_amount
             - loan_product_amount = @branch.same_frequency_branch_loan_product(@center)
-            = select :amount, :collection => loan_product_amount.map{|x| [x.to_s]}, :selected => selected_amount, :prompt => 'Select'
+            = select :amount, :collection => loan_product_amount.map{|x| x.to_s}, :selected => selected_amount, :prompt => 'Select'
           %td
             = text_field :client_address
           %td

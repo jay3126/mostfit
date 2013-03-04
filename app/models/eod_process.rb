@@ -74,7 +74,7 @@ class EodProcess
       Ledger.run_branch_eod_accounting_first_time_accrual_trasaction(self.biz_location, self.on_date)
       Ledger.run_branch_eod_accounting_mark_write_off_accounting(self.biz_location, self.on_date)
       self.update(:completed_at => Time.now, :status => COMPLETED)
-      Ledger.head_office_eod(self.on_date) if EodProcess.first(:on_date => self.on_date, :status.not => COMPLETED).blank?
+      #Ledger.head_office_eod(self.on_date) if EodProcess.first(:on_date => self.on_date, :status.not => COMPLETED).blank?
     }
   end
   

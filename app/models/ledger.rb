@@ -517,7 +517,7 @@ class Ledger
         elsif type == :payment_towards_loan_recovery
           loan_receipt_amt = LoanReceipt.sum(:loan_recovery, :payment_transaction_id => payments.map(&:id))
           recovery_amt = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt.to_i)
-          payment_allocation = {:advance_adjusted => recovery_amt}
+          payment_allocation = {:total_received => recovery_amt}
         elsif type == :payment_towards_loan_preclosure
           loan_receipt_amt = LoanReceipt.all(:payment_transaction_id => payments.map(&:id)).aggregate(:principal_received.sum, :interest_received.sum)
           collect_principal = loan_receipt_amt.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipt_amt[0].to_i)

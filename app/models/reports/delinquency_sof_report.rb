@@ -36,7 +36,7 @@ class DelinquencySofReport < Report
     loan_hash = {}
     loan_status = ['Current Loans', '1-29 Days', '30-59 Days', '60-89 Days', '90-119 Days', '120-149 Days', '150-179 Days', 'Above 180 Days']
     data[:status] = loan_status
-    @funding_line_id = @funding_line_id.blank? ? NewFundingLine.all.map(&:id) : [@funding_line_id]
+    @funding_line_id = @funding_line_id.blank? ? NewFunder.all.map(&:id) : [@funding_line_id]
     all_due_statuses = get_reporting_facade(@user).get_loan_due_status_for_sof_on_date(@date, @funding_line_id)
     data[:records] = {}
     all_due_statuses.each do |funding_line, loan_due_statuses|
@@ -57,8 +57,7 @@ class DelinquencySofReport < Report
         disbursed_principal_money_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_amt[0].to_i)
         disbursed_interest_money_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_amt[1].to_i)
         total_loan_disbursed = disbursed_principal_money_amt + disbursed_interest_money_amt
-        loan_receipts = l_ids.blank? ? [] : LoanReceipt.all(:lending_id => l_ids, :effective_on.lte => @date)
-        loan_recevied_amt = LoanReceipt.add_up(loan_receipts)
+        loan_receipts = l_ids.blank? ? [] : LoanReceipt.all(:lending_id => l_ids, :effective_on.lte => @date).aggregate(:principal_received.sum, :interest_received.sum)
         scheduled_principal_outstanding = values.map(&:scheduled_principal_outstanding).sum
         scheduled_interest_outstanding = values.map(&:scheduled_interest_outstanding).sum
         scheduled_principal_outstanding_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_principal_outstanding.to_i)
@@ -67,14 +66,14 @@ class DelinquencySofReport < Report
         scheduled_interest_on_date = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(values.map(&:scheduled_interest_due).sum.to_i)
         scheduled_principal_due_till_date = (disbursed_principal_money_amt - scheduled_principal_outstanding_amt)
         scheduled_interest_due_till_date = (disbursed_interest_money_amt - scheduled_interest_outstanding_amt)
-        received_principal_till_date = loan_recevied_amt[:principal_received]
-        received_interest_till_date = loan_recevied_amt[:interest_received]
-        outstanding_principal = disbursed_principal_money_amt > received_principal_till_date ? disbursed_principal_money_amt - received_principal_till_date : MoneyManager.default_zero_money
-        outstanding_interest = disbursed_interest_money_amt > received_interest_till_date ?  disbursed_interest_money_amt - received_interest_till_date : MoneyManager.default_zero_money
+        received_principal_till_date = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.first.to_i)
+        received_interest_till_date = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.last.to_i  )
+        outstanding_principal = disbursed_principal_money_amt > scheduled_principal_due_till_date ? disbursed_principal_money_amt - scheduled_principal_due_till_date : MoneyManager.default_zero_money
+        outstanding_interest = disbursed_interest_money_amt > scheduled_interest_due_till_date ?  disbursed_interest_money_amt - scheduled_interest_due_till_date : MoneyManager.default_zero_money
         total_outstanding = outstanding_principal + outstanding_interest
         overdue_principal = scheduled_principal_due_till_date > received_principal_till_date ? scheduled_principal_due_till_date - received_principal_till_date : MoneyManager.default_zero_money
         overdue_interest = scheduled_interest_due_till_date > received_interest_till_date ? scheduled_interest_due_till_date - received_interest_till_date : MoneyManager.default_zero_money
-        if overdue_principal > MoneyManager.default_zero_money
+        if overdue_principal > MoneyManager.default_zero_money && outstanding_principal > MoneyManager.default_zero_money
           par_value = (overdue_principal.amount.to_f)/(outstanding_principal.amount.to_f)
           par = ('%.3f' % par_value)
         else

@@ -731,8 +731,8 @@ class Lending
   end
 
   def broken_period_interest_due(on_date)
-    return zero_money_amount unless (self.disbursal_date and on_date > self.disbursal_date)
-    return zero_money_amount if schedule_actual_date?(on_date)
+    return zero_money_amount unless (self.disbursal_date)
+    return zero_money_amount if schedule_actual_date?(on_date) && schedule_actual_dates.first != on_date
     return zero_money_amount if on_date >= last_actual_scheduled_date
 
     previous_schedule_date = Constants::Time.get_immediately_earlier_date(on_date, *schedule_actual_dates)
@@ -746,10 +746,11 @@ class Lending
         day = next_schedule_date.day
         actual_previous_schedule_date = Date.new(year,month,day)
       elsif self.repayment_frequency == MarkerInterfaces::Recurrence::BIWEEKLY
+        next_schedule_date = schedule_actual_dates[1]
         actual_previous_schedule_date = next_schedule_date - 14
       end
+
     end
-    return zero_money_amount if actual_previous_schedule_date == on_date || next_schedule_date == on_date
     return zero_money_amount if on_date < actual_previous_schedule_date
     schedules = self.loan_base_schedule.base_schedule_line_items(:actual_date => [previous_schedule_date, next_schedule_date])
     return zero_money_amount if schedules.blank?

@@ -84,7 +84,7 @@ module Allocation
     end
 
     def self.calculate_broken_period_interest(ios_earlier, ios_later, prior_period_date, later_period_date, period_ends, loan_repayment_frequency)
-      raise ArgumentError, "Dates: #{prior_period_date}, #{period_ends}, #{later_period_date} appear to be invalid for computing broken period interest" unless ((prior_period_date < period_ends) and (period_ends < later_period_date))
+      raise ArgumentError, "Dates: #{prior_period_date}, #{period_ends}, #{later_period_date} appear to be invalid for computing broken period interest" if ((prior_period_date > period_ends) or (period_ends > later_period_date))
       total_number_of_days = 0
       if (loan_repayment_frequency == MarkerInterfaces::Recurrence::MONTHLY)
         total_number_of_days = (later_period_date - prior_period_date).to_i

@@ -32,6 +32,7 @@ class LoanDueStatus
   property :advance_adjusted_till_date,     *MONEY_AMOUNT
   property :advance_balance,                *MONEY_AMOUNT
   property :interest_accrual_till_date,     *MONEY_AMOUNT
+  property :interest_accrued_on_date,       *MONEY_AMOUNT
   property :currency,                       *CURRENCY
   property :day_past_due,                   Integer, :default => 0
   property :created_at,                     *CREATED_AT
@@ -135,6 +136,7 @@ class LoanDueStatus
       due_status_amounts[SCHEDULED_INTEREST_DUE]          = schedule_info.blank? ? zero_amount : schedule_info.to_money[:scheduled_interest_due]
       due_status_amounts[SCHEDULED_TOTAL_DUE]             = due_status_amounts[SCHEDULED_PRINCIPAL_DUE] + due_status_amounts[SCHEDULED_INTEREST_DUE]
 
+      due_status_amounts[:interest_accrued_on_date]       = loan.broken_period_interest_due(on_date)
       due_status_amounts[:principal_received_on_date]     = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:principal_received]
       due_status_amounts[:interest_received_on_date]      = receipt_on_date_info.blank? ? zero_amount : receipt_on_date_info[:interest_received]
       due_status_amounts[:principal_received_till_date]   = receipt_till_date_info.blank? ? zero_amount : receipt_till_date_info[:principal_received]
