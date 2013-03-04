@@ -49,12 +49,12 @@
             %td
               = center_cycle.cgt_recorded_at.blank? ? "CGT Not Done" : center_cycle.cgt_recorded_at.display
             %td
-              = center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE ? "CGT Not Done" : @center_cycle.grt_status.humanize
+              = center_cycle.grt_status == Constants::CenterFormation::GRT_NOT_DONE rescue nil ? "CGT Not Done" : @center_cycle.grt_status.humanize
             %td
-              = @center_cycle.grt_completed_on.blank? ? "GRT Not Done" : @center_cycle.grt_completed_on
+              = @center_cycle.grt_completed_on.blank? ? "GRT Not Done" : @center_cycle.grt_completed_on rescue nil
             %td
               = @center_cycle.grt_completed_by_staff.blank? ? "GRT Not Done" : StaffMember.get(@center_cycle.grt_completed_by_staff).name rescue nil
             %td
-              = @center_cycle.grt_recorded_at.blank? ? "GRT Not Done" : @center_cycle.grt_recorded_at.display
+              = @center_cycle.grt_recorded_at.blank? ? "GRT Not Done" : @center_cycle.grt_recorded_at.display rescue nil
   - else
     %h3 No center cycle

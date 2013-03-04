@@ -4,7 +4,7 @@ class CenterCycles < Application
     center_id = params[:center_id]
     center = BizLocation.get(center_id)
     center_cycle = CenterCycle.new(:initiated_on => params[:initiated_date], :created_by => session.user.id,
-      :initiated_by_staff_id => session.user.id, :created_at => Date.today, :center_id => center_id)
+      :initiated_by_staff_id => session.user.id, :center_id => center_id)
     if center_cycle.save
       message = {:notice => "Center cycle successfully created for center: #{center.name}"}
     else
@@ -18,21 +18,31 @@ class CenterCycles < Application
     center_id = params[:id]
     current_center_cycle_number = params[:current_center_cycle_number]
     center_cycle = loan_applications_facade.get_center_cycle(center_id, current_center_cycle_number)
-    center_cycle.cycle_number = current_center_cycle_number.to_i + 1
     loan_ids = LoanApplication.all(:at_center_id => center_id, :center_cycle_id => current_center_cycle_number).map{|la| la.lending_id}.compact
-    loan_ids.each do |loan_id|
-      loan = Lending.get loan_id
-      status = loan.status
-      if (status == LoanLifeCycle::STATUS_NOT_SPECIFIED || status == LoanLifeCycle::NEW_LOAN_STATUS ||
-            status == LoanLifeCycle::APPROVED_LOAN_STATUS || status == LoanLifeCycle::DISBURSED_LOAN_STATUS)
-        is_eligible << false
+    new_center_cycle_number = current_center_cycle_number.to_i + 1
+    unless loan_ids.blank?
+      loan_ids.each do |loan_id|
+        loan = Lending.get loan_id
+        status = loan.status
+        if (status == LoanLifeCycle::STATUS_NOT_SPECIFIED || status == LoanLifeCycle::NEW_LOAN_STATUS ||
+              status == LoanLifeCycle::APPROVED_LOAN_STATUS || status == LoanLifeCycle::DISBURSED_LOAN_STATUS)
+          is_eligible << false
+        end
       end
-    end
-    if is_eligible.blank?
-      center_cycle.save
-      message = {:notice => "center cycle has been updated successfully"}
+      if is_eligible.blank?
+        center_cycle.status = Constants::Space::CLOSED_CENTER_CYCLE_STATUS
+        center_cycle.closed_by_staff_id = session.user.staff_member.id
+        center_cycle.closed_on = get_effective_date
+        center_cycle.save
+        new_center_cycle = CenterCycle.new(:initiated_on => get_effective_date, :created_by => session.user.staff_member.id,
+          :initiated_by_staff_id => session.user.staff_member.id, :created_at => get_effective_date, :biz_location_id => center_id, :cycle_number => new_center_cycle_number)
+        new_center_cycle.save
+        message = {:notice => "center cycle has been updated successfully"}
+      else
+        message = {:error => "center cycle cannot be updated there may be some active loans"}
+      end
     else
-      message = {:error => "center cycle cannot be updated there may be some active loans"}
+      message = {:error => "current center cycle #{current_center_cycle_number} is open so cannot be updated"}
     end
     redirect url("user_locations/weeksheet_collection/#{center_id}"), :message => message
   end
