@@ -18,6 +18,7 @@ class ChequeLeaf
   property :bank_branch_id, Integer, :nullable => false
   property :biz_location_id, Integer, :nullable => false
 
+  validates_is_unique :serial_number, :scope => :cheque_book
   belongs_to :cheque_book
 
   def money_amount; to_money_amount(:amount); end

@@ -58,19 +58,16 @@ class DelinquencySofReport < Report
         disbursed_interest_money_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(disbursed_amt[1].to_i)
         total_loan_disbursed = disbursed_principal_money_amt + disbursed_interest_money_amt
         loan_receipts = l_ids.blank? ? [] : LoanReceipt.all(:lending_id => l_ids, :effective_on.lte => @date).aggregate(:principal_received.sum, :interest_received.sum)
-        scheduled_principal_outstanding = values.map(&:scheduled_principal_outstanding).sum
-        scheduled_interest_outstanding = values.map(&:scheduled_interest_outstanding).sum
-        scheduled_principal_outstanding_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_principal_outstanding.to_i)
-        scheduled_interest_outstanding_amt = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_interest_outstanding.to_i)
         scheduled_principal_on_date = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(values.map(&:scheduled_principal_due).sum.to_i)
         scheduled_interest_on_date = l_ids.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(values.map(&:scheduled_interest_due).sum.to_i)
-        scheduled_principal_due_till_date = (disbursed_principal_money_amt - scheduled_principal_outstanding_amt)
-        scheduled_interest_due_till_date = (disbursed_interest_money_amt - scheduled_interest_outstanding_amt)
+        scheduled_till_date  = l_ids.blank? ? [] : BaseScheduleLineItem.all('loan_base_schedule.lending_id' => l_ids, :on_date.lte => @date).aggregate(:scheduled_principal_due.sum, :scheduled_interest_due.sum) rescue []
+        scheduled_principal_due_till_date = scheduled_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_till_date.first.to_i)
+        scheduled_interest_due_till_date = scheduled_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(scheduled_till_date.last.to_i)
         received_principal_till_date = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.first.to_i)
         received_interest_till_date = loan_receipts.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(loan_receipts.last.to_i  )
         outstanding_principal = disbursed_principal_money_amt > scheduled_principal_due_till_date ? disbursed_principal_money_amt - scheduled_principal_due_till_date : MoneyManager.default_zero_money
         outstanding_interest = disbursed_interest_money_amt > scheduled_interest_due_till_date ?  disbursed_interest_money_amt - scheduled_interest_due_till_date : MoneyManager.default_zero_money
-        total_outstanding = outstanding_principal + outstanding_interest
+        total_outstanding = outstanding_principal+outstanding_interest
         overdue_principal = scheduled_principal_due_till_date > received_principal_till_date ? scheduled_principal_due_till_date - received_principal_till_date : MoneyManager.default_zero_money
         overdue_interest = scheduled_interest_due_till_date > received_interest_till_date ? scheduled_interest_due_till_date - received_interest_till_date : MoneyManager.default_zero_money
         if overdue_principal > MoneyManager.default_zero_money && outstanding_principal > MoneyManager.default_zero_money

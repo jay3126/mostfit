@@ -80,6 +80,7 @@
           Principal
     %tbody
       - @default_currency ||= MoneyManager.get_default_currency
+      - @end_month = false
       - accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
       - @data[:record].each do |branch, branch_values|
         - branch_accumulate_row_values = Hash.new(MoneyManager.default_zero_money)
@@ -146,8 +147,8 @@
               - branch_accumulate_row_values[:total_collection] += t_collection
             %td
               = values[:interest_accrued]
-              - accumulate_row_values[:interest_accrued] += values[:interest_accrued]
               - branch_accumulate_row_values[:interest_accrued] += values[:interest_accrued]
+              - @end_month = true if Constants::Time.is_last_day_of_month?(values[:on_date])
             %td
               = values[:disbursed_amount]
               - accumulate_row_values[:disbursed_amount] += values[:disbursed_amount]
@@ -155,6 +156,9 @@
             %td
               = values[:outstanding_principal]
               - branch_accumulate_row_values[:outstanding_principal] = values[:outstanding_principal]
+            - branch_accumulate_row_values[:interest_between_dates_amt] = values[:interest_between_dates_amt]
+            - branch_accumulate_row_values[:reverse_interest_amt] = values[:reverse_interest_amt]
+            - branch_accumulate_row_values[:broken_interest_amt] = values[:broken_interest_amt]
         - branch_total_rows = Money.add_money_hash_values(@default_currency, branch_accumulate_row_values)
         %tr{:class => 'header_row', :style => "text-align:center; background:#708890;"}
           %th{:style => 'display:none'}
@@ -188,7 +192,9 @@
           %td
             = branch_total_rows[:total_collection]
           %td
-            = branch_total_rows[:interest_accrued]
+            - total_interest_accrued = @end_month ? (branch_total_rows[:interest_between_dates_amt] - branch_total_rows[:reverse_interest_amt]) + branch_total_rows[:broken_interest_amt] : branch_total_rows[:interest_accrued]
+            = total_interest_accrued
+            - accumulate_row_values[:interest_accrued] += total_interest_accrued
           %td
             = branch_total_rows[:disbursed_amount]
           %td

@@ -171,7 +171,7 @@ class Ledger
         ledger[:ledger_classification] = ledger_classification
         ledger[:manual_voucher_permitted] = true
         ledger_obj = first_or_create(ledger)
-        LocationLink.assign(ledger_obj, parent_ledger)
+        LocationLink.assign(ledger_obj, parent_ledger, open_on_date)
         AccountingLocation.first_or_create(:product_type => 'ledger', :biz_location_id => location.id, :product_id => ledger_obj.id, :cost_center_id => cost_center_id, :effective_on => open_on_date, :performed_by => performed_by, :recorded_by => recorded_by)
       end
     end
@@ -330,19 +330,14 @@ class Ledger
     on_date = Date.parse(on_date.to_s) if on_date.class != Date
     h_ledgers = head_office.accounting_locations(:product_type => 'ledger', :effective_on.lte => on_date).map(&:product)
     h_ledgers = h_ledgers.compact.uniq unless h_ledgers.blank?
-    ledger_classification = LedgerClassification.resolve(:loan_disbursement)
-    all_vouchers = Voucher.all(:eod => false)
+    ledger_classification = LedgerClassification.resolve(:customer_loan_disbursed)
     h_ledgers.each do |h_ledger|
       ledger_balances = {}
       postings_collection = []
-      c_ledgers = LocationLink.get_children(h_ledger, on_date)
+      c_ledgers = LocationLink.get_children_by_sql(h_ledger, on_date)
       c_vouchers = []
       c_ledgers.each do |c_ledger|
-        t_vouchers = c_ledger.vouchers.all(:eod => false)
-        unless t_vouchers.blank?
-          c_vouchers += all_vouchers & t_vouchers
-          all_vouchers = all_vouchers - t_vouchers
-        end
+        c_vouchers += c_ledger.vouchers.all(:eod => false)
       end
       c_vouchers = c_vouchers.flatten.compact.uniq unless c_vouchers.blank?
       c_vouchers.uniq.group_by{|v| v.effective_on}.each do |effective_date, vouchers|
@@ -372,8 +367,8 @@ class Ledger
                 voucher_postings << posting_info
               end
             end
-            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', '', narration, true)
-            vouchers.each{|d| d.update(:eod=>true)}
+            Voucher.create_generated_voucher(total_amount.amount, receipt_type , total_amount.currency, effective_date, voucher_postings.flatten, '', '', narration, '',true)
+            vouchers.each{|d| d.update!(:eod=>true)}
           end
         end
       end

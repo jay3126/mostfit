@@ -60,6 +60,7 @@ class BranchDateWiseDcaReport < Report
       p_loans_schedules = p_loans.blank? ? [] : p_loans.loan_base_schedule.base_schedule_line_items(:on_date.lte => @to_date)
       process_fee = loan_fee[:loan_fee_receipts].blank? ? [] : loan_fee[:loan_fee_receipts]
       preclose_fee = loan_fee[:loan_preclousure_fee_receipts].blank? ? [] : loan_fee[:loan_preclousure_fee_receipts]
+
       data[:record][branch_id] = {}
       (@from_date..@to_date).each do |on_date|
         data[:record][branch_id][on_date] = {}
@@ -99,12 +100,23 @@ class BranchDateWiseDcaReport < Report
         schedule_principal_till_date = total_loans.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => total_loans, :on_date.lte => on_date)
         schedule_principal_till_date_amt = schedule_principal_till_date.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(schedule_principal_till_date.to_i)
         pos_on_date = total_disbured_amt > schedule_principal_till_date_amt ? total_disbured_amt - schedule_principal_till_date_amt : MoneyManager.default_zero_money
+        interest_between_dates_amt = reverse_interest_amt = broken_interest_amt = interest_accrued = MoneyManager.default_zero_money
+        interest_accrued = scheduled_interest
+        if Constants::Time.is_last_day_of_month?(on_date)
+          reverse_interest = AccrualTransaction.sum(:amount, :accrual_temporal_type => :reverse_broken_period_accrual, :effective_on.lte => @to_date, :effective_on.gte => @from_date, :accounted_at => branch_id)
+          reverse_interest_amt = reverse_interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(reverse_interest.to_i)
+          broken_interest = AccrualTransaction.sum(:amount, :accrual_temporal_type => :accrue_broken_period, :effective_on => on_date, :accounted_at => branch_id)
+          broken_interest_amt = broken_interest.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(broken_interest.to_i)
+          interest_between_dates = AccrualTransaction.sum(:amount, :accrual_allocation_type => :accrue_interest_allocation, :accrual_temporal_type => :accrue_regular, :effective_on.gte => @from_date, :effective_on.lte => @to_date, :accounted_at => branch_id)
+          interest_between_dates_amt = interest_between_dates.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(interest_between_dates.to_i)
+        end
         data[:record][branch_id][on_date] = {
           :branch_name => branch_name, :branch_id => branch_id, :on_date => on_date,
           :dues_emi_principal => scheduled_principal , :dues_emi_interest => scheduled_interest, :dues_emi_total => scheduled_total,
           :emi_collect_principal => received_principal, :emi_collect_interest => received_interest, :emi_collect_total => total_received,
           :loan_fee_collect => processing_fee_on_date, :preclosure_collect_fee => preclose_fee_on_date, :preclosure_principal => preclose_principal, :preclosure_interest => preclose_interest, :total_fee_collect => total_collection,
-          :interest_accrued => scheduled_interest, :disbursed_amount => disbursed_money_amt, :outstanding_principal => pos_on_date, :advance_received => received_advance, :loan_recovery => received_recovery
+          :interest_accrued => interest_accrued, :disbursed_amount => disbursed_money_amt, :outstanding_principal => pos_on_date, :advance_received => received_advance, :loan_recovery => received_recovery,
+          :interest_between_dates_amt => interest_between_dates_amt, :reverse_interest_amt => reverse_interest_amt, :broken_interest_amt => broken_interest_amt
         }
       end
     end
