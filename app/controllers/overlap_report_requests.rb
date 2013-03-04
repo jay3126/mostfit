@@ -40,8 +40,8 @@ class OverlapReportRequests < Application
     FileUtils.mkdir_p folder
     FileUtils.mkdir_p equvifax_folder
 
-    @files_highmark = Dir.glob(File.join(folder, "*csv"))
-    @equvifax_files = Dir.glob(File.join(equvifax_folder, "*csv"))
+    @files_highmark = Dir.glob(File.join(folder, "*csv")).sort {|a,b| File.ctime(a) <=> File.ctime(b) }
+    @equvifax_files = Dir.glob(File.join(equvifax_folder, "*csv")).sort {|a,b| File.ctime(a) <=> File.ctime(b) }
     @files = @files_highmark + @equvifax_files
     render
   end
