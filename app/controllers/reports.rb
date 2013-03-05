@@ -14,12 +14,13 @@ class Reports < Application
     #  :statistics   => [LoanApplicationsReport, CreditBureauReport, LoanFilesReport, LoanSizePerManagerReport, LoanPurposeReport, ClientOccupationReport, ClosedLoanReport, LastUpdateReport, DeviationReport],
     #  :exceptions   => [RepaymentOverdue, LateDisbursalsReport, DelinquentLoanReport, ParByCenterReport, ParByStaffReport, ParByLoanAgeingReport, ClientAttendanceReport, DuplicateClientsReport, NonDisbursedClientsAfterGroupRecognitionTest, LoanAgeingAnalysis],
     #  :accounting   => [BooksTrialBalance, BookJournal, BooksBalanceSheet, GeneralLedgerReport, JournalBook, TrialBalance, DayBook, CashBook, BankBook, IncomeStatement, BalanceSheet]
-    :accounting   => [TrialBalance, DayBook]
+    :accounting   => [TrialBalance, DayBook],
+    :pre_disbursal => [DisbursementLabel]
   }
-  Order = [:periodic, :consolidated, :registers, :targets_and_projections, :statistics, :exceptions, :accounting]
+  Order = [:targets_and_projections, :accounting, :pre_disbursal, :statistics, :periodic, :consolidated, :registers, :exceptions]
   layout :determine_layout
   before :set_staff_and_user, :only => [:index, :show]
-  
+
   # provides :xml, :yaml, :js
   def index
     @reports = Report.all
@@ -62,15 +63,19 @@ class Reports < Application
             when 1
               @data = @report.generate(params)
             end
-            display @data
+            if params[:format] == "pdf"
+              send_data(@data.to_s, :filename => "#{@report.name}.pdf")
+            else
+              display @data
+            end
           end
         else
           params.delete(:submit)
-          message[:error] = "Report cannot be generated"          
+          message[:error] = "Report cannot be generated"
           render :form
         end
       end
-  
+
     elsif id.nil?
       @reports = klass.all(:order => [:start_date.desc])
       if klass==DuplicateClientsReport and (DuplicateClientsReport.count==0 or (Date.today - DuplicateClientsReport.all.aggregate(:created_at).max).to_i>6)
@@ -81,13 +86,13 @@ class Reports < Application
       send_data(@report.get_pdf.generate, :filename => 'report.pdf')
     end
   end
-  
+
   def new
     only_provides :html
     @report = Report.new
     display @report
   end
-  
+
   def edit(id)
     only_provides :html
     @report = Report.get(id)
@@ -142,10 +147,10 @@ class Reports < Application
       return Date.strptime(date_hash, Mfi.first.date_format || ('%Y-%m-%d'))
     end
   end
-    
+
   def set_staff_and_user
     @user = session.user
     @staff_member = @user.staff_member
   end
-  
+
 end # Reports

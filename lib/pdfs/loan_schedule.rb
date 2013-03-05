@@ -66,36 +66,38 @@ module Pdf
     end
 
     def generate_disbursement_labels_pdf(user_id, on_date)
-      location_facade = FacadeFactory.instance.get_instance(FacadeFactory::LOCATION_FACADE, user_id)
-      meeting_facade  = FacadeFactory.instance.get_instance(FacadeFactory::MEETING_FACADE, user_id)
-      lendings        = location_facade.get_loans_administered(self.id, on_date).compact
+      lendings        = self.location_level.level == 0 ? LoanAdministration.get_loans_administered_by_sql(self.id, on_date, false, 'approved_loan_status') : LoanAdministration.get_loans_accounted_by_sql(self.id, on_date, false, 'approved_loan_status')
       raise ArgumentError,"No loans for generate labels pdf" if lendings.blank?
 
       pdf            = PDF::QuickRef.new("LETTER", 2)
       pdf.body_font_size  = 8
       pdf.h1_font_size = 8
       count   = 0
-      meeting = meeting_facade.get_meeting(self, on_date)
-      lendings.each do |la|
-        client        = la.borrower
-        count         = count + 1
-        start_date    = la.scheduled_first_repayment_date
-        end_date      = la.last_scheduled_date
-        disburse_date = la.scheduled_disbursal_date
-        pdf.h1 "<b>Purpose of Loan</b>                   #{la.loan_purpose}"
-        pdf.h1 "<b>Name</b>                                     #{client.nil? ? 'No Client' : client.name}"
-        pdf.h1 "<b>Gtr. Name</b>                             #{client.nil? ? 'No Guarantor' : client.guarantor_name}"
-        pdf.h1 "<b>Center Name</b>                         #{self.name}"
-        pdf.h1 "<b>Meeting Address</b>                   #{}"
-        if meeting.blank?
-          pdf.h1 "<b>Meeting Day / Time</b>              No Meeting"
-        else
-          pdf.h1 "<b>Meeting Day / Time</b>              #{on_date}/#{meeting.meeting_time_begins_hours}:#{'%02d' % meeting.meeting_time_begins_minutes}"
+      lendings.group_by{|s| s.administered_at_origin}.each do |center_id, loans|
+        center = BizLocation.get(center_id)
+        meeting = center.meeting_schedules.last
+        meeting_time = meeting.blank? ? 'No Meeting' : "#{meeting.schedule_begins_on}(#{meeting.meeting_begins_at})"
+        loans.each do |la|
+          client        = la.borrower
+          count         = count + 1
+          start_date    = la.scheduled_first_repayment_date
+          end_date      = la.last_scheduled_date
+          disburse_date = la.scheduled_disbursal_date
+          pdf.h1 "<b>Purpose of Loan</b>                   #{la.loan_purpose}"
+          pdf.h1 "<b>Name</b>                                     #{client.nil? ? 'No Client' : client.name}"
+          pdf.h1 "<b>Gtr. Name</b>                             #{client.nil? ? 'No Guarantor' : client.guarantor_name}"
+          pdf.h1 "<b>Center Name</b>                         #{self.name}"
+          pdf.h1 "<b>Meeting Address</b>                   #{center.biz_location_address}"
+          if meeting.blank?
+            pdf.h1 "<b>Meeting Day / Time</b>              No Meeting"
+          else
+            pdf.h1 "<b>Meeting Day / Time</b>              #{meeting_time}"
+          end
+          pdf.h1 "<b>Disbursal Date</b>        #{disburse_date}        <b>Loan A/c. No.</b>       #{la.lan}"
+          pdf.h1 "<b>Start Date</b>                #{start_date}        <b>End Date</b>               #{end_date}"
+          pdf.body "\n"
+          pdf.pdf.start_new_page if count%7 == 0
         end
-        pdf.h1 "<b>Disbursal Date</b>        #{disburse_date}        <b>Loan A/c. No.</b>       #{la.lan}"
-        pdf.h1 "<b>Start Date</b>                #{start_date}        <b>End Date</b>               #{end_date}"
-        pdf.body "\n"
-        pdf.body "\n" if count%5 == 0
       end
       return pdf
     end

@@ -311,6 +311,10 @@
                 %td
                   Format:
                   = select :name => 'report_format', :collection => ["CSV"], :include_blank => true, :prompt => "Select Format", :selected => params[:report_format]
+            - if @report.respond_to?(:format)
+              %tr
+                %td
+                  = hidden_field :name => 'format', :value => 'pdf'
         %table{:style => "padding-top: 0px;"}
           %tr
             - if @report.respond_to?(:loan_cycle)

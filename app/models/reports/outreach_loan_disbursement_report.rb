@@ -45,7 +45,7 @@ class OutreachLoanDisbursementReport < Report
       client_ids           = clients_caste_group[caste].map(&:id) rescue []
       loan_ids             = client_ids.blank? ? [] : Lending.all('loan_borrower.counterparty_id' => client_ids, :id => disbursed_loan_ids).aggregate(:id)
       disbursed_amt        = loan_ids.blank? ? 0 : Lending.all(:id => loan_ids).aggregate(:disbursed_amount.sum)
-      principal            = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal            = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt        = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount     = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(disbursed_amt.to_i, default_currency)
       total_pos_per_caste  = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money
@@ -60,7 +60,7 @@ class OutreachLoanDisbursementReport < Report
       client_ids           = clients_religion_group[religion].map(&:id) rescue []
       loan_ids             = client_ids.blank? ? [] : Lending.all('loan_borrower.counterparty_id' => client_ids, :id => disbursed_loan_ids).aggregate(:id)
       disbursed_amt        = loan_ids.blank? ? 0 : Lending.all(:id => loan_ids).aggregate(:disbursed_amount.sum)
-      principal            = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal            = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt        = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount     = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(disbursed_amt.to_i, default_currency)
       total_pos_per_religion  = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money
@@ -84,7 +84,7 @@ class OutreachLoanDisbursementReport < Report
       loans                      = loans_group_by_loan_product[loan_product.id]
       loan_ids                   = loans.blank? ? [] : loans.map(&:id)
       disbursed_amt              = loans.blank? ? 0 : loans.map(&:disbursed_amount).sum
-      principal                  = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal                  = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt              = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount           = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(disbursed_amt.to_i, default_currency)
       total_pos_per_loan_product = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money
@@ -97,7 +97,7 @@ class OutreachLoanDisbursementReport < Report
     branch_master_list.each do |branch|
       loan_ids             = LoanAdministration.get_loan_ids_accounted_for_date_range_by_sql(branch.id, @from_date, @to_date, false, 'disbursed_loan_status')
       loan_disbursed_amt   = loan_ids.blank? ? 0 : Lending.all(:id => loan_ids).aggregate(:disbursed_amount.sum)
-      principal            = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal            = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt        = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount     = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(loan_disbursed_amt.to_i, default_currency)
       total_pos_per_branch = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money
@@ -112,7 +112,7 @@ class OutreachLoanDisbursementReport < Report
       clients              = clients_classification_group[classification]
       loan_ids             = clients.blank? ? [] : Lending.all('loan_borrower.counterparty_id' => clients.map(&:id), :id => disbursed_loan_ids).aggregate(:id)
       disbursed_amt        = loan_ids.blank? ? 0 : Lending.all(:id => loan_ids).aggregate(:disbursed_amount.sum)
-      principal            = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal            = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt        = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount     = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(disbursed_amt.to_i, default_currency)
       total_pos_per_classification = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money
@@ -128,7 +128,7 @@ class OutreachLoanDisbursementReport < Report
       clients              = (psl != nil) ? clients_psl_group[psl.id] : clients_psl_group[nil]
       loan_ids             = clients.blank? ? [] : Lending.all('loan_borrower.counterparty_id' => clients.map(&:id), :id => disbursed_loan_ids).aggregate(:id)
       disbursed_amt        = loan_ids.blank? ? 0 : Lending.all(:id => loan_ids).aggregate(:disbursed_amount.sum)
-      principal            = loan_ids.blank? ? [] : LoanReceipt.all(:lending_id => loan_ids, :effective_on.gte =>@from_date, :effective_on.lte => @to_date).aggrerate(:principal_received.sum) rescue []
+      principal            = loan_ids.blank? ? [] : BaseScheduleLineItem.sum(:scheduled_principal_due, 'loan_base_schedule.lending_id' => loan_ids, :on_date.lte => @to_date) rescue []
       principal_amt        = principal.blank? ? MoneyManager.default_zero_money : MoneyManager.get_money_instance_least_terms(principal.to_i)
       disbursed_amount     = loan_ids.blank? ? MoneyManager.default_zero_money : Money.new(disbursed_amt.to_i, default_currency)
       total_pos_per_psl    = disbursed_amount > principal_amt ? disbursed_amount-principal_amt : MoneyManager.default_zero_money

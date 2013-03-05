@@ -159,7 +159,7 @@ class LoanAdministration
 
   def self.get_loans_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, count = false, status = nil, funder_id = nil)
     locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
-    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
+    loan_ids                                    = locations.compact!.blank? ? [] : repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loan_search                                 = {}
     if loan_ids.blank?
       count == true ? 0 : []
@@ -188,7 +188,7 @@ class LoanAdministration
 
   def self.get_loans_group_vise_at_location_by_sql(administered_or_accounted_choice, given_location_id, on_date = Date.today, funder_id = nil)
     locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
-    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
+    loan_ids                                    = locations.compact!.blank? ? [] : repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{on_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
     if loan_ids.blank?
       loans
@@ -216,7 +216,7 @@ class LoanAdministration
 
   def self.get_loans_group_vise_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, from_date = Date.today, till_date = Date.today, funder_id = nil)
     locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
-    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
+    loan_ids                                    = locations.compact!.blank? ? [] : repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     loans = {STATUS_NOT_SPECIFIED => [], NEW_LOAN_STATUS => [], APPROVED_LOAN_STATUS => [], REJECTED_LOAN_STATUS => [], DISBURSED_LOAN_STATUS => [], REPAID_LOAN_STATUS =>[], PRECLOSED_LOAN_STATUS => [], WRITTEN_OFF_LOAN_STATUS =>[]}
     if loan_ids.blank?
       loans
@@ -268,7 +268,7 @@ class LoanAdministration
   def self.get_loans_at_location_for_date_range_by_sql(administered_or_accounted_choice, given_location_id, on_date, till_date, count = false, status = nil, funder_id = nil)
     loan_search                                 = {}
     locations                                   = given_location_id.class == Array ? given_location_id : [given_location_id]
-    loan_ids                                    = repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
+    loan_ids                                    = locations.compact!.blank? ? [] : repository(:default).adapter.query("select a.loan_id from loan_administrations a inner join (select loan_id, max(id) max_id from loan_administrations where effective_on <= '#{till_date.strftime('%Y-%m-%d')}' group by loan_id) as b on a.id = b.max_id where a.#{administered_or_accounted_choice} IN (#{locations.join(',')});")
     if loan_ids.blank?
       count == true ? 0 : []
     else
