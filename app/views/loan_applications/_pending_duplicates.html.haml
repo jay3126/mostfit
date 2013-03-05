@@ -78,7 +78,7 @@
                 = hidden_field :name => 'staff_member_id', :value => get_session_user_id
               %td
                 %b Created On
-                = date_select :created_on, Date.today, :max_date => Date.today
+                = date_select :created_on, get_effective_date, :max_date => get_effective_date
               %td{:style => "text-align:right;"}
                 = submit "Save all"
                 %input{:value => "Reset all", :type => "button", :onclick => "reset_all_fields();"}
