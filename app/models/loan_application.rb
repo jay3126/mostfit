@@ -514,7 +514,7 @@ class LoanApplication
   end
 
   def resubmit_loan_application(params)
-    self.status = 'new'
+    self.status = Constants::Status::CPV2_APPROVED_STATUS
     save
     raise Errors::DataError, self.errors.first unless self.saved?
     dependency_destroy_for_loan_application
@@ -523,7 +523,6 @@ class LoanApplication
   def dependency_destroy_for_loan_application
     adapter = DataMapper.repository(:default).adapter
     adapter.execute("delete from loan_authorizations where loan_application_id = #{self.id}") if self.to_info && self.to_info.authorization_info
-    adapter.execute("delete from client_verifications where loan_application_id = #{self.id}") unless self.client_verifications.blank?
   end
 
   def self.is_center_eligible_for_cgt_grt?(branch, center)
