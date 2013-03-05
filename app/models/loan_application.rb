@@ -626,25 +626,24 @@ class LoanApplication
     return [
       nil,                                                                    #ReferenceID                                                
       nil,                                                                    #Member ID
-       "OE" ,                                                          # credit inquiry purpose type           
-      nil,                                                                   # Transaction Amount
-     client_name,                                                             # Consumer name
-     client_reference2.blank? ? nil : id_type[client_reference2_type],  # Additional Type 
-     client_reference2.blank? ? nil : client_reference2,   # "Additional Name1",  
-     client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_sym],   #"Additional Type2", 
-     client_guarantor_name.blank? ? nil : client_guarantor_name,  # "Additional Name2",
-     client_address,                                                          # applicant address 1
-     BizLocation.get(at_branch_id).name,                                               # applicant address 1 city
-     states[(client_state).to_sym],                                # applicant address 1 state
-     client_pincode,    #"Address & City"
-     client_reference1.blank? ? nil : client_reference1,               #"Ration Card",
-
-      nil,#"Additional Id 1",
-     nil, # "Additional Id 2",
-     nil,     #"National ID Card",
-     nil,     #"Tax ID / PAN",
-     nil,     #"Phone (Home)",  
-     nil,     #"Phone (Mobile)",
+       "OE" ,                                                                 #credit inquiry purpose type           
+      nil,                                                                    #Transaction Amount
+     client_name,                                                             #Consumer name
+     client_reference2.blank? ? nil : id_type[client_reference2_type],        #Additional Type 
+     client_reference2.blank? ? nil : client_reference2,                      #Additional Name1,  
+     client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_sym],   #Additional Type2, 
+     client_guarantor_name.blank? ? nil : client_guarantor_name,              #Additional Name2,
+     client_address,                                                          #applicant address 1
+     BizLocation.get(at_branch_id).name,                                      #applicant address 1 city
+     states[(client_state).to_sym],                                           #applicant address 1 state
+     client_pincode,                                                          #Address & City
+     client_reference1.blank? ? nil : client_reference1,                      #Ration Card,
+     nil,                                                                     #Additional Id 1,
+     nil,                                                                     #Additional Id 2,
+     nil,                                                                     #National ID Card,
+     nil,                                                                     #Tax ID / PAN,
+     nil,                                                                     #Phone (Home),  
+     nil,                                                                     #Phone (Mobile),
      client_dob,    #"DOB",
      nil,#     "Gender",
      at_branch_id,#     "Branch ID",
