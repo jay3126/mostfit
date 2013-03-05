@@ -631,7 +631,7 @@ class LoanApplication
      client_name,                                                             # Consumer name
      client_reference2.blank? ? nil : id_type[client_reference2_type],  # Additional Type 
      client_reference2.blank? ? nil : client_reference2,   # "Additional Name1",  
-     client_guarantor_relationship,    #"Additional Type2", 
+     client_guarantor_relationship.nil? ? nil : key_person_relationship[client_guarantor_relationship.to_sym],   #"Additional Type2", 
      client_guarantor_name.blank? ? nil : client_guarantor_name,  # "Additional Name2",
      client_address,                                                          # applicant address 1
      BizLocation.get(at_branch_id).name,                                               # applicant address 1 city
