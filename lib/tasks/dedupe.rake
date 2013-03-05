@@ -31,7 +31,8 @@ namespace :mostfit do
         #checking for duplications start here inside the loop.rake mostfit:update_loan_application_status
       elsif (applicant.client_reference1 and applicant.client_reference1.length>0)
         #checking reference1 in existing loan applications
-        same_reference_clients = total_loan_applications.select{|la| la.client_reference1_type == applicant.client_reference1_type and la.client_reference1.downcase.strip == applicant.client_reference1.downcase.strip}
+        same_reference_clients = total_loan_applications.select{|la|
+          la.client_reference1_type == applicant.client_reference1_type and !la.client_reference1.blank? && !applicant.client_reference1.blank? && la.client_reference1.downcase.strip == applicant.client_reference1.downcase.strip}
         #checking reference1 in existing clients
         same_client_reference = clients.select{|c| (c.reference_type == applicant.client_reference1_type and c.reference.downcase.strip.include?(applicant.client_reference1.downcase.strip)) || (c.reference2_type == applicant.client_reference1_type and c.reference2.downcase.strip.include?(applicant.client_reference1.downcase.strip)) }
         #checking reference1 in existing clients only for numeric reference1
