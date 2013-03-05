@@ -637,7 +637,10 @@ class LoanApplication
      states[(client_state).to_sym],                                           #state
      client_pincode,                                                          #Address & City
      client_reference1.blank? ? nil : client_reference1,                      #Ration Card,
+<<<<<<< Updated upstream
+=======
      client_reference2.blank? ? nil : client_reference2,                      #voter id
+>>>>>>> Stashed changes
      nil,                                                                     #Additional Id 1,
      nil,                                                                     #Additional Id 2,
      nil,                                                                     #National ID Card,
